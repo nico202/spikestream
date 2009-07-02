@@ -1,0 +1,24 @@
+#!/bin/sh
+
+#Removes makefiles and any built objects and libraries
+
+cd $SPIKESTREAM_ROOT
+make clean
+
+rm Makefile
+rm application/Makefile
+rm archiver/Makefile
+rm library/Makefile
+rm simulator/Makefile
+rm simulatorlibrary/Makefile
+rm neurons/stdp1neuron/Makefile
+rm synapses/stdp1synapse/Makefile
+
+rm bin/spikestream
+rm bin/spikestreamarchiver
+rm bin/spikestreamsimulator
+
+rm lib/*.so*
+rm lib/neurons/*
+rm lib/synapses/*
+ 

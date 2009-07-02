@@ -1,0 +1,65 @@
+#Configuration file for SpikeStream application
+#Each configuration item must have a unique name.
+#SpikeStream needs to be restarted for any changes to take effect
+
+#PARAMETERS FOR NEURAL NETWORK DATABASE
+neuralNetworkHost = localhost
+#neuralNetworkHost = 192.168.1.9
+neuralNetworkUser = SpikeStream
+neuralNetworkPassword = ekips
+neuralNetworkDatabase = NeuralNetwork
+
+#PARAMETERS FOR ARCHIVE DATABASE
+archiveHost = localhost
+#archiveHost = 192.168.1.9
+archiveUser = SpikeStream
+archivePassword = ekips
+archiveDatabase = NeuralArchive
+
+#PARAMETERS FOR PATTERN DATABASE
+patternHost = localhost
+#patternHost = 192.168.1.9
+patternUser = SpikeStream
+patternPassword = ekips
+patternDatabase = Patterns
+
+#PARAMETERS FOR DEVICE DATABASE
+#deviceHost = 155.245.23.251
+deviceHost = localhost
+deviceUser = SpikeStream
+devicePassword = ekips
+deviceDatabase = Devices
+
+#PARAMETERS FOR NETWORK ANALYSIS DATABASE
+networkAnalysisHost = localhost
+networkAnalysisUser = SpikeStream
+networkAnalysisPassword = ekips
+networkAnalysisDatabase = NetworkAnalysis
+
+#LOGGING PARAMETERS
+#Log file parameters
+Max_log_size = 5000000
+
+#Log level parameters: O disables logging; 1 enables medium logging; 2 enables full logging, which may incur performance penalties
+log_level = 0
+#log_level = 1
+#log_level = 2
+
+#FILE PARAMETERS
+default_file_location = /home/davidg/spikestream
+
+#NETWORK VIEWER PARAMETERS
+#Controls the maximum size of connection group that will be automatically loaded.
+max_autoload_conngrp_size = 1000000
+
+#SIMULATION PARAMETERS
+#How long the simulation waits for tasks to load their neuron data. You may need to increse this value for large networks. Value is in seconds.
+max_neuron_data_load_time = 1000
+
+#NUMBER OF DELAY VALUES
+#Controls how many buffers are in the simulation and thus how many delay values are possible
+#Each delay value is a single time step and so the amount of delay varies with the time step size in milliseconds
+#FIXME THINK ABOUT WHETHER TO IMPLEMENT THIS OR NOT
+number_of_delay_values = 250
+
+
