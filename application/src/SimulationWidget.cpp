@@ -883,6 +883,7 @@ void SimulationWidget::initialiseButtonToggled(bool on){
 		archNameText->setText(archiveName);
 
 		//Sort out whether spikes or firing neurons are being archived
+                cout<<"CURRENT TEXT: "<<archMonitorTypeCombo->currentText().toStdString()<<endl;
 		map<const char*, unsigned int> parameterMap;
 		if(archMonitorTypeCombo->currentText() == "Archive firing neurons")//Archive firing neurons
 			parameterMap["ArchiveFiringNeurons"] = 1;

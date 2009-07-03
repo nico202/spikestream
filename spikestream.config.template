@@ -4,36 +4,32 @@
 
 #PARAMETERS FOR NEURAL NETWORK DATABASE
 neuralNetworkHost = localhost
-#neuralNetworkHost = 192.168.1.9
 neuralNetworkUser = SpikeStream
-neuralNetworkPassword = ekips
+neuralNetworkPassword = password
 neuralNetworkDatabase = NeuralNetwork
 
 #PARAMETERS FOR ARCHIVE DATABASE
 archiveHost = localhost
-#archiveHost = 192.168.1.9
 archiveUser = SpikeStream
-archivePassword = ekips
+archivePassword = password
 archiveDatabase = NeuralArchive
 
 #PARAMETERS FOR PATTERN DATABASE
 patternHost = localhost
-#patternHost = 192.168.1.9
 patternUser = SpikeStream
-patternPassword = ekips
+patternPassword = password
 patternDatabase = Patterns
 
 #PARAMETERS FOR DEVICE DATABASE
-#deviceHost = 155.245.23.251
 deviceHost = localhost
 deviceUser = SpikeStream
-devicePassword = ekips
+devicePassword = password
 deviceDatabase = Devices
 
 #PARAMETERS FOR NETWORK ANALYSIS DATABASE
 networkAnalysisHost = localhost
 networkAnalysisUser = SpikeStream
-networkAnalysisPassword = ekips
+networkAnalysisPassword = password
 networkAnalysisDatabase = NetworkAnalysis
 
 #LOGGING PARAMETERS
@@ -46,7 +42,7 @@ log_level = 0
 #log_level = 2
 
 #FILE PARAMETERS
-default_file_location = /home/davidg/spikestream
+default_file_location = /home/terry/spikestream
 
 #NETWORK VIEWER PARAMETERS
 #Controls the maximum size of connection group that will be automatically loaded.
@@ -59,7 +55,7 @@ max_neuron_data_load_time = 1000
 #NUMBER OF DELAY VALUES
 #Controls how many buffers are in the simulation and thus how many delay values are possible
 #Each delay value is a single time step and so the amount of delay varies with the time step size in milliseconds
-#FIXME THINK ABOUT WHETHER TO IMPLEMENT THIS OR NOT
+#FIXME: NOT IMPLEMENTED - THINK ABOUT WHETHER TO IMPLEMENT THIS OR NOT
 number_of_delay_values = 250
 
 

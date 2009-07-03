@@ -1,0 +1,76 @@
+#!/bin/sh
+###########################################################################
+#                                                                         #
+#  SpikeStream Script                                                     #
+#  Copyright (C) 2007 by David Gamez                                      #
+#   david@davidgamez.eu                                                   #
+#   Version 0.1                                                           #
+#                                                                         #
+#   This program is free software; you can redistribute it and/or modify  #
+#   it under the terms of the GNU General Public License as published by  #
+#   the Free Software Foundation; either version 2 of the License, or     #
+#   (at your option) any later version.                                   #
+#                                                                         #
+#   This program is distributed in the hope that it will be useful,       #
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+#   GNU General Public License for more details.                          #
+#                                                                         #
+#   You should have received a copy of the GNU General Public License     #
+#   along with this program; if not, write to the                         #
+#   Free Software Foundation, Inc.,                                       #
+#   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             #
+#                                                                         #
+###########################################################################
+
+#----------------------- Load SpikeStream Database ------------------------
+#  Used by SpikeStreamApplication to load databases from a .sql.tar.gz file
+#  Arguments to this script should be: 
+#  $1 = user
+#  $2 = password
+#  $3 = host
+#  $4 = database
+#  $5 = file
+#--------------------------------------------------------------------------
+
+
+#Test for user variable for database, should be something like -uUSER
+if [ -z $1 ]
+then
+echo "Missing user variable, exiting"
+exit 1
+fi
+
+#Test for password variable for database, should be something like -pPASSWORD
+if [ -z $2 ]
+then
+echo "Missing password variable, exiting"
+exit 1
+fi
+
+#Test for host variable for database, should be something like -hHOST
+if [ -z $3 ]
+then
+echo "Missing host variable, exiting"
+exit 1
+fi
+
+#Test to see if database parameter has been set
+if [ -z $4 ]
+then
+echo "Missing database variable, exiting"
+exit 1
+fi
+
+#Check that database file is ok
+if [ -f $5 ]
+then
+tar -Oz -f $5 --extract $4.sql | mysql $1 $2 $3
+else
+echo "Invalid database file: $5"
+exit 1
+fi
+
+exit 0
+
+

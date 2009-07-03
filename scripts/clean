@@ -18,7 +18,6 @@ rm bin/spikestream
 rm bin/spikestreamarchiver
 rm bin/spikestreamsimulator
 
-rm lib/*.so*
-rm lib/neurons/*
-rm lib/synapses/*
+rm lib/*
+
  
