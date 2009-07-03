@@ -101,15 +101,13 @@ SimulationWidget::SimulationWidget(QWidget *parent, DBInterface *netDBInter, DBI
 
 	//=================== SIMULATION SETTINGS =====================
 	//Create a group box for the simulation settings
-	settingsGrpBox = new Q3GroupBox("Initialisation Settings", this);
+        settingsGrpBox = new Q3GroupBox("Initialisation Settings", this);
 
 	//Create a vertical box to organise layout in group box
-	Q3VBoxLayout *settingsVerticalBox = new Q3VBoxLayout(settingsGrpBox, 5, 10, "vertical2");
-	settingsVerticalBox->addSpacing(20);
+        Q3VBoxLayout *settingsVerticalBox = new Q3VBoxLayout(settingsGrpBox, 5, 5, "vertical2");
 
 	//Add box to take archive name
 	Q3HBoxLayout *archiveNameBox = new Q3HBoxLayout();
-	archiveNameBox->addSpacing(10);
 	archiveNameBox->addWidget(new QLabel("Archive name", settingsGrpBox));
 	archNameText = new QLineEdit("UNTITLED", settingsGrpBox);
 	archNameText->setValidator(archiveNameValidator);
@@ -126,7 +124,7 @@ SimulationWidget::SimulationWidget(QWidget *parent, DBInterface *netDBInter, DBI
 
 	//Set up the pattern input tab
 	QWidget *patternWidgetTab = new QWidget(settingsGrpBox);
-	Q3VBoxLayout *patternWidgetVerticalBox = new Q3VBoxLayout(patternWidgetTab, 5, 10, "vertical2");	
+        Q3VBoxLayout *patternWidgetVerticalBox = new Q3VBoxLayout(patternWidgetTab, 5, 5, "vertical2");
 
 	//Set up table to hold pattern information
 	patternTable = new Q3Table(0, 7, patternWidgetTab);
@@ -153,7 +151,6 @@ SimulationWidget::SimulationWidget(QWidget *parent, DBInterface *netDBInter, DBI
 	patternTableHeader->setLabel( patternNeurGrpCol, "Neuron Group" );
 	patternTable->setColumnWidth( patternNeurGrpCol, 100);
 	loadPatternTable();
-	patternTable->setMinimumSize(700, 150);
 	patternWidgetVerticalBox->addWidget(patternTable);
 
 	//Set up option to choose the number of timesteps per pattern
@@ -167,7 +164,6 @@ SimulationWidget::SimulationWidget(QWidget *parent, DBInterface *netDBInter, DBI
 
 	//Add the patternWidget tab to the input tab widget
 	inputTabWidget->addTab(patternWidgetTab, "Pattern Input");
-
 
 	//Set up tab to hold live input settings
 	QWidget *liveWidgetTab = new QWidget(settingsGrpBox);
@@ -203,14 +199,13 @@ SimulationWidget::SimulationWidget(QWidget *parent, DBInterface *netDBInter, DBI
 	deviceTableHeader->setLabel( deviceFiringModeCol, "Firing Mode" );
 	deviceTable->setColumnWidth( deviceFiringModeCol, 150);
 	loadDeviceTable();
-	deviceTable->setMinimumSize(800, 150);
 	liveWidgetVerticalBox->addWidget(deviceTable);
 
 	inputTabWidget->addTab(liveWidgetTab, "Device Input/Output");
 	settingsVerticalBox->addWidget(inputTabWidget);
 
-
 	//Add settings box to layout. Need an extra box to make it fit nicely
+        settingsGrpBox->setMinimumWidth(700);
 	Q3HBoxLayout *settingsHBox = new Q3HBoxLayout();
 	settingsHBox->addWidget(settingsGrpBox);
 	settingsHBox->addStretch(5);
@@ -220,11 +215,9 @@ SimulationWidget::SimulationWidget(QWidget *parent, DBInterface *netDBInter, DBI
 	//====================   PARAMETERS   ==========================
 	//Create a group box for the parameters
 	Q3GroupBox *parameterGrpBox = new Q3GroupBox("Parameters", this);
-	parameterGrpBox->setMinimumSize(725, 70);
 
-	//Create a vertical box to organise layout in group box
-	Q3HBoxLayout *parameterHBox = new Q3HBoxLayout();
-	parameterHBox->addSpacing(10);
+        //Create a horizontal box to organise layout in group box
+        Q3HBoxLayout *parameterHBox = new Q3HBoxLayout();
 
 	//Add button to display neuron parameters
 	QPushButton *neurParamButton = new QPushButton("Neuron Parameters", parameterGrpBox);
@@ -247,28 +240,28 @@ SimulationWidget::SimulationWidget(QWidget *parent, DBInterface *netDBInter, DBI
 	parameterHBox->addWidget(noiseParamButton);
 	parameterHBox->addSpacing(10);
 
+        //Add parameter box containing buttons to layout of parameter box
 	Q3VBoxLayout *parameterVBox = new Q3VBoxLayout(parameterGrpBox, 5, 10);
-	parameterVBox->addSpacing(20);
 	parameterVBox->addLayout(parameterHBox);
-	parameterVBox->addSpacing(10);
+        parameterVBox->addSpacing(10);
 
-	Q3HBoxLayout *paramHBox = new Q3HBoxLayout();
-	paramHBox->addWidget(parameterGrpBox);
-	paramHBox->addStretch(5);
-	mainVerticalBox->addLayout(paramHBox);
+        parameterGrpBox->setMinimumWidth(700);
+        Q3HBoxLayout *paramHolderHBox = new Q3HBoxLayout();
+        paramHolderHBox->addWidget(parameterGrpBox);
+        paramHolderHBox->addStretch(5);
+        mainVerticalBox->addLayout(paramHolderHBox);
 
 
 	//=================== SIMULATION CONTROLS =========================
 	//Create group box for the simulation controls
 	Q3GroupBox *controlGrpBox = new Q3GroupBox("Simulation Controls", this);
+        controlGrpBox->setMinimumSize(700, 300);
 
 	//Create a vertical box to organise layout in group box
 	Q3VBoxLayout *controlVerticalBox = new Q3VBoxLayout(controlGrpBox, 5, 10, "vertical3");
-	controlVerticalBox->addSpacing(20);
 
 	//Set up initialise section
 	Q3HBoxLayout *initialiseBox = new Q3HBoxLayout();
-	initialiseBox->addSpacing(10);
 	initialiseButton = new QPushButton("Initialise", controlGrpBox);
 	initialiseButton->setToggleButton(true);
 	connect (initialiseButton, SIGNAL(toggled(bool)), this, SLOT(initialiseButtonToggled(bool)));
@@ -298,35 +291,23 @@ SimulationWidget::SimulationWidget(QWidget *parent, DBInterface *netDBInter, DBI
 	simStartButton = new QPushButton(QIcon(playPixmap), "", controlGrpBox);
 	simStartButton->setToggleButton(true);
 	simStartButton->setEnabled(false);
-	simStartButton->setBaseSize(120, 30);
-	simStartButton->setMaximumSize(120, 30);
-	simStartButton->setMinimumSize(120, 30);
 	connect (simStartButton, SIGNAL(toggled(bool)), this, SLOT(simStartButtonToggled(bool)));
 	simTransportButtonBox->addSpacing(10);
 	simTransportButtonBox->addWidget(simStartButton);
 
 	simStepButton = new QPushButton(QIcon(stepPixmap), "", controlGrpBox);
 	simStepButton->setEnabled(false);
-	simStepButton->setBaseSize(50, 30);
-	simStepButton->setMaximumSize(50, 30);
-	simStepButton->setMinimumSize(50, 30);
 	connect (simStepButton, SIGNAL(clicked()), this, SLOT(simStepButtonPressed()));
 	simTransportButtonBox->addWidget(simStepButton);
 
 	recordButton = new QPushButton(QIcon(recordPixmap), "", controlGrpBox);
 	recordButton->setEnabled(false);
 	recordButton->setToggleButton(true);
-	recordButton->setBaseSize(50, 30);
-	recordButton->setMaximumSize(50, 30);
-	recordButton->setMinimumSize(50, 30);
 	connect (recordButton, SIGNAL(toggled(bool)), this, SLOT(recordButtonToggled(bool)));
 	simTransportButtonBox->addWidget(recordButton);
 
 	simStopButton = new QPushButton(QIcon(stopPixmap), "", controlGrpBox);
 	simStopButton->setEnabled(false);
-	simStopButton->setBaseSize(50, 30);
-	simStopButton->setMaximumSize(50, 30);
-	simStopButton->setMinimumSize(50, 30);
 	connect (simStopButton, SIGNAL(clicked()), this, SLOT(simStopButtonPressed()));
 	simTransportButtonBox->addWidget(simStopButton);
 
@@ -339,9 +320,6 @@ SimulationWidget::SimulationWidget(QWidget *parent, DBInterface *netDBInter, DBI
 	frameRateCombo->insertItem("15 fps");
 	frameRateCombo->insertItem("20 fps");
 	frameRateCombo->insertItem("25 fps");
-	frameRateCombo->setBaseSize(100, 30);
-	frameRateCombo->setMaximumSize(100, 30);
-	frameRateCombo->setMinimumSize(100, 30);
 	frameRateCombo->setCurrentItem(0);
 	connect(frameRateCombo, SIGNAL(activated(int)), this, SLOT(frameRateComboChanged(int)));
 	simTransportButtonBox->addWidget(frameRateCombo);
@@ -352,9 +330,6 @@ SimulationWidget::SimulationWidget(QWidget *parent, DBInterface *netDBInter, DBI
 	simModeCombo->insertItem("Update all neurons");	
 	simModeCombo->insertItem("Update all synapses");
 	simModeCombo->insertItem("Update everything");
-	simModeCombo->setBaseSize(130, 30);
-	simModeCombo->setMaximumSize(130, 30);
-	simModeCombo->setMinimumSize(130, 30);
 	simModeCombo->setCurrentItem(0);
 	connect(simModeCombo, SIGNAL(activated(int)), this, SLOT(simModeComboChanged(int)));
 	simTransportButtonBox->addWidget(simModeCombo);
@@ -369,22 +344,14 @@ SimulationWidget::SimulationWidget(QWidget *parent, DBInterface *netDBInter, DBI
 	Q3HBoxLayout *monitorBox = new Q3HBoxLayout();
 	neuronGrpMonitorCombo = new QComboBox(controlGrpBox);
 	neuronGrpMonitorCombo->setEnabled(false);
-	neuronGrpMonitorCombo->setBaseSize(180, 20);
-	neuronGrpMonitorCombo->setMaximumSize(180, 20);
-	neuronGrpMonitorCombo->setMinimumSize(180, 20);
 	monitorBox->addSpacing(10);
 	monitorBox->addWidget(neuronGrpMonitorCombo);
 	liveMonitorTypeCombo = new QComboBox(controlGrpBox);
 	liveMonitorTypeCombo->insertItem("Neurons");
 	liveMonitorTypeCombo->insertItem("Spikes");
-	liveMonitorTypeCombo->setBaseSize(100, 20);
-	liveMonitorTypeCombo->setMaximumSize(100, 20);
-	liveMonitorTypeCombo->setMinimumSize(100, 20);
 	liveMonitorTypeCombo->setEnabled(false);
 	monitorBox->addWidget(liveMonitorTypeCombo);
 	monitorButton = new QPushButton("Live Monitor", controlGrpBox);
-	monitorButton->setMaximumSize(120, 20);
-	monitorButton->setMinimumSize(120, 20);
 	monitorButton->setEnabled(false);
 	connect(monitorButton, SIGNAL(clicked()), this, SLOT(monitorButtonPressed()));
 	monitorBox->addWidget(monitorButton);
@@ -396,22 +363,14 @@ SimulationWidget::SimulationWidget(QWidget *parent, DBInterface *netDBInter, DBI
 	monitorNeuronCombo = new QComboBox(controlGrpBox);
 	connect(monitorNeuronCombo, SIGNAL(activated(const QString &)), this, SLOT(monitorNeuronComboActivated(const QString &)));
 	monitorNeuronCombo->setEnabled(false);
-	monitorNeuronCombo->setBaseSize(180, 20);
-	monitorNeuronCombo->setMaximumSize(180, 20);
-	monitorNeuronCombo->setMinimumSize(180, 20);
 	monitorNeuronBox->addSpacing(10);
 	monitorNeuronBox->addWidget(monitorNeuronCombo);
 	monitorNeuronText = new QLineEdit(controlGrpBox);
-	monitorNeuronText->setBaseSize(100, 20);
-	monitorNeuronText->setMaximumSize(100, 20);
-	monitorNeuronText->setMinimumSize(100, 20);
 	monitorNeuronValidator = new QIntValidator(this);
 	monitorNeuronText->setValidator(monitorNeuronValidator);
 	monitorNeuronText->setEnabled(false);
 	monitorNeuronBox->addWidget(monitorNeuronText);
 	monitorNeuronButton = new QPushButton("Monitor Neuron", controlGrpBox);
-	monitorNeuronButton->setMaximumSize(120, 20);
-	monitorNeuronButton->setMinimumSize(120, 20);
 	connect(monitorNeuronButton, SIGNAL(clicked()), this, SLOT(monitorNeuronButtonPressed()));
 	monitorNeuronButton->setEnabled(false);
 	monitorNeuronBox->addWidget(monitorNeuronButton);
@@ -422,34 +381,21 @@ SimulationWidget::SimulationWidget(QWidget *parent, DBInterface *netDBInter, DBI
 	Q3HBoxLayout *monitorSynapseBox = new Q3HBoxLayout();
 	monitorSynapseBox->addSpacing(10);
 	monitorSynapseFromLabel = new QLabel("From: ", controlGrpBox);
-	monitorSynapseFromLabel->setBaseSize(40, 20);
-	monitorSynapseFromLabel->setMinimumSize(40, 20);
-	monitorSynapseFromLabel->setMaximumSize(40, 20);
 	monitorSynapseFromLabel->setEnabled(false);
 	monitorSynapseBox->addWidget(monitorSynapseFromLabel);
 	monitorSynapseFromNumLabel = new QLabel("0", controlGrpBox);
 	monitorSynapseFromNumLabel->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-	monitorSynapseFromNumLabel->setBaseSize(100, 20);
-	monitorSynapseFromNumLabel->setMinimumSize(100, 20);
-	monitorSynapseFromNumLabel->setMaximumSize(40, 20);
 	monitorSynapseFromNumLabel->setEnabled(false);
 	monitorSynapseBox->addWidget(monitorSynapseFromNumLabel);
 	monitorSynapseToLabel = new QLabel("To: ", controlGrpBox);
-	monitorSynapseToLabel->setBaseSize(30, 20);
-	monitorSynapseToLabel->setMinimumSize(30, 20);
-	monitorSynapseToLabel->setMaximumSize(30, 20);
 	monitorSynapseToLabel->setEnabled(false);
 	monitorSynapseBox->addWidget(monitorSynapseToLabel);
 	monitorSynapseToNumLabel = new QLabel("0", controlGrpBox);
 	monitorSynapseToNumLabel->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-	monitorSynapseToNumLabel->setBaseSize(90, 20);
-	monitorSynapseToNumLabel->setMinimumSize(90, 20);
 	monitorSynapseToNumLabel->setEnabled(false);
 	monitorSynapseBox->addWidget(monitorSynapseToNumLabel);
 	monitorSynapseButton = new QPushButton("Monitor Synapse", controlGrpBox);
-	monitorSynapseButton->setMaximumSize(120, 20);
-	monitorSynapseButton->setMinimumSize(120, 20);
-	connect(monitorSynapseButton, SIGNAL(clicked()), this, SLOT(monitorSynapseButtonPressed()));
+        connect(monitorSynapseButton, SIGNAL(clicked()), this, SLOT(monitorSynapseButtonPressed()));
 	monitorSynapseButton->setEnabled(false);
 	monitorSynapseBox->addWidget(monitorSynapseButton);
 	monitorSynapseBox->addStretch(5);
@@ -462,9 +408,6 @@ SimulationWidget::SimulationWidget(QWidget *parent, DBInterface *netDBInter, DBI
 	//Combo to choose neuron group
 	injectNoiseNeurGrpCombo = new QComboBox(controlGrpBox);
 	injectNoiseNeurGrpCombo->setEnabled(false);
-	injectNoiseNeurGrpCombo->setBaseSize(180, 20);
-	injectNoiseNeurGrpCombo->setMaximumSize(180, 20);
-	injectNoiseNeurGrpCombo->setMinimumSize(180, 20);
 	injectNoiseBox->addSpacing(10);
 	injectNoiseBox->addWidget(injectNoiseNeurGrpCombo);
 
@@ -476,16 +419,11 @@ SimulationWidget::SimulationWidget(QWidget *parent, DBInterface *netDBInter, DBI
 	injectNoiseAmntCombo->insertItem("50%");
 	injectNoiseAmntCombo->insertItem("75%");
 	injectNoiseAmntCombo->insertItem("100%");
-	injectNoiseAmntCombo->setBaseSize(100, 20);
-	injectNoiseAmntCombo->setMaximumSize(100, 20);
-	injectNoiseAmntCombo->setMinimumSize(100, 20);
 	injectNoiseAmntCombo->setEnabled(false);
 	injectNoiseBox->addWidget(injectNoiseAmntCombo);
 
 	//Button to control noise
 	injectNoiseButton = new QPushButton("Inject Noise", controlGrpBox);
-	injectNoiseButton->setMaximumSize(120, 20);
-	injectNoiseButton->setMinimumSize(120, 20);
 	injectNoiseButton->setEnabled(false);
 	connect(injectNoiseButton, SIGNAL(clicked()), this, SLOT(injectNoiseButtonPressed()));
 	injectNoiseBox->addWidget(injectNoiseButton);
@@ -498,22 +436,14 @@ SimulationWidget::SimulationWidget(QWidget *parent, DBInterface *netDBInter, DBI
 	fireNeuronCombo = new QComboBox(controlGrpBox);
 	connect(fireNeuronCombo, SIGNAL(activated(const QString &)), this, SLOT(fireNeuronComboActivated(const QString &)));
 	fireNeuronCombo->setEnabled(false);
-	fireNeuronCombo->setBaseSize(180, 20);
-	fireNeuronCombo->setMaximumSize(180, 20);
-	fireNeuronCombo->setMinimumSize(180, 20);
 	fireNeuronBox->addSpacing(10);
 	fireNeuronBox->addWidget(fireNeuronCombo);
 	fireNeuronText = new QLineEdit(controlGrpBox);
-	fireNeuronText->setBaseSize(100, 20);
-	fireNeuronText->setMaximumSize(100, 20);
-	fireNeuronText->setMinimumSize(100, 20);
 	fireNeuronValidator = new QIntValidator(this);
 	fireNeuronText->setValidator(fireNeuronValidator);
 	fireNeuronText->setEnabled(false);
 	fireNeuronBox->addWidget(fireNeuronText);
 	fireNeuronButton = new QPushButton("Fire Neuron", controlGrpBox);
-	fireNeuronButton->setMaximumSize(120, 20);
-	fireNeuronButton->setMinimumSize(120, 20);
 	connect(fireNeuronButton, SIGNAL(clicked()), this, SLOT(fireNeuronButtonPressed()));
 	fireNeuronButton->setEnabled(false);
 	fireNeuronBox->addWidget(fireNeuronButton);
@@ -531,7 +461,7 @@ SimulationWidget::SimulationWidget(QWidget *parent, DBInterface *netDBInter, DBI
 
 
 	//========================== DOCKING AND GRAPH VISIBILITY CONTROLS ==============================
-	Q3HBoxLayout *dockButtonBox = new Q3HBoxLayout();
+        Q3HBoxLayout *dockButtonBox = new Q3HBoxLayout();
 	dockAllButton = new QPushButton("Dock All", this);
 	dockAllButton->setEnabled(false);
 	connect(dockAllButton, SIGNAL(clicked()), this, SLOT(dockAllButtonClicked()));
@@ -550,7 +480,8 @@ SimulationWidget::SimulationWidget(QWidget *parent, DBInterface *netDBInter, DBI
 	dockButtonBox->addWidget(showGraphsButton);
 	dockButtonBox->addStretch(5);
 
-	mainVerticalBox->addLayout(dockButtonBox);
+
+        mainVerticalBox->addLayout(dockButtonBox);
 
 	simErrorCheckTimer = new QTimer(this);
 	connect( simErrorCheckTimer, SIGNAL(timeout()), this, SLOT(checkSimManagerForErrors()));
@@ -1976,4 +1907,7 @@ bool SimulationWidget::neuronGroupsIsolated(){
 	}
 	return false;
 }
+
+
+
 

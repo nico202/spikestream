@@ -71,20 +71,16 @@ LayerWidget::LayerWidget(QWidget *parent, DBInterface *netDBInter, DBInterface* 
 	zoomClickCount = 0;
 	
 	//Create vertical layout to organise widget
-	Q3VBoxLayout *verticalBox = new Q3VBoxLayout(this, 5, 10, "vertical");
+        Q3VBoxLayout *verticalBox = new Q3VBoxLayout(this, 5, 5, "vertical");
 
 	//Set up buttons
 	Q3HBoxLayout *buttonBox = new Q3HBoxLayout();
 	newLayerButt = new QPushButton("Add Neurons", this, "NewNeuronGrp");
-	newLayerButt->setBaseSize(100, 30);
-	newLayerButt->setMaximumSize(100,30);
 	newLayerButt->setAccel(QKeySequence(Qt::CTRL + Qt::Key_N));
 	connect (newLayerButt, SIGNAL(clicked()), this, SLOT(newLayer()));
 	buttonBox->addWidget(newLayerButt);
 	
 	deleteButt = new QPushButton("Delete", this, "Delete");
-	deleteButt->setBaseSize(100, 30);
-	deleteButt->setMaximumSize(100,30);
 	deleteButt->setAccel(QKeySequence(Qt::Key_Delete));
 	connect (deleteButt, SIGNAL(clicked()), this, SLOT(deleteLayer()));
 	buttonBox->addWidget(deleteButt);

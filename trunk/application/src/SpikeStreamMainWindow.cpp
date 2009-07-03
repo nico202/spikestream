@@ -324,7 +324,6 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 
 	//Set up monitor area at bottom of simulation tab
 	MonitorArea *simulationMonitorArea = new MonitorArea(networkDBInterface, simulationManager, simulationSplitterWidget);
-	simulationMonitorArea->setMinimumSize(60, 200);
 	simulationWidget->setMonitorArea(simulationMonitorArea);
         tabWidget->addTab(simulationScrollView, "Simulation");
 
@@ -367,7 +366,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	QPixmap iconPixmap(workingDirectory + "/images/spikestream_icon_64.png" );
 	setIcon(iconPixmap);
         setCentralWidget( mainSplitterWidget );
-	setWindowState(Qt::WindowMaximized);
+        setWindowState(Qt::WindowMaximized);
 
 	//Get rid of splash screen if it is showing
 	if(splashScreen){

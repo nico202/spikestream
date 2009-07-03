@@ -273,7 +273,7 @@ void DatabaseManager::readFromStderr(){
 	//Print out current process arguments
 	cerr<<"DatabaseManager: PROCESS ERROR: ";
 	QStringList processArgs = process->arguments();
-	for(unsigned int i=0; i<processArgs.size(); ++i)
+        for(int i=0; i<processArgs.size(); ++i)
                 cerr<<processArgs[i].toStdString()<<" ";
 	cerr<<endl;
 
@@ -361,7 +361,7 @@ void DatabaseManager::fillLoadTable(){
 	DBParameters devDBParam = devDBInterface->getDBParameters();
 
 	//Add name to table if it matches the name of one of the existing databases
-	for(unsigned int i=0; i<loadDBList.size(); ++i){
+        for(int i=0; i<loadDBList.size(); ++i){
 		if(loadDBList[i].section('.', 0, 0) == netDBParam.database)
 			netDBRow = addDatabaseToTable(netDBInterface);
 		else if(loadDBList[i].section('.', 0, 0) == archDBParam.database)

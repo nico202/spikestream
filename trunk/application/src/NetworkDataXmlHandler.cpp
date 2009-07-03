@@ -154,7 +154,7 @@ bool NetworkDataXmlHandler::characters(const QString& chars){
 			QStringList tempStringList = QStringList::split(",", chars);
 	
 			//Add firing neuron IDs to firing neuron maps in this class (for statistics) and elsewhere
-			for(unsigned int i=0; i< tempStringList.size(); ++i){
+                        for(int i=0; i< tempStringList.size(); ++i){
 				firingNeuronID = Utilities::getUInt(tempStringList[i].ascii());
 
 				//Store the neuron id for statistical analysis
