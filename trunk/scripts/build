@@ -1,0 +1,11 @@
+#!/bin/sh
+
+#Builds the entire project
+
+cd $SPIKESTREAM_ROOT
+
+qmake spikestream.pro
+
+make
+
+

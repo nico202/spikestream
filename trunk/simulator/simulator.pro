@@ -8,7 +8,7 @@ DESTDIR = $(SPIKESTREAM_ROOT)/bin
 
 OBJECTS_DIR = build/objects
 
-CONFIG += debug \
+CONFIG += release \
           warn_on
 
 HEADERS = include/ClassLoader.h \

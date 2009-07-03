@@ -1628,13 +1628,17 @@ bool SimulationManager::spawnArchiveTask(const QString &archiveName, map<const c
 
 	//Determine whether to monitor spikes or firing neurons
 	commandLineArray[18] = "-at";//Type of monitoring
-	if(parameterMap.find("ArchiveFiringNeurons") != parameterMap.end()){
-		commandLineArray[19] = "Neurons";
-	}
-	else if(parameterMap.find("ArchiveSpikes") != parameterMap.end()){
-		commandLineArray[19] = "Spikes";
-	}
-	else{
+        commandLineArray[19] = "";
+        for(map<const char*, unsigned int>::iterator iter = parameterMap.begin(); iter != parameterMap.end(); ++iter){
+            if(strcmp(iter->first, "ArchiveFiringNeurons")){
+                commandLineArray[19] = "Neurons";
+            }
+            else if(strcmp(iter->first, "ArchiveSpikes")){
+                commandLineArray[19] = "Spikes";
+            }
+        }
+
+        if(!strcmp(commandLineArray[19], "ArchiveFiringNeurons") && !strcmp(commandLineArray[19], "ArchiveSpikes")){
 		cerr<<"SimulationManager. CANNOT FIND ARCHIVE SPIKES/FIRING NEURONS PARAMETER"<<endl;
 		return false;
 	}
@@ -1784,7 +1788,7 @@ bool SimulationManager::spawnNeuronGroupTasks(){
 			Utilities::safeCStringCopy(commandLineArray[1], neuronGrpString.c_str(), 20);
 			
 			//Spawn the task
-			int numTasksLaunched = pvm_spawn("spikestreamsimulation", commandLineArray, 0, "", 1, &newTaskID);
+                        int numTasksLaunched = pvm_spawn("spikestreamsimulator", commandLineArray, 0, "", 1, &newTaskID);
 			
 			// Check that task has launched
 			if (numTasksLaunched == 1) {
