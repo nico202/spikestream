@@ -450,16 +450,16 @@ void ConnectionManager::createSIMNOSComponentConns(ConnectionHolder& connHolder,
 	networkQuery<<"SELECT Width, Length FROM NeuronGroups WHERE NeuronGrpID = "<<connHolder.fromLayerID;
         StoreQueryResult fromSizeRes = networkQuery.store();
 	Row fromSizeRow (*fromSizeRes.begin());//fromLayerID should be unique
-	unsigned int fromGrpWidth = Utilities::getUInt((std::string)fromSizeRow["Width"]);
-	unsigned int fromGrpLength = Utilities::getUInt((std::string)fromSizeRow["Length"]);
+        int fromGrpWidth = Utilities::getInt((std::string)fromSizeRow["Width"]);
+        int fromGrpLength = Utilities::getInt((std::string)fromSizeRow["Length"]);
 
 	//Get the width and length of the to neuron group
 	networkQuery.reset();
 	networkQuery<<"SELECT Width, Length FROM NeuronGroups WHERE NeuronGrpID = "<<connHolder.toLayerID;
         StoreQueryResult toSizeRes = networkQuery.store();
 	Row toSizeRow (*toSizeRes.begin());//fromLayerID should be unique
-	unsigned int toGrpWidth = Utilities::getUInt((std::string)toSizeRow["Width"]);
-	unsigned int toGrpLength = Utilities::getUInt((std::string)toSizeRow["Length"]);
+        int toGrpWidth = Utilities::getInt((std::string)toSizeRow["Width"]);
+        int toGrpLength = Utilities::getInt((std::string)toSizeRow["Length"]);
 
 	//In current implementation from and to group widths should be identical
 	if(fromGrpWidth != toGrpWidth){
@@ -507,7 +507,7 @@ void ConnectionManager::createSIMNOSComponentConns(ConnectionHolder& connHolder,
 		by the StartRow and NumRows values. Currently the colums are ignored. */
 	unsigned int devGrpNeurID, newGrpNeurID;
 	unsigned int newGrpRowNum = 0;
-	for(unsigned int i=0; i<receptorIDStrList.size(); ++i){
+        for(int i=0; i<receptorIDStrList.size(); ++i){
 		deviceQuery.reset();
                 deviceQuery<<"SELECT StartRow, NumRows FROM SIMNOSSpikeReceptors WHERE ReceptorID ="<<receptorIDStrList[i].toStdString();
                 StoreQueryResult recYRes = deviceQuery.store();
@@ -528,7 +528,7 @@ void ConnectionManager::createSIMNOSComponentConns(ConnectionHolder& connHolder,
 		//Work through all of the rows in the receptor
 		for(unsigned int j=0; j<devNumRows; ++j){
 			//Work across row and create connections between the layers
-			for(unsigned int i=0; i< fromGrpWidth; ++i){//From and to grp width are the same
+                        for(int i=0; i< fromGrpWidth; ++i){//From and to grp width are the same
 				//Sort out weight and delay
 				unsigned short connectionDelay = getDelay(connHolder.minDelay, connHolder.maxDelay);
 				short connectionWeight = getWeight(connHolder.paramMap["Average weight"], connHolder.paramMap["Weight range"], 0); //Random, not normal, distribution

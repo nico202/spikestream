@@ -312,7 +312,7 @@ bool NeuronParametersDialog::loadNeuronParameters(){
 			query.reset();
 			if(fieldNamesMap[neuronTypeID]->size() > 0){
 				query<<"SELECT NeuronGrpID, ";
-				for(unsigned int i=0; i<fieldNamesMap[neuronTypeID]->size() - 1; ++i){
+                                for(int i=0; i<fieldNamesMap[neuronTypeID]->size() - 1; ++i){
                                         query<<(*fieldNamesMap[neuronTypeID])[i].toStdString()<<"_val, ";
 				}
                                 query<<(*fieldNamesMap[neuronTypeID])[fieldNamesMap[neuronTypeID]->size() - 1].toStdString()<<"_val FROM "<<((std::string)neuronTypesRow["ParameterTableName"]);
@@ -343,7 +343,7 @@ bool NeuronParametersDialog::loadNeuronParameters(){
                                 paramTableMap[neuronTypeID]->setItem(currentRowNumber, nameColumn, new Q3TableItem(paramTableMap[neuronTypeID], Q3TableItem::Never, ((std::string)nameRow["Name"]).data()));
 		
 				//Work through parameters and load them into the table
-				for(unsigned int i=0; i<fieldNamesMap[neuronTypeID]->size(); ++i){
+                                for(int i=0; i<fieldNamesMap[neuronTypeID]->size(); ++i){
 					QString valueQueryName = (*fieldNamesMap[neuronTypeID])[i] + "_val";
 					
 					if(checkBoxMap[neuronTypeID].count((*fieldNamesMap[neuronTypeID])[i])){//Add a check box for the value
@@ -543,7 +543,7 @@ void NeuronParametersDialog::storeNeuronParameters(){
                                 queryString += paramTableIter->second->getParameterTableName().data();
 				queryString += " SET ";
 		
-				for(unsigned int i = 0; i < fieldNamesMap[neurTypeID]->size(); ++i){
+                                for(int i = 0; i < fieldNamesMap[neurTypeID]->size(); ++i){
 					QString valueName = (*fieldNamesMap[neurTypeID])[i] + "_val";
 					QString valueText = "";
 	

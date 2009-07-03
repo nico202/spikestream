@@ -251,7 +251,6 @@ class SimulationWidget : public QWidget {
 		void loadNeuronGrpNames(QComboBox *comboBox);
 		void loadPatternTable();
 		bool neuronGroupsIsolated();
-
 };
 
 

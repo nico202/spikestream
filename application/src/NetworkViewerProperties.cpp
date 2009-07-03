@@ -66,9 +66,6 @@ NetworkViewerProperties::NetworkViewerProperties(QWidget *parent, NetworkViewer 
 	//Add button to control highlighting
 	Q3HBoxLayout* highlightBox = new Q3HBoxLayout();
 	highlightButton = new QPushButton("Highlight", this);
-	highlightButton->setBaseSize(150, 20);
-	highlightButton->setMinimumSize(150, 20);
-	highlightButton->setMaximumSize(150, 20);
 	connect(highlightButton, SIGNAL(clicked()), this, SLOT(highlightButtonPressed()));
 	highlightBox->addWidget(highlightButton);
 	highlightBox->addStretch(5);
@@ -217,18 +214,18 @@ NetworkViewerProperties::NetworkViewerProperties(QWidget *parent, NetworkViewer 
 	connectionDetailsTable->setLeftMargin(0);
 	Q3Header * connTableHeader = connectionDetailsTable->horizontalHeader();
 	connTableHeader->setLabel(0, "ConnGrpID" );
-	connectionDetailsTable->setColumnWidth(0, 75);
+        connectionDetailsTable->setColumnWidth(0, 95);
 	connTableHeader->setLabel(1, "PreConnNeurID" );
-	connectionDetailsTable->setColumnWidth(1, 110);
+        connectionDetailsTable->setColumnWidth(1, 130);
 	connTableHeader->setLabel(2, "PostConnNeurID" );
-	connectionDetailsTable->setColumnWidth(2, 110);
+        connectionDetailsTable->setColumnWidth(2, 130);
 	connTableHeader->setLabel(3, "Saved Weight" );
-	connectionDetailsTable->setColumnWidth(3, 90);
+        connectionDetailsTable->setColumnWidth(3, 110);
 	connTableHeader->setLabel(4, "Temp Weight" );
-	connectionDetailsTable->setColumnWidth(4, 90);
+        connectionDetailsTable->setColumnWidth(4, 110);
 	connTableHeader->setLabel(5, "Delay" );
-	connectionDetailsTable->setColumnWidth(5, 60);
-	connectionDetailsTable->setMinimumSize(600,300);
+        connectionDetailsTable->setColumnWidth(5, 80);
+        connectionDetailsTable->setMinimumSize(800,400);
 	connDetailsTableBox->addWidget(connectionDetailsTable);
 	connDetailsTableBox->addStretch(5);
 	vBox->addLayout(connDetailsTableBox);

@@ -69,20 +69,16 @@ ConnectionWidget::ConnectionWidget(QWidget *parent, DBInterface *netDBInter, DBI
 	
 	//Set up widget
 	//Create vertical layout to arrange panel
-	Q3VBoxLayout *verticalBox = new Q3VBoxLayout(this, 5, 10, "vertical");
+        Q3VBoxLayout *verticalBox = new Q3VBoxLayout(this, 5, 5, "vertical");
 
 	//Set up buttons
 	Q3HBoxLayout *buttonBox = new Q3HBoxLayout();
 	newConnButt = new QPushButton("Add Connections", this, "NewConnection");
-	newConnButt->setBaseSize(120, 30);
-	newConnButt->setMaximumSize(120,30);
 	newConnButt->setAccel(QKeySequence(Qt::CTRL + Qt::Key_N));
 	connect (newConnButt, SIGNAL(clicked()), this, SLOT(newConnectionsButtonPressed()));
 	buttonBox->addWidget(newConnButt);
 	
 	deleteConnButt = new QPushButton("Delete", this, "Delete Conns");
-	deleteConnButt->setBaseSize(100, 30);
-	deleteConnButt->setMaximumSize(100,30);
 	deleteConnButt->setAccel(QKeySequence(Qt::Key_Delete));
 	connect (deleteConnButt, SIGNAL(clicked()), this, SLOT(deleteConnections()));
 	buttonBox->addWidget(deleteConnButt);

@@ -152,7 +152,7 @@ void PatternDialog::addPattern(){
 		return;
 
 	try{
-		for(unsigned int i=0; i<fileNames.size(); ++i){
+                for(int i=0; i<fileNames.size(); ++i){
 			if(!patternManager->addPattern(fileNames[i])){
 				QString errorString = "Error adding pattern to database. Check the format of the input file:\n";
 				errorString += fileNames[i];

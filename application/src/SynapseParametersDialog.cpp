@@ -321,7 +321,7 @@ bool SynapseParametersDialog::loadSynapseParameters(){
 			//Generate and execute query for this synapse type 
 			query.reset();
 			query<<"SELECT ConnGrpID, ";
-			for(unsigned int i=0; i<fieldNamesMap[synapseTypeID]->size() - 1; ++i){
+                        for(int i=0; i<fieldNamesMap[synapseTypeID]->size() - 1; ++i){
                                 query<<(*fieldNamesMap[synapseTypeID])[i].toStdString()<<"_val, ";
 			}
                         query<<(*fieldNamesMap[synapseTypeID])[fieldNamesMap[synapseTypeID]->size() - 1].toStdString()<<"_val FROM "<<((std::string)synapseTypesRow["ParameterTableName"]);
@@ -354,7 +354,7 @@ bool SynapseParametersDialog::loadSynapseParameters(){
                                 paramTableMap[synapseTypeID]->setItem(currentRowNumber, toGrpColumn, new Q3TableItem(paramTableMap[synapseTypeID], Q3TableItem::Never, getNeuronGroupName(QString(((std::string)fromToIDRow["ToNeuronGrpID"]).data()))));
 		
 				//Work through parameters and load them into the table
-				for(unsigned int i=0; i<fieldNamesMap[synapseTypeID]->size(); ++i){
+                                for(int i=0; i<fieldNamesMap[synapseTypeID]->size(); ++i){
 					QString valueQueryName = (*fieldNamesMap[synapseTypeID])[i] + "_val";
 					
 					if(checkBoxMap[synapseTypeID].count((*fieldNamesMap[synapseTypeID])[i])){//Add a check box for the value
@@ -592,7 +592,7 @@ void SynapseParametersDialog::storeSynapseParameters(){
                                 queryString += paramTableIter->second->getParameterTableName().data();
 				queryString += " SET ";
 		
-				for(unsigned int i = 0; i < fieldNamesMap[synTypeID]->size(); ++i){
+                                for(int i = 0; i < fieldNamesMap[synTypeID]->size(); ++i){
 					QString valueName = (*fieldNamesMap[synTypeID])[i] + "_val";
 					QString valueText = "";
 	

@@ -35,6 +35,9 @@ SpikeStreamApplication::SpikeStreamApplication(int & argc, char ** argv) : QAppl
 	renderDuration_ms = 0;
 	startRenderKeyEventTime = 0;
 	rendering = false;
+
+        //Set the application styles
+        this->setStyleSheet("* { font-size: 12px; }");
 }
 
 
