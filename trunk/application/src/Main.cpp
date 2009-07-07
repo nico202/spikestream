@@ -24,10 +24,28 @@
 #include "SpikeStreamMainWindow.h"
 #include "SpikeStreamApplication.h"
 
-#include "testQApplication.h"
-
+//Qt includes
 #include <QApplication>
- #include <QPushButton>
+#include <QMessageBox>
+
+ void logMessageOutput(QtMsgType type, const char *msg){
+     switch (type) {
+         case QtDebugMsg:
+             cout<<"Debug: "<<msg<<endl;
+             break;
+         case QtWarningMsg:
+             fprintf(stderr, "Warning: %s\n", msg);
+             break;
+         case QtCriticalMsg:
+             QMessageBox::critical( 0, "SpikeStream Critical Error", msg);
+             fprintf(stderr, "Critical: %s\n", msg);
+             break;
+         case QtFatalMsg:
+             QMessageBox::critical( 0, "SpikeStream Fatal Error", msg);
+             fprintf(stderr, "Fatal: %s\n", msg);
+             abort();
+     }
+ }
 
 //-------------------------- Main ------------------------------------------
 /*! Main method for simulator that launches the application. */
@@ -35,17 +53,9 @@
 
 int main( int argc, char ** argv ) {
 
+    //Install message handler for logging
+    qInstallMsgHandler(logMessageOutput);
 
-     //QApplication spikeStrApp(argc, argv);
-   /*  SpikeStreamApplication spikeStrApp(argc, argv);
-    //testQApplication spikeStrApp(argc, argv);
-     QPushButton hello("Hello world11!");
-     hello.resize(100, 30);
-
-     hello.show();
-     return spikeStrApp.exec();
-
-*/
 
 	//Create QApplication
         SpikeStreamApplication spikeStrApp(argc, argv);
