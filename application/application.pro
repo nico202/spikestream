@@ -15,7 +15,10 @@ LIBS += -lqwt -L/usr/local/qwt/lib \
         -lmysqlpp \
         -lpvm3 
 
-INCLUDEPATH += $(SPIKESTREAM_ROOT)/library/include \
+INCLUDEPATH += src \
+                src/analysis \
+                src/exceptions \
+                $(SPIKESTREAM_ROOT)/library/include \
                  /usr/include/mysql \
                  /usr/local/include/mysql++ \
                  /usr/local/qwt/include
@@ -27,6 +30,8 @@ CONFIG += debug \
           thread \
           exceptions \
           stl 
+
+#DEFINES += QT_NO_DEBUG_OUTPUT
 
 QT += xml  opengl qt3support
 
@@ -82,7 +87,11 @@ HEADERS += src/ArchiveManager.h \
            src/ViewModelDialog.h \
            src/ConnectionMatrixLoader.h \
            src/HighlightDialog.h \
-            src/testQApplication.h
+           src/analysis/AnalysisLoaderWidget.h \
+           src/PluginManager.h \
+           src/exceptions/SpikeStreamException.h \
+           src/Globals.h
+
 
 SOURCES += src/ArchiveManager.cpp \
            src/ArchiveStatistic.cpp \
@@ -134,5 +143,8 @@ SOURCES += src/ArchiveManager.cpp \
            src/ViewModelDialog.cpp \
            src/ConnectionMatrixLoader.cpp \
            src/HighlightDialog.cpp \
-            src/testQApplication.cpp
+           src/analysis/AnalysisLoaderWidget.cpp \
+           src/PluginManager.cpp \
+           src/exceptions/SpikeStreamException.cpp \
+           src/Globals.cpp
 

@@ -21,6 +21,7 @@
  ***************************************************************************/
 
 //SpikeStream includes
+#include "AnalysisLoaderWidget.h"
 #include "SpikeStreamMainWindow.h"
 #include "LogWriter.h"
 #include "Debug.h"
@@ -32,6 +33,7 @@
 #include "ProbeDialog.h"
 #include "ConfigLoader.h"
 #include "ConnectionMatrixLoader.h"
+#include "Globals.h"
 
 //Qt includes
 #include <qsplitter.h>
@@ -48,6 +50,7 @@
 //Added by qt3to4:
 #include <QCloseEvent>
 #include <Q3PopupMenu>
+#include <QtDebug>
 
 //Other includes
 #include <mysql++.h>
@@ -64,11 +67,13 @@ SpikeStreamApplication* SpikeStreamMainWindow::spikeStreamApplication;
 
 /*! Constructor. */
 SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3MainWindow( 0, "SpikeStream", Qt::WDestructiveClose ){
-	//Store a static reference to itself so that it can be accessed from anywhere
+    //Store a static reference to itself so that it can be accessed from anywhere
 	spikeStrMainWin = this;
 
 	//Store reference to spike stream application
 	spikeStreamApplication = ssApp;
+
+        //FIXME: CARRY OUT HOUSEKEEPING TASKS ON DATABASE, SUCH AS SORTING OUT CRASHED SIMULATIONS ETC.
 
 	//Get the working directory, which should be defined by the SPIKESTREAM_ROOT variable
 	workingDirectory = getenv("SPIKESTREAM_ROOT");
@@ -91,6 +96,8 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 			cout<<"Working directory: "<<workingDirectory<<endl;
 		#endif//PATH_DEBUG
 	}
+        //Store root directory in global scope
+        Globals::setRootDirectory(workingDirectory);
 
 	//Set up splash screen to give feedback whilst application is loading
 	QSplashScreen *splashScreen = 0;
@@ -111,7 +118,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	}
 	
 
-	//Set up the logging
+        //Set up the logging - FIXME USE PROPER LOGGER
 	//Load the log level from the configuration file: 0 disables logging, 1 enables medium logging, 2 enables full logging
 	int logLev = 0;
 	try{
@@ -342,7 +349,10 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	archiveMonitorArea->setMinimumSize(60, 200);
 	archiveWidget->setMonitorArea(archiveMonitorArea);
         tabWidget->addTab(archiveScrollView, "Archive");
-	
+
+        //Set up analysis tab
+        AnalysisLoaderWidget* analysisLoaderWidget = new AnalysisLoaderWidget(this);
+        tabWidget->addTab(analysisLoaderWidget, "Analysis");
 
 	//Set up layer widget connections
 	layerWidget->setConnectionWidget(connectionWidget);

@@ -1,0 +1,7 @@
+SpikeStream 0.2 - Most Annoying Bugs
+
+The archiver and simulator both cause SpikeStream to crash when they are running - an intermittent problem connected, I think, with the graphics updating. 
+
+The archive dock windows do not appear to be draggable.
+
+ 
