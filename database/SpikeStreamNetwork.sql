@@ -1,19 +1,26 @@
+/*------------------------  SpikeStreamNeuralNetwork ----------------------*/
+/* Holds the neurons and connections. All of the databases are created using
+	InnoDB so that we can use foreign keys. Performance looks roughly the same
+	or better than MyISAM. */             
+/*-------------------------------------------------------------------------*/
  
-/* Create and use the database. */
-DROP DATABASE IF EXISTS SpikeStreamNeuralNetwork;
-CREATE DATABASE SpikeStreamNeuralNetwork;
-USE SpikeStreamNeuralNetwork;
-
 /* Disable foreign key checks whilst creating tables etc. */
 SET foreign_key_checks = 0;
 
 
+/* Create and use the database. */
+DROP DATABASE IF EXISTS SpikeStreamNetwork;
+CREATE DATABASE SpikeStreamNetwork;
+USE SpikeStreamNetwork;
+
+
 /* NeuralNetwork
-	Allows a number of different networks to be held in the same database.
+	Allows a number of different networks to be held in the same database, 
+	and allows networks to be archived.
 */
 CREATE TABLE NeuralNetworks (
     NeuralNetworkID SMALLINT NOT NULL AUTO_INCREMENT,
-    Name CHAR(100),
+    Name CHAR(100) NOT NULL DEFAULT "Untitled",
     PRIMARY KEY (NeuralNetworkID),
     INDEX NeuralNetworkIDIndex(NeuralNetworkID)
 )
@@ -21,25 +28,15 @@ ENGINE=InnoDB;
 
 
 /* NeuronGroups
-    Neurons are gathered together into neuron groups. 
-    This table stores an overall geometry for the neuron group as the minimum bounding 
-    NOTE: Ideally this would be a geometry field, but MySQL only supports 2D geometry at present
+    Neurons are gathered together into neuron groups that have common parameters and types
 */
 CREATE TABLE NeuronGroups (
     NeuronGroupID SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT, /* Primary key */
     NeuralNetworkID SMALLINT NOT NULL, /* Network that this group is part of */
-    Name CHAR(50), /*Short name, for example, 'motor cortex' */
-    Description CHAR(100), /* Description, for example, layer, etc. */
+    Name CHAR(50) NOT NULL DEFAULT "Untitled", /*Short name, for example, 'motor cortex' */
+    Description CHAR(100) NOT NULL DEFAULT "No description", /* Description, for example, layer, etc. */
     Parameters BLOB, /* XML describing the parameters used to create the group */
-    NeuronTypeID SMALLINT UNSIGNED NOT NULL, /*The type of neuron in the layer. Used for parameters and class loading */
-
-     /* Minimum bounding rectangular box of the neuron group. Ideally would be a 3D geometry field, but not currently supported by MySQL */
-    X SMALLINT NOT NULL,
-    Y SMALLINT NOT NULL,
-    Z SMALLINT NOT NULL,
-    Width SMALLINT NOT NULL,
-    Length SMALLINT NOT NULL,
-    Height SMALLINT NOT NULL,
+    NeuronTypeID SMALLINT UNSIGNED NOT NULL, /*The type of neuron in the group. Used for parameters and class loading */
 
     PRIMARY KEY (NeuronGroupID),
     INDEX NeuronGroupIDIndex(NeuronGroupID),
@@ -70,7 +67,7 @@ CREATE TABLE Neurons (
     Z SMALLINT NOT NULL,
 
     PRIMARY KEY (NeuronID),
-    INDEX Positions (X, Y, Z),/* Used when creating connections. */
+    INDEX Positions (X, Y, Z),/* Used when creating connections. FIXME: CHECK MIN(X), MIN(Y) AND MIN(Z) ON THE INDEX. */
     INDEX NeuronGroupIDIndex(NeuronGroupID),
 
     FOREIGN KEY NeuronGroupID_FK(NeuronGroupID) REFERENCES NeuronGroups(NeuronGroupID) ON DELETE CASCADE
@@ -86,16 +83,15 @@ ALTER TABLE Neurons AUTO_INCREMENT = 10;
 
 /* NeuronTypes
 	Holds the differnt types of neuron, which are implemented by different
-	dynamically loaded classes. Each entry in this table needs a corresponding
+	dynamically loaded classes. Each entry in this table must match a corresponding
 	table containing the parameters for this neuron type.
-	AddNeuronTypes.sql adds the individual types and associated parameter tables. */
+	AddSpikeStreamNeuronTypes.sql adds the individual types and associated parameter tables. */
 CREATE TABLE NeuronTypes (
     NeuronTypeID SMALLINT UNSIGNED NOT NULL,
     Description CHAR(100) NOT NULL,
-    ParameterTableName CHAR(100) NOT NULL,
-    ClassLibrary CHAR(100) NOT NULL,
-    PRIMARY KEY (NeuronTypeID),
-    UNIQUE (Description)
+    ParameterTableName CHAR(100) NOT NULL,/* Table where parameters for this neuron type are stored. */
+    ClassLibrary CHAR(100) NOT NULL, /* Dynamically loadable library used to simulate this neuron type */
+    PRIMARY KEY (NeuronTypeID)
 )
 ENGINE=InnoDB;
 
@@ -130,7 +126,7 @@ ALTER TABLE ConnectionGroups AUTO_INCREMENT = 10;
 	Each connection between two neurons has an entry in this table
 	containing its delay, weight and the connection group it belongs to
 	TempWeight is for storing weights temporarily for viewing the state of 
-	the simulation without storing the weights permanently. */
+	the simulation without overwriting the current weight values. */
 CREATE TABLE Connections (
 	FromNeuronID MEDIUMINT UNSIGNED NOT NULL,
 	ToNeuronID MEDIUMINT UNSIGNED NOT NULL,
@@ -161,8 +157,7 @@ CREATE TABLE SynapseTypes (
 	Description CHAR(100) NOT NULL,
 	ParameterTableName CHAR(100) NOT NULL,
 	ClassLibrary CHAR(100) NOT NULL,
-	PRIMARY KEY (SynapseTypeID),
-	UNIQUE (Description)
+	PRIMARY KEY (SynapseTypeID)
 )
 ENGINE=InnoDB;
 
@@ -186,18 +181,19 @@ ENGINE=InnoDB;
 
 
 /* WeightlessNeuronPatterns
-    Each position in the lookup table pattern refers to a particular neuron.
+    Each position in the lookup table pattern refers to connection between two neurons.
 */
 CREATE TABLE WeightlessNeuronConnections (
 	FromNeuronID MEDIUMINT UNSIGNED NOT NULL,
 	ToNeuronID MEDIUMINT UNSIGNED NOT NULL,
 	PatternIndex MEDIUMINT UNSIGNED NOT NULL,
 
-    FOREIGN KEY NeuronID_FK(NeuronID) REFERENCES Neurons(NeuronID) ON DELETE CASCADE
+	PRIMARY KEY (FromNeuronID, ToNeuronID),
+
+    FOREIGN KEY FromNeuronID_FK(FromNeuronID) REFERENCES Neurons(NeuronID) ON DELETE CASCADE,
+    FOREIGN KEY ToNeuronID_FK(ToNeuronID) REFERENCES Neurons(NeuronID) ON DELETE CASCADE
 )
 ENGINE=InnoDB;
-
-
 
 
 /* Re-enable foreign key checks on the tables */

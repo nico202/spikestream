@@ -1,12 +1,17 @@
-/*---------------------------- Devices Database ----------------------------
-	Database to hold information about all of the devices that the 
+/*---------------------------- Devices Database ----------------------------*/
+/* Database to hold information about all of the devices that the 
 	simulation can connect to.
----------------------------------------------------------------------------*/
+	NOTE: This database has been left largely 'as is' for the moment. */
+/* ----------------------------------------------------------------------------*/
+
+/* Disable foreign key checks whilst creating tables etc. */
+SET foreign_key_checks = 0;
+
 
 /* Create and use the Devices database. */
-DROP DATABASE IF EXISTS Devices;
-CREATE DATABASE Devices;
-USE Devices;
+DROP DATABASE IF EXISTS SpikeStreamDevice;
+CREATE DATABASE SpikeStreamDevice;
+USE SpikeStreamDevice;
 
 
 /* Devices
@@ -67,14 +72,20 @@ ENGINE=InnoDB;
 	stops delaying. Other tasks can then see if there is a synchronization delay by 
 	counting the number of rows. 
 	FIXME THIS APPROACH COULD RUN INTO TROUBLE WHEN THERE ARE MORE THAN 1 DEVICES PROVIDING
-	DATA*/
+	DATA
+*/
 CREATE TABLE SynchronizationDelay (
-	NeuronGrpID SMALLINT UNSIGNED NOT NULL,
-
+	NeuronGroupID SMALLINT UNSIGNED NOT NULL,
+	TaskID SMALLINT UNSIGNED NOT NULL,
 	PRIMARY KEY (NeuronGroupID),
-	INDEX IDIndex (NeuronGroupID)
+	INDEX NeuronGroupIDIndex (NeuronGroupID),
+    FOREIGN KEY NeuronGroupID_FK(NeuronGroupID) REFERENCES SpikeStreamNetwork.NeuronGroups(NeuronGroupID) ON DELETE NO ACTION
 )
 ENGINE=InnoDB;
+
+
+/* Re-enable foreign key checks */
+SET foreign_key_checks = 1;
 
 
 
