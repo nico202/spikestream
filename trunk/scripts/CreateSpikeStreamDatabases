@@ -1,0 +1,153 @@
+#!/bin/sh
+
+#--------------------- Create SpikeStream Databases -----------------------
+#  Creates all of the SpikeStream databases using the supplied database 
+#  name, user name, host and password information.
+#  These must be set up correctly before running the script.
+#--------------------------------------------------------------------------
+
+# Set details about database here. This should match the details in the
+# spikestream.config file.
+
+#----------- SpikeStreamNetwork Database -------------
+NETWORK_HOST=localhost
+NETWORK_USER=SpikeStream
+NETWORK_PASSWORD=ekips
+
+#----------- SpikeStreamArchive Database -------------
+ARCHIVE_HOST=localhost
+ARCHIVE_USER=SpikeStream
+ARCHIVE_PASSWORD=ekips
+
+#----------- SpikeStreamPattern Database -------------------
+PATTERNS_HOST=localhost
+PATTERNS_USER=SpikeStream
+PATTERNS_PASSWORD=ekips
+
+#----------- SpikeStreamSimulation Database --------------------
+SIMULATION_HOST=localhost
+SIMULATION_USER=SpikeStream
+SIMULATION_PASSWORD=ekips
+
+#----------- SpikeStreamDevice Database --------------------
+DEVICES_HOST=localhost
+DEVICES_USER=SpikeStream
+DEVICES_PASSWORD=ekips
+
+
+# Inform user what is going on
+echo ""
+echo "Creating databases for SpikeStream..."
+
+
+# Run a check that we can connect to each of these servers
+if ! mysql -h${NETWORK_HOST} -u${NETWORK_USER} -p${NETWORK_PASSWORD} -e"SHOW DATABASES;" > /dev/null;
+then 
+	echo "Cannot connect to MySQL server for SpikeStreamNetwork database. Check the server, firewall and parameters and try again."
+	DATABASE_ERROR=true;
+fi
+
+if ! mysql -h${ARCHIVE_HOST} -u${ARCHIVE_USER} -p${ARCHIVE_PASSWORD} -e"SHOW DATABASES;" > /dev/null;
+then 
+	echo "Cannot connect to MySQL server for SpikeStreamArchive database. Check the server, firewall and parameters and try again."
+	DATABASE_ERROR=true;
+fi
+
+if ! mysql -h${PATTERNS_HOST} -u${PATTERNS_USER} -p${PATTERNS_PASSWORD} -e"SHOW DATABASES;" > /dev/null;
+then 
+	echo "Cannot connect to MySQL server for SpikeStreamPattern database. Check the server, firewall and parameters and try again."
+	DATABASE_ERROR=true;
+fi
+
+if ! mysql -h${SIMULATION_HOST} -u${SIMULATION_USER} -p${SIMULATION_PASSWORD} -e"SHOW DATABASES;" > /dev/null;
+then 
+	echo "Cannot connect to MySQL server for SpikeStreamSimulation database. Check the server, firewall and parameters and try again."
+	DATABASE_ERROR=true;
+fi
+
+if ! mysql -h${DEVICES_HOST} -u${DEVICES_USER} -p${DEVICES_PASSWORD} -e"SHOW DATABASES;" > /dev/null;
+then 
+	echo "Cannot connect to MySQL server for SpikeStreamDevice database. Check the server, firewall and parameters and try again."
+	DATABASE_ERROR=true;
+fi
+
+
+# Exit if any of the parameters are not correct.
+if [  $DATABASE_ERROR ]
+then
+	echo "Database parameters incorrect. Failed to create databases."
+	echo ""
+	exit 1
+fi
+
+
+# Change to directory with sql files
+cd $SPIKESTREAM_ROOT/database
+
+
+# Create the databases
+if ! mysql -h${NETWORK_HOST} -u${NETWORK_USER} -p${NETWORK_PASSWORD} < SpikeStreamNetwork.sql
+then
+	echo "Error creating SpikeStreamNetwork database."
+	DATABASE_ERROR=true;
+fi
+
+if ! mysql -h${ARCHIVE_HOST} -u${ARCHIVE_USER} -p${ARCHIVE_PASSWORD} < SpikeStreamArchive.sql
+then 
+	echo "Error creating SpikeStreamArchive database."
+	DATABASE_ERROR=true;
+fi
+
+if ! mysql -h${PATTERNS_HOST} -u${PATTERNS_USER} -p${PATTERNS_PASSWORD} < SpikeStreamPattern.sql
+then
+	echo "Error creating SpikeStreamPattern database."
+	DATABASE_ERROR=true;
+fi
+
+if ! mysql -h${SIMULATION_HOST} -u${SIMULATION_USER} -p${SIMULATION_PASSWORD} < SpikeStreamSimulation.sql
+then
+	echo "Error creating SpikeStreamSimulation database."
+	DATABASE_ERROR=true;
+fi
+
+if ! mysql -h${DEVICES_HOST} -u${DEVICES_USER} -p${DEVICES_PASSWORD} < SpikeStreamDevice.sql
+then
+	echo "Error creating SpikeStreamDevice database."
+	DATABASE_ERROR=true;
+fi
+
+
+# Fill databases with any default information.
+if ! mysql -h${NETWORK_HOST} -u${NETWORK_USER} -p${NETWORK_PASSWORD} < AddNeuronTypes.sql
+then
+	echo "Error adding neuron types."
+	DATABASE_ERROR=true;
+fi
+
+if ! mysql -h${NETWORK_HOST} -u${NETWORK_USER} -p${NETWORK_PASSWORD} < AddSynapseTypes.sql
+then
+	echo "Error adding synapse types."
+	DATABASE_ERROR=true;
+fi
+
+if ! mysql -h${NETWORK_HOST} -u${NETWORK_USER} -p${NETWORK_PASSWORD} < AddPatternTypes.sql
+then
+	echo "Error adding pattern types."
+	DATABASE_ERROR=true;
+fi
+
+if ! mysql -h${DEVICES_HOST} -u${DEVICES_USER} -p${DEVICES_PASSWORD} < AddDevices.sql
+then
+	echo "Error adding device types."
+	DATABASE_ERROR=true;
+fi
+
+
+# Script has finished successfully
+if [ ! $DATABASE_ERROR ]
+then
+	echo "Databases successfully created."
+fi
+echo ""
+
+
