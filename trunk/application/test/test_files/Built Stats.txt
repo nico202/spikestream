@@ -1,0 +1,6 @@
+
+Layer 1 Neurons: 1 x 1 Total: 1
+Connections:   Neuron  Total   Layer   Total
+Path 1:		1	1	1	1
+
+Total neurons: 1   Total connections: 1

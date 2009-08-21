@@ -1,0 +1,55 @@
+#ifndef NRMCONFIGLOADER_H
+#define NRMCONFIGLOADER_H
+
+//SpikeStream includes
+#include "NRMNetwork.h"
+
+//Qt includes
+#include <QHash>
+
+//Other includes
+#include <string>
+using namespace std;
+
+
+/*! Holds information about a connection */
+struct cons {
+
+};
+
+/*! Loads up information from an NRM configuration file. File should have extension .cfg */
+class NRMConfigLoader{
+	public:
+		NRMConfigLoader(void);
+		~NRMConfigLoader(void);
+
+		void loadConfig(const char* filePath);
+		int getOpVer(){ return 2; }//Returns the current version of NRM
+
+		NRMNetwork* getNetwork();
+		void reset();
+
+
+	private:
+		//=========================  VARIABLES  ==============================
+		/*! The network that is loaded from the configuration file */
+		NRMNetwork* network;
+
+		//==========================  METHODS  ===============================
+		void getInputLayerSize(int inputLayerNum, int& ctWidth, int& ctHeight, int& ctColPlanes, int& ctType);
+		void getNeuralLayerSize(int neuralLayerNum, int& ctWidth, int& ctHeight, int& ctColPlanes);
+		void loadConfigVersion(FILE* file);
+		void loadConnectionParameters(conType& conParams, FILE* file);
+		void loadConnections(FILE* file);
+		void loadInputs(FILE* file);
+		void loadNeuralLayers(FILE* file);
+		void SetConParams(cons*, int, int, int, int, int, int, int, int );
+
+};
+
+
+
+
+
+#endif//NRMCONFIGLOADER_H
+

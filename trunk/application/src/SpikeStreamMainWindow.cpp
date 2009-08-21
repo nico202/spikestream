@@ -34,6 +34,7 @@
 #include "ConfigLoader.h"
 #include "ConnectionMatrixLoader.h"
 #include "Globals.h"
+#include "NRMImportDialog.h"
 
 //Qt includes
 #include <qsplitter.h>
@@ -242,6 +243,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	fileMenu->insertItem("Save databases", this, SLOT(saveDatabases()), Qt::CTRL+Qt::Key_S);
 	fileMenu->insertSeparator();
 	fileMenu->insertItem("Import connection matrix", this, SLOT(importConnectionMatrix()), Qt::CTRL+Qt::Key_I);
+	fileMenu->insertItem("Import NRM network", this, SLOT(importNRMNetwork()));
 	fileMenu->insertSeparator();
 	fileMenu->insertItem("Quit", qApp, SLOT(closeAllWindows()), Qt::CTRL+Qt::Key_Q);
 
@@ -747,6 +749,16 @@ void SpikeStreamMainWindow::importConnectionMatrix(){
 
 	//Reload the graphics
 	reloadEverything();
+}
+
+
+/*! Displays a dialog/wizard to import networks from NRM files into the SpikeStream database */
+void SpikeStreamMainWindow::importNRMNetwork(){
+    NRMImportDialog nrmDialog(this);
+    nrmDialog.exec();
+    	//PatternDialog* patternDialog = new PatternDialog(this, patternDBInterface);
+	//patternDialog->exec();
+	//delete patternDialog;
 }
 
 

@@ -95,6 +95,7 @@ class SpikeStreamMainWindow: public Q3MainWindow {
 		void closeEvent( QCloseEvent* );
 		void importConnectionMatrix();
 		void loadDatabases();
+		void importNRMNetwork();
 		void managePatterns();
 		void manageProbes();
 		void reloadDevices();
