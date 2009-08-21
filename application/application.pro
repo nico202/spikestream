@@ -13,15 +13,18 @@ MOC_DIR = build/moc
 LIBS += -lqwt -L/usr/local/qwt/lib \
         -lspikestream -L$(SPIKESTREAM_ROOT)/lib \
         -lmysqlpp \
-        -lpvm3 
+	-lpvm3 \
+	-lgmp
 
 INCLUDEPATH += src \
                 src/analysis \
                 src/exceptions \
+                src/nrm \
+		src/dialogs \
                 $(SPIKESTREAM_ROOT)/library/include \
-                 /usr/include/mysql \
-                 /usr/local/include/mysql++ \
-                 /usr/local/qwt/include
+                /usr/include/mysql \
+                /usr/local/include/mysql++ \
+                /usr/local/qwt/include
 
 CONFIG += debug \
           warn_on \
@@ -31,10 +34,57 @@ CONFIG += debug \
           exceptions \
           stl 
 
-#DEFINES += QT_NO_DEBUG_OUTPUT
-
 QT += xml  opengl qt3support
 
+
+#----------------------------------------------#
+#---            nrm folder                  ---#
+#----------------------------------------------#
+HEADERS += src/nrm/NRMNetwork.h \
+            src/nrm/NRMConfigLoader.h \
+            src/nrm/NRMTrainingLoader.h \
+            src/nrm/NRMConstants.h \
+            src/nrm/NRMLayer.h \
+            src/nrm/NRMNeuralLayer.h \
+            src/nrm/NRMInputLayer.h \
+            src/nrm/NRMConnection.h \
+            src/nrm/NRMNeuron.h \
+            src/nrm/NRMRandom.h
+SOURCES += src/nrm/NRMNetwork.cpp \
+            src/nrm/NRMConfigLoader.cpp \
+            src/nrm/NRMTrainingLoader.cpp \
+            src/nrm/NRMLayer.cpp \
+            src/nrm/NRMNeuralLayer.cpp \
+            src/nrm/NRMInputLayer.cpp \
+            src/nrm/NRMConnection.cpp \
+            src/nrm/NRMNeuron.cpp \
+            src/nrm/NRMRandom.cpp
+
+
+#----------------------------------------------#
+#---            exceptions folder           ---#
+#----------------------------------------------#
+HEADERS += src/exceptions/SpikeStreamException.h \
+            src/exceptions/NRMException.h
+SOURCES += src/exceptions/SpikeStreamException.cpp \
+            src/exceptions/NRMException.cpp
+
+
+#----------------------------------------------#
+#---             analysis folder            ---#
+#----------------------------------------------#
+HEADERS += src/analysis/AnalysisLoaderWidget.h
+SOURCES += src/analysis/AnalysisLoaderWidget.cpp
+
+#----------------------------------------------#
+#---              dialogs folder            ---#
+#----------------------------------------------#
+HEADERS += src/dialogs/NRMImportDialog.h
+SOURCES += src/dialogs/NRMImportDialog.cpp
+
+#----------------------------------------------#
+#---               src folder               ---#
+#----------------------------------------------#
 HEADERS += src/ArchiveManager.h \
            src/ArchiveStatistic.h \
            src/ArchiveStatisticsDialog.h \
@@ -87,11 +137,8 @@ HEADERS += src/ArchiveManager.h \
            src/ViewModelDialog.h \
            src/ConnectionMatrixLoader.h \
            src/HighlightDialog.h \
-           src/analysis/AnalysisLoaderWidget.h \
            src/PluginManager.h \
-           src/exceptions/SpikeStreamException.h \
            src/Globals.h
-
 
 SOURCES += src/ArchiveManager.cpp \
            src/ArchiveStatistic.cpp \
@@ -143,8 +190,6 @@ SOURCES += src/ArchiveManager.cpp \
            src/ViewModelDialog.cpp \
            src/ConnectionMatrixLoader.cpp \
            src/HighlightDialog.cpp \
-           src/analysis/AnalysisLoaderWidget.cpp \
            src/PluginManager.cpp \
-           src/exceptions/SpikeStreamException.cpp \
            src/Globals.cpp
 
