@@ -98,7 +98,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 		#endif//PATH_DEBUG
 	}
         //Store root directory in global scope
-        Globals::setRootDirectory(workingDirectory);
+	Globals::setSpikeStreamRoot(workingDirectory);
 
 	//Set up splash screen to give feedback whilst application is loading
 	QSplashScreen *splashScreen = 0;
@@ -229,6 +229,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 
 	//Get the default location for saving and loading databases
 	defaultFileLocation = configLoader->getCharData("default_file_location");
+	Globals::setWorkingDirectory(defaultFileLocation);
 
 	//Set up tester to run any code that needs testing
 	//Tester *tester = new Tester();
@@ -243,7 +244,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	fileMenu->insertItem("Save databases", this, SLOT(saveDatabases()), Qt::CTRL+Qt::Key_S);
 	fileMenu->insertSeparator();
 	fileMenu->insertItem("Import connection matrix", this, SLOT(importConnectionMatrix()), Qt::CTRL+Qt::Key_I);
-	fileMenu->insertItem("Import NRM network", this, SLOT(importNRMNetwork()));
+	fileMenu->insertItem("Import NRM network", this, SLOT(importNRMNetwork()), Qt::CTRL+Qt::Key_M);
 	fileMenu->insertSeparator();
 	fileMenu->insertItem("Quit", qApp, SLOT(closeAllWindows()), Qt::CTRL+Qt::Key_Q);
 
@@ -754,8 +755,9 @@ void SpikeStreamMainWindow::importConnectionMatrix(){
 
 /*! Displays a dialog/wizard to import networks from NRM files into the SpikeStream database */
 void SpikeStreamMainWindow::importNRMNetwork(){
-    NRMImportDialog nrmDialog(this);
-    nrmDialog.exec();
+    NRMImportDialog* nrmDialog = new NRMImportDialog(this);
+    nrmDialog->exec();
+    delete nrmDialog;
     	//PatternDialog* patternDialog = new PatternDialog(this, patternDBInterface);
 	//patternDialog->exec();
 	//delete patternDialog;

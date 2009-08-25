@@ -6,16 +6,19 @@
 
 class Globals {
   public:
-    static QString getRootDirectory();
+    static QString getSpikeStreamRoot();
+    static QString getWorkingDirectory();
     friend class SpikeStreamMainWindow;
 
   private:
     //=====================  VARIABLES ============================
-    static QString rootDirectory;
+    static QString spikeStreamRoot;
+    static QString workingDirectory;
 
 
     //======================  METHODS  ============================
-    static void setRootDirectory(QString rootDir);
+    static void setSpikeStreamRoot(QString rootDir);
+    static void setWorkingDirectory(QString workingDir);
 
 };
 

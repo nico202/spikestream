@@ -1,11 +1,17 @@
 #ifndef NRMIMPORTDIALOG_H
 #define NRMIMPORTDIALOG_H
 
+//SpikeStream includes
+#include "NRMDataImporter.h"
+#include "NRMFileLoader.h"
+#include "NRMNetwork.h"
+
 //Qt includes
 #include <QDialog>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QString>
+#include <QWidget>
 
 class NRMImportDialog : public QDialog {
     Q_OBJECT
@@ -15,9 +21,16 @@ class NRMImportDialog : public QDialog {
 	~NRMImportDialog();
 
     private slots:
+	void addNetwork();
+	void cancel();
 	void getConfigFile();
 	void getTrainingFile();
-	void nextButtonPressed();
+	void loadPage2();
+	void showBusyPage();
+	void showPage1();
+	void showPage2();
+	void showSuccessPage();
+	void threadFinished();
 
     private:
 	//======================  VARIABLES  =======================
@@ -27,13 +40,42 @@ class NRMImportDialog : public QDialog {
 	/*! Allows user to enter the path to the training file */
 	QLineEdit* trainingFilePath;
 
-	/*! When pressed this button loads the next stage of the import.
-	    Only enabled when the user has entered the file information.*/
-	QPushButton* nextButton;
+	/*! Displayed when thread-based operations are taking place, such as
+	    file loading and data importing */
+	QWidget* busyWidget;
+
+	/*! Holds all of the controls for the first stage of the dialog */
+	QWidget* page1Widget;
+
+	/*! Holds all of the controls for the second stage of the dialog */
+	QWidget* page2Widget;
+
+	/*! Displayed when data has been successfully imported */
+	QWidget* successWidget;
+
+	/*! Records if an operation has been cancelled by the user */
+	bool operationCancelled;
+
+	/*! Set to true when file loading is taking place in a separate thread */
+	bool fileLoading;
+
+	/*! Set to true when data is being imported in a separate thread */
+	bool dataImporting;
+
+	/*! Runs as a separate thread to load data from configuration and training files */
+	NRMFileLoader* fileLoader;
+
+	/*! Runs as a separate thread to load a NRM network into the database */
+	NRMDataImporter* dataImporter;
 
 
 	//=======================  METHODS  =========================
 	QString getFilePath(QString fileFilter);
+	void buildBusyPage();
+	void buildPage1();
+	void buildPage2();
+	void buildSuccessPage();
+
 };
 
 #endif//NRMIMPORTDIALOG_H
