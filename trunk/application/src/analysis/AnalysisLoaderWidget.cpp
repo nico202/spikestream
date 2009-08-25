@@ -16,7 +16,7 @@ AnalysisLoaderWidget::AnalysisLoaderWidget(QWidget* parent) : QWidget(parent) {
 
     try{
         //Get list of available analysis plugins
-        QString pluginPath = Globals::getRootDirectory() + "/plugins/analysis";
+	QString pluginPath = Globals::getSpikeStreamRoot() + "/plugins/analysis";
         PluginManager* pluginManager = new PluginManager(this, pluginPath);
         QStringList pluginList = pluginManager->getPluginNames();
 

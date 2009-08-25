@@ -14,7 +14,7 @@ HEADERS = src/gui/StateBasedPhiWidget.h
 
 SOURCES = src/gui/StateBasedPhiWidget.cpp
 
-CONFIG += plugin
+CONFIG += plugin thread
 
 INCLUDEPATH += src \
                 $(SPIKESTREAM_ROOT)/library/include \

@@ -49,7 +49,9 @@ HEADERS += src/nrm/NRMNetwork.h \
             src/nrm/NRMInputLayer.h \
             src/nrm/NRMConnection.h \
             src/nrm/NRMNeuron.h \
-            src/nrm/NRMRandom.h
+	    src/nrm/NRMRandom.h \
+	    src/nrm/NRMFileLoader.h \
+	    src/nrm/NRMDataImporter.h
 SOURCES += src/nrm/NRMNetwork.cpp \
             src/nrm/NRMConfigLoader.cpp \
             src/nrm/NRMTrainingLoader.cpp \
@@ -58,8 +60,9 @@ SOURCES += src/nrm/NRMNetwork.cpp \
             src/nrm/NRMInputLayer.cpp \
             src/nrm/NRMConnection.cpp \
             src/nrm/NRMNeuron.cpp \
-            src/nrm/NRMRandom.cpp
-
+	    src/nrm/NRMRandom.cpp \
+	    src/nrm/NRMFileLoader.cpp \
+	    src/nrm/NRMDataImporter.cpp
 
 #----------------------------------------------#
 #---            exceptions folder           ---#
