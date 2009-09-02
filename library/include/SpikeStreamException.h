@@ -9,8 +9,10 @@ class SpikeStreamException {
         virtual ~SpikeStreamException();
         QString getMessage();
 
+    protected:
+	QString type;
+
     private:
-        QString type;
         QString details;
 };
 

@@ -1,6 +1,6 @@
 #include "NRMDataImporter.h"
 
-NRMDataImporter::NRMDataImporter(){
+NRMDataImporter::NRMDataImporter(const DBInfo& dbInfo){
 }
 
 

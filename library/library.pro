@@ -9,11 +9,18 @@ DESTDIR = $(SPIKESTREAM_ROOT)/lib
 OBJECTS_DIR = build/objects
 
 CONFIG += debug \
-          warn_on
+	  warn_on \
+	  thread
+
+QT += sql
+
+
+INCLUDEPATH += include \
+		/usr/include/mysql \
+		/usr/local/include/mysql++
 
 HEADERS = include/ConfigLoader.h \
             include/ConnectionType.h \
-            include/DBInterface.h \
             include/DeviceMessages.h \
             include/DeviceTypes.h \
             include/GlobalVariables.h \
@@ -22,21 +29,53 @@ HEADERS = include/ConfigLoader.h \
             include/PatternTypes.h \
             include/PerformanceTimer.h \
             include/PVMMessages.h \
-            include/SimulationTypes.h \
+	    include/SimulationTypes.h \
+	    include/SpikeStreamVolume.h \
             include/Utilities.h
 
 SOURCES = src/ConfigLoader.cpp \
             src/ConnectionType.cpp \
-            src/DBInterface.cpp \
-            src/DeviceTypes.cpp \
+	    src/DeviceTypes.cpp \
             src/LogWriter.cpp \
             src/NeuronGroupType.cpp \
             src/PatternTypes.cpp \
             src/PerformanceTimer.cpp \
+	    src/SpikeStreamVolume.cpp \
             src/Utilities.cpp
-			
-INCLUDEPATH += include \
-                /usr/include/mysql \
-                /usr/local/include/mysql++
+
+#----------------------------------------------#
+#---               database                 ---#
+#----------------------------------------------#
+HEADERS += include/AbstractDao.h \
+	    include/DBInfo.h \
+	    include/DBInterface.h \
+	    include/NetworkDao.h
+SOURCES += src/database/DBInfo.cpp \
+	    src/database/DBInterface.cpp \
+	    src/database/AbstractDao.cpp \
+	    src/database/NetworkDao.cpp
+
+#----------------------------------------------#
+#---             exceptions                 ---#
+#----------------------------------------------#
+HEADERS += include/SpikeStreamDBException.h \
+	    include/SpikeStreamException.h
+SOURCES += src/exceptions/SpikeStreamDBException.cpp \
+	    src/exceptions/SpikeStreamException.cpp
+
+#----------------------------------------------#
+#---                model                   ---#
+#----------------------------------------------#
+HEADERS += include/Network.h \
+	    include/NeuronGroup.h \
+	    include/NeuronGroupInfo.h \
+	    include/ConnectionGroup.h \
+	    include/ConnectionGroupInfo.h
+SOURCES += src/model/Network.cpp \
+	    src/model/NeuronGroup.cpp \
+	    src/model/NeuronGroupInfo.cpp \
+	    src/model/ConnectionGroup.cpp \
+	    src/model/ConnectionGroupInfo.cpp
+
 
 

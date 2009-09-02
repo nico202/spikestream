@@ -1,4 +1,4 @@
-/*------------------------  SpikeStreamNeuralNetwork ----------------------*/
+/*------------------------  SpikeStreamNetwork ----------------------*/
 /* Holds the neurons and connections. All of the databases are created using
 	InnoDB so that we can use foreign keys. Performance looks roughly the same
 	or better than MyISAM. */             
@@ -128,6 +128,7 @@ ALTER TABLE ConnectionGroups AUTO_INCREMENT = 10;
 	TempWeight is for storing weights temporarily for viewing the state of 
 	the simulation without overwriting the current weight values. */
 CREATE TABLE Connections (
+	ConnectionID BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	FromNeuronID MEDIUMINT UNSIGNED NOT NULL,
 	ToNeuronID MEDIUMINT UNSIGNED NOT NULL,
 	ConnectionGroupID SMALLINT UNSIGNED NOT NULL,
@@ -136,9 +137,10 @@ CREATE TABLE Connections (
 	Weight FLOAT NOT NULL,
 	TempWeight FLOAT DEFAULT 0.0,/* To allow the user to view the connections without overwriting the current connections */
 
-	PRIMARY KEY (FromNeuronID, ToNeuronID),
-	INDEX ConnectionGroupID (ConnectionGroupID),
+	PRIMARY KEY(ConnectionID),
+	INDEX FromNeuronIndex (FromNeuronID, ToNeuronID),
 	INDEX ToNeuronIndex (ToNeuronID),
+	INDEX ConnectionGroupID (ConnectionGroupID),
 
     FOREIGN KEY ConnectionGroupID_FK(ConnectionGroupID) REFERENCES ConnectionGroups(ConnectionGroupID) ON DELETE CASCADE,
     FOREIGN KEY FromNeuronID_FK(FromNeuronID) REFERENCES Neurons(NeuronID) ON DELETE CASCADE,
