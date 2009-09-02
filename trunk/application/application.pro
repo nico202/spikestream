@@ -22,7 +22,7 @@ INCLUDEPATH += src \
                 src/nrm \
 		src/dialogs \
                 $(SPIKESTREAM_ROOT)/library/include \
-                /usr/include/mysql \
+		/usr/include/mysql \
                 /usr/local/include/mysql++ \
                 /usr/local/qwt/include
 
@@ -34,7 +34,7 @@ CONFIG += debug \
           exceptions \
           stl 
 
-QT += xml  opengl qt3support
+QT += xml opengl qt3support sql
 
 
 #----------------------------------------------#
@@ -67,11 +67,8 @@ SOURCES += src/nrm/NRMNetwork.cpp \
 #----------------------------------------------#
 #---            exceptions folder           ---#
 #----------------------------------------------#
-HEADERS += src/exceptions/SpikeStreamException.h \
-            src/exceptions/NRMException.h
-SOURCES += src/exceptions/SpikeStreamException.cpp \
-            src/exceptions/NRMException.cpp
-
+HEADERS += src/exceptions/NRMException.h
+SOURCES += src/exceptions/NRMException.cpp
 
 #----------------------------------------------#
 #---             analysis folder            ---#

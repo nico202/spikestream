@@ -1,12 +1,15 @@
 #ifndef NRMDATAIMPORTER_H
 #define NRMDATAIMPORTER_H
 
+//SpikeStream includes
+#include "DBInfo.h"
+
 //Qt includes
 #include <QThread>
 
 class NRMDataImporter : public QThread {
     public:
-	NRMDataImporter();
+	NRMDataImporter(const DBInfo& dbInfo);
 	~NRMDataImporter();
 	void run();
 	void stop();

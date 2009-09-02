@@ -8,6 +8,8 @@
 
 //Qt includes
 #include <QDialog>
+#include <QLabel>
+#include <QLayout>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QString>
@@ -25,8 +27,8 @@ class NRMImportDialog : public QDialog {
 	void cancel();
 	void getConfigFile();
 	void getTrainingFile();
-	void loadPage2();
-	void showBusyPage();
+	void loadNetworkFromFiles();
+	void showBusyPage(QString msg);
 	void showPage1();
 	void showPage2();
 	void showSuccessPage();
@@ -43,6 +45,13 @@ class NRMImportDialog : public QDialog {
 	/*! Displayed when thread-based operations are taking place, such as
 	    file loading and data importing */
 	QWidget* busyWidget;
+
+	/*! Label explaning which operation is in progress */
+	QLabel* busyLabel;
+
+	/*! Grid layout for page2 holding components that enable
+	    user to edit location of layers */
+	QGridLayout* layerLocationGrid;
 
 	/*! Holds all of the controls for the first stage of the dialog */
 	QWidget* page1Widget;
@@ -70,11 +79,12 @@ class NRMImportDialog : public QDialog {
 
 
 	//=======================  METHODS  =========================
-	QString getFilePath(QString fileFilter);
+	void addLayersToPage2();
 	void buildBusyPage();
 	void buildPage1();
 	void buildPage2();
 	void buildSuccessPage();
+	QString getFilePath(QString fileFilter);
 
 };
 

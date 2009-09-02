@@ -2,11 +2,11 @@
 #include "NRMImportDialog.h"
 #include "Globals.h"
 #include "NRMException.h"
+#include "SpikeStreamVolume.h"
+#include "NetworkDao.h"
 
 //Qt includes
 #include <QDebug>
-#include <QLayout>
-#include <QLabel>
 #include <QFileDialog>
 #include <QProgressBar>
 
@@ -29,7 +29,7 @@ NRMImportDialog::NRMImportDialog(QWidget* parent) : QDialog(parent, "NoiseParamD
     //Create the nrm loader, which will run as a separate thread
     fileLoader = new NRMFileLoader();
     connect (fileLoader, SIGNAL(finished()), this, SLOT(threadFinished()));
-    dataImporter = new NRMDataImporter();
+    dataImporter = new NRMDataImporter(Globals::getNetworkDao()->getDBInfo());
     connect (dataImporter, SIGNAL(finished()), this, SLOT(threadFinished()));
 
     //Set initial state of variables
@@ -44,6 +44,8 @@ NRMImportDialog::NRMImportDialog(QWidget* parent) : QDialog(parent, "NoiseParamD
 
 /*! Destructor */
 NRMImportDialog::~NRMImportDialog(){
+    delete fileLoader;
+    delete dataImporter;
 }
 
 
@@ -53,9 +55,14 @@ NRMImportDialog::~NRMImportDialog(){
 
 /*! Builds the network based on the information stored in the dialog and entered by the user */
 void NRMImportDialog::addNetwork(){
+    //Validate the input fields - should contain integers
+
+    //
 
 }
 
+
+/*! Cancels the operation that is currently in progress. */
 void NRMImportDialog::cancel(){
     operationCancelled = true;
     if(fileLoading)
@@ -65,6 +72,7 @@ void NRMImportDialog::cancel(){
 }
 
 
+/*! Called when a thread doing potentially heavy operations finishes */
 void NRMImportDialog::threadFinished(){
     //Operation has been cancelled by user interaction with buttons in this widget
     if(operationCancelled){
@@ -81,8 +89,8 @@ void NRMImportDialog::threadFinished(){
     //Operation has not been cancelled and thread has terminated normally
     else{
 	if(fileLoading){
-	   fileLoader->getNetwork()->printInputLayers();
-	   showPage2();
+	    addLayersToPage2();
+	    showPage2();
 	}
 	else if(dataImporting){
 	    showSuccessPage();
@@ -112,7 +120,9 @@ void NRMImportDialog::getTrainingFile(){
 }
 
 
-void NRMImportDialog::showBusyPage(){
+/*! Displays the busy page */
+void NRMImportDialog::showBusyPage(QString busyMessage){
+    busyLabel->setText(busyMessage);
     busyWidget->setVisible(true);
     page1Widget->setVisible(false);
     page2Widget->setVisible(false);
@@ -120,6 +130,7 @@ void NRMImportDialog::showBusyPage(){
 }
 
 
+/*! Shows the first page of the wizard */
 void NRMImportDialog::showPage1(){
     configFilePath->setStyleSheet("* { color: black; }");
     configFilePath->setSelection(0, 0);
@@ -132,6 +143,7 @@ void NRMImportDialog::showPage1(){
 }
 
 
+/*! Shows the second page of the wizard */
 void NRMImportDialog::showPage2(){
     busyWidget->setVisible(false);
     page1Widget->setVisible(false);
@@ -139,15 +151,18 @@ void NRMImportDialog::showPage2(){
     successWidget->setVisible(false);
 }
 
+
+/*! Shows final page when import has been completed */
 void NRMImportDialog::showSuccessPage(){
-busyWidget->setVisible(false);
+    busyWidget->setVisible(false);
     page1Widget->setVisible(false);
     page2Widget->setVisible(false);
     successWidget->setVisible(true);
 }
 
 
-void NRMImportDialog::loadPage2(){
+/*! Loads up config and information from files, which is used to construct page 2. */
+void NRMImportDialog::loadNetworkFromFiles(){
     //Check that file paths are valid
     bool fileError = false;
     if(!QFile::exists(configFilePath->text())){
@@ -168,8 +183,9 @@ void NRMImportDialog::loadPage2(){
 	return;
 
     //Load up configuration file
-    showBusyPage();
+    showBusyPage(QString ("Loading configuration and training files"));
     try{
+	operationCancelled =false;
 	fileLoading = true;
 	fileLoader->setConfigFilePath(configFilePath->text());
 	fileLoader->setTrainingFilePath(trainingFilePath->text());
@@ -190,22 +206,111 @@ void NRMImportDialog::loadPage2(){
 /*-----                 PRIVATE METHODS                -----*/
 /*----------------------------------------------------------*/
 
+/*! Adds the network layers to page 2 so that user can fine tune their
+    final locations in SpikeStream */
+void NRMImportDialog::addLayersToPage2(){
+    //Check network has been loaded
+    if(fileLoader->getNetwork() == NULL){
+	qCritical()<<"Network has not been loaded. Cannot add network layers to dialog.";
+	return;
+    }
+
+    //Clear grid layout
+    for(int x=0; x<layerLocationGrid->rowCount(); ++x){
+	for(int y=0; y<layerLocationGrid->columnCount(); ++y){
+	    layerLocationGrid->removeItem(layerLocationGrid->itemAtPosition(x, y));
+	}
+    }
+
+    //Get the input and neural layers
+    QList<NRMInputLayer*> inputList = fileLoader->getNetwork()->getAllInputs();
+    QList<NRMNeuralLayer*> neuralList = fileLoader->getNetwork()->getAllNeuralLayers();
+
+    /* Default option is to place layers in a column with a spacing of ten between each layer
+	Start by finding the maximum width and heigth of a layer */
+    unsigned int maxWidth = 0, maxHeight = 0, layerCount = 0;
+    for(int i=0; i<inputList.size(); ++i){
+	++layerCount;
+	if(inputList[i]->width > maxWidth)
+	    maxWidth = inputList[i]->width;
+	if(inputList[i]->height > maxHeight)
+	    maxHeight = inputList[i]->height;
+    }
+    for(int i=0; i<neuralList.size(); ++i){
+	++layerCount;
+	if(neuralList[i]->width > maxWidth)
+	    maxWidth = neuralList[i]->width;
+	if(neuralList[i]->height > maxHeight)
+	    maxHeight = neuralList[i]->height;
+    }
+
+    //Check that there are no neurons in the proposed import volume
+    SpikeStreamVolume vol(0, 0, 0, maxWidth, maxHeight, layerCount*10);
+    unsigned int neurCount = 1;
+    while(neurCount != 0){
+	neurCount = Globals::getNetworkDao()->countNeuronsInVolume(vol);
+	if(neurCount != 0){
+	    vol.translate(10, 0, 0);
+	}
+    }
+
+    //Add input layers to grid layout.
+    int rowCount = 0;
+    for(int i=0; i<inputList.size(); ++i){
+	layerLocationGrid->addWidget(new QLabel( QString::number(inputList[i]->frameNum) ), rowCount, 0);
+	layerLocationGrid->addWidget(new QLabel( inputList[i]->frameName.data() ), rowCount, 1);
+	QString sizeStr = "(" + QString::number(inputList[i]->width) + "x" + QString::number(inputList[i]->height) + "):";
+	layerLocationGrid->addWidget(new QLabel(sizeStr), rowCount, 2);//size
+	layerLocationGrid->addWidget(new QLabel(" x="), rowCount, 3);//size
+	layerLocationGrid->addWidget(new QLineEdit( QString::number(vol.getX1()) ), rowCount, 4);//x location
+	layerLocationGrid->addWidget(new QLabel(" y="), rowCount, 5);//size
+	layerLocationGrid->addWidget(new QLineEdit( QString::number(vol.getY1()) ), rowCount, 6);//y location
+	layerLocationGrid->addWidget(new QLabel(" z="), rowCount, 7);//size
+	layerLocationGrid->addWidget(new QLineEdit( QString::number(rowCount * 10) ), rowCount, 8);//z location
+	++rowCount;
+    }
+
+    //Add neural layers to grid layout.
+    for(int i=0; i<neuralList.size(); ++i){
+	layerLocationGrid->addWidget(new QLabel( QString::number(neuralList[i]->frameNum) ), rowCount, 0);
+	layerLocationGrid->addWidget(new QLabel( neuralList[i]->frameName.data() ), rowCount, 1);
+	QString sizeStr = "(" + QString::number(neuralList[i]->width) + "x" + QString::number(neuralList[i]->height) + "):";
+	layerLocationGrid->addWidget(new QLabel(sizeStr), rowCount, 2);//size
+	layerLocationGrid->addWidget(new QLabel(" x="), rowCount, 3);//size
+	layerLocationGrid->addWidget(new QLineEdit( QString::number(vol.getX1()) ), rowCount, 4);//x location
+	layerLocationGrid->addWidget(new QLabel(" y="), rowCount, 5);//size
+	layerLocationGrid->addWidget(new QLineEdit( QString::number(vol.getY1()) ), rowCount, 6);//y location
+	layerLocationGrid->addWidget(new QLabel(" z="), rowCount, 7);//size
+	layerLocationGrid->addWidget(new QLineEdit( QString::number(rowCount * 10) ), rowCount, 8);//z location
+	++rowCount;
+    }
+}
+
+
+/*! Builds page to display when an operation is taking place */
 void NRMImportDialog::buildBusyPage(){
     busyWidget = new QWidget(this);
     QVBoxLayout *verticalBox = new QVBoxLayout(busyWidget, 2, 2);
     verticalBox->setMargin(10);
 
+    QHBoxLayout *hBox = new QHBoxLayout();
+    hBox->addStretch(5);
+    busyLabel = new QLabel("Operation in progress");
+    hBox->addWidget(busyLabel);
+
     //Progress bar
     QProgressBar* progBar = new QProgressBar();
     progBar->setRange(0, 0);
-    verticalBox->addWidget(progBar);
+    hBox->addSpacing(10);
+    hBox->addWidget(progBar);
 
     //Cancel button
-    QHBoxLayout *buttonBox = new QHBoxLayout();
     QPushButton* cancelButton = new QPushButton("Cancel");
-    buttonBox->addWidget(cancelButton);
     connect (cancelButton, SIGNAL(clicked()), this, SLOT(cancel()));
-    verticalBox->addLayout(buttonBox);
+    hBox->addWidget(cancelButton);
+    hBox->addStretch(10);
+    verticalBox->addSpacing(10);
+    verticalBox->addLayout(hBox);
 }
 
 
@@ -247,7 +352,7 @@ void NRMImportDialog::buildPage1(){
     connect (cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
     QPushButton* nextButton = new QPushButton("Next");
     buttonBox->addWidget(nextButton);
-    connect (nextButton, SIGNAL(clicked()), this, SLOT(loadPage2()));
+    connect (nextButton, SIGNAL(clicked()), this, SLOT(loadNetworkFromFiles()));
     verticalBox->addLayout(buttonBox);
 }
 
@@ -259,7 +364,12 @@ void NRMImportDialog::buildPage2(){
 
     //Create box to organise dialog
     QVBoxLayout *verticalBox = new QVBoxLayout(page2Widget, 2, 2);
-    verticalBox->setMargin(10);
+    verticalBox->setMargin(20);
+
+    layerLocationGrid = new QGridLayout();
+    layerLocationGrid->setHorizontalSpacing(5);
+    verticalBox->addLayout(layerLocationGrid);
+    verticalBox->addSpacing(10);
 
     //Buttons at bottom of dialog
     QHBoxLayout *buttonBox = new QHBoxLayout();

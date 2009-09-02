@@ -227,6 +227,21 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 		exit(1);
 	}
 
+	//Set up the data access objects wrapping the databases.
+	DBInfo netDBInfo(
+		configLoader->getCharData("neuralNetworkHost"),
+		configLoader->getCharData("neuralNetworkUser"),
+		configLoader->getCharData("neuralNetworkPassword"),
+		configLoader->getCharData("neuralNetworkDatabase")
+	);
+	try{
+	    NetworkDao* networkDao = new NetworkDao(netDBInfo);
+	    Globals::setNetworkDao(networkDao);
+	}
+	catch(SpikeStreamException ex){
+	    qCritical()<<ex.getMessage();
+	}
+
 	//Get the default location for saving and loading databases
 	defaultFileLocation = configLoader->getCharData("default_file_location");
 	Globals::setWorkingDirectory(defaultFileLocation);
@@ -421,6 +436,9 @@ SpikeStreamMainWindow::~SpikeStreamMainWindow(){
 	delete archiveDBInterface;
 	delete patternDBInterface;
 	delete deviceDBInterface;
+
+	//Clean up globals - everything stored in globals is cleaned up by globals
+	Globals::cleanUp();
 }
 
 
