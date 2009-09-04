@@ -5,9 +5,6 @@
 	Static patterns consist of 1s and 0s. */
 /*-------------------------------------------------------------------------*/
 
-/* Use SpikeStreamPatterns database */
-USE SpikeStreamPattern;
-
 /* Add entries to the PatternTypes table */
 INSERT INTO PatternTypes(PatternTypeID, Description) VALUES (1, "Temporal");
 INSERT INTO PatternTypes(PatternTypeID, Description) VALUES (2, "Static");

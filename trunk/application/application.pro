@@ -64,11 +64,6 @@ SOURCES += src/nrm/NRMNetwork.cpp \
 	    src/nrm/NRMFileLoader.cpp \
 	    src/nrm/NRMDataImporter.cpp
 
-#----------------------------------------------#
-#---            exceptions folder           ---#
-#----------------------------------------------#
-HEADERS += src/exceptions/NRMException.h
-SOURCES += src/exceptions/NRMException.cpp
 
 #----------------------------------------------#
 #---             analysis folder            ---#

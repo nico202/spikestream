@@ -8,12 +8,6 @@
 SET foreign_key_checks = 0;
 
 
-/* Create and use the database. */
-DROP DATABASE IF EXISTS SpikeStreamNetwork;
-CREATE DATABASE SpikeStreamNetwork;
-USE SpikeStreamNetwork;
-
-
 /* NeuralNetwork
 	Allows a number of different networks to be held in the same database, 
 	and allows networks to be archived.
@@ -21,6 +15,7 @@ USE SpikeStreamNetwork;
 CREATE TABLE NeuralNetworks (
     NeuralNetworkID SMALLINT NOT NULL AUTO_INCREMENT,
     Name CHAR(100) NOT NULL DEFAULT "Untitled",
+	Locked BOOLEAN NOT NULL DEFAULT 0,/*Set to true when the network is associated with archived simulation run data */
     PRIMARY KEY (NeuralNetworkID),
     INDEX NeuralNetworkIDIndex(NeuralNetworkID)
 )

@@ -5,13 +5,6 @@
 /* Disable foreign key checks whilst creating tables etc. */
 SET foreign_key_checks = 0;
 
-
-/* Create the database */
-DROP DATABASE IF EXISTS SpikeStreamSimulation;
-CREATE DATABASE SpikeStreamSimulation;
-USE SpikeStreamSimulation;
-
-
 /* Records which tasks are simulating which neuron groups 
 */
 CREATE TABLE Tasks (

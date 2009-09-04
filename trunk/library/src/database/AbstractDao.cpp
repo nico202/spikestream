@@ -6,7 +6,7 @@ unsigned int AbstractDao::dbCounter = 0;
 
 
 /*! Constructor. Creats connection with unique name. */
-AbstractDao::AbstractDao(DBInfo& dbInfo){
+AbstractDao::AbstractDao(const DBInfo& dbInfo){
     //Store the information about the database
     this->dbInfo = dbInfo;
 
@@ -14,23 +14,22 @@ AbstractDao::AbstractDao(DBInfo& dbInfo){
     dbThread = QThread::currentThread();
 
     //Get a unique name that can be used to access the database
-    dbName = AbstractDao::getDBName();
+    dbName = AbstractDao::getUniqueDBName();
 
     //Create database unique to this thread. No need to store reference because it is held statically
-    database = QSqlDatabase::addDatabase("QMYSQL", dbName);
-    database.setHostName(dbInfo.getHost());
-    database.setDatabaseName(dbInfo.getDatabase());
-    database.setUserName(dbInfo.getUser());
-    database.setPassword(dbInfo.getPassword());
+    QSqlDatabase database = QSqlDatabase::addDatabase("QMYSQL", dbName);
+    database.setHostName(this->dbInfo.getHost());
+    database.setDatabaseName(this->dbInfo.getDatabase());
+    database.setUserName(this->dbInfo.getUser());
+    database.setPassword(this->dbInfo.getPassword());
     bool ok = database.open();
     if(!ok)
-	throw SpikeStreamDBException( QString("Cannot connect to database ") + dbInfo.toString() + ". Error: " + database.lastError().text() );
+	throw SpikeStreamDBException( QString("Cannot connect to database ") + this->dbInfo.toString() + ". Error: " + database.lastError().text() );
 }
 
 
 /*! Destructor. Closes connection and removes database */
 AbstractDao::~AbstractDao(){
-    database.close();
     QSqlDatabase::removeDatabase(dbName);
 }
 
@@ -61,13 +60,29 @@ void AbstractDao::checkDatabase(){
 }
 
 
+/*! Executes the query */
+void AbstractDao::executeQuery(QSqlQuery& query){
+    bool result = query.exec();
+    if(!result){
+	qCritical()<<"Error executing query: '"<<query.lastQuery()<<"'; Error='"<<query.lastError()<<"'.";
+    }
+}
+
+
+/*! Returns a query object for the database */
+QSqlQuery AbstractDao::getQuery(){
+    checkDatabase();
+    return QSqlQuery(QSqlDatabase::database(dbName));
+}
+
+
 /*----------------------------------------------------------*/
 /*-----                 PRIVATE METHODS                -----*/
 /*----------------------------------------------------------*/
 
 /*! Returns a unique name that is used to access the database associated with this class
     and thread */
-QString AbstractDao::getDBName(){
+QString AbstractDao::getUniqueDBName(){
     ++dbCounter;
     return QString("Database-") + QString::number(dbCounter);
 }
