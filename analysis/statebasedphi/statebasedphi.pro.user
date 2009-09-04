@@ -70,14 +70,14 @@
     <value type="QString" >CPU=i686</value>
     <value type="QString" >CSHEDIT=emacs</value>
     <value type="QString" >CVS_RSH=ssh</value>
-    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-49AeC8GZiI,guid=0c60e01df68879813dad218d4a94f7c5</value>
+    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-haBwha5plB,guid=321ffcd32a3dca0e3e7f68d74aa0d230</value>
     <value type="QString" >DESKTOP_SESSION=default</value>
     <value type="QString" >DESKTOP_STARTUP_ID=</value>
     <value type="QString" >DISPLAY=:0.0</value>
     <value type="QString" >DM_CONTROL=/var/run/xdmctl</value>
     <value type="QString" >ENV=/etc/bash.bashrc</value>
     <value type="QString" >FROM_HEADER=</value>
-    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-IYhi0n/S.gpg-agent:3874:1</value>
+    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-ypeJCd/S.gpg-agent:4191:1</value>
     <value type="QString" >GS_LIB=/home/taropeg/.fonts</value>
     <value type="QString" >GTK2_RC_FILES=/etc/gtk-2.0/gtkrc:/usr/share/themes//QtCurve/gtk-2.0/gtkrc:/home/taropeg/.gtkrc-2.0-qtengine:/home/taropeg/.gtkrc-2.0:/home/taropeg/.kde4/share/config/gtkrc-2.0</value>
     <value type="QString" >GTK_IM_MODULE=cedilla</value>
@@ -119,24 +119,24 @@
     <value type="QString" >NNTPSERVER=news</value>
     <value type="QString" >OSTYPE=linux</value>
     <value type="QString" >PAGER=less</value>
-    <value type="QString" >PATH=/home/taropeg/qtsdk-2009.03/qt/bin:/usr/lib/qt4/bin:/home/taropeg/projects/spikestream/trunk/bin:/home/taropeg/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/X11R6/bin:/usr/games:/opt/kde3/bin:/usr/lib/mit/bin:/usr/lib/mit/sbin:/usr/lib/qt3/bin</value>
+    <value type="QString" >PATH=/usr/bin:/usr/lib/qt4/bin:/home/taropeg/projects/spikestream/trunk/bin:/home/taropeg/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/X11R6/bin:/usr/games:/opt/kde3/bin:/usr/lib/mit/bin:/usr/lib/mit/sbin:/usr/lib/qt3/bin</value>
     <value type="QString" >PROFILEREAD=true</value>
     <value type="QString" >PVM_ROOT=/usr/lib/pvm3</value>
     <value type="QString" >PWD=/home/taropeg/qtsdk-2009.03/bin</value>
     <value type="QString" >PYTHONSTARTUP=/etc/pythonstart</value>
-    <value type="QString" >QTDIR=/home/taropeg/qtsdk-2009.03/qt</value>
+    <value type="QString" >QTDIR=/usr/lib/qt4</value>
     <value type="QString" >QT_IM_MODULE=xim</value>
     <value type="QString" >QT_IM_SWITCHER=imsw-multi</value>
     <value type="QString" >QT_PLUGIN_PATH=/home/taropeg/.kde4/lib/kde4/plugins/:/usr/lib/kde4/plugins/</value>
     <value type="QString" >QT_SYSTEM_DIR=/usr/share/desktop-data</value>
     <value type="QString" >SDK_HOME=/usr/lib/jvm/java</value>
-    <value type="QString" >SESSION_MANAGER=local/linux-30aa:@/tmp/.ICE-unix/3969,unix/linux-30aa:/tmp/.ICE-unix/3969</value>
+    <value type="QString" >SESSION_MANAGER=local/linux-30aa:@/tmp/.ICE-unix/4286,unix/linux-30aa:/tmp/.ICE-unix/4286</value>
     <value type="QString" >SHELL=/bin/bash</value>
     <value type="QString" >SHLVL=1</value>
     <value type="QString" >SPIKESTREAM_ROOT=/home/taropeg/projects/spikestream/trunk</value>
-    <value type="QString" >SSH_AGENT_PID=3875</value>
+    <value type="QString" >SSH_AGENT_PID=4192</value>
     <value type="QString" >SSH_ASKPASS=/usr/lib/ssh/x11-ssh-askpass</value>
-    <value type="QString" >SSH_AUTH_SOCK=/tmp/ssh-CqBuP3734/agent.3734</value>
+    <value type="QString" >SSH_AUTH_SOCK=/tmp/ssh-JgNjK4083/agent.4083</value>
     <value type="QString" >TERM=xterm</value>
     <value type="QString" >TMPDIR=/tmp</value>
     <value type="QString" >USER=taropeg</value>
@@ -147,7 +147,7 @@
     <value type="QString" >XCURSOR_THEME=Oxygen_White</value>
     <value type="QString" >XDG_CONFIG_DIRS=/etc/xdg</value>
     <value type="QString" >XDG_DATA_DIRS=/usr/share:/etc/opt/kde3/share:/opt/kde3/share</value>
-    <value type="QString" >XDG_SESSION_COOKIE=1ad84edac528716ecbcd8e5b49dca96b-1251276739.380456-1825988140</value>
+    <value type="QString" >XDG_SESSION_COOKIE=1ad84edac528716ecbcd8e5b49dca96b-1252053550.174551-1656865028</value>
     <value type="QString" >XDM_MANAGED=method=classic</value>
     <value type="QString" >XKEYSYMDB=/usr/share/X11/XKeysymDB</value>
     <value type="QString" >XMODIFIERS=@im=local</value>
@@ -159,11 +159,11 @@
    <valuelist key="abstractProcess.arguments" type="QVariantList" >
     <value type="QString" >/home/taropeg/projects/spikestream/trunk/analysis/statebasedphi/statebasedphi.pro</value>
     <value type="QString" >-spec</value>
-    <value type="QString" >linux-g++</value>
+    <value type="QString" >/usr/share/qt4/mkspecs/linux-g++</value>
     <value type="QString" >-r</value>
     <value type="QString" >CONFIG+=debug</value>
    </valuelist>
-   <value key="abstractProcess.command" type="QString" >/home/taropeg/qtsdk-2009.03/qt/bin/qmake</value>
+   <value key="abstractProcess.command" type="QString" >/usr/lib/qt4/bin/qmake</value>
    <value key="abstractProcess.enabled" type="bool" >false</value>
    <value key="abstractProcess.workingDirectory" type="QString" >/home/taropeg/projects/spikestream/trunk/analysis/statebasedphi</value>
    <value key="buildConfiguration" type="int" >2</value>
@@ -178,14 +178,14 @@
     <value type="QString" >CPU=i686</value>
     <value type="QString" >CSHEDIT=emacs</value>
     <value type="QString" >CVS_RSH=ssh</value>
-    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-49AeC8GZiI,guid=0c60e01df68879813dad218d4a94f7c5</value>
+    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-haBwha5plB,guid=321ffcd32a3dca0e3e7f68d74aa0d230</value>
     <value type="QString" >DESKTOP_SESSION=default</value>
     <value type="QString" >DESKTOP_STARTUP_ID=</value>
     <value type="QString" >DISPLAY=:0.0</value>
     <value type="QString" >DM_CONTROL=/var/run/xdmctl</value>
     <value type="QString" >ENV=/etc/bash.bashrc</value>
     <value type="QString" >FROM_HEADER=</value>
-    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-IYhi0n/S.gpg-agent:3874:1</value>
+    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-ypeJCd/S.gpg-agent:4191:1</value>
     <value type="QString" >GS_LIB=/home/taropeg/.fonts</value>
     <value type="QString" >GTK2_RC_FILES=/etc/gtk-2.0/gtkrc:/usr/share/themes//QtCurve/gtk-2.0/gtkrc:/home/taropeg/.gtkrc-2.0-qtengine:/home/taropeg/.gtkrc-2.0:/home/taropeg/.kde4/share/config/gtkrc-2.0</value>
     <value type="QString" >GTK_IM_MODULE=cedilla</value>
@@ -227,24 +227,24 @@
     <value type="QString" >NNTPSERVER=news</value>
     <value type="QString" >OSTYPE=linux</value>
     <value type="QString" >PAGER=less</value>
-    <value type="QString" >PATH=/home/taropeg/qtsdk-2009.03/qt/bin:/usr/lib/qt4/bin:/home/taropeg/projects/spikestream/trunk/bin:/home/taropeg/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/X11R6/bin:/usr/games:/opt/kde3/bin:/usr/lib/mit/bin:/usr/lib/mit/sbin:/usr/lib/qt3/bin</value>
+    <value type="QString" >PATH=/usr/bin:/usr/lib/qt4/bin:/home/taropeg/projects/spikestream/trunk/bin:/home/taropeg/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/X11R6/bin:/usr/games:/opt/kde3/bin:/usr/lib/mit/bin:/usr/lib/mit/sbin:/usr/lib/qt3/bin</value>
     <value type="QString" >PROFILEREAD=true</value>
     <value type="QString" >PVM_ROOT=/usr/lib/pvm3</value>
     <value type="QString" >PWD=/home/taropeg/qtsdk-2009.03/bin</value>
     <value type="QString" >PYTHONSTARTUP=/etc/pythonstart</value>
-    <value type="QString" >QTDIR=/home/taropeg/qtsdk-2009.03/qt</value>
+    <value type="QString" >QTDIR=/usr/lib/qt4</value>
     <value type="QString" >QT_IM_MODULE=xim</value>
     <value type="QString" >QT_IM_SWITCHER=imsw-multi</value>
     <value type="QString" >QT_PLUGIN_PATH=/home/taropeg/.kde4/lib/kde4/plugins/:/usr/lib/kde4/plugins/</value>
     <value type="QString" >QT_SYSTEM_DIR=/usr/share/desktop-data</value>
     <value type="QString" >SDK_HOME=/usr/lib/jvm/java</value>
-    <value type="QString" >SESSION_MANAGER=local/linux-30aa:@/tmp/.ICE-unix/3969,unix/linux-30aa:/tmp/.ICE-unix/3969</value>
+    <value type="QString" >SESSION_MANAGER=local/linux-30aa:@/tmp/.ICE-unix/4286,unix/linux-30aa:/tmp/.ICE-unix/4286</value>
     <value type="QString" >SHELL=/bin/bash</value>
     <value type="QString" >SHLVL=1</value>
     <value type="QString" >SPIKESTREAM_ROOT=/home/taropeg/projects/spikestream/trunk</value>
-    <value type="QString" >SSH_AGENT_PID=3875</value>
+    <value type="QString" >SSH_AGENT_PID=4192</value>
     <value type="QString" >SSH_ASKPASS=/usr/lib/ssh/x11-ssh-askpass</value>
-    <value type="QString" >SSH_AUTH_SOCK=/tmp/ssh-CqBuP3734/agent.3734</value>
+    <value type="QString" >SSH_AUTH_SOCK=/tmp/ssh-JgNjK4083/agent.4083</value>
     <value type="QString" >TERM=xterm</value>
     <value type="QString" >TMPDIR=/tmp</value>
     <value type="QString" >USER=taropeg</value>
@@ -255,7 +255,7 @@
     <value type="QString" >XCURSOR_THEME=Oxygen_White</value>
     <value type="QString" >XDG_CONFIG_DIRS=/etc/xdg</value>
     <value type="QString" >XDG_DATA_DIRS=/usr/share:/etc/opt/kde3/share:/opt/kde3/share</value>
-    <value type="QString" >XDG_SESSION_COOKIE=1ad84edac528716ecbcd8e5b49dca96b-1251276739.380456-1825988140</value>
+    <value type="QString" >XDG_SESSION_COOKIE=1ad84edac528716ecbcd8e5b49dca96b-1252053550.174551-1656865028</value>
     <value type="QString" >XDM_MANAGED=method=classic</value>
     <value type="QString" >XKEYSYMDB=/usr/share/X11/XKeysymDB</value>
     <value type="QString" >XMODIFIERS=@im=local</value>
@@ -267,7 +267,7 @@
    <valuelist key="abstractProcess.arguments" type="QVariantList" >
     <value type="QString" >-w</value>
    </valuelist>
-   <value key="abstractProcess.command" type="QString" >/usr/lib/qt4/bin/make</value>
+   <value key="abstractProcess.command" type="QString" >/usr/bin/make</value>
    <value key="abstractProcess.enabled" type="bool" >true</value>
    <value key="abstractProcess.workingDirectory" type="QString" >/home/taropeg/projects/spikestream/trunk/analysis/statebasedphi</value>
   </valuemap>
@@ -281,14 +281,14 @@
     <value type="QString" >CPU=i686</value>
     <value type="QString" >CSHEDIT=emacs</value>
     <value type="QString" >CVS_RSH=ssh</value>
-    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-49AeC8GZiI,guid=0c60e01df68879813dad218d4a94f7c5</value>
+    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-haBwha5plB,guid=321ffcd32a3dca0e3e7f68d74aa0d230</value>
     <value type="QString" >DESKTOP_SESSION=default</value>
     <value type="QString" >DESKTOP_STARTUP_ID=</value>
     <value type="QString" >DISPLAY=:0.0</value>
     <value type="QString" >DM_CONTROL=/var/run/xdmctl</value>
     <value type="QString" >ENV=/etc/bash.bashrc</value>
     <value type="QString" >FROM_HEADER=</value>
-    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-IYhi0n/S.gpg-agent:3874:1</value>
+    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-ypeJCd/S.gpg-agent:4191:1</value>
     <value type="QString" >GS_LIB=/home/taropeg/.fonts</value>
     <value type="QString" >GTK2_RC_FILES=/etc/gtk-2.0/gtkrc:/usr/share/themes//QtCurve/gtk-2.0/gtkrc:/home/taropeg/.gtkrc-2.0-qtengine:/home/taropeg/.gtkrc-2.0:/home/taropeg/.kde4/share/config/gtkrc-2.0</value>
     <value type="QString" >GTK_IM_MODULE=cedilla</value>
@@ -330,24 +330,24 @@
     <value type="QString" >NNTPSERVER=news</value>
     <value type="QString" >OSTYPE=linux</value>
     <value type="QString" >PAGER=less</value>
-    <value type="QString" >PATH=/home/taropeg/qtsdk-2009.03/qt/bin:/usr/lib/qt4/bin:/home/taropeg/projects/spikestream/trunk/bin:/home/taropeg/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/X11R6/bin:/usr/games:/opt/kde3/bin:/usr/lib/mit/bin:/usr/lib/mit/sbin:/usr/lib/qt3/bin</value>
+    <value type="QString" >PATH=/usr/bin:/usr/lib/qt4/bin:/home/taropeg/projects/spikestream/trunk/bin:/home/taropeg/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/X11R6/bin:/usr/games:/opt/kde3/bin:/usr/lib/mit/bin:/usr/lib/mit/sbin:/usr/lib/qt3/bin</value>
     <value type="QString" >PROFILEREAD=true</value>
     <value type="QString" >PVM_ROOT=/usr/lib/pvm3</value>
     <value type="QString" >PWD=/home/taropeg/qtsdk-2009.03/bin</value>
     <value type="QString" >PYTHONSTARTUP=/etc/pythonstart</value>
-    <value type="QString" >QTDIR=/home/taropeg/qtsdk-2009.03/qt</value>
+    <value type="QString" >QTDIR=/usr/lib/qt4</value>
     <value type="QString" >QT_IM_MODULE=xim</value>
     <value type="QString" >QT_IM_SWITCHER=imsw-multi</value>
     <value type="QString" >QT_PLUGIN_PATH=/home/taropeg/.kde4/lib/kde4/plugins/:/usr/lib/kde4/plugins/</value>
     <value type="QString" >QT_SYSTEM_DIR=/usr/share/desktop-data</value>
     <value type="QString" >SDK_HOME=/usr/lib/jvm/java</value>
-    <value type="QString" >SESSION_MANAGER=local/linux-30aa:@/tmp/.ICE-unix/3969,unix/linux-30aa:/tmp/.ICE-unix/3969</value>
+    <value type="QString" >SESSION_MANAGER=local/linux-30aa:@/tmp/.ICE-unix/4286,unix/linux-30aa:/tmp/.ICE-unix/4286</value>
     <value type="QString" >SHELL=/bin/bash</value>
     <value type="QString" >SHLVL=1</value>
     <value type="QString" >SPIKESTREAM_ROOT=/home/taropeg/projects/spikestream/trunk</value>
-    <value type="QString" >SSH_AGENT_PID=3875</value>
+    <value type="QString" >SSH_AGENT_PID=4192</value>
     <value type="QString" >SSH_ASKPASS=/usr/lib/ssh/x11-ssh-askpass</value>
-    <value type="QString" >SSH_AUTH_SOCK=/tmp/ssh-CqBuP3734/agent.3734</value>
+    <value type="QString" >SSH_AUTH_SOCK=/tmp/ssh-JgNjK4083/agent.4083</value>
     <value type="QString" >TERM=xterm</value>
     <value type="QString" >TMPDIR=/tmp</value>
     <value type="QString" >USER=taropeg</value>
@@ -358,7 +358,7 @@
     <value type="QString" >XCURSOR_THEME=Oxygen_White</value>
     <value type="QString" >XDG_CONFIG_DIRS=/etc/xdg</value>
     <value type="QString" >XDG_DATA_DIRS=/usr/share:/etc/opt/kde3/share:/opt/kde3/share</value>
-    <value type="QString" >XDG_SESSION_COOKIE=1ad84edac528716ecbcd8e5b49dca96b-1251276739.380456-1825988140</value>
+    <value type="QString" >XDG_SESSION_COOKIE=1ad84edac528716ecbcd8e5b49dca96b-1252053550.174551-1656865028</value>
     <value type="QString" >XDM_MANAGED=method=classic</value>
     <value type="QString" >XKEYSYMDB=/usr/share/X11/XKeysymDB</value>
     <value type="QString" >XMODIFIERS=@im=local</value>
@@ -371,7 +371,7 @@
     <value type="QString" >clean</value>
     <value type="QString" >-w</value>
    </valuelist>
-   <value key="abstractProcess.command" type="QString" >/usr/lib/qt4/bin/make</value>
+   <value key="abstractProcess.command" type="QString" >/usr/bin/make</value>
    <value key="abstractProcess.enabled" type="bool" >true</value>
    <value key="abstractProcess.workingDirectory" type="QString" >/home/taropeg/projects/spikestream/trunk/analysis/statebasedphi</value>
   </valuemap>

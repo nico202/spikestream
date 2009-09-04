@@ -2,9 +2,6 @@
 /*  Adds the current devices. NOTE: Unchanged from SpikeStream 0.1 */
 /*-------------------------------------------------------------------------*/
 
-
-USE SpikeStreamDevice;
-
 /* SQL to create a couple of example devices. */
 INSERT INTO Devices (Description, Type, IPAddress, Port, TotalNumColumns, TotalNumRows) VALUES ("Example Device", 1, "155.245.23.250", 2235, 10, 7);
 

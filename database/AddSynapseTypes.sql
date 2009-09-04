@@ -8,10 +8,6 @@
 	SPIKESTREAM_ROOT/lib.
 ---------------------------------------------------------------------------*/
 
-/* Use the NeuralNetwork database. */
-USE SpikeStreamNetwork;
-
-
 /* Add entry to the SynapseTypes table */
 INSERT INTO SynapseTypes(SynapseTypeID, Description, ParameterTableName, ClassLibrary) VALUES (1, "STDP1 Synapse", "STDP1SynapseParameters", "libstdp1synapse.so");
 

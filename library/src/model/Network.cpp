@@ -1,48 +1,45 @@
+//SpikeStream includes
 #include "Network.h"
-using namespace SpikeStream;
+#include "SpikeStreamException.h"
+using namespace spikestream;
 
 /*! Constructor */
-Network::Network(unsigned int id, NetworkDao* networkDao){
+Network::Network(const NetworkInfo& networkInfo, NetworkDao* networkDao){
     //Store information
-    this->networkID = id;
+    this->networkInfo = networkInfo;
     this->networkDao = networkDao;
-
-    //Load up the general information about the network
-    loadNeuronGroupsInfo();
-    loadConnectionGroupsInfo();
 }
 
 
 /*! Destructor */
 Network::~Network(){
     //Delete all neuron groups
-    for(QHash<unsigned int, NeuronGroup*>::iterator iter = neurGrpHash.begin(); iter != neurGrpHash.end(); ++iter)
+    for(QHash<unsigned int, NeuronGroup*>::iterator iter = neurGrpMap.begin(); iter != neurGrpMap.end(); ++iter)
 	delete iter.value();
-    neurGrpHash.clear();
+    neurGrpMap.clear();
 
     //Delete all connection groups
-    for(QHash<unsigned int, ConnectionGroup*>::iterator iter = connGrpHash.begin(); iter != connGrpHash.end(); ++iter)
+    for(QHash<unsigned int, ConnectionGroup*>::iterator iter = connGrpMap.begin(); iter != connGrpMap.end(); ++iter)
 	delete iter.value();
-    connGrpHash.clear();
+    connGrpMap.clear();
 }
 
 
 
 /*--------------------------------------------------------- */
-/*-----                PUBLIC METHODS                ----- */
+/*-----                PUBLIC METHODS                 ----- */
 /*--------------------------------------------------------- */
 
 /*! Returns a list of the neuron group ids in the network */
 QList<unsigned int> Network::getNeuronGroupIDs(){
-    return neurGrpHash.keys();
+    return neurGrpMap.keys();
 }
 
 
 /*! Returns a list of the connection group ids in the network */
 QList<unsigned int> Network::getConnectionGroupIDs(){
-    return connGrpHash.keys();
+    return connGrpMap.keys();
 }
-
 
 
 /*! Returns the neuron group with the specified id.
@@ -51,17 +48,17 @@ QList<unsigned int> Network::getConnectionGroupIDs(){
 NeuronGroup* Network::getNeuronGroup(unsigned int id){
     checkNeuronGroupID(id);
 
-    if(!neurGrpHash[id]->isLoaded())
-	loadNeuronGroup(id);
+    if(!neurGrpMap[id]->neuronsLoaded())
+	loadNeurons(id);
 
-    return neurGrpHash[id];
+    return neurGrpMap[id];
 }
 
 
 /*! Returns information about the neuron group with the specified id */
-NeuronGroupInfo* Network::getNeuronGroupInfo(unsigned int id){
+NeuronGroupInfo Network::getNeuronGroupInfo(unsigned int id){
     checkNeuronGroupID(id);
-    return neurGrpHash[id]->getInfo();
+    return neurGrpMap[id]->getInfo();
 }
 
 
@@ -71,17 +68,25 @@ NeuronGroupInfo* Network::getNeuronGroupInfo(unsigned int id){
 ConnectionGroup* Network::getConnectionGroup(unsigned int id){
     checkConnectionGroupID(id);
 
-    if(!connGrpHash[id]->isLoaded())
-	loadConnectionGroup(id);
+    if(!connGrpMap[id]->connectionsLoaded())
+	loadConnections(id);
 
-    return connGrpHash[id];
+    return connGrpMap[id];
 }
 
 
 /*! Returns information about the connection group with the specified id */
-ConnectionGroupInfo* Network::getConnectionGroupInfo(unsigned int id){
+ConnectionGroupInfo Network::getConnectionGroupInfo(unsigned int id){
     checkConnectionGroupID(id);
-    return connGrpHash[id]->getInfo();
+    return connGrpMap[id]->getInfo();
+}
+
+
+/*! Loads up the network from the database */
+void Network::loadNetwork(){
+    //Load up information about the neuron and connection groups
+    loadNeuronGroupsInfo();
+    loadConnectionGroupsInfo();
 }
 
 
@@ -92,7 +97,7 @@ ConnectionGroupInfo* Network::getConnectionGroupInfo(unsigned int id){
 /*! Checks that the specified neurong group id is present in the network
     and throws an exception if not. */
 void Network::checkConnectionGroupID(unsigned int id){
-    if(!connGrpHash.contains(id))
+    if(!connGrpMap.contains(id))
 	throw SpikeStreamException(QString("Connection group with id ") + QString::number(id) + " is not in network with id " + QString::number(networkID));
 }
 
@@ -100,7 +105,7 @@ void Network::checkConnectionGroupID(unsigned int id){
 /*! Checks that the specified connection group id is present in the network
     and throws an exception if not. */
 void Network::checkNeuronGroupID(unsigned int id){
-    if(!neurGrpHash.contains(id))
+    if(!neurGrpMap.contains(id))
 	throw SpikeStreamException(QString("Neuron group with id ") + QString::number(id) + " is not in network with id " + QString::number(networkID));
 }
 
@@ -108,41 +113,41 @@ void Network::checkNeuronGroupID(unsigned int id){
 /*! Uses network dao to obtain list of connection groups and load them into hash map */
 void Network::loadConnectionGroupsInfo(){
     //Clear hash map
-    connGrpHash.clear();
+    connGrpMap.clear();
 
     //Get list of neuron groups from database
-    QList<ConnectionGroupInfo*> connGrpList = networkDao->getConnectionGroupsInfo();
+    QList<ConnectionGroupInfo> connGrpInfoList = networkDao->getConnectionGroupsInfo(networkID);
 
     //Copy list into hash map for faster access
-    for(int i=0; i<connGrpList.size(); ++i)
-	connGrpHash[ connGrpList[i]->getID() ] = new ConnectionGroup(connGrpList[i]);
+    for(int i=0; i<connGrpInfoList.size(); ++i)
+	connGrpMap[ connGrpInfoList[i].getID() ] = new ConnectionGroup(connGrpInfoList[i]);
 }
 
 
 /*! Passes a connection group to the network dao, which populates it with
     all the necessary data from the database. */
 void Network::loadConnections(unsigned int connGrpId){
-    networkDao->getConnections(connGrpHash[connGrpId]);
+    networkDao->getConnections(connGrpMap[connGrpId]);
 }
 
 
 /*! Uses network dao to obtain list of neuron groups and load them into hash map */
 void Network::loadNeuronGroupsInfo(){
     //Clear hash map
-    neurGrpHash.clear();
+    neurGrpMap.clear();
 
     //Get list of neuron groups from database
-    QList<NeuronGroupInfo*> neurGrpList = networkDao->getNeuronGroupsInfo();
+    QList<NeuronGroupInfo> neurGrpInfoList = networkDao->getNeuronGroupsInfo(networkID);
 
     //Copy list into hash map for faster access
-    for(int i=0; i<neurGrpList.size(); ++i)
-	neurGrpHash[ neurGrpList[i]->getID() ] = new NeuronGroup(neurGrpList[i]);
+    for(int i=0; i<neurGrpInfoList.size(); ++i)
+	neurGrpMap[ neurGrpInfoList[i].getID() ] = new NeuronGroup(neurGrpInfoList[i]);
 }
 
 
 /*! Loads up the positions of all of the neurons in the group */
 void Network::loadNeurons(unsigned int neurGrpID){
-    networkDao->getNeurons(neurGrpHash[neurGrpId]);
+    networkDao->getNeurons(neurGrpMap[neurGrpID]);
 }
 
 

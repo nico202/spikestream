@@ -1,7 +1,3 @@
-//SpikeStream includes
-#include "NRMConfigLoader.h"
-#include "NRMException.h"
-
 //Test includes
 #include "TestRunner.h"
 

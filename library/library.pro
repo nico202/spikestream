@@ -29,8 +29,10 @@ HEADERS = include/ConfigLoader.h \
             include/PatternTypes.h \
             include/PerformanceTimer.h \
             include/PVMMessages.h \
+	    include/RGBColor.h \
 	    include/SimulationTypes.h \
-	    include/SpikeStreamVolume.h \
+	    include/Box.h \
+	    include/Point3D.h \
             include/Utilities.h
 
 SOURCES = src/ConfigLoader.cpp \
@@ -40,7 +42,7 @@ SOURCES = src/ConfigLoader.cpp \
             src/NeuronGroupType.cpp \
             src/PatternTypes.cpp \
             src/PerformanceTimer.cpp \
-	    src/SpikeStreamVolume.cpp \
+	    src/Box.cpp \
             src/Utilities.cpp
 
 #----------------------------------------------#
@@ -67,11 +69,14 @@ SOURCES += src/exceptions/SpikeStreamDBException.cpp \
 #---                model                   ---#
 #----------------------------------------------#
 HEADERS += include/Network.h \
+	    include/NetworkInfo.h \
 	    include/NeuronGroup.h \
 	    include/NeuronGroupInfo.h \
+	    include/Connection.h \
 	    include/ConnectionGroup.h \
 	    include/ConnectionGroupInfo.h
 SOURCES += src/model/Network.cpp \
+	    src/model/NetworkInfo.cpp \
 	    src/model/NeuronGroup.cpp \
 	    src/model/NeuronGroupInfo.cpp \
 	    src/model/ConnectionGroup.cpp \

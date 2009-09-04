@@ -1,4 +1,5 @@
 #include "DBInfo.h"
+using namespace spikestream;
 
 /*! Normal constructor */
 DBInfo::DBInfo(QString host, QString user, QString password, QString database){

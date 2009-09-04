@@ -5,10 +5,6 @@
 	NeuronTypes table and a new table to hold its parameters. */
 /*-----------------------------------------------------------------------------*/
 
-/* Use the SpikeStreamNetwork database. */
-USE SpikeStreamNetwork;
-
-
 /* Add an entry for the STDP1 Neuron to the NeuronTypes table */
 INSERT INTO NeuronTypes(NeuronTypeID, Description, ParameterTableName, ClassLibrary) VALUES (1, "STDP1 Neuron", "STDP1NeuronParameters", "libstdp1neuron.so");
 

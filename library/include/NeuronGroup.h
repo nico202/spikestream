@@ -1,41 +1,37 @@
 #ifndef NEURONGROUP_H
 #define NEURONGROUP_H
 
-namespace SpikeStream {
+//SpikeStream includes
+#include "Box.h"
+#include "NeuronGroupInfo.h"
+#include "Point3D.h"
+
+
+namespace spikestream {
 
     class NeuronGroup {
 	public:
-	    NeuronGroup(NeuronGroupInfo* info);
-	    NeuronGroupInfo* getInfo();
-	    bool isLoaded();
-
-
+	    NeuronGroup(const NeuronGroupInfo& info);
+	    ~NeuronGroup();
+	    NeuronGroupInfo getInfo() {return info;}
+	    QHash<unsigned int, Point3D*>* getNeuronMap() { return neuronMap; }
+	    Box getMinimumBoundingBox() { return boundingBox; }
+	    bool neuronsLoaded();
+	    int size(){ return info.getNumberOfNeurons(); }
 
 	 private:
 	    //==========================  VARIABLES  =========================
 	    /*! Information about the neuron group copied from NeuronGroup
 		table in SpikeStreamNetwork database */
-	    NeuronGroupInfo* info;
+	    NeuronGroupInfo info;
 
-	    /*! ID of the first neuron. This is used for rapid access to X, Y, Z
-				coordinates.*/
-	    unsigned int startNeuronID;
-	    unsigned int *neuronIDArray;
-	    float *xPosArray;
-	    float *yPosArray;
-	    float *zPosArray;
-	    unsigned short neuronType;
-	    unsigned int numberOfNeurons;
-	    QString name;
-	    unsigned int width;
-	    unsigned int length;
-	    unsigned int depth;
-	    unsigned int neuronSpacing;
-	    int xPos;
-	    int yPos;
-	    int zPos;
-	    ClippingVolume clippingVolume;
+	    /*! Map linking neuron Ids to a position in the array.
+		This map can be used to get a list of all the neuron ids in the
+		group and also to get the position of an individual neuron. */
+	    QHash<unsigned int, Point3D*>* neuronMap;
 
+	    /*! The minimum box enclosing the group */
+	    Box boundingBox;
     };
 
 }

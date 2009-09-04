@@ -5,13 +5,6 @@
 /* Disable foreign key checks whilst creating tables etc. */
 SET foreign_key_checks = 0;
 
-
-/* Create the database */
-DROP DATABASE IF EXISTS SpikeStreamArchive;
-CREATE DATABASE SpikeStreamArchive;
-USE SpikeStreamArchive;
-
-
 /* SimulationRun
     Holds general information about each simulation run.
     Entries will be automatically deleted if there is no associated simulation data.

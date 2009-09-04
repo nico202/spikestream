@@ -35,6 +35,8 @@
 #include "ConnectionMatrixLoader.h"
 #include "Globals.h"
 #include "NRMImportDialog.h"
+#include "SpikeStreamException.h"
+using namespace spikestream;
 
 //Qt includes
 #include <qsplitter.h>
@@ -238,7 +240,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	    NetworkDao* networkDao = new NetworkDao(netDBInfo);
 	    Globals::setNetworkDao(networkDao);
 	}
-	catch(SpikeStreamException ex){
+	catch(SpikeStreamException& ex){
 	    qCritical()<<ex.getMessage();
 	}
 

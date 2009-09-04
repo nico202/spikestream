@@ -2,8 +2,9 @@
 #include "NRMImportDialog.h"
 #include "Globals.h"
 #include "NRMException.h"
-#include "SpikeStreamVolume.h"
+#include "Box.h"
 #include "NetworkDao.h"
+using namespace spikestream;
 
 //Qt includes
 #include <QDebug>
@@ -245,14 +246,14 @@ void NRMImportDialog::addLayersToPage2(){
     }
 
     //Check that there are no neurons in the proposed import volume
-    SpikeStreamVolume vol(0, 0, 0, maxWidth, maxHeight, layerCount*10);
+    Box box(0, 0, 0, maxWidth, maxHeight, layerCount*10);
     unsigned int neurCount = 1;
-    while(neurCount != 0){
-	neurCount = Globals::getNetworkDao()->countNeuronsInVolume(vol);
+   /* while(neurCount != 0){
+	neurCount = Globals::getNetworkDao()->countNeuronsInVolume(box);
 	if(neurCount != 0){
-	    vol.translate(10, 0, 0);
+	    box.translate(10, 0, 0);
 	}
-    }
+    }*/
 
     //Add input layers to grid layout.
     int rowCount = 0;
@@ -262,11 +263,11 @@ void NRMImportDialog::addLayersToPage2(){
 	QString sizeStr = "(" + QString::number(inputList[i]->width) + "x" + QString::number(inputList[i]->height) + "):";
 	layerLocationGrid->addWidget(new QLabel(sizeStr), rowCount, 2);//size
 	layerLocationGrid->addWidget(new QLabel(" x="), rowCount, 3);//size
-	layerLocationGrid->addWidget(new QLineEdit( QString::number(vol.getX1()) ), rowCount, 4);//x location
+	layerLocationGrid->addWidget(new QLineEdit( QString::number(box.getX1()) ), rowCount, 4);//x location
 	layerLocationGrid->addWidget(new QLabel(" y="), rowCount, 5);//size
-	layerLocationGrid->addWidget(new QLineEdit( QString::number(vol.getY1()) ), rowCount, 6);//y location
+	layerLocationGrid->addWidget(new QLineEdit( QString::number(box.getY1()) ), rowCount, 6);//y location
 	layerLocationGrid->addWidget(new QLabel(" z="), rowCount, 7);//size
-	layerLocationGrid->addWidget(new QLineEdit( QString::number(rowCount * 10) ), rowCount, 8);//z location
+	layerLocationGrid->addWidget(new QLineEdit( QString::number(box.getZ1()) ), rowCount, 8);//z location
 	++rowCount;
     }
 
@@ -277,11 +278,11 @@ void NRMImportDialog::addLayersToPage2(){
 	QString sizeStr = "(" + QString::number(neuralList[i]->width) + "x" + QString::number(neuralList[i]->height) + "):";
 	layerLocationGrid->addWidget(new QLabel(sizeStr), rowCount, 2);//size
 	layerLocationGrid->addWidget(new QLabel(" x="), rowCount, 3);//size
-	layerLocationGrid->addWidget(new QLineEdit( QString::number(vol.getX1()) ), rowCount, 4);//x location
+	layerLocationGrid->addWidget(new QLineEdit( QString::number(box.getX1()) ), rowCount, 4);//x location
 	layerLocationGrid->addWidget(new QLabel(" y="), rowCount, 5);//size
-	layerLocationGrid->addWidget(new QLineEdit( QString::number(vol.getY1()) ), rowCount, 6);//y location
+	layerLocationGrid->addWidget(new QLineEdit( QString::number(box.getY1()) ), rowCount, 6);//y location
 	layerLocationGrid->addWidget(new QLabel(" z="), rowCount, 7);//size
-	layerLocationGrid->addWidget(new QLineEdit( QString::number(rowCount * 10) ), rowCount, 8);//z location
+	layerLocationGrid->addWidget(new QLineEdit( QString::number(box.getZ1()) ), rowCount, 8);//z location
 	++rowCount;
     }
 }

@@ -4,8 +4,8 @@ SUBDIRS = library \
             archiver \
             simulator \
             simulatorlibrary \
-            neurons/stdp1neuron \
             synapses/stdp1synapse \
+	    neurons/stdp1neuron \
             application
 
 
