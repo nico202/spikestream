@@ -24,9 +24,11 @@ class TestDao : public QObject {
 
 	//==========================  METHODS  ==========================
 	void connectToDatabase(const QString& dbName);
-
-
-
+	void cleanTestDatabases();
+	void executeQuery(QSqlQuery& query);
+	void executeQuery(const QString& queryStr);
+	QSqlQuery getQuery();
+	QSqlQuery getQuery(const QString& queryStr);
 
 };
 

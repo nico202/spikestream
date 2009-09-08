@@ -21,6 +21,10 @@ CREATE TABLE NeuralNetworks (
 )
 ENGINE=InnoDB;
 
+/* Need to change NeuronGroups so that auto increment starts with 10 
+	This is to reserve numbers 0-9 for deleting and empty keys in 
+	dense_hash_maps and other things. */
+ALTER TABLE NeuralNetworks AUTO_INCREMENT = 10;
 
 /* NeuronGroups
     Neurons are gathered together into neuron groups that have common parameters and types
@@ -30,7 +34,7 @@ CREATE TABLE NeuronGroups (
     NeuralNetworkID SMALLINT NOT NULL, /* Network that this group is part of */
     Name CHAR(50) NOT NULL DEFAULT "Untitled", /*Short name, for example, 'motor cortex' */
     Description CHAR(100) NOT NULL DEFAULT "No description", /* Description, for example, layer, etc. */
-    Parameters BLOB, /* XML describing the parameters used to create the group */
+    Parameters TEXT, /* XML describing the parameters used to create the group */
     NeuronTypeID SMALLINT UNSIGNED NOT NULL, /*The type of neuron in the group. Used for parameters and class loading */
 
     PRIMARY KEY (NeuronGroupID),
@@ -100,7 +104,7 @@ CREATE TABLE ConnectionGroups (
 	FromNeuronGroupID SMALLINT UNSIGNED NOT NULL,
 	ToNeuronGroupID SMALLINT UNSIGNED NOT NULL,
 	SynapseTypeID SMALLINT UNSIGNED NOT NULL,
-	Parameters BLOB,
+	Parameters TEXT,
 
 	PRIMARY KEY (ConnectionGroupID),
 	INDEX ConnectionGroupIDIndex(ConnectionGroupID),

@@ -18,3 +18,44 @@ void TestDao::connectToDatabase(const QString& dbName){    //Set the database pa
     if(!ok)
 	throw SpikeStreamDBException( QString("Cannot connect to database ") + dbInfo.toString() + ". Error: " + database.lastError().text() );
 }
+
+/*! Cleans up everything from the test networks database */
+void TestDao::cleanTestDatabases(){
+    executeQuery("DELETE FROM NeuralNetworks");
+    executeQuery("DELETE FROM NeuronGroups");
+    executeQuery("DELETE FROM ConnectionGroups");
+    executeQuery("DELETE FROM Neurons");
+    executeQuery("DELETE FROM Connections");
+}
+
+
+/*! Executes the query */
+void TestDao::executeQuery(QSqlQuery& query){
+    bool result = query.exec();
+    if(!result){
+	QString errMsg = "Error executing query: '" + query.lastQuery() + "'; Error='" + query.lastError().text() + "'.";
+	QFAIL(errMsg.toAscii());
+    }
+}
+
+
+/*! Executes the query */
+void TestDao::executeQuery(const QString& queryStr){
+    QSqlQuery query = getQuery(queryStr);
+    executeQuery(query);
+}
+
+
+/*! Returns a query object for the database */
+QSqlQuery TestDao::getQuery(){
+    return QSqlQuery(database);
+}
+
+
+/*! Returns a query object for the database */
+QSqlQuery TestDao::getQuery(const QString& queryStr){
+    QSqlQuery tmpQuery(database);
+    tmpQuery.prepare(queryStr);
+    return tmpQuery;
+}
+
