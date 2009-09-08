@@ -16,7 +16,10 @@ class TestNetworkDao : public TestDao {
 	    void cleanupTestCase();
 	    void init();
 	    void initTestCase();
+	    void testAddConnectionGroup();
+	    void testAddNetwork();
 	    void testGetNetworksInfo();
+	    void testAddNeuronGroup();
 
 	private:
 	    void addTestNetwork1();

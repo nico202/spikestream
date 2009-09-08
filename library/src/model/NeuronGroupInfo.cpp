@@ -11,7 +11,7 @@ NeuronGroupInfo::NeuronGroupInfo(){
 
 
 /*! Normal constructor */
-NeuronGroupInfo::NeuronGroupInfo(unsigned int id, const QString& name, const QString& desc, QHash<QString, double> paramMap, int neurType, int numNeur){
+NeuronGroupInfo::NeuronGroupInfo(unsigned int id, const QString& name, const QString& desc, const QHash<QString, double>& paramMap, int neurType, int numNeur){
     this->id = id;
     this->name = name;
     this->description = desc;
@@ -58,3 +58,16 @@ NeuronGroupInfo& NeuronGroupInfo::operator=(const NeuronGroupInfo& rhs) {
 }
 
 
+/*! Returns the parameters as an XML string */
+QString NeuronGroupInfo::getParameterXML(){
+    QString tmpStr = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>";
+    tmpStr += "<neuron_group_parameters>";
+    for(QHash<QString, double>::iterator iter = parameterMap.begin(); iter != parameterMap.end(); ++iter){
+	tmpStr +="<parameter>";
+	tmpStr += "<description>" + iter.key() + "</description>";
+	tmpStr += "<value>" + QString::number(iter.value()) + "</value>";
+	tmpStr += "</parameter>";
+    }
+    tmpStr += "</neuron_group_parameters>";
+    return tmpStr;
+}

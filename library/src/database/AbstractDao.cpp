@@ -64,8 +64,15 @@ void AbstractDao::checkDatabase(){
 void AbstractDao::executeQuery(QSqlQuery& query){
     bool result = query.exec();
     if(!result){
-	qCritical()<<"Error executing query: '"<<query.lastQuery()<<"'; Error='"<<query.lastError()<<"'.";
+	throw SpikeStreamDBException(QString("Error executing query: '") + query.lastQuery() + "'; Error='" + query.lastError().text() + "'.");
     }
+}
+
+
+/*! Creates and executes a query with the specified string */
+void AbstractDao::executeQuery(const QString& queryStr){
+    QSqlQuery query = getQuery(queryStr);
+    executeQuery(query);
 }
 
 
@@ -73,6 +80,15 @@ void AbstractDao::executeQuery(QSqlQuery& query){
 QSqlQuery AbstractDao::getQuery(){
     checkDatabase();
     return QSqlQuery(QSqlDatabase::database(dbName));
+}
+
+
+/*! Returns a query object for the database using specified string to create query */
+QSqlQuery AbstractDao::getQuery(const QString& queryStr){
+    checkDatabase();
+    QSqlQuery tmpQuery(QSqlDatabase::database(dbName));
+    tmpQuery.prepare(queryStr);
+    return tmpQuery;
 }
 
 

@@ -19,7 +19,9 @@ class AbstractDao {
     protected:
 	void checkDatabase();
 	void executeQuery(QSqlQuery& query);
+	void executeQuery(const QString& queryStr);
 	QSqlQuery getQuery();
+	QSqlQuery getQuery(const QString& queryStr);
 
     private:
 	//=========================  VARIABLES  ============================
