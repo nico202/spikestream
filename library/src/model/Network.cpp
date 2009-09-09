@@ -48,7 +48,7 @@ QList<unsigned int> Network::getConnectionGroupIDs(){
 NeuronGroup* Network::getNeuronGroup(unsigned int id){
     checkNeuronGroupID(id);
 
-    if(!neurGrpMap[id]->neuronsLoaded())
+    if(!neurGrpMap[id]->isLoaded())
 	loadNeurons(id);
 
     return neurGrpMap[id];
@@ -68,7 +68,7 @@ NeuronGroupInfo Network::getNeuronGroupInfo(unsigned int id){
 ConnectionGroup* Network::getConnectionGroup(unsigned int id){
     checkConnectionGroupID(id);
 
-    if(!connGrpMap[id]->connectionsLoaded())
+    if(!connGrpMap[id]->isLoaded())
 	loadConnections(id);
 
     return connGrpMap[id];

@@ -7,11 +7,14 @@ using namespace spikestream;
 
 /*! Constructor. DBInfo is stored by AbstractDao */
 NetworkDao::NetworkDao(DBInfo& dbInfo) : AbstractDao(dbInfo){
+    //Connect to the database straight away since this will be running in the same thread.
+    connectToDatabase();
 }
 
 
 /*! Destructor */
 NetworkDao::~NetworkDao(){
+    closeDatabaseConnection();
 }
 
 
@@ -21,7 +24,7 @@ NetworkDao::~NetworkDao(){
 
 /*! Adds the specified neural network to the database */
 void NetworkDao::addNetwork(NetworkInfo& netInfo){
-    QSqlQuery query = getQuery("INSERT INTO NeuralNetworks (Name) VALUES ('" + netInfo.getName() + "')");
+    QSqlQuery query = getQuery("INSERT INTO NeuralNetworks (Name, Description) VALUES ('" + netInfo.getName() + "', '" + netInfo.getDescription() + "')");
     executeQuery(query);
 
     //Check id is correct and add to network info if it is
@@ -29,32 +32,9 @@ void NetworkDao::addNetwork(NetworkInfo& netInfo){
     if(lastInsertID >= START_NEURALNETWORK_ID)
 	netInfo.setID(lastInsertID);
     else
-	throw SpikeStreamDBException("Insert ID for NeuralNetwork is invalid.");
+	throw SpikeStreamDBException("Insert ID for NeuralNetwork is invalid: " + QString::number(lastInsertID));
 }
 
-
-/*! Adds a neuron group to the network with the specified id */
-void NetworkDao::addNeuronGroup(unsigned int networkID, NeuronGroupInfo& neurGrpInfo){ 
-    //Build query string
-    QString queryStr = "INSERT INTO NeuronGroups (NeuralNetworkID, Name, Description, Parameters, NeuronTypeID ) VALUES (";
-    queryStr += QString::number(networkID) + ", ";
-    queryStr += neurGrpInfo.getName() + ", " + neurGrpInfo.getDescription() + ", '" + neurGrpInfo.getParameterXML() + "', ";
-    queryStr += QString::number(neurGrpInfo.getNeuronType()) + ")";
-    QSqlQuery query = getQuery(queryStr);
-    executeQuery(query);
-
-    //Check id is correct and add to network info if it is
-    int lastInsertID = query.lastInsertId().toInt();
-    if(lastInsertID >= START_NEURONGROUP_ID)
-	neurGrpInfo.setID(lastInsertID);
-    else
-	throw SpikeStreamDBException("Insert ID for NeuronGroup is invalid.");
-}
-
-
-/*! Adds a connection group to the network with the specified id */
-void NetworkDao::addConnectionGroup(unsigned int networkID, ConnectionGroupInfo& connGrpInfo){
-}
 
 /*! Returns information about the connection groups associated with the specified network */
 QList<ConnectionGroupInfo> NetworkDao::getConnectionGroupsInfo(unsigned int networkID){

@@ -3,6 +3,7 @@
 
 //SpikeStream includes
 #include "DBInfo.h"
+using namespace spikestream;
 
 //Qt includes
 #include <QThread>

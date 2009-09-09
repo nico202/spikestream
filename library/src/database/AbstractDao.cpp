@@ -10,27 +10,14 @@ AbstractDao::AbstractDao(const DBInfo& dbInfo){
     //Store the information about the database
     this->dbInfo = dbInfo;
 
-    //Record the thread that this database was created in - this class cannot be used across multiple threads
-    dbThread = QThread::currentThread();
-
-    //Get a unique name that can be used to access the database
-    dbName = AbstractDao::getUniqueDBName();
-
-    //Create database unique to this thread. No need to store reference because it is held statically
-    QSqlDatabase database = QSqlDatabase::addDatabase("QMYSQL", dbName);
-    database.setHostName(this->dbInfo.getHost());
-    database.setDatabaseName(this->dbInfo.getDatabase());
-    database.setUserName(this->dbInfo.getUser());
-    database.setPassword(this->dbInfo.getPassword());
-    bool ok = database.open();
-    if(!ok)
-	throw SpikeStreamDBException( QString("Cannot connect to database ") + this->dbInfo.toString() + ". Error: " + database.lastError().text() );
+    //Default name of database  - this changes when it is connected.
+    dbName = "";
 }
 
 
 /*! Destructor. Closes connection and removes database */
 AbstractDao::~AbstractDao(){
-    QSqlDatabase::removeDatabase(dbName);
+    closeDatabaseConnection();
 }
 
 
@@ -52,11 +39,48 @@ DBInfo AbstractDao::getDBInfo(){
     NOTE: It is assumed that it exists and is open, since this should be checked in the constructor.
     Thread checks have to be done at runtime. */
 void AbstractDao::checkDatabase(){
+    if(!isConnected())
+	connectToDatabase();
+
     /* Check that we are accessing datbase connection from the thread it was created on.
        The Qt database class only works within a single thread.*/
     if(QThread::currentThread() != dbThread){
 	throw SpikeStreamDBException("Attempting to access database from different thread. This is not supported in Qt4");
     }
+}
+
+
+/*! Returns true if the database used by this class exists and is connected. */
+bool AbstractDao::isConnected(){
+    QSqlDatabase db = QSqlDatabase::database(dbName);
+    if(db.isValid())
+	if(db.isOpen())
+	    return true;
+    return false;
+}
+
+
+void AbstractDao::closeDatabaseConnection(){
+    QSqlDatabase::removeDatabase(dbName);
+}
+
+
+void AbstractDao::connectToDatabase(){
+   //Record the thread that this database was created in - this class cannot be used across multiple threads
+    dbThread = QThread::currentThread();
+
+    //Get a unique name that can be used to access the database
+    dbName = AbstractDao::getUniqueDBName();
+
+    //Create database unique to this thread. No need to store reference because it is held statically
+    QSqlDatabase database = QSqlDatabase::addDatabase("QMYSQL", dbName);
+    database.setHostName(this->dbInfo.getHost());
+    database.setDatabaseName(this->dbInfo.getDatabase());
+    database.setUserName(this->dbInfo.getUser());
+    database.setPassword(this->dbInfo.getPassword());
+    bool ok = database.open();
+    if(!ok)
+	throw SpikeStreamDBException( QString("Cannot connect to database ") + this->dbInfo.toString() + ". Error: " + database.lastError().text() );
 }
 
 

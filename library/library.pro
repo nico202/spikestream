@@ -51,11 +51,13 @@ SOURCES = src/ConfigLoader.cpp \
 HEADERS += include/AbstractDao.h \
 	    include/DBInfo.h \
 	    include/DBInterface.h \
-	    include/NetworkDao.h
+	    include/NetworkDao.h \
+	    include/NetworkDaoThread.h
 SOURCES += src/database/DBInfo.cpp \
 	    src/database/DBInterface.cpp \
 	    src/database/AbstractDao.cpp \
-	    src/database/NetworkDao.cpp
+	    src/database/NetworkDao.cpp \
+	    src/database/NetworkDaoThread.cpp
 
 #----------------------------------------------#
 #---             exceptions                 ---#

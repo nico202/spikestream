@@ -9,12 +9,13 @@ namespace spikestream{
     class NetworkInfo {
 	public:
 	    NetworkInfo();
-	    NetworkInfo(unsigned int id, const QString& name, bool locked);
+	    NetworkInfo(unsigned int id, const QString& name, const QString& desc, bool locked);
 	    NetworkInfo(const NetworkInfo& netInfo);
 	    ~NetworkInfo();
 	    NetworkInfo& operator=(const NetworkInfo& rhs);
 
 	    unsigned int getID(){ return id; }
+	    QString getDescription(){ return description; }
 	    QString getName(){ return name; }
 	    bool isLocked(){ return locked; }
 	    void setID(unsigned int id) { this->id = id; }
@@ -26,6 +27,9 @@ namespace spikestream{
 
 	    /*! Name of the network */
 	    QString name;
+
+	    /*! Description of the network */
+	    QString description;
 
 	    /*! Whether the network is editable or not.
 		Networks associated with archived simulation runs are not editable */

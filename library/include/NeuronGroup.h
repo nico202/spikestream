@@ -2,10 +2,11 @@
 #define NEURONGROUP_H
 
 //SpikeStream includes
-#include "Box.h"
 #include "NeuronGroupInfo.h"
 #include "Point3D.h"
+using namespace spikestream;
 
+typedef QHash<unsigned int, Point3D*> NeuronMap;
 
 namespace spikestream {
 
@@ -13,11 +14,12 @@ namespace spikestream {
 	public:
 	    NeuronGroup(const NeuronGroupInfo& info);
 	    ~NeuronGroup();
+	    unsigned int getID() { return info.getID(); }
 	    NeuronGroupInfo getInfo() {return info;}
-	    QHash<unsigned int, Point3D*>* getNeuronMap() { return neuronMap; }
-	    Box getMinimumBoundingBox() { return boundingBox; }
-	    bool neuronsLoaded();
-	    int size(){ return info.getNumberOfNeurons(); }
+	    NeuronMap* getNeuronMap() { return neuronMap; }
+	    bool isLoaded() { return loaded; }
+	    void setLoaded(bool loaded) { this->loaded = loaded; }
+	    void setID(unsigned int id){ info.setID(id); }
 
 	 private:
 	    //==========================  VARIABLES  =========================
@@ -28,10 +30,16 @@ namespace spikestream {
 	    /*! Map linking neuron Ids to a position in the array.
 		This map can be used to get a list of all the neuron ids in the
 		group and also to get the position of an individual neuron. */
-	    QHash<unsigned int, Point3D*>* neuronMap;
+	   NeuronMap* neuronMap;
 
-	    /*! The minimum box enclosing the group */
-	    Box boundingBox;
+	   /*! Returns true if the state of the neuron map matches the database.
+		This should be false if no neurons have been loaded and false
+		if the neuron map is full of neurons with dummy ids */
+	   bool loaded;
+
+	   //====================  METHODS  ==========================
+	   NeuronGroup(const NeuronGroup& connGrp);
+	   NeuronGroup& operator=(const NeuronGroup& rhs);
     };
 
 }

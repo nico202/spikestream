@@ -18,6 +18,9 @@ class AbstractDao {
 
     protected:
 	void checkDatabase();
+	void closeDatabaseConnection();
+	void connectToDatabase();
+	bool isConnected();
 	void executeQuery(QSqlQuery& query);
 	void executeQuery(const QString& queryStr);
 	QSqlQuery getQuery();
@@ -34,8 +37,6 @@ class AbstractDao {
 
 	/*! Unique name of the database */
 	QString dbName;
-
-
 
 	/*! Static counter that is used to assign a unique id to each QSql database */
 	static unsigned int dbCounter;

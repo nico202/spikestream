@@ -9,7 +9,7 @@ namespace spikestream {
     class NeuronGroupInfo {
 	public:
 	    NeuronGroupInfo();
-	    NeuronGroupInfo(unsigned int id, const QString& name, const QString& desc, const QHash<QString, double>& paramMap, int neurType, int numNeur);
+	    NeuronGroupInfo(unsigned int id, const QString& name, const QString& desc, const QHash<QString, double>& paramMap, int neurType);
 	    NeuronGroupInfo(const NeuronGroupInfo& neurGrpInfo);
 	    NeuronGroupInfo& operator=(const NeuronGroupInfo& rhs);
 	    ~NeuronGroupInfo();
@@ -20,7 +20,6 @@ namespace spikestream {
 	    QHash<QString, double> getParameterMap() { return parameterMap; }
 	    QString getParameterXML();
 	    unsigned int getNeuronType() { return neuronType; }
-	    unsigned int getNumberOfNeurons() { return numberOfNeurons; }
 
 	    void setID(unsigned int id) { this->id = id; }
 
@@ -40,10 +39,6 @@ namespace spikestream {
 	    /*! The type of neuron in the group. Should correspond to an id
 		in the NeuronTypes table in the SpikeStreamNetwork database */
 	    int neuronType;
-
-	    /*! Number of neurons in the group
-		NOTE: Take care that this value matches the loaded size of the network. */
-	    int numberOfNeurons;
 
     };
 

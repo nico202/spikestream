@@ -9,7 +9,7 @@ using namespace spikestream;
 using namespace std;
 
 /*----------------------------------------------------------*/
-/*-----                  TEST METHODS                  -----*/
+/*-----                INIT AND CLEANUP                -----*/
 /*----------------------------------------------------------*/
 
 /*! Called after each test */
@@ -19,6 +19,9 @@ void TestNetworkDao::cleanup(){
 
 /*! Called after all the tests */
 void TestNetworkDao::cleanupTestCase() {
+    //Leave databases in clean state
+    cleanTestDatabases();
+
     //Close database connection
     database.close();
 }
@@ -35,75 +38,9 @@ void TestNetworkDao::initTestCase(){
     connectToDatabase("SpikeStreamNetworkTest");
 }
 
-
-/*! Tests the addition of a connection group to the network */
-void TestNetworkDao::testAddConnectionGroup(){
-//    NetworkInfo netInfo(0, "test3", 0);
-//    NetworkDao networkDao (dbInfo);
-//
-//    //Build the connection group that is to be added
-//    QHash<QString, double> paramMap;
-//    paramMap["param3"] = 0.7;
-//    paramMap["param4"] = 0.8;
-//    ConnectionGroupInfo connGrpInfo(0, "testConnGroup1Name", "testConnGroup1Desc", paramMap, 1, 0);
-//
-//    try{
-//	/* Add network - slightly sloppy to use the network dao method, but it has been tested elsewhere
-//	    and we need a network because of foreign key constraints */
-//	networkDao.addNetwork(netInfo);
-//
-//	//Test the neuron group addition
-//	networkDao.addNeuronGroup(netInfo.getID(), neurGrpInfo);
-//	QSqlQuery query = getQuery("SELECT NeuralNetworkID, Name, Description, Parameters, NeuronTypeID FROM NeuronGroups");
-//	executeQuery(query);
-//	QCOMPARE(1, query.size());
-//	query.next();
-//	QCOMPARE(query.value(0).toString(), QString::number(netInfo.getID()));//Check network id
-//	QCOMPARE(query.value(1).toString(), neurGrpInfo.getName());//Check name
-//	QCOMPARE(query.value(2).toString(), neurGrpInfo.getDescription());//Check description
-//	QCOMPARE(query.value(3).toString(), neurGrpInfo.getParameterXML());//Check parameters
-//	QCOMPARE(query.value(4).toString(), QString::number(neurGrpInfo.getNeuronType()));//Check neuron type
-//	QVERIFY( neurGrpInfo.getID() != 0);
-//    }
-//    catch(SpikeStreamException& ex){
-//	QFAIL(ex.getMessage().toAscii());
-//    }
-}
-
-
-/*! Tests the addition of a neuron group to the network */
-void TestNetworkDao::testAddNeuronGroup(){
-    NetworkInfo netInfo(0, "test2", 0);
-    NetworkDao networkDao (dbInfo);
-
-    //Build the neuron group that is to be added
-    QHash<QString, double> paramMap;
-    paramMap["param1"] = 0.5;
-    paramMap["param2"] = 0.6;
-    NeuronGroupInfo neurGrpInfo(0, "testNeuronGroup1Name", "testNeuronGroup1Desc", paramMap, 1, 0);
-
-    try{
-	/* Add network - slightly sloppy to use the network dao method, but it has been tested elsewhere
-	    and we need a network because of foreign key constraints */
-	networkDao.addNetwork(netInfo);
-
-	//Test the neuron group addition
-	networkDao.addNeuronGroup(netInfo.getID(), neurGrpInfo);
-	QSqlQuery query = getQuery("SELECT NeuralNetworkID, Name, Description, Parameters, NeuronTypeID FROM NeuronGroups");
-	executeQuery(query);
-	QCOMPARE(1, query.size());
-	query.next();
-	QCOMPARE(query.value(0).toString(), QString::number(netInfo.getID()));//Check network id
-	QCOMPARE(query.value(1).toString(), neurGrpInfo.getName());//Check name
-	QCOMPARE(query.value(2).toString(), neurGrpInfo.getDescription());//Check description
-	QCOMPARE(query.value(3).toString(), neurGrpInfo.getParameterXML());//Check parameters
-	QCOMPARE(query.value(4).toString(), QString::number(neurGrpInfo.getNeuronType()));//Check neuron type
-	QVERIFY( neurGrpInfo.getID() != 0);
-    }
-    catch(SpikeStreamException& ex){
-	QFAIL(ex.getMessage().toAscii());
-    }
-}
+/*----------------------------------------------------------*/
+/*-----                     TESTS                      -----*/
+/*----------------------------------------------------------*/
 
 
 /*! Tests the addition of a network to the database */
@@ -112,7 +49,7 @@ void TestNetworkDao::testAddNetwork(){
     NetworkDao networkDao (dbInfo);
 
     //Information about the network to be added
-    NetworkInfo netInfo(0, "test1", 0);
+    NetworkInfo netInfo(0, "test1Name","test3Description", 0);
     try{
 	//Invoke method that is being tested
 	networkDao.addNetwork(netInfo);
