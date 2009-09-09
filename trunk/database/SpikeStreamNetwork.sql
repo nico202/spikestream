@@ -14,14 +14,15 @@ SET foreign_key_checks = 0;
 */
 CREATE TABLE NeuralNetworks (
     NeuralNetworkID SMALLINT NOT NULL AUTO_INCREMENT,
-    Name CHAR(100) NOT NULL DEFAULT "Untitled",
+    Name CHAR(250) NOT NULL DEFAULT "Untitled",
+    Description CHAR(250) NOT NULL DEFAULT "Untitled",
 	Locked BOOLEAN NOT NULL DEFAULT 0,/*Set to true when the network is associated with archived simulation run data */
     PRIMARY KEY (NeuralNetworkID),
     INDEX NeuralNetworkIDIndex(NeuralNetworkID)
 )
 ENGINE=InnoDB;
 
-/* Need to change NeuronGroups so that auto increment starts with 10 
+/* Need to change NeuralNetworks so that auto increment starts with 10 
 	This is to reserve numbers 0-9 for deleting and empty keys in 
 	dense_hash_maps and other things. */
 ALTER TABLE NeuralNetworks AUTO_INCREMENT = 10;
@@ -32,8 +33,8 @@ ALTER TABLE NeuralNetworks AUTO_INCREMENT = 10;
 CREATE TABLE NeuronGroups (
     NeuronGroupID SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT, /* Primary key */
     NeuralNetworkID SMALLINT NOT NULL, /* Network that this group is part of */
-    Name CHAR(50) NOT NULL DEFAULT "Untitled", /*Short name, for example, 'motor cortex' */
-    Description CHAR(100) NOT NULL DEFAULT "No description", /* Description, for example, layer, etc. */
+    Name CHAR(250) NOT NULL DEFAULT "Untitled", /*Short name, for example, 'motor cortex' */
+    Description CHAR(250) NOT NULL DEFAULT "No description", /* Description, for example, layer, etc. */
     Parameters TEXT, /* XML describing the parameters used to create the group */
     NeuronTypeID SMALLINT UNSIGNED NOT NULL, /*The type of neuron in the group. Used for parameters and class loading */
 
@@ -87,7 +88,7 @@ ALTER TABLE Neurons AUTO_INCREMENT = 10;
 	AddSpikeStreamNeuronTypes.sql adds the individual types and associated parameter tables. */
 CREATE TABLE NeuronTypes (
     NeuronTypeID SMALLINT UNSIGNED NOT NULL,
-    Description CHAR(100) NOT NULL,
+    Description CHAR(250) NOT NULL,
     ParameterTableName CHAR(100) NOT NULL,/* Table where parameters for this neuron type are stored. */
     ClassLibrary CHAR(100) NOT NULL, /* Dynamically loadable library used to simulate this neuron type */
     PRIMARY KEY (NeuronTypeID)
@@ -100,7 +101,7 @@ ENGINE=InnoDB;
 CREATE TABLE ConnectionGroups (
 	ConnectionGroupID SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	NeuralNetworkID SMALLINT NOT NULL,
-	Description CHAR(100) NOT NULL, 
+	Description CHAR(250) NOT NULL, 
 	FromNeuronGroupID SMALLINT UNSIGNED NOT NULL,
 	ToNeuronGroupID SMALLINT UNSIGNED NOT NULL,
 	SynapseTypeID SMALLINT UNSIGNED NOT NULL,
@@ -155,7 +156,7 @@ ENGINE=InnoDB;
 	AddSynapseTypes.sql adds the indiviual types and their associated parameter tables.*/
 CREATE TABLE SynapseTypes (
 	SynapseTypeID SMALLINT UNSIGNED NOT NULL,
-	Description CHAR(100) NOT NULL,
+	Description CHAR(250) NOT NULL,
 	ParameterTableName CHAR(100) NOT NULL,
 	ClassLibrary CHAR(100) NOT NULL,
 	PRIMARY KEY (SynapseTypeID)

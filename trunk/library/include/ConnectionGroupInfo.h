@@ -12,18 +12,21 @@ namespace spikestream {
     class ConnectionGroupInfo {
 	public:
 	    ConnectionGroupInfo();
-	    ConnectionGroupInfo(unsigned int id, const QString& desc, unsigned int fromID, unsigned int toID, unsigned int synType, QHash<QString, double> paramMap);
+	    ConnectionGroupInfo(unsigned int id, const QString& desc, unsigned int fromID, unsigned int toID, QHash<QString, double> paramMap, unsigned int synType);
 	    ConnectionGroupInfo(const ConnectionGroupInfo& conGrpInfo);
 	    ~ConnectionGroupInfo();
 	    ConnectionGroupInfo& operator=(const ConnectionGroupInfo& rhs);
 
 	    unsigned int getID() { return id; }
 	    QString getDescription() { return description; }
-	    unsigned int getFromNeuronroupID() { return fromNeuronGroupID; }
+	    unsigned int getFromNeuronGroupID() { return fromNeuronGroupID; }
 	    unsigned int getToNeuronGroupID() { return toNeuronGroupID; }
 	    unsigned int getSynapseType() { return synapseType; }
 	    QHash<QString, double> getParameterMap() { return parameterMap; }
 	    unsigned int getNumberOfConnections() { return numberOfConnections; }
+	    QString getParameterXML();
+
+	    void setID(unsigned int id) { this->id = id; }
 
 	private:
 	    /*! ID of the connection group. Should match a row in the ConnectionGroup

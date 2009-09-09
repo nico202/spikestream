@@ -1,10 +1,17 @@
 #include "NetworkInfo.h"
+#include "GlobalVariables.h"
+#include "SpikeStreamException.h"
 using namespace spikestream;
 
 /*! Normal constructor */
-NetworkInfo::NetworkInfo(unsigned int id, const QString& name, bool locked){
+NetworkInfo::NetworkInfo(unsigned int id, const QString& name, const QString& desc, bool locked){
+    //Check that name and description will fit in the database
+    if(name.size() > MAX_DATABASE_NAME_LENGTH || description.size() > MAX_DATABASE_DESCRIPTION_LENGTH)
+	throw SpikeStreamException("NeuralNetwork: Name and/or description length exceeds maximum possible size in database.");
+
     this->id = id;
     this->name = name;
+    this->description = desc;
     this->locked = locked;
 }
 
@@ -13,6 +20,7 @@ NetworkInfo::NetworkInfo(unsigned int id, const QString& name, bool locked){
 NetworkInfo::NetworkInfo(){
     id = 0;
     name = "undefined";
+    description = "undefined";
     locked = 0;
 }
 
@@ -21,6 +29,7 @@ NetworkInfo::NetworkInfo(){
 NetworkInfo::NetworkInfo(const NetworkInfo& netInfo){
     this->id = netInfo.id;
     this->name = netInfo.name;
+    this->description = netInfo.description;
     this->locked = netInfo.locked;
 }
 
@@ -38,6 +47,7 @@ NetworkInfo& NetworkInfo::operator=(const NetworkInfo& rhs) {
 
     this->id = rhs.id;
     this->name = rhs.name;
+    this->description = rhs.description;
     this->locked = rhs.locked;
 
     return *this;

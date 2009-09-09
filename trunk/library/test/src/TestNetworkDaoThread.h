@@ -1,5 +1,5 @@
-#ifndef TESTNETWORKDAO_H
-#define TESTNETWORKDAO_H
+#ifndef TESTNETWORKDAOTHREAD_H
+#define TESTNETWORKDAOTHREAD_H
 
 //SpikeStream includes
 #include "TestDao.h"
@@ -8,7 +8,7 @@
 #include <QtTest>
 #include <QString>
 
-class TestNetworkDao : public TestDao {
+class TestNetworkDaoThread : public TestDao {
 	Q_OBJECT
 
 	private slots:
@@ -16,13 +16,14 @@ class TestNetworkDao : public TestDao {
 	    void cleanupTestCase();
 	    void init();
 	    void initTestCase();
-	    void testAddNetwork();
-	    void testGetNetworksInfo();
+	    void testAddConnectionGroup();
+	    void testAddNeuronGroup();
 
 	private:
-	    void addTestNetwork1();
+
 
 };
 
-#endif//TESTNETWORKDAO_H
+
+#endif//TESTNETWORKDAOTHREAD_H
 

@@ -78,6 +78,12 @@ HEADERS += src/dialogs/NRMImportDialog.h
 SOURCES += src/dialogs/NRMImportDialog.cpp
 
 #----------------------------------------------#
+#---            exceptions folder           ---#
+#----------------------------------------------#
+HEADERS += src/exceptions/NRMException.h
+SOURCES += src/exceptions/NRMException.cpp
+
+#----------------------------------------------#
 #---               src folder               ---#
 #----------------------------------------------#
 HEADERS += src/ArchiveManager.h \

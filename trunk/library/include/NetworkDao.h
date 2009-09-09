@@ -15,7 +15,10 @@ using namespace spikestream;
 
 namespace spikestream{
 
-    /*! Abstraction layer on top of the SpikeStreamNetwork database.*/
+    /*! Abstraction layer on top of the SpikeStreamNetwork database.
+	Used for light operations taking place in the same thread as the calling
+	function. Operations that are more database intensive can be found in
+	the NetworkDaoThread class. */
     class NetworkDao : public AbstractDao {
 	public:
 	    NetworkDao(DBInfo& dbInfo);

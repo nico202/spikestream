@@ -5,6 +5,7 @@ using namespace spikestream;
 ConnectionGroup::ConnectionGroup(const ConnectionGroupInfo& connGrpInfo){
     this->info = connGrpInfo;
     connectionArray = NULL;
+    connectionArrayLength = 0;
 }
 
 

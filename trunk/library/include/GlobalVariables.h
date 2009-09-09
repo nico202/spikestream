@@ -53,7 +53,10 @@
 
 
 /*! The maximum length of a name in the database.*/
-#define MAX_DATABASE_NAME_LENGTH 255
+#define MAX_DATABASE_NAME_LENGTH 250
+
+/*! The maximum length of a name in the database.*/
+#define MAX_DATABASE_DESCRIPTION_LENGTH 250
 
 
 /*! Monitor windows are added in the constructor.
@@ -94,7 +97,7 @@
 
 
 /*! First valid automatically generated ID in NeuralNetwork database */
-#define FIRST_CONNECTIONGROUP_ID 10
+#define START_CONNECTIONGROUP_ID 10
 
 /*! Commenting or uncommenting this define determines whether 
 	statistics are recorded for the simulation.*/
