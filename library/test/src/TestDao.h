@@ -3,6 +3,7 @@
 
 //SpikeStream includes
 #include "DBInfo.h"
+#include "NetworkDaoThread.h"
 using namespace spikestream;
 
 //Qt includes
@@ -22,9 +23,13 @@ class TestDao : public QObject {
 	/*! Database connection */
 	QSqlDatabase database;
 
+	/*! Name to statically access database via QSqlDatabase methods */
+	QString dbRefName;
+
 	//==========================  METHODS  ==========================
 	void connectToDatabase(const QString& dbName);
 	void cleanTestDatabases();
+	void closeDatabase();
 	void executeQuery(QSqlQuery& query);
 	void executeQuery(const QString& queryStr);
 	QSqlQuery getQuery();

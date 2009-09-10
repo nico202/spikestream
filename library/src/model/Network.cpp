@@ -3,11 +3,15 @@
 #include "SpikeStreamException.h"
 using namespace spikestream;
 
-/*! Constructor */
+
+/*! Standard constructor */
 Network::Network(const NetworkInfo& networkInfo, NetworkDao* networkDao){
     //Store information
     this->networkInfo = networkInfo;
     this->networkDao = networkDao;
+
+    //Create a network dao thread for heavy operations
+    networkDaoThread = new NetworkDaoThread(networkDao->getDBInfo());
 }
 
 
@@ -39,6 +43,10 @@ QList<unsigned int> Network::getNeuronGroupIDs(){
 /*! Returns a list of the connection group ids in the network */
 QList<unsigned int> Network::getConnectionGroupIDs(){
     return connGrpMap.keys();
+}
+
+
+Box Network::getMinimumBoundingBox(){
 }
 
 
@@ -83,7 +91,7 @@ ConnectionGroupInfo Network::getConnectionGroupInfo(unsigned int id){
 
 
 /*! Loads up the network from the database */
-void Network::loadNetwork(){
+void Network::load(){
     //Load up information about the neuron and connection groups
     loadNeuronGroupsInfo();
     loadConnectionGroupsInfo();
@@ -127,7 +135,8 @@ void Network::loadConnectionGroupsInfo(){
 /*! Passes a connection group to the network dao, which populates it with
     all the necessary data from the database. */
 void Network::loadConnections(unsigned int connGrpId){
-    networkDao->getConnections(connGrpMap[connGrpId]);
+    networkDaoThread->prepareLoadConnections(this->networkID, connGrpMap[connGrpId]);
+    runNetworkDaoThread();
 }
 
 
@@ -147,9 +156,26 @@ void Network::loadNeuronGroupsInfo(){
 
 /*! Loads up the positions of all of the neurons in the group */
 void Network::loadNeurons(unsigned int neurGrpID){
-    networkDao->getNeurons(neurGrpMap[neurGrpID]);
+    networkDaoThread->prepareLoadNeurons(this->networkID, neurGrpMap[neurGrpID]);
+    runNetworkDaoThread();
 }
 
 
+/*! Slot called when thread has finished running. */
+void Network::threadFinished(){
+    threadRunning = false;
+    if(networkDaoThread->isError()){
+	QString errMsg = networkDaoThread->getErrorMessage();
+	throw SpikeStreamException(errMsg);
+    }
+}
+
+
+/*! Runs the network dao thread stored in this class*/
+void Network::runNetworkDaoThread(){
+    connect (networkDaoThread, SIGNAL(finished()), this, SLOT(threadFinished()));
+    networkDaoThread->start();
+    threadRunning = true;
+}
 
 

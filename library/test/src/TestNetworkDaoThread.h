@@ -20,7 +20,7 @@ class TestNetworkDaoThread : public TestDao {
 	    void testAddNeuronGroup();
 
 	private:
-
+	    void runThread(NetworkDaoThread& netDaoThread);
 
 };
 

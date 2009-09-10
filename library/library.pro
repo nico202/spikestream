@@ -8,6 +8,8 @@ DESTDIR = $(SPIKESTREAM_ROOT)/lib
 
 OBJECTS_DIR = build/objects
 
+MOC_DIR = build/moc
+
 CONFIG += debug \
 	  warn_on \
 	  thread

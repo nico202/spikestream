@@ -14,12 +14,15 @@ namespace spikestream {
 	public:
 	    NeuronGroup(const NeuronGroupInfo& info);
 	    ~NeuronGroup();
+	    bool contains(unsigned int neurID, float x, float y, float z);
 	    unsigned int getID() { return info.getID(); }
 	    NeuronGroupInfo getInfo() {return info;}
+	    QList<unsigned int> getNeuronIDs() { return neuronMap->keys(); }
 	    NeuronMap* getNeuronMap() { return neuronMap; }
 	    bool isLoaded() { return loaded; }
 	    void setLoaded(bool loaded) { this->loaded = loaded; }
 	    void setID(unsigned int id){ info.setID(id); }
+	    void setNeuronMap(NeuronMap* newMap) { this->neuronMap = newMap; }
 
 	 private:
 	    //==========================  VARIABLES  =========================

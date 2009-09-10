@@ -23,7 +23,7 @@ void TestNetworkDao::cleanupTestCase() {
     cleanTestDatabases();
 
     //Close database connection
-    database.close();
+    closeDatabase();
 }
 
 
@@ -72,8 +72,13 @@ void TestNetworkDao::testAddNetwork(){
 /*! Tests the getNeworksInfo method in the NetworkDao.
     This method returns a list containing information about the networks. */
 void TestNetworkDao::testGetNetworksInfo(){
-    //Add a test network with known properties
-    addTestNetwork1();
+    //Add two networks with known properties
+    QSqlQuery query = getQuery("INSERT INTO NeuralNetworks (Name, Description) VALUES ('testNetwork1Name', 'testNetwork1Description')");
+    executeQuery(query);
+    unsigned int network1ID = query.lastInsertId().toUInt();
+    query = getQuery("INSERT INTO NeuralNetworks (Name, Description) VALUES ('testNetwork2Name', 'testNetwork2Description')");
+    executeQuery(query);
+    unsigned int network2ID = query.lastInsertId().toUInt();
 
     //Create the network dao
     NetworkDao networkDao (dbInfo);
@@ -82,16 +87,22 @@ void TestNetworkDao::testGetNetworksInfo(){
     QList<NetworkInfo> netInfoList = networkDao.getNetworksInfo();
 
     //Should be two entries
-    //QCOMPARE(netInfoList.size(), 2);
+    QCOMPARE(netInfoList.size(), 2);
 
     //Check that list is correct
-    for(int i=0; i<2; ++i){
-    }
+    QCOMPARE(netInfoList[0].getID(), network1ID);
+    QCOMPARE(netInfoList[0].getName(), QString("testNetwork1Name"));
+    QCOMPARE(netInfoList[0].getDescription(), QString("testNetwork1Description"));
+    QCOMPARE(netInfoList[1].getID(), network2ID);
+    QCOMPARE(netInfoList[1].getName(), QString("testNetwork2Name"));
+    QCOMPARE(netInfoList[1].getDescription(), QString("testNetwork2Description"));
 }
 
 
 /*! Adds a test network to the database */
 void TestNetworkDao::addTestNetwork1(){
+
+
 }
 
 

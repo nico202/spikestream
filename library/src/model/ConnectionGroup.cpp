@@ -4,21 +4,23 @@ using namespace spikestream;
 /*! Constructor */
 ConnectionGroup::ConnectionGroup(const ConnectionGroupInfo& connGrpInfo){
     this->info = connGrpInfo;
-    connectionArray = NULL;
-    connectionArrayLength = 0;
+    connectionList = new ConnectionList();
 }
 
 
 /*! Destructor */
 ConnectionGroup::~ConnectionGroup(){
-    if(connectionArray != NULL)
-	delete [] connectionArray;
+    if(connectionList != NULL){
+	ConnectionList::iterator endConnList = connectionList->end();
+	for(ConnectionList::iterator iter = connectionList->begin(); iter != endConnList; ++iter){
+	    delete *iter;
+	}
+	delete connectionList;
+    }
 }
 
 
-/*! Returns true if the connections have been loaded */
-bool ConnectionGroup::connectionsLoaded(){
-    if(connectionArray == NULL)
-	return false;
-    return true;
+
+void ConnectionGroup::addConnection(Connection* newConn){
+    connectionList->append(newConn);
 }

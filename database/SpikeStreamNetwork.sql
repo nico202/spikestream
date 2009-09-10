@@ -25,7 +25,7 @@ ENGINE=InnoDB;
 /* Need to change NeuralNetworks so that auto increment starts with 10 
 	This is to reserve numbers 0-9 for deleting and empty keys in 
 	dense_hash_maps and other things. */
-ALTER TABLE NeuralNetworks AUTO_INCREMENT = 10;
+/*ALTER TABLE NeuralNetworks AUTO_INCREMENT = 10;*/
 
 /* NeuronGroups
     Neurons are gathered together into neuron groups that have common parameters and types
@@ -51,7 +51,7 @@ ENGINE=InnoDB;
 /* Need to change NeuronGroups so that auto increment starts with 10 
 	This is to reserve numbers 0-9 for deleting and empty keys in 
 	dense_hash_maps and other things. */
-ALTER TABLE NeuronGroups AUTO_INCREMENT = 10;
+/*ALTER TABLE NeuronGroups AUTO_INCREMENT = 10;*/
 
 
 /* Neurons
@@ -78,7 +78,7 @@ ENGINE=InnoDB;
 /* Need to change Neurons so that auto increment starts with 10 
 	This is to reserve numbers 0-9 for deleting and empty keys in 
 	dense_hash_maps */
-ALTER TABLE Neurons AUTO_INCREMENT = 10;
+/*ALTER TABLE Neurons AUTO_INCREMENT = 10;*/
 
 
 /* NeuronTypes
@@ -119,7 +119,7 @@ ENGINE=InnoDB;
 /* Need to change ConnectionGroups so that auto increment starts with 10 
 	This is to reserve numbers 0-9 for deleting and empty keys in 
 	dense_hash_maps and other things. */
-ALTER TABLE ConnectionGroups AUTO_INCREMENT = 10;
+/*ALTER TABLE ConnectionGroups AUTO_INCREMENT = 10;*/
 
 
 /* Connections
@@ -147,6 +147,12 @@ CREATE TABLE Connections (
     FOREIGN KEY ToNeuronID_FK(ToNeuronID) REFERENCES Neurons(NeuronID) ON DELETE CASCADE
 )
 ENGINE=InnoDB;
+
+
+/* Need to change ConnectionGroups so that auto increment starts with 10 
+	This is to reserve numbers 0-9 for deleting and empty keys in 
+	dense_hash_maps and other things. */
+/*ALTER TABLE Connections AUTO_INCREMENT = 10;*/
 
 
 /* SynapseTypes
