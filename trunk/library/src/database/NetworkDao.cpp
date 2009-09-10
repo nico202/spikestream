@@ -4,6 +4,9 @@
 #include "SpikeStreamDBException.h"
 using namespace spikestream;
 
+//Other includes
+#include <iostream>
+using namespace std;
 
 /*! Constructor. DBInfo is stored by AbstractDao */
 NetworkDao::NetworkDao(DBInfo& dbInfo) : AbstractDao(dbInfo){
@@ -41,29 +44,40 @@ QList<ConnectionGroupInfo> NetworkDao::getConnectionGroupsInfo(unsigned int netw
 }
 
 
-/*! Fills the supplied connection group class with detailed information about the connections */
-void NetworkDao::getConnections(ConnectionGroup* connGrp){
-}
-
-
 /*! Returns a list of information about the available networks. */
 QList<NetworkInfo> NetworkDao::getNetworksInfo(){
-    QSqlQuery query = getQuery();
-    query.prepare("SELECT * FROM NeuralNetworks");
+    QSqlQuery query = getQuery("SELECT NeuralNetworkID, Name, Description, Locked FROM NeuralNetworks");
     executeQuery(query);
-
-    return QList<NetworkInfo>();
+    QList<NetworkInfo> tmpList;
+    for(int i=0; i<query.size(); ++i){
+	query.next();
+	tmpList.append( NetworkInfo(query.value(0).toUInt(), query.value(1).toString(), query.value(2).toString(), query.value(3).toBool()));
+    }
+    return tmpList;
 }
 
 
 /*! Returns information about the neuron groups associated with the specified network */
 QList<NeuronGroupInfo> NetworkDao::getNeuronGroupsInfo(unsigned int networkID){
+    QSqlQuery query = ("SELECT NeuronGroupID, Name, Description, Parameters, NeuronTypeID FROM NeuronGroups WHERE NeuralNetworkID=" + QString::number(networkID));
+    executeQuery(query);
+    QList<NeuronGroupInfo> tmpList;
+    for(int i=0; i<query.size(); ++i){
+	query.next();
+	tmpList.append(
+		NeuronGroupInfo(
+			query.value(0).toUInt(),
+			query.value(1).toString(),
+			query.value(2).toString,
+			    HERE********* WILL PROBABLY HAVE TO BUILD AN XML PARAMETER PARSER
+			query.value(3).toString(),
+			query.value(4).toUInt()
+		)
+	);
+    }
+    return tmpList;
 
 }
 
-
-/*! Fills the supplied neuron group class with the detailed information about the neurons */
-void NetworkDao::getNeurons(NeuronGroup* neurGrp){
-}
 
 

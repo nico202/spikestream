@@ -1,23 +1,14 @@
 //SpikeStream includes
 #include "GlobalVariables.h"
 #include "NetworkDaoThread.h"
-#include "SpikeStreamDBException.h"
 
 #include <iostream>
 using namespace std;
 
-/*! Constructor that prepares thread for adding a connection group */
-NetworkDaoThread::NetworkDaoThread(const DBInfo& dbInfo, unsigned int networkID, ConnectionGroup* connGrp) : AbstractDao(dbInfo) {
-    this->networkID = networkID;
-    this->connectionGroup = connGrp;
-    currentTask = ADD_CONNECTION_GROUP_TASK;
-}
-
-/*! Constructor that prepares thread for adding a neuron group */
-NetworkDaoThread::NetworkDaoThread(const DBInfo& dbInfo, unsigned int networkID, NeuronGroup* neurGrp) : AbstractDao(dbInfo) {
-    this->networkID = networkID;
-    this->neuronGroup = neurGrp;
-    currentTask = ADD_NEURON_GROUP_TASK;
+/*! Constructor  */
+NetworkDaoThread::NetworkDaoThread(const DBInfo& dbInfo) : AbstractDao(dbInfo) {
+    currentTask = NO_TASK_DEFINED;
+    clearError();
 }
 
 
@@ -26,10 +17,55 @@ NetworkDaoThread::~NetworkDaoThread(){
 }
 
 
+void NetworkDaoThread::prepareAddConnectionGroup(unsigned int networkID, ConnectionGroup* connGrp){
+    this->networkID = networkID;
+    this->connectionGroup = connGrp;
+    currentTask = ADD_CONNECTION_GROUP_TASK;
+}
+
+
+void NetworkDaoThread::prepareAddNeuronGroup(unsigned int networkID, NeuronGroup* neurGrp){
+    this->networkID = networkID;
+    this->neuronGroup = neurGrp;
+    currentTask = ADD_NEURON_GROUP_TASK;
+}
+
+
+void NetworkDaoThread::prepareLoadConnections(unsigned int networkID, ConnectionGroup* connGrp){
+    this->networkID = networkID;
+    this->connectionGroup = connGrp;
+    currentTask = LOAD_CONNECTIONS_TASK;
+}
+
+void NetworkDaoThread::prepareLoadNeurons(unsigned int networkID, NeuronGroup* neurGrp){
+    this->networkID = networkID;
+    this->neuronGroup = neurGrp;
+    currentTask = LOAD_NEURONS_TASK;
+}
+
+
+/*! Resets the error state */
+void NetworkDaoThread::clearError(){
+    errorMessage = "";
+    error = false;
+}
+
+
+/*! Exceptions do not work across threads, so errors are flagged by calling this method.
+    The invoking method is responsible for checking whether an error occurred and throwing
+    an exeption if necessary.*/
+void NetworkDaoThread::setError(QString msg){
+    errorMessage = msg;
+    error = true;
+    stopThread = true;
+}
+
+
 /*! Run method inherited from QThread.
     Carries out the task that has been prepared. */
 void NetworkDaoThread::run(){
     stopThread = false;
+    clearError();
 
     //Connect to the database now that we are in a separate thread
     connectToDatabase();
@@ -41,12 +77,22 @@ void NetworkDaoThread::run(){
 	case ADD_CONNECTION_GROUP_TASK:
 	    addConnectionGroup();
 	break;
+	case LOAD_CONNECTIONS_TASK:
+	    loadConnections();
+	break;
+	case LOAD_NEURONS_TASK:
+	    loadNeurons();
+	break;
 	default:
-	    throw SpikeStreamException("NetworkDaoThread started without defined task.");
+	    setError("NetworkDaoThread started without defined task.");
     }
 
     //Database connection can be closed
     closeDatabaseConnection();
+
+    //Current task is complete
+    currentTask = NO_TASK_DEFINED;
+    stopThread = true;
 }
 
 
@@ -78,17 +124,46 @@ void NetworkDaoThread::addConnectionGroup(){
     int lastInsertID = query.lastInsertId().toInt();
     if(lastInsertID >= START_CONNECTIONGROUP_ID)
 	connectionGroup->setID(lastInsertID);
-    else
-	throw SpikeStreamDBException("Insert ID for ConnectionGroup is invalid.");
+    else{
+	setError("Insert ID for ConnectionGroup is invalid.");
+	return;
+    }
 
     //Check for cancellation of task
     if(stopThread)
 	return;
 
     //Add connections to database
-    for(unsigned int i=0; i<connectionGroup->size(); ++i){
+    QList<Connection*>* connList = connectionGroup->getConnections();
+    ConnectionList::iterator endConnList = connList->end();
+    for(ConnectionList::iterator iter = connList->begin(); iter != endConnList; ++iter){
+	//Build query string
+	queryStr = "INSERT INTO Connections ( ConnectionGroupID, FromNeuronID, ToNeuronID, Delay, Weight) VALUES (";
+	queryStr += QString::number(connectionGroup->getID()) + ", ";
+	queryStr += QString::number((*iter)->fromNeuronID) + ", ";
+	queryStr += QString::number((*iter)->toNeuronID) + ", ";
+	queryStr += QString::number((*iter)->delay) + ", ";
+	queryStr += QString::number((*iter)->weight) + ")";
 
+	//Execute query
+    	query = getQuery(queryStr);
+	executeQuery(query);
+
+	//Add connection id to connection
+	int lastInsertID = query.lastInsertId().toInt();
+	if(lastInsertID < START_CONNECTION_ID){
+	    setError("Insert ID for Connection is invalid.");
+	    return;
+	}
+
+	(*iter)->setID(lastInsertID);
+
+	if(stopThread)
+	    return;
     }
+
+    //ConnectionGroup should now match information in database
+    connectionGroup->setLoaded(true);
 }
 
 
@@ -97,7 +172,8 @@ void NetworkDaoThread::addConnectionGroup(){
 void NetworkDaoThread::addNeuronGroup(){
     //Check that parameters have been set correctly
     if(networkID == 0){
-	throw SpikeStreamDBException("NeuralNetwork ID has not been set.");
+	setError("NeuralNetwork ID has not been set.");
+	return;
     }
 
     //Get information about the neuron group
@@ -115,8 +191,10 @@ void NetworkDaoThread::addNeuronGroup(){
     int lastInsertID = query.lastInsertId().toInt();
     if(lastInsertID >= START_NEURONGROUP_ID)
 	neuronGroup->setID(lastInsertID);//Set this on neuron group, not on the copied info
-    else
-	throw SpikeStreamDBException("Insert ID for NeuronGroup is invalid.");
+    else{
+	setError("Insert ID for NeuronGroup is invalid.");
+	return;
+    }
 
     //Check for cancellation of task
     if(stopThread)
@@ -124,6 +202,7 @@ void NetworkDaoThread::addNeuronGroup(){
 
     //Add neurons
     NeuronMap* neurMap = neuronGroup->getNeuronMap();
+    NeuronMap* newNeurMap = new NeuronMap();
     NeuronMap::iterator mapEnd = neurMap->end();//Saves accessing this function multiple times
     for(NeuronMap::iterator iter=neurMap->begin(); iter != mapEnd; ++iter){
 	QString queryStr("INSERT INTO Neurons (NeuronGroupID, X, Y, Z) VALUES (");
@@ -131,9 +210,38 @@ void NetworkDaoThread::addNeuronGroup(){
 	queryStr += QString::number(iter.value()->x) + ", ";
 	queryStr += QString::number(iter.value()->y) + ", ";
 	queryStr += QString::number(iter.value()->z) + ")";
-	executeQuery(queryStr);
+	query = getQuery(queryStr);
+	executeQuery(query);
+
+	//Add neuron with correct id to the new map
+	int lastInsertID = query.lastInsertId().toInt();
+	if(lastInsertID < START_NEURON_ID){
+	    setError("Insert ID for Neuron is invalid.");
+	    return;
+	}
+	(*newNeurMap)[lastInsertID] = iter.value();
 
 	if(stopThread)
 	    return;
     }
+    //Add the correct map to the neuron group. This should also clean up the old map
+    neuronGroup->setNeuronMap(newNeurMap);
+
+    /* Clean up the dynamically allocated neuron map, but keep the dynamically allocated
+	Point3Ds, which are used in the new map */
+    delete neurMap;
+
+    //Neuron group now reflects state of table in database, so set loaded to true
+    neuronGroup->setLoaded(true);
 }
+
+
+void NetworkDaoThread::loadConnections(){
+}
+
+
+void NetworkDaoThread::loadNeurons(){
+}
+
+
+

@@ -4,6 +4,9 @@
 //SpikeStream includes
 #include "Connection.h"
 #include "ConnectionGroupInfo.h"
+using namespace spikestream;
+
+typedef QList<Connection*> ConnectionList;
 
 namespace spikestream {
 
@@ -12,23 +15,23 @@ namespace spikestream {
 	    ConnectionGroup(const ConnectionGroupInfo& connGrpInfo);
 	    ~ConnectionGroup();
 
+	    void addConnection(Connection* newConn);
+	    unsigned int getID() { return info.getID(); }
 	    bool isLoaded() { return loaded; }
 	    void setLoaded(bool loaded) { this->loaded = loaded; }
+
 	    ConnectionGroupInfo getInfo() { return info; }
-	    Connection* getConnectionArray() { return connectionArray; }
+	    ConnectionList* getConnections() { return connectionList; }
 	    void setID(unsigned int id) { info.setID(id); }
-	    unsigned int size() { return connectionArrayLength; }
+	    int size() { return connectionList->size(); }
 
 	private:
 	    /*! Holds information about the connection group.
 		Should match ConnectionGroup table in SpikeStreamNetwork database */
 	    ConnectionGroupInfo info;
 
-	    /*! Array of connections between neurons */
-	    Connection* connectionArray;
-
-	    /*! Length of the array */
-	    unsigned int connectionArrayLength;
+	    /*! List of connections between neurons */
+	    ConnectionList* connectionList;
 
 	   /*! Returns true if the state of the connection array matches the database.
 		This should be false if no connections have been loaded and false

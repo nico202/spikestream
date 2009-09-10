@@ -25,14 +25,11 @@ namespace spikestream{
 	    virtual ~NetworkDao();
 
 	    void addNetwork(NetworkInfo& netInfo);
-	    void addNeuronGroup(unsigned int networkID, NeuronGroupInfo& neurGrpInfo);
-	    void addConnectionGroup(unsigned int networkID, ConnectionGroupInfo& connGrpInfo);
 
-	    QList<ConnectionGroupInfo> getConnectionGroupsInfo(unsigned int networkID);
-	    void getConnections(ConnectionGroup* connGrp);
 	    QList<NetworkInfo> getNetworksInfo();
 	    QList<NeuronGroupInfo> getNeuronGroupsInfo(unsigned int networkID);
-	    void getNeurons(NeuronGroup* neurGrp);
+	    QList<ConnectionGroupInfo> getConnectionGroupsInfo(unsigned int networkID);
+
 
 	private:
 	    //==========================  VARIABLES  ==========================

@@ -10,6 +10,7 @@ namespace spikestream {
 	public:
 	    NeuronGroupInfo();
 	    NeuronGroupInfo(unsigned int id, const QString& name, const QString& desc, const QHash<QString, double>& paramMap, int neurType);
+	    NeuronGroupInfo(unsigned int id, const QString& name, const QString& desc, const QString& parameterXMLString, int neurType);
 	    NeuronGroupInfo(const NeuronGroupInfo& neurGrpInfo);
 	    NeuronGroupInfo& operator=(const NeuronGroupInfo& rhs);
 	    ~NeuronGroupInfo();
@@ -24,6 +25,7 @@ namespace spikestream {
 	    void setID(unsigned int id) { this->id = id; }
 
 	private:
+	    //==========================  VARIABLES  ===========================
 	    /*! Id of the neuron group, which should match that in the database */
 	    unsigned int id;
 
@@ -40,6 +42,9 @@ namespace spikestream {
 		in the NeuronTypes table in the SpikeStreamNetwork database */
 	    int neuronType;
 
+
+	    //===========================  METHODS  ============================
+	    void loadParameters(const QString& parameterXMLString);
     };
 
 }

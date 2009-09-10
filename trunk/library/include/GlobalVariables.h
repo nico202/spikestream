@@ -89,15 +89,22 @@
 #define RANDOM_PERCENT_NEURONS_NOISE 1000
 
 /*! First valid automatically generated ID in NeuralNetwork database */
-#define START_NEURALNETWORK_ID 10
+#define START_NEURALNETWORK_ID 1
 
 
 /*! First valid automatically generated ID in NeuralNetwork database */
-#define START_NEURONGROUP_ID 10
+#define START_NEURONGROUP_ID 1
 
 
 /*! First valid automatically generated ID in NeuralNetwork database */
-#define START_CONNECTIONGROUP_ID 10
+#define START_NEURON_ID 1
+
+/*! First valid automatically generated ID in NeuralNetwork database */
+#define START_CONNECTION_ID 1
+
+
+/*! First valid automatically generated ID in NeuralNetwork database */
+#define START_CONNECTIONGROUP_ID 1
 
 /*! Commenting or uncommenting this define determines whether 
 	statistics are recorded for the simulation.*/

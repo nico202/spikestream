@@ -2,14 +2,15 @@
 #include "SpikeStreamException.h"
 #include "SpikeStreamDBException.h"
 
-
 /*! Connects to the test database.
     FIXME: LOAD PARAMETERS FROM FILE. */
 void TestDao::connectToDatabase(const QString& dbName){    //Set the database parameters to be used in the test
+    dbRefName = "TestDBRef";
+
     dbInfo = DBInfo("localhost", "SpikeStream", "ekips", dbName);
 
     //Create database unique to this thread. No need to store reference because it is held statically
-    database = QSqlDatabase::addDatabase("QMYSQL", dbName);
+    database = QSqlDatabase::addDatabase("QMYSQL", dbRefName);
     database.setHostName(dbInfo.getHost());
     database.setDatabaseName(dbInfo.getDatabase());
     database.setUserName(dbInfo.getUser());
@@ -28,6 +29,10 @@ void TestDao::cleanTestDatabases(){
     executeQuery("DELETE FROM Connections");
 }
 
+
+void TestDao::closeDatabase(){
+    QSqlDatabase::removeDatabase(dbRefName);
+}
 
 /*! Executes the query */
 void TestDao::executeQuery(QSqlQuery& query){

@@ -25,6 +25,19 @@ NeuronGroupInfo::NeuronGroupInfo(unsigned int id, const QString& name, const QSt
     this->neuronType = neurType;
 }
 
+/*! Constructor with XML string containing parameters. */
+NeuronGroupInfo::NeuronGroupInfo(unsigned int id, const QString& name, const QString& desc, const QString& parameterXMLString, int neurType){
+       //Check that name and description will fit in the database
+    if(name.size() > MAX_DATABASE_NAME_LENGTH || desc.size() > MAX_DATABASE_DESCRIPTION_LENGTH)
+	throw SpikeStreamException("NeuronGroup: Name and/or description length exceeds maximum possible size in database.");
+
+    this->id = id;
+    this->name = name;
+    this->description = desc;
+    loadParameters(parameterXMLString);
+    this->neuronType = neurType;
+}
+
 
 /*! Copy constructor */
 NeuronGroupInfo::NeuronGroupInfo(const NeuronGroupInfo& neurGrpInfo){
@@ -74,3 +87,16 @@ QString NeuronGroupInfo::getParameterXML(){
     tmpStr += "</neuron_group_parameters>";
     return tmpStr;
 }
+
+
+/*--------------------------------------------------------- */
+/*-----                PRIVATE METHODS                ----- */
+/*--------------------------------------------------------- */
+
+/*! Extracts the parameters from the supplied string and adds them to the parameter map. */
+void loadParameters(const QString& parameterXMLString){
+
+
+}
+
+
