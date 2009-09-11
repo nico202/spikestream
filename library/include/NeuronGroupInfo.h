@@ -10,7 +10,6 @@ namespace spikestream {
 	public:
 	    NeuronGroupInfo();
 	    NeuronGroupInfo(unsigned int id, const QString& name, const QString& desc, const QHash<QString, double>& paramMap, int neurType);
-	    NeuronGroupInfo(unsigned int id, const QString& name, const QString& desc, const QString& parameterXMLString, int neurType);
 	    NeuronGroupInfo(const NeuronGroupInfo& neurGrpInfo);
 	    NeuronGroupInfo& operator=(const NeuronGroupInfo& rhs);
 	    ~NeuronGroupInfo();
@@ -44,7 +43,6 @@ namespace spikestream {
 
 
 	    //===========================  METHODS  ============================
-	    void loadParameters(const QString& parameterXMLString);
     };
 
 }

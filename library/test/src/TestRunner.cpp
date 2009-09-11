@@ -3,6 +3,7 @@
 #include "TestRunner.h"
 #include "TestNetworkDao.h"
 #include "TestNetworkDaoThread.h"
+#include "TestXMLParameterParser.h"
 
 //Other includes
 #include <iostream>
@@ -15,6 +16,9 @@ void TestRunner::runTests(){
 
     TestNetworkDaoThread testNetworkDaoThread;
     QTest::qExec(&testNetworkDaoThread);
+
+    TestXMLParameterParser testXMLParameterParser;
+    QTest::qExec(&testXMLParameterParser);
 }
 
 

@@ -36,8 +36,10 @@ namespace spikestream {
 	    NeuronGroupInfo getNeuronGroupInfo(unsigned int id);
 	    ConnectionGroup* getConnectionGroup(unsigned int id);
 	    ConnectionGroupInfo getConnectionGroupInfo(unsigned int id);
-	    bool isBusy() { return threadRunning; }
+	    bool isBusy();
 	    void load();
+	    void reset();
+	    void cancel();
 	    void setNetworkDao(NetworkDao* netDao) { this->networkDao = netDao; }
 
 	private slots:
@@ -73,17 +75,22 @@ namespace spikestream {
 	    /*! Records whether this class is carrying out operations with a separate thread. */
 	    bool threadRunning;
 
-	    /*! NetworkDaoThread, which may be running in the background to load neurons etc. */
-	    NetworkDaoThread* networkDaoThread;
+	    /*! NetworkDaoThread to run in the background and handle neuron loading. */
+	    NetworkDaoThread* neuronNetworkDaoThread;
+
+	    /*! NetworkDaoThread to run in the background and handle connection loading. */
+	    NetworkDaoThread* connectionNetworkDaoThread;
+
 
 	    //============================  METHODS  ==============================
 	    void checkNeuronGroupID(unsigned int id);
 	    void checkConnectionGroupID(unsigned int id);
+	    void deleteConnectionGroups();
+	    void deleteNeuronGroups();
 	    void loadConnectionGroupsInfo();
 	    void loadConnections(unsigned int connGrpId);
 	    void loadNeuronGroupsInfo();
 	    void loadNeurons(unsigned int neurGrpID);
-	    void runNetworkDaoThread();
     };
 
 }

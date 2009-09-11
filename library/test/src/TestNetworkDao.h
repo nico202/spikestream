@@ -17,11 +17,14 @@ class TestNetworkDao : public TestDao {
 	    void init();
 	    void initTestCase();
 	    void testAddNetwork();
+	    void testGetConnectionGroupsInfo();
 	    void testGetNetworksInfo();
+	    void testGetNeuronGroupsInfo();
 
 	private:
 	    void addTestNetwork1();
-
+	    QString getConnectionParameterXML();
+	    QString getNeuronParameterXML();
 };
 
 #endif//TESTNETWORKDAO_H

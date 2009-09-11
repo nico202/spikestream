@@ -18,8 +18,23 @@ class TestNetworkDaoThread : public TestDao {
 	    void initTestCase();
 	    void testAddConnectionGroup();
 	    void testAddNeuronGroup();
+	    void testLoadConnections();
+	    void testLoadNeurons();
 
 	private:
+	    //======================  VARIABLES  =======================
+	    unsigned int testNetID;
+	    unsigned int neurGrp1ID;
+	    unsigned int neurGrp2ID;
+	    unsigned int connGrp1ID;
+	    QList<unsigned int> testConnIDList;
+	    QList<unsigned int> testNeurIDList;
+
+
+	    //=======================  METHODS  ========================
+	    void addTestNetwork1();
+	    unsigned int addTestConnection(unsigned int connGrpID, unsigned int fromID, unsigned int toID, float weight, float delay);
+	    unsigned int addTestNeuron(unsigned int neurGrpID, float x, float y, float z);
 	    void runThread(NetworkDaoThread& netDaoThread);
 
 };

@@ -27,19 +27,34 @@ namespace spikestream {
 	    void setError(QString msg);
 	    void prepareAddConnectionGroup(unsigned int networkID, ConnectionGroup* connGrp);
 	    void prepareAddNeuronGroup(unsigned int networkID, NeuronGroup* neurGrp);
-	    void prepareLoadConnections(unsigned int networkID, ConnectionGroup* connGrp);
-	    void prepareLoadNeurons(unsigned int networkID, NeuronGroup* neurGrp);
+	    void prepareLoadConnections(unsigned int networkID, QList<ConnectionGroup*>& connGrpList);
+	    void prepareLoadNeurons(unsigned int networkID, QList<NeuronGroup*>& neurGrpList);
 	    void run();
 	    void stop();
 
 
 	private:
 	    //========================  VARIABLES  =========================
+	    /*! Neuron group being added to the network */
 	    NeuronGroup* neuronGroup;
+
+	    /*! Connection group being added to the network */
 	    ConnectionGroup* connectionGroup;
+
+	    /*! List of connection groups to load connections into */
+	    QList<ConnectionGroup*> connectionGroupList;
+
+
+	    /*! List of neuron groups to load neurons into */
+	    QList<NeuronGroup*> neuronGroupList;
+
+	    /*! Id of network to which neuron or connection group are added */
 	    unsigned int networkID;
+
+	    /*! Records which task is being undertaken - task IDs are defined below */
 	    unsigned int currentTask;
 
+	    /*! When set to true the run method is exited. */
 	    bool stopThread;
 
 	    /*! Exceptions do not work across threads, so need to record when an error takes place when

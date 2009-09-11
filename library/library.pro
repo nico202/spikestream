@@ -14,7 +14,7 @@ CONFIG += debug \
 	  warn_on \
 	  thread
 
-QT += sql
+QT += sql xml
 
 
 INCLUDEPATH += include \
@@ -65,9 +65,11 @@ SOURCES += src/database/DBInfo.cpp \
 #---             exceptions                 ---#
 #----------------------------------------------#
 HEADERS += include/SpikeStreamDBException.h \
-	    include/SpikeStreamException.h
+	    include/SpikeStreamException.h \
+	    include/SpikeStreamXMLException.h
 SOURCES += src/exceptions/SpikeStreamDBException.cpp \
-	    src/exceptions/SpikeStreamException.cpp
+	    src/exceptions/SpikeStreamException.cpp \
+	    src/exceptions/SpikeStreamXMLException.cpp
 
 #----------------------------------------------#
 #---                model                   ---#
@@ -85,6 +87,13 @@ SOURCES += src/model/Network.cpp \
 	    src/model/NeuronGroupInfo.cpp \
 	    src/model/ConnectionGroup.cpp \
 	    src/model/ConnectionGroupInfo.cpp
+
+#----------------------------------------------#
+#---                  xml                   ---#
+#----------------------------------------------#
+HEADERS += include/XMLParameterParser.h
+SOURCES += src/xml/XMLParameterParser.cpp
+
 
 
 
