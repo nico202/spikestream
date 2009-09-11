@@ -67,7 +67,7 @@ QString ConnectionGroupInfo::getParameterXML(){
     tmpStr += "<connection_group_parameters>";
     for(QHash<QString, double>::iterator iter = parameterMap.begin(); iter != parameterMap.end(); ++iter){
 	tmpStr +="<parameter>";
-	tmpStr += "<description>" + iter.key() + "</description>";
+	tmpStr += "<name>" + iter.key() + "</name>";
 	tmpStr += "<value>" + QString::number(iter.value()) + "</value>";
 	tmpStr += "</parameter>";
     }

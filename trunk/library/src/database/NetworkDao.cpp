@@ -2,6 +2,7 @@
 #include "GlobalVariables.h"
 #include "NetworkDao.h"
 #include "SpikeStreamDBException.h"
+#include "XMLParameterParser.h"
 using namespace spikestream;
 
 //Other includes
@@ -41,6 +42,24 @@ void NetworkDao::addNetwork(NetworkInfo& netInfo){
 
 /*! Returns information about the connection groups associated with the specified network */
 QList<ConnectionGroupInfo> NetworkDao::getConnectionGroupsInfo(unsigned int networkID){
+    QSqlQuery query = getQuery("SELECT ConnectionGroupID, Description, FromNeuronGroupID, ToNeuronGroupID, Parameters, SynapseTypeID FROM ConnectionGroups WHERE NeuralNetworkID=" + QString::number(networkID));
+    executeQuery(query);
+    QList<ConnectionGroupInfo> tmpList;
+    XMLParameterParser parameterParser;
+    for(int i=0; i<query.size(); ++i){
+	query.next();
+	tmpList.append(
+		ConnectionGroupInfo(
+			query.value(0).toUInt(),//Connection group id
+			query.value(1).toString(),//Description
+			query.value(2).toUInt(),//From group id
+			query.value(3).toUInt(),//To group id
+			parameterParser.getParameterMap(query.value(4).toString()),//Parameters
+			query.value(5).toUInt()//Synapse id
+		)
+	);
+    }
+    return tmpList;
 }
 
 
@@ -59,18 +78,18 @@ QList<NetworkInfo> NetworkDao::getNetworksInfo(){
 
 /*! Returns information about the neuron groups associated with the specified network */
 QList<NeuronGroupInfo> NetworkDao::getNeuronGroupsInfo(unsigned int networkID){
-    QSqlQuery query = ("SELECT NeuronGroupID, Name, Description, Parameters, NeuronTypeID FROM NeuronGroups WHERE NeuralNetworkID=" + QString::number(networkID));
+    QSqlQuery query = getQuery("SELECT NeuronGroupID, Name, Description, Parameters, NeuronTypeID FROM NeuronGroups WHERE NeuralNetworkID=" + QString::number(networkID));
     executeQuery(query);
     QList<NeuronGroupInfo> tmpList;
+    XMLParameterParser parameterParser;
     for(int i=0; i<query.size(); ++i){
 	query.next();
 	tmpList.append(
 		NeuronGroupInfo(
 			query.value(0).toUInt(),
 			query.value(1).toString(),
-			query.value(2).toString,
-			    HERE********* WILL PROBABLY HAVE TO BUILD AN XML PARAMETER PARSER
-			query.value(3).toString(),
+			query.value(2).toString(),
+			parameterParser.getParameterMap(query.value(3).toString()),
 			query.value(4).toUInt()
 		)
 	);

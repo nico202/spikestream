@@ -1,4 +1,5 @@
 //SpikeStream includes
+#include "GlobalVariables.h"
 #include "Network.h"
 #include "SpikeStreamException.h"
 using namespace spikestream;
@@ -10,22 +11,18 @@ Network::Network(const NetworkInfo& networkInfo, NetworkDao* networkDao){
     this->networkInfo = networkInfo;
     this->networkDao = networkDao;
 
-    //Create a network dao thread for heavy operations
-    networkDaoThread = new NetworkDaoThread(networkDao->getDBInfo());
+    //Create network dao threads for heavy operations
+    neuronNetworkDaoThread = new NetworkDaoThread(networkDao->getDBInfo());
+    connect (thread, SIGNAL(finished()), this, SLOT(neuronThreadFinished()));
+    connectionNetworkDaoThread = new NetworkDaoThread(networkDao->getDBInfo());
+    connect (thread, SIGNAL(finished()), this, SLOT(connectionThreadFinished()));
 }
 
 
 /*! Destructor */
 Network::~Network(){
-    //Delete all neuron groups
-    for(QHash<unsigned int, NeuronGroup*>::iterator iter = neurGrpMap.begin(); iter != neurGrpMap.end(); ++iter)
-	delete iter.value();
-    neurGrpMap.clear();
-
-    //Delete all connection groups
-    for(QHash<unsigned int, ConnectionGroup*>::iterator iter = connGrpMap.begin(); iter != connGrpMap.end(); ++iter)
-	delete iter.value();
-    connGrpMap.clear();
+    //Empties all data stored in the class
+    reset();
 }
 
 
@@ -33,6 +30,24 @@ Network::~Network(){
 /*--------------------------------------------------------- */
 /*-----                PUBLIC METHODS                 ----- */
 /*--------------------------------------------------------- */
+
+void Network::cancel(){
+    neuronNetworkDaoThread->stop();
+    connectionNetworkDaoThread->stop();
+}
+
+bool Network::isBusy() {
+    if(neuronNetworkDaoThread->isRunning() || connectionNetworkDaoThread->isRunning())
+	return true;
+    return false;
+}
+
+/*! Deletes all data stored in the class */
+void Network::reset(){
+    deleteConnectionGroups();
+    deleteNeuronGroups();
+}
+
 
 /*! Returns a list of the neuron group ids in the network */
 QList<unsigned int> Network::getNeuronGroupIDs(){
@@ -92,9 +107,47 @@ ConnectionGroupInfo Network::getConnectionGroupInfo(unsigned int id){
 
 /*! Loads up the network from the database */
 void Network::load(){
+    //Clear current information
+    reset();
+
     //Load up information about the neuron and connection groups
     loadNeuronGroupsInfo();
     loadConnectionGroupsInfo();
+
+    //Load up all neurons
+    neuronNetworkDaoThread->prepareLoadNeurons(this->networkID, neurGrpMap.keys());
+    neuronNetworkDaoThread->start();
+
+    //Load all connection groups that are above a certain size
+    QList<ConnectionGroup*> loadList;
+    for(QList<ConnectionGroup*>::iterator iter = connGrpMap.keys().begin(); iter != connGrpMap.keys().end(); ++iter){
+	unsigned int connGrpSize = networkDao->getConnectionCount((*iter)->getID());
+	if(connGrpSize <= LAZY_LOADING_THRESHOLD)
+	    loadList.append(*iter);
+    }
+    connectionNetworkDaoThread->prepareLoadConnections(this->networkID, loadList);
+    connectionNetworkDaoThread->start();
+}
+
+/*--------------------------------------------------------- */
+/*-----                  PRIVATE SLOTS                ----- */
+/*--------------------------------------------------------- */
+
+/*! Slot called when thread processing connections has finished running. */
+void Network::connectionThreadFinished(){
+    if(connetionNetworkDaoThread->isError()){
+	QString errMsg = connectionNetworkDaoThread->getErrorMessage();
+	throw SpikeStreamException(errMsg);
+    }
+}
+
+
+/*! Slot called when thread processing neurons has finished running. */
+void Network::neuronThreadFinished(){
+    if(neuronNetworkDaoThread->isError()){
+	QString errMsg = neuronNetworkDaoThread->getErrorMessage();
+	throw SpikeStreamException(errMsg);
+    }
 }
 
 
@@ -102,7 +155,7 @@ void Network::load(){
 /*-----                PRIVATE METHODS                ----- */
 /*--------------------------------------------------------- */
 
-/*! Checks that the specified neurong group id is present in the network
+/*! Checks that the specified neuron group id is present in the network
     and throws an exception if not. */
 void Network::checkConnectionGroupID(unsigned int id){
     if(!connGrpMap.contains(id))
@@ -118,10 +171,11 @@ void Network::checkNeuronGroupID(unsigned int id){
 }
 
 
-/*! Uses network dao to obtain list of connection groups and load them into hash map */
+/*! Uses network dao to obtain list of connection groups and load them into hash map.
+    Individual connections are loaded separately to enable lazy loading. */
 void Network::loadConnectionGroupsInfo(){
     //Clear hash map
-    connGrpMap.clear();
+    deleteConnectionGroups();
 
     //Get list of neuron groups from database
     QList<ConnectionGroupInfo> connGrpInfoList = networkDao->getConnectionGroupsInfo(networkID);
@@ -135,15 +189,16 @@ void Network::loadConnectionGroupsInfo(){
 /*! Passes a connection group to the network dao, which populates it with
     all the necessary data from the database. */
 void Network::loadConnections(unsigned int connGrpId){
-    networkDaoThread->prepareLoadConnections(this->networkID, connGrpMap[connGrpId]);
-    runNetworkDaoThread();
+    connectionNetworkDaoThread->prepareLoadConnections(connGrpMap[connGrpId]);
+    connectionNeworkDaoThread->start();
 }
 
 
-/*! Uses network dao to obtain list of neuron groups and load them into hash map */
+/*! Uses network dao to obtain list of neuron groups and load them into hash map.
+    Individual neurons are loaded separately to enable lazy loading if required.  */
 void Network::loadNeuronGroupsInfo(){
     //Clear hash map
-    neurGrpMap.clear();
+    deleteNeuronGroups();
 
     //Get list of neuron groups from database
     QList<NeuronGroupInfo> neurGrpInfoList = networkDao->getNeuronGroupsInfo(networkID);
@@ -161,21 +216,17 @@ void Network::loadNeurons(unsigned int neurGrpID){
 }
 
 
-/*! Slot called when thread has finished running. */
-void Network::threadFinished(){
-    threadRunning = false;
-    if(networkDaoThread->isError()){
-	QString errMsg = networkDaoThread->getErrorMessage();
-	throw SpikeStreamException(errMsg);
-    }
+void Network::deleteConnectionGroups(){
+    //Delete all connection groups
+    for(QHash<unsigned int, ConnectionGroup*>::iterator iter = connGrpMap.begin(); iter != connGrpMap.end(); ++iter)
+	delete iter.value();
+    connGrpMap.clear();
 }
 
 
-/*! Runs the network dao thread stored in this class*/
-void Network::runNetworkDaoThread(){
-    connect (networkDaoThread, SIGNAL(finished()), this, SLOT(threadFinished()));
-    networkDaoThread->start();
-    threadRunning = true;
-}
-
-
+void Network::deleteNeuronGroups(){
+	    //Delete all neuron groups
+    for(QHash<unsigned int, NeuronGroup*>::iterator iter = neurGrpMap.begin(); iter != neurGrpMap.end(); ++iter)
+	delete iter.value();
+    neurGrpMap.clear();
+}S

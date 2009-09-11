@@ -30,16 +30,26 @@ void NetworkDaoThread::prepareAddNeuronGroup(unsigned int networkID, NeuronGroup
     currentTask = ADD_NEURON_GROUP_TASK;
 }
 
-
-void NetworkDaoThread::prepareLoadConnections(unsigned int networkID, ConnectionGroup* connGrp){
+/*! Prepares to load connections for a list of connection groups */
+void NetworkDaoThread::prepareLoadConnections(QList<ConnectionGroup*>& connGrpList){
     this->networkID = networkID;
-    this->connectionGroup = connGrp;
+    this->connectionGroupList = connGrpList;
     currentTask = LOAD_CONNECTIONS_TASK;
 }
 
-void NetworkDaoThread::prepareLoadNeurons(unsigned int networkID, NeuronGroup* neurGrp){
+/*! Prepares to load connections for a single connection group */
+void NetworkDaoThread::prepareLoadConnections(ConnectionGroup* connGrp){
     this->networkID = networkID;
-    this->neuronGroup = neurGrp;
+    connectionGroupList.clear();
+    connectionGroupList.append(connGrp);
+    currentTask = LOAD_CONNECTIONS_TASK;
+}
+
+
+/*! Prepares to load neurons for a single neuron group */
+void NetworkDaoThread::prepareLoadNeurons(QList<NeuronGroup*>& neurGrpList){
+    this->networkID = networkID;
+    this->neuronGroupList = neurGrpList;
     currentTask = LOAD_NEURONS_TASK;
 }
 
@@ -237,6 +247,27 @@ void NetworkDaoThread::addNeuronGroup(){
 
 
 void NetworkDaoThread::loadConnections(){
+    //Work through all the connections to be loaded
+    for(QList<ConnectionGroup*>::iterator iter = connectionGroupList.begin(); iter != connectionGroupList.end(); ++iter){
+
+	//Empty current connections in group
+	(*iter)->clearConnections();
+
+	//Load connections into group
+	QSqlQuery query = getQuery("SELECT ConnectionID, FromNeuronID, ToNeuronID, Delay, Weight FROM Connections WHERE ConnectionGroupID = " + QString::number((*iter)->getID());    }
+	while ( query.next() ) {
+	    Connection* tmpConn = new Connection(
+			query.value(0).toUInt(),//ConnectionID
+			query.value(1).toUInt(),//FromNeuronID
+			query.value(2).toUInt(),//ToNeuronID
+			query.value(3).toString().toFloat(),//Delay
+			query.value(4).toString().toFloat()//Weight
+	    );
+	    (*iter)->addConnection(tmpConn);
+	}
+
+	//Connection group now matches the database
+	(*iter)->setLoaded(true);
 }
 
 

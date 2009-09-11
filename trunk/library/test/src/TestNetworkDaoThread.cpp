@@ -209,6 +209,101 @@ void TestNetworkDaoThread::testAddNeuronGroup(){
 }
 
 
+void TestNetworkDaoThread::testLoadConnections(){
+    //Add test network
+    addTestNetwork1();
+
+    //Create a connection group with the appropriate id
+    ConnectionGroup connGrp(ConnectionGroupInfo(connGrp1ID, "undefined", 0, ,  QHash<QString, double>(), 1));
+
+    //Load connections associated with this neuron group
+    networkDaoThread->prepareLoadConnections(connGrp);
+    runNetworkDaoThread();
+
+    ADD ASSERTIONS ABOUT CONNECTIONS
+
+}
+
+
+void TestNetworkDaoThread::testLoadNeurons(){
+}
+
+/*----------------------------------------------------------*/
+/*-----               PRIVATE METHODS                  -----*/
+/*----------------------------------------------------------*/
+
+/*! Adds a test network to the database with known properties */
+void TestNetworkDaoThread::addTestNetwork1(){
+    //Add network with known properties
+    QSqlQuery query = getQuery("INSERT INTO NeuralNetworks (Name, Description) VALUES ('testNetwork1Name', 'testNetwork1Description')");
+    executeQuery(query);
+    testNetID = query.lastInsertId().toUInt();
+
+    //Add two neuron groups
+    QString queryStr = "INSERT INTO NeuronGroups (NeuralNetworkID, Name, Description, Parameters, NeuronTypeID ) VALUES (";
+    queryStr += QString::number(networkID) + ", " + "'name1', 'desc1', '" + getConnectionParameterXML() + "', 1)";
+    query = getQuery(queryStr);
+    executeQuery(query);
+    neurGrp1ID = query.lastInsertId().toUInt();
+
+    queryStr = "INSERT INTO NeuronGroups (NeuralNetworkID, Name, Description, Parameters, NeuronTypeID ) VALUES (";
+    queryStr += QString::number(networkID) + ", " + "'name2', 'desc2', '" + getConnectionParameterXML() + "', 1)";
+    query = getQuery(queryStr);
+    executeQuery(query);
+    neurGrp2ID = query.lastInsertId().toUInt();
+
+    //Create connection group between the two neuron groups
+    queryStr = "INSERT INTO ConnectionGroups (NeuralNetworkID, Description, FromNeuronGroupID, ToNeuronGroupID, Parameters, SynapseTypeID ) VALUES (";
+    queryStr += QString::number(networkID) + ", 'conngrpdesc1', " + QString::number(neurGrp1ID) + ", " + QString::number(neurGrp2ID) + ", '" + getConnectionParameterXML() + "', 1)";
+    query = getQuery(queryStr);
+    executeQuery(query);
+    connGrp1ID = query.lastInsertId().toUInt();
+
+    //Add neurons to the groups, storing database id in testNeurIDList
+    testNeurIDList.clear();
+    testNeurIDList.append(addTestNeuron(neurGrp1ID, 0, 0, 0));
+    testNeurIDList.append(addTestNeuron(neurGrp1ID, 0, 1, 0));
+    testNeurIDList.append(addTestNeuron(neurGrp1ID, 1, 1, 0));
+    testNeurIDList.append(addTestNeuron(neurGrp2ID, 0, 0, 10));
+    testNeurIDList.append(addTestNeuron(neurGrp2ID, 1, 1, 10));
+
+    //Add test connections
+    testConnIDList(addTestConnection(connGrp1ID, testNeurIDList[0], testNeurIDList[1], 0.1));
+    testConnIDList(addTestConnection(connGrp1ID, testNeurIDList[0], testNeurIDList[2], 0.2));
+    testConnIDList(addTestConnection(connGrp1ID, testNeurIDList[0], testNeurIDList[3], 0.3));
+    testConnIDList(addTestConnection(connGrp1ID, testNeurIDList[4], testNeurIDList[3], 0.4));
+    testConnIDList(addTestConnection(connGrp1ID, testNeurIDList[4], testNeurIDList[1], 0.5));
+    testConnIDList(addTestConnection(connGrp1ID, testNeurIDList[3], testNeurIDList[2], 0.6));
+}
+
+
+/*! Adds a test connection to the database */
+unsigned int TestNetworkDaoThread::addTestConnection(unsigned int connGrpID, unsigned int fromID, unsigned int toID, float weight, float delay){
+    QString queryStr = "INSERT INTO Connections ( ConnectionGroupID, FromNeuronID, ToNeuronID, Delay, Weight) VALUES (";
+    queryStr += QString::number(connGrpID) + ", ";
+    queryStr += QString::number(fromID) + ", ";
+    queryStr += QString::number(toID) + ", ";
+    queryStr += QString::number(delay) + ", ";
+    queryStr += QString::number(weight) + ")";
+    query = getQuery(queryStr);
+    executeQuery(query);
+    return query.lastInsertId().toUInt();
+}
+
+
+/*! Adds a test neuron to the database */
+void TestNetworkDaoThread::addTestNeuron(unsigned int neurGrpID, float x, float y, float z){
+    QString queryStr("INSERT INTO Neurons (NeuronGroupID, X, Y, Z) VALUES (");
+    queryStr += QString::number(neurGrpID) + ", ";
+    queryStr += QString::number(x) + ", ";
+    queryStr += QString::number(y) + ", ";
+    queryStr += QString::number(z) + ")";
+    query = getQuery(queryStr);
+    executeQuery(query);
+    return query.lastInsertId().toUInt();
+}
+
+
 /*! Runs the supplied thread and checks for errors */
 void TestNetworkDaoThread::runThread(NetworkDaoThread& thread){
     thread.start();

@@ -13,7 +13,7 @@ INCLUDEPATH += src \
 
 LIBS += -lspikestream -L$(SPIKESTREAM_ROOT)/lib  -lmysqlpp
 
-QT += sql
+QT += sql xml
 
 CONFIG += qtestlib
 
@@ -23,13 +23,15 @@ CONFIG += qtestlib
 HEADERS += src/TestRunner.h \
 	    src/TestDao.h \
 	    src/TestNetworkDao.h \
-	    src/TestNetworkDaoThread.h
+	    src/TestNetworkDaoThread.h \
+	    src/TestXMLParameterParser.h
 
 SOURCES += src/Main.cpp \
 	    src/TestRunner.cpp \
 	    src/TestDao.cpp \
 	    src/TestNetworkDao.cpp \
-	    src/TestNetworkDaoThread.cpp
+	    src/TestNetworkDaoThread.cpp \
+	    src/TestXMLParameterParser.cpp
 
 
 

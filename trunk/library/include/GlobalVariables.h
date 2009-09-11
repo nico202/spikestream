@@ -106,6 +106,10 @@
 /*! First valid automatically generated ID in NeuralNetwork database */
 #define START_CONNECTIONGROUP_ID 1
 
+
+/*! Default threshold for lazy loading */
+#define LAZY_LOADING_THRESHOLD 10000
+
 /*! Commenting or uncommenting this define determines whether 
 	statistics are recorded for the simulation.*/
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
