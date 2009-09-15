@@ -36,6 +36,7 @@
 #include "Globals.h"
 #include "NRMImportDialog.h"
 #include "SpikeStreamException.h"
+#include "NetworksWidget.h"
 using namespace spikestream;
 
 //Qt includes
@@ -231,10 +232,10 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 
 	//Set up the data access objects wrapping the databases.
 	DBInfo netDBInfo(
-		configLoader->getCharData("neuralNetworkHost"),
-		configLoader->getCharData("neuralNetworkUser"),
-		configLoader->getCharData("neuralNetworkPassword"),
-		configLoader->getCharData("neuralNetworkDatabase")
+		configLoader->getCharData("spikeStreamNetworkHost"),
+		configLoader->getCharData("spikeStreamNetworkUser"),
+		configLoader->getCharData("spikeStreamNetworkPassword"),
+		configLoader->getCharData("spikeStreamNetworkDatabase")
 	);
 	try{
 	    NetworkDao* networkDao = new NetworkDao(netDBInfo);
@@ -247,6 +248,11 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	//Get the default location for saving and loading databases
 	defaultFileLocation = configLoader->getCharData("default_file_location");
 	Globals::setWorkingDirectory(defaultFileLocation);
+
+	//Set up the global event router and connect appropriate signals to this class
+	EventRouter* eventRouter = new EventRouter();
+	Globals::setEventRouter(eventRouter);
+	connect(eventRouter, SIGNAL(reloadSignal()), this, SLOT(reloadEverything()), Qt::QueuedConnection);
 
 	//Set up tester to run any code that needs testing
 	//Tester *tester = new Tester();
@@ -270,7 +276,9 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	menuBar()->insertItem("View", viewMenu);
 	viewMenu->insertItem("Reload devices", this, SLOT(reloadDevices()), Qt::CTRL+Qt::Key_D);
 	viewMenu->insertItem("Reload patterns", this, SLOT(reloadPatterns()), Qt::CTRL+Qt::Key_P);
-	viewMenu->insertItem("Reload everything", this, SLOT(reloadEverything()), Qt::SHIFT+Qt::Key_F5);
+
+	//Reload everything is broadcast to all classes connected to the event router
+	viewMenu->insertItem("Reload everything", eventRouter, SLOT(reloadSlot()), Qt::SHIFT+Qt::Key_F5);
 
 	//Add tools menu for pattern manager and probe
 	Q3PopupMenu *toolsMenu = new Q3PopupMenu(this);
@@ -288,6 +296,10 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	//Set up main splitter, which will divide graphical view from editor/viewer/simulator windows
 	QSplitter *mainSplitterWidget = new QSplitter(this);
 	tabWidget = new QTabWidget(mainSplitterWidget);
+
+	//Add networks tab and connect it to appropriate signals
+	NetworksWidget* networksWidget = new NetworksWidget(this);
+	tabWidget->addTab(networksWidget, "Networks");
 	
 	//Set up editor window and add to tab widget
 	QSplitter *layerSplitterWidget = new QSplitter( tabWidget);
@@ -858,6 +870,10 @@ void SpikeStreamMainWindow::reloadDevices(){
 
 /*! Reloads neuron groups and connections from the database. */
 void SpikeStreamMainWindow::reloadEverything(){
+    //Emit a signal. NOTE: Better way of handling this and saves keeping endless references
+    emit reload();
+
+    //Manual reload of classes  not connected to the signal FIXME: REPLACE WITH SIGNAL MECHANISM
 	try{
 		layerWidget->reloadNeuronGroups();
 		connectionWidget->reloadConnections();

@@ -24,11 +24,12 @@ namespace spikestream {
 	    bool isError() { return error; }
 	    bool isRunning() { return !stopThread; }
 	    QString getErrorMessage() { return errorMessage; }
-	    void setError(QString msg);
 	    void prepareAddConnectionGroup(unsigned int networkID, ConnectionGroup* connGrp);
 	    void prepareAddNeuronGroup(unsigned int networkID, NeuronGroup* neurGrp);
-	    void prepareLoadConnections(unsigned int networkID, QList<ConnectionGroup*>& connGrpList);
-	    void prepareLoadNeurons(unsigned int networkID, QList<NeuronGroup*>& neurGrpList);
+	    void prepareLoadConnections(QList<ConnectionGroup*>& connGrpList);
+	    void prepareLoadConnections(ConnectionGroup* connGrp);
+	    void prepareLoadNeurons(const QList<NeuronGroup*>& neurGrpList);
+	    void prepareLoadNeurons(NeuronGroup* neurGrp);
 	    void run();
 	    void stop();
 
@@ -43,7 +44,6 @@ namespace spikestream {
 
 	    /*! List of connection groups to load connections into */
 	    QList<ConnectionGroup*> connectionGroupList;
-
 
 	    /*! List of neuron groups to load neurons into */
 	    QList<NeuronGroup*> neuronGroupList;
@@ -75,6 +75,7 @@ namespace spikestream {
 	    void addConnectionGroup();
 	    void loadConnections();
 	    void loadNeurons();
+	    void setError(QString msg);
     };
 
 }

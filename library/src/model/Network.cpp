@@ -13,9 +13,9 @@ Network::Network(const NetworkInfo& networkInfo, NetworkDao* networkDao){
 
     //Create network dao threads for heavy operations
     neuronNetworkDaoThread = new NetworkDaoThread(networkDao->getDBInfo());
-    connect (thread, SIGNAL(finished()), this, SLOT(neuronThreadFinished()));
+    connect (neuronNetworkDaoThread, SIGNAL(finished()), this, SLOT(neuronThreadFinished()));
     connectionNetworkDaoThread = new NetworkDaoThread(networkDao->getDBInfo());
-    connect (thread, SIGNAL(finished()), this, SLOT(connectionThreadFinished()));
+    connect (connectionNetworkDaoThread, SIGNAL(finished()), this, SLOT(connectionThreadFinished()));
 }
 
 
@@ -86,15 +86,31 @@ NeuronGroupInfo Network::getNeuronGroupInfo(unsigned int id){
 
 
 /*! Returns the connection group with the specified id.
-    An exception is thrown if the connection group id is not in the network.
-    Lazy loading used, so that connection groups are loaded only if requested. */
+    An exception is thrown if the connection group id is not in the network.*/
 ConnectionGroup* Network::getConnectionGroup(unsigned int id){
     checkConnectionGroupID(id);
-
-    if(!connGrpMap[id]->isLoaded())
-	loadConnections(id);
-
     return connGrpMap[id];
+}
+
+bool Network::connectionGroupIsLoaded(unsigned int id){
+    checkConnectionGroupID(id);
+    return connGrpMap[id]->isLoaded();
+}
+
+bool Network::neuronGroupIsLoaded(unsigned int id){
+    checkNeuronGroupID(id);
+    return neurGrpMap[id]->isLoaded();
+}
+
+
+/*! Loads up the connection group using a separate thread.
+    Need to check that loading has completed before using the connection group. */
+void Network::loadConnections(unsigned int connGrpID){
+    checkConnectionGroupID(connGrpID);
+    if(!connGrpMap[connGrpID]->isLoaded()){
+	connectionNetworkDaoThread->prepareLoadConnections(connGrpMap[connGrpID]);
+	connectionNetworkDaoThread->start();
+    }
 }
 
 
@@ -115,19 +131,35 @@ void Network::load(){
     loadConnectionGroupsInfo();
 
     //Load up all neurons
-    neuronNetworkDaoThread->prepareLoadNeurons(this->networkID, neurGrpMap.keys());
+    neuronNetworkDaoThread->prepareLoadNeurons(neurGrpMap.values());
     neuronNetworkDaoThread->start();
 
     //Load all connection groups that are above a certain size
     QList<ConnectionGroup*> loadList;
-    for(QList<ConnectionGroup*>::iterator iter = connGrpMap.keys().begin(); iter != connGrpMap.keys().end(); ++iter){
-	unsigned int connGrpSize = networkDao->getConnectionCount((*iter)->getID());
+    for(QList<ConnectionGroup*>::iterator iter = connGrpMap.values().begin(); iter != connGrpMap.values().end(); ++iter){
+	unsigned int connGrpSize = networkDao->getConnectionGroupSize((*iter)->getID());
 	if(connGrpSize <= LAZY_LOADING_THRESHOLD)
 	    loadList.append(*iter);
     }
-    connectionNetworkDaoThread->prepareLoadConnections(this->networkID, loadList);
+    connectionNetworkDaoThread->prepareLoadConnections(loadList);
     connectionNetworkDaoThread->start();
+
+    /* Both threads will now be running to load connections and neurons.
+       This class will return true to the isBusy() method until the threads finish.
+       When the threads finish they should call the appropriat slot in this class. */
 }
+
+
+/*! Loads up the positions of all of the neurons in the group.
+    This method runs as a separate thread, so need to check that neuron group
+    is loaded before using this method. */
+void Network::loadNeurons(unsigned int neurGrpID){
+    checkNeuronGroupID(neurGrpID);
+
+    neuronNetworkDaoThread->prepareLoadNeurons(neurGrpMap[neurGrpID]);
+    neuronNetworkDaoThread->start();
+}
+
 
 /*--------------------------------------------------------- */
 /*-----                  PRIVATE SLOTS                ----- */
@@ -135,7 +167,7 @@ void Network::load(){
 
 /*! Slot called when thread processing connections has finished running. */
 void Network::connectionThreadFinished(){
-    if(connetionNetworkDaoThread->isError()){
+    if(connectionNetworkDaoThread->isError()){
 	QString errMsg = connectionNetworkDaoThread->getErrorMessage();
 	throw SpikeStreamException(errMsg);
     }
@@ -186,14 +218,6 @@ void Network::loadConnectionGroupsInfo(){
 }
 
 
-/*! Passes a connection group to the network dao, which populates it with
-    all the necessary data from the database. */
-void Network::loadConnections(unsigned int connGrpId){
-    connectionNetworkDaoThread->prepareLoadConnections(connGrpMap[connGrpId]);
-    connectionNeworkDaoThread->start();
-}
-
-
 /*! Uses network dao to obtain list of neuron groups and load them into hash map.
     Individual neurons are loaded separately to enable lazy loading if required.  */
 void Network::loadNeuronGroupsInfo(){
@@ -209,12 +233,6 @@ void Network::loadNeuronGroupsInfo(){
 }
 
 
-/*! Loads up the positions of all of the neurons in the group */
-void Network::loadNeurons(unsigned int neurGrpID){
-    networkDaoThread->prepareLoadNeurons(this->networkID, neurGrpMap[neurGrpID]);
-    runNetworkDaoThread();
-}
-
 
 void Network::deleteConnectionGroups(){
     //Delete all connection groups
@@ -229,4 +247,4 @@ void Network::deleteNeuronGroups(){
     for(QHash<unsigned int, NeuronGroup*>::iterator iter = neurGrpMap.begin(); iter != neurGrpMap.end(); ++iter)
 	delete iter.value();
     neurGrpMap.clear();
-}S
+}

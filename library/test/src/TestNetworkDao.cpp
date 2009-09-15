@@ -107,13 +107,13 @@ void TestNetworkDao::testGetConnectionGroupsInfo(){
 
     //Add two neuron groups
     QString queryStr = "INSERT INTO NeuronGroups (NeuralNetworkID, Name, Description, Parameters, NeuronTypeID ) VALUES (";
-    queryStr += QString::number(networkID) + ", " + "'name1', 'desc1', '" + getConnectionParameterXML() + "', 1)";
+    queryStr += QString::number(networkID) + ", " + "'name1', 'desc1', '" + getNeuronParameterXML() + "', 1)";
     query = getQuery(queryStr);
     executeQuery(query);
     unsigned int neurGrp1ID = query.lastInsertId().toUInt();
 
     queryStr = "INSERT INTO NeuronGroups (NeuralNetworkID, Name, Description, Parameters, NeuronTypeID ) VALUES (";
-    queryStr += QString::number(networkID) + ", " + "'name2', 'desc2', '" + getConnectionParameterXML() + "', 1)";
+    queryStr += QString::number(networkID) + ", " + "'name2', 'desc2', '" + getNeuronParameterXML() + "', 1)";
     query = getQuery(queryStr);
     executeQuery(query);
     unsigned int neurGrp2ID = query.lastInsertId().toUInt();
@@ -149,7 +149,7 @@ void TestNetworkDao::testGetConnectionGroupsInfo(){
     QCOMPARE(connGrpInfoList[0].getDescription(), QString("conngrpdesc1"));
     QCOMPARE(connGrpInfoList[0].getFromNeuronGroupID(), neurGrp1ID);
     QCOMPARE(connGrpInfoList[0].getToNeuronGroupID(), neurGrp2ID);
-    QCOMPARE(connGrpInfoList[0].getParameterMap()["param2"], 440.7);
+    QCOMPARE(connGrpInfoList[0].getParameterMap()["connparam2"], 1.31);
     QCOMPARE(connGrpInfoList[0].getSynapseType(), (unsigned int)1);
 
     QCOMPARE(connGrpInfoList[1].getID(), connGrp2ID);
@@ -157,6 +157,16 @@ void TestNetworkDao::testGetConnectionGroupsInfo(){
     QCOMPARE(connGrpInfoList[1].getFromNeuronGroupID(), neurGrp2ID);
     QCOMPARE(connGrpInfoList[1].getToNeuronGroupID(), neurGrp1ID);
     QCOMPARE(connGrpInfoList[1].getSynapseType(), (unsigned int)1);
+}
+
+
+void TestNetworkDao::testGetConnectionGroupSize(unsigned int connGrpID){
+    //Adds test network with known properties
+    addTestNetwork1();
+
+    NetworkDao networkDao(dbInfo);
+    unsigned int numConns = networkDao.getConnectionGroupSize(connGrp1ID);
+    QCOMPARE(numConns, (unsigned int)6);
 }
 
 
@@ -203,7 +213,7 @@ void TestNetworkDao::testGetNeuronGroupsInfo(){
     QCOMPARE(neurGrpInfoList[0].getName(), QString("name1"));
     QCOMPARE(neurGrpInfoList[0].getDescription(), QString("desc1"));
     QCOMPARE(neurGrpInfoList[0].getNeuronType(), (unsigned int)1);
-    QCOMPARE(neurGrpInfoList[0].getParameterMap()["param1"], 0.7);
+    QCOMPARE(neurGrpInfoList[0].getParameterMap()["neurparam1"], 1.63);
 
     QCOMPARE(neurGrpInfoList[1].getID(), neurGrp2ID);
     QCOMPARE(neurGrpInfoList[1].getName(), QString("name2"));
@@ -214,41 +224,6 @@ void TestNetworkDao::testGetNeuronGroupsInfo(){
     QCOMPARE(neurGrpInfoList[2].getDescription(), QString("desc3"));
 }
 
-
-
-QString TestNetworkDao::getConnectionParameterXML(){
-    QString xmlString = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>";
-    xmlString += "<connection_group_parameters>";
-    xmlString += "<parameter><name>param1</name>";
-    xmlString += "<value>0.9</value>";
-    xmlString += "</parameter>";
-    xmlString += "<parameter><name>param2</name>";
-    xmlString += "<value>440.7</value>";
-    xmlString += "</parameter>";
-    xmlString += "</connection_group_parameters>";
-    return xmlString;
-}
-
-
-
-QString TestNetworkDao::getNeuronParameterXML(){
-    QString xmlString = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>";
-    xmlString += "<neuron_group_parameters>";
-    xmlString += "<parameter><name>param1</name>";
-    xmlString += "<value>0.7</value>";
-    xmlString += "</parameter>";
-    xmlString += "<parameter><name>param2</name>";
-    xmlString += "<value>20.7</value>";
-    xmlString += "</parameter>";
-    xmlString += "</neuron_group_parameters>";
-    return xmlString;
-}
-
-/*! Adds a test network to the database */
-void TestNetworkDao::addTestNetwork1(){
-
-
-}
 
 
 

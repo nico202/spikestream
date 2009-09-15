@@ -86,6 +86,9 @@ class SpikeStreamMainWindow: public Q3MainWindow {
 
 	public slots:
 		void reloadPatterns();
+
+	signals:
+		void reload();
 	
 	
 	private slots:

@@ -18,13 +18,12 @@ class TestNetworkDao : public TestDao {
 	    void initTestCase();
 	    void testAddNetwork();
 	    void testGetConnectionGroupsInfo();
+	    void testGetConnectionGroupSize(unsigned int connGrpID);
 	    void testGetNetworksInfo();
 	    void testGetNeuronGroupsInfo();
 
 	private:
-	    void addTestNetwork1();
-	    QString getConnectionParameterXML();
-	    QString getNeuronParameterXML();
+
 };
 
 #endif//TESTNETWORKDAO_H
