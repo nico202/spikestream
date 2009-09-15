@@ -28,8 +28,9 @@ namespace spikestream {
 	    Network(const NetworkInfo& networkInfo, NetworkDao* networkDao);
 	    ~Network();
 
+	    bool connectionGroupIsLoaded(unsigned int connGrpID);
+	    unsigned int getID() { return networkInfo.getID(); }
 	    Box getMinimumBoundingBox();
-
 	    QList<unsigned int> getNeuronGroupIDs();
 	    QList<unsigned int> getConnectionGroupIDs();
 	    NeuronGroup* getNeuronGroup(unsigned int id);
@@ -38,12 +39,16 @@ namespace spikestream {
 	    ConnectionGroupInfo getConnectionGroupInfo(unsigned int id);
 	    bool isBusy();
 	    void load();
+	    void loadConnections(unsigned int connGrpId);
+	    void loadNeurons(unsigned int neurGrpID);
+	    bool neuronGroupIsLoaded(unsigned int neurGrpID);
 	    void reset();
 	    void cancel();
 	    void setNetworkDao(NetworkDao* netDao) { this->networkDao = netDao; }
 
 	private slots:
-	    void threadFinished();
+	    void connectionThreadFinished();
+	    void neuronThreadFinished();
 
 	private:
 	    //===========================  VARIABLES  ===========================
@@ -88,9 +93,7 @@ namespace spikestream {
 	    void deleteConnectionGroups();
 	    void deleteNeuronGroups();
 	    void loadConnectionGroupsInfo();
-	    void loadConnections(unsigned int connGrpId);
 	    void loadNeuronGroupsInfo();
-	    void loadNeurons(unsigned int neurGrpID);
     };
 
 }

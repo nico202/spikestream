@@ -1,10 +1,14 @@
 #include "ConnectionGroup.h"
 using namespace spikestream;
 
+#include <iostream>
+using namespace std;
+
 /*! Constructor */
 ConnectionGroup::ConnectionGroup(const ConnectionGroupInfo& connGrpInfo){
     this->info = connGrpInfo;
     connectionList = new ConnectionList();
+    loaded = false;
 }
 
 
@@ -34,4 +38,27 @@ void ConnectionGroup::clearConnections(){
 	delete *iter;
     }
     connectionList->clear();
+    fromConnectionMap.clear();
+    toConnectionMap.clear();
+    loaded = false;
 }
+
+
+/*! Returns a list of connections from the neuron with this ID.
+    Empty list is returned if neuron id cannot be found. */
+const QList<Connection*>& ConnectionGroup::getFromConnections(unsigned int neurID){
+    if(!fromConnectionMap.contains(neurID))
+	return emptyConnectionList;//Returns an empty connetion list without filling map with invalid from and to neurons
+    return fromConnectionMap[neurID];
+}
+
+
+/*! Returns a list of connections to the neuron with the specified id.
+    Exception is thrown if the neuron cannot be found. */
+const QList<Connection*>& ConnectionGroup::getToConnections(unsigned int neurID){
+   if(!toConnectionMap.contains(neurID))
+       return emptyConnectionList;//Returns an empty connetion list without filling map with invalid from and to neurons
+   return toConnectionMap[neurID];
+}
+
+

@@ -21,8 +21,8 @@ namespace spikestream {
 	    bool isLoaded() { return loaded; }
 	    void setLoaded(bool loaded) { this->loaded = loaded; }
 
-	    QList<Connection*> getFromConnections(unsigned int neurID);
-	    QList<Connection*> getToConnections(unsigned int neurID);
+	    const QList<Connection*>& getFromConnections(unsigned int neurID);
+	    const QList<Connection*>& getToConnections(unsigned int neurID);
 
 	    ConnectionGroupInfo getInfo() { return info; }
 	    ConnectionList* getConnections() { return connectionList; }
@@ -37,6 +37,10 @@ namespace spikestream {
 	    /*! List of connections between neurons.
 		Used for fast access to complete list */
 	    ConnectionList* connectionList;
+
+	    /*! This empty connection list is returned whenever there are no from or to connections
+		This avoids filling map with empty lists and avoids returning a reference to a temporary object. */
+	    ConnectionList emptyConnectionList;
 
 	    /*! Map enabling rapid access to the connections from any neuron */
 	    QHash<unsigned int, QList<Connection*> > fromConnectionMap;

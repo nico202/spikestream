@@ -17,6 +17,11 @@ NetworkDaoThread::~NetworkDaoThread(){
 }
 
 
+/*----------------------------------------------------------*/
+/*-----                 PUBLIC METHODS                 -----*/
+/*----------------------------------------------------------*/
+
+/*! Prepares to add a connection group to the database. This task is executed when the thread runs. */
 void NetworkDaoThread::prepareAddConnectionGroup(unsigned int networkID, ConnectionGroup* connGrp){
     this->networkID = networkID;
     this->connectionGroup = connGrp;
@@ -24,32 +29,40 @@ void NetworkDaoThread::prepareAddConnectionGroup(unsigned int networkID, Connect
 }
 
 
+/*! Prepares to add a neuron group to the database. This task is executed when the thread runs. */
 void NetworkDaoThread::prepareAddNeuronGroup(unsigned int networkID, NeuronGroup* neurGrp){
     this->networkID = networkID;
     this->neuronGroup = neurGrp;
     currentTask = ADD_NEURON_GROUP_TASK;
 }
 
-/*! Prepares to load connections for a list of connection groups */
+
+/*! Prepares to load connections for a list of connection groups. This task is executed when the thread runs.  */
 void NetworkDaoThread::prepareLoadConnections(QList<ConnectionGroup*>& connGrpList){
-    this->networkID = networkID;
     this->connectionGroupList = connGrpList;
     currentTask = LOAD_CONNECTIONS_TASK;
 }
 
-/*! Prepares to load connections for a single connection group */
+
+/*! Prepares to load connections for a single connection group. This task is executed when the thread runs.  */
 void NetworkDaoThread::prepareLoadConnections(ConnectionGroup* connGrp){
-    this->networkID = networkID;
     connectionGroupList.clear();
     connectionGroupList.append(connGrp);
     currentTask = LOAD_CONNECTIONS_TASK;
 }
 
 
-/*! Prepares to load neurons for a single neuron group */
-void NetworkDaoThread::prepareLoadNeurons(QList<NeuronGroup*>& neurGrpList){
-    this->networkID = networkID;
+/*! Prepares to load a list of neuron groups. This task is executed when the thread runs.  */
+void NetworkDaoThread::prepareLoadNeurons(const QList<NeuronGroup*>& neurGrpList){
     this->neuronGroupList = neurGrpList;
+    currentTask = LOAD_NEURONS_TASK;
+}
+
+
+/*! Prepares to load neurons for a single neuron group. This task is executed when the thread runs.  */
+void NetworkDaoThread::prepareLoadNeurons(NeuronGroup* neurGrp){
+    neuronGroupList.clear();
+    neuronGroupList.append(neurGrp);
     currentTask = LOAD_NEURONS_TASK;
 }
 
@@ -58,16 +71,6 @@ void NetworkDaoThread::prepareLoadNeurons(QList<NeuronGroup*>& neurGrpList){
 void NetworkDaoThread::clearError(){
     errorMessage = "";
     error = false;
-}
-
-
-/*! Exceptions do not work across threads, so errors are flagged by calling this method.
-    The invoking method is responsible for checking whether an error occurred and throwing
-    an exeption if necessary.*/
-void NetworkDaoThread::setError(QString msg){
-    errorMessage = msg;
-    error = true;
-    stopThread = true;
 }
 
 
@@ -111,6 +114,10 @@ void NetworkDaoThread::stop(){
     stopThread = true;
 }
 
+
+/*----------------------------------------------------------*/
+/*-----                PRIVATE METHODS                 -----*/
+/*----------------------------------------------------------*/
 
 /*! Adds a connection group to the network with the specified id.
     Should only work if neuron groups with the specified ids already exist in the database.
@@ -254,25 +261,42 @@ void NetworkDaoThread::loadConnections(){
 	(*iter)->clearConnections();
 
 	//Load connections into group
-	QSqlQuery query = getQuery("SELECT ConnectionID, FromNeuronID, ToNeuronID, Delay, Weight FROM Connections WHERE ConnectionGroupID = " + QString::number((*iter)->getID());    }
+	QSqlQuery query = getQuery("SELECT ConnectionID, FromNeuronID, ToNeuronID, Delay, Weight, TempWeight FROM Connections WHERE ConnectionGroupID = " + QString::number((*iter)->getID()));
+	executeQuery(query);
 	while ( query.next() ) {
 	    Connection* tmpConn = new Connection(
 			query.value(0).toUInt(),//ConnectionID
 			query.value(1).toUInt(),//FromNeuronID
 			query.value(2).toUInt(),//ToNeuronID
 			query.value(3).toString().toFloat(),//Delay
-			query.value(4).toString().toFloat()//Weight
+			query.value(4).toString().toFloat(),//Weight
+			query.value(5).toString().toFloat()//tempWeight
 	    );
 	    (*iter)->addConnection(tmpConn);
+
+	    //Quit if user cancels
+	    if(stopThread)
+		return;
 	}
 
 	//Connection group now matches the database
 	(*iter)->setLoaded(true);
+    }
 }
 
 
 void NetworkDaoThread::loadNeurons(){
 }
 
+
+
+/*! Exceptions do not work across threads, so errors are flagged by calling this method.
+    The invoking method is responsible for checking whether an error occurred and throwing
+    an exeption if necessary.*/
+void NetworkDaoThread::setError(QString msg){
+    errorMessage = msg;
+    error = true;
+    stopThread = true;
+}
 
 

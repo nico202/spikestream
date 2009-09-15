@@ -21,6 +21,7 @@ INCLUDEPATH += src \
                 src/exceptions \
                 src/nrm \
 		src/dialogs \
+		src/widgets \
                 $(SPIKESTREAM_ROOT)/library/include \
 		/usr/include/mysql \
                 /usr/local/include/mysql++ \
@@ -84,6 +85,12 @@ HEADERS += src/exceptions/NRMException.h
 SOURCES += src/exceptions/NRMException.cpp
 
 #----------------------------------------------#
+#---              widgets folder            ---#
+#----------------------------------------------#
+HEADERS += src/widgets/NetworksWidget.h
+SOURCES += src/widgets/NetworksWidget.cpp
+
+#----------------------------------------------#
 #---               src folder               ---#
 #----------------------------------------------#
 HEADERS += src/ArchiveManager.h \
@@ -139,7 +146,10 @@ HEADERS += src/ArchiveManager.h \
            src/ConnectionMatrixLoader.h \
            src/HighlightDialog.h \
            src/PluginManager.h \
-           src/Globals.h
+	   src/Globals.h \
+	   src/EventRouter.h \
+	   src/NetworkViewer_V2.h \
+	   src/NetworkDisplay.h
 
 SOURCES += src/ArchiveManager.cpp \
            src/ArchiveStatistic.cpp \
@@ -192,5 +202,8 @@ SOURCES += src/ArchiveManager.cpp \
            src/ConnectionMatrixLoader.cpp \
            src/HighlightDialog.cpp \
            src/PluginManager.cpp \
-           src/Globals.cpp
+	   src/Globals.cpp \
+	   src/EventRouter.cpp \
+	   src/NetworkViewer_V2.cpp \
+	   src/NetworkDisplay.cpp
 

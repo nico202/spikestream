@@ -63,6 +63,14 @@ QList<ConnectionGroupInfo> NetworkDao::getConnectionGroupsInfo(unsigned int netw
 }
 
 
+/*! Returns the number of connections in the specified connection group */
+unsigned int NetworkDao::getConnectionGroupSize(unsigned int connGrpID){
+    QSqlQuery query = getQuery("SELECT COUNT(*) FROM Connections WHERE ConnectionGroupID=" + QString::number(connGrpID));
+    executeQuery(query);
+    return query.value(0).toUInt();
+}
+
+
 /*! Returns a list of information about the available networks. */
 QList<NetworkInfo> NetworkDao::getNetworksInfo(){
     QSqlQuery query = getQuery("SELECT NeuralNetworkID, Name, Description, Locked FROM NeuralNetworks");
