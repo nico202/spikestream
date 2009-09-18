@@ -23,7 +23,8 @@
 #define HIGHLIGHTDIALOG_H
 
 //SpikeStream includes
-#include "NetworkViewer.h"
+#include "NetworkViewer_V2.h"
+using namespace spikestream;
 
 //Qt includes
 #include <qdialog.h>
@@ -40,7 +41,7 @@ class HighlightDialog : public QDialog {
 	Q_OBJECT
 
 	public: 
-		HighlightDialog(QWidget* parent, NetworkViewer* nwViewer);
+		HighlightDialog(QWidget* parent, NetworkViewer_V2* nwViewer);
 		~HighlightDialog();
 
 
@@ -53,7 +54,7 @@ class HighlightDialog : public QDialog {
 	private:
 		//========================= VARIABLES ==========================
 		/*! The class that displays the highlighted neurons.*/
-		NetworkViewer* networkViewer;
+		NetworkViewer_V2* networkViewer;
 
 		/*! The current highlight colour. */
 		QColor highlightColor;

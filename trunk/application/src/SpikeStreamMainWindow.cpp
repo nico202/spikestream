@@ -250,13 +250,82 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	Globals::setWorkingDirectory(defaultFileLocation);
 
 	//Set up the global event router and connect appropriate signals to this class
-	EventRouter* eventRouter = new EventRouter();
-	Globals::setEventRouter(eventRouter);
-	connect(eventRouter, SIGNAL(reloadSignal()), this, SLOT(reloadEverything()), Qt::QueuedConnection);
+	connect(Globals::getEventRouter(), SIGNAL(reloadSignal()), this, SLOT(reloadEverything()), Qt::QueuedConnection);
 
 	//Set up tester to run any code that needs testing
 	//Tester *tester = new Tester();
 	//delete tester;
+
+
+	//Actions
+	//Add OpenGL actions
+	QAction* moveUpAction = new QAction(this);
+	moveUpAction->setShortcut(QKeySequence(Qt::Key_Up));
+	connect(moveUpAction, SIGNAL(triggered()), Globals::getEventRouter(), SLOT(moveUpSlot()));
+	this->addAction(moveUpAction);
+
+	QAction* moveDownAction = new QAction(this);
+	moveDownAction->setShortcut(QKeySequence(Qt::Key_Down));
+	connect(moveDownAction, SIGNAL(triggered()), Globals::getEventRouter(), SLOT(moveDownSlot()));
+	this->addAction(moveDownAction);
+
+	QAction* moveLeftAction = new QAction(this);
+	moveLeftAction->setShortcut(QKeySequence(Qt::Key_Left));
+	connect(moveLeftAction, SIGNAL(triggered()), Globals::getEventRouter(), SLOT(moveLeftSlot()));
+	this->addAction(moveLeftAction);
+
+	QAction* moveRightAction = new QAction(this);
+	moveRightAction->setShortcut(QKeySequence(Qt::Key_Right));
+	connect(moveRightAction, SIGNAL(triggered()), Globals::getEventRouter(), SLOT(moveRightSlot()));
+	this->addAction(moveRightAction);
+
+	QAction* moveForwardAction = new QAction(this);
+	moveForwardAction->setShortcut(QKeySequence(Qt::Key_PageUp));
+	connect(moveForwardAction, SIGNAL(triggered()), Globals::getEventRouter(), SLOT(moveForwardSlot()));
+	this->addAction(moveForwardAction);
+
+	QAction* moveBackwardAction = new QAction(this);
+	moveBackwardAction->setShortcut(QKeySequence(Qt::Key_PageDown));
+	connect(moveBackwardAction, SIGNAL(triggered()), Globals::getEventRouter(), SLOT(moveBackwardSlot()));
+	this->addAction(moveBackwardAction);
+
+/*	QAction* rotateLeftAction = new QAction(this);
+	rotateLeftAction->setShortcuts(QKeySequence::Open);
+     connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
+
+		keyboardAccelerator->insertItem(Qt::Key_Up);
+	keyboardAccelerator->insertItem(Qt::Key_Down);
+	keyboardAccelerator->insertItem(Qt::Key_Left);
+	keyboardAccelerator->insertItem(Qt::Key_Right);
+	keyboardAccelerator->insertItem(Qt::CTRL + Qt::Key_Up);
+	keyboardAccelerator->insertItem(Qt::CTRL + Qt::Key_Down);
+	keyboardAccelerator->insertItem(Qt::CTRL + Qt::Key_Left);
+	keyboardAccelerator->insertItem(Qt::CTRL + Qt::Key_Right);
+	keyboardAccelerator->insertItem(Qt::SHIFT + Qt::Key_Up);
+	keyboardAccelerator->insertItem(Qt::SHIFT + Qt::Key_Down);
+	keyboardAccelerator->insertItem(Qt::SHIFT + Qt::Key_Left);
+	keyboardAccelerator->insertItem(Qt::SHIFT + Qt::Key_Right);
+	keyboardAccelerator->insertItem(Qt::ALT + Qt::Key_Up);
+	keyboardAccelerator->insertItem(Qt::ALT + Qt::Key_Down);
+	keyboardAccelerator->insertItem(Qt::ALT + Qt::Key_Left);
+	keyboardAccelerator->insertItem(Qt::ALT + Qt::Key_Right);
+	keyboardAccelerator->insertItem(Qt::CTRL + Qt::ALT + Qt::Key_Up);
+	keyboardAccelerator->insertItem(Qt::CTRL + Qt::ALT + Qt::Key_Down);
+	keyboardAccelerator->insertItem(Qt::CTRL + Qt::ALT + Qt::Key_Left);
+	keyboardAccelerator->insertItem(Qt::CTRL + Qt::ALT + Qt::Key_Right);
+	keyboardAccelerator->insertItem(Qt::CTRL + Qt::Key_R);
+	keyboardAccelerator->insertItem(Qt::CTRL + Qt::Key_Equal);
+	keyboardAccelerator->insertItem(Qt::CTRL + Qt::Key_Minus);
+
+
+
+	*/
+
+
+
+
+
+
 
 	//Set up menus. 
 	//Add file menu.
@@ -278,7 +347,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	viewMenu->insertItem("Reload patterns", this, SLOT(reloadPatterns()), Qt::CTRL+Qt::Key_P);
 
 	//Reload everything is broadcast to all classes connected to the event router
-	viewMenu->insertItem("Reload everything", eventRouter, SLOT(reloadSlot()), Qt::SHIFT+Qt::Key_F5);
+	viewMenu->insertItem("Reload everything", Globals::getEventRouter(), SLOT(reloadSlot()), Qt::SHIFT+Qt::Key_F5);
 
 	//Add tools menu for pattern manager and probe
 	Q3PopupMenu *toolsMenu = new Q3PopupMenu(this);
@@ -322,9 +391,10 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 		QMessageBox::critical( 0, "Config Error", errorString);
 	}
 
-	networkViewer = new NetworkViewer(mainSplitterWidget, splashScreen, networkDBInterface, maxAutoLoadConnGrpSize);
-	networkViewer->setMinimumSize(200, 60);
-	networkViewer->setBaseSize(700, 60);
+	//networkViewer = new NetworkViewer(mainSplitterWidget, splashScreen, networkDBInterface, maxAutoLoadConnGrpSize);
+	networkViewer2 = new NetworkViewer_V2(mainSplitterWidget);
+	networkViewer2->setMinimumSize(200, 60);
+	networkViewer2->setBaseSize(700, 60);
 
 
 	//Set up viewer tab
@@ -332,7 +402,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	Q3VBox* nwViewerPropViewBox = new Q3VBox(nwViewerPropScrollView->viewport());
 	nwViewerPropViewBox->setMinimumSize(1000,800);
 	nwViewerPropScrollView->addChild(nwViewerPropViewBox);
-	networkViewerProperties = new NetworkViewerProperties(nwViewerPropViewBox, networkViewer, networkDBInterface);
+	networkViewerProperties = new NetworkViewerProperties(nwViewerPropViewBox, networkViewer2, networkDBInterface);
 	networkViewerProperties->setMinimumSize(800, 600);
         tabWidget->addTab(nwViewerPropScrollView, "Viewer");
 
@@ -383,14 +453,14 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
         tabWidget->addTab(archiveScrollView, "Archive");
 
         //Set up analysis tab
-        AnalysisLoaderWidget* analysisLoaderWidget = new AnalysisLoaderWidget(this);
-        tabWidget->addTab(analysisLoaderWidget, "Analysis");
+       // AnalysisLoaderWidget* analysisLoaderWidget = new AnalysisLoaderWidget(this);
+	//tabWidget->addTab(analysisLoaderWidget, "Analysis");
 
 	//Set up layer widget connections
 	layerWidget->setConnectionWidget(connectionWidget);
 	
 	//Set up network viewer references
-	networkViewer->setNetworkViewerProperties((QWidget*)networkViewerProperties);
+	//networkViewer2->setNetworkViewerProperties((QWidget*)networkViewerProperties);
 
 	//Set up an accelerator to switch between the tabs
 	keyboardAccelerator = new Q3Accel( this );
@@ -408,7 +478,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	QPixmap iconPixmap(workingDirectory + "/images/spikestream_icon_64.png" );
 	setIcon(iconPixmap);
         setCentralWidget( mainSplitterWidget );
-        setWindowState(Qt::WindowMaximized);
+        //setWindowState(Qt::WindowMaximized);
 
 	//Get rid of splash screen if it is showing
 	if(splashScreen){
@@ -461,8 +531,8 @@ SpikeStreamMainWindow::~SpikeStreamMainWindow(){
 //--------------------------------------------------------------------------
 
 /*! Returns a reference to the network viewer. */
-NetworkViewer* SpikeStreamMainWindow::getNetworkViewer(){
-	return networkViewer;
+NetworkViewer_V2* SpikeStreamMainWindow::getNetworkViewer(){
+	return networkViewer2;
 }
 
 
@@ -881,7 +951,7 @@ void SpikeStreamMainWindow::reloadEverything(){
 		simulationWidget->reloadConnectionGroups();
 		networkViewerProperties->reloadConnections();
 		networkViewerProperties->reloadNeuronGroups();
-		networkViewer->reloadEverything();
+		networkViewer2->reloadEverything();
 	}
 	catch (const BadQuery& er) {// Handle any query errors
 		cerr<<"SpikeStreamMainWindow: MYSQL QUERY EXCEPTION \""<<er.what()<<"\""<<endl;

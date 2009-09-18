@@ -1,8 +1,11 @@
 #include "Globals.h"
+#include "SpikeStreamException.h"
 
 //Declare static variables
-EventRouter* Globals::eventRouter = NULL;
+EventRouter* Globals::eventRouter = new EventRouter();
 Network* Globals::network = NULL;
+NetworkDisplay* Globals::networkDisplay = new NetworkDisplay();
+bool Globals::rendering = false;
 QString Globals::spikeStreamRoot = "";
 QString Globals::workingDirectory = "";
 NetworkDao* Globals::networkDao = NULL;
@@ -31,6 +34,8 @@ void Globals::cleanUp(){
 
 /*! Returns the current network */
 Network* Globals::getNetwork(){
+    if(network == NULL)
+	throw SpikeStreamException("No network loaded. You should check that network is loaded using networkLoaded() before calling this method.");
     return network;
 }
 
@@ -39,6 +44,12 @@ Network* Globals::getNetwork(){
     SpikeStreamNetwork database */
 NetworkDao* Globals::getNetworkDao(){
     return networkDao;
+}
+
+
+/*! Returns the network display. */
+NetworkDisplay* Globals::getNetworkDisplay(){
+    return networkDisplay;
 }
 
 
@@ -52,6 +63,20 @@ QString Globals::getSpikeStreamRoot(){
 /*! Returns the working directory which is opened when loading projects, import files etc. */
 QString Globals::getWorkingDirectory(){
     return workingDirectory;
+}
+
+
+/*! Returns true if a network is loaded, false if no network exists. */
+bool Globals::networkLoaded(){
+    if(network == NULL)
+	return false;
+    return true;
+}
+
+
+/*! Returns true if OpenGL rendering is in progress */
+bool Globals::isRendering() {
+    return rendering;
 }
 
 
@@ -70,16 +95,25 @@ void Globals::setEventRouter(EventRouter* eventRouter){
 
 
 /*! Sets the network */
-void Globals::setNetwork(Network* network){
+void Globals::setNetwork(Network* net){
     //Clean up the old network if it exists
     if(Globals::network != NULL)
-	delete network;
-
-    //Reset the network display
-    networkDisplay->reset();
+	delete Globals::network;
 
     //Store reference to the new network.
-    Globals::network = network;
+    Globals::network = net;
+
+}
+
+
+/*! Sets the class controlling the display of the network */
+void Globals::setNetworkDisplay(NetworkDisplay* networkDisplay){
+    //Clean up the old network display if it exists
+    if(Globals::networkDisplay != NULL)
+	delete networkDisplay;
+
+    //Store reference to the new network display
+    Globals::networkDisplay = networkDisplay;
 }
 
 
@@ -90,6 +124,12 @@ void Globals::setNetworkDao(NetworkDao* networkDao){
 	delete networkDao;
 
     Globals::networkDao = networkDao;
+}
+
+
+/*! Sets whether the OpenGL rendering is taking place or is complete */
+void Globals::setRendering(bool rendering){
+    Globals::rendering = rendering;
 }
 
 

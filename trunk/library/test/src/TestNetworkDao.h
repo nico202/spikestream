@@ -18,7 +18,8 @@ class TestNetworkDao : public TestDao {
 	    void initTestCase();
 	    void testAddNetwork();
 	    void testGetConnectionGroupsInfo();
-	    void testGetConnectionGroupSize(unsigned int connGrpID);
+	    void testGetConnectionGroupSize();
+	    void testGetNeuronGroupBoundingBox();
 	    void testGetNetworksInfo();
 	    void testGetNeuronGroupsInfo();
 

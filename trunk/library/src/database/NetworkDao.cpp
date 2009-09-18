@@ -63,10 +63,28 @@ QList<ConnectionGroupInfo> NetworkDao::getConnectionGroupsInfo(unsigned int netw
 }
 
 
+/*! Returns a box enclosing a particular neuron group */
+Box NetworkDao::getNeuronGroupBoundingBox(unsigned int neurGrpID){
+    QSqlQuery query = getQuery("SELECT MIN(X), MIN(Y), MIN(Z), MAX(X), MAX(Y), MAX(Z) FROM Neurons WHERE NeuronGroupID = " + QString::number(neurGrpID));
+    executeQuery(query);
+    query.next();
+    Box box(
+	query.value(0).toInt(),//x1
+	query.value(1).toInt(),//y1
+	query.value(2).toInt(),//z1
+	query.value(3).toInt(),//x2
+	query.value(4).toInt(),//y2
+	query.value(5).toInt()//z2
+    );
+    return box;
+}
+
+
 /*! Returns the number of connections in the specified connection group */
 unsigned int NetworkDao::getConnectionGroupSize(unsigned int connGrpID){
     QSqlQuery query = getQuery("SELECT COUNT(*) FROM Connections WHERE ConnectionGroupID=" + QString::number(connGrpID));
     executeQuery(query);
+    query.next();
     return query.value(0).toUInt();
 }
 

@@ -121,7 +121,6 @@ HEADERS += src/ArchiveManager.h \
            src/NetworkDataXmlHandler.h \
            src/NetworkModelXmlHandler.h \
            src/NetworkMonitor.h \
-           src/NetworkViewer.h \
            src/NetworkViewerProperties.h \
            src/NeuronGroup.h \
            src/NeuronGroupHolder.h \
@@ -177,7 +176,6 @@ SOURCES += src/ArchiveManager.cpp \
            src/NetworkDataXmlHandler.cpp \
            src/NetworkModelXmlHandler.cpp \
            src/NetworkMonitor.cpp \
-           src/NetworkViewer.cpp \
            src/NetworkViewerProperties.cpp \
            src/NeuronGroupHolder.cpp \
            src/NeuronParametersDialog.cpp \

@@ -90,6 +90,7 @@
 
 /*! First valid automatically generated ID in NeuralNetwork database */
 #define START_NEURALNETWORK_ID 1
+#define INVALID_NETWORK_ID 0
 
 
 /*! First valid automatically generated ID in NeuralNetwork database */

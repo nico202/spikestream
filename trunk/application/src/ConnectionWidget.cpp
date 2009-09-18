@@ -23,7 +23,7 @@
 //SpikeStream includes
 #include "ConnectionWidget.h"
 #include "ConnectionPropertiesDialog.h"
-#include "NetworkViewer.h"
+#include "NetworkViewer_V2.h"
 #include "Debug.h"
 #include "Utilities.h"
 #include "ConnectionTableItem.h"

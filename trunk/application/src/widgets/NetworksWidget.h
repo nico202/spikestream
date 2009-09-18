@@ -2,13 +2,15 @@
 #define NETWORKSWIDGET_H
 
 //SpikeStream includes
-#include "NetworkInfo.h"
+#include "Network.h"
 using namespace spikestream;
 
 //Qt includes
 #include <QWidget>
 #include <QLayout>
 #include <QHash>
+#include <QProgressDialog>
+#include <QTimer>
 
 namespace spikestream {
 
@@ -23,8 +25,9 @@ namespace spikestream {
 	    void networkChanged();
 
 	private slots:
-	    void reloadNetworkList();
+	    void checkLoadingProgress();
 	    void loadNetwork();
+	    void reloadNetworkList();
 
 	private:
 	    //======================  VARIABLES  =====================
@@ -35,6 +38,14 @@ namespace spikestream {
 		networks to be dynamically reloaded */
 	    QGridLayout* gridLayout;
 
+	    /*! Timer to keep track of the loading of the network. */
+	    QTimer* loadingTimer;
+
+	    /*! Dialog providing feedback about the loading of the network */
+	    QProgressDialog* progressDialog;
+
+	    /*! The network that is being loaded */
+	    Network* newNetwork;
 
 	    //=======================  METHODS  ======================
 	    void loadNetwork(NetworkInfo& netInfo);

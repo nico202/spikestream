@@ -1,4 +1,5 @@
 #include "Box.h"
+#include "SpikeStreamException.h"
 using namespace spikestream;
 
 /*! Default constructor */
@@ -34,8 +35,43 @@ Box::Box(const Box& box){
 }
 
 
+/*! Assignment operator */
+Box& Box::operator=(const Box& rhs){
+    if(this == &rhs)
+	return *this;
+
+    this->x1 = rhs.x1;
+    this->y1 = rhs.y1;
+    this->z1 = rhs.z1;
+    this->x2 = rhs.x2;
+    this->y2 = rhs.y2;
+    this->z2 = rhs.z2;
+
+    return *this;
+
+}
+
 /*! Destructor */
 Box::~Box(){
+}
+
+/*! Expands the box by the specified percentage */
+void Box::expand_percent(float percent){
+    //Check input
+    if(percent < 0.0f)
+	throw SpikeStreamException("Method does not support expansion by a negative number.");
+
+    float xExpansion = (1.0f + percent / 100.0f) * (x2-x1) - (x2-x1);
+    x1 -= xExpansion / 2.0f;
+    x2 += xExpansion / 2.0f;
+
+    float yExpansion = (1.0f + percent / 100.0f) * (y2-y1) - (y2-y1);
+    y1 -= yExpansion / 2.0f;
+    y2 += yExpansion / 2.0f;
+
+    float zExpansion = (1.0f + percent / 100.0f) * (z2-z1) - (z2-z1);
+    z1 -= zExpansion / 2.0f;
+    z2 += zExpansion / 2.0f;
 }
 
 

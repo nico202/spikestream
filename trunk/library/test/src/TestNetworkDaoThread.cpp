@@ -246,7 +246,46 @@ void TestNetworkDaoThread::testLoadConnections(){
 
 
 void TestNetworkDaoThread::testLoadNeurons(){
+    //Add test network
+    addTestNetwork1();
+
+    //Create a list of neuron groups with the appropriate ids
+    NeuronGroup neurGrp1( NeuronGroupInfo(neurGrp1ID, "undefined name", "undefined desc", QHash<QString, double>(), 1) );
+    NeuronGroup neurGrp2( NeuronGroupInfo(neurGrp2ID, "undefined name", "undefined desc", QHash<QString, double>(), 1) );
+    QList<NeuronGroup*> neurGrpList;
+    neurGrpList.append(&neurGrp1);
+    neurGrpList.append(&neurGrp2);
+
+    //Check that both neuron groups are not loaded
+    QVERIFY(!neurGrp1.isLoaded());
+    QVERIFY(!neurGrp2.isLoaded());
+
+    //Load neurons associated with this neuron group
+    NetworkDaoThread networkDaoThread(dbInfo);
+    networkDaoThread.prepareLoadNeurons(neurGrpList);
+    runThread(networkDaoThread);
+
+    //Check that both neuron groups are loaded
+    QVERIFY(neurGrp1.isLoaded());
+    QVERIFY(neurGrp2.isLoaded());
+
+    //Check that neuron groups have correct number of neurons
+    QCOMPARE(neurGrp1.size(), (int)3);
+    QCOMPARE(neurGrp2.size(), (int)2);
+
+    //Check the ids and location in neuron group 1 are correct
+    QHash<unsigned int, Point3D*>* neurGrpMap = neurGrp1.getNeuronMap();
+    QCOMPARE((*neurGrpMap)[ testNeurIDList[0] ]->xPos, -1.0f);
+    QCOMPARE((*neurGrpMap)[ testNeurIDList[0] ]->zPos, -6.0f);
+    QCOMPARE((*neurGrpMap)[ testNeurIDList[2] ]->yPos, -4.0f);
+
+    //Check the ids and location in neuron group 2 are correct
+    neurGrpMap = neurGrp2.getNeuronMap();
+    QCOMPARE((*neurGrpMap)[ testNeurIDList[3] ]->xPos, 0.0f);
+    QCOMPARE((*neurGrpMap)[ testNeurIDList[3] ]->zPos, 10.0f);
+    QCOMPARE((*neurGrpMap)[ testNeurIDList[4] ]->yPos, -7.0f);
 }
+
 
 /*----------------------------------------------------------*/
 /*-----               PRIVATE METHODS                  -----*/

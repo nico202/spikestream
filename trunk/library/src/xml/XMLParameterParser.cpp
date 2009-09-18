@@ -24,7 +24,7 @@ XMLParameterParser::~XMLParameterParser(){
 /*! Parses the XML string and returns a map of parameters */
 QHash<QString, double> XMLParameterParser::getParameterMap(const QString& xmlString){
     if(xmlString == "")
-	throw SpikeStreamXMLException("XML string is invalid '" + xmlString + "'");
+	throw SpikeStreamXMLException("XML string is invalid'" + xmlString + "'");
 
     //Clear parameter map
     parameterMap.clear();

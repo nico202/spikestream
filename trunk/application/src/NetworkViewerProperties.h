@@ -24,7 +24,7 @@
 #define NETWORKVIEWERPROPERTIES_H
 
 //SpikeStream includes
-#include "NetworkViewer.h"
+#include "NetworkViewer_V2.h"
 #include "DBInterface.h"
 #include "HighlightDialog.h"
 
@@ -48,7 +48,7 @@ class NetworkViewerProperties : public QWidget {
 	Q_OBJECT
  
  	public:
- 		NetworkViewerProperties(QWidget *parent, NetworkViewer*, DBInterface*);
+		NetworkViewerProperties(QWidget *parent, NetworkViewer_V2*, DBInterface*);
 		~NetworkViewerProperties();
 		void reloadConnectionDetails();
 		void reloadConnections();
@@ -117,7 +117,7 @@ class NetworkViewerProperties : public QWidget {
 		bool betweenMode;
 
 		/*! Reference to NetworkViewer that this class controls.*/
-		NetworkViewer *networkViewer;
+		NetworkViewer_V2* networkViewer;
 
 		/*! Reference to class handling database.*/
 		DBInterface *dbInterface;

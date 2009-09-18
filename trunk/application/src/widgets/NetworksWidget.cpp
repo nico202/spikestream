@@ -83,7 +83,7 @@ void NetworksWidget::reloadNetworkList(){
     /* If the current network is in the network list, then set this as the one loaded
        Otherwise currentNetworkID is set to zero and the user has to choose the loaded network */
     unsigned int currentNetworkID = 0;
-    if(Globals::getNetwork() != NULL && networkInfoMap.contains(Globals::getNetwork()->getID())){
+    if(Globals::networkLoaded() && networkInfoMap.contains(Globals::getNetwork()->getID())){
 	currentNetworkID = Globals::getNetwork()->getID();
     }
 
@@ -136,7 +136,7 @@ void NetworksWidget::reloadNetworkList(){
     /* Load up the appropriate network
 
 	- if it is not already loaded
-    if(Globals::getNetwork() != NULL && Globals::getNetwork()->getID() != currentNetworkID){
+    if(Globals::networkLoaded() && Globals::getNetwork()->getID() != currentNetworkID){
 	loadNetwork(networkInfoMap[currentNetworkID]);
     }*/
 
@@ -166,8 +166,65 @@ void NetworksWidget::loadNetwork(NetworkInfo& netInfo){
 	return;
     }
 
-    //Create new network and store it in global scope
-    Network* newNetwork = new Network(netInfo, Globals::getNetworkDao());
+    try{
+	/* Create new network and store it in global scope.
+	   Network is set to null because an exception thrown during construction
+	   prevents object being created */
+	newNetwork = NULL;
+	newNetwork = new Network(netInfo, Globals::getNetworkDao());
+
+	//Start network loading, all the heavy work is done by separate threads
+	newNetwork->load();
+    }
+    catch (SpikeStreamException& ex){
+	qCritical()<<ex.getMessage();
+	if(newNetwork != NULL)
+	    delete newNetwork;
+	return;
+    }
+
+    //Set up progress dialog, this checks on the network every 200ms until loading is complete
+    progressDialog = new QProgressDialog("Loading network", "Abort load", 0, newNetwork->getTotalNumberOfSteps(), this);
+    progressDialog->setWindowModality(Qt::WindowModal);
+    loadingTimer  = new QTimer(this);
+    connect(loadingTimer, SIGNAL(timeout()), this, SLOT(checkLoadingProgress()));
+    loadingTimer->start(200);
+}
+
+
+
+void NetworksWidget::checkLoadingProgress(){
+    //Check for errors during loading
+    if(newNetwork->isLoadingError()){
+	loadingTimer->stop();
+	newNetwork->cancel();
+	progressDialog->setValue(progressDialog->maximum());
+	delete progressDialog;
+	qCritical()<<"Error occurred loading network: '"<<newNetwork->getLoadingErrorMessage()<<"'.";
+	return;
+    }
+
+    //Check for cancelation - stop timer and abort operation
+    else if(progressDialog->wasCanceled()){
+    	loadingTimer->stop();
+	newNetwork->cancel();
+	progressDialog->setValue(progressDialog->maximum());
+	delete progressDialog;
+	return;
+    }
+
+    //If networks is busy, update progress bar and return with loading timer still running
+    else if(newNetwork->isBusy()){
+	progressDialog->setValue(newNetwork->getNumberOfCompletedSteps());
+	return;
+    }
+
+    //If we have reached this point, loading is complete
+    loadingTimer->stop();
+    progressDialog->setValue(progressDialog->maximum());
+    delete progressDialog;
+
+    //Store network in global scope
     Globals::setNetwork(newNetwork);
 
     //Use event router to inform other classes that the network has changed.
@@ -177,6 +234,7 @@ void NetworksWidget::loadNetwork(NetworkInfo& netInfo){
 	Should not lead to an infinite loop because network in Globals
 	should match one in the list returned from the database */
     reloadNetworkList();
+
 }
 
 
@@ -197,19 +255,19 @@ void NetworksWidget::reset(){
     for(int i=0; i<networkInfoMap.size(); ++i){
 	QLayoutItem* item = gridLayout->itemAtPosition(i, 0);
 	if(item != 0){
-	    delete item->widget();
+	    item->widget()->deleteLater();
 	}
 	item = gridLayout->itemAtPosition(i, 1);
 	if(item != 0){
-	    delete item->widget();
+	    item->widget()->deleteLater();
 	}
 	item = gridLayout->itemAtPosition(i, 3);
 	if(item != 0){
-	    delete item->widget();
+	    item->widget()->deleteLater();
 	}
 	item = gridLayout->itemAtPosition(i, 4);
 	if(item != 0){
-	    delete item->widget();
+	    item->widget()->deleteLater();
 	}
     }
     networkInfoMap.clear();

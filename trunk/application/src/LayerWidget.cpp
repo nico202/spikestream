@@ -22,7 +22,7 @@
  
 //SpikeStream includes
 #include "LayerWidget.h"
-#include "NetworkViewer.h"
+#include "NetworkViewer_V2.h"
 #include "LayerPropertiesDialog.h"
 #include "Debug.h"
 #include "Utilities.h"

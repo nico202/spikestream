@@ -14,6 +14,8 @@ namespace spikestream {
 	public:
 	    NeuronGroup(const NeuronGroupInfo& info);
 	    ~NeuronGroup();
+	    void addNeuron(float xPos, float yPos, float zPos);
+	    void clearNeurons();
 	    bool contains(unsigned int neurID, float x, float y, float z);
 	    unsigned int getID() { return info.getID(); }
 	    NeuronGroupInfo getInfo() {return info;}
@@ -23,6 +25,7 @@ namespace spikestream {
 	    void setLoaded(bool loaded) { this->loaded = loaded; }
 	    void setID(unsigned int id){ info.setID(id); }
 	    void setNeuronMap(NeuronMap* newMap) { this->neuronMap = newMap; }
+	    int size();
 
 	 private:
 	    //==========================  VARIABLES  =========================

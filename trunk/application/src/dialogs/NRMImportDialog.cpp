@@ -56,10 +56,37 @@ NRMImportDialog::~NRMImportDialog(){
 
 /*! Builds the network based on the information stored in the dialog and entered by the user */
 void NRMImportDialog::addNetwork(){
-    //Validate the input fields - should contain integers
+    //Create network
+    Network* network = new Network(Globals::getNetworkDao());
 
-    //
+    //Get the input and neural layers
+    QList<NRMInputLayer*> inputList = fileLoader->getNetwork()->getAllInputs();
+    QList<NRMNeuralLayer*> neuralList = fileLoader->getNetwork()->getAllNeuralLayers();
 
+    /* Work through input and neural layers in the same way as was done when adding them to the
+	page in addLayersToPage2() method */
+    for(int i=0; i<inputList.size(); ++i){
+
+	//Add neuron
+	QWidget* lineEdit = layerLocationGrid->itemAtPosition(rowCount, page2XCol).widget();
+	int neurXPos = getInt(lineEdit->text());
+	lineEdit = layerLocationGrid->itemAtPosition(rowCount, page2YCol).widget();
+	int neurYPos = getInt(lineEdit->text());
+	lineEdit = layerLocationGrid->itemAtPosition(rowCount, page2ZCol).widget();
+	int neurZPos = getInt(lineEdit->text());
+
+	//Add neuron to group
+	tmpNeurGrp->addNeuron(neurXPos, neurYPos, neurZPos);
+
+	//Add neuron group to network - this adds the neuron group to the database as well
+	network->addNeuronGroup(tmpNeurGrp);
+    }
+
+
+    //Extract the X, Y and Z positions. Validate the input fields - should contain integers
+
+    //Clean up network from memory - this does not affect the network stored in the database
+    delete network;
 }
 
 
@@ -227,63 +254,45 @@ void NRMImportDialog::addLayersToPage2(){
     QList<NRMInputLayer*> inputList = fileLoader->getNetwork()->getAllInputs();
     QList<NRMNeuralLayer*> neuralList = fileLoader->getNetwork()->getAllNeuralLayers();
 
-    /* Default option is to place layers in a column with a spacing of ten between each layer
-	Start by finding the maximum width and heigth of a layer */
-    unsigned int maxWidth = 0, maxHeight = 0, layerCount = 0;
-    for(int i=0; i<inputList.size(); ++i){
-	++layerCount;
-	if(inputList[i]->width > maxWidth)
-	    maxWidth = inputList[i]->width;
-	if(inputList[i]->height > maxHeight)
-	    maxHeight = inputList[i]->height;
-    }
-    for(int i=0; i<neuralList.size(); ++i){
-	++layerCount;
-	if(neuralList[i]->width > maxWidth)
-	    maxWidth = neuralList[i]->width;
-	if(neuralList[i]->height > maxHeight)
-	    maxHeight = neuralList[i]->height;
-    }
-
-    //Check that there are no neurons in the proposed import volume
-    Box box(0, 0, 0, maxWidth, maxHeight, layerCount*10);
-    unsigned int neurCount = 1;
-   /* while(neurCount != 0){
-	neurCount = Globals::getNetworkDao()->countNeuronsInVolume(box);
-	if(neurCount != 0){
-	    box.translate(10, 0, 0);
-	}
-    }*/
+    //Variables for addition of layers to dialog
+    int rowCount = 0, tmpXPos = 1, tmpYPos = 1, tmpZPos = 1;
 
     //Add input layers to grid layout.
-    int rowCount = 0;
     for(int i=0; i<inputList.size(); ++i){
+	//Add widgets to grid
 	layerLocationGrid->addWidget(new QLabel( QString::number(inputList[i]->frameNum) ), rowCount, 0);
 	layerLocationGrid->addWidget(new QLabel( inputList[i]->frameName.data() ), rowCount, 1);
 	QString sizeStr = "(" + QString::number(inputList[i]->width) + "x" + QString::number(inputList[i]->height) + "):";
 	layerLocationGrid->addWidget(new QLabel(sizeStr), rowCount, 2);//size
 	layerLocationGrid->addWidget(new QLabel(" x="), rowCount, 3);//size
-	layerLocationGrid->addWidget(new QLineEdit( QString::number(box.getX1()) ), rowCount, 4);//x location
+	layerLocationGrid->addWidget(new QLineEdit( QString::number(tmpXPos) ), rowCount, page2XCol);//x location
 	layerLocationGrid->addWidget(new QLabel(" y="), rowCount, 5);//size
-	layerLocationGrid->addWidget(new QLineEdit( QString::number(box.getY1()) ), rowCount, 6);//y location
+	layerLocationGrid->addWidget(new QLineEdit( QString::number(tmpYPos) ), rowCount, page2YCol);//y location
 	layerLocationGrid->addWidget(new QLabel(" z="), rowCount, 7);//size
-	layerLocationGrid->addWidget(new QLineEdit( QString::number(box.getZ1()) ), rowCount, 8);//z location
+	layerLocationGrid->addWidget(new QLineEdit( QString::number(tmpZPos) ), rowCount, page2ZCol);//z location
 	++rowCount;
+
+	//Calculate next proposed insertion position
+	tmpXPos += inputList[i]->width + 2;
     }
 
     //Add neural layers to grid layout.
     for(int i=0; i<neuralList.size(); ++i){
+	//Add widgets to grid
 	layerLocationGrid->addWidget(new QLabel( QString::number(neuralList[i]->frameNum) ), rowCount, 0);
 	layerLocationGrid->addWidget(new QLabel( neuralList[i]->frameName.data() ), rowCount, 1);
 	QString sizeStr = "(" + QString::number(neuralList[i]->width) + "x" + QString::number(neuralList[i]->height) + "):";
 	layerLocationGrid->addWidget(new QLabel(sizeStr), rowCount, 2);//size
 	layerLocationGrid->addWidget(new QLabel(" x="), rowCount, 3);//size
-	layerLocationGrid->addWidget(new QLineEdit( QString::number(box.getX1()) ), rowCount, 4);//x location
+	layerLocationGrid->addWidget(new QLineEdit( QString::number(tmpXPos) ), rowCount, 4);//x location
 	layerLocationGrid->addWidget(new QLabel(" y="), rowCount, 5);//size
-	layerLocationGrid->addWidget(new QLineEdit( QString::number(box.getY1()) ), rowCount, 6);//y location
+	layerLocationGrid->addWidget(new QLineEdit( QString::number(tmpYPos) ), rowCount, 6);//y location
 	layerLocationGrid->addWidget(new QLabel(" z="), rowCount, 7);//size
-	layerLocationGrid->addWidget(new QLineEdit( QString::number(box.getZ1()) ), rowCount, 8);//z location
+	layerLocationGrid->addWidget(new QLineEdit( QString::number(tmpZPos) ), rowCount, 8);//z location
 	++rowCount;
+
+	//Calculate next proposed insertion position
+	tmpXPos += neuralList[i]->width + 2;
     }
 }
 

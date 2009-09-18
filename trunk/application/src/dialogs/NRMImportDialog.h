@@ -77,6 +77,15 @@ class NRMImportDialog : public QDialog {
 	/*! Runs as a separate thread to load a NRM network into the database */
 	NRMDataImporter* dataImporter;
 
+	/*! Location of the x QLineEdit widget */
+	int page2XCol = 4;
+
+	/*! Location of the y QLineEdit widget */
+	int page2YCol = 6;
+
+	/*! Location of the z QLineEdit widget */
+	int page2ZCol = 8;
+
 
 	//=======================  METHODS  =========================
 	void addLayersToPage2();

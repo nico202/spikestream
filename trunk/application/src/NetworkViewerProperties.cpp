@@ -43,7 +43,7 @@ using namespace mysqlpp;
 
 
 /*! Constructor. */
-NetworkViewerProperties::NetworkViewerProperties(QWidget *parent, NetworkViewer *nwViewer, DBInterface *dbInter) : QWidget(parent, "Network Viewer Properties"){
+NetworkViewerProperties::NetworkViewerProperties(QWidget *parent, NetworkViewer_V2 *nwViewer, DBInterface *dbInter) : QWidget(parent, "Network Viewer Properties"){
 
 	//Store reference to the networkViewer and dbInterface
 	networkViewer = nwViewer;

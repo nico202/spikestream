@@ -6,6 +6,8 @@
 #include "EventRouter.h"
 #include "NetworkDao.h"
 #include "Network.h"
+#include "NetworkDisplay.h"
+#include "NetworkViewer_V2.h"
 using namespace spikestream;
 
 //Qt includes
@@ -17,13 +19,17 @@ class Globals {
     static EventRouter* getEventRouter() {return eventRouter; }
     static Network* getNetwork();
     static NetworkDao* getNetworkDao();
+    static NetworkDisplay* getNetworkDisplay();
     static QString getSpikeStreamRoot();
     static QString getWorkingDirectory();
+    static bool isRendering();
+    static bool networkLoaded();
 
     /* Friend classes that are allowed to change the state of Globals
 	by accessing private setter methods*/
     friend class SpikeStreamMainWindow;
     friend class spikestream::NetworksWidget;
+    friend class spikestream::NetworkViewer_V2;
 
   private:
     //=====================  VARIABLES ============================
@@ -40,14 +46,22 @@ class Globals {
     /*! The current network that is being viewed, edited, etc. */
     static Network* network;
 
+    /*! Class controlling how the current network is displayed */
+    static NetworkDisplay* networkDisplay;
+
     /*! Router for application-wide events */
     static EventRouter* eventRouter;
 
+    /*! Records when rendering is in progress */
+    static bool rendering;
+
 
     //======================  METHODS  ============================
+    static void setNetworkDisplay(NetworkDisplay* networkDisplay);
     static void setEventRouter(EventRouter* eventRouter);
     static void setNetworkDao(NetworkDao* networkDao);
     static void setNetwork(Network* network);
+    static void setRendering(bool rendering);
     static void setSpikeStreamRoot(QString rootDir);
     static void setWorkingDirectory(QString workingDir);
 

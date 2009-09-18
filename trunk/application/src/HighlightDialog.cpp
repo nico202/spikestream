@@ -36,9 +36,12 @@
 #include <Q3HBoxLayout>
 #include <Q3VBoxLayout>
 
+#include <iostream>
+using namespace std;
+
 
 /*! Constructor. */
-HighlightDialog::HighlightDialog(QWidget* parent, NetworkViewer* nwViewer) : QDialog(parent) {
+HighlightDialog::HighlightDialog(QWidget* parent, NetworkViewer_V2* nwViewer) : QDialog(parent) {
 	//Store references
 	networkViewer = nwViewer;
 
