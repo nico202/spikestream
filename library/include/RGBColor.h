@@ -3,9 +3,17 @@
 
 namespace spikestream {
 
-    /*! A simple RGB color struct used to hold the highlight colour.
-	    Use this instead of QColor to minimise space. */
-    struct RGBColor {
+    /*! A simple RGB color class. */
+    class RGBColor {
+	public:
+	    //=======================  METHODS  ========================
+	    RGBColor();
+	    RGBColor(float red, float green, float blue);
+	    RGBColor(const RGBColor& rgbColor);
+	    RGBColor& operator=(const RGBColor& rhs);
+	    void set(float red, float green, float blue);
+
+	    //======================  VARIABLES  =======================
 	    float red;
 	    float green;
 	    float blue;

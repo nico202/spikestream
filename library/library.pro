@@ -45,7 +45,8 @@ SOURCES = src/ConfigLoader.cpp \
             src/PatternTypes.cpp \
             src/PerformanceTimer.cpp \
 	    src/Box.cpp \
-            src/Utilities.cpp
+	    src/Utilities.cpp \
+	    src/RGBColor.cpp
 
 #----------------------------------------------#
 #---               database                 ---#

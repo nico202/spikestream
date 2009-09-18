@@ -3,6 +3,7 @@
 
 //SpikeStream includes
 #include "AbstractDao.h"
+#include "Box.h"
 #include "ConnectionGroup.h"
 #include "ConnectionGroupInfo.h"
 #include "NetworkInfo.h"
@@ -26,7 +27,7 @@ namespace spikestream{
 
 	    void addNetwork(NetworkInfo& netInfo);
 	    unsigned int getConnectionGroupSize(unsigned int connGrpID);
-
+	    Box getNeuronGroupBoundingBox(unsigned int neurGrpID);
 	    QList<NetworkInfo> getNetworksInfo();
 	    QList<NeuronGroupInfo> getNeuronGroupsInfo(unsigned int networkID);
 	    QList<ConnectionGroupInfo> getConnectionGroupsInfo(unsigned int networkID);

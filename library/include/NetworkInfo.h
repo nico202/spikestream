@@ -20,6 +20,8 @@ namespace spikestream{
 	    bool isLocked(){ return locked; }
 	    void setID(unsigned int id) { this->id = id; }
 	    void setLocked(bool locked) { this->locked = locked; }
+	    void setName(const QString& name) { this->name = name; }
+	    void setDescription(const QString& description) { this->description = description; }
 
 	private:
 	    /*! Id of the network in SpikeStreamNetwork database */

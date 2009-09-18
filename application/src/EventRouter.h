@@ -14,12 +14,28 @@ namespace spikestream {
 	public:
 
 	signals:
+	    //OpenGL signals
+	    void moveBackwardSignal();
+	    void moveForwardSignal();
+	    void moveUpSignal();
+	    void moveDownSignal();
+	    void moveLeftSignal();
+	    void moveRightSignal();
+
 	    void networkChangedSignal();
 	    void networkDisplayChangedSignal();
 	    void reloadSignal();
 
 	private slots:
-	    void networkChangedSlot() { emit networkChangedSignal(); emit networkDisplayChangedSignal(); }
+	    //OpenGL slots
+	    void moveBackwardSlot() { emit moveBackwardSignal(); }
+	    void moveForwardSlot() { emit moveForwardSignal(); }
+	    void moveUpSlot() { emit moveUpSignal(); }
+	    void moveDownSlot() { emit moveDownSignal(); }
+	    void moveLeftSlot() { emit moveLeftSignal(); }
+	    void moveRightSlot() { emit moveRightSignal(); }
+
+	    void networkChangedSlot() { emit networkChangedSignal(); }
 	    void networkDisplayChangedSlot() { emit networkDisplayChangedSignal(); }
 	    void reloadSlot() { emit reloadSignal(); }
 

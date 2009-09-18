@@ -1,6 +1,7 @@
 
 //SpikeStream includes
 #include "TestRunner.h"
+#include "TestNetwork.h"
 #include "TestNetworkDao.h"
 #include "TestNetworkDaoThread.h"
 #include "TestXMLParameterParser.h"
@@ -19,6 +20,9 @@ void TestRunner::runTests(){
 
     TestXMLParameterParser testXMLParameterParser;
     QTest::qExec(&testXMLParameterParser);
+
+    TestNetwork testNework;
+    QTest::qExec(&testNework);
 }
 
 

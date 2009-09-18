@@ -24,14 +24,15 @@ HEADERS += src/TestRunner.h \
 	    src/TestDao.h \
 	    src/TestNetworkDao.h \
 	    src/TestNetworkDaoThread.h \
-	    src/TestXMLParameterParser.h
+	    src/TestXMLParameterParser.h \
+	    src/TestNetwork.h
 
 SOURCES += src/Main.cpp \
 	    src/TestRunner.cpp \
 	    src/TestDao.cpp \
 	    src/TestNetworkDao.cpp \
 	    src/TestNetworkDaoThread.cpp \
-	    src/TestXMLParameterParser.cpp
-
+	    src/TestXMLParameterParser.cpp \
+	    src/TestNetwork.cpp
 
 

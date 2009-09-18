@@ -23,47 +23,83 @@ NetworkDaoThread::~NetworkDaoThread(){
 
 /*! Prepares to add a connection group to the database. This task is executed when the thread runs. */
 void NetworkDaoThread::prepareAddConnectionGroup(unsigned int networkID, ConnectionGroup* connGrp){
+    //Store necessary variables
     this->networkID = networkID;
     this->connectionGroup = connGrp;
+
+    //Set the task that will run when the thread starts
     currentTask = ADD_CONNECTION_GROUP_TASK;
+
+    //Record the total number of steps that the task involves
+    totalNumberOfSteps = 1;
 }
 
 
 /*! Prepares to add a neuron group to the database. This task is executed when the thread runs. */
 void NetworkDaoThread::prepareAddNeuronGroup(unsigned int networkID, NeuronGroup* neurGrp){
+    //Store necessary variables
     this->networkID = networkID;
     this->neuronGroup = neurGrp;
+
+    //Set the task that will run when the thread starts
     currentTask = ADD_NEURON_GROUP_TASK;
+
+    //Record the total number of steps that the task involves
+    totalNumberOfSteps = 1;
 }
 
 
 /*! Prepares to load connections for a list of connection groups. This task is executed when the thread runs.  */
 void NetworkDaoThread::prepareLoadConnections(QList<ConnectionGroup*>& connGrpList){
+    //Store necessary variables
     this->connectionGroupList = connGrpList;
+
+    //Set the taks that will run when the thread starts
     currentTask = LOAD_CONNECTIONS_TASK;
+
+    //Record the total number of steps that the task involves
+    totalNumberOfSteps = connGrpList.size();
 }
 
 
 /*! Prepares to load connections for a single connection group. This task is executed when the thread runs.  */
 void NetworkDaoThread::prepareLoadConnections(ConnectionGroup* connGrp){
+    //Store necessary variables
     connectionGroupList.clear();
     connectionGroupList.append(connGrp);
+
+    //Set the task that will run when the thread starts
     currentTask = LOAD_CONNECTIONS_TASK;
+
+    //Record the total number of steps that the task involves
+    totalNumberOfSteps = 1;
 }
 
 
 /*! Prepares to load a list of neuron groups. This task is executed when the thread runs.  */
 void NetworkDaoThread::prepareLoadNeurons(const QList<NeuronGroup*>& neurGrpList){
+    //Store necessary variables
     this->neuronGroupList = neurGrpList;
+
+    //Set the task that will run when the thread starts
     currentTask = LOAD_NEURONS_TASK;
+
+    //Record the total number of steps that the task involves
+    totalNumberOfSteps = neurGrpList.size();
 }
 
 
 /*! Prepares to load neurons for a single neuron group. This task is executed when the thread runs.  */
 void NetworkDaoThread::prepareLoadNeurons(NeuronGroup* neurGrp){
+    //Store necessary variables
     neuronGroupList.clear();
     neuronGroupList.append(neurGrp);
+
+    //Set the task that will run when the thread starts
     currentTask = LOAD_NEURONS_TASK;
+
+    //Record the total number of steps that the task involves
+    totalNumberOfSteps = 1;
 }
 
 
@@ -79,6 +115,7 @@ void NetworkDaoThread::clearError(){
 void NetworkDaoThread::run(){
     stopThread = false;
     clearError();
+    numberOfCompletedSteps = 0;
 
     //Connect to the database now that we are in a separate thread
     connectToDatabase();
@@ -224,9 +261,9 @@ void NetworkDaoThread::addNeuronGroup(){
     for(NeuronMap::iterator iter=neurMap->begin(); iter != mapEnd; ++iter){
 	QString queryStr("INSERT INTO Neurons (NeuronGroupID, X, Y, Z) VALUES (");
 	queryStr += QString::number(neuronGroup->getID()) + ", ";
-	queryStr += QString::number(iter.value()->x) + ", ";
-	queryStr += QString::number(iter.value()->y) + ", ";
-	queryStr += QString::number(iter.value()->z) + ")";
+	queryStr += QString::number(iter.value()->xPos) + ", ";
+	queryStr += QString::number(iter.value()->yPos) + ", ";
+	queryStr += QString::number(iter.value()->zPos) + ")";
 	query = getQuery(queryStr);
 	executeQuery(query);
 
@@ -286,6 +323,34 @@ void NetworkDaoThread::loadConnections(){
 
 
 void NetworkDaoThread::loadNeurons(){
+    //Work through all the neurons to be loaded
+    for(QList<NeuronGroup*>::iterator iter = neuronGroupList.begin(); iter != neuronGroupList.end(); ++iter){
+
+	//Empty current connections in group
+	(*iter)->clearNeurons();
+
+	//Get pointer to neuron map
+	NeuronMap* tmpNeurMap = (*iter)->getNeuronMap();
+
+	//Load neurons into group
+	QSqlQuery query = getQuery("SELECT NeuronID, X, Y, Z FROM Neurons WHERE NeuronGroupID = " + QString::number((*iter)->getID()));
+	executeQuery(query);
+	while ( query.next() ) {
+	    Point3D* tmpPoint = new Point3D(
+			query.value(1).toString().toFloat(),//X
+			query.value(2).toString().toFloat(),//Y
+			query.value(3).toString().toFloat()//Z
+	    );
+	    (*tmpNeurMap)[query.value(0).toUInt()] = tmpPoint;
+
+	    //Quit if user cancels
+	    if(stopThread)
+		return;
+	}
+
+	//Neuron group now matches the database
+	(*iter)->setLoaded(true);
+    }
 }
 
 

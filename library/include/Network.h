@@ -25,12 +25,19 @@ namespace spikestream {
 	Q_OBJECT
 
 	public:
+	    Network(NetworkDao* networkDao);
 	    Network(const NetworkInfo& networkInfo, NetworkDao* networkDao);
 	    ~Network();
 
 	    bool connectionGroupIsLoaded(unsigned int connGrpID);
-	    unsigned int getID() { return networkInfo.getID(); }
-	    Box getMinimumBoundingBox();
+	    unsigned int getID() { return info.getID(); }
+	    Box getBoundingBox();
+	    void clearLoadingError() { loadingError = false; loadingErrorMessage = ""; }
+	    bool isLoadingError() { return loadingError; }
+	    QString getLoadingErrorMessage() { return  loadingErrorMessage; }
+	    Box getNeuronGroupBoundingBox(unsigned int neurGrpID);
+	    int getTotalNumberOfSteps() { return totalNumberOfSteps; }
+	    int getNumberOfCompletedSteps();
 	    QList<unsigned int> getNeuronGroupIDs();
 	    QList<unsigned int> getConnectionGroupIDs();
 	    NeuronGroup* getNeuronGroup(unsigned int id);
@@ -39,12 +46,14 @@ namespace spikestream {
 	    ConnectionGroupInfo getConnectionGroupInfo(unsigned int id);
 	    bool isBusy();
 	    void load();
-	    void loadConnections(unsigned int connGrpId);
-	    void loadNeurons(unsigned int neurGrpID);
 	    bool neuronGroupIsLoaded(unsigned int neurGrpID);
-	    void reset();
 	    void cancel();
 	    void setNetworkDao(NetworkDao* netDao) { this->networkDao = netDao; }
+	    int size();
+
+	    void setName(const QString& name) { this->info.setName(name); }
+	    void setDescription(const QString& description) { this->info.setDescription(description); }
+
 
 	private slots:
 	    void connectionThreadFinished();
@@ -53,7 +62,7 @@ namespace spikestream {
 	private:
 	    //===========================  VARIABLES  ===========================
 	    /*! Information about the network */
-	    NetworkInfo networkInfo;
+	    NetworkInfo info;
 
 	    /*! Access to the database layer. Stored here to enable dynamic loading
 		of neurons and connections on request.
@@ -65,9 +74,6 @@ namespace spikestream {
 
 	    /*! Hash map of the connection groups in the network */
 	    QHash<unsigned int, ConnectionGroup*> connGrpMap;
-
-	    /*! The database ID of the network */
-	    unsigned int networkID;
 
 	    /*! Whether the network is editable or not. Networks are locked when they are associated
 		with archived data and have to be copied to be editable again */
@@ -86,6 +92,15 @@ namespace spikestream {
 	    /*! NetworkDaoThread to run in the background and handle connection loading. */
 	    NetworkDaoThread* connectionNetworkDaoThread;
 
+	    /*! The total number of steps that the task involves. */
+	    int totalNumberOfSteps;
+
+	    /*! Set to true when there is an error loading  */
+	    bool loadingError;
+
+	    /*! Loading error message */
+	    QString loadingErrorMessage;
+
 
 	    //============================  METHODS  ==============================
 	    void checkNeuronGroupID(unsigned int id);
@@ -94,6 +109,7 @@ namespace spikestream {
 	    void deleteNeuronGroups();
 	    void loadConnectionGroupsInfo();
 	    void loadNeuronGroupsInfo();
+
     };
 
 }

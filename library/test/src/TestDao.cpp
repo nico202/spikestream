@@ -100,11 +100,11 @@ void TestDao::addTestNetwork1(){
 
     //Add neurons to the groups, storing database id in testNeurIDList
     testNeurIDList.clear();
-    testNeurIDList.append(addTestNeuron(neurGrp1ID, 0, 0, 0));
-    testNeurIDList.append(addTestNeuron(neurGrp1ID, 0, 1, 0));
-    testNeurIDList.append(addTestNeuron(neurGrp1ID, 1, 1, 0));
-    testNeurIDList.append(addTestNeuron(neurGrp2ID, 0, 0, 10));
-    testNeurIDList.append(addTestNeuron(neurGrp2ID, 1, 1, 10));
+    testNeurIDList.append(addTestNeuron(neurGrp1ID, -1, -5, -6));
+    testNeurIDList.append(addTestNeuron(neurGrp1ID, 0, -1, 0));
+    testNeurIDList.append(addTestNeuron(neurGrp1ID, 9, -4, 0));
+    testNeurIDList.append(addTestNeuron(neurGrp2ID, 0, -1, 10));
+    testNeurIDList.append(addTestNeuron(neurGrp2ID, -3, -7, 5));
 
     //Add test connections
     testConnIDList.append(addTestConnection(connGrp1ID, testNeurIDList[0], testNeurIDList[1], 0.1, 1.1));
