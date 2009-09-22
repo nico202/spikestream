@@ -24,6 +24,7 @@ namespace spikestream {
 
 	    void networkChangedSignal();
 	    void networkDisplayChangedSignal();
+	    void networkListChangedSignal();
 	    void reloadSignal();
 
 	private slots:
@@ -37,6 +38,7 @@ namespace spikestream {
 
 	    void networkChangedSlot() { emit networkChangedSignal(); }
 	    void networkDisplayChangedSlot() { emit networkDisplayChangedSignal(); }
+	    void networkListChangedSlot() { emit networkListChangedSignal(); }
 	    void reloadSlot() { emit reloadSignal(); }
 
     };

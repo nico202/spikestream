@@ -3,11 +3,13 @@
 #include "NetworkDao.h"
 #include "NetworksWidget.h"
 #include "SpikeStreamException.h"
+#include "Util.h"
 using namespace spikestream;
 
 //Qt includes
 #include <QDebug>
 #include <QLabel>
+#include <QMessageBox>
 #include <QPushButton>
 
 #include <iostream>
@@ -26,6 +28,7 @@ NetworksWidget::NetworksWidget(QWidget* parent) : QWidget(parent){
     gridLayout->setColumnMinimumWidth(2, 50);//Spacer
     gridLayout->setColumnMinimumWidth(3, 250);//Description
     gridLayout->setColumnMinimumWidth(4, 100);//Load button
+    gridLayout->setColumnMinimumWidth(5, 100);//Delete button
 
     QHBoxLayout* gridLayoutHolder = new QHBoxLayout();
     gridLayoutHolder->addLayout(gridLayout);
@@ -33,12 +36,14 @@ NetworksWidget::NetworksWidget(QWidget* parent) : QWidget(parent){
     verticalBox->addLayout(gridLayoutHolder);
 
     //Load the network into the grid layout
-    reloadNetworkList();
+    loadNetworkList();
 
     verticalBox->addStretch(10);
 
     //Connect to global reload signal
-    connect(Globals::getEventRouter(), SIGNAL(reloadSignal()), this, SLOT(reloadNetworkList()), Qt::QueuedConnection);
+    connect(Globals::getEventRouter(), SIGNAL(reloadSignal()), this, SLOT(loadNetworkList()), Qt::QueuedConnection);
+    connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(loadNetworkList()), Qt::QueuedConnection);
+    connect(Globals::getEventRouter(), SIGNAL(networkListChangedSignal()), this, SLOT(loadNetworkList()), Qt::QueuedConnection);
     connect(this, SIGNAL(networkChanged()), Globals::getEventRouter(), SLOT(networkChangedSlot()), Qt::QueuedConnection);
 }
 
@@ -52,7 +57,48 @@ NetworksWidget::~NetworksWidget(){
 /*-----                 PRIVATE SLOTS                  -----*/
 /*----------------------------------------------------------*/
 
-void NetworksWidget::reloadNetworkList(){
+/*! Deletes a network */
+void NetworksWidget::deleteNetwork(){
+    //Get the ID of the network to be deleted
+    unsigned int networkID = Util::getUInt(sender()->objectName());
+    if(!networkInfoMap.contains(networkID)){
+	qCritical()<<"Network with ID "<<networkID<<" cannot be found.";
+	return;
+    }
+
+    //Confirm that user wants to take this action.
+    QMessageBox msgBox;
+    msgBox.setText("Deleting Network");
+    msgBox.setInformativeText("Are you sure that you want to delete network with ID " + QString::number(networkID) + "? This step cannot be undone.");
+    msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+    msgBox.setDefaultButton(QMessageBox::Cancel);
+    int ret = msgBox.exec();
+    if(ret != QMessageBox::Ok)
+	return;
+
+    //Delete the network from the database
+    try{
+	Globals::getNetworkDao()->deleteNetwork(networkID);
+    }
+    catch(SpikeStreamException& ex){
+	qCritical()<<"Exception thrown when deleting network.";
+    }
+
+    /* If we have deleted the current network, use event router to inform other classes that the network has changed.
+       This will automatically reload the network list. */
+    if(Globals::networkLoaded() && Globals::getNetwork()->getID() == networkID){
+	Globals::setNetwork(NULL);
+	emit networkChanged();
+    }
+
+    //Otherwise, just reload the network list
+    else{
+	loadNetworkList();
+    }
+}
+
+
+void NetworksWidget::loadNetworkList(){
     //Reset widget
     reset();
 
@@ -95,10 +141,15 @@ void NetworksWidget::reloadNetworkList(){
 	QLabel* nameLabel = new QLabel(networkInfoList[i].getName());
 	QLabel* descriptionLabel = new QLabel(networkInfoList[i].getDescription());
 
-	//Create the button and name it with the object id so we can tell which button was invoked
+	//Create the load button and name it with the object id so we can tell which button was invoked
 	QPushButton* loadButton = new QPushButton("Load");
 	loadButton->setObjectName(QString::number(networkInfoList[i].getID()));
-	connect ( loadButton, SIGNAL(clicked()), this, SLOT( loadNetwork() ) );//networkInfoList[i].getID()
+	connect ( loadButton, SIGNAL(clicked()), this, SLOT( loadNetwork() ) );
+
+	//Create the delete button and name it with the object id so we can tell which button was invoked
+	QPushButton* deleteButton = new QPushButton("Delete");
+	deleteButton->setObjectName(QString::number(networkInfoList[i].getID()));
+	connect ( deleteButton, SIGNAL(clicked()), this, SLOT( deleteNetwork() ) );
 
 	//Set labels and buttons depending on whether it is the current network
 	if(currentNetworkID == networkInfoList[i].getID()){
@@ -130,16 +181,8 @@ void NetworksWidget::reloadNetworkList(){
 	gridLayout->addWidget(nameLabel, i, 1);
 	gridLayout->addWidget(descriptionLabel, i, 3);
 	gridLayout->addWidget(loadButton, i, 4);
+	gridLayout->addWidget(deleteButton, i, 5);
     }
-
-
-    /* Load up the appropriate network
-
-	- if it is not already loaded
-    if(Globals::networkLoaded() && Globals::getNetwork()->getID() != currentNetworkID){
-	loadNetwork(networkInfoMap[currentNetworkID]);
-    }*/
-
 }
 
 
@@ -195,12 +238,12 @@ void NetworksWidget::loadNetwork(NetworkInfo& netInfo){
 
 void NetworksWidget::checkLoadingProgress(){
     //Check for errors during loading
-    if(newNetwork->isLoadingError()){
+    if(newNetwork->isError()){
 	loadingTimer->stop();
 	newNetwork->cancel();
 	progressDialog->setValue(progressDialog->maximum());
 	delete progressDialog;
-	qCritical()<<"Error occurred loading network: '"<<newNetwork->getLoadingErrorMessage()<<"'.";
+	qCritical()<<"Error occurred loading network: '"<<newNetwork->getErrorMessage()<<"'.";
 	return;
     }
 
@@ -233,7 +276,7 @@ void NetworksWidget::checkLoadingProgress(){
     /* Reload network list to reflect color changes and buttons enabled
 	Should not lead to an infinite loop because network in Globals
 	should match one in the list returned from the database */
-    reloadNetworkList();
+    loadNetworkList();
 
 }
 
@@ -266,6 +309,10 @@ void NetworksWidget::reset(){
 	    item->widget()->deleteLater();
 	}
 	item = gridLayout->itemAtPosition(i, 4);
+	if(item != 0){
+	    item->widget()->deleteLater();
+	}
+	item = gridLayout->itemAtPosition(i, 5);
 	if(item != 0){
 	    item->widget()->deleteLater();
 	}

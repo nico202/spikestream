@@ -5,6 +5,8 @@
 #include "NRMDataImporter.h"
 #include "NRMFileLoader.h"
 #include "NRMNetwork.h"
+#include "Network.h"
+using namespace spikestream;
 
 //Qt includes
 #include <QDialog>
@@ -21,6 +23,9 @@ class NRMImportDialog : public QDialog {
     public:
 	NRMImportDialog(QWidget* parent);
 	~NRMImportDialog();
+
+    signals:
+	void networkListChanged();
 
     private slots:
 	void addNetwork();
@@ -65,35 +70,47 @@ class NRMImportDialog : public QDialog {
 	/*! Records if an operation has been cancelled by the user */
 	bool operationCancelled;
 
-	/*! Set to true when file loading is taking place in a separate thread */
-	bool fileLoading;
+	/*! The current task the dialog is performing. Different task types are given below */
+	int currentTask;
 
-	/*! Set to true when data is being imported in a separate thread */
-	bool dataImporting;
+	/*! Task of loading file in a separate thread */
+	static const int FILE_LOADING_TASK = 1;
+
+	/*! Task of adding a network to the database */
+	static const int ADD_NETWORK_TASK = 2;
 
 	/*! Runs as a separate thread to load data from configuration and training files */
 	NRMFileLoader* fileLoader;
 
-	/*! Runs as a separate thread to load a NRM network into the database */
-	NRMDataImporter* dataImporter;
+	/*! Network that is being imported */
+	Network* newNetwork;
+
+	/*! Name assigned to the network being imported */
+	QLineEdit* networkName;
+
+	/*! Description of the network being imported */
+	QLineEdit* networkDescription;
 
 	/*! Location of the x QLineEdit widget */
-	int page2XCol = 4;
+	static const int page2XCol = 4;
 
 	/*! Location of the y QLineEdit widget */
-	int page2YCol = 6;
+	static const int page2YCol = 6;
 
 	/*! Location of the z QLineEdit widget */
-	int page2ZCol = 8;
+	static const int page2ZCol = 8;
 
 
 	//=======================  METHODS  =========================
+	void addConnectionGroups();
 	void addLayersToPage2();
 	void buildBusyPage();
 	void buildPage1();
 	void buildPage2();
 	void buildSuccessPage();
 	QString getFilePath(QString fileFilter);
+	int getInt();
+	void showMessage();
 
 };
 

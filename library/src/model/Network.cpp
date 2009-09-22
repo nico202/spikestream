@@ -9,15 +9,22 @@ using namespace spikestream;
 using namespace std;
 
 /*! Constructor that creates a new network and adds it to the database */
-Network::Network(NetworkDao* networkDao){
+Network::Network(NetworkDao* networkDao, const QString& name, const QString& description){
     //Store information
     this->networkDao = networkDao;
+    this->info.setName(name);
+    this->info.setDescription(description);
 
     //Create network dao threads for heavy operations
     neuronNetworkDaoThread = new NetworkDaoThread(networkDao->getDBInfo());
     connect (neuronNetworkDaoThread, SIGNAL(finished()), this, SLOT(neuronThreadFinished()));
     connectionNetworkDaoThread = new NetworkDaoThread(networkDao->getDBInfo());
     connect (connectionNetworkDaoThread, SIGNAL(finished()), this, SLOT(connectionThreadFinished()));
+
+    //Initialize variables
+    currentNeuronTask = -1;
+    currentConnectionTask = -1;
+    clearError();
 
     //Create new network in database. ID will be stored in the network info
     networkDao->addNetwork(info);
@@ -40,7 +47,12 @@ Network::Network(const NetworkInfo& networkInfo, NetworkDao* networkDao){
     connect (neuronNetworkDaoThread, SIGNAL(finished()), this, SLOT(neuronThreadFinished()));
     connectionNetworkDaoThread = new NetworkDaoThread(networkDao->getDBInfo());
     connect (connectionNetworkDaoThread, SIGNAL(finished()), this, SLOT(connectionThreadFinished()));
-        
+
+    //Initialize variables
+    currentNeuronTask = -1;
+    currentConnectionTask = -1;
+    clearError();
+
     //Load up basic information about the neuron and connection groups
     loadNeuronGroupsInfo();
     loadConnectionGroupsInfo();
@@ -71,10 +83,26 @@ Network::~Network(){
 /*-----                PUBLIC METHODS                 ----- */
 /*--------------------------------------------------------- */
 
+
+/*! Adds neuron groups to the network */
+void Network::addNeuronGroups(QList<NeuronGroup*>& neuronGroupList){
+    //Store the list of neuron groups to be added later when the thread has finished and we have the correct ID
+    newNeuronGroups = neuronGroupList;
+
+    //Start thread that adds neuron groups to database
+    clearError();
+    neuronNetworkDaoThread->prepareAddNeuronGroups(getID(), neuronGroupList);
+    currentNeuronTask = ADD_NEURONS_TASK;
+    neuronNetworkDaoThread->start();
+}
+
+
 /*! Cancels thread-based operations that are in progress */
 void Network::cancel(){
     neuronNetworkDaoThread->stop();
     connectionNetworkDaoThread->stop();
+    currentNeuronTask = -1;
+    currentConnectionTask = -1;
 }
 
 
@@ -188,10 +216,11 @@ int Network::getNumberOfCompletedSteps(){
 
 /*! Loads up the network from the database */
 void Network::load(){
-    clearLoadingError();
+    clearError();
 
     //Load up all neurons
     neuronNetworkDaoThread->prepareLoadNeurons(neurGrpMap.values());
+    currentNeuronTask = LOAD_NEURONS_TASK;
     neuronNetworkDaoThread->start();
 
     //Load all connection groups that are above a certain size
@@ -203,6 +232,7 @@ void Network::load(){
 	    loadList.append(*iter);
     }
     connectionNetworkDaoThread->prepareLoadConnections(loadList);
+    currentConnectionTask = LOAD_CONNECTIONS_TASK;
     connectionNetworkDaoThread->start();
 
     //Record the total number of steps and initialise the number of completed steps
@@ -222,18 +252,64 @@ void Network::load(){
 /*! Slot called when thread processing connections has finished running. */
 void Network::connectionThreadFinished(){
     if(connectionNetworkDaoThread->isError()){
-	loadingErrorMessage += "Connection Loading Error: '" + connectionNetworkDaoThread->getErrorMessage() + "'. ";
-	loadingError = true;
+	errorMessage += "Connection Loading Error: '" + connectionNetworkDaoThread->getErrorMessage() + "'. ";
+	error = true;
     }
+
+    //Switch on the currentConnectionTask if necessary
+
+    //Reset task
+    currentConnectionTask = -1;
+
+    if(!isBusy())
+	emit taskFinished();
 }
 
 
 /*! Slot called when thread processing neurons has finished running. */
 void Network::neuronThreadFinished(){
+    //Check for errors
     if(neuronNetworkDaoThread->isError()){
-	loadingErrorMessage += "Neuron Loading Error: '" + neuronNetworkDaoThread->getErrorMessage() + "'. ";
-	loadingError = true;
+	errorMessage += "Neuron Loading Error: '" + neuronNetworkDaoThread->getErrorMessage() + "'. ";
+	error = true;
     }
+
+    //Handle any task-specific stuff
+    if(!error){
+	try{
+	    switch(currentNeuronTask){
+		case ADD_NEURONS_TASK:
+		    //Add neuron groups to the network now that they have the correct ID
+		    for(QList<NeuronGroup*>::iterator iter = newNeuronGroups.begin(); iter != newNeuronGroups.end(); ++iter){
+			//Check to see if ID already exists - error in this case
+			if( neurGrpMap.contains( (*iter)->getID() ) ){
+			    cout<<"NEUR GRP MAP SIZE: "<<neurGrpMap.size()<<" incorrect id: "<<(*iter)->getID()<<endl;
+			    throw SpikeStreamException("Adding neurons task - trying to add a neuron group with ID " + QString::number((*iter)->getID()) + " that already exists in the network.");
+			}
+
+			//Store neuron group
+			neurGrpMap[ (*iter)->getID() ] = *iter;
+		    }
+		break;
+		case LOAD_NEURONS_TASK:
+		    ;//Nothing to do at present
+		break;
+		default:
+		    throw SpikeStreamException("The current task ID has not been recognized.");
+	    }
+	}
+	catch(SpikeStreamException& ex){
+	    errorMessage = ex.getMessage();
+	    error = true;
+	}
+    }
+
+    //Reset task
+    currentNeuronTask = -1;
+
+    //Emit signal that task has finished if no other threads are carrying out operations
+    if(!isBusy())
+	emit taskFinished();
 }
 
 /*! Returns the size of the network.

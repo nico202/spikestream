@@ -25,16 +25,17 @@ namespace spikestream {
 	Q_OBJECT
 
 	public:
-	    Network(NetworkDao* networkDao);
+	    Network(NetworkDao* networkDao, const QString& name, const QString& description);
 	    Network(const NetworkInfo& networkInfo, NetworkDao* networkDao);
 	    ~Network();
 
+	    void addNeuronGroups(QList<NeuronGroup*>& neuronGroupList);
+	    void cancel();
+	    void clearError() { error = false; errorMessage = ""; }
 	    bool connectionGroupIsLoaded(unsigned int connGrpID);
-	    unsigned int getID() { return info.getID(); }
 	    Box getBoundingBox();
-	    void clearLoadingError() { loadingError = false; loadingErrorMessage = ""; }
-	    bool isLoadingError() { return loadingError; }
-	    QString getLoadingErrorMessage() { return  loadingErrorMessage; }
+	    unsigned int getID() { return info.getID(); }
+	    QString getErrorMessage() { return  errorMessage; }
 	    Box getNeuronGroupBoundingBox(unsigned int neurGrpID);
 	    int getTotalNumberOfSteps() { return totalNumberOfSteps; }
 	    int getNumberOfCompletedSteps();
@@ -45,15 +46,14 @@ namespace spikestream {
 	    ConnectionGroup* getConnectionGroup(unsigned int id);
 	    ConnectionGroupInfo getConnectionGroupInfo(unsigned int id);
 	    bool isBusy();
+	    bool isError() { return error; }
 	    void load();
 	    bool neuronGroupIsLoaded(unsigned int neurGrpID);
-	    void cancel();
 	    void setNetworkDao(NetworkDao* netDao) { this->networkDao = netDao; }
 	    int size();
 
-	    void setName(const QString& name) { this->info.setName(name); }
-	    void setDescription(const QString& description) { this->info.setDescription(description); }
-
+	signals:
+	    void taskFinished();
 
 	private slots:
 	    void connectionThreadFinished();
@@ -96,10 +96,25 @@ namespace spikestream {
 	    int totalNumberOfSteps;
 
 	    /*! Set to true when there is an error loading  */
-	    bool loadingError;
+	    bool error;
 
 	    /*! Loading error message */
-	    QString loadingErrorMessage;
+	    QString errorMessage;
+
+	    /*! List of neuron groups that are being added to the network */
+	    QList<NeuronGroup*> newNeuronGroups;
+
+	    /*! Current task being undertaken by the neuron thread.*/
+	    int currentNeuronTask;
+
+	    /*! Current task being undertaken by the connection thread.*/
+	    int currentConnectionTask;
+
+	    static const int ADD_NEURONS_TASK = 1;
+	    static const int LOAD_NEURONS_TASK = 2;
+	    static const int ADD_CONNECTIONS_TASK = 3;
+	    static const int LOAD_CONNECTIONS_TASK = 4;
+
 
 
 	    //============================  METHODS  ==============================

@@ -3,7 +3,7 @@
 
 class TestRunner {
 	public:
-		static void runTests();
+	    static void runTests();
 };
 
 

@@ -2,6 +2,7 @@
 //SpikeStream includes
 #include "TestRunner.h"
 #include "TestNetwork.h"
+#include "TestNeuronGroup.h"
 #include "TestNetworkDao.h"
 #include "TestNetworkDaoThread.h"
 #include "TestXMLParameterParser.h"
@@ -23,6 +24,9 @@ void TestRunner::runTests(){
 
     TestNetwork testNework;
     QTest::qExec(&testNework);
+
+    TestNeuronGroup testNeuronGroup;
+    QTest::qExec(&testNeuronGroup);
 }
 
 

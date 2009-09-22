@@ -14,6 +14,7 @@ namespace spikestream {
 	public:
 	    NeuronGroup(const NeuronGroupInfo& info);
 	    ~NeuronGroup();
+	    void addLayer(int width, int height, int xPos, int yPos, int zPos);
 	    void addNeuron(float xPos, float yPos, float zPos);
 	    void clearNeurons();
 	    bool contains(unsigned int neurID, float x, float y, float z);
