@@ -40,6 +40,11 @@ void NetworkDao::addNetwork(NetworkInfo& netInfo){
 }
 
 
+void NetworkDao::deleteNetwork(unsigned int networkID){
+    executeQuery("DELETE FROM NeuralNetworks WHERE NeuralNetworkID = " + QString::number(networkID));
+}
+
+
 /*! Returns information about the connection groups associated with the specified network */
 QList<ConnectionGroupInfo> NetworkDao::getConnectionGroupsInfo(unsigned int networkID){
     QSqlQuery query = getQuery("SELECT ConnectionGroupID, Description, FromNeuronGroupID, ToNeuronGroupID, Parameters, SynapseTypeID FROM ConnectionGroups WHERE NeuralNetworkID=" + QString::number(networkID));

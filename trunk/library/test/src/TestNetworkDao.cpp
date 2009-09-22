@@ -68,6 +68,29 @@ void TestNetworkDao::testAddNetwork(){
     }
 }
 
+void TestNetworkDao::testDeleteNetwork(){
+    //Add test network
+    addTestNetwork1();
+
+    //Check that test network is in database
+    QSqlQuery query = getQuery("SELECT * FROM NeuralNetworks WHERE NeuralNetworkID = " + QString::number(testNetID));
+    executeQuery(query);
+
+    //Should be a single network
+    QCOMPARE(query.size(), (int)1);
+
+    //Invoke method being tested
+    NetworkDao networkDao(dbInfo);
+    networkDao.deleteNetwork(testNetID);
+
+    //Check to see if network with this id has been removed from the database
+    query = getQuery("SELECT * FROM NeuralNetworks WHERE NeuralNetworkID = " + QString::number(testNetID));
+    executeQuery(query);
+
+    //Should be no networks
+    QCOMPARE(query.size(), (int)0);
+}
+
 
 /*! Tests the getNeworksInfo method in the NetworkDao.
     This method returns a list containing information about the networks. */

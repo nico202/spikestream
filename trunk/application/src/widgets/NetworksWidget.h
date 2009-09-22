@@ -26,8 +26,9 @@ namespace spikestream {
 
 	private slots:
 	    void checkLoadingProgress();
+	    void deleteNetwork();
 	    void loadNetwork();
-	    void reloadNetworkList();
+	    void loadNetworkList();
 
 	private:
 	    //======================  VARIABLES  =====================

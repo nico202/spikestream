@@ -26,6 +26,7 @@ namespace spikestream{
 	    virtual ~NetworkDao();
 
 	    void addNetwork(NetworkInfo& netInfo);
+	    void deleteNetwork(unsigned int networkID);
 	    unsigned int getConnectionGroupSize(unsigned int connGrpID);
 	    Box getNeuronGroupBoundingBox(unsigned int neurGrpID);
 	    QList<NetworkInfo> getNetworksInfo();

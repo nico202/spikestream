@@ -12,7 +12,8 @@ MOC_DIR = build/moc
 
 CONFIG += debug \
 	  warn_on \
-	  thread
+	  thread \
+	  exceptions
 
 QT += sql xml
 
@@ -35,7 +36,8 @@ HEADERS = include/ConfigLoader.h \
 	    include/SimulationTypes.h \
 	    include/Box.h \
 	    include/Point3D.h \
-            include/Utilities.h
+	    include/Utilities.h \
+	    include/Util.h
 
 SOURCES = src/ConfigLoader.cpp \
             src/ConnectionType.cpp \
@@ -46,7 +48,9 @@ SOURCES = src/ConfigLoader.cpp \
             src/PerformanceTimer.cpp \
 	    src/Box.cpp \
 	    src/Utilities.cpp \
-	    src/RGBColor.cpp
+	    src/RGBColor.cpp \
+	    src/Util.cpp
+
 
 #----------------------------------------------#
 #---               database                 ---#
@@ -67,10 +71,12 @@ SOURCES += src/database/DBInfo.cpp \
 #----------------------------------------------#
 HEADERS += include/SpikeStreamDBException.h \
 	    include/SpikeStreamException.h \
-	    include/SpikeStreamXMLException.h
+	    include/SpikeStreamXMLException.h \
+	    include/NumberConversionException.h
 SOURCES += src/exceptions/SpikeStreamDBException.cpp \
 	    src/exceptions/SpikeStreamException.cpp \
-	    src/exceptions/SpikeStreamXMLException.cpp
+	    src/exceptions/SpikeStreamXMLException.cpp \
+	    src/exceptions/NumberConversionException.cpp
 
 #----------------------------------------------#
 #---                model                   ---#

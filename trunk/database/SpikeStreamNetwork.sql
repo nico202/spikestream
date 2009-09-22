@@ -70,6 +70,7 @@ CREATE TABLE Neurons (
     INDEX Positions (X, Y, Z),/* Used when creating connections. FIXME: CHECK MIN(X), MIN(Y) AND MIN(Z) ON THE INDEX. */
     INDEX NeuronGroupIDIndex(NeuronGroupID),
 
+	CONSTRAINT UniquePositions_CON UNIQUE (X, Y, Z),/* Neurons in the same group cannot occupy the same point in space. */
     FOREIGN KEY NeuronGroupID_FK(NeuronGroupID) REFERENCES NeuronGroups(NeuronGroupID) ON DELETE CASCADE
 )
 ENGINE=InnoDB;

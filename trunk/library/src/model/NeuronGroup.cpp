@@ -29,9 +29,22 @@ NeuronGroup::~NeuronGroup(){
 
 /*! Adds a neuron to the group using a temporary ID. This ID is replaced
     by the actual ID when the group is added to the network and database. */
-void addNeuron(float xPos, float yPos, float zPos){
-    Point3D tmpPoint = new Point3D(xPos, yPos, zPos);
-    neuronMap[neuronMap->size()] = tmpPoint;
+void NeuronGroup::addNeuron(float xPos, float yPos, float zPos){
+    Point3D* tmpPoint = new Point3D(xPos, yPos, zPos);
+    if(neuronMap->contains(neuronMap->size()))
+	throw SpikeStreamException("Temporary neuron ID conflicts with neuron ID already in group.");
+    (*neuronMap)[(unsigned int) neuronMap->size()] = tmpPoint;
+}
+
+
+/*! Adds a layer to the group with the specified width and height.
+    Temporary neuron ids are used and the neurons are appended to the neurons already in the group. */
+void NeuronGroup::addLayer(int width, int height, int xPos, int yPos, int zPos){
+    for(int x=xPos; x < (xPos + width); ++x){
+	for(int y=yPos; y < (yPos + height); ++y){
+	    addNeuron(x, y, zPos);
+	}
+    }
 }
 
 
