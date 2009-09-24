@@ -23,7 +23,7 @@ void NRMNeuron::addTraining(unsigned char* inBitArray, unsigned int inBitArrLen,
 	else if( (inBitArrLen + 1) != trainingArrayLength)
 		throw NRMException("Length of current training array does not match new training data.");
 
-	//Copy training information into a temporary dynamic array
+	//Copy training information into a new dynamic array
 	unsigned char* tmpArr = new unsigned char[trainingArrayLength];
 	tmpArr[0] = output;
 	for(unsigned int i=0; i<inBitArrLen; ++i)

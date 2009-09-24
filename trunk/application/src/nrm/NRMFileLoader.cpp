@@ -38,19 +38,6 @@ NRMNetwork* NRMFileLoader::getNetwork(){
 void NRMFileLoader::run(){
     stopThread = false;
 
-  /*  for(unsigned int i=0; i<4294967295; ++i){
-	unsigned int* tstArr = new unsigned int [1000000];
-	for(int i=0; i<1000000; ++i){
-	    if(stopThread)
-		return;
-	    tstArr[i] = 5;
-	}
-	delete []tstArr;
-	if(stopThread)
-	    return;
-    }*/
-
-
     if(configFilePath == "" || trainingFilePath == "")
 	throw NRMException("Training or configuration file path(s) missing!");
 

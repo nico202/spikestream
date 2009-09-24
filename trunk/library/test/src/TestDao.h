@@ -17,7 +17,7 @@ class TestDao : public QObject {
 
     protected:
 	//=========================  VARIABLES  =========================
-	/*! Information about the database used in the tests */
+	/*! Information about the SpikeStreamNetwork database used in the tests */
 	DBInfo dbInfo;
 
 	/*! Database connection */
@@ -26,6 +26,16 @@ class TestDao : public QObject {
 	/*! Name to statically access database via QSqlDatabase methods */
 	QString dbRefName;
 
+	/*! Information about the SpikeStreamNetwork database used in the tests */
+	DBInfo archiveDBInfo;
+
+	/*! Database connection */
+	QSqlDatabase archiveDatabase;
+
+	/*! Name to statically access database via QSqlDatabase methods */
+	QString archiveDBRefName;
+
+
 	//Parameters for test networks
 	unsigned int testNetID;
 	unsigned int neurGrp1ID;
@@ -33,6 +43,8 @@ class TestDao : public QObject {
 	unsigned int connGrp1ID;
 	QList<unsigned int> testConnIDList;
 	QList<unsigned int> testNeurIDList;
+
+	unsigned int testArchiveID;
 
 
 	//==========================  METHODS  ==========================

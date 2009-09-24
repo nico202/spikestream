@@ -51,7 +51,8 @@ HEADERS += src/nrm/NRMNetwork.h \
             src/nrm/NRMConnection.h \
             src/nrm/NRMNeuron.h \
 	    src/nrm/NRMRandom.h \
-	    src/nrm/NRMFileLoader.h
+	    src/nrm/NRMFileLoader.h \
+	    src/nrm/NRMDataImporter.h
 SOURCES += src/nrm/NRMNetwork.cpp \
             src/nrm/NRMConfigLoader.cpp \
             src/nrm/NRMTrainingLoader.cpp \
@@ -61,7 +62,8 @@ SOURCES += src/nrm/NRMNetwork.cpp \
             src/nrm/NRMConnection.cpp \
             src/nrm/NRMNeuron.cpp \
 	    src/nrm/NRMRandom.cpp \
-	    src/nrm/NRMFileLoader.cpp
+	    src/nrm/NRMFileLoader.cpp \
+	    src/nrm/NRMDataImporter.cpp
 
 
 #----------------------------------------------#
@@ -85,8 +87,10 @@ SOURCES += src/exceptions/NRMException.cpp
 #----------------------------------------------#
 #---              widgets folder            ---#
 #----------------------------------------------#
-HEADERS += src/widgets/NetworksWidget.h
-SOURCES += src/widgets/NetworksWidget.cpp
+HEADERS += src/widgets/NetworksWidget.h \
+	    src/widgets/ArchiveWidget_V2.h
+SOURCES += src/widgets/NetworksWidget.cpp \
+	    src/widgets/ArchiveWidget_V2.cpp
 
 #----------------------------------------------#
 #---               src folder               ---#

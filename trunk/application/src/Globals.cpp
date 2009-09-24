@@ -47,6 +47,13 @@ NetworkDao* Globals::getNetworkDao(){
 }
 
 
+/*! Returns the archive dao, which provides a layer of abstraction on top of the
+    SpikeStreamArchive database */
+NetworkDao* Globals::getArchiveDao(){
+    return archiveDao;
+}
+
+
 /*! Returns the network display. */
 NetworkDisplay* Globals::getNetworkDisplay(){
     return networkDisplay;

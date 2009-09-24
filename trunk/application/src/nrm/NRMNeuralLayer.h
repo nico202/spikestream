@@ -5,6 +5,7 @@
 #include "NRMLayer.h"
 #include "NRMConnection.h"
 #include "NRMNeuron.h"
+using namespace nrm;
 
 //Qt includes
 #include <QList>

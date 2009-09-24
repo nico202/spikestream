@@ -2,8 +2,10 @@
 #define GLOBALS_H
 
 //SpikeStream includes
+#include "Archive.h"
 #include "NetworksWidget.h"
 #include "EventRouter.h"
+#include "ArchiveDao.h"
 #include "NetworkDao.h"
 #include "Network.h"
 #include "NetworkDisplay.h"
@@ -19,6 +21,7 @@ class Globals {
     static EventRouter* getEventRouter() {return eventRouter; }
     static Network* getNetwork();
     static NetworkDao* getNetworkDao();
+    static NetworkDao* getArchiveDao();
     static NetworkDisplay* getNetworkDisplay();
     static QString getSpikeStreamRoot();
     static QString getWorkingDirectory();
@@ -30,11 +33,15 @@ class Globals {
     friend class SpikeStreamMainWindow;
     friend class spikestream::NetworksWidget;
     friend class spikestream::NetworkViewer_V2;
+    friend class spikestream::ArchiveWidget_V2;
 
   private:
     //=====================  VARIABLES ============================
     /*! Wrapper for the SpikeStreamNetwork database */
     static NetworkDao* networkDao;
+
+    /*! Wrapper for SpikeStreamArchive database */
+    static ArchiveDao* archiveDao;
 
     /*! Corresponds to the root of the whole spikestream directory,
 	environment variable SPIKESTREAMROOT */
@@ -45,6 +52,9 @@ class Globals {
 
     /*! The current network that is being viewed, edited, etc. */
     static Network* network;
+
+    /*! The current loaded archive */
+    static Archive* archive;
 
     /*! Class controlling how the current network is displayed */
     static NetworkDisplay* networkDisplay;
@@ -57,6 +67,7 @@ class Globals {
 
 
     //======================  METHODS  ============================
+    static void setArchive(Archive* archive);
     static void setNetworkDisplay(NetworkDisplay* networkDisplay);
     static void setEventRouter(EventRouter* eventRouter);
     static void setNetworkDao(NetworkDao* networkDao);

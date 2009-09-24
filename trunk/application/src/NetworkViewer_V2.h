@@ -37,7 +37,6 @@ namespace spikestream {
 	    void loadConnectionGroup(unsigned int, bool){}
 	    void loadNeuronGroup(unsigned int, bool){}
 	    void reloadEverything(){}
-	    void resetView(){}
 	    void setConnectionView(vector<unsigned int>){}
 	    void setFullRenderMode(bool){}
 	    void setLayerView(vector<unsigned int>){}
@@ -63,6 +62,9 @@ namespace spikestream {
 	    void paintGL();
 	    void resizeGL(int width, int height);
 
+	    //Methods inherited from QWidget
+	    void mouseDoubleClickEvent (QMouseEvent * event );
+
 	private slots:
 	    void moveBackward();
 	    void moveForward();
@@ -70,6 +72,11 @@ namespace spikestream {
 	    void moveDown();
 	    void moveLeft();
 	    void moveRight();
+	    void resetView();
+	    void rotateUp();
+	    void rotateDown();
+	    void rotateLeft();
+	    void rotateRight();
 
 	    void viewClippingVolume_Horizontal(Box& clipVolume);
 	    void viewClippingVolume_Vertical(Box& clipVolume);
@@ -137,6 +144,7 @@ namespace spikestream {
 	    //======================  METHODS  ===========================
 	    void checkOpenGLErrors();
 	    void drawAxes();
+	    void drawConnections();
 	    void drawNeurons();
 	    void fillRotationMatrix(float angle, float x, float y, float z);
 	    void initialiseCameraParameters();

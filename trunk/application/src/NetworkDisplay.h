@@ -21,6 +21,8 @@ namespace spikestream {
 	    ~NetworkDisplay();
 	    QHash<unsigned int, RGBColor*>& getNeuronColorMap() { return neuronColorMap; }
 	    RGBColor getDefaultNeuronColor() { return defaultNeuronColor; }
+	    RGBColor getNegativeConnectionColor(){ return negativeConnectionColor; }
+	    RGBColor getPositiveConnectionColor(){ return positiveConnectionColor; }
 	    QList<unsigned int> getVisibleConnectionGroupIDs() { return connGrpDisplayMap.keys(); }
 	    QList<unsigned int> getVisibleNeuronGroupIDs() { return neurGrpDisplayMap.keys(); }
 	    void setDefaultNeuronColor(RGBColor& color) { defaultNeuronColor = color; }
@@ -47,6 +49,12 @@ namespace spikestream {
 
 	    /*! Default color of a neuron */
 	    RGBColor defaultNeuronColor;
+
+	    /*! Postive connection color */
+	    RGBColor positiveConnectionColor;
+
+	    /*! Negative connection color */
+	    RGBColor negativeConnectionColor;
 
 	    //=========================  METHODS  =========================
 

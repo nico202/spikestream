@@ -27,6 +27,7 @@ namespace spikestream {
 	   // bool isRunning() { return !stopThread; }
 	    QString getErrorMessage() { return errorMessage; }
 	    void prepareAddConnectionGroup(unsigned int networkID, ConnectionGroup* connGrp);
+	    void prepareAddConnectionGroups(unsigned int networkID, QList<ConnectionGroup*>& connGrpList);
 	    void prepareAddNeuronGroup(unsigned int networkID, NeuronGroup* neurGrp);
 	    void prepareAddNeuronGroups(unsigned int networkID, QList<NeuronGroup*>& neurGrpList);
 	    void prepareLoadConnections(QList<ConnectionGroup*>& connGrpList);
@@ -39,10 +40,8 @@ namespace spikestream {
 
 	private:
 	    //========================  VARIABLES  =========================
-	    /*! Connection group being added to the network */
-	    ConnectionGroup* connectionGroup;
-
-	    /*! List of connection groups to load connections into */
+	    /*! List of connection groups to load connections into or used for
+		adding connection groups to the database. */
 	    QList<ConnectionGroup*> connectionGroupList;
 
 	    /*! List of neuron groups to load neurons into or for adding to database */
@@ -72,14 +71,14 @@ namespace spikestream {
 	    int numberOfCompletedSteps;
 
 	    const static unsigned int NO_TASK_DEFINED = 1;
-	    const static unsigned int ADD_CONNECTION_GROUP_TASK = 2;
+	    const static unsigned int ADD_CONNECTION_GROUPS_TASK = 2;
 	    const static unsigned int ADD_NEURON_GROUPS_TASK = 3;
 	    const static unsigned int LOAD_NEURONS_TASK = 4;
 	    const static unsigned int LOAD_CONNECTIONS_TASK = 5;
 
 	    //========================  METHODS  ===========================
 	    void addNeuronGroups();
-	    void addConnectionGroup();
+	    void addConnectionGroups();
 	    void loadConnections();
 	    void loadNeurons();
 	    void setError(const QString& msg);

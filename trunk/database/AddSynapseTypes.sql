@@ -11,6 +11,8 @@
 /* Add entry to the SynapseTypes table */
 INSERT INTO SynapseTypes(SynapseTypeID, Description, ParameterTableName, ClassLibrary) VALUES (1, "STDP1 Synapse", "STDP1SynapseParameters", "libstdp1synapse.so");
 
+INSERT INTO SynapseTypes(SynapseTypeID, Description, ParameterTableName, ClassLibrary) VALUES (2, "Weightless Synapse", "WeigthlessSynapseParameters", "undefined.so");
+
 
 /* Add table for STDP1Synapse parameters
 	Table containing the parameters for the STDO1 synapse type
@@ -45,6 +47,22 @@ CREATE TABLE STDP1SynapseParameters (
 	MaximumDrift_desc CHAR(100) DEFAULT "Maximum drift",
 	MinimumDrift_val DOUBLE DEFAULT 0.0,
 	MinimumDrift_desc CHAR(100) DEFAULT "Minimum drift",
+
+	PRIMARY KEY (ConnectionGroupID),
+	FOREIGN KEY ConnectionGroupID_FK(ConnectionGroupID) REFERENCES ConnectionGroups(ConnectionGroupID) ON DELETE CASCADE
+)
+ENGINE=InnoDB;
+
+
+
+
+/* Add table for WeigthlessSynapse parameters
+	Table containing the parameters for the STDO1 synapse type
+	Each connection group created with this type will have an entry in this table.*/
+CREATE TABLE WeightlessSynapseParameters (
+	ConnectionGroupID SMALLINT UNSIGNED NOT NULL,
+	Test_val BOOLEAN DEFAULT 0,
+	Test_desc CHAR(100) DEFAULT "Test parameter",
 
 	PRIMARY KEY (ConnectionGroupID),
 	FOREIGN KEY ConnectionGroupID_FK(ConnectionGroupID) REFERENCES ConnectionGroups(ConnectionGroupID) ON DELETE CASCADE

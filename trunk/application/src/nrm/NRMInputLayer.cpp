@@ -4,6 +4,7 @@
 using namespace std;
 
 NRMInputLayer::NRMInputLayer(){
+    type = NRM_INPUT_LAYER;
 }
 
 NRMInputLayer::~NRMInputLayer(){

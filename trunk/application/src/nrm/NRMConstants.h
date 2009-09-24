@@ -23,7 +23,7 @@
 #define FRAME_REQ 0
 #define NO_FRAME_REQ 1
 
-/*! Different types of object that connections can be made to */
+/*! Neural layer types */
 #define MAGNUS_IN_OB 0
 #define MAGNUS_PREV_OB 1
 #define MAGNUS_STATE_OB 2

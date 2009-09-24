@@ -18,6 +18,8 @@ namespace spikestream {
 
 	    void addConnection(Connection* newConn);
 	    unsigned int getID() { return info.getID(); }
+	    unsigned int getFromNeuronGroupID() { return info.getFromNeuronGroupID(); }
+	    unsigned int getToNeuronGroupID() { return info.getToNeuronGroupID(); }
 	    bool isLoaded() { return loaded; }
 	    void setLoaded(bool loaded) { this->loaded = loaded; }
 

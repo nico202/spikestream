@@ -77,13 +77,22 @@ class NRMImportDialog : public QDialog {
 	static const int FILE_LOADING_TASK = 1;
 
 	/*! Task of adding a network to the database */
-	static const int ADD_NETWORK_TASK = 2;
+	static const int ADD_NEURON_GROUPS_TASK = 2;
+
+	/*! Task of adding a network to the database */
+	static const int ADD_CONNECTION_GROUPS_TASK = 3;
 
 	/*! Runs as a separate thread to load data from configuration and training files */
 	NRMFileLoader* fileLoader;
 
+	/*! Runs as a separate thread to load connections */
+	NRMDataImporter* dataImporter;
+
 	/*! Network that is being imported */
 	Network* newNetwork;
+
+	/*! List of neuron groups that are added to the network */
+	QList<NeuronGroup*> newNeuronGroupList;
 
 	/*! Name assigned to the network being imported */
 	QLineEdit* networkName;
@@ -104,6 +113,7 @@ class NRMImportDialog : public QDialog {
 	//=======================  METHODS  =========================
 	void addConnectionGroups();
 	void addLayersToPage2();
+	void addNeuronGroupIDsToNRMNetwork();
 	void buildBusyPage();
 	void buildPage1();
 	void buildPage2();

@@ -21,6 +21,11 @@ namespace spikestream {
 	    void moveDownSignal();
 	    void moveLeftSignal();
 	    void moveRightSignal();
+	    void resetViewSignal();
+	    void rotateUpSignal();
+	    void rotateDownSignal();
+	    void rotateLeftSignal();
+	    void rotateRightSignal();
 
 	    void networkChangedSignal();
 	    void networkDisplayChangedSignal();
@@ -35,6 +40,11 @@ namespace spikestream {
 	    void moveDownSlot() { emit moveDownSignal(); }
 	    void moveLeftSlot() { emit moveLeftSignal(); }
 	    void moveRightSlot() { emit moveRightSignal(); }
+	    void resetViewSlot() { emit resetViewSignal(); }
+	    void rotateUpSlot() { emit rotateUpSignal(); }
+	    void rotateDownSlot() { emit rotateDownSignal(); }
+	    void rotateLeftSlot() { emit rotateLeftSignal(); }
+	    void rotateRightSlot() { emit rotateRightSignal(); }
 
 	    void networkChangedSlot() { emit networkChangedSignal(); }
 	    void networkDisplayChangedSlot() { emit networkDisplayChangedSignal(); }

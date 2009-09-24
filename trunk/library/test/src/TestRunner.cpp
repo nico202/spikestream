@@ -1,5 +1,6 @@
 
 //SpikeStream includes
+#include "TestArchiveDao.h"
 #include "TestRunner.h"
 #include "TestNetwork.h"
 #include "TestNeuronGroup.h"
@@ -27,6 +28,9 @@ void TestRunner::runTests(){
 
     TestNeuronGroup testNeuronGroup;
     QTest::qExec(&testNeuronGroup);
+
+    TestArchiveDao testArchiveDao;
+    QTest::qExec(&testArchiveDao);
 }
 
 

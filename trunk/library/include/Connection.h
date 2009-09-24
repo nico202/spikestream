@@ -26,12 +26,32 @@ namespace spikestream {
 
 	    void setID(unsigned int id){ this->id = id; }
 
+//	    void setFromNeuronPosition(float xPos, float yPos, float zPos){
+//		fromXPos = xPos;
+//		fromYPos = yPos;
+//		fromZPos = zPos;
+//	    }
+//
+//	    void setToNeuronPosition(float xPos, float yPos, float zPos){
+//		toXPos = xPos;
+//		toYPos = yPos;
+//		toZPos = zPos;
+//	    }
+
+
 	    unsigned int id;
 	    unsigned int fromNeuronID;
 	    unsigned int toNeuronID;
 	    float delay;
 	    float weight;
 	    float tempWeight;
+
+//	    float fromXPos;
+//	    float fromYPos;
+//	    float fromZPos;
+//	    float toXPos;
+//	    float toYPos;
+//	    float toZPos;
     };
 
 }
