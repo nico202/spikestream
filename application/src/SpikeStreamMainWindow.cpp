@@ -37,6 +37,7 @@
 #include "NRMImportDialog.h"
 #include "SpikeStreamException.h"
 #include "NetworksWidget.h"
+#include "ArchiveWidget_V2.h"
 using namespace spikestream;
 
 //Qt includes
@@ -230,7 +231,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 		exit(1);
 	}
 
-	//Set up the data access objects wrapping the databases.
+	//Set up the data access objects wrapping the network database
 	DBInfo netDBInfo(
 		configLoader->getCharData("spikeStreamNetworkHost"),
 		configLoader->getCharData("spikeStreamNetworkUser"),
@@ -245,17 +246,28 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	    qCritical()<<ex.getMessage();
 	}
 
+
+	//Set up the data access objects wrapping the archive database.
+	DBInfo archiveDBInfo(
+		configLoader->getCharData("spikeStreamArchiveHost"),
+		configLoader->getCharData("spikeStreamArchiveUser"),
+		configLoader->getCharData("spikeStreamArchivePassword"),
+		configLoader->getCharData("spikeStreamArchiveDatabase")
+	);
+	try{
+	    ArchiveDao* archiveDao = new ArchiveDao(archiveDBInfo);
+	    Globals::setArchiveDao(archiveDao);
+	}
+	catch(SpikeStreamException& ex){
+	    qCritical()<<ex.getMessage();
+	}
+
 	//Get the default location for saving and loading databases
 	defaultFileLocation = configLoader->getCharData("default_file_location");
 	Globals::setWorkingDirectory(defaultFileLocation);
 
 	//Set up the global event router and connect appropriate signals to this class
 	connect(Globals::getEventRouter(), SIGNAL(reloadSignal()), this, SLOT(reloadEverything()), Qt::QueuedConnection);
-
-	//Set up tester to run any code that needs testing
-	//Tester *tester = new Tester();
-	//delete tester;
-
 
 	//Actions
 	//Add OpenGL actions
@@ -289,19 +301,34 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	connect(moveBackwardAction, SIGNAL(triggered()), Globals::getEventRouter(), SLOT(moveBackwardSlot()));
 	this->addAction(moveBackwardAction);
 
+	QAction* resetViewAction = new QAction(this);
+	resetViewAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_R));
+	connect(resetViewAction, SIGNAL(triggered()), Globals::getEventRouter(), SLOT(resetViewSlot()));
+	this->addAction(resetViewAction);
+
+	QAction* rotateUpAction = new QAction(this);
+	rotateUpAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Up));
+	connect(rotateUpAction, SIGNAL(triggered()), Globals::getEventRouter(), SLOT(rotateUpSlot()));
+	this->addAction(rotateUpAction);
+
+	QAction* rotateDownAction = new QAction(this);
+	rotateDownAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Down));
+	connect(rotateDownAction, SIGNAL(triggered()), Globals::getEventRouter(), SLOT(rotateDownSlot()));
+	this->addAction(rotateDownAction);
+
+	QAction* rotateLeftAction = new QAction(this);
+	rotateLeftAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Left));
+	connect(rotateLeftAction, SIGNAL(triggered()), Globals::getEventRouter(), SLOT(rotateLeftSlot()));
+	this->addAction(rotateLeftAction);
+
+	QAction* rotateRightAction = new QAction(this);
+	rotateRightAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Right));
+	connect(rotateRightAction, SIGNAL(triggered()), Globals::getEventRouter(), SLOT(rotateRightSlot()));
+	this->addAction(rotateRightAction);
+
 /*	QAction* rotateLeftAction = new QAction(this);
 	rotateLeftAction->setShortcuts(QKeySequence::Open);
-     connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
-
-		keyboardAccelerator->insertItem(Qt::Key_Up);
-	keyboardAccelerator->insertItem(Qt::Key_Down);
-	keyboardAccelerator->insertItem(Qt::Key_Left);
-	keyboardAccelerator->insertItem(Qt::Key_Right);
-	keyboardAccelerator->insertItem(Qt::CTRL + Qt::Key_Up);
-	keyboardAccelerator->insertItem(Qt::CTRL + Qt::Key_Down);
-	keyboardAccelerator->insertItem(Qt::CTRL + Qt::Key_Left);
-	keyboardAccelerator->insertItem(Qt::CTRL + Qt::Key_Right);
-	keyboardAccelerator->insertItem(Qt::SHIFT + Qt::Key_Up);
+    	keyboardAccelerator->insertItem(Qt::SHIFT + Qt::Key_Up);
 	keyboardAccelerator->insertItem(Qt::SHIFT + Qt::Key_Down);
 	keyboardAccelerator->insertItem(Qt::SHIFT + Qt::Key_Left);
 	keyboardAccelerator->insertItem(Qt::SHIFT + Qt::Key_Right);
@@ -312,26 +339,14 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	keyboardAccelerator->insertItem(Qt::CTRL + Qt::ALT + Qt::Key_Up);
 	keyboardAccelerator->insertItem(Qt::CTRL + Qt::ALT + Qt::Key_Down);
 	keyboardAccelerator->insertItem(Qt::CTRL + Qt::ALT + Qt::Key_Left);
-	keyboardAccelerator->insertItem(Qt::CTRL + Qt::ALT + Qt::Key_Right);
-	keyboardAccelerator->insertItem(Qt::CTRL + Qt::Key_R);
-	keyboardAccelerator->insertItem(Qt::CTRL + Qt::Key_Equal);
-	keyboardAccelerator->insertItem(Qt::CTRL + Qt::Key_Minus);
-
-
-
-	*/
-
-
-
-
-
+	keyboardAccelerator->insertItem(Qt::CTRL + Qt::ALT + Qt::Key_Right);	*/
 
 
 	//Set up menus. 
 	//Add file menu.
 	Q3PopupMenu * fileMenu = new Q3PopupMenu(this);
 	menuBar()->insertItem("File", fileMenu);
-	fileMenu->insertItem("Clear databases", this, SLOT(clearDatabases()), Qt::CTRL+Qt::Key_R);
+	fileMenu->insertItem("Clear databases", this, SLOT(clearDatabases()));
 	fileMenu->insertItem("Load databases", this, SLOT(loadDatabases()), Qt::CTRL+Qt::Key_L);
 	fileMenu->insertItem("Save databases", this, SLOT(saveDatabases()), Qt::CTRL+Qt::Key_S);
 	fileMenu->insertSeparator();
@@ -438,19 +453,10 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 
 
 	//Set up archive tab
-	Q3ScrollView* archiveScrollView = new Q3ScrollView(this);
-	Q3VBox* archiveViewBox = new Q3VBox(archiveScrollView->viewport());
-	archiveViewBox->setMinimumSize(1000, 800);
-	archiveScrollView->addChild(archiveViewBox);
-	QSplitter *archiveSplitterWidget = new QSplitter(archiveViewBox);
-	archiveSplitterWidget->setOrientation(Qt::Vertical);
-	archiveWidget = new ArchiveWidget(archiveSplitterWidget, archiveDBInterface, archiveManager);
-	archiveManager = archiveWidget->getArchiveManager();
-
-	MonitorArea *archiveMonitorArea = new MonitorArea(archiveManager, archiveSplitterWidget);
-	archiveMonitorArea->setMinimumSize(60, 200);
-	archiveWidget->setMonitorArea(archiveMonitorArea);
-        tabWidget->addTab(archiveScrollView, "Archive");
+	ArchiveWidget_V2* archiveWidget = new ArchiveWidget_V2(this);
+	QScrollArea* archiveScrollArea = new QScrollArea(this);
+	archiveScrollArea->setWidget(archiveWidget);
+	tabWidget->addTab(archiveScrollArea, "Archives");
 
         //Set up analysis tab
        // AnalysisLoaderWidget* analysisLoaderWidget = new AnalysisLoaderWidget(this);

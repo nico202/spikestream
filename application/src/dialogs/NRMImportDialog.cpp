@@ -1,4 +1,5 @@
 //SpikeStream includes
+#include "NRMConstants.h"
 #include "NRMImportDialog.h"
 #include "Globals.h"
 #include "NRMException.h"
@@ -33,6 +34,8 @@ NRMImportDialog::NRMImportDialog(QWidget* parent) : QDialog(parent, "NoiseParamD
     //Create the nrm loader, which will run as a separate thread
     fileLoader = new NRMFileLoader();
     connect (fileLoader, SIGNAL(finished()), this, SLOT(threadFinished()));
+    dataImporter = new NRMDataImporter(Globals::getNetworkDao()->getDBInfo());
+    connect(dataImporter, SIGNAL(finished()), this, SLOT(threadFinished()));
 
     //Connect this class up to the event router to inform other classes when the network list changes
     connect(this, SIGNAL(networkListChanged()), Globals::getEventRouter(), SLOT(networkListChangedSlot()));
@@ -43,7 +46,6 @@ NRMImportDialog::NRMImportDialog(QWidget* parent) : QDialog(parent, "NoiseParamD
 
     //Show the first page
     showPage1();
-
 }
 
 
@@ -60,6 +62,7 @@ NRMImportDialog::~NRMImportDialog(){
 /*! Builds the network based on the information stored in the dialog and entered by the user */
 void NRMImportDialog::addNetwork(){
     operationCancelled = false;
+    currentTask = -1;
 
     //Make sure network name and description have text
     if(networkName->text() == "")
@@ -71,8 +74,8 @@ void NRMImportDialog::addNetwork(){
     QList<NRMInputLayer*> inputList = fileLoader->getNetwork()->getAllInputs();
     QList<NRMNeuralLayer*> neuralList = fileLoader->getNetwork()->getAllNeuralLayers();
 
-    //List holding neuron groups to be added to the network
-    QList<NeuronGroup*> newNeurGrpList;
+    //Clear list holding neuron groups to be added to the network
+    newNeuronGroupList.clear();
 
     /* Work through input layers in the same way as was done when adding them to the
 	page in addLayersToPage2() method */
@@ -100,7 +103,7 @@ void NRMImportDialog::addNetwork(){
 
 	//Add layer with width, height and position to group
 	tmpNeurGrp->addLayer(inputList[i]->width, inputList[i]->height, neurGrpXPos, neurGrpYPos, neurGrpZPos);
-	newNeurGrpList.append(tmpNeurGrp);
+	newNeuronGroupList.append(tmpNeurGrp);
 
 	++rowCount;
     }
@@ -130,7 +133,7 @@ void NRMImportDialog::addNetwork(){
 
 	//Add layer with width, height and position to group
 	tmpNeurGrp->addLayer(neuralList[i]->width, neuralList[i]->height, neurGrpXPos, neurGrpYPos, neurGrpZPos);
-	newNeurGrpList.append(tmpNeurGrp);
+	newNeuronGroupList.append(tmpNeurGrp);
 
 	++rowCount;
     }
@@ -141,12 +144,12 @@ void NRMImportDialog::addNetwork(){
 	//Create network
 	newNetwork = new Network(Globals::getNetworkDao(), networkName->text(), networkDescription->text());
 	connect(newNetwork, SIGNAL(taskFinished()), this, SLOT(threadFinished()));
-	showBusyPage("Adding network to database...");
+	showBusyPage("Adding neurons to database...");
 
 	/* Add all of the neuron groups to the network
 	   This network starts a thread. Need to show busy dialog and periodically check to see if thread has
 	   finished using a timer. */
-	newNetwork->addNeuronGroups(newNeurGrpList);
+	newNetwork->addNeuronGroups(newNeuronGroupList);
 
 	//Show busy page and wait for thread to finish
 	currentTask = ADD_NEURON_GROUPS_TASK;
@@ -169,8 +172,11 @@ void NRMImportDialog::cancel(){
 	case FILE_LOADING_TASK:
 	    fileLoader->stop();
 	break;
-	case ADD_NETWORK_TASK:
+	case ADD_NEURON_GROUPS_TASK:
 	    newNetwork->cancel();
+	break;
+	case ADD_CONNECTION_GROUPS_TASK:
+	    dataImporter->stop();
 	break;
 	default:
 	    qCritical()<<"Current task with id " + QString::number(currentTask) + " is not recognized.";
@@ -196,55 +202,56 @@ void NRMImportDialog::threadFinished(){
 	    default:
 		qCritical()<<"Current task with id " + QString::number(currentTask) + " is not recognized.";
 	}
+	currentTask = -1;
+	operationCancelled = false;
+	return;
     }
 
-    //Operation has not been cancelled and thread has terminated normally
-    else{
-	switch (currentTask){
-	    case FILE_LOADING_TASK:
-		addLayersToPage2();
-		showPage2();
-	    break;
-	    case ADD_NEURON_GROUPS_TASK:
-		//Check for errors and clean up
-		if(newNetwork->isError()){
-		    qCritical()<<"Error adding Network: "<<newNetwork->getErrorMessage();
-		    Globals::getNetworkDao()->deleteNetwork(newNetwork->getID());
-		    this->reject();
-		}
+    /* Operation has not been cancelled and thread has terminated normally
+	Carry out appropriate operation depending on the current task */
+    switch (currentTask){
+	case FILE_LOADING_TASK:
+	    addLayersToPage2();
+	    showPage2();
+	break;
+	case ADD_NEURON_GROUPS_TASK:
+	    //Check for errors and clean up
+	    if(newNetwork->isError()){
+		qCritical()<<"Error adding Network: "<<newNetwork->getErrorMessage();
+		Globals::getNetworkDao()->deleteNetwork(newNetwork->getID());
+		this->reject();
+	    }
 
-		//Add connection groups to network
-		addConnectionGroups();
+	    //Store the new neuron group IDs in the NRM network
+	    addNeuronGroupIDsToNRMNetwork();
 
-	    break;
-	    case: ADD_CONNECTION_GROUPS_TASK:
-		//Check for errors and clean up
-		if(newNetwork->isError()){
-		    qCritical()<<"Error adding Network: "<<newNetwork->getErrorMessage();
-		    Globals::getNetworkDao()->deleteNetwork(newNetwork->getID());
-		    this->reject();
-		}
-		else{
-		    //Inform other classes that the list of networks has changed
-		    emit networkListChanged();
+	    //Start the add connection groups to network task
+	    addConnectionGroups();
+	break;
+	case ADD_CONNECTION_GROUPS_TASK:
+	    //Check for errors and clean up
+	    if(dataImporter->isError()){
+		qCritical()<<"Error adding Network: "<<dataImporter->getErrorMessage();
+		Globals::getNetworkDao()->deleteNetwork(newNetwork->getID());
+		this->reject();
+	    }
+	    else{//Importing was successful
 
-		    //Inform user that it went ok
-		    showSuccessPage();
-		}
+		//Inform other classes that the list of networks has changed
+		emit networkListChanged();
 
-		//Clean up network from memory - this does not affect the network stored in the database
-		if(newNetwork != NULL)
-		    delete newNetwork;
-	    break;
-	    break;
-	    default:
-		qCritical()<<"Current task with id " + QString::number(currentTask) + " is not recognized.";
-	}
+		//Inform user that it went ok
+		showSuccessPage();
+	    }
+
+	    //Clean up network from memory - this does not affect the network stored in the database
+	    if(newNetwork != NULL)
+		delete newNetwork;
+	break;
+	default:
+	    qCritical()<<"Current task with id " + QString::number(currentTask) + " is not recognized.";
     }
 
-    //Reset variables
-    operationCancelled = false;
-    currentTask = -1;
 }
 
 
@@ -269,6 +276,7 @@ void NRMImportDialog::showBusyPage(QString busyMessage){
     page1Widget->setVisible(false);
     page2Widget->setVisible(false);
     successWidget->setVisible(false);
+    adjustSize();
 }
 
 
@@ -309,6 +317,7 @@ void NRMImportDialog::showSuccessPage(){
 void NRMImportDialog::loadNetworkFromFiles(){
     bool fileError = false;
     operationCancelled = false;
+    currentTask = -1;
 
     //Check that file paths are valid
     if(!QFile::exists(configFilePath->text())){
@@ -359,50 +368,15 @@ void NRMImportDialog::loadNetworkFromFiles(){
 
 /*! Adds connection groups and connections to the new network */
 void NRMImportDialog::addConnectionGroups(){
-    QList<NRMInputLayer*> inputList = fileLoader->getNetwork()->getAllInputLayers();
-    QList<NRMNeuralLayer*> neuralList = fileLoader->getNetwork()->getAllNeuralLayers();
+    //Reset variables
+    operationCancelled = false;
+    currentTask = ADD_CONNECTION_GROUPS_TASK;
 
-    /* Work through the list of neuron groups added to the database.
-	The first items in this list are input layers, which do not contain connections.
-	So calculate the offset in the list of added neuron groups. */
-    int offset = inputList.size();
-    for(int i=0; i<neuralList.size(); ++i){
+    showBusyPage("Adding connections to database...");
 
-	//Easier to manipulate the NRM neuron group
-	NRMNeuralLayer* nrmNeurGrp = neuralList[i];
+    dataImporter->prepareAddConnections(fileLoader->getNetwork(), newNetwork);
+    dataImporter->start();
 
-	//Get the list of connection groups from the NRM network
-	QList<NRMConnection*> nrmConnGrpList = nrmNeurGrp->getConnections();
-
-	for(int j=0; j<nrmConnGrpList.size(); ++j){
-	    //Easier to manipulate the appropriate NRMConnection
-	    NRMConnection* nrmConGrp = nrmConnGrpList[j];
-
-	    //Create a connection group
-	    ConnectionGroup* conGrp = new ConnectionGroup( ConnectionGroupInfo(id, desc, fromID, utoID,paramMap, synType) );
-
-	    //Work through the neurons and add their connections to the group
-	    for(int neurNum = 0; neurNum < nrmNeurGrp->getSize(); ++i){
-		//Get the layer that this neuron connects to
-		fromLayerID = nrmConGrp->srcLayerId;
-		if(nrmConGrp->srcObjectType == FIXME INPUT LAYER)
-
-
-		//Get the connections of this neuron
-		QList<unsigned int> nrmConGrp->getNeuronConnections(neurNum);
-
-	    }
-
-	    //Add these connections to the network
-	    newNetwork->addConnectionGroup();
-
-
-
-	}
-
-
-
-    }
 }
 
 
@@ -465,6 +439,32 @@ void NRMImportDialog::addLayersToPage2(){
 
 	//Calculate next proposed insertion position
 	tmpXPos += neuralList[i]->width + 2;
+    }
+}
+
+
+/*! Stores the SpikeStream neuron group ID inside the NRM layers to enable
+    the connections to be added correctly. */
+void NRMImportDialog::addNeuronGroupIDsToNRMNetwork(){
+    //Lists of the input and neural layers in the NRM network
+    QList<NRMInputLayer*> inputList = fileLoader->getNetwork()->getAllInputs();
+    QList<NRMNeuralLayer*> neuralList = fileLoader->getNetwork()->getAllNeuralLayers();
+
+    //Check that the lists are likely to be in synchrony
+    if( (inputList.size() + neuralList.size()) != newNeuronGroupList.size()){
+	qCritical()<<"NRM layers and new neuron groups do not match.";
+	return;
+    }
+
+    //Work through list in same order as was used to generate the list
+    int index = 0;
+    for(int i=0; i<inputList.size(); ++i){
+	inputList[i]->spikeStreamID = newNeuronGroupList[index]->getID();
+	++index;
+    }
+    for(int i=0; i<neuralList.size(); ++i){
+	neuralList[i]->spikeStreamID = newNeuronGroupList[index]->getID();
+	++index;
     }
 }
 

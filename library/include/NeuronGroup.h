@@ -19,13 +19,16 @@ namespace spikestream {
 	    void clearNeurons();
 	    bool contains(unsigned int neurID, float x, float y, float z);
 	    unsigned int getID() { return info.getID(); }
+	    unsigned int getStartNeuronID() { return startNeuronID; }
 	    NeuronGroupInfo getInfo() {return info;}
 	    QList<unsigned int> getNeuronIDs() { return neuronMap->keys(); }
 	    NeuronMap* getNeuronMap() { return neuronMap; }
+	    Point3D* getNeuronLocation(unsigned int neuronID);
 	    bool isLoaded() { return loaded; }
 	    void setLoaded(bool loaded) { this->loaded = loaded; }
 	    void setID(unsigned int id){ info.setID(id); }
 	    void setNeuronMap(NeuronMap* newMap) { this->neuronMap = newMap; }
+	    void setStartNeuronID(unsigned int id) { this->startNeuronID = id; }
 	    int size();
 
 	 private:
@@ -43,6 +46,10 @@ namespace spikestream {
 		This should be false if no neurons have been loaded and false
 		if the neuron map is full of neurons with dummy ids */
 	   bool loaded;
+
+	   /*! The first and lowest neuron id in the group. Useful when you know that
+		a neuron group has continuously increasing IDs. */
+	   unsigned int startNeuronID;
 
 	   //====================  METHODS  ==========================
 	   NeuronGroup(const NeuronGroup& connGrp);

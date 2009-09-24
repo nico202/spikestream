@@ -226,7 +226,7 @@ void LayerWidget::deleteLayer(){
 				}
 				//Reset default clipping volume so that remaining neuron groups fit within it
 				SpikeStreamMainWindow::spikeStrMainWin->getNetworkViewer()->loadDefaultClippingVolume();
-				SpikeStreamMainWindow::spikeStrMainWin->getNetworkViewer()->resetView();
+				//SpikeStreamMainWindow::spikeStrMainWin->getNetworkViewer()->resetView();
 				
 				//Reload neuron groups and connection groups
 				SpikeStreamMainWindow::spikeStrMainWin->reloadNeuronGroups();
@@ -364,7 +364,7 @@ void LayerWidget::editLayerProperties(){
 				
 				//Load default clipping volume so that remaining neuron groups fit within it
 				SpikeStreamMainWindow::spikeStrMainWin->getNetworkViewer()->loadDefaultClippingVolume();
-				SpikeStreamMainWindow::spikeStrMainWin->getNetworkViewer()->resetView();
+				//SpikeStreamMainWindow::spikeStrMainWin->getNetworkViewer()->resetView();
 				
 				//Set the view vector so the same neuron groups are visible as before
 				SpikeStreamMainWindow::spikeStrMainWin->getNetworkViewer()->setLayerView(viewVector);
@@ -432,7 +432,7 @@ void LayerWidget::newLayer(){
 			else{//Layer has been created successfully
 				SpikeStreamMainWindow::spikeStrMainWin->getNetworkViewer()->loadNeuronGroup(layerID, true);
 				SpikeStreamMainWindow::spikeStrMainWin->getNetworkViewer()->loadDefaultClippingVolume();
-				SpikeStreamMainWindow::spikeStrMainWin->getNetworkViewer()->resetView();
+				//SpikeStreamMainWindow::spikeStrMainWin->getNetworkViewer()->resetView();
 				
 				//Update list of neuron groups in the rest of the application
 				SpikeStreamMainWindow::spikeStrMainWin->reloadNeuronGroups();

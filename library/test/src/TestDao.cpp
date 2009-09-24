@@ -21,6 +21,26 @@ void TestDao::connectToDatabase(const QString& dbName){    //Set the database pa
     bool ok = database.open();
     if(!ok)
 	throw SpikeStreamDBException( QString("Cannot connect to database ") + dbInfo.toString() + ". Error: " + database.lastError().text() );
+SORT THIS OUT
+    archiveDBRefName = "TestArchiveDBRef";
+    archiveDBInfo = DBInfo("localhost", "SpikeStream", "ekips", dbName);
+
+    //Create database unique to this thread. No need to store reference because it is held statically
+    database = QSqlDatabase::addDatabase("QMYSQL", dbRefName);
+    database.setHostName(dbInfo.getHost());
+    database.setDatabaseName(dbInfo.getDatabase());
+    database.setUserName(dbInfo.getUser());
+    database.setPassword(dbInfo.getPassword());
+    bool ok = database.open();
+    if(!ok)
+	throw SpikeStreamDBException( QString("Cannot connect to database ") + dbInfo.toString() + ". Error: " + database.lastError().text() );
+
+
+
+
+
+
+
 }
 
 /*! Cleans up everything from the test networks database */
@@ -63,6 +83,19 @@ QSqlQuery TestDao::getQuery(){
 /*! Returns a query object for the database */
 QSqlQuery TestDao::getQuery(const QString& queryStr){
     QSqlQuery tmpQuery(database);
+    tmpQuery.prepare(queryStr);
+    return tmpQuery;
+}
+
+/*! Returns a query object for the database */
+QSqlQuery TestDao::getArchiveQuery(){
+    return QSqlQuery(archiveDatabase);
+}
+
+
+/*! Returns a query object for the database */
+QSqlQuery TestDao::getArchiveQuery(const QString& queryStr){
+    QSqlQuery tmpQuery(archiveDatabase);
     tmpQuery.prepare(queryStr);
     return tmpQuery;
 }

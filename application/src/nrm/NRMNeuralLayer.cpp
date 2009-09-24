@@ -10,6 +10,7 @@ using namespace std;
 /*! Constructor */
 NRMNeuralLayer::NRMNeuralLayer(){
 	trainingStringCount = 0;
+	type = NRM_NEURAL_LAYER;
 }
 
 

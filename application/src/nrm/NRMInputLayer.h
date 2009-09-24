@@ -2,6 +2,7 @@
 #define NRMINPUTLAYER_H
 
 #include "NRMLayer.h"
+using namespace nrm;
 
 /*! Holds information about NRM input layers */
 class NRMInputLayer : public NRMLayer {

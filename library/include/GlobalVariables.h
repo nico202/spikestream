@@ -109,7 +109,7 @@
 
 
 /*! Default threshold for lazy loading */
-#define LAZY_LOADING_THRESHOLD 10000
+#define LAZY_LOADING_THRESHOLD 1000000
 
 /*! Commenting or uncommenting this define determines whether 
 	statistics are recorded for the simulation.*/

@@ -140,10 +140,10 @@ NRMNeuralLayer* NRMNetwork::getNeuralLayerById(int id){
 /*! Returns the requested layer with the object type used to discriminate between
 	neural and input layers */
 NRMLayer* NRMNetwork::getLayerById(int layerId, int objectType){
-	if(objectType == MAGNUS_PREV_OB || objectType == MAGNUS_STATE_OB){
+	if( objectType == MAGNUS_IN_OB || objectType == MAGNUS_PREV_OB || objectType == MAGNUS_STATE_OB){
 		return getNeuralLayerById(layerId);
 	}
-	else if(objectType == IMG_INPUT_OB || objectType == MAGNUS_IN_OB){
+	else if(objectType == IMG_INPUT_OB){
 		return this->getInputById(layerId);
 	}
 	throw NRMException("Object type not recognized: ", objectType);

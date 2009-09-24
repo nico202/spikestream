@@ -26,7 +26,8 @@ HEADERS += src/TestRunner.h \
 	    src/TestNetworkDaoThread.h \
 	    src/TestXMLParameterParser.h \
 	    src/TestNetwork.h \
-	    src/TestNeuronGroup.h
+	    src/TestNeuronGroup.h \
+	    src/TestArchiveDao.h
 
 SOURCES += src/Main.cpp \
 	    src/TestRunner.cpp \
@@ -35,6 +36,7 @@ SOURCES += src/Main.cpp \
 	    src/TestNetworkDaoThread.cpp \
 	    src/TestXMLParameterParser.cpp \
 	    src/TestNetwork.cpp \
-	    src/TestNeuronGroup.cpp
+	    src/TestNeuronGroup.cpp \
+	    src/TestArchiveDao.cpp
 
 

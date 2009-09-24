@@ -3,19 +3,62 @@
 
 //SpikeStream includes
 #include "DBInfo.h"
+#include "NRMNetwork.h"
+#include "Network.h"
+#include "NetworkDaoThread.h"
 using namespace spikestream;
 
 //Qt includes
+#include <QString>
 #include <QThread>
 
-class NRMDataImporter : public QThread {
-    public:
-	NRMDataImporter(const DBInfo& dbInfo);
-	~NRMDataImporter();
-	void run();
-	void stop();
+namespace spikestream {
 
-};
+    class NRMDataImporter : public QThread {
+	public:
+	    NRMDataImporter(const DBInfo& dbInfo);
+	    ~NRMDataImporter();
+	    bool isError(){ return error; }
+	    QString getErrorMessage() { return errorMessage; }
+	    void prepareAddConnections(NRMNetwork* nrmNetwork, Network* network);
+	    void run();
+	    void stop();
+
+	private:
+	    //========================  VARIABLES  ==========================
+	    /*! Used to add connections to the database */
+	    NetworkDaoThread* networkDaoThread;
+
+	    /*! Records which task is being undertaken - task IDs are defined below */
+	    unsigned int currentTask;
+
+	    /*! Task of adding connections to the database */
+	    static const int ADD_CONNECTIONS_TASK = 1;
+
+	    /*! When set to true the run method is exited. */
+	    bool stopThread;
+
+	    /*! Exceptions do not work across threads, so need to record when an error takes place when
+		 the thread is executing a task.*/
+	    bool error;
+
+	    /*! Error message */
+	    QString errorMessage;
+
+	    /*! NRM Network containing the data being imported */
+	    NRMNetwork* nrmNetwork;
+
+	    /*! SpikeStream network with all the neuron groups and which handles the database stuff */
+	    Network* network;
+
+
+	    //==========================  METHODS  ===========================
+	    void addConnections();
+	    void clearError();
+	    void setError(const QString& errMsg);
+    };
+
+}
 
 #endif//NRMDATAIMPORTER_H
 

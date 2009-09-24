@@ -11,8 +11,7 @@ using namespace std;
 
 /*! Constructor. DBInfo is stored by AbstractDao */
 NetworkDao::NetworkDao(DBInfo& dbInfo) : AbstractDao(dbInfo){
-    //Connect to the database straight away since this will be running in the same thread.
-    connectToDatabase();
+
 }
 
 

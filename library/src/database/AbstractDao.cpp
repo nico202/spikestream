@@ -12,6 +12,9 @@ AbstractDao::AbstractDao(const DBInfo& dbInfo){
 
     //Default name of database  - this changes when it is connected.
     dbName = "";
+
+    //Connect to the database
+    connectToDatabase();
 }
 
 

@@ -7,6 +7,7 @@ NeuronGroup::NeuronGroup(const NeuronGroupInfo& info){
     this->info = info;
     neuronMap = new NeuronMap();
     loaded = false;
+    startNeuronID = 0;
 }
 
 
@@ -65,6 +66,14 @@ bool NeuronGroup::contains(unsigned int neurID, float x, float y, float z){
     if((*neuronMap)[neurID]->xPos != x || (*neuronMap)[neurID]->yPos != y || (*neuronMap)[neurID]->zPos != z)
 	return false;
     return true;
+}
+
+
+/*! Returns the location of the neuron with the specified ID */
+Point3D* NeuronGroup::getNeuronLocation(unsigned int neuronID){
+    if(!neuronMap->contains(neuronID))
+	throw SpikeStreamException("Neuron ID '" + QString::number(neuronID) + "' could not be found.");
+    return (*neuronMap)[neuronID];
 }
 
 

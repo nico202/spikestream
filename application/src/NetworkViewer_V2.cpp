@@ -46,6 +46,11 @@ NetworkViewer_V2::NetworkViewer_V2(QWidget* parent) : QGLWidget(parent) {
     connect(Globals::getEventRouter(), SIGNAL(moveRightSignal()), this, SLOT(moveRight()), Qt::QueuedConnection);
     connect(Globals::getEventRouter(), SIGNAL(moveBackwardSignal()), this, SLOT(moveBackward()), Qt::QueuedConnection);
     connect(Globals::getEventRouter(), SIGNAL(moveForwardSignal()), this, SLOT(moveForward()), Qt::QueuedConnection);
+    connect(Globals::getEventRouter(), SIGNAL(resetViewSignal()), this, SLOT(resetView()), Qt::QueuedConnection);
+    connect(Globals::getEventRouter(), SIGNAL(rotateUpSignal()), this, SLOT(rotateUp()), Qt::QueuedConnection);
+    connect(Globals::getEventRouter(), SIGNAL(rotateDownSignal()), this, SLOT(rotateDown()), Qt::QueuedConnection);
+    connect(Globals::getEventRouter(), SIGNAL(rotateLeftSignal()), this, SLOT(rotateLeft()), Qt::QueuedConnection);
+    connect(Globals::getEventRouter(), SIGNAL(rotateRightSignal()), this, SLOT(rotateRight()), Qt::QueuedConnection);
 
     //Set display to initial state
     reset();
@@ -113,6 +118,9 @@ void NetworkViewer_V2::paintGL(){
 	    //Draw the neurons
 	    drawNeurons();
 
+	    //Draw the connections
+	    drawConnections();
+
 	    //Restore the original state of the matrix
 	    glPopMatrix();
 
@@ -174,6 +182,33 @@ void NetworkViewer_V2::resizeGL(int screenWidth, int screenHeight){
     checkOpenGLErrors();
 }
 
+void NetworkViewer_V2::mouseDoubleClickEvent (QMouseEvent * event ){
+    cout<<"Mouse double click: "<<endl;
+//    If you derive a class from QGLWidget you can reimplement
+//mouseMoveEvent(QMouseEvent *event).
+//Use something like this (stolen from the red book p152):
+//
+//  // Get the cursor and convert to model coordinates
+//  QPoint cursor = event->pos();
+//  GLint viewport[4];
+//  GLdouble mvmatrix[16], projmatrix[16];
+//  GLint realy;
+//  GLdouble wx, wy, wz;
+//
+//  // Convert to model coordinates
+//  glGetIntegerv(GL_VIEWPORT, viewport);
+//  glGetDoublev(GL_MODELVIEW_MATRIX, mvmatrix);
+//  glGetDoublev(GL_PROJECTION_MATRIX, projmatrix);
+//
+//  realy = viewport[3] - (GLint) cursor.y() - 1;
+//  gluUnProject((GLdouble) cursor.x(), (GLdouble) realy, 0.0,
+//    mvmatrix, projmatrix, viewport, &wx, &wy, &wz);
+//
+//Note the above assumes the point you're asking for is at 0 in
+//the Z plane.
+
+}
+
 
 /*----------------------------------------------------------*/
 /*-----                PRIVATE SLOTS                   -----*/
@@ -221,6 +256,30 @@ void NetworkViewer_V2::moveBackward(){
     updateGL();
 }
 
+void NetworkViewer_V2::resetView(){
+    viewClippingVolume_Horizontal(defaultClippingVol);
+    updateGL();
+}
+
+void NetworkViewer_V2::rotateUp(){
+    sceneRotateX += 2.5f;
+    updateGL();
+}
+
+void NetworkViewer_V2::rotateDown(){
+    sceneRotateX -= 2.5f;
+    updateGL();
+}
+
+void NetworkViewer_V2::rotateLeft(){
+    sceneRotateZ += 2.5f;
+    updateGL();
+}
+
+void NetworkViewer_V2::rotateRight(){
+    sceneRotateZ -= 2.5f;
+    updateGL();
+}
 
 
 /*! Re-draws the network */
@@ -357,6 +416,67 @@ void NetworkViewer_V2::drawAxes(void){
 	//Reset line width to original value
 	glPopAttrib();
 }
+
+
+/*! Draws the connections */
+void NetworkViewer_V2::drawConnections(){
+    //Nothing to do if no network is loaded
+    if(!Globals::networkLoaded())
+	return;
+
+    //Local variables declared once here to save processing
+    Point3D* fromNeurPoint;
+    Point3D* toNeurPoint;
+
+    //Get pointer to network that is to be drawn and its associated display
+    Network* network = Globals::getNetwork();
+    NetworkDisplay* netDisplay = Globals::getNetworkDisplay();
+
+    //Default neuron colour
+    RGBColor positiveConnectionColor = netDisplay->getPositiveConnectionColor();
+    RGBColor negativeConnectionColor = netDisplay->getNegativeConnectionColor();
+
+    //Start drawing lines
+    glBegin(GL_LINES);
+
+	//Work through the connection groups listed in the network display
+	QList<unsigned int> conGrpIDs = Globals::getNetworkDisplay()->getVisibleConnectionGroupIDs();
+	for(QList<unsigned int>::iterator conGrpIter = conGrpIDs.begin(); conGrpIter != conGrpIDs.end(); ++conGrpIter){
+
+	    //Pointer to connection group
+	    ConnectionGroup* conGrp = network->getConnectionGroup(*conGrpIter);
+
+	    //Get neuron groups for extracting the position information
+	    NeuronGroup* fromNeuronGroup = network->getNeuronGroup(conGrp->getFromNeuronGroupID());
+	    NeuronGroup* toNeuronGroup = network->getNeuronGroup(conGrp->getToNeuronGroupID());
+
+	    //Draw all the connections in the group
+	    QList<Connection*>* conList = conGrp->getConnections();
+	    QList<Connection*>::iterator endConList = conList->end();
+	    for(QList<Connection*>::iterator conIter = conList->begin(); conIter != endConList; ++ conIter){
+
+		//Get the position of the from and to neurons
+		//FIXME: THIS COULD BE SPEEDED UP BY STORING THE POSITION IN Connection AT THE COST OF SOME LOADING COMPLEXITY
+		fromNeurPoint = fromNeuronGroup->getNeuronLocation((*conIter)->fromNeuronID);
+		toNeurPoint = toNeuronGroup->getNeuronLocation((*conIter)->toNeuronID);
+
+		//Set the colour
+		if((*conIter)->weight >= 0)
+		    glColor3f(positiveConnectionColor.red, positiveConnectionColor.green, positiveConnectionColor.blue);
+		else
+		    glColor3f(negativeConnectionColor.red, negativeConnectionColor.green, negativeConnectionColor.blue);
+
+		//Draw the neuron
+		glVertex3f(fromNeurPoint->xPos, fromNeurPoint->yPos, fromNeurPoint->zPos);
+		glVertex3f(toNeurPoint->xPos, toNeurPoint->yPos, toNeurPoint->zPos);
+
+	    }
+	}
+
+    //End of line drawing
+    glEnd();
+}
+
 
 
 /*! Draws the visible neurons in the network */

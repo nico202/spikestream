@@ -11,8 +11,10 @@ NetworkDisplay::NetworkDisplay(){
     //Inform other classes when the display has changed
     connect(this, SIGNAL(networkDisplayChanged()), Globals::getEventRouter(), SLOT(networkDisplayChangedSlot()), Qt:: QueuedConnection);
 
-    //Set the default neuron color
+    //Set the default colors
     defaultNeuronColor.set(0.0f, 0.0f, 0.0f);
+    negativeConnectionColor.set(0.0f, 0.0f, 1.0f);
+    positiveConnectionColor.set(1.0f, 0.0f, 0.0f);
 }
 
 
@@ -33,8 +35,10 @@ void NetworkDisplay::networkChanged(){
     neuronColorMap.clear();
 
     //Make the neuron groups visible by default
-    if(Globals::networkLoaded())
+    if(Globals::networkLoaded()){
 	setVisibleNeuronGroupIDs(Globals::getNetwork()->getNeuronGroupIDs());
+	setVisibleConnectionGroupIDs(Globals::getNetwork()->getConnectionGroupIDs());
+    }
 }
 
 
