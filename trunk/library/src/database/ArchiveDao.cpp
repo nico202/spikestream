@@ -23,8 +23,8 @@ void ArchiveDao::deleteArchive(unsigned int archiveID){
 
 
 /*! Returns a list of the archives in the database that are associated with the specified network. */
-QList<ArchiveDaoInfo> ArchiveDao::getArchivesInfo(unsigned int networkID){
-    QSqlQuery query = getQuery("SELECT ArchiveID, FROM_UNIXTIME(StartTime), Description FROM Archives WHERE NetworkID=" + QString::number(networkID) + " ORDER BY StartTime");
+QList<ArchiveInfo> ArchiveDao::getArchivesInfo(unsigned int networkID){
+    QSqlQuery query = getQuery("SELECT ArchiveID, StartTime, Description FROM Archives WHERE NetworkID=" + QString::number(networkID) + " ORDER BY StartTime");
     executeQuery(query);
     QList<ArchiveInfo> tmpList;
     for(int i=0; i<query.size(); ++i){
@@ -35,7 +35,7 @@ QList<ArchiveDaoInfo> ArchiveDao::getArchivesInfo(unsigned int networkID){
 		ArchiveInfo(
 			archiveID,
 			networkID,
-			query.value(1).toString(),//Start time in date format
+			Util::getUInt(query.value(1).toString()),//Start time as a unix timestamp
 			query.value(2).toString(),//Description
 			archiveSize
 		)

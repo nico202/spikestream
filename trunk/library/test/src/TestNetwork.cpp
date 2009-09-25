@@ -3,33 +3,6 @@
 using namespace spikestream;
 
 
-/*! Called after each test */
-void TestNetwork::cleanup(){
-}
-
-
-/*! Called after all the tests */
-void TestNetwork::cleanupTestCase() {
-    //Leave databases in clean state
-    cleanTestDatabases();
-
-    //Close database connection
-    closeDatabase();
-}
-
-
-/*! Called before each test */
-void TestNetwork::init(){
-    cleanTestDatabases();
-}
-
-
-/*! Called before all the tests */
-void TestNetwork::initTestCase(){
-    connectToDatabase("SpikeStreamNetworkTest");
-}
-
-
 /*----------------------------------------------------------*/
 /*-----                     TESTS                      -----*/
 /*----------------------------------------------------------*/

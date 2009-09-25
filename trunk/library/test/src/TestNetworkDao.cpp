@@ -8,37 +8,9 @@ using namespace spikestream;
 #include <iostream>
 using namespace std;
 
-/*----------------------------------------------------------*/
-/*-----                INIT AND CLEANUP                -----*/
-/*----------------------------------------------------------*/
-
-/*! Called after each test */
-void TestNetworkDao::cleanup(){
-}
-
-
-/*! Called after all the tests */
-void TestNetworkDao::cleanupTestCase() {
-    //Leave databases in clean state
-    cleanTestDatabases();
-
-    //Close database connection
-    closeDatabase();
-}
-
-
-/*! Called before each test */
-void TestNetworkDao::init(){
-    cleanTestDatabases();
-}
-
-
-/*! Called before all the tests */
-void TestNetworkDao::initTestCase(){
-    connectToDatabase("SpikeStreamNetworkTest");
-}
-
-
+//void TestNetworkDao::init(){
+//    cout<<"HELLO FROM INIT"<<endl;
+//}
 /*----------------------------------------------------------*/
 /*-----                     TESTS                      -----*/
 /*----------------------------------------------------------*/

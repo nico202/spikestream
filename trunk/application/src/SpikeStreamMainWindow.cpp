@@ -56,6 +56,7 @@ using namespace spikestream;
 #include <QCloseEvent>
 #include <Q3PopupMenu>
 #include <QtDebug>
+#include <QScrollArea>
 
 //Other includes
 #include <mysql++.h>
@@ -383,7 +384,9 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 
 	//Add networks tab and connect it to appropriate signals
 	NetworksWidget* networksWidget = new NetworksWidget(this);
-	tabWidget->addTab(networksWidget, "Networks");
+	QScrollArea* networksScrollArea = new QScrollArea(this);
+	networksScrollArea->setWidget(networksWidget);
+	tabWidget->addTab(networksScrollArea, "Networks");
 	
 	//Set up editor window and add to tab widget
 	QSplitter *layerSplitterWidget = new QSplitter( tabWidget);
@@ -615,22 +618,22 @@ void SpikeStreamMainWindow::acceleratorKeyPressed(int acceleratorID){
 	switch(keySequence){
                 case (Qt::Key_F1)://Edit tab
 			simulationWidget->hideOpenWindows();
-			archiveWidget->hideOpenWindows();
+			//archiveWidget->hideOpenWindows();
 			tabWidget->setCurrentPage(0);
 		break;
                 case (Qt::Key_F2)://Network viewer properties tab
 			simulationWidget->hideOpenWindows();
-			archiveWidget->hideOpenWindows();
+			//archiveWidget->hideOpenWindows();
 			tabWidget->setCurrentPage(1);
 		break;
                 case (Qt::Key_F3)://Simulation tab
 			simulationWidget->showOpenWindows();
-			archiveWidget->hideOpenWindows();
+			//archiveWidget->hideOpenWindows();
 			tabWidget->setCurrentPage(2);
 		break;
                 case(Qt::Key_F4)://Archive tab
 			simulationWidget->hideOpenWindows();
-			archiveWidget->showOpenWindows();
+			//archiveWidget->showOpenWindows();
 			tabWidget->setCurrentPage(3);
 		break;
 		default:
@@ -662,7 +665,7 @@ void SpikeStreamMainWindow::clearDatabases(){
 		return;
 
 	//Unload archive if it is loaded. Database clearing will invalidate the query.
-	archiveWidget->unloadArchive();
+//	archiveWidget->unloadArchive();
 
 	//Execute queries to clear all databases
 	try{
@@ -843,7 +846,7 @@ void SpikeStreamMainWindow::importConnectionMatrix(){
 		return;
 
 	//Unload archive if it is loaded. Database loading will invalidate the query if it changes the archive database.
-	archiveWidget->unloadArchive();
+//	archiveWidget->unloadArchive();
 
 	//Load from the file
 	#ifdef LOAD_MATRIX_DEBUG
@@ -899,7 +902,7 @@ void SpikeStreamMainWindow::loadDatabases(){
 		return;
 
 	//Unload archive if it is loaded. Database loading will invalidate the query if it changes the archive database.
-	archiveWidget->unloadArchive();
+//	archiveWidget->unloadArchive();
 
 	//Do some sorting out on the name. The user may have typed .sql.zip at the end
 	if(!fileName.endsWith(NEURON_APPLICATION_FILE_EXTENSION))

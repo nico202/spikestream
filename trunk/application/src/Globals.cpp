@@ -2,22 +2,38 @@
 #include "SpikeStreamException.h"
 
 //Declare static variables
+Archive* Globals::archive = NULL;
+ArchiveDao* Globals::archiveDao = NULL;
 EventRouter* Globals::eventRouter = new EventRouter();
 Network* Globals::network = NULL;
+NetworkDao* Globals::networkDao = NULL;
 NetworkDisplay* Globals::networkDisplay = new NetworkDisplay();
 bool Globals::rendering = false;
 QString Globals::spikeStreamRoot = "";
 QString Globals::workingDirectory = "";
-NetworkDao* Globals::networkDao = NULL;
 
 
 /*---------------------------------------------------------------------------------*/
 /*----------                  PUBLIC METHODS                          -------------*/
 /*---------------------------------------------------------------------------------*/
 
+/*! Returns true if an archive is loaded.
+    Should always check with this method before requesting the archive because it
+    will be null if it is not loaded. */
+bool Globals::archiveLoaded(){
+    if(archive == NULL)
+	return false;
+    return true;
+}
+
+
 /*! Cleans up all classes stored in Globals.
     Everything stored in Globals is deleted by Globals. */
 void Globals::cleanUp(){
+    if(archive != NULL){
+	delete archive;
+	archive = NULL;
+    }
     if(network != NULL){
 	delete network;
 	network = NULL;
@@ -32,6 +48,21 @@ void Globals::cleanUp(){
     }
 }
 
+
+/*! Returns the current archive */
+Archive* Globals::getArchive(){
+    if(archive == NULL)
+	throw SpikeStreamException("No archive loaded. You should check that archive is loaded using archiveLoaded() before calling this method.");
+    return archive;
+}
+
+/*! Returns the archive dao, which provides a layer of abstraction on top of the
+    SpikeStreamArchive database */
+ArchiveDao* Globals::getArchiveDao(){
+    return archiveDao;
+}
+
+
 /*! Returns the current network */
 Network* Globals::getNetwork(){
     if(network == NULL)
@@ -44,13 +75,6 @@ Network* Globals::getNetwork(){
     SpikeStreamNetwork database */
 NetworkDao* Globals::getNetworkDao(){
     return networkDao;
-}
-
-
-/*! Returns the archive dao, which provides a layer of abstraction on top of the
-    SpikeStreamArchive database */
-NetworkDao* Globals::getArchiveDao(){
-    return archiveDao;
 }
 
 
@@ -91,6 +115,27 @@ bool Globals::isRendering() {
 /*----------                  PRIVATE METHODS                         -------------*/
 /*---------------------------------------------------------------------------------*/
 
+/*! Sets the archive */
+void Globals::setArchive(Archive* arch){
+    //Clean up the old network if it exists
+    if(Globals::archive != NULL)
+	delete Globals::archive;
+
+    //Store reference to the new network.
+    Globals::archive = arch;
+}
+
+
+/*! Sets the archive dao. */
+void Globals::setArchiveDao(ArchiveDao* archiveDao){
+    //Clean up the old network DAO if it exists
+    if(Globals::archiveDao != NULL)
+	delete archiveDao;
+
+    Globals::archiveDao = archiveDao;
+}
+
+
 /*! Sets the event router */
 void Globals::setEventRouter(EventRouter* eventRouter){
     //Clean up the old network if it exists
@@ -109,7 +154,6 @@ void Globals::setNetwork(Network* net){
 
     //Store reference to the new network.
     Globals::network = net;
-
 }
 
 

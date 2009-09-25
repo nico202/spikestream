@@ -12,11 +12,11 @@ SET foreign_key_checks = 0;
 CREATE TABLE Archives (
 	ArchiveID MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	StartTime BIGINT NOT NULL, /*When the simulation was initialized */
-	NeuralNetworkID SMALLINT NOT NULL, /* References a neural network in the SpikeStreamNetwork table. This network should not be editable if it is associated with simulation data. */
+	NetworkID SMALLINT NOT NULL, /* References a neural network in the SpikeStreamNetwork table. This network should not be editable if it is associated with simulation data. */
 	Description CHAR(100),/* Brief description of the run */
 
 	PRIMARY KEY (ArchiveID),
-	FOREIGN KEY NeuralNetworkID_FK(NeuralNetworkID) REFERENCES SpikeStreamNetwork.NeuralNetworks(NeuralNetworkID) ON DELETE CASCADE
+	FOREIGN KEY NetworkID_FK(NetworkID) REFERENCES SpikeStreamNetwork.NeuralNetworks(NeuralNetworkID) ON DELETE CASCADE
 )
 ENGINE=InnoDB;
 
@@ -31,7 +31,7 @@ CREATE TABLE ArchiveData (
 	FiringNeurons LONGTEXT NOT NULL, /* Comma separated list of neuron ids that were firing at the time step. */
 
 	PRIMARY KEY (ArchiveID, TimeStep), /* Each simulation run is associated with a number of time steps, which should all be different. */
-	FOREIGN KEY ArchiveID_FK(ArchiveID) REFERENCES SimulationRun(ArchiveID) ON DELETE CASCADE
+	FOREIGN KEY ArchiveID_FK(ArchiveID) REFERENCES Archives(ArchiveID) ON DELETE CASCADE
 )
 ENGINE=InnoDB;
 

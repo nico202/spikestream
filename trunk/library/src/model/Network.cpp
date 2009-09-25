@@ -86,6 +86,9 @@ Network::~Network(){
 
 /*! Adds neuron groups to the network */
 void Network::addNeuronGroups(QList<NeuronGroup*>& neuronGroupList){
+    if(isLocked())//Check if network is editable or not
+	throw SpikeStreamException("Cannot add neuron groups to a locked network.");
+
     //Store the list of neuron groups to be added later when the thread has finished and we have the correct ID
     newNeuronGroups = neuronGroupList;
 

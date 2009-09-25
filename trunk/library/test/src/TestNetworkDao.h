@@ -12,10 +12,7 @@ class TestNetworkDao : public TestDao {
 	Q_OBJECT
 
 	private slots:
-	    void cleanup();
-	    void cleanupTestCase();
-	    void init();
-	    void initTestCase();
+    //void init();
 	    void testAddNetwork();
 	    void testDeleteNetwork();
 	    void testGetConnectionGroupsInfo();

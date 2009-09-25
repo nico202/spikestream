@@ -12,14 +12,11 @@ class TestArchiveDao : public TestDao {
 	Q_OBJECT
 
 	private slots:
-	    void cleanup();
-	    void cleanupTestCase();
-	    void init();
-	    void initTestCase();
 	    void testDeleteArchive();
 	    void testGetArchivesInfo();
 	    void testGetArchiveSize();
 
+};
 
 #endif//TESTARCHIVEDAO_H
 

@@ -5,7 +5,7 @@
 #include <iostream>
 using namespace std;
 
-int main(int argc, char* argv[]){
+int main(int, char**){
     //Call the runner to invoke tests
     TestRunner::runTests();
     return 0;

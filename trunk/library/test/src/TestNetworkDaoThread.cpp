@@ -9,36 +9,6 @@ using namespace spikestream;
 #include <iostream>
 using namespace std;
 
-/*----------------------------------------------------------*/
-/*-----                INIT AND CLEANUP                -----*/
-/*----------------------------------------------------------*/
-
-/*! Called after each test */
-void TestNetworkDaoThread::cleanup(){
-}
-
-
-/*! Called after all the tests */
-void TestNetworkDaoThread::cleanupTestCase() {
-    //Leave databases in clean state
-    //cleanTestDatabases();
-
-    //Close database connection
-    closeDatabase();
-}
-
-
-/*! Called before each test */
-void TestNetworkDaoThread::init(){
-    cleanTestDatabases();
-}
-
-
-/*! Called before all the tests */
-void TestNetworkDaoThread::initTestCase(){
-    connectToDatabase("SpikeStreamNetworkTest");
-}
-
 
 /*----------------------------------------------------------*/
 /*-----                     TESTS                      -----*/

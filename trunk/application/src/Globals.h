@@ -3,6 +3,7 @@
 
 //SpikeStream includes
 #include "Archive.h"
+#include "ArchiveWidget_V2.h"
 #include "NetworksWidget.h"
 #include "EventRouter.h"
 #include "ArchiveDao.h"
@@ -17,11 +18,13 @@ using namespace spikestream;
 
 class Globals {
   public:
+    static bool archiveLoaded();
     static void cleanUp();
+    static Archive* getArchive();
+    static ArchiveDao* getArchiveDao();
     static EventRouter* getEventRouter() {return eventRouter; }
     static Network* getNetwork();
     static NetworkDao* getNetworkDao();
-    static NetworkDao* getArchiveDao();
     static NetworkDisplay* getNetworkDisplay();
     static QString getSpikeStreamRoot();
     static QString getWorkingDirectory();
@@ -68,8 +71,9 @@ class Globals {
 
     //======================  METHODS  ============================
     static void setArchive(Archive* archive);
-    static void setNetworkDisplay(NetworkDisplay* networkDisplay);
+    static void setArchiveDao(ArchiveDao* archiveDao);
     static void setEventRouter(EventRouter* eventRouter);
+    static void setNetworkDisplay(NetworkDisplay* networkDisplay);
     static void setNetworkDao(NetworkDao* networkDao);
     static void setNetwork(Network* network);
     static void setRendering(bool rendering);

@@ -1,20 +1,24 @@
 #ifndef ARCHIVEINFO_H
 #define ARCHIVEINFO_H
 
+//Qt includes
+#include <QString>
+#include <QDateTime>
+
 namespace spikestream {
 
     class ArchiveInfo {
 	public:
 	    ArchiveInfo();
-	    ArchiveInfo(unsigned int id, unsigned int networkID, const QString& startDateTime, const QString& description, int numberOfEntries = 0);
+	    ArchiveInfo(unsigned int id, unsigned int networkID, unsigned int unixTimestamp, const QString& description, int numberOfEntries = 0);
 	    ArchiveInfo(const ArchiveInfo& archInfo);
 	    ~ArchiveInfo();
 	    ArchiveInfo& operator=(const ArchiveInfo& rhs);
 
 	    unsigned int getID() { return id; }
 	    unsigned int getNetworkID() { return networkID; }
-	    unsigned int getDate() { return startDateTime; }
-	    unsigned int getDescription() { return description; }
+	    QDateTime getDateTime() { return startDateTime; }
+	    QString getDescription() { return description; }
 	    int size() { return numberOfEntries; }
 
 	private:
@@ -22,7 +26,7 @@ namespace spikestream {
 	    /*! ID of the archive in the database */
 	    unsigned int id;
 	    unsigned int networkID;
-	    QString startDateTime;
+	    QDateTime startDateTime;
 	    QString description;
 
 	    /*! The number of entries in the archive */
