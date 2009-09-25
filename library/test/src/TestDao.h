@@ -20,19 +20,19 @@ class TestDao : public QObject {
 	/*! Information about the SpikeStreamNetwork database used in the tests */
 	DBInfo dbInfo;
 
-	/*! Database connection */
+	/*! SpikeStreamNetwork database connection */
 	QSqlDatabase database;
 
-	/*! Name to statically access database via QSqlDatabase methods */
+	/*! Name to statically access SpikeStreamNetwork database via QSqlDatabase methods */
 	QString dbRefName;
 
-	/*! Information about the SpikeStreamNetwork database used in the tests */
+	/*! Information about the SpikeStreamArchive database used in the tests */
 	DBInfo archiveDBInfo;
 
-	/*! Database connection */
+	/*! SpikeStreamArchive database connection */
 	QSqlDatabase archiveDatabase;
 
-	/*! Name to statically access database via QSqlDatabase methods */
+	/*! Name to statically access SpikeStreamArchive database via QSqlDatabase methods */
 	QString archiveDBRefName;
 
 
@@ -44,24 +44,40 @@ class TestDao : public QObject {
 	QList<unsigned int> testConnIDList;
 	QList<unsigned int> testNeurIDList;
 
-	unsigned int testArchiveID;
+	//Variables storing information about test archives
+	unsigned int testArchive1ID;
+	unsigned int testArchive2ID;
 
 
 	//==========================  METHODS  ==========================
+	void addTestArchive1();
+	void addTestArchive2();
 	void addTestNetwork1();
 	unsigned int addTestConnection(unsigned int connGrpID, unsigned int fromID, unsigned int toID, float weight, float delay);
 	unsigned int addTestNeuron(unsigned int neurGrpID, float x, float y, float z);
 	QString getConnectionParameterXML();
 	QString getNeuronParameterXML();
 
-	void connectToDatabase(const QString& dbName);
+	void connectToDatabases(const QString& networkDBName, const QString& archiveDBName);
 	void cleanTestDatabases();
-	void closeDatabase();
+	void closeDatabases();
 	void executeQuery(QSqlQuery& query);
 	void executeQuery(const QString& queryStr);
+	void executeArchiveQuery(const QString& queryStr);
+	QSqlQuery getArchiveQuery();
+	QSqlQuery getArchiveQuery(const QString& queryStr);
 	QSqlQuery getQuery();
 	QSqlQuery getQuery(const QString& queryStr);
-	void resetTestNetwork();
+	void resetTestNetwork1();
+	void resetTestArchive1();
+	void resetTestArchive2();
+
+	protected slots:
+	    //QTest methods
+	    virtual void cleanup();
+	    virtual void cleanupTestCase();
+	    virtual void init();
+	    virtual void initTestCase();
 
 };
 

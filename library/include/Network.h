@@ -47,6 +47,7 @@ namespace spikestream {
 	    ConnectionGroupInfo getConnectionGroupInfo(unsigned int id);
 	    bool isBusy();
 	    bool isError() { return error; }
+	    bool isLocked() { return info.isLocked(); }
 	    void load();
 	    bool neuronGroupIsLoaded(unsigned int neurGrpID);
 	    void setNetworkDao(NetworkDao* netDao) { this->networkDao = netDao; }
@@ -74,10 +75,6 @@ namespace spikestream {
 
 	    /*! Hash map of the connection groups in the network */
 	    QHash<unsigned int, ConnectionGroup*> connGrpMap;
-
-	    /*! Whether the network is editable or not. Networks are locked when they are associated
-		with archived data and have to be copied to be editable again */
-	    bool locked;
 
 	    /*! Used for painting and highlighting the neurons.
 		Neurons with an entry in this map are painted with the specified color */

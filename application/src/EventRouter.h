@@ -14,6 +14,8 @@ namespace spikestream {
 	public:
 
 	signals:
+	    void archiveChangedSignal();
+
 	    //OpenGL signals
 	    void moveBackwardSignal();
 	    void moveForwardSignal();
@@ -33,6 +35,8 @@ namespace spikestream {
 	    void reloadSignal();
 
 	private slots:
+	    void archiveChangedSlot() { emit archiveChangedSignal(); }
+
 	    //OpenGL slots
 	    void moveBackwardSlot() { emit moveBackwardSignal(); }
 	    void moveForwardSlot() { emit moveForwardSignal(); }

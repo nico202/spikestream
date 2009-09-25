@@ -14,7 +14,7 @@ namespace spikestream {
 	    virtual ~ArchiveDao();
 
 	    void deleteArchive(unsigned int archiveID);
-	    QList<ArchiveInfo> getArchivesInfo();
+	    QList<ArchiveInfo> getArchivesInfo(unsigned int networkID);
 	    int getArchiveSize(unsigned int archiveID);
     };
 

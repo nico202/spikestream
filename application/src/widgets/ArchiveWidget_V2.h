@@ -1,9 +1,19 @@
 #ifndef ARCHIVEWIDGET_V2
 #define ARCHIVEWIDGET_V2
 
+//SpikeStream includes
+#include "ArchiveInfo.h"
+
+//Qt includes
+#include <QWidget>
+#include <QLayout>
+#include <QHash>
+
 namespace spikestream{
 
     class ArchiveWidget_V2 : public QWidget {
+	Q_OBJECT
+
 	public:
 	    ArchiveWidget_V2(QWidget* parent);
 	    ~ArchiveWidget_V2();
@@ -12,6 +22,8 @@ namespace spikestream{
 	    void archiveChanged();
 
 	private slots:
+	    void deleteArchive();
+	    void loadArchive();
 	    void loadArchiveList();
 	    void rewindButtonPressed();
 	    void playButtonToggled(bool on);
@@ -42,6 +54,8 @@ namespace spikestream{
 
 	    //========================  METHODS  =========================
 	    void buildTransportControls();
+	    void loadArchive(ArchiveInfo& archiveInfo);
+	    void reset();
 
     };
 }

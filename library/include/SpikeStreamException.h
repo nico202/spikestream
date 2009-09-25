@@ -7,7 +7,7 @@ class SpikeStreamException {
     public:
         SpikeStreamException(QString details = QString("No details available"));
         virtual ~SpikeStreamException();
-        QString getMessage();
+	virtual QString getMessage();
 
     protected:
 	QString type;

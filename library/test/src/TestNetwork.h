@@ -11,10 +11,6 @@ class TestNetwork : public TestDao {
 	Q_OBJECT
 
 	private slots:
-	    void cleanup();
-	    void cleanupTestCase();
-	    void init();
-	    void initTestCase();
 	    void testGetBoundingBox();
 
 	private:

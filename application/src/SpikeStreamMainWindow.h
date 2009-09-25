@@ -34,7 +34,7 @@
 #include "LayerWidget.h"
 #include "BusyDialog.h"
 #include "SpikeStreamApplication.h"
-#include "ArchiveWidget.h"
+//#include "ArchiveWidget.h"
 
 //Qt includes
 #include <q3mainwindow.h>
@@ -122,7 +122,7 @@ class SpikeStreamMainWindow: public Q3MainWindow {
 		SimulationWidget *simulationWidget;
 		ConnectionWidget *connectionWidget;
 		LayerWidget *layerWidget;
-		ArchiveWidget *archiveWidget;
+		//ArchiveWidget *archiveWidget;
 		QTabWidget *tabWidget;
 		Q3Accel* keyboardAccelerator;
 	

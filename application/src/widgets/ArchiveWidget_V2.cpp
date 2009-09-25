@@ -1,6 +1,15 @@
+//SpikeStream includes
 #include "ArchiveWidget_V2.h"
+#include "Globals.h"
+#include "SpikeStreamException.h"
+#include "Util.h"
 using namespace spikestream;
 
+//Qt includes
+#include <QLabel>
+#include <QMessageBox>
+#include <QPixmap>
+#include <QPushButton>
 
 /*! Constructor */
 ArchiveWidget_V2::ArchiveWidget_V2(QWidget* parent) : QWidget(parent){
@@ -28,8 +37,12 @@ ArchiveWidget_V2::ArchiveWidget_V2(QWidget* parent) : QWidget(parent){
     //Load the current set of archives, if they exist, into the grid layout
     loadArchiveList();
 
-    //Listen for changes in the network
-    connect(Globals::getEventRouter(), SIGNAL(networkChanged()), this, SLOT(loadArchiveList()));
+    //Listen for changes in the network and archive
+    connect(Globals::getEventRouter(), SIGNAL(archiveChangedSignal()), this, SLOT(loadArchiveList()));
+    connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(loadArchiveList()));
+
+    //Inform other classes when a different archive is loaded
+    connect(this, SIGNAL(archiveChanged()), Globals::getEventRouter(), SLOT(archiveChangedSlot()));
 
     verticalBox->addStretch(10);
 }
@@ -40,19 +53,23 @@ ArchiveWidget_V2::~ArchiveWidget_V2(){
 }
 
 
+/*----------------------------------------------------------*/
+/*-----                 PRIVATE SLOTS                  -----*/
+/*----------------------------------------------------------*/
+
 /*! Deletes an archive */
 void ArchiveWidget_V2::deleteArchive(){
-    //Get the ID of the network to be deleted
-    unsigned int networkID = Util::getUInt(sender()->objectName());
-    if(!networkInfoMap.contains(networkID)){
-	qCritical()<<"Archive with ID "<<networkID<<" cannot be found.";
+    //Get the ID of the archive to be deleted
+    unsigned int archiveID = Util::getUInt(sender()->objectName());
+    if(!archiveInfoMap.contains(archiveID)){
+	qCritical()<<"Archive with ID "<<archiveID<<" cannot be found.";
 	return;
     }
 
     //Confirm that user wants to take this action.
     QMessageBox msgBox;
     msgBox.setText("Deleting Archive");
-    msgBox.setInformativeText("Are you sure that you want to delete archive with ID " + QString::number(networkID) + "? This step cannot be undone.");
+    msgBox.setInformativeText("Are you sure that you want to delete archive with ID " + QString::number(archiveID) + "? This step cannot be undone.");
     msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
     msgBox.setDefaultButton(QMessageBox::Cancel);
     int ret = msgBox.exec();
@@ -64,23 +81,35 @@ void ArchiveWidget_V2::deleteArchive(){
 	Globals::getArchiveDao()->deleteArchive(archiveID);
     }
     catch(SpikeStreamException& ex){
-	qCritical()<<"Exception thrown when deleting archive.";
+	qCritical()<<ex.getMessage();
     }
 
-    /* If we have deleted the current archive, use event router to inform other classes that the network has changed.
+    /* If we have deleted the current archive, use event router to inform other classes that the archive has changed.
        This will automatically reload the archive list. */
     if(Globals::archiveLoaded() && Globals::getArchive()->getID() == archiveID){
-	Globals::seArchive(NULL);
+	Globals::setArchive(NULL);
 	emit archiveChanged();
     }
-
-    //Otherwise, just reload the network list
-    else{
+    else{//Otherwise, just reload the archive list
 	loadArchiveList();
     }
 }
 
 
+/*! Loads a particular archive into memory */
+void ArchiveWidget_V2::loadArchive(){
+    unsigned int archiveID = sender()->objectName().toUInt();
+    if(!archiveInfoMap.contains(archiveID)){
+	qCritical()<<"Archive with ID "<<archiveID<<" cannot be found.";
+	return;
+    }
+
+    //load the archive
+    loadArchive(archiveInfoMap[archiveID]);
+}
+
+
+/*! Loads up a list of archives corresponding to the current network. */
 void ArchiveWidget_V2::loadArchiveList(){
     //Reset widget
     reset();
@@ -91,9 +120,9 @@ void ArchiveWidget_V2::loadArchiveList(){
 	return;
     }
 
-    //Get a list of the networks in the database
+    //Get a list of the archives in the database
     ArchiveDao* archiveDao = Globals::getArchiveDao();
-    QList<ArchivekInfo> archiveInfoList;
+    QList<ArchiveInfo> archiveInfoList;
     try{
 	archiveInfoList = archiveDao->getArchivesInfo(Globals::getNetwork()->getID());
     }
@@ -105,43 +134,49 @@ void ArchiveWidget_V2::loadArchiveList(){
     //Show "no archive" message if list is empty
     if(archiveInfoList.size() == 0){
 	gridLayout->addWidget(new QLabel("No archives in database"), 0, 0);
-	Globals::setArchive(0);
-	emit archiveChanged();
-	return;
     }
 
-    //Copy network infos into map
+
+    /* Check to see if network is locked. Networks associated with archives should always be locked
+       FIXME: ONLY A WARNING GENERATED AT PRESENT */
+    if(!Globals::getNetwork()->isLocked())
+	qWarning()<<"NETWORK IS UNLOCKED. Networks associated with archives should be locked.";
+
+    //Copy archive infos into map
     for(int i=0; i<archiveInfoList.size(); ++i){
 	archiveInfoMap[archiveInfoList[i].getID()] = archiveInfoList[i];
     }
 
-    /* If the current network is in the network list, then set this as the one loaded
-       Otherwise currentNetworkID is set to zero and the user has to choose the loaded network */
+    /* If the current archive is in the archive list, then set this as the one loaded
+       Otherwise currentArchiveID is set to zero and the user has to choose the loaded archive */
     unsigned int currentArchiveID = 0;
     if(Globals::archiveLoaded() && archiveInfoMap.contains(Globals::getArchive()->getID())){
 	currentArchiveID = Globals::getArchive()->getID();
     }
 
+
     //Display the list in the widget
     for(int i=0; i<archiveInfoList.size(); ++i){
+	ArchiveInfo archInfo = archiveInfoList[i];
+
 	//Create labels
-	QLabel* idLabel = new QLabel(QString::number(archiveInfoList[i].getID()));
-	QLabel* networkIDLabel = new QLabel(archiveInfoList[i].getNetworkID());
-	QLabel* dateLabel = new QLabel(archiveInfoList[i].getDate());
-	QLabel* descriptionLabel = new QLabel(archiveInfoList[i].getDescription());
+	QLabel* idLabel = new QLabel(QString::number(archInfo.getID()));
+	QLabel* networkIDLabel = new QLabel(QString::number(archInfo.getNetworkID()));
+	QLabel* dateLabel = new QLabel(archInfo.getDateTime().toString());
+	QLabel* descriptionLabel = new QLabel(archInfo.getDescription());
 
 	//Create the load button and name it with the object id so we can tell which button was invoked
 	QPushButton* loadButton = new QPushButton("Load");
-	loadButton->setObjectName(QString::number(archiveInfoList[i].getID()));
+	loadButton->setObjectName(QString::number(archInfo.getID()));
 	connect ( loadButton, SIGNAL(clicked()), this, SLOT( loadArchive() ) );
 
 	//Create the delete button and name it with the object id so we can tell which button was invoked
 	QPushButton* deleteButton = new QPushButton("Delete");
-	deleteButton->setObjectName(QString::number(archiveInfoList[i].getID()));
-	connect ( deleteButton, SIGNAL(clicked()), this, SLOT( deleteNetwork() ) );
+	deleteButton->setObjectName(QString::number(archInfo.getID()));
+	connect ( deleteButton, SIGNAL(clicked()), this, SLOT( deleteArchive() ) );
 
-	//Set labels and buttons depending on whether it is the current network
-	if(currentArchiveID == archiveInfoList[i].getID()){//The curently loaded archive
+	//Set labels and buttons depending on whether it is the current archive
+	if(currentArchiveID == archInfo.getID()){//The curently loaded archive
 	    idLabel->setStyleSheet( "QLabel { color: #008000; font-weight: bold; }");
 	    networkIDLabel->setStyleSheet( "QLabel { color: #008000; font-weight: bold; }");
 	    dateLabel->setStyleSheet( "QLabel { color: #008000; font-weight: bold; }");
@@ -162,13 +197,22 @@ void ArchiveWidget_V2::loadArchiveList(){
 	gridLayout->addWidget(descriptionLabel, i, descCol);
 	gridLayout->addWidget(loadButton, i, loadButCol);
 	gridLayout->addWidget(deleteButton, i, delButCol);
+	//gridLayout->setRowMinimumHeight(i, 50);
+    }
+
+
+    //List of archives is empty or current archive is not found in this list
+    if(archiveInfoList.size() == 0 || currentArchiveID == 0){
+	//Unload the current archive and inform other classes
+	if(Globals::archiveLoaded()){
+	    Globals::setArchive(0);
+	    emit archiveChanged();
+	}
     }
 }
 
 
-/*----------------------------------------------------------*/
-/*-----                 PRIVATE SLOTS                  -----*/
-/*----------------------------------------------------------*/
+
 void ArchiveWidget_V2::rewindButtonPressed(){
 }
 void ArchiveWidget_V2::playButtonToggled(bool on){
@@ -191,15 +235,15 @@ void ArchiveWidget_V2::frameRateComboChanged(int){
 /*! Adds the transport controls to the supplied layout */
 void ArchiveWidget_V2::buildTransportControls(){
     //Set up pixmaps to control play and stop
-    QPixmap playPixmap(SpikeStreamMainWindow::workingDirectory + "/images/play.xpm");
-    QPixmap stepPixmap(SpikeStreamMainWindow::workingDirectory + "/images/step.xpm");
-    QPixmap stopPixmap(SpikeStreamMainWindow::workingDirectory + "/images/stop.xpm");
-    QPixmap rewindPixmap(SpikeStreamMainWindow::workingDirectory + "/images/rewind.xpm");
-    QPixmap fastForwardPixmap(SpikeStreamMainWindow::workingDirectory + "/images/fast_forward.xpm");
+    QPixmap playPixmap(Globals::getSpikeStreamRoot() + "/images/play.xpm");
+    QPixmap stepPixmap(Globals::getSpikeStreamRoot() + "/images/step.xpm");
+    QPixmap stopPixmap(Globals::getSpikeStreamRoot() + "/images/stop.xpm");
+    QPixmap rewindPixmap(Globals::getSpikeStreamRoot() + "/images/rewind.xpm");
+    QPixmap fastForwardPixmap(Globals::getSpikeStreamRoot() + "/images/fast_forward.xpm");
 
     transportControlWidget = new QWidget(this);
     QHBoxLayout *archTransportBox = new QHBoxLayout(transportControlWidget);
-    QPushButton* rewindButton = new QPushButton(QIcon(rewindPixmap));
+    QPushButton* rewindButton = new QPushButton(QIcon(rewindPixmap), "");
     rewindButton->setBaseSize(30, 30);
     rewindButton->setMaximumSize(30, 30);
     rewindButton->setMinimumSize(30, 30);
@@ -207,7 +251,7 @@ void ArchiveWidget_V2::buildTransportControls(){
     archTransportBox->addSpacing(10);
     archTransportBox->addWidget(rewindButton);
 
-    QPushButton* playButton = new QPushButton(QIcon(playPixmap));
+    QPushButton* playButton = new QPushButton(QIcon(playPixmap), "");
     playButton->setToggleButton(true);
     playButton->setBaseSize(100, 30);
     playButton->setMaximumSize(100, 30);
@@ -215,14 +259,14 @@ void ArchiveWidget_V2::buildTransportControls(){
     connect (playButton, SIGNAL(toggled(bool)), this, SLOT(playButtonToggled(bool)));
     archTransportBox->addWidget(playButton);
 
-    QPushButton* stepButton = new QPushButton(QIcon(stepPixmap));
+    QPushButton* stepButton = new QPushButton(QIcon(stepPixmap), "");
     stepButton->setBaseSize(50, 30);
     stepButton->setMaximumSize(50, 30);
     stepButton->setMinimumSize(50, 30);
     connect (stepButton, SIGNAL(clicked()), this, SLOT(stepButtonPressed()));
     archTransportBox->addWidget(stepButton);
 
-    QPushButton* fastForwardButton = new QPushButton(QIcon(fastForwardPixmap));
+    QPushButton* fastForwardButton = new QPushButton(QIcon(fastForwardPixmap), "");
     fastForwardButton->setToggleButton(true);
     fastForwardButton->setBaseSize(30, 30);
     fastForwardButton->setMaximumSize(30, 30);
@@ -230,7 +274,7 @@ void ArchiveWidget_V2::buildTransportControls(){
     connect (fastForwardButton, SIGNAL(toggled(bool)), this, SLOT(fastForwardButtonToggled(bool)));
     archTransportBox->addWidget(fastForwardButton);
 
-    QPushButton* topButton = new QPushButton(QIcon(stopPixmap));
+    QPushButton* stopButton = new QPushButton(QIcon(stopPixmap), "");
     stopButton->setBaseSize(50, 30);
     stopButton->setMaximumSize(50, 30);
     stopButton->setMinimumSize(50, 30);
@@ -238,7 +282,7 @@ void ArchiveWidget_V2::buildTransportControls(){
     archTransportBox->addWidget(stopButton);
     archTransportBox->addSpacing(10);
 
-    archFrameRateBox->addWidget( new QLabel("Frames per second") );
+    archTransportBox->addWidget( new QLabel("Frames per second") );
     QComboBox* frameRateCombo = new QComboBox();
     frameRateCombo->insertItem("1");
     frameRateCombo->insertItem("5");
@@ -255,19 +299,9 @@ void ArchiveWidget_V2::buildTransportControls(){
 }
 
 
-/*! Loads a particular network into memory */
-void ArchiveWidget_V2::loadArchive(){
-    unsigned int archiveID = sender()->objectName().toUInt();
-    if(!archiveInfoMap.contains(archiveID)){
-	qCritical()<<"Archive with ID "<<archiveID<<" cannot be found.";
-	return;
-    }
-
-    //load the network
-    loadArchive(archiveInfoMap[archiveID]);
-}
 
 
+/*! Loads the archive */
 void ArchiveWidget_V2::loadArchive(ArchiveInfo& archiveInfo){
     if(!archiveInfoMap.contains(archiveInfo.getID())){
 	qCritical()<<"Archive with ID "<<archiveInfo.getID()<<" cannot be found.";
@@ -277,13 +311,16 @@ void ArchiveWidget_V2::loadArchive(ArchiveInfo& archiveInfo){
     // Create new archive
     Archive* newArchive = new Archive(archiveInfo);
     Globals::setArchive(newArchive);
+
+    //Inform classes about the change - this should trigger reloading of archive list via event router
+    emit archiveChanged();
 }
 
 
 /*! Resets the state of the widget.
     Deleting the widget automatically removes it from the layout. */
 void ArchiveWidget_V2::reset(){
-    //Remove no networks label if it exists
+    //Remove no archives label if it exists
     if(archiveInfoMap.size() == 0){
     	QLayoutItem* item = gridLayout->itemAtPosition(0, 0);
 	if(item != 0){

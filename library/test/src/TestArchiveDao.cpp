@@ -8,56 +8,25 @@ using namespace spikestream;
 #include <iostream>
 using namespace std;
 
-/*----------------------------------------------------------*/
-/*-----                INIT AND CLEANUP                -----*/
-/*----------------------------------------------------------*/
 
-/*! Called after each test */
-void TestArchiveDao::cleanup(){
-}
-
-
-/*! Called after all the tests */
-void TestArchiveDao::cleanupTestCase() {
-    //Leave databases in clean state
-    cleanTestDatabases();
-
-    //Close database connection
-    closeDatabase();
-}
-
-
-/*! Called before each test */
-void TestArchiveDao::init(){
-    cleanTestDatabases();
-}
-
-
-/*! Called before all the tests */
-void TestArchiveDao::initTestCase(){
-    connectToDatabase("SpikeStreamArchiveTest");
-}
 
 /*----------------------------------------------------------*/
 /*-----                    TESTS                       -----*/
 /*----------------------------------------------------------*/
 
 void TestArchiveDao::testDeleteArchive(){
-    //Add a test network to get a valid network id
-    addTestNetwork1();
-
     //Add a test archive
     addTestArchive1();
 
     //Check that test archive is in database
-    QSqlQuery query = getArchiveQuery("SELECT * FROM Archives WHERE ArchiveID = " + QString::number(testArchiveID));
+    QSqlQuery query = getArchiveQuery("SELECT * FROM Archives WHERE ArchiveID = " + QString::number(testArchive1ID));
     executeQuery(query);
 
     //Should be a single network
     QCOMPARE(query.size(), (int)1);
 
     //Check that archive data is in database
-    QSqlQuery query = getArchiveQuery("SELECT * FROM ArchiveData WHERE ArchiveID = " + QString::number(testArchiveID));
+    query = getArchiveQuery("SELECT * FROM ArchiveData WHERE ArchiveID = " + QString::number(testArchive1ID));
     executeQuery(query);
 
     //Should be a three time steps
@@ -65,49 +34,55 @@ void TestArchiveDao::testDeleteArchive(){
 
     //Invoke method being tested
     ArchiveDao archiveDao(archiveDBInfo);
-    archiveDao.deleteArchive(testArchiveID);
+    archiveDao.deleteArchive(testArchive1ID);
 
     //Check to see if archive with this id has been removed from the database
-    query = getArchiveQuery("SELECT * FROM Archives WHERE ArchiveID = " + QString::number(testArchiveID));
+    query = getArchiveQuery("SELECT * FROM Archives WHERE ArchiveID = " + QString::number(testArchive1ID));
     executeQuery(query);
 
     //Should be no archive
     QCOMPARE(query.size(), (int)0);
 
     //Check that delete has cascaded properly
-    QSqlQuery query = getArchiveQuery("SELECT * FROM ArchiveData WHERE ArchiveID = " + QString::number(testArchiveID));
+    query = getArchiveQuery("SELECT * FROM ArchiveData WHERE ArchiveID = " + QString::number(testArchive1ID));
     executeQuery(query);
 
-    //Should be a three time steps
+    //Should be no time steps
     QCOMPARE(query.size(), (int)0);
 }
 
 
 void TestArchiveDao::testGetArchivesInfo(){
-    //Add a test network to get a valid network id
-    addTestNetwork1();
-
-    //Add a test archive
+    //Add two test archives
     addTestArchive1();
+    addTestArchive2();
 
     //Check that the information returned is correct
     ArchiveDao archiveDao(archiveDBInfo);
-    QList<ArchiveInfo> = archiveDao.getArchivesInfo();
+    QList<ArchiveInfo> archInfoList = archiveDao.getArchivesInfo(testNetID);
 
+    //Should be two archives
+    QCOMPARE(archInfoList.size(), (int)2);
 
+    //Check details from database
+    QCOMPARE(archInfoList[0].getDescription(), QString("testArchive1Description"));
+    QCOMPARE(archInfoList[1].getDescription(), QString("testArchive2Description"));
+    QCOMPARE(archInfoList[0].getDateTime(), QDateTime::fromTime_t(1011));
+    QCOMPARE(archInfoList[1].getDateTime(), QDateTime::fromTime_t(2022211));
+    QCOMPARE(archInfoList[0].getNetworkID(), testNetID);
+    QCOMPARE(archInfoList[1].getNetworkID(), testNetID);
+    QCOMPARE(archInfoList[0].size(), (int)3);
+    QCOMPARE(archInfoList[1].size(), (int)0);
 }
 
 
 void TestArchiveDao::testGetArchiveSize(){
-    //Add a test network to get a valid network id
-    addTestNetwork1();
-
     //Add a test archive
     addTestArchive1();
 
     //Should be three rows
     ArchiveDao archiveDao(archiveDBInfo);
-    int archiveSize = archiveDao.getArchiveSize(archiveID);
+    int archiveSize = archiveDao.getArchiveSize(testArchive1ID);
     QCOMPARE(archiveSize, (int)3);
 }
 

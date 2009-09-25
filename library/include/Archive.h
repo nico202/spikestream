@@ -11,6 +11,7 @@ namespace spikestream {
 	    Archive(const ArchiveInfo& archiveInfo);
 	    ~Archive();
 
+	    unsigned int getID() { return info.getID(); }
 	    int size() { return info.size(); }
 
 
