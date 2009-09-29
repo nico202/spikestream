@@ -2,7 +2,11 @@
 #include "SpikeStreamException.h"
 #include "TestArchiveDao.h"
 #include "ArchiveDao.h"
+#include "Util.h"
 using namespace spikestream;
+
+//Qt includes
+#include <QDebug>
 
 //Other includes
 #include <iostream>
@@ -71,8 +75,6 @@ void TestArchiveDao::testGetArchivesInfo(){
     QCOMPARE(archInfoList[1].getDateTime(), QDateTime::fromTime_t(2022211));
     QCOMPARE(archInfoList[0].getNetworkID(), testNetID);
     QCOMPARE(archInfoList[1].getNetworkID(), testNetID);
-    QCOMPARE(archInfoList[0].size(), (int)3);
-    QCOMPARE(archInfoList[1].size(), (int)0);
 }
 
 
@@ -87,7 +89,47 @@ void TestArchiveDao::testGetArchiveSize(){
 }
 
 
+void TestArchiveDao::testGetFiringNeuronIDs(){
+    //Add a test archive
+    addTestArchive1();
 
+    ArchiveDao archiveDao(archiveDBInfo);
+
+    //Check that correct IDs are returned for each time step
+    QStringList firingNeuronIDs = archiveDao.getFiringNeuronIDs(testArchive1ID, 1);
+    QCOMPARE(firingNeuronIDs.size(), (int)4);
+    QCOMPARE(Util::getUInt(firingNeuronIDs[0]), (unsigned int)256);
+    QCOMPARE(Util::getUInt(firingNeuronIDs[1]), (unsigned int)311);
+    QCOMPARE(Util::getUInt(firingNeuronIDs[2]), (unsigned int)21);
+    QCOMPARE(Util::getUInt(firingNeuronIDs[3]), (unsigned int)4);
+
+    firingNeuronIDs = archiveDao.getFiringNeuronIDs(testArchive1ID, 2);
+    QCOMPARE(firingNeuronIDs.size(), (int)3);
+    QCOMPARE(Util::getUInt(firingNeuronIDs[0]), (unsigned int)22);
+    QCOMPARE(Util::getUInt(firingNeuronIDs[1]), (unsigned int)31);
+    QCOMPARE(Util::getUInt(firingNeuronIDs[2]), (unsigned int)4888888);
+
+    firingNeuronIDs = archiveDao.getFiringNeuronIDs(testArchive1ID, 3);
+    QCOMPARE(firingNeuronIDs.size(), (int)0);
+
+    firingNeuronIDs = archiveDao.getFiringNeuronIDs(testArchive1ID, 5);
+    QCOMPARE(firingNeuronIDs.size(), (int)1);
+    QCOMPARE(Util::getUInt(firingNeuronIDs[0]), (unsigned int)3);
+
+}
+
+
+
+void TestArchiveDao::testGetMaxTimeStep(){
+    //Add a test archive
+    addTestArchive1();
+
+    ArchiveDao archiveDao(archiveDBInfo);
+
+    //Check maximum time step is correct
+    unsigned int maxTimeStep = archiveDao.getMaxTimeStep(testArchive1ID);
+    QCOMPARE(maxTimeStep, (unsigned int)5);
+}
 
 
 

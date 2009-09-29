@@ -12,8 +12,8 @@ namespace spikestream {
 	    ~Archive();
 
 	    unsigned int getID() { return info.getID(); }
-	    int size() { return info.size(); }
-
+	    unsigned int getTimeStep() { return timeStep; }
+	    void setTimeStep(unsigned int timeStep){ this->timeStep = timeStep; }
 
 	private:
 	    //========================  VARIABLES  ===========================

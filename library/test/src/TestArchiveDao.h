@@ -15,6 +15,8 @@ class TestArchiveDao : public TestDao {
 	    void testDeleteArchive();
 	    void testGetArchivesInfo();
 	    void testGetArchiveSize();
+	    void testGetFiringNeuronIDs();
+	    void testGetMaxTimeStep();
 
 };
 

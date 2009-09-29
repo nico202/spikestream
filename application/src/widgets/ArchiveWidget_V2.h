@@ -3,11 +3,15 @@
 
 //SpikeStream includes
 #include "ArchiveInfo.h"
+#include "ArchivePlayerThread.h"
+using namespace spikestream;
 
 //Qt includes
 #include <QWidget>
 #include <QLayout>
 #include <QHash>
+#include <QPushButton>
+#include <QLabel>
 
 namespace spikestream{
 
@@ -22,6 +26,8 @@ namespace spikestream{
 	    void archiveChanged();
 
 	private slots:
+	    void archiveTimeStepChanged();
+	    void archivePlayerStopped();
 	    void deleteArchive();
 	    void loadArchive();
 	    void loadArchiveList();
@@ -45,6 +51,26 @@ namespace spikestream{
 	    /*! Widget holding transport controls */
 	    QWidget* transportControlWidget;
 
+	    /*! Used to ignore button events when button state is changed programatically */
+	    bool ignoreButton;
+
+	    /*! Class responsible for playing the archive */
+	    ArchivePlayerThread* archivePlayer;
+
+	    /*! Records if the rewind button was used to stop the playback thread */
+	    bool rewind;
+
+	    QPushButton* playButton;
+	    QPushButton* stopButton;
+	    QPushButton* stepButton;
+	    QPushButton* fastForwardButton;
+	    QPushButton* rewindButton;
+	    QComboBox* frameRateCombo;
+
+	    QLabel* timeStepLabel;
+	    QLabel* maxTimeStepLabel;
+
+
 	    const static int idCol = 0;
 	    const static int netIDCol = 1;
 	    const static int dateCol = 2;
@@ -56,6 +82,7 @@ namespace spikestream{
 	    void buildTransportControls();
 	    void loadArchive(ArchiveInfo& archiveInfo);
 	    void reset();
+	    void rewindArchive();
 
     };
 }

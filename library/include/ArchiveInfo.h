@@ -10,7 +10,7 @@ namespace spikestream {
     class ArchiveInfo {
 	public:
 	    ArchiveInfo();
-	    ArchiveInfo(unsigned int id, unsigned int networkID, unsigned int unixTimestamp, const QString& description, int numberOfEntries = 0);
+	    ArchiveInfo(unsigned int id, unsigned int networkID, unsigned int unixTimestamp, const QString& description);
 	    ArchiveInfo(const ArchiveInfo& archInfo);
 	    ~ArchiveInfo();
 	    ArchiveInfo& operator=(const ArchiveInfo& rhs);
@@ -19,7 +19,6 @@ namespace spikestream {
 	    unsigned int getNetworkID() { return networkID; }
 	    QDateTime getDateTime() { return startDateTime; }
 	    QString getDescription() { return description; }
-	    int size() { return numberOfEntries; }
 
 	private:
 	    //=========================  VARIABLES  ===========================
@@ -28,9 +27,6 @@ namespace spikestream {
 	    unsigned int networkID;
 	    QDateTime startDateTime;
 	    QString description;
-
-	    /*! The number of entries in the archive */
-	    int numberOfEntries;
 
     };
 

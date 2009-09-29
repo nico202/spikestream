@@ -30,14 +30,12 @@ QList<ArchiveInfo> ArchiveDao::getArchivesInfo(unsigned int networkID){
     for(int i=0; i<query.size(); ++i){
 	query.next();
 	unsigned int archiveID = Util::getUInt(query.value(0).toString());
-	int archiveSize = getArchiveSize(archiveID);
 	tmpList.append(
 		ArchiveInfo(
 			archiveID,
 			networkID,
 			Util::getUInt(query.value(1).toString()),//Start time as a unix timestamp
-			query.value(2).toString(),//Description
-			archiveSize
+			query.value(2).toString()//Description
 		)
 	);
     }
@@ -50,7 +48,36 @@ int ArchiveDao::getArchiveSize(unsigned int archiveID){
     QSqlQuery query = getQuery("SELECT COUNT(*) FROM ArchiveData WHERE ArchiveID=" + QString::number(archiveID));
     executeQuery(query);
     query.next();
-    return Util::getInt(query.value(0).toString());
+    unsigned int archiveSize = Util::getInt(query.value(0).toString());
+    return archiveSize;
 }
+
+
+/*! Returns the maximum time step in the archive */
+unsigned int ArchiveDao::getMaxTimeStep(unsigned int archiveID){
+    QSqlQuery query = getQuery("SELECT MAX(TimeStep) FROM ArchiveData WHERE ArchiveID=" + QString::number(archiveID));
+    executeQuery(query);
+    query.next();
+    return Util::getUInt(query.value(0).toString());
+}
+
+
+/*! Returns a string containing the comma separated list of neuron IDs */
+QStringList ArchiveDao::getFiringNeuronIDs(unsigned int archiveID, unsigned int timeStep){
+    QSqlQuery query = getQuery("SELECT FiringNeurons FROM ArchiveData WHERE TimeStep=" + QString::number(timeStep) + " AND ArchiveID=" + QString::number(archiveID));
+    executeQuery(query);
+    //Return empty string if no entries for this time step
+    if(query.size() == 0)
+	return QStringList();
+
+    //Return the list of firing neuron ids
+    query.next();
+    return query.value(0).toString().split(",");
+}
+
+
+
+
+
 
 

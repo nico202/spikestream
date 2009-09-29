@@ -10,12 +10,11 @@ ArchiveInfo::ArchiveInfo(){
     this->networkID = 0;
     this->startDateTime = QDateTime::fromTime_t(0);
     this->description = "";
-    numberOfEntries = 0;
 }
 
 
 /*! Standard constructor */
-ArchiveInfo::ArchiveInfo(unsigned int id, unsigned int networkID, unsigned int unixTimestamp, const QString& description, int numberOfEntries){
+ArchiveInfo::ArchiveInfo(unsigned int id, unsigned int networkID, unsigned int unixTimestamp, const QString& description){
 	//Check that name and description will fit in the database
     if(description.size() > MAX_DATABASE_DESCRIPTION_LENGTH)
 	throw SpikeStreamException("Archive description length exceeds maximum possible size in database.");
@@ -24,7 +23,6 @@ ArchiveInfo::ArchiveInfo(unsigned int id, unsigned int networkID, unsigned int u
     this->networkID = networkID;
     this->startDateTime = QDateTime::fromTime_t(unixTimestamp);
     this->description = description;
-    this->numberOfEntries = numberOfEntries;
 }
 
 
@@ -34,7 +32,6 @@ ArchiveInfo::ArchiveInfo(const ArchiveInfo& archInfo){
     this->networkID = archInfo.networkID;
     this->startDateTime = archInfo.startDateTime;
     this->description = archInfo.description;
-    this->numberOfEntries = archInfo.numberOfEntries;
 }
 
 
@@ -53,7 +50,6 @@ ArchiveInfo& ArchiveInfo::operator=(const ArchiveInfo& rhs){
     this->networkID = rhs.networkID;
     this->startDateTime = rhs.startDateTime;
     this->description = rhs.description;
-    this->numberOfEntries = rhs.numberOfEntries;
     return *this;
 }
 

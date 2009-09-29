@@ -150,7 +150,8 @@ HEADERS += src/ArchiveManager.h \
 	   src/Globals.h \
 	   src/EventRouter.h \
 	   src/NetworkViewer_V2.h \
-	   src/NetworkDisplay.h
+	   src/NetworkDisplay.h \
+	   src/ArchivePlayerThread.h
 
 SOURCES += src/ArchiveManager.cpp \
            src/ArchiveStatistic.cpp \
@@ -205,5 +206,5 @@ SOURCES += src/ArchiveManager.cpp \
 	   src/Globals.cpp \
 	   src/EventRouter.cpp \
 	   src/NetworkViewer_V2.cpp \
-	   src/NetworkDisplay.cpp
-
+	   src/NetworkDisplay.cpp \
+	   src/ArchivePlayerThread.cpp
