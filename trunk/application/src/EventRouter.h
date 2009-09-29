@@ -13,8 +13,12 @@ namespace spikestream {
 
 	public:
 
+	public slots:
+	    void archiveTimeStepChangedSlot() { emit archiveTimeStepChangedSignal(); }
+
 	signals:
 	    void archiveChangedSignal();
+	    void archiveTimeStepChangedSignal();
 
 	    //OpenGL signals
 	    void moveBackwardSignal();

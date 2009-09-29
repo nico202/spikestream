@@ -24,10 +24,11 @@ using namespace std;
 
 /*! Constructor */
 NetworkViewer_V2::NetworkViewer_V2(QWidget* parent) : QGLWidget(parent) {
-    //Refresh the display whenever network display has changed
+    //Connect refresh to changes in the display of network or archive
     connect(Globals::getEventRouter(), SIGNAL(networkDisplayChangedSignal()), this, SLOT(refresh()), Qt::QueuedConnection);
+    connect(Globals::getEventRouter(), SIGNAL(archiveTimeStepChangedSignal()), this, SLOT(refresh()), Qt::QueuedConnection);
 
-    //Reset the display whenever the network changes
+    //Connect reset to changes in the network
     connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(reset()), Qt::QueuedConnection);
 
     //Initialize variables
@@ -109,6 +110,10 @@ void NetworkViewer_V2::paintGL(){
 
     //Record a new display list
     else{
+	//Lock network display whilst rendering is taking place
+	//FIXME: MIGHT WANT TO LOCK NETWORK AS WELL
+	Globals::getNetworkDisplay()->lockMutex();
+
 	//Start recording new display list
 	glNewList(mainDisplayList, GL_COMPILE_AND_EXECUTE);
 
@@ -129,9 +134,14 @@ void NetworkViewer_V2::paintGL(){
 
 	//Have now created the display list so record this fact for next render
 	//useDisplayList = true;
+
+	//Unlock network display
+	Globals::getNetworkDisplay()->unlockMutex();
     }
 
-    //Check for OpenGL errors//
+    //Check for OpenGL errors
+    checkOpenGLErrors();
+
     //Render has stopped
     Globals::setRendering(false);
 
@@ -433,8 +443,8 @@ void NetworkViewer_V2::drawConnections(){
     NetworkDisplay* netDisplay = Globals::getNetworkDisplay();
 
     //Default neuron colour
-    RGBColor positiveConnectionColor = netDisplay->getPositiveConnectionColor();
-    RGBColor negativeConnectionColor = netDisplay->getNegativeConnectionColor();
+    RGBColor positiveConnectionColor = *netDisplay->getPositiveConnectionColor();
+    RGBColor negativeConnectionColor = *netDisplay->getNegativeConnectionColor();
 
     //Start drawing lines
     glBegin(GL_LINES);
@@ -493,7 +503,7 @@ void NetworkViewer_V2::drawNeurons(){
     NetworkDisplay* netDisplay = Globals::getNetworkDisplay();
 
     //Default neuron colour
-    RGBColor defaultNeuronColor = netDisplay->getDefaultNeuronColor();
+    RGBColor defaultNeuronColor = *netDisplay->getDefaultNeuronColor();
 
     //Get map with colours of neurons
     QHash<unsigned int, RGBColor*> neuronColorMap = netDisplay->getNeuronColorMap();

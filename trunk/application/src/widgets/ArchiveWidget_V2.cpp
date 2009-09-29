@@ -37,6 +37,9 @@ ArchiveWidget_V2::ArchiveWidget_V2(QWidget* parent) : QWidget(parent){
     //Load the current set of archives, if they exist, into the grid layout
     loadArchiveList();
 
+    //Pad out with some stretch
+    verticalBox->addStretch(1);
+
     //Listen for changes in the network and archive
     connect(Globals::getEventRouter(), SIGNAL(archiveChangedSignal()), this, SLOT(loadArchiveList()));
     connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(loadArchiveList()));
@@ -44,12 +47,24 @@ ArchiveWidget_V2::ArchiveWidget_V2(QWidget* parent) : QWidget(parent){
     //Inform other classes when a different archive is loaded
     connect(this, SIGNAL(archiveChanged()), Globals::getEventRouter(), SLOT(archiveChangedSlot()));
 
-    verticalBox->addStretch(10);
+    //Listen for changes in the archive time step
+    connect(Globals::getEventRouter(), SIGNAL(archiveTimeStepChangedSignal()),this, SLOT(archiveTimeStepChanged()));
+
+    //Create class to load archive data in a separate thread
+    archivePlayer = new ArchivePlayerThread(Globals::getArchiveDao()->getDBInfo());
+    connect(archivePlayer, SIGNAL(finished()), this, SLOT(archivePlayerStopped()));
+
+    //Inform other classes when the archive time step changes
+    connect(archivePlayer, SIGNAL(archiveTimeStepChanged()), Globals::getEventRouter(), SLOT(archiveTimeStepChangedSlot()));
+
+    //Initialise variables
+    ignoreButton = false;
 }
 
 
 /*! Destructor */
 ArchiveWidget_V2::~ArchiveWidget_V2(){
+    delete archivePlayer;
 }
 
 
@@ -197,7 +212,7 @@ void ArchiveWidget_V2::loadArchiveList(){
 	gridLayout->addWidget(descriptionLabel, i, descCol);
 	gridLayout->addWidget(loadButton, i, loadButCol);
 	gridLayout->addWidget(deleteButton, i, delButCol);
-	//gridLayout->setRowMinimumHeight(i, 50);
+	gridLayout->setRowMinimumHeight(i, 20);
     }
 
 
@@ -209,23 +224,114 @@ void ArchiveWidget_V2::loadArchiveList(){
 	    emit archiveChanged();
 	}
     }
+
+    //FIXME: HACK TO GET IT TO DISPLAY PROPERLY
+    this->setMinimumHeight(archiveInfoList.size() * 100);
 }
 
+
+/*! Called when the time step changes and updates the time step counter */
+void ArchiveWidget_V2::archiveTimeStepChanged(){
+    //Update the time step counter
+    timeStepLabel->setText(QString::number(Globals::getArchive()->getTimeStep()));
+}
 
 
 void ArchiveWidget_V2::rewindButtonPressed(){
+    //Stop thread if it is running. Rewind will be done when thread finishes
+    if(archivePlayer->isRunning()){
+	archivePlayer->stop();
+	rewind = true;
+    }
+    //Archive player not running, so just rewind
+    else{
+	rewindArchive();
+    }
 }
+
 void ArchiveWidget_V2::playButtonToggled(bool on){
+    if(ignoreButton){
+	ignoreButton = false;
+	return;
+    }
+
+    //Reset variables
+    rewind = false;
+
+    //Reset play button if no archive is loaded
+    if(!Globals::archiveLoaded()){
+	ignoreButton= true;
+	playButton->toggle();
+	return;
+    }
+
+    if(on){
+	//Start the player thread playing
+	unsigned int frameRate = Util::getUInt(frameRateCombo->currentText());
+	unsigned int startTimeStep = Globals::getArchive()->getTimeStep();
+	archivePlayer->play(startTimeStep, Globals::getArchive()->getID(), frameRate);
+
+	//FIXME: DISABLE EDITING AND LOADING FUNCTIONS
+
+	if(fastForwardButton->isOn()){
+	    ignoreButton = true;
+	    fastForwardButton->toggle();
+	}
+    }
+    else{
+	archivePlayer->stop();
+    }
 }
+
+
+
 void ArchiveWidget_V2::stepButtonPressed(){
 }
 void ArchiveWidget_V2::fastForwardButtonToggled(bool on){
 }
+
 void ArchiveWidget_V2::stopButtonPressed(){
+    archivePlayer->stop();
 }
+
+
+/*! Called when the frame rate combo is changed */
 void ArchiveWidget_V2::frameRateComboChanged(int){
+    unsigned int frameRate = Util::getUInt(frameRateCombo->currentText());
+    archivePlayer->setFrameRate(frameRate);
+}
+
+void ArchiveWidget_V2::rewindArchive(){
+    if(!Globals::archiveLoaded()){
+	qCritical()<<"No archive loaded,so cannot rewind archive.";
+	return;
     }
 
+    Globals::getArchive()->setTimeStep(0);
+    Globals::getEventRouter()->archiveTimeStepChangedSlot();
+    Globals::getNetworkDisplay()->clearNeuronColorMap();
+}
+
+
+/*! Called when the player thread finishes.
+    Resets the state of the buttons. */
+void ArchiveWidget_V2::archivePlayerStopped(){
+    //Rewind if this has been set
+    if(rewind){
+	rewindArchive();
+	rewind = false;
+    }
+
+    //Reset the state of all the buttons
+    if(fastForwardButton->isOn()){
+	ignoreButton = true;
+	fastForwardButton->toggle();
+    }
+    if(playButton->isOn()){
+	ignoreButton = true;
+	playButton->toggle();
+    }
+}
 
 
 /*----------------------------------------------------------*/
@@ -251,7 +357,7 @@ void ArchiveWidget_V2::buildTransportControls(){
     archTransportBox->addSpacing(10);
     archTransportBox->addWidget(rewindButton);
 
-    QPushButton* playButton = new QPushButton(QIcon(playPixmap), "");
+    playButton = new QPushButton(QIcon(playPixmap), "");
     playButton->setToggleButton(true);
     playButton->setBaseSize(100, 30);
     playButton->setMaximumSize(100, 30);
@@ -259,14 +365,14 @@ void ArchiveWidget_V2::buildTransportControls(){
     connect (playButton, SIGNAL(toggled(bool)), this, SLOT(playButtonToggled(bool)));
     archTransportBox->addWidget(playButton);
 
-    QPushButton* stepButton = new QPushButton(QIcon(stepPixmap), "");
+    stepButton = new QPushButton(QIcon(stepPixmap), "");
     stepButton->setBaseSize(50, 30);
     stepButton->setMaximumSize(50, 30);
     stepButton->setMinimumSize(50, 30);
     connect (stepButton, SIGNAL(clicked()), this, SLOT(stepButtonPressed()));
     archTransportBox->addWidget(stepButton);
 
-    QPushButton* fastForwardButton = new QPushButton(QIcon(fastForwardPixmap), "");
+    fastForwardButton = new QPushButton(QIcon(fastForwardPixmap), "");
     fastForwardButton->setToggleButton(true);
     fastForwardButton->setBaseSize(30, 30);
     fastForwardButton->setMaximumSize(30, 30);
@@ -274,7 +380,7 @@ void ArchiveWidget_V2::buildTransportControls(){
     connect (fastForwardButton, SIGNAL(toggled(bool)), this, SLOT(fastForwardButtonToggled(bool)));
     archTransportBox->addWidget(fastForwardButton);
 
-    QPushButton* stopButton = new QPushButton(QIcon(stopPixmap), "");
+    stopButton = new QPushButton(QIcon(stopPixmap), "");
     stopButton->setBaseSize(50, 30);
     stopButton->setMaximumSize(50, 30);
     stopButton->setMinimumSize(50, 30);
@@ -283,7 +389,7 @@ void ArchiveWidget_V2::buildTransportControls(){
     archTransportBox->addSpacing(10);
 
     archTransportBox->addWidget( new QLabel("Frames per second") );
-    QComboBox* frameRateCombo = new QComboBox();
+    frameRateCombo = new QComboBox();
     frameRateCombo->insertItem("1");
     frameRateCombo->insertItem("5");
     frameRateCombo->insertItem("10");
@@ -292,13 +398,24 @@ void ArchiveWidget_V2::buildTransportControls(){
     frameRateCombo->insertItem("25");
     connect(frameRateCombo, SIGNAL(activated(int)), this, SLOT(frameRateComboChanged(int)));
     archTransportBox->addWidget(frameRateCombo);
+
+    //FIXME THESE LOOK REALLY CRAPPY HERE - REPLACE WITH A PROPER TOOLBAR
+    timeStepLabel = new QLabel ("0");
+    timeStepLabel->setStyleSheet( "QLabel { background-color: #ffffff; border-color: #555555; border-width: 2px; border-style: outset; font-weight: bold;}");
+    timeStepLabel->setMinimumSize(50, 20);
+    timeStepLabel->setAlignment(Qt::AlignCenter);
+    archTransportBox->addWidget(timeStepLabel);
+    maxTimeStepLabel = new QLabel("0");
+    maxTimeStepLabel->setStyleSheet( "QLabel { background-color: #ffffff; border-color: #555555; border-width: 2px; border-style: outset; font-weight: bold;}");
+    maxTimeStepLabel->setMinimumSize(50, 20);
+    maxTimeStepLabel->setAlignment(Qt::AlignCenter);
+    archTransportBox->addWidget(maxTimeStepLabel);
+
     archTransportBox->addStretch(5);
 
     //Disable widget and all children - will be re-enabled when an archive is loaded
     transportControlWidget->setEnabled(false);
 }
-
-
 
 
 /*! Loads the archive */
@@ -314,6 +431,13 @@ void ArchiveWidget_V2::loadArchive(ArchiveInfo& archiveInfo){
 
     //Inform classes about the change - this should trigger reloading of archive list via event router
     emit archiveChanged();
+
+    //Set the time step labels
+    timeStepLabel->setText("0");
+    maxTimeStepLabel->setText(QString::number(Globals::getArchiveDao()->getMaxTimeStep(newArchive->getID())));
+
+    //Enable the transport controls
+    transportControlWidget->setEnabled(true);
 }
 
 
@@ -357,5 +481,8 @@ void ArchiveWidget_V2::reset(){
 	}
     }
     archiveInfoMap.clear();
+
+    //Disable the transport controls
+    transportControlWidget->setEnabled(false);
 }
 
