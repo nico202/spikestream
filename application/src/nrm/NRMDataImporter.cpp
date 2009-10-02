@@ -1,4 +1,7 @@
+#include "ArchiveInfo.h"
+#include "ArchiveDao.h"
 #include "NRMDataImporter.h"
+#include "NRMException.h"
 #include "SpikeStreamException.h"
 using namespace spikestream;
 
@@ -6,9 +9,10 @@ using namespace spikestream;
 using namespace std;
 
 /*! Constructor */
-NRMDataImporter::NRMDataImporter(const DBInfo& dbInfo){
+NRMDataImporter::NRMDataImporter(const DBInfo& networkDBInfo, const DBInfo& archiveDBInfo){
     currentTask = -1;
-    networkDaoThread = new NetworkDaoThread(dbInfo);
+    networkDaoThread = new NetworkDaoThread(networkDBInfo);
+    this->archiveDBInfo = archiveDBInfo;
 }
 
 
@@ -25,6 +29,19 @@ void NRMDataImporter::prepareAddConnections(NRMNetwork* nrmNetwork, Network* net
 }
 
 
+/*! Sets class up to add archives to the database */
+void NRMDataImporter::prepareAddArchives(NRMNetwork* nrmNetwork, Network* network, NRMDataSet* nrmDataset){
+    this->nrmNetwork = nrmNetwork;
+    this->network = network;
+    this->nrmDataset = nrmDataset;
+
+    //Run some basic checks
+    if(nrmDataset->size() % nrmNetwork->getNumberOfLayers() != 0)
+	throw NRMException("Number of entries in dataset does not divide exactly into the number of layers in the NRM network. Too few or too many data set entries.");
+    currentTask = ADD_ARCHIVES_TASK;
+}
+
+
 /*! Inherited from QThread.  */
 void NRMDataImporter::run(){
     stopThread = false;
@@ -32,6 +49,9 @@ void NRMDataImporter::run(){
 
     try{
 	switch(currentTask){
+	    case ADD_ARCHIVES_TASK:
+		addArchives();
+	    break;
 	    case ADD_CONNECTIONS_TASK:
 		addConnections();
 	    break;
@@ -55,6 +75,88 @@ void NRMDataImporter::run(){
 void NRMDataImporter::stop(){
     networkDaoThread->stop();
     stopThread = true;
+}
+
+
+/*! Adds archives to the archive database.
+    Each dataset is assigned to the input layers in ascending order, then the neural layers,
+    then the cycle is repeated again. Mismatch in the numbers should be detected when this
+    task is prepared */
+void NRMDataImporter::addArchives(){
+    //Add a new archive to the database
+    ArchiveInfo archiveInfo(0, network->getID(), QDateTime::currentDateTime().toTime_t(), "NRM imported dataset");
+    ArchiveDao archiveDao(archiveDBInfo);
+    archiveDao.addArchive(archiveInfo);
+
+    //Get the list of data arrays from the data set
+    QList<unsigned char*> dataList = nrmDataset->getDataList();
+
+    //Keeps track of where we are in the data list
+    unsigned int dataListCtr = 0;
+
+    //Check that there is an exact division between the number of layers and the size of the dataset
+    if(dataList.size() % nrmNetwork->getNumberOfLayers() != 0)
+	throw NRMException("Data sets do not match layers in NRM network");
+
+    //Work through the dataset one time step at a time. Each time step is added as an entry to the archive data
+    for(int timeStepCtr=1; timeStepCtr <= ( dataList.size() / nrmNetwork->getNumberOfLayers() ); ++timeStepCtr){
+
+	//String containing the firing neurons at this time step
+	QString firingNeuronString = "";
+
+	//Work through the input layers
+	QList<NRMInputLayer*> inputList = nrmNetwork->getAllInputs();
+	for(int layerCtr=0; layerCtr<inputList.size(); ++layerCtr){
+	    NRMLayer* nrmLayer = inputList[layerCtr];
+
+	    //Get the spikestream neuron group corresponding to this NRM layer
+	    NeuronGroup* neurGrp = network->getNeuronGroup(nrmLayer->spikeStreamID);
+
+	    //Check that the size matches the dataset
+	    if(neurGrp->size() != (nrmDataset->width * nrmDataset->height))
+		throw NRMException("Dataset does not match neuron group size.");
+
+	    //Add firing neurons to the string
+	    for(int neurCtr = 0; neurCtr < neurGrp->size(); ++neurCtr){
+		if(dataList[dataListCtr][neurCtr] != 0){//Typically a firing neuron has value 7
+		    firingNeuronString += QString::number(neurGrp->getStartNeuronID() + neurCtr) + ",";
+		}
+	    }
+
+	    //Increase counter keeping track of where we are in the datasets
+	    ++dataListCtr;
+	}
+
+	//Work through the neural layers
+	QList<NRMNeuralLayer*> neuralList = nrmNetwork->getAllNeuralLayers();
+	for(int layerCtr=0; layerCtr<neuralList.size(); ++layerCtr){
+	    NRMLayer* nrmLayer = neuralList[layerCtr];
+
+	    //Get the spikestream neuron group corresponding to this NRM layer
+	    NeuronGroup* neurGrp = network->getNeuronGroup(nrmLayer->spikeStreamID);
+
+	    //Check that the size matches the dataset
+	    if(neurGrp->size() != (nrmDataset->width * nrmDataset->height))
+		throw SpikeStreamException("Dataset does not match neuron group size.");
+
+	    //Add firing neurons to the string
+	    for(int neurCtr=0; neurCtr < neurGrp->size(); ++neurCtr){
+		if(dataList[dataListCtr][neurCtr] != 0){
+		    firingNeuronString += QString::number(neurGrp->getStartNeuronID() + neurCtr) + ",";
+		}
+	    }
+
+	    //Increase counter keeping track of where we are in the datasets
+	    ++dataListCtr;
+	}
+
+	//trim trailing comma off firing string
+	if(firingNeuronString.length() > 0)
+	    firingNeuronString.truncate(firingNeuronString.length() - 1);
+
+	//Add the archive data to the database
+	archiveDao.addArchiveData(archiveInfo.getID(), timeStepCtr, firingNeuronString);
+    }
 }
 
 

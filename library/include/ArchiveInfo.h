@@ -19,6 +19,7 @@ namespace spikestream {
 	    unsigned int getNetworkID() { return networkID; }
 	    QDateTime getDateTime() { return startDateTime; }
 	    QString getDescription() { return description; }
+	    void setID(unsigned int id) { this->id = id; }
 
 	private:
 	    //=========================  VARIABLES  ===========================

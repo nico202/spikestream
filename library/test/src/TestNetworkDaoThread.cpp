@@ -70,7 +70,7 @@ void TestNetworkDaoThread::testAddConnectionGroup(){
 	runThread(netDaoThread);
 
 	//Check that the connection group was added correctly
-	QSqlQuery query = getQuery("SELECT NeuralNetworkID, Description, FromNeuronGroupID, ToNeuronGroupID, Parameters, SynapseTypeID FROM ConnectionGroups");
+	QSqlQuery query = getQuery("SELECT NetworkID, Description, FromNeuronGroupID, ToNeuronGroupID, Parameters, SynapseTypeID FROM ConnectionGroups");
 	executeQuery(query);
 	QCOMPARE(1, query.size());
 	query.next();
@@ -128,7 +128,7 @@ void TestNetworkDaoThread::testAddNeuronGroup(){
 	runThread(netDaoThread);
 
 	//Check that the neuron group was added correctly
-	QSqlQuery query = getQuery("SELECT NeuralNetworkID, Name, Description, Parameters, NeuronTypeID FROM NeuronGroups");
+	QSqlQuery query = getQuery("SELECT NetworkID, Name, Description, Parameters, NeuronTypeID FROM NeuronGroups");
 	executeQuery(query);
 	QCOMPARE(1, query.size());
 	query.next();

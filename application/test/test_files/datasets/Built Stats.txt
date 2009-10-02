@@ -1,0 +1,9 @@
+
+Layer 1 Neurons: 3 x 2 Total: 6
+Connections:   Neuron  Total   Layer   Total
+
+Layer 2 Neurons: 3 x 2 Total: 6
+Connections:   Neuron  Total   Layer   Total
+Path 1:		32	32	192	192
+
+Total neurons: 12   Total connections: 192

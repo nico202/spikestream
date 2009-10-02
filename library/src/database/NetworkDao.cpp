@@ -27,7 +27,7 @@ NetworkDao::~NetworkDao(){
 
 /*! Adds the specified neural network to the database */
 void NetworkDao::addNetwork(NetworkInfo& netInfo){
-    QSqlQuery query = getQuery("INSERT INTO NeuralNetworks (Name, Description) VALUES ('" + netInfo.getName() + "', '" + netInfo.getDescription() + "')");
+    QSqlQuery query = getQuery("INSERT INTO Networks (Name, Description) VALUES ('" + netInfo.getName() + "', '" + netInfo.getDescription() + "')");
     executeQuery(query);
 
     //Check id is correct and add to network info if it is
@@ -35,18 +35,18 @@ void NetworkDao::addNetwork(NetworkInfo& netInfo){
     if(lastInsertID >= START_NEURALNETWORK_ID)
 	netInfo.setID(lastInsertID);
     else
-	throw SpikeStreamDBException("Insert ID for NeuralNetwork is invalid: " + QString::number(lastInsertID));
+	throw SpikeStreamDBException("Insert ID for Network is invalid: " + QString::number(lastInsertID));
 }
 
 
 void NetworkDao::deleteNetwork(unsigned int networkID){
-    executeQuery("DELETE FROM NeuralNetworks WHERE NeuralNetworkID = " + QString::number(networkID));
+    executeQuery("DELETE FROM Networks WHERE NetworkID = " + QString::number(networkID));
 }
 
 
 /*! Returns information about the connection groups associated with the specified network */
 QList<ConnectionGroupInfo> NetworkDao::getConnectionGroupsInfo(unsigned int networkID){
-    QSqlQuery query = getQuery("SELECT ConnectionGroupID, Description, FromNeuronGroupID, ToNeuronGroupID, Parameters, SynapseTypeID FROM ConnectionGroups WHERE NeuralNetworkID=" + QString::number(networkID));
+    QSqlQuery query = getQuery("SELECT ConnectionGroupID, Description, FromNeuronGroupID, ToNeuronGroupID, Parameters, SynapseTypeID FROM ConnectionGroups WHERE NetworkID=" + QString::number(networkID));
     executeQuery(query);
     QList<ConnectionGroupInfo> tmpList;
     XMLParameterParser parameterParser;
@@ -95,7 +95,7 @@ unsigned int NetworkDao::getConnectionGroupSize(unsigned int connGrpID){
 
 /*! Returns a list of information about the available networks. */
 QList<NetworkInfo> NetworkDao::getNetworksInfo(){
-    QSqlQuery query = getQuery("SELECT NeuralNetworkID, Name, Description, Locked FROM NeuralNetworks");
+    QSqlQuery query = getQuery("SELECT NetworkID, Name, Description, Locked FROM Networks");
     executeQuery(query);
     QList<NetworkInfo> tmpList;
     for(int i=0; i<query.size(); ++i){
@@ -108,7 +108,7 @@ QList<NetworkInfo> NetworkDao::getNetworksInfo(){
 
 /*! Returns information about the neuron groups associated with the specified network */
 QList<NeuronGroupInfo> NetworkDao::getNeuronGroupsInfo(unsigned int networkID){
-    QSqlQuery query = getQuery("SELECT NeuronGroupID, Name, Description, Parameters, NeuronTypeID FROM NeuronGroups WHERE NeuralNetworkID=" + QString::number(networkID));
+    QSqlQuery query = getQuery("SELECT NeuronGroupID, Name, Description, Parameters, NeuronTypeID FROM NeuronGroups WHERE NetworkID=" + QString::number(networkID));
     executeQuery(query);
     QList<NeuronGroupInfo> tmpList;
     XMLParameterParser parameterParser;

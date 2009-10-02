@@ -198,7 +198,7 @@ void NetworkDaoThread::addConnectionGroups(){
 	ConnectionGroupInfo connGrpInfo = connectionGroup->getInfo();
 
 	//Build query string
-	QString queryStr = "INSERT INTO ConnectionGroups (NeuralNetworkID, Description, FromNeuronGroupID, ToNeuronGroupID, Parameters, SynapseTypeID ) VALUES (";
+	QString queryStr = "INSERT INTO ConnectionGroups (NetworkID, Description, FromNeuronGroupID, ToNeuronGroupID, Parameters, SynapseTypeID ) VALUES (";
 	queryStr += QString::number(networkID) + ", ";
 	queryStr += "'" + connGrpInfo.getDescription() + "', ";
 	queryStr += QString::number(connGrpInfo.getFromNeuronGroupID()) + ", ";
@@ -261,7 +261,7 @@ void NetworkDaoThread::addConnectionGroups(){
 void NetworkDaoThread::addNeuronGroups(){
     //Check that parameters have been set correctly
     if(networkID == 0){
-	setError("NeuralNetwork ID has not been set.");
+	setError("Network ID has not been set.");
 	return;
     }
 
@@ -274,7 +274,7 @@ void NetworkDaoThread::addNeuronGroups(){
 	NeuronGroupInfo neurGrpInfo = neuronGroup->getInfo();
 
 	//Add the neuron group first
-	QString queryStr = "INSERT INTO NeuronGroups (NeuralNetworkID, Name, Description, Parameters, NeuronTypeID ) VALUES (";
+	QString queryStr = "INSERT INTO NeuronGroups (NetworkID, Name, Description, Parameters, NeuronTypeID ) VALUES (";
 	queryStr += QString::number(networkID) + ", ";
 	queryStr += "'" + neurGrpInfo.getName() + "', '" + neurGrpInfo.getDescription() + "', '" + neurGrpInfo.getParameterXML() + "', ";
 	queryStr += QString::number(neurGrpInfo.getNeuronType()) + ")";

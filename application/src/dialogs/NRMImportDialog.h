@@ -31,6 +31,7 @@ class NRMImportDialog : public QDialog {
 	void addNetwork();
 	void cancel();
 	void getConfigFile();
+	void getDatasetFile();
 	void getTrainingFile();
 	void loadNetworkFromFiles();
 	void showBusyPage(QString msg);
@@ -46,6 +47,9 @@ class NRMImportDialog : public QDialog {
 
 	/*! Allows user to enter the path to the training file */
 	QLineEdit* trainingFilePath;
+
+	/*! Allows user to enter the path to the dataset file */
+	QLineEdit* datasetFilePath;
 
 	/*! Displayed when thread-based operations are taking place, such as
 	    file loading and data importing */
@@ -82,6 +86,9 @@ class NRMImportDialog : public QDialog {
 	/*! Task of adding a network to the database */
 	static const int ADD_CONNECTION_GROUPS_TASK = 3;
 
+	/*! Task of converting data sets to archives */
+	static const int ADD_ARCHIVES_TASK = 4;
+
 	/*! Runs as a separate thread to load data from configuration and training files */
 	NRMFileLoader* fileLoader;
 
@@ -111,6 +118,7 @@ class NRMImportDialog : public QDialog {
 
 
 	//=======================  METHODS  =========================
+	void addArchives();
 	void addConnectionGroups();
 	void addLayersToPage2();
 	void addNeuronGroupIDsToNRMNetwork();

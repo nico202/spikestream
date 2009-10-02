@@ -23,25 +23,36 @@ HEADERS += src/TestNRMConfigLoader.h \
             src/TestRunner.h \
             src/TestNRMTrainingLoader.h \
             src/TestNRMRandom.h \
-            src/TestNRMConnection.h
+	    src/TestNRMConnection.h \
+	    src/TestNRMDataSetImporter.h
 
 SOURCES += src/Main.cpp \
             src/TestRunner.cpp \
             src/TestNRMConfigLoader.cpp \
             src/TestNRMTrainingLoader.cpp \
             src/TestNRMRandom.cpp \
-            src/TestNRMConnection.cpp
+	    src/TestNRMConnection.cpp \
+	    src/TestNRMDataSetImporter.cpp
 
 #----------------------------------------------#
 #---          Files used in tests           ---#
 #----------------------------------------------#
 SOURCES += ../src/nrm/NRMNetwork.cpp \
-    ../src/nrm/NRMConfigLoader.cpp \
-    ../src/nrm/NRMTrainingLoader.cpp \
-    ../src/exceptions/NRMException.cpp \
-    ../src/nrm/NRMLayer.cpp \
-    ../src/nrm/NRMNeuralLayer.cpp \
-    ../src/nrm/NRMInputLayer.cpp \
-    ../src/nrm/NRMConnection.cpp \
-    ../src/nrm/NRMNeuron.cpp \
-    ../src/nrm/NRMRandom.cpp
+	    ../src/nrm/NRMConfigLoader.cpp \
+	    ../src/nrm/NRMTrainingLoader.cpp \
+	    ../src/exceptions/NRMException.cpp \
+	    ../src/nrm/NRMLayer.cpp \
+	    ../src/nrm/NRMNeuralLayer.cpp \
+	    ../src/nrm/NRMInputLayer.cpp \
+	    ../src/nrm/NRMConnection.cpp \
+	    ../src/nrm/NRMNeuron.cpp \
+	    ../src/nrm/NRMRandom.cpp \
+	    ../src/nrm/NRMDataSet.cpp \
+	    ../src/nrm/NRMDataSetImporter.cpp
+
+
+
+
+
+
+

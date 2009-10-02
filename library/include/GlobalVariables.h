@@ -31,9 +31,9 @@
 #include <cstring>
 
 
-/*! Defines of the different archive types. 
+/*! Defines of the different archive types.
 	A firing neurons archive records the firing state of the neurons at any point in time
-	This is different from recording the spikes sent out from a neuron group, which are 
+	This is different from recording the spikes sent out from a neuron group, which are
 	generally spread out in time because of the delay.*/
 #define FIRING_NEURON_ARCHIVE 1
 #define SPIKE_ARCHIVE 10
@@ -60,7 +60,7 @@
 
 
 /*! Monitor windows are added in the constructor.
-	This is the size of the monitorWindowArray: this number of 
+	This is the size of the monitorWindowArray: this number of
 	dock windows will be added to the dock area.*/
 #define MAX_NUMBER_MONITOR_WINDOWS 100
 
@@ -108,10 +108,13 @@
 #define START_CONNECTIONGROUP_ID 1
 
 
+/*! First valid automatically generated ID in Archives database */
+#define START_ARCHIVE_ID 1
+
 /*! Default threshold for lazy loading */
 #define LAZY_LOADING_THRESHOLD 1000000
 
-/*! Commenting or uncommenting this define determines whether 
+/*! Commenting or uncommenting this define determines whether
 	statistics are recorded for the simulation.*/
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //#define RECORD_STATISTICS

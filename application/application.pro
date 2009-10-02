@@ -52,7 +52,9 @@ HEADERS += src/nrm/NRMNetwork.h \
             src/nrm/NRMNeuron.h \
 	    src/nrm/NRMRandom.h \
 	    src/nrm/NRMFileLoader.h \
-	    src/nrm/NRMDataImporter.h
+	    src/nrm/NRMDataImporter.h \
+	    src/nrm/NRMDataSetImporter.h \
+	    src/nrm/NRMDataSet.h
 SOURCES += src/nrm/NRMNetwork.cpp \
             src/nrm/NRMConfigLoader.cpp \
             src/nrm/NRMTrainingLoader.cpp \
@@ -63,7 +65,9 @@ SOURCES += src/nrm/NRMNetwork.cpp \
             src/nrm/NRMNeuron.cpp \
 	    src/nrm/NRMRandom.cpp \
 	    src/nrm/NRMFileLoader.cpp \
-	    src/nrm/NRMDataImporter.cpp
+	    src/nrm/NRMDataImporter.cpp \
+	    src/nrm/NRMDataSetImporter.cpp \
+	    src/nrm/NRMDataSet.cpp
 
 
 #----------------------------------------------#

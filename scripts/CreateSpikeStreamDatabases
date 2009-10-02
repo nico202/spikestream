@@ -126,7 +126,7 @@ then
 	echo "Error creating SpikeStreamArchive database."
 	DATABASE_ERROR=true;
 fi
-if ! mysql ${ARCHIVE_TEST_DATABASE} -h${ARCHIVE_HOST} -u${ARCHIVE_USER} -p${ARCHIVE_PASSWORD} < SpikeStreamArchive.sql
+if ! mysql ${ARCHIVE_TEST_DATABASE} -h${ARCHIVE_HOST} -u${ARCHIVE_USER} -p${ARCHIVE_PASSWORD} < SpikeStreamArchiveTest.sql
 then 
 	echo "Error creating SpikeStreamArchiveTest database."
 	DATABASE_ERROR=true;

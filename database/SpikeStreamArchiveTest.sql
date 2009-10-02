@@ -16,7 +16,7 @@ CREATE TABLE Archives (
 	Description CHAR(100),/* Brief description of the run */
 
 	PRIMARY KEY (ArchiveID),
-	FOREIGN KEY NetworkID_FK(NetworkID) REFERENCES SpikeStreamNetwork.Networks(NetworkID) ON DELETE CASCADE
+	FOREIGN KEY NetworkID_FK(NetworkID) REFERENCES SpikeStreamNetworkTest.Networks(NetworkID) ON DELETE CASCADE
 )
 ENGINE=InnoDB;
 
