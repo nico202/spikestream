@@ -5,6 +5,7 @@
 #include "TestNRMConfigLoader.h"
 #include "TestNRMConnection.h"
 #include "TestNRMTrainingLoader.h"
+#include "TestNRMDataSetImporter.h"
 
 //Other includes
 #include <iostream>
@@ -23,6 +24,9 @@ void TestRunner::runTests(){
 
 	TestNRMRandom testNRMRandom;
 	QTest::qExec(&testNRMRandom);
+
+	TestNRMDataSetImporter testNRMDataSetImporter;
+	QTest::qExec(&testNRMDataSetImporter);
 }
 
 

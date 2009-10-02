@@ -20,6 +20,7 @@ class NRMNetwork {
 		int getConfigVersion();
 		int getInputLayerCount();
 		int getNeuralLayerCount();
+		int getNumberOfLayers() { return getInputLayerCount() + getNeuralLayerCount(); }
 		QList<NRMInputLayer*> getPanelInputs();
 		QList<NRMInputLayer*> getFramedImageInputs();
 		NRMInputLayer* getInputById(int id);

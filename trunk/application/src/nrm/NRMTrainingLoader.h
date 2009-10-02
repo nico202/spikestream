@@ -9,7 +9,7 @@ class NRMTrainingLoader {
 		~NRMTrainingLoader();
 		NRMNetwork* getNetwork();
 		void loadTraining(const char* filePath);
-		void loadTrainingHeader(FILE* file, int numTrainedLayers, int* trainedLayerIDArray);
+		void loadTrainingHeader(FILE* file, int numNetworkLayers, int& numTrainedLayers, int*& trainedLayerIDArray);
 		void loadLayerTraining(int layerID, FILE* file);
 		void printTrainingPattern(unsigned char* patternArray, unsigned int arraySize, int trainingStrNumber);
 

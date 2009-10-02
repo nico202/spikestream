@@ -18,6 +18,71 @@ using namespace std;
 /*-----                    TESTS                       -----*/
 /*----------------------------------------------------------*/
 
+void TestArchiveDao::testAddArchive(){
+    //Add a test network so we get a valid network id
+    addTestNetwork1();
+
+    //Create the archive dao
+    ArchiveDao archiveDao (archiveDBInfo);
+
+    //Information about the archive to be added
+    ArchiveInfo archInfo(0, testNetID, 1212121, "Test archive 1");
+    try{
+	//Invoke method that is being tested
+	archiveDao.addArchive(archInfo);
+
+	//Check that archive has been added
+	QSqlQuery query = getArchiveQuery("SELECT NetworkID, StartTime, Description FROM Archives");
+	executeQuery(query);
+
+	//Should only be one row
+	QCOMPARE(query.size(), 1);
+	query.next();
+
+	//Check details of archive
+	QVERIFY( archInfo.getID() != 0);
+	QCOMPARE(query.value(0).toUInt(), testNetID);
+	QCOMPARE(query.value(1).toUInt(), (unsigned int)1212121);
+	QCOMPARE(query.value(2).toString(), QString("Test archive 1"));
+    }
+    catch(SpikeStreamException& ex){
+	QFAIL(ex.getMessage().toAscii());
+    }
+}
+
+
+void TestArchiveDao::testAddArchiveData(){
+    //Add test archive without data
+    addTestNetwork1();//Not automatically added by addTestArchive2() method
+    addTestArchive2();
+
+    //Create the archive dao
+    ArchiveDao archiveDao (archiveDBInfo);
+
+    //Invoke method being tested
+    archiveDao.addArchiveData(testArchive2ID, 1, "12,13,14,15");
+    archiveDao.addArchiveData(testArchive2ID, 3, "121,131,141,151");
+
+    //Check data was added correctly
+    QSqlQuery query = getArchiveQuery("SELECT ArchiveID, TimeStep, FiringNeurons FROM ArchiveData");
+    executeQuery(query);
+
+    //Should only be two rows
+    QCOMPARE(query.size(), 2);
+
+    //Check the rows
+    query.next();
+    QCOMPARE(query.value(0).toUInt(), testArchive2ID);
+    QCOMPARE(query.value(1).toUInt(), (unsigned int)1);
+    QCOMPARE(query.value(2).toString(), QString("12,13,14,15"));
+
+    query.next();
+    QCOMPARE(query.value(0).toUInt(), testArchive2ID);
+    QCOMPARE(query.value(1).toUInt(), (unsigned int)3);
+    QCOMPARE(query.value(2).toString(), QString("121,131,141,151"));
+}
+
+
 void TestArchiveDao::testDeleteArchive(){
     //Add a test archive
     addTestArchive1();

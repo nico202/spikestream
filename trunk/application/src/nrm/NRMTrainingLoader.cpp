@@ -37,13 +37,14 @@ void NRMTrainingLoader::loadTraining(const char* filePath){
 	int numNetworkLayers = network->getNeuralLayerCount();
 
 	//Array listing the trained layers that need to be loaded
-	int* layerIdArray = new int[numNetworkLayers];
+	int* layerIdArray;
+	int numTrainedLayers = 0;
 
 	//Check information in header is correct and extract the ids of layers to be read
-	loadTrainingHeader(file, numNetworkLayers, layerIdArray);
+	loadTrainingHeader(file, numNetworkLayers, numTrainedLayers, layerIdArray);
 
 	//Load up the training data from the file
-	for ( int n=0; n < numNetworkLayers; n++ ) {
+	for ( int n=0; n < numTrainedLayers; n++ ) {
 		loadLayerTraining(layerIdArray[n], file);
 	}
 
@@ -57,9 +58,8 @@ void NRMTrainingLoader::loadTraining(const char* filePath){
 
 
 /*! Reads in header of training file to check that it has the correct information */
-void NRMTrainingLoader::loadTrainingHeader(FILE* file, int numNetworkLayers, int* layerIdArray){
+void NRMTrainingLoader::loadTrainingHeader(FILE* file, int numNetworkLayers, int& numTrainedLayers, int*& layerIdArray){
 	unsigned short val;
-	int numTrainedLayers;
 
 	//Read in version of file
 	char buf[10];
@@ -81,6 +81,7 @@ void NRMTrainingLoader::loadTrainingHeader(FILE* file, int numNetworkLayers, int
 	}
 
 	//Read in the ids of the trained layers
+	layerIdArray = new int[numTrainedLayers];
 	for ( int n = 0; n < numTrainedLayers; n++ ) {
 		fReadFile(&val, 2, 1, file);
 		layerIdArray[n] = val;
@@ -222,7 +223,7 @@ void NRMTrainingLoader::loadLayerTraining(int layerId, FILE* file){
 	}
 
 	//Check that number of connections in the parameters is correct */
-	for (unsigned int n = 0; n < layerConns.size(); n++ ) {
+	for (int n = 0; n < layerConns.size(); n++ ) {
 		fReadFile(&val, 2, 1, file);
 		if ( val != layerConns[n]->conParams.numCons ) {
 			fclose(file);
@@ -234,7 +235,7 @@ void NRMTrainingLoader::loadLayerTraining(int layerId, FILE* file){
 
 	//Check that the sWidth and sHeight parameters are ok
 	unsigned int lcWidth, lcHeight;
-	for (unsigned int n = 0; n < layerConns.size(); n++ ) {
+	for (int n = 0; n < layerConns.size(); n++ ) {
 		fReadFile(&sval, 2, 1, file);
 		lcWidth = sval;
 		fReadFile(&sval, 2, 1, file);
@@ -282,7 +283,7 @@ void NRMTrainingLoader::loadLayerTraining(int layerId, FILE* file){
 	fReadFile(&numTrainingStrings, 2, 1, file); // num trained strings
 
 	unsigned int patArrSize = neuralLayer->getPatternArraySize();
-	//cout<<"Num trained strings = "<<numTrainingStrings<<"; patArrSize="<<patArrSize<<" layer size="<<neuralLayer->getSize()<<". fileByteCount="<<fileByteCount<<endl;
+	cout<<"Num trained strings = "<<numTrainingStrings<<"; patArrSize="<<patArrSize<<" layer size="<<neuralLayer->getSize()<<". fileByteCount="<<fileByteCount<<endl;
 
 	//Create neurons if they have not been created already - FIXME: THIS IS A BIT RUBBISH, BUT WORKS FOR THE MOMENT
 	neuralLayer->createNeurons();
@@ -290,7 +291,7 @@ void NRMTrainingLoader::loadLayerTraining(int layerId, FILE* file){
 	unsigned int trainingStrArrSize = patArrSize + 1;
 	unsigned char* trainingStrArray = new unsigned char [trainingStrArrSize];
 	//NOTE: Assume that netType is SMALL_NET or BIG_NET
-	for (unsigned int neurNum = 0; neurNum < neuralLayer->getSize(); neurNum++ ) {
+	for (int neurNum = 0; neurNum < neuralLayer->getSize(); neurNum++ ) {
 		for (int i = 0; i < numTrainingStrings; i++ ) {
 			fReadFile(trainingStrArray, trainingStrArrSize, 1, file);
 			neuralLayer->getNeuron(neurNum)->addTraining(&trainingStrArray[1], patArrSize, trainingStrArray[0]);

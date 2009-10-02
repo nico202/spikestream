@@ -12,13 +12,13 @@ SET foreign_key_checks = 0;
 	Allows a number of different networks to be held in the same database, 
 	and allows networks to be archived.
 */
-CREATE TABLE NeuralNetworks (
-    NeuralNetworkID SMALLINT NOT NULL AUTO_INCREMENT,
+CREATE TABLE Networks (
+    NetworkID SMALLINT NOT NULL AUTO_INCREMENT,
     Name CHAR(250) NOT NULL DEFAULT "Untitled",
     Description CHAR(250) NOT NULL DEFAULT "Untitled",
 	Locked BOOLEAN NOT NULL DEFAULT 0,/*Set to true when the network is associated with archived simulation run data */
-    PRIMARY KEY (NeuralNetworkID),
-    INDEX NeuralNetworkIDIndex(NeuralNetworkID)
+    PRIMARY KEY (NetworkID),
+    INDEX NetworkIDIndex(NetworkID)
 )
 ENGINE=InnoDB;
 
@@ -32,7 +32,7 @@ ENGINE=InnoDB;
 */
 CREATE TABLE NeuronGroups (
     NeuronGroupID SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT, /* Primary key */
-    NeuralNetworkID SMALLINT NOT NULL, /* Network that this group is part of */
+    NetworkID SMALLINT NOT NULL, /* Network that this group is part of */
     Name CHAR(250) NOT NULL DEFAULT "Untitled", /*Short name, for example, 'motor cortex' */
     Description CHAR(250) NOT NULL DEFAULT "No description", /* Description, for example, layer, etc. */
     Parameters TEXT, /* XML describing the parameters used to create the group */
@@ -40,9 +40,9 @@ CREATE TABLE NeuronGroups (
 
     PRIMARY KEY (NeuronGroupID),
     INDEX NeuronGroupIDIndex(NeuronGroupID),
-    INDEX NeuralNetworkIDIndex(NeuralNetworkID),/* To support the foreign key constraint */
+    INDEX NetworkIDIndex(NetworkID),/* To support the foreign key constraint */
 
-    FOREIGN KEY NeuralNetworkID_FK(NeuralNetworkID) REFERENCES NeuralNetworks(NeuralNetworkID) ON DELETE CASCADE,
+    FOREIGN KEY NetworkID_FK(NetworkID) REFERENCES Networks(NetworkID) ON DELETE CASCADE,
     FOREIGN KEY NeuronTypeID_FK(NeuronTypeID) REFERENCES NeuronTypes(NeuronTypeID) ON DELETE NO ACTION
 )
 ENGINE=InnoDB;
@@ -101,7 +101,7 @@ ENGINE=InnoDB;
 	Connections are held as groups with global characteristics. */
 CREATE TABLE ConnectionGroups (
 	ConnectionGroupID SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
-	NeuralNetworkID SMALLINT NOT NULL,
+	NetworkID SMALLINT NOT NULL,
 	Description CHAR(250) NOT NULL, 
 	FromNeuronGroupID SMALLINT UNSIGNED NOT NULL,
 	ToNeuronGroupID SMALLINT UNSIGNED NOT NULL,
@@ -111,7 +111,7 @@ CREATE TABLE ConnectionGroups (
 	PRIMARY KEY (ConnectionGroupID),
 	INDEX ConnectionGroupIDIndex(ConnectionGroupID),
 
-    FOREIGN KEY NeuralNetworkID_FK(NeuralNetworkID) REFERENCES NeuralNetworks(NeuralNetworkID) ON DELETE CASCADE,
+    FOREIGN KEY NetworkID_FK(NetworkID) REFERENCES Networks(NetworkID) ON DELETE CASCADE,
     FOREIGN KEY SynapseTypeID_FK(SynapseTypeID) REFERENCES SynapseTypes(SynapseTypeID) ON DELETE NO ACTION
 )
 ENGINE=InnoDB;
@@ -193,11 +193,12 @@ ENGINE=InnoDB;
     Each position in the lookup table pattern refers to connection between two neurons.
 */
 CREATE TABLE WeightlessNeuronConnections (
+	ConnectionID BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	FromNeuronID MEDIUMINT UNSIGNED NOT NULL,
 	ToNeuronID MEDIUMINT UNSIGNED NOT NULL,
 	PatternIndex MEDIUMINT UNSIGNED NOT NULL,
 
-	PRIMARY KEY (FromNeuronID, ToNeuronID),
+	PRIMARY KEY (ConnectionID),
 
     FOREIGN KEY FromNeuronID_FK(FromNeuronID) REFERENCES Neurons(NeuronID) ON DELETE CASCADE,
     FOREIGN KEY ToNeuronID_FK(ToNeuronID) REFERENCES Neurons(NeuronID) ON DELETE CASCADE

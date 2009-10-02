@@ -12,23 +12,40 @@ NRMFileLoader::NRMFileLoader(){
     //Initialise variables
     stopThread = true;
     configFilePath = "";
+    datasetFilePath = "";
     trainingFilePath = "";
 
     //Create config loader
     configLoader = new NRMConfigLoader();
+
+    //Create dataset importer
+    dataSetImporter = new NRMDataSetImporter();
 }
 
 
 /*! Destructor */
 NRMFileLoader::~NRMFileLoader(){
+    delete configLoader;
+    delete dataSetImporter;
 }
+
+
 
 /*----------------------------------------------------------*/
 /*-----                 PUBLIC METHODS                 -----*/
 /*----------------------------------------------------------*/
 
+/*! Returns the dataset that has been loaded */
+NRMDataSet* NRMFileLoader::getDataSet(){
+    if(!datasetLoaded)
+	throw NRMException("No dataset loaded");
+    return dataSetImporter->getDataSet();
+}
+
 /*! Returns the network that has been loaded */
 NRMNetwork* NRMFileLoader::getNetwork(){
+    if(!configLoaded)
+	throw NRMException("No config loaded");
     return configLoader->getNetwork();
 }
 
@@ -37,27 +54,60 @@ NRMNetwork* NRMFileLoader::getNetwork(){
     Loads up the configuration and  training files. */
 void NRMFileLoader::run(){
     stopThread = false;
+    configLoaded = false;
+    datasetLoaded = false;
+    trainingLoaded = false;
+    clearError();
 
-    if(configFilePath == "" || trainingFilePath == "")
-	throw NRMException("Training or configuration file path(s) missing!");
-
-    //Load up configuration
-    configLoader->reset();
-    configLoader->loadConfig(configFilePath.toAscii());
-
-    //Check to see if operation has been cancelled before loading training data
-    if(stopThread)
+    if(configFilePath == "" || datasetFilePath == "" || trainingFilePath == ""){
+	setError("Training or configuration file path(s) missing!");
 	return;
+    }
 
-    //Load up training
-    NRMTrainingLoader trainingLoader(configLoader->getNetwork());
-    trainingLoader.loadTraining(trainingFilePath.toAscii());
+    try{
+	//Load up configuration
+	configLoader->reset();
+	configLoader->loadConfig(configFilePath.toAscii());
+	configLoaded = true;
+
+	//Check to see if operation has been cancelled before loading training data
+	if(stopThread)
+	    return;
+
+	//Load up training
+	NRMTrainingLoader trainingLoader(configLoader->getNetwork());
+	trainingLoader.loadTraining(trainingFilePath.toAscii());
+	trainingLoaded = true;
+
+	//Check to see if operation has been cancelled before loading training data
+	if(stopThread)
+	    return;
+
+	//Load dataset
+	dataSetImporter->reset();
+	dataSetImporter->loadDataSet(datasetFilePath.toAscii());
+	datasetLoaded = true;
+    }
+    catch(NRMException& ex){
+	setError(ex.getMessage());
+    }
+    catch(...){
+	setError("Unknown exception occurred.");
+    }
+
+    stopThread = true;
 }
 
 
 /*! Sets the file path to the configuration file */
 void NRMFileLoader::setConfigFilePath(QString configFilePath){
     this->configFilePath = configFilePath;
+}
+
+
+/*! Sets the file path to the dataset file */
+void NRMFileLoader::setDatasetFilePath(QString datasetFilePath){
+    this->datasetFilePath = datasetFilePath;
 }
 
 
@@ -70,11 +120,23 @@ void NRMFileLoader::setTrainingFilePath(QString trainingFilePath){
 
 /*! Stops the file loader */
 void NRMFileLoader::stop(){
-    cout<<"STOPPING THREAD"<<endl;
     stopThread = true;
 }
 
 
+
+/*! Clears the error message and state */
+void NRMFileLoader::clearError(){
+    error = false;
+    errorMessage = "";
+}
+
+/*! Records that there has been an error and sets the thread to stop */
+void NRMFileLoader::setError(const QString& errMsg){
+    error = true;
+    stopThread = true;
+    errorMessage = errMsg;
+}
 
 
 

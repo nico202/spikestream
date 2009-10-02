@@ -1,4 +1,6 @@
 #include "ArchiveDao.h"
+#include "GlobalVariables.h"
+#include "SpikeStreamDBException.h"
 #include "Util.h"
 using namespace spikestream;
 
@@ -13,8 +15,28 @@ ArchiveDao::~ArchiveDao(){
 
 
 /*----------------------------------------------------------*/
-/*-----                PUBLIC METHODS                 -----*/
+/*-----                 PUBLIC METHODS                 -----*/
 /*----------------------------------------------------------*/
+
+/*! Adds the archive with the specified ID */
+void ArchiveDao::addArchive(ArchiveInfo& archInfo){
+    QSqlQuery query = getQuery("INSERT INTO Archives (StartTime, NetworkID, Description) VALUES (" + QString::number(archInfo.getDateTime().toTime_t()) + ", " + QString::number(archInfo.getNetworkID()) + ", '" + archInfo.getDescription() + "')");
+    executeQuery(query);
+
+    //Check id is correct and add to network info if it is
+    int lastInsertID = query.lastInsertId().toInt();
+    if(lastInsertID >= START_ARCHIVE_ID)
+	archInfo.setID(lastInsertID);
+    else
+	throw SpikeStreamDBException("Insert ID for Archives is invalid: " + QString::number(lastInsertID));
+}
+
+
+/*! Adds data to the archive with the specified ID */
+void ArchiveDao::addArchiveData(unsigned int archiveID, unsigned int timeStep, const QString& firingNeuronString){
+    executeQuery("INSERT INTO ArchiveData(ArchiveID, TimeStep, FiringNeurons) VALUES (" + QString::number(archiveID) + ", " + QString::number(timeStep) + ", '"  + firingNeuronString + "')");
+}
+
 
 /*! Deletes the archive with the specified ID */
 void ArchiveDao::deleteArchive(unsigned int archiveID){

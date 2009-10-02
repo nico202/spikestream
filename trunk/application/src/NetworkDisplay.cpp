@@ -18,7 +18,7 @@ NetworkDisplay::NetworkDisplay(){
     defaultColorMap[&negativeConnectionColor] = true;
     positiveConnectionColor.set(1.0f, 0.0f, 0.0f);
     defaultColorMap[&positiveConnectionColor] = true;
-    firingNeuronColor.set(0.02f, 0.85f, 0.04f);
+    firingNeuronColor.set(1.0f, 0.0f, 1.0f);
     defaultColorMap[&firingNeuronColor] = true;
 
     //Initialize color map

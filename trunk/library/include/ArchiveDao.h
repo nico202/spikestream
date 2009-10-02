@@ -13,6 +13,8 @@ namespace spikestream {
 	    ArchiveDao(const DBInfo& dbInfo);
 	    virtual ~ArchiveDao();
 
+	    void addArchive(ArchiveInfo& archiveInfo);
+	    void addArchiveData(unsigned int archiveID, unsigned int timeStep, const QString& firingNeuronString);
 	    void deleteArchive(unsigned int archiveID);
 	    QList<ArchiveInfo> getArchivesInfo(unsigned int networkID);
 	    int getArchiveSize(unsigned int archiveID);

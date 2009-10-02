@@ -12,6 +12,8 @@ class TestArchiveDao : public TestDao {
 	Q_OBJECT
 
 	private slots:
+	    void testAddArchive();
+	    void testAddArchiveData();
 	    void testDeleteArchive();
 	    void testGetArchivesInfo();
 	    void testGetArchiveSize();

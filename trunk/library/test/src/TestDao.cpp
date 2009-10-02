@@ -72,7 +72,7 @@ void TestDao::connectToDatabases(const QString& networkDBName, const QString& ar
 /*! Cleans up everything from the test networks database */
 void TestDao::cleanTestDatabases(){
     //Clean up network database
-    executeQuery("DELETE FROM NeuralNetworks");
+    executeQuery("DELETE FROM Networks");
     executeQuery("DELETE FROM NeuronGroups");
     executeQuery("DELETE FROM ConnectionGroups");
     executeQuery("DELETE FROM Neurons");
@@ -180,25 +180,25 @@ void TestDao::addTestNetwork1(){
     resetTestNetwork1();
 
     //Add network with known properties
-    QSqlQuery query = getQuery("INSERT INTO NeuralNetworks (Name, Description) VALUES ('testNetwork1Name', 'testNetwork1Description')");
+    QSqlQuery query = getQuery("INSERT INTO Networks (Name, Description) VALUES ('testNetwork1Name', 'testNetwork1Description')");
     executeQuery(query);
     testNetID = query.lastInsertId().toUInt();
 
     //Add two neuron groups
-    QString queryStr = "INSERT INTO NeuronGroups (NeuralNetworkID, Name, Description, Parameters, NeuronTypeID ) VALUES (";
+    QString queryStr = "INSERT INTO NeuronGroups (NetworkID, Name, Description, Parameters, NeuronTypeID ) VALUES (";
     queryStr += QString::number(testNetID) + ", " + "'name1', 'desc1', '" + getConnectionParameterXML() + "', 1)";
     query = getQuery(queryStr);
     executeQuery(query);
     neurGrp1ID = query.lastInsertId().toUInt();
 
-    queryStr = "INSERT INTO NeuronGroups (NeuralNetworkID, Name, Description, Parameters, NeuronTypeID ) VALUES (";
+    queryStr = "INSERT INTO NeuronGroups (NetworkID, Name, Description, Parameters, NeuronTypeID ) VALUES (";
     queryStr += QString::number(testNetID) + ", " + "'name2', 'desc2', '" + getNeuronParameterXML() + "', 1)";
     query = getQuery(queryStr);
     executeQuery(query);
     neurGrp2ID = query.lastInsertId().toUInt();
 
     //Create connection group between the two neuron groups
-    queryStr = "INSERT INTO ConnectionGroups (NeuralNetworkID, Description, FromNeuronGroupID, ToNeuronGroupID, Parameters, SynapseTypeID ) VALUES (";
+    queryStr = "INSERT INTO ConnectionGroups (NetworkID, Description, FromNeuronGroupID, ToNeuronGroupID, Parameters, SynapseTypeID ) VALUES (";
     queryStr += QString::number(testNetID) + ", 'conngrpdesc1', " + QString::number(neurGrp1ID) + ", " + QString::number(neurGrp2ID) + ", '" + getConnectionParameterXML() + "', 1)";
     query = getQuery(queryStr);
     executeQuery(query);

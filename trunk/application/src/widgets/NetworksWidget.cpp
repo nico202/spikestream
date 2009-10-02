@@ -183,6 +183,9 @@ void NetworksWidget::loadNetworkList(){
 	gridLayout->addWidget(loadButton, i, 4);
 	gridLayout->addWidget(deleteButton, i, 5);
     }
+
+    //FIXME: HACK TO GET IT TO DISPLAY PROPERLY
+    this->setMinimumHeight(networkInfoList.size() * 100);
 }
 
 

@@ -34,7 +34,7 @@ NRMImportDialog::NRMImportDialog(QWidget* parent) : QDialog(parent, "NoiseParamD
     //Create the nrm loader, which will run as a separate thread
     fileLoader = new NRMFileLoader();
     connect (fileLoader, SIGNAL(finished()), this, SLOT(threadFinished()));
-    dataImporter = new NRMDataImporter(Globals::getNetworkDao()->getDBInfo());
+    dataImporter = new NRMDataImporter(Globals::getNetworkDao()->getDBInfo(), Globals::getArchiveDao()->getDBInfo());
     connect(dataImporter, SIGNAL(finished()), this, SLOT(threadFinished()));
 
     //Connect this class up to the event router to inform other classes when the network list changes
@@ -207,7 +207,44 @@ void NRMImportDialog::threadFinished(){
 	return;
     }
 
-    /* Operation has not been cancelled and thread has terminated normally
+    //Check for errors
+    bool threadError = false;
+    switch (currentTask){
+	case FILE_LOADING_TASK:
+	    if(fileLoader->isError()){
+		qCritical()<<fileLoader->getErrorMessage();
+		threadError = true;
+	    }
+	break;
+	case ADD_NEURON_GROUPS_TASK:
+	    if(newNetwork->isError()){
+		qCritical()<<newNetwork->getErrorMessage();
+		Globals::getNetworkDao()->deleteNetwork(newNetwork->getID());
+		threadError = true;
+	    }
+	break;
+	case ADD_CONNECTION_GROUPS_TASK:
+	    if(dataImporter->isError()){
+		qCritical()<<dataImporter->getErrorMessage();
+		threadError = true;
+	    }
+	break;
+	case ADD_ARCHIVES_TASK:
+	    if(dataImporter->isError()){
+		qCritical()<<dataImporter->getErrorMessage();
+		threadError = true;
+	    }
+	break;
+	default:
+	    qCritical()<<"Current task with id " + QString::number(currentTask) + " is not recognized.";
+    }
+    if(threadError){
+	showPage1();
+	currentTask = -1;
+	return;
+    }
+
+    /* Operation has not been cancelled and thread has terminated normally and without errors
 	Carry out appropriate operation depending on the current task */
     switch (currentTask){
 	case FILE_LOADING_TASK:
@@ -215,13 +252,6 @@ void NRMImportDialog::threadFinished(){
 	    showPage2();
 	break;
 	case ADD_NEURON_GROUPS_TASK:
-	    //Check for errors and clean up
-	    if(newNetwork->isError()){
-		qCritical()<<"Error adding Network: "<<newNetwork->getErrorMessage();
-		Globals::getNetworkDao()->deleteNetwork(newNetwork->getID());
-		this->reject();
-	    }
-
 	    //Store the new neuron group IDs in the NRM network
 	    addNeuronGroupIDsToNRMNetwork();
 
@@ -229,20 +259,16 @@ void NRMImportDialog::threadFinished(){
 	    addConnectionGroups();
 	break;
 	case ADD_CONNECTION_GROUPS_TASK:
-	    //Check for errors and clean up
-	    if(dataImporter->isError()){
-		qCritical()<<"Error adding Network: "<<dataImporter->getErrorMessage();
-		Globals::getNetworkDao()->deleteNetwork(newNetwork->getID());
-		this->reject();
-	    }
-	    else{//Importing was successful
+	    //Add the archives to the database
+	    addArchives();
+	break;
+	case ADD_ARCHIVES_TASK:
+	    /* Inform other classes that the list of networks has changed
+	       No need to inform about archive changes because the new network is not loaded. */
+	    emit networkListChanged();
 
-		//Inform other classes that the list of networks has changed
-		emit networkListChanged();
-
-		//Inform user that it went ok
-		showSuccessPage();
-	    }
+	    //Inform user that it went ok
+	    showSuccessPage();
 
 	    //Clean up network from memory - this does not affect the network stored in the database
 	    if(newNetwork != NULL)
@@ -259,6 +285,13 @@ void NRMImportDialog::threadFinished(){
 void NRMImportDialog::getConfigFile(){
     QString filePath = getFilePath("*.cfg");
     configFilePath->setText(filePath);
+}
+
+
+/*! When user clicks on 'browse' file dialog is displayed to select the dataset file */
+void NRMImportDialog::getDatasetFile(){
+    QString filePath = getFilePath("*.set");
+    datasetFilePath->setText(filePath);
 }
 
 
@@ -284,6 +317,8 @@ void NRMImportDialog::showBusyPage(QString busyMessage){
 void NRMImportDialog::showPage1(){
     configFilePath->setStyleSheet("* { color: black; }");
     configFilePath->setSelection(0, 0);
+    datasetFilePath->setStyleSheet("* { color: black; }");
+    datasetFilePath->setSelection(0, 0);
     trainingFilePath->setStyleSheet("* { color: black; }");
     trainingFilePath->setSelection(0, 0);
     busyWidget->setVisible(false);
@@ -330,6 +365,16 @@ void NRMImportDialog::loadNetworkFromFiles(){
     else{
 	configFilePath->setStyleSheet("* { color: black; }");
     }
+    if(!QFile::exists(datasetFilePath->text())){
+	if(datasetFilePath->text() == "")
+	    datasetFilePath->setText("Please enter a valid file path");
+	datasetFilePath->setStyleSheet("* { color: red; }");
+	datasetFilePath->setSelection(0, 0);
+	fileError = true;
+    }
+    else{
+	datasetFilePath->setStyleSheet("* { color: black; }");
+    }
     if(!QFile::exists(trainingFilePath->text())){
 	if(trainingFilePath->text() == "")
 	    trainingFilePath->setText("Please enter a valid file path");
@@ -348,6 +393,7 @@ void NRMImportDialog::loadNetworkFromFiles(){
     try{
 	currentTask = FILE_LOADING_TASK;
 	fileLoader->setConfigFilePath(configFilePath->text());
+	fileLoader->setDatasetFilePath(datasetFilePath->text());
 	fileLoader->setTrainingFilePath(trainingFilePath->text());
 	fileLoader->start();
     }
@@ -366,14 +412,33 @@ void NRMImportDialog::loadNetworkFromFiles(){
 /*-----                 PRIVATE METHODS                -----*/
 /*----------------------------------------------------------*/
 
+void NRMImportDialog::addArchives(){
+    //Do nothing if there is no data
+    if(fileLoader->getDataSet()->size() == 0)
+	return;
+
+    //Reset variables
+    operationCancelled = false;
+    currentTask = ADD_ARCHIVES_TASK;
+    showBusyPage("Adding archives to database...");
+    try{
+	dataImporter->prepareAddArchives(fileLoader->getNetwork(), newNetwork, fileLoader->getDataSet());
+	dataImporter->start();
+    }
+    catch(SpikeStreamException& ex){
+	qCritical()<<ex.getMessage();
+	showPage1();
+	currentTask = -1;
+    }
+}
+
+
 /*! Adds connection groups and connections to the new network */
 void NRMImportDialog::addConnectionGroups(){
     //Reset variables
     operationCancelled = false;
     currentTask = ADD_CONNECTION_GROUPS_TASK;
-
     showBusyPage("Adding connections to database...");
-
     dataImporter->prepareAddConnections(fileLoader->getNetwork(), newNetwork);
     dataImporter->start();
 
@@ -525,6 +590,17 @@ void NRMImportDialog::buildPage1(){
     QPushButton* trainingFileButt = new QPushButton("Browse");
     connect (trainingFileButt, SIGNAL(clicked()), this, SLOT(getTrainingFile()));
     gridLayout->addWidget(trainingFileButt, 1, 2);
+
+    //Data set information
+    gridLayout->addWidget(new QLabel("NRM Dataset File: "), 2, 0);
+    datasetFilePath = new QLineEdit();
+    datasetFilePath->setMinimumSize(250, 30);
+    gridLayout->addWidget(datasetFilePath, 2, 1);
+    QPushButton* datasetFileButt = new QPushButton("Browse");
+    connect (datasetFileButt, SIGNAL(clicked()), this, SLOT(getDatasetFile()));
+    gridLayout->addWidget(datasetFileButt, 2, 2);
+
+    //Add layout to dialog
     verticalBox->addLayout(gridLayout);
 
     //Buttons at bottom of dialog
