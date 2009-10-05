@@ -83,7 +83,7 @@ void NRMConfigLoader::loadConfig(const char* filePath){
 	//Load up information about neural layers
 	loadNeuralLayers(file);
 
-	/* Loading black and white and colour information 
+	/* Loading black and white and colour information
 		- don't think this is needed by me */
 	//bwAscii* bw = new bwAscii;
 	fread(&val2, 4, 1, file);
@@ -140,6 +140,7 @@ void NRMConfigLoader::loadConfig(const char* filePath){
 
 	//Build the connections using the random number generator
 	network->createConnections();
+	//network->printConnections();
 
 	//------------------------------------------------------------------
 	//------------             LOAD DATA SETS                -----------
@@ -152,60 +153,60 @@ void NRMConfigLoader::loadConfig(const char* filePath){
 	if ( count && val ) {
 		char* fileName = new char [FILE_TITLE];
 		for ( int n = 0; n < sets; n++ ) {
-   			fread(&val, 2, 1, file); // str len
+			fread(&val, 2, 1, file); // str len
 			fread(fileName, val, 1, file);
 			fileName[val] = '\0';
 			//if ( LoadDataSet(fileName) )
-         	//	loadFail = true;
+		//	loadFail = true;
 		}
 		delete [] fileName;
 
 		if ( loadFail ) {
 			fclose(file);
-   			config = false;
+			config = false;
 			if ( bmpFail )  {
 				if ( welcome ){
-            		welcome = 4;
+			welcome = 4;
 				}
 				throw NRMException("Not all bitmap files, recorded in the configuration\nfor loading into the Framed Input(s), were found\nin the local folder.\n\nAlso\n\nNot all Data Sets recorded in configuration were found\nin the local folder.\n\nNo Data Sets have been associated with panel objects.");
 			}
 			else {
 				if ( welcome ){
-         			welcome = 3;
+				welcome = 3;
 				}
-      			throw NRMException("Not all Data Sets recorded in configuration were found\nin the local folder.\n\nNo Data Sets have been associated with panel objects.");
+			throw NRMException("Not all Data Sets recorded in configuration were found\nin the local folder.\n\nNo Data Sets have been associated with panel objects.");
 			}
 		}
 		else {
-      		fread(&val, 2, 1, file);
-      		num = val;
+		fread(&val, 2, 1, file);
+		num = val;
 
-      		for ( int n = 0; n < num; n++ ) {
-      			fread(&val, 2, 1, file);
-         		if ( val > -1 )
-         			;//AutoAssociateInputSet(n, val);
-      		}
+		for ( int n = 0; n < num; n++ ) {
+			fread(&val, 2, 1, file);
+			if ( val > -1 )
+				;//AutoAssociateInputSet(n, val);
+		}
 
-      		fread(&val, 2, 1, file);
-      		num = val;
+		fread(&val, 2, 1, file);
+		num = val;
 
-      		for ( int n = 0; n < num; n++ ) {
-      			fread(&val, 2, 1, file);
-         		if ( val > -1 )
+		for ( int n = 0; n < num; n++ ) {
+			fread(&val, 2, 1, file);
+			if ( val > -1 )
 					;//AutoAssociateStateSet(n, val);
-      			fread(&val, 2, 1, file);
-         		if ( val > -1 )
+			fread(&val, 2, 1, file);
+			if ( val > -1 )
 					;//AutoAssociatePreviousSet(n, val);
-      		}
+		}
 		}
 	}
 
 	//Throw exception if we cannot load bitmap files.
 	if ( bmpFail ) {
 		fclose(file);
-   		config = false;
+		config = false;
 		if ( welcome ){
-      		welcome = 2;
+		welcome = 2;
 		}
 		throw NRMException("Not all bitmap files, recorded in the configuration\nfor loading into the Framed Input(s), were found\nin the local folder");
 	}
@@ -916,7 +917,7 @@ void NRMConfigLoader::SetConParams(cons *con, int inNumCon, int inLocWidth, int 
 
 	con->conParams.HFlipped = false;
 	con->conParams.VFlipped = false;
- 
+
 	if ( con->destObjectType > 4 )
 		getInputLayerSize(con->destLayer, ctWidth, ctHeight, ctColPlanes, ctType);
 	else {
@@ -925,30 +926,30 @@ void NRMConfigLoader::SetConParams(cons *con, int inNumCon, int inLocWidth, int 
 	}
 
 	switch ( ctColPlanes ) {
-		case FREE_TO_CHANGE_COL: 
-			ctColPlanes = 3; 
+		case FREE_TO_CHANGE_COL:
+			ctColPlanes = 3;
 		break;
-  		case FREE_TO_CHANGE_BW: 
-			ctColPlanes = 1; 
+		case FREE_TO_CHANGE_BW:
+			ctColPlanes = 1;
 		break;
 	}
 
-  	if ( (ctType == _FRAME_WIN || ctType == FRAME_WIN) && inLocWidth < GAZE_LIMIT && inLocHeight < GAZE_LIMIT ){
+	if ( (ctType == _FRAME_WIN || ctType == FRAME_WIN) && inLocWidth < GAZE_LIMIT && inLocHeight < GAZE_LIMIT ){
 		if ( inLocLeft < -1 || inLocLeft > 1 ){
 			gazeType = true;
 		}
 	}
 	if ( inLocWidth == ctWidth )
 		inLocWidth = 0;
-  	if ( inLocHeight == ctHeight )
-     	inLocHeight = 0;
-         
+	if ( inLocHeight == ctHeight )
+	inLocHeight = 0;
+
 	if ( inLocWidth == 0 && inLocHeight == 0 ) {
 		if ( ctColPlanes == 1 && inNumCon == ctWidth * ctHeight ) {
 			con->conParams.randomCon = false;
 			con->conParams.fullCon = true;
 			con->conParams.globalMap = true;
- 			con->conParams.iconicMap = false;
+			con->conParams.iconicMap = false;
 			con->conParams.segmentedMap = false;
 			con->conParams.gazeMap = false;
 			con->conParams.tileMap = false;
@@ -970,7 +971,7 @@ void NRMConfigLoader::SetConParams(cons *con, int inNumCon, int inLocWidth, int 
 			con->conParams.iconicMap = false;
 			con->conParams.segmentedMap = false;
 			con->conParams.gazeMap = false;
-		 	con->conParams.tileMap = false;
+			con->conParams.tileMap = false;
 			con->conParams.spatialAlignment = false;
 			con->conParams.sWidth = -1;
 			con->conParams.sHeight = -1;
@@ -1109,13 +1110,13 @@ void NRMConfigLoader::SetConParams(cons *con, int inNumCon, int inLocWidth, int 
 			}
 			else if ( ctColPlanes > 1 && inNumCon == (inLocWidth * inLocHeight * 8) ) {
 				if ( ctColPlanes > 1 ){
-	        		InColScheme = LIN_COLS;
+				InColScheme = LIN_COLS;
 				}
 				if ( inLocLeft > -1 ) {
 					con->conParams.randomCon = false;
 					con->conParams.fullCon = true;
 					con->conParams.globalMap = true;
-    				con->conParams.iconicMap = false;
+				con->conParams.iconicMap = false;
 					con->conParams.segmentedMap = false;
 					con->conParams.gazeMap = false;
 					con->conParams.tileMap = false;
@@ -1168,7 +1169,7 @@ void NRMConfigLoader::SetConParams(cons *con, int inNumCon, int inLocWidth, int 
 						con->conParams.randomCon = false;
 						con->conParams.fullCon = false;
 						con->conParams.globalMap = false;
-  						con->conParams.iconicMap = false;
+						con->conParams.iconicMap = false;
 						con->conParams.segmentedMap = true;
 						con->conParams.gazeMap = false;
 						con->conParams.tileMap = false;
@@ -1181,8 +1182,8 @@ void NRMConfigLoader::SetConParams(cons *con, int inNumCon, int inLocWidth, int 
 						con->conParams.rHeight = 1;
 					}
 				}
- 			}
-        	else {
+			}
+		else {
 				if ( inLocLeft > -1 ) {
 					con->conParams.randomCon = true;
 					con->conParams.fullCon = false;
@@ -1203,7 +1204,7 @@ void NRMConfigLoader::SetConParams(cons *con, int inNumCon, int inLocWidth, int 
 					con->conParams.randomCon = false;
 					con->conParams.fullCon = false;
 					con->conParams.globalMap = false;
-  					con->conParams.iconicMap = false;
+					con->conParams.iconicMap = false;
 					con->conParams.segmentedMap = true;
 					con->conParams.gazeMap = false;
 					con->conParams.tileMap = false;
@@ -1218,12 +1219,12 @@ void NRMConfigLoader::SetConParams(cons *con, int inNumCon, int inLocWidth, int 
 			}
 		}
 	}
-  	else {
+	else {
 		int lwidth, lheight, inTrack;
 		getLayerSize(con->layer, lwidth, lheight, inTrack);
 
-  		if ( ctColPlanes == 1 && inNumCon == inLocWidth * inLocHeight ) {
-     		if ( (lwidth < ctWidth) && (lwidth * inLocWidth == ctWidth) && (lheight * inLocHeight == ctHeight) ) {
+		if ( ctColPlanes == 1 && inNumCon == inLocWidth * inLocHeight ) {
+		if ( (lwidth < ctWidth) && (lwidth * inLocWidth == ctWidth) && (lheight * inLocHeight == ctHeight) ) {
 				con->conParams.randomCon = false;
 				con->conParams.fullCon = true;
 				con->conParams.globalMap = false;
@@ -1256,7 +1257,7 @@ void NRMConfigLoader::SetConParams(cons *con, int inNumCon, int inLocWidth, int 
 				con->conParams.rHeight = inLocHeight;
 			}
 		}
-     	else if ( ctColPlanes > 1 && inNumCon == (inLocWidth * inLocHeight * 8) ) {
+	else if ( ctColPlanes > 1 && inNumCon == (inLocWidth * inLocHeight * 8) ) {
 			if ( ctColPlanes > 1 ){
 				InColScheme = LIN_COLS;
 			}
@@ -1294,7 +1295,7 @@ void NRMConfigLoader::SetConParams(cons *con, int inNumCon, int inLocWidth, int 
 			}
 		}
 		else {
-     	  	if ( ((lwidth < ctWidth) && lwidth * inLocWidth == ctWidth) && (lheight * inLocHeight == ctHeight) ) {
+		if ( ((lwidth < ctWidth) && lwidth * inLocWidth == ctWidth) && (lheight * inLocHeight == ctHeight) ) {
 				con->conParams.randomCon = true;
 				con->conParams.fullCon = false;
 				con->conParams.globalMap = false;
@@ -1343,7 +1344,7 @@ void NRMConfigLoader::SetConParams(cons *con, int inNumCon, int inLocWidth, int 
 		con->conParams.sTop =  inLocTop + 1;
 		con->conParams.rWidth = 1;
 		con->conParams.rHeight = 1;
-	}   
+	}
 	con->conParams.colScheme = InColScheme;
 	con->conParams.numCons = inNumCon;
 	*/

@@ -83,6 +83,17 @@ Network::~Network(){
 /*-----                PUBLIC METHODS                 ----- */
 /*--------------------------------------------------------- */
 
+/*! Adds a connection group to the network without saving it to the database.
+    #FIXME#: MAKE THIS WORK IN THE SAME WAY AS A NEURON GROUP. WILL HAVE TO CHANGE NRM IMPORTER WHEN THIS IS DONE. */
+void Network::addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList){
+    for(QList<ConnectionGroup*>::iterator iter = connectionGroupList.begin(); iter != connectionGroupList.end(); ++iter){
+	if(connGrpMap.contains((*iter)->getID()))
+	    throw SpikeStreamException("Connection group with ID " + QString::number((*iter)->getID()) + " is already present in the network.");
+
+	connGrpMap[(*iter)->getID()] = *iter;
+    }
+}
+
 
 /*! Adds neuron groups to the network */
 void Network::addNeuronGroups(QList<NeuronGroup*>& neuronGroupList){
@@ -106,6 +117,35 @@ void Network::cancel(){
     connectionNetworkDaoThread->stop();
     currentNeuronTask = -1;
     currentConnectionTask = -1;
+}
+
+/*! Returns true if a neuron with the specified ID is in the network */
+bool Network::containsNeuron(unsigned int neurID){
+    //Need to check each neuron group to see if it contains the neuron.
+    for(QHash<unsigned int, NeuronGroup*>::iterator iter = neurGrpMap.begin(); iter != neurGrpMap.end(); ++iter){
+	if(iter.value()->contains(neurID)){
+	    return true;
+	}
+    }
+    return false;
+}
+
+
+/*! Returns the number of neurons that connect to the specified neuron */
+int Network::getNumberOfToConnections(unsigned int neuronID){
+    //Check neuron id is in the network
+    if(!containsNeuron(neuronID))
+	throw SpikeStreamException("Request for number of connections to a neuron that is not in the network.");
+
+    //Count up the number of connections to this neuron in each connection group
+    int toConCount = 0;
+    for(QHash<unsigned int, ConnectionGroup*>::iterator iter = connGrpMap.begin(); iter != connGrpMap.end(); ++iter){
+	//Get the number of connections to the neuron in this connection group
+	toConCount += iter.value()->getToConnections(neuronID).size();
+    }
+
+    //Return final count
+    return toConCount;
 }
 
 

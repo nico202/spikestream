@@ -39,8 +39,57 @@ void NetworkDao::addNetwork(NetworkInfo& netInfo){
 }
 
 
+/*! Deletes a network from the database. Does nothing if a network with the specified
+    id does not exist. */
 void NetworkDao::deleteNetwork(unsigned int networkID){
     executeQuery("DELETE FROM Networks WHERE NetworkID = " + QString::number(networkID));
+}
+
+
+/*! Adds a weightless connection pattern index to the database */
+void NetworkDao::addWeightlessConnection(unsigned int connectionID, unsigned int patternIndex){
+    QSqlQuery query = getQuery("INSERT INTO WeightlessConnections (ConnectionID, PatternIndex) VALUES (" + QString::number(connectionID) + ", " + QString::number(patternIndex) + ")");
+    executeQuery(query);
+}
+
+
+/*! Adds a weightless neuron training pattern to the database and returns the new pattern id. */
+unsigned int NetworkDao::addWeightlessNeuronTrainingPattern(unsigned int neuronID, const unsigned char* patternArray, bool output, unsigned int patternArraySize){
+    //Create a byte array that does not copy data
+    QByteArray tmpByteArray = QByteArray::fromRawData((char*) patternArray, patternArraySize);
+
+    //Add data to database
+    QSqlQuery query = getQuery("INSERT INTO WeightlessNeuronTrainingPatterns (NeuronID, Pattern, Output) VALUES (" + QString::number(neuronID) + ", :PATTERNARRAY, " + QString::number(output) + ")");
+    query.bindValue(":PATTERNARRAY", tmpByteArray);
+    executeQuery(query);
+
+    //Check id is correct and return it if it is
+    int lastInsertID = query.lastInsertId().toInt();
+    if(lastInsertID >= START_WEIGHTLESS_TRAINING_PATTERN_ID)
+	return lastInsertID;
+
+    //Throw exception if the last insert id is not in the valid range
+    throw SpikeStreamDBException("Insert ID for WeightlessNeuronTrainingPatterns is invalid: " + QString::number(lastInsertID));
+}
+
+
+/*! Returns all of the connections from the specified neuron to the specified neuron. */
+QList<Connection> NetworkDao::getConnections(unsigned int fromNeuronID, unsigned int toNeuronID){
+    QSqlQuery query = getQuery("SELECT ConnectionID, Delay, Weight, TempWeight FROM Connections WHERE FromNeuronID=" + QString::number(fromNeuronID) + " AND ToNeuronID="+ QString::number(toNeuronID));
+    executeQuery(query);
+    QList<Connection> conList;
+    while ( query.next() ) {
+	Connection tmpCon(
+		query.value(0).toUInt(),//ConnectionID
+		fromNeuronID,//FromNeuronID
+		toNeuronID,//ToNeuronID
+		query.value(1).toString().toFloat(),//Delay
+		query.value(2).toString().toFloat(),//Weight
+		query.value(3).toString().toFloat()//tempWeight
+	);
+	conList.append(tmpCon);
+    }
+    return conList;
 }
 
 

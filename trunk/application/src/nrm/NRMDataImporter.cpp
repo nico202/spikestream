@@ -1,5 +1,6 @@
 #include "ArchiveInfo.h"
 #include "ArchiveDao.h"
+#include "Globals.h"
 #include "NRMDataImporter.h"
 #include "NRMException.h"
 #include "SpikeStreamException.h"
@@ -42,6 +43,14 @@ void NRMDataImporter::prepareAddArchives(NRMNetwork* nrmNetwork, Network* networ
 }
 
 
+/*! Prepares the class to add training data to the network database. */
+void NRMDataImporter::prepareAddTraining(NRMNetwork* nrmNetwork, Network* network){
+    this->nrmNetwork = nrmNetwork;
+    this->network = network;
+    currentTask = ADD_TRAINING_TASK;
+}
+
+
 /*! Inherited from QThread.  */
 void NRMDataImporter::run(){
     stopThread = false;
@@ -54,6 +63,9 @@ void NRMDataImporter::run(){
 	    break;
 	    case ADD_CONNECTIONS_TASK:
 		addConnections();
+	    break;
+	    case ADD_TRAINING_TASK:
+		addTraining();
 	    break;
 	    default:
 		setError("Current task not recognized: " + QString::number(currentTask));
@@ -241,6 +253,10 @@ void NRMDataImporter::addConnections(){
 
     }//Finished working through all of the NRM neural layers
 
+    //Add connections to network
+    //FIXME: THIS SHOULD BE DONE IN THE SAME WAY AS NEURON GROUPS
+    network->addConnectionGroups(newConnectionGrpsList);
+
     //Add connections to the database
     networkDaoThread->prepareAddConnectionGroups(network->getID(), newConnectionGrpsList);
     networkDaoThread->start();
@@ -252,6 +268,107 @@ void NRMDataImporter::addConnections(){
     //Check for errors
     if(networkDaoThread->isError())
 	setError(networkDaoThread->getErrorMessage());
+}
+
+
+/*! Adds the training to the Network database.
+    Training consists of an input pattern of 1's and 0's, the output for this input pattern
+    and an index that links an input neuron ID with a position in this pattern. */
+void NRMDataImporter::addTraining(){
+    //Network dao to add training to database
+    DBInfo netDBInfo = Globals::getNetworkDao()->getDBInfo();
+    NetworkDao networkDao(netDBInfo);
+
+    /* Work through the list of neural layers in the NRM network.
+       Only the neural layers contain training. */
+    QList<NRMNeuralLayer*> neuralList = nrmNetwork->getTrainedNeuralLayers();
+    for(int neuListCtr=0; neuListCtr<neuralList.size(); ++neuListCtr){
+	//Get pointer to the current neural layer
+	NRMNeuralLayer* nrmLayer = neuralList[neuListCtr];
+
+	//Get the neuron group corresponding to this NRM neural layer
+	NeuronGroup* neuronGroup = network->getNeuronGroup(nrmLayer->spikeStreamID);
+
+	//Work through all of the neurons in this layer
+	for(int neurCtr = 0; neurCtr < nrmLayer->getSize(); ++neurCtr){
+	    //The list of training strings for this neuron
+	    QList<unsigned char*> trainingList = nrmLayer->neuronArray[neurCtr]->getTraining();
+
+	    //Work out the neuron's ID in the database
+	    unsigned int neuronID = neurCtr + neuronGroup->getStartNeuronID();
+
+	    /* The lenght of each training string for this neuron.
+	       The returned training array length is the pattern string length + 1 for the output */
+	    unsigned int trainingArrayLength = nrmLayer->neuronArray[neurCtr]->getTrainingArrayLength();
+
+	    //Add the training strings to the database
+	    for(QList<unsigned char*>::iterator iter = trainingList.begin(); iter != trainingList.end(); ++iter){
+		networkDao.addWeightlessNeuronTrainingPattern(neuronID, &(*iter)[1], (*iter)[0], trainingArrayLength-1);
+	    }
+
+	    //Need to obtain a complete list of the connections for this neuron
+	    QList<unsigned int> neuronConnectionList;
+
+	    //Work through all of the connections in this layer
+	    QList<NRMConnection*> conList = nrmLayer->getConnections();
+	    for(QList<NRMConnection*>::iterator iter = conList.begin(); iter != conList.end(); ++iter){
+		/* Get the NRM layer connecting to this layer
+		    In NRM the src layer is the current layer and the destination layer is the layer
+		    connecting to this layer. */
+		NRMLayer* nrmFromLayer= nrmNetwork->getLayerById((*iter)->destLayerId, (*iter)->destObjectType);
+		unsigned int fromGrpStartNeurID = network->getNeuronGroup(nrmFromLayer->spikeStreamID)->getStartNeuronID();
+
+		//Get the list of connections
+		QList<unsigned int> neurCons = (*iter)->getNeuronConnections(neurCtr);
+
+		/* Append the connections to the current list.to get a list of connections made from
+		    the other layer to this layer*/
+		QList<unsigned int>::iterator neurConsEnd = neurCons.end();
+		for(QList<unsigned int>::iterator neurConsIter = neurCons.begin(); neurConsIter != neurConsEnd; ++neurConsIter){
+		    neuronConnectionList.append(*neurConsIter + fromGrpStartNeurID);
+		}
+	    }
+
+	    /* Should now have a complete list of all the neurons connecting to this neuron.
+	       The neuron ids should match the neuron ids in the database.
+	       The order of these neuron ids should match the order in the pattern string. */
+
+	    //Check that the number of connections matches the number of connections in the network
+	    if(network->getNumberOfToConnections(neuronID) != neuronConnectionList.size()){
+		throw SpikeStreamException("Number of connections in the network does not match the number of NRM connections. Number of network connections=" + QString::number(network->getNumberOfToConnections(neuronID)) + " neuronConnectionList connections=" + QString::number(neuronConnectionList.size()));
+	    }
+
+	    //Calculate the expected pattern length in bytes
+	    int expectedPatternLength = neuronConnectionList.size() / 8;
+	    if ( neuronConnectionList.size() % 8 )
+		++expectedPatternLength;
+
+	    //Check that the number of connections matches the pattern length
+	    if(expectedPatternLength != (trainingArrayLength-1)){
+		throw SpikeStreamException("Training pattern length does not match the number of connections. neuronConnectionList size=" + QString::number(neuronConnectionList.size()) + "; training pattern length=" + QString::number(trainingArrayLength-1));
+	    }
+
+	    //Add indexes to the database
+	    unsigned int numberOfAddedConnections = 0;//A check on the addition of multiple connections between neurons
+	    for(int patIndex = 0; patIndex < neuronConnectionList.size(); ++patIndex){
+		//Get the connections between these two neurons from the database
+		QList<Connection> tmpConList = networkDao.getConnections(neuronConnectionList[patIndex], neuronID);
+
+		//Add the index of the weightless connection to the database using the id of the connection
+		for(int tmpConCtr = 0; tmpConCtr < tmpConList.size(); ++tmpConCtr){
+		    networkDao.addWeightlessConnection(tmpConList[tmpConCtr].getID(), patIndex);
+		    ++numberOfAddedConnections;
+
+		    //Increase the pattern index if we have more than one
+		    if(tmpConCtr < (tmpConList.size()-1))
+			++patIndex;
+		}
+	    }
+	    //Check number of added connections is correct.
+	    if(numberOfAddedConnections != neuronConnectionList.size())
+		throw SpikeStreamException("Number of added connections does not match the number of connections.");
+	}
+    }
 }
 
 

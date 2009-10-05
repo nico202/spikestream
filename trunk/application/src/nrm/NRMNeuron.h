@@ -11,6 +11,7 @@ class NRMNeuron {
 
 		void addTraining(unsigned char* inBitArray, unsigned int inBitArrLen, unsigned char output);
 		QList<unsigned char*> getTraining();
+		unsigned int getTrainingArrayLength() { return trainingArrayLength; }
 		void printTraining();
 
 

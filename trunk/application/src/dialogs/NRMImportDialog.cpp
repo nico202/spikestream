@@ -193,10 +193,7 @@ void NRMImportDialog::threadFinished(){
 	    case FILE_LOADING_TASK:
 		showPage1();
 	    break;
-	    case ADD_NEURON_GROUPS_TASK:
-		showPage2();
-	    break;
-	    case ADD_CONNECTION_GROUPS_TASK:
+	    case ADD_NEURON_GROUPS_TASK: case ADD_CONNECTION_GROUPS_TASK: case ADD_TRAINING_TASK:
 		showPage2();
 	    break;
 	    default:
@@ -223,13 +220,7 @@ void NRMImportDialog::threadFinished(){
 		threadError = true;
 	    }
 	break;
-	case ADD_CONNECTION_GROUPS_TASK:
-	    if(dataImporter->isError()){
-		qCritical()<<dataImporter->getErrorMessage();
-		threadError = true;
-	    }
-	break;
-	case ADD_ARCHIVES_TASK:
+	case ADD_CONNECTION_GROUPS_TASK: case ADD_ARCHIVES_TASK: case ADD_TRAINING_TASK:
 	    if(dataImporter->isError()){
 		qCritical()<<dataImporter->getErrorMessage();
 		threadError = true;
@@ -263,6 +254,10 @@ void NRMImportDialog::threadFinished(){
 	    addArchives();
 	break;
 	case ADD_ARCHIVES_TASK:
+	    //Add training to the database
+	    addTraining();
+	break;
+	case ADD_TRAINING_TASK:
 	    /* Inform other classes that the list of networks has changed
 	       No need to inform about archive changes because the new network is not loaded. */
 	    emit networkListChanged();
@@ -530,6 +525,22 @@ void NRMImportDialog::addNeuronGroupIDsToNRMNetwork(){
     for(int i=0; i<neuralList.size(); ++i){
 	neuralList[i]->spikeStreamID = newNeuronGroupList[index]->getID();
 	++index;
+    }
+}
+
+/*! Prepares the data importer to add training to the database */
+void NRMImportDialog::addTraining(){
+    operationCancelled = false;
+    currentTask = ADD_TRAINING_TASK;
+    showBusyPage("Adding training to database...");
+    try{
+	dataImporter->prepareAddTraining(fileLoader->getNetwork(), newNetwork);
+	dataImporter->start();
+    }
+    catch(SpikeStreamException& ex){
+	qCritical()<<ex.getMessage();
+	showPage1();
+	currentTask = -1;
     }
 }
 

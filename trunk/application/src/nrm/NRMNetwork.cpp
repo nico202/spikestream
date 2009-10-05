@@ -149,6 +149,18 @@ NRMLayer* NRMNetwork::getLayerById(int layerId, int objectType){
 	throw NRMException("Object type not recognized: ", objectType);
 }
 
+
+/*! Returns a list of the neural layers that have been trained. */
+QList<NRMNeuralLayer*> NRMNetwork::getTrainedNeuralLayers(){
+    QList<NRMNeuralLayer*> tmpList;
+    for(QHash<int, NRMNeuralLayer*>::iterator iter = neuralLayerMap.begin(); iter != neuralLayerMap.end(); ++iter){
+	if(iter.value()->isTrained())
+	    tmpList<<iter.value();
+    }
+    return tmpList;
+}
+
+
 /*! Sets the config version */
 void NRMNetwork::setConfigVersion(int version){
 	configVersion = version;
@@ -157,9 +169,16 @@ void NRMNetwork::setConfigVersion(int version){
 
 /*! Prints out the connections */
 void NRMNetwork::printConnections(){
-	for(QHash<int, NRMNeuralLayer*>::iterator iter = neuralLayerMap.begin(); iter != neuralLayerMap.end(); ++iter){
-		iter.value()->printConnections();
+    for(QHash<int, NRMNeuralLayer*>::iterator iter = neuralLayerMap.begin(); iter != neuralLayerMap.end(); ++iter){
+	QList<NRMConnection*> connectionList = iter.value()->getConnections();
+	for(int conCtr=0; conCtr<connectionList.size(); ++conCtr){
+	    connectionList[conCtr]->print();
+	    cout<<"======================  NEURAL CONNECTIONS  ========================"<<endl;
+	    for(int neurCtr=0; neurCtr<iter.value()->getSize(); ++neurCtr){
+		connectionList[conCtr]->printNeuronConnections(neurCtr);
+	    }
 	}
+    }
 }
 
 

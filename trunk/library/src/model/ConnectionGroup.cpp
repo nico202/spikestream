@@ -57,7 +57,7 @@ const QList<Connection*>& ConnectionGroup::getFromConnections(unsigned int neurI
     Exception is thrown if the neuron cannot be found. */
 const QList<Connection*>& ConnectionGroup::getToConnections(unsigned int neurID){
    if(!toConnectionMap.contains(neurID))
-       return emptyConnectionList;//Returns an empty connetion list without filling map with invalid from and to neurons
+       return emptyConnectionList;//Returns an empty connection list without filling map with invalid from and to neurons
    return toConnectionMap[neurID];
 }
 

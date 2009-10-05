@@ -25,6 +25,7 @@ class NRMNetwork {
 		QList<NRMInputLayer*> getFramedImageInputs();
 		NRMInputLayer* getInputById(int id);
 		QList<NRMNeuralLayer*> getAllNeuralLayers();
+		QList<NRMNeuralLayer*> getTrainedNeuralLayers();
 		NRMLayer* getLayerById(int layerId, int objectType);
 		NRMNeuralLayer* getNeuralLayerById(int id);
 		void setConfigVersion(int version);

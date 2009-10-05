@@ -17,6 +17,7 @@ namespace spikestream {
 	    void addLayer(int width, int height, int xPos, int yPos, int zPos);
 	    void addNeuron(float xPos, float yPos, float zPos);
 	    void clearNeurons();
+	    bool contains(unsigned int neurID);
 	    bool contains(unsigned int neurID, float x, float y, float z);
 	    unsigned int getID() { return info.getID(); }
 	    unsigned int getStartNeuronID() { return startNeuronID; }

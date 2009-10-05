@@ -29,14 +29,17 @@ namespace spikestream {
 	    Network(const NetworkInfo& networkInfo, NetworkDao* networkDao);
 	    ~Network();
 
+	    void addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList);
 	    void addNeuronGroups(QList<NeuronGroup*>& neuronGroupList);
 	    void cancel();
 	    void clearError() { error = false; errorMessage = ""; }
 	    bool connectionGroupIsLoaded(unsigned int connGrpID);
+	    bool containsNeuron(unsigned int neurID);
 	    Box getBoundingBox();
 	    unsigned int getID() { return info.getID(); }
 	    QString getErrorMessage() { return  errorMessage; }
 	    Box getNeuronGroupBoundingBox(unsigned int neurGrpID);
+	    int getNumberOfToConnections(unsigned int neuronID);
 	    int getTotalNumberOfSteps() { return totalNumberOfSteps; }
 	    int getNumberOfCompletedSteps();
 	    QList<unsigned int> getNeuronGroupIDs();

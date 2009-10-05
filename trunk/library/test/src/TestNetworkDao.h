@@ -14,7 +14,10 @@ class TestNetworkDao : public TestDao {
 	private slots:
     //void init();
 	    void testAddNetwork();
+	    void testAddWeightlessConnection();
+	    void testAddWeightlessNeuronTrainingPattern();
 	    void testDeleteNetwork();
+	    void testGetConnections();
 	    void testGetConnectionGroupsInfo();
 	    void testGetConnectionGroupSize();
 	    void testGetNeuronGroupBoundingBox();

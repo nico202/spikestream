@@ -9,9 +9,9 @@ OBJECTS_DIR = build/objects
 MOC_DIR = build/moc
 
 INCLUDEPATH += .src \
-                ../src \
-                ../src/exceptions \
-                ../src/nrm
+		../src \
+		../src/exceptions \
+		../src/nrm
 LIBS += -lgmp
 
 CONFIG += qtestlib
@@ -20,19 +20,21 @@ CONFIG += qtestlib
 #---            Test Files                  ---#
 #----------------------------------------------#
 HEADERS += src/TestNRMConfigLoader.h \
-            src/TestRunner.h \
-            src/TestNRMTrainingLoader.h \
-            src/TestNRMRandom.h \
+	    src/TestRunner.h \
+	    src/TestNRMTrainingLoader.h \
+	    src/TestNRMRandom.h \
 	    src/TestNRMConnection.h \
-	    src/TestNRMDataSetImporter.h
+	    src/TestNRMDataSetImporter.h \
+	    src/TestNRMDataImporter.h
 
 SOURCES += src/Main.cpp \
-            src/TestRunner.cpp \
-            src/TestNRMConfigLoader.cpp \
-            src/TestNRMTrainingLoader.cpp \
-            src/TestNRMRandom.cpp \
+	    src/TestRunner.cpp \
+	    src/TestNRMConfigLoader.cpp \
+	    src/TestNRMTrainingLoader.cpp \
+	    src/TestNRMRandom.cpp \
 	    src/TestNRMConnection.cpp \
-	    src/TestNRMDataSetImporter.cpp
+	    src/TestNRMDataSetImporter.cpp \
+	    src/TestNRMDataImporter.cpp
 
 #----------------------------------------------#
 #---          Files used in tests           ---#
@@ -48,7 +50,8 @@ SOURCES += ../src/nrm/NRMNetwork.cpp \
 	    ../src/nrm/NRMNeuron.cpp \
 	    ../src/nrm/NRMRandom.cpp \
 	    ../src/nrm/NRMDataSet.cpp \
-	    ../src/nrm/NRMDataSetImporter.cpp
+	    ../src/nrm/NRMDataSetImporter.cpp \
+	    ../src/nrm/NRMDataImporter.cpp
 
 
 

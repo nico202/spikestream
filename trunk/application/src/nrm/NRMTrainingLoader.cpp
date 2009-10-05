@@ -300,6 +300,7 @@ void NRMTrainingLoader::loadLayerTraining(int layerId, FILE* file){
 		//neuralLayer->getNeuron(neurNum)->printTraining();
 	}
 
+	neuralLayer->setTrained(true);
 
 	//Clean up
 	delete [] trainingStrArray;
