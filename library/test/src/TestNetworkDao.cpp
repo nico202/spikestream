@@ -40,6 +40,71 @@ void TestNetworkDao::testAddNetwork(){
     }
 }
 
+
+void TestNetworkDao::testAddWeightlessConnection(){
+    //Add a test network to give us a valid connection id
+    addTestNetwork1();
+
+    //The network dao being tested
+    NetworkDao networkDao(dbInfo);
+
+    //Add a pattern index to the database
+    try{
+	networkDao.addWeightlessConnection(testConnIDList[0], 2);
+    }
+    catch(SpikeStreamException& ex){
+	QFAIL(ex.getMessage().toAscii());
+    }
+
+    //Check pattern index has been added
+    QSqlQuery query = getQuery("SELECT ConnectionID, PatternIndex FROM WeightlessConnections");
+    executeQuery(query);
+
+    //Should be 1 entry
+    QCOMPARE(query.size(), (int)1);
+
+    //Check entries are correct
+    query.next();
+    QCOMPARE(query.value(0).toUInt(), testConnIDList[0]);
+    QCOMPARE(query.value(1).toUInt(), (unsigned int)2);
+}
+
+
+void TestNetworkDao::testAddWeightlessNeuronTrainingPattern(){
+    //Add a test network to give us a valid connection id
+    addTestNetwork1();
+
+    //The network dao being tested
+    NetworkDao networkDao(dbInfo);
+
+    //Create the pattern array and add it to the database
+    unsigned char* patternArray = new unsigned char[3];
+    patternArray[0] = 55;
+    patternArray[1] = 2;
+    patternArray[2] = 231;
+    unsigned int patternID = networkDao.addWeightlessNeuronTrainingPattern(testNeurIDList[1], patternArray, 1, 3);
+
+    //Check training pattern has been added
+    QSqlQuery query = getQuery("Select NeuronID, PatternID, Output, Pattern FROM WeightlessNeuronTrainingPatterns");
+    executeQuery(query);
+
+    //Should be 1 entry
+    QCOMPARE(query.size(), (int)1);
+
+    //Check entries are correct
+    query.next();
+    QCOMPARE(query.value(0).toUInt(), testNeurIDList[1]);
+    QCOMPARE(query.value(1).toUInt(), patternID);
+    QCOMPARE(query.value(2).toBool(), true);
+
+    QByteArray byteArrayRes = query.value(3).toByteArray();
+    QCOMPARE(byteArrayRes.size(), 3);
+    QCOMPARE((unsigned char)byteArrayRes[0], (unsigned char)55);
+    QCOMPARE((unsigned char)byteArrayRes[1], (unsigned char)2);
+    QCOMPARE((unsigned char)byteArrayRes[2], (unsigned char)231);
+}
+
+
 void TestNetworkDao::testDeleteNetwork(){
     //Add test network
     addTestNetwork1();
@@ -61,6 +126,27 @@ void TestNetworkDao::testDeleteNetwork(){
 
     //Should be no networks
     QCOMPARE(query.size(), (int)0);
+}
+
+
+void TestNetworkDao::testGetConnections(){
+    //Add a test network to give us a valid connection id
+    addTestNetwork1();
+
+    //The network dao being tested
+    NetworkDao networkDao(dbInfo);
+
+    //Execute method
+    QList<Connection> conList = networkDao.getConnections(testNeurIDList[4], testNeurIDList[3]);
+
+    //Should be a single connection
+    QCOMPARE(conList.size(), (int)1);
+
+    //Check values of connection
+    QCOMPARE(conList[0].fromNeuronID, testNeurIDList[4]);
+    QCOMPARE(conList[0].toNeuronID, testNeurIDList[3]);
+    QCOMPARE(conList[0].delay, 1.4f);
+    QCOMPARE(conList[0].weight, 0.4f);
 }
 
 

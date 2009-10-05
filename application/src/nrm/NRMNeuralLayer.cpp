@@ -11,6 +11,7 @@ using namespace std;
 NRMNeuralLayer::NRMNeuralLayer(){
 	trainingStringCount = 0;
 	type = NRM_NEURAL_LAYER;
+	trained = false;
 }
 
 

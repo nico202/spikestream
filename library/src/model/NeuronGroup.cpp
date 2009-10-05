@@ -59,6 +59,14 @@ void NeuronGroup::clearNeurons(){
 }
 
 
+/*! Returns true if the neuron group contains a neuron with the specified id. */
+bool NeuronGroup::contains(unsigned int neurID){
+    if(neuronMap->contains(neurID))
+	return true;
+    return false;
+}
+
+
 /*! Returns true if a neuron with this specification exists in this group */
 bool NeuronGroup::contains(unsigned int neurID, float x, float y, float z){
     if(!neuronMap->contains(neurID))

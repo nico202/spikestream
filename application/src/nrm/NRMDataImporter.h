@@ -23,6 +23,7 @@ namespace spikestream {
 	    QString getErrorMessage() { return errorMessage; }
 	    void prepareAddArchives(NRMNetwork* nrmNetwork, Network* network, NRMDataSet* nrmDataset);
 	    void prepareAddConnections(NRMNetwork* nrmNetwork, Network* network);
+	    void prepareAddTraining(NRMNetwork* nrmNetwork, Network* network);
 	    void run();
 	    void stop();
 
@@ -37,11 +38,14 @@ namespace spikestream {
 	    /*! Records which task is being undertaken - task IDs are defined below */
 	    unsigned int currentTask;
 
-	    /*! Task of adding connections to the database */
-	    static const int ADD_CONNECTIONS_TASK = 1;
-
 	    /*! Task of adding archives to the database */
-	    static const int ADD_ARCHIVES_TASK = 2;
+	    static const int ADD_ARCHIVES_TASK = 1;
+
+	    /*! Task of adding connections to the database */
+	    static const int ADD_CONNECTIONS_TASK = 2;
+
+	    /*! Task of adding training to the database */
+	    static const int ADD_TRAINING_TASK = 3;
 
 	    /*! When set to true the run method is exited. */
 	    bool stopThread;
@@ -66,6 +70,7 @@ namespace spikestream {
 	    //==========================  METHODS  ===========================
 	    void addArchives();
 	    void addConnections();
+	    void addTraining();
 	    void clearError();
 	    void setError(const QString& errMsg);
     };

@@ -27,10 +27,12 @@ class NRMNeuralLayer : public NRMLayer {
 		unsigned int getNumberOfConnections();
 		unsigned int getNumConnsPerNeuron();
 		unsigned int getPatternArraySize();
+		bool isTrained() { return trained; }
 		void print();
 		void printConnections();
 		void printNeuronConnections(unsigned int neurNum);
 		void printTraining();
+		void setTrained(bool trained){ this->trained = trained; }
 
 		//========================  VARIABLES  ===========================
 		int generalisation;
@@ -54,6 +56,9 @@ class NRMNeuralLayer : public NRMLayer {
 
 		/*! Array of neurons */
 		NRMNeuron** neuronArray;
+
+		/*! Records whether the neuron has been trained or not. */
+		bool trained;
 
 };
 

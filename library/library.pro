@@ -23,15 +23,15 @@ INCLUDEPATH += include \
 		/usr/local/include/mysql++
 
 HEADERS = include/ConfigLoader.h \
-            include/ConnectionType.h \
-            include/DeviceMessages.h \
-            include/DeviceTypes.h \
-            include/GlobalVariables.h \
-            include/LogWriter.h \
-            include/NeuronGroupType.h \
-            include/PatternTypes.h \
-            include/PerformanceTimer.h \
-            include/PVMMessages.h \
+	    include/ConnectionType.h \
+	    include/DeviceMessages.h \
+	    include/DeviceTypes.h \
+	    include/GlobalVariables.h \
+	    include/LogWriter.h \
+	    include/NeuronGroupType.h \
+	    include/PatternTypes.h \
+	    include/PerformanceTimer.h \
+	    include/PVMMessages.h \
 	    include/RGBColor.h \
 	    include/SimulationTypes.h \
 	    include/Box.h \
@@ -40,12 +40,12 @@ HEADERS = include/ConfigLoader.h \
 	    include/Util.h
 
 SOURCES = src/ConfigLoader.cpp \
-            src/ConnectionType.cpp \
+	    src/ConnectionType.cpp \
 	    src/DeviceTypes.cpp \
-            src/LogWriter.cpp \
-            src/NeuronGroupType.cpp \
-            src/PatternTypes.cpp \
-            src/PerformanceTimer.cpp \
+	    src/LogWriter.cpp \
+	    src/NeuronGroupType.cpp \
+	    src/PatternTypes.cpp \
+	    src/PerformanceTimer.cpp \
 	    src/Box.cpp \
 	    src/Utilities.cpp \
 	    src/RGBColor.cpp \
@@ -99,7 +99,8 @@ SOURCES += src/model/Network.cpp \
 	    src/model/ConnectionGroup.cpp \
 	    src/model/ConnectionGroupInfo.cpp \
 	    src/model/Archive.cpp \
-	    src/model/ArchiveInfo.cpp
+	    src/model/ArchiveInfo.cpp \
+	    src/model/Connection.cpp
 
 #----------------------------------------------#
 #---                  xml                   ---#

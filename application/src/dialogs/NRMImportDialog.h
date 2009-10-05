@@ -89,6 +89,9 @@ class NRMImportDialog : public QDialog {
 	/*! Task of converting data sets to archives */
 	static const int ADD_ARCHIVES_TASK = 4;
 
+	/*! Task of adding training to the database */
+	static const int ADD_TRAINING_TASK = 5;
+
 	/*! Runs as a separate thread to load data from configuration and training files */
 	NRMFileLoader* fileLoader;
 
@@ -122,6 +125,7 @@ class NRMImportDialog : public QDialog {
 	void addConnectionGroups();
 	void addLayersToPage2();
 	void addNeuronGroupIDsToNRMNetwork();
+	void addTraining();
 	void buildBusyPage();
 	void buildPage1();
 	void buildPage2();

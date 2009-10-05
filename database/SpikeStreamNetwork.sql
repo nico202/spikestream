@@ -176,12 +176,13 @@ ENGINE=InnoDB;
 	The connection represented by an entry in the pattern is stored in the weightless
 	neuron connection table.
 */
-CREATE TABLE WeightlessNeuronLookupTables (
+CREATE TABLE WeightlessNeuronTrainingPatterns (
+	PatternID MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	NeuronID MEDIUMINT UNSIGNED NOT NULL,
 	Pattern MEDIUMBLOB NOT NULL,
 	OUTPUT BOOLEAN NOT NULL,
 
-	PRIMARY KEY (NeuronID),
+	PRIMARY KEY (PatternID),
 	INDEX NeuronIDIndex(NeuronID),
 
     FOREIGN KEY NeuronID_FK(NeuronID) REFERENCES Neurons(NeuronID) ON DELETE CASCADE
@@ -189,19 +190,15 @@ CREATE TABLE WeightlessNeuronLookupTables (
 ENGINE=InnoDB;
 
 
-/* WeightlessNeuronPatterns
-    Each position in the lookup table pattern refers to connection between two neurons.
+/* WeightlessConnections
+    Stores an index for each connection that refers to the connection between two neurons.
 */
-CREATE TABLE WeightlessNeuronConnections (
-	ConnectionID BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-	FromNeuronID MEDIUMINT UNSIGNED NOT NULL,
-	ToNeuronID MEDIUMINT UNSIGNED NOT NULL,
+CREATE TABLE WeightlessConnections (
+	ConnectionID BIGINT UNSIGNED NOT NULL,
 	PatternIndex MEDIUMINT UNSIGNED NOT NULL,
 
 	PRIMARY KEY (ConnectionID),
-
-    FOREIGN KEY FromNeuronID_FK(FromNeuronID) REFERENCES Neurons(NeuronID) ON DELETE CASCADE,
-    FOREIGN KEY ToNeuronID_FK(ToNeuronID) REFERENCES Neurons(NeuronID) ON DELETE CASCADE
+    FOREIGN KEY ConnectionID_FK(ConnectionID) REFERENCES Connections(ConnectionID) ON DELETE CASCADE
 )
 ENGINE=InnoDB;
 

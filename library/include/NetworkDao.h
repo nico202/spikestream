@@ -26,7 +26,10 @@ namespace spikestream{
 	    virtual ~NetworkDao();
 
 	    void addNetwork(NetworkInfo& netInfo);
+	    void addWeightlessConnection(unsigned int connectionID, unsigned int patternIndex);
+	    unsigned int addWeightlessNeuronTrainingPattern(unsigned int neuronID, const unsigned char* patternArray, bool output, unsigned int patternArraySize);
 	    void deleteNetwork(unsigned int networkID);
+	    QList<Connection> getConnections(unsigned int fromNeuronID, unsigned int toNeuronID);
 	    unsigned int getConnectionGroupSize(unsigned int connGrpID);
 	    Box getNeuronGroupBoundingBox(unsigned int neurGrpID);
 	    QList<NetworkInfo> getNetworksInfo();

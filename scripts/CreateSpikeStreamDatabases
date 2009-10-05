@@ -45,7 +45,7 @@ DEVICES_DATABASE=SpikeStreamDevices
 DEVICES_TEST_DATABASE=SpikeStreamDevicesTest
 
 # Double check that user wants to continue - this will erase all databases
-echo "This will erase all of the data in the current databases. Do you want to continue?"
+echo "This will erase all of the data in the current databases. Do you want to continue (yes/no)?"
 read confirmResponse
 if [ $confirmResponse != "yes" ]
 then

@@ -77,6 +77,8 @@ void TestDao::cleanTestDatabases(){
     executeQuery("DELETE FROM ConnectionGroups");
     executeQuery("DELETE FROM Neurons");
     executeQuery("DELETE FROM Connections");
+    executeQuery("DELETE FROM WeightlessConnections");
+    executeQuery("DELETE FROM WeightlessNeuronTrainingPatterns");
 
     //Clean up archive database
     executeArchiveQuery("DELETE FROM Archives");
