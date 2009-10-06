@@ -11,25 +11,22 @@ class AnalysisLoaderWidget : public QWidget {
   Q_OBJECT
 
     public:
-        AnalysisLoaderWidget(QWidget* parent);
-        ~AnalysisLoaderWidget();
+	AnalysisLoaderWidget(QWidget* parent);
+	~AnalysisLoaderWidget();
 
     private slots:
-        void setAnalysisWidget();
+	void showAnalysisWidget();
 
     private:
-        //=========================  VARIABLES  =============================
-        /*! Combo box to select plugin */
-        QComboBox* pluginsCombo;
+	//=========================  VARIABLES  =============================
+	/*! Combo box to select plugin */
+	QComboBox* pluginsCombo;
 
-        /*! Map of all the dynamically loaded analysis widgets */
-        QHash<QString, QWidget*> pluginWidgetMap;
+	/*! Stores the position in the stacked widget where the analysis plugins are stored. */
+	QHash<QString, int> pluginWidgetMap;
 
-        /*! The widget that is currently visible */
-        QWidget* currentAnalysisWidget;
-
-        /*! Vertical box organizing layout */
-        QVBoxLayout *mainVerticalBox;
+	/*! Vertical box organizing layout */
+	QVBoxLayout *mainVerticalBox;
 };
 
 
