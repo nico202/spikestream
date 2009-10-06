@@ -11,7 +11,7 @@
 #include <QHash>
 
 /*! The type of the function used to create plugins. */
-typedef QWidget* (*CreatePluginFunctionType)(QWidget*);
+typedef QWidget* (*CreatePluginFunctionType)();
 
 /*! The type of the function used to create neurons. */
 typedef QString (*GetPluginNameFunctionType)();
@@ -19,7 +19,7 @@ typedef QString (*GetPluginNameFunctionType)();
 
 class PluginManager {
   public:
-    PluginManager(QWidget* parentWidget, QString& pluginFolder) throw(SpikeStreamException*);
+    PluginManager(QString& pluginFolder) throw(SpikeStreamException*);
     ~PluginManager();
 
     QStringList getPluginNames() throw(SpikeStreamException*);
@@ -28,8 +28,6 @@ class PluginManager {
 
   private:
     //============================== VARIABLES ============================
-    QWidget* parentWidget;
-
     /*! Location where plugins are stored. */
     QString pluginFolder;
 

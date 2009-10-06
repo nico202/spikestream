@@ -79,7 +79,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	//Store reference to spike stream application
 	spikeStreamApplication = ssApp;
 
-        //FIXME: CARRY OUT HOUSEKEEPING TASKS ON DATABASE, SUCH AS SORTING OUT CRASHED SIMULATIONS ETC.
+	//FIXME: CARRY OUT HOUSEKEEPING TASKS ON DATABASE, SUCH AS SORTING OUT CRASHED SIMULATIONS ETC.
 
 	//Get the working directory, which should be defined by the SPIKESTREAM_ROOT variable
 	workingDirectory = getenv("SPIKESTREAM_ROOT");
@@ -92,7 +92,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 		exit(1);
 	}
 	else if( !QFile::exists(workingDirectory) ){
-                cerr<<"SPIKESTREAM_ROOT VARIABLE POINTS TO AN INVALID DIRECTORY: "<<workingDirectory.toStdString()<<endl;
+		cerr<<"SPIKESTREAM_ROOT VARIABLE POINTS TO AN INVALID DIRECTORY: "<<workingDirectory.toStdString()<<endl;
 		QMessageBox::critical( 0, "SpikeStream", "SPIKESTREAM_ROOT variable does not point to a valid directory.\nApplication will now exit.");
 		delete this;
 		exit(1);
@@ -102,7 +102,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 			cout<<"Working directory: "<<workingDirectory<<endl;
 		#endif//PATH_DEBUG
 	}
-        //Store root directory in global scope
+	//Store root directory in global scope
 	Globals::setSpikeStreamRoot(workingDirectory);
 
 	//Set up splash screen to give feedback whilst application is loading
@@ -115,16 +115,16 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	//Set up config
 	ConfigLoader* configLoader;
 	if(QFile::exists(workingDirectory +  "/spikestream.config")){
-                configLoader = new ConfigLoader(workingDirectory.toStdString() + "/spikestream.config");
+		configLoader = new ConfigLoader(workingDirectory.toStdString() + "/spikestream.config");
 	}
 	else{
-                cerr<<"Cannot find configuration file at "<<workingDirectory.toStdString()<<"/spikestream.config"<<endl;
+		cerr<<"Cannot find configuration file at "<<workingDirectory.toStdString()<<"/spikestream.config"<<endl;
 		QMessageBox::critical( 0, "Config Error", "Cannot find configuration file\nApplication will now exit.");
-		exit(1);	
+		exit(1);
 	}
-	
 
-        //Set up the logging - FIXME USE PROPER LOGGER
+
+	//Set up the logging - FIXME USE PROPER LOGGER
 	//Load the log level from the configuration file: 0 disables logging, 1 enables medium logging, 2 enables full logging
 	int logLev = 0;
 	try{
@@ -148,7 +148,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 			cerr<<"SpikeStreamMainWindow: LOG LEVEL SHOULD BE 0, 1 OR 2"<<endl;
 			LogWriter::setLogLevel(1);
 		}
-		
+
 		//Find the log file
 		if(QFile::exists(workingDirectory + "/SpikeStream.log")){
 			QString logPath = workingDirectory + "/SpikeStream.log";
@@ -158,8 +158,8 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 			cerr<<"Cannot find log file. Creating new file."<<endl;
 			LogWriter::setLogPath(workingDirectory + "/SpikeStream.log");
 		}
-		
-		//Check to see if it has reached its maximum size defined in config file. 
+
+		//Check to see if it has reached its maximum size defined in config file.
 		//Disable logging if it is too big
 		unsigned int maxLogSize = 100000;
 		try{
@@ -176,19 +176,19 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 		QFile logFile(workingDirectory + "/SpikeStream.log");
 		if(logFile.size() > maxLogSize){
 			cerr<<"Log file is full. Logging disabled. [ Max_log_size: "<<maxLogSize<<"; Current log size: "<<logFile.size()<<" ]"<<endl;
-			LogWriter::disableLogging();	
+			LogWriter::disableLogging();
 		}
-		
+
 		//Write the date and time to the log.
 		LogWriter::writeDate();
 	}
-	
+
 	//Set up the Network database interface and connect to it
 	//This will be used by many other classes, so keep reference to it
 	networkDBInterface = new DBInterface(
-		configLoader->getCharData("neuralNetworkHost"), 
-		configLoader->getCharData("neuralNetworkUser"), 
-		configLoader->getCharData("neuralNetworkPassword"), 
+		configLoader->getCharData("neuralNetworkHost"),
+		configLoader->getCharData("neuralNetworkUser"),
+		configLoader->getCharData("neuralNetworkPassword"),
 		configLoader->getCharData("neuralNetworkDatabase")
 	);
 	if(!networkDBInterface->connectToDatabase(true)){//Exceptions enabled
@@ -198,9 +198,9 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 
 	//Set up the archive database interface and connect to it
 	archiveDBInterface = new DBInterface(
-		configLoader->getCharData("archiveHost"), 
-		configLoader->getCharData("archiveUser"), 
-		configLoader->getCharData("archivePassword"), 
+		configLoader->getCharData("archiveHost"),
+		configLoader->getCharData("archiveUser"),
+		configLoader->getCharData("archivePassword"),
 		configLoader->getCharData("archiveDatabase")
 	);
 	if(!archiveDBInterface->connectToDatabase(true)){//Exceptions enabled
@@ -210,9 +210,9 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 
 	//Set up the pattern database interface and connect to it
 	patternDBInterface = new DBInterface(
-		configLoader->getCharData("patternHost"), 
-		configLoader->getCharData("patternUser"), 
-		configLoader->getCharData("patternPassword"), 
+		configLoader->getCharData("patternHost"),
+		configLoader->getCharData("patternUser"),
+		configLoader->getCharData("patternPassword"),
 		configLoader->getCharData("patternDatabase")
 	);
 	if(!patternDBInterface->connectToDatabase(true)){//Exceptions enabled
@@ -222,9 +222,9 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 
 	//Set up the device database interface and connect to it
 	deviceDBInterface = new DBInterface(
-		configLoader->getCharData("deviceHost"), 
-		configLoader->getCharData("deviceUser"), 
-		configLoader->getCharData("devicePassword"), 
+		configLoader->getCharData("deviceHost"),
+		configLoader->getCharData("deviceUser"),
+		configLoader->getCharData("devicePassword"),
 		configLoader->getCharData("deviceDatabase")
 	);
 	if(!deviceDBInterface->connectToDatabase(true)){//Exceptions enabled
@@ -245,6 +245,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	}
 	catch(SpikeStreamException& ex){
 	    qCritical()<<ex.getMessage();
+	    exit(1);
 	}
 
 
@@ -261,6 +262,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	}
 	catch(SpikeStreamException& ex){
 	    qCritical()<<ex.getMessage();
+	    exit(1);
 	}
 
 	//Get the default location for saving and loading databases
@@ -343,7 +345,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	keyboardAccelerator->insertItem(Qt::CTRL + Qt::ALT + Qt::Key_Right);	*/
 
 
-	//Set up menus. 
+	//Set up menus.
 	//Add file menu.
 	Q3PopupMenu * fileMenu = new Q3PopupMenu(this);
 	menuBar()->insertItem("File", fileMenu);
@@ -375,8 +377,8 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	Q3PopupMenu *helpMenu = new Q3PopupMenu(this);
 	menuBar()->insertItem("Help", helpMenu);
 	helpMenu->insertItem("About", this , SLOT(about()), Qt::Key_F12);
-	
-	
+
+
 	//Set up panes
 	//Set up main splitter, which will divide graphical view from editor/viewer/simulator windows
 	QSplitter *mainSplitterWidget = new QSplitter(this);
@@ -387,14 +389,14 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	QScrollArea* networksScrollArea = new QScrollArea(this);
 	networksScrollArea->setWidget(networksWidget);
 	tabWidget->addTab(networksScrollArea, "Networks");
-	
+
 	//Set up editor window and add to tab widget
 	QSplitter *layerSplitterWidget = new QSplitter( tabWidget);
 	layerWidget = new LayerWidget(layerSplitterWidget, networkDBInterface, deviceDBInterface);
 	connectionWidget = new ConnectionWidget(layerSplitterWidget, networkDBInterface, deviceDBInterface);
 	layerSplitterWidget->setOrientation(Qt::Vertical);
-        tabWidget->addTab(layerSplitterWidget, "Editor");
-	
+	tabWidget->addTab(layerSplitterWidget, "Editor");
+
 
 	//Create network viewer for right half of screen
 	unsigned int maxAutoLoadConnGrpSize = 1000000;
@@ -422,7 +424,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	nwViewerPropScrollView->addChild(nwViewerPropViewBox);
 	networkViewerProperties = new NetworkViewerProperties(nwViewerPropViewBox, networkViewer2, networkDBInterface);
 	networkViewerProperties->setMinimumSize(800, 600);
-        tabWidget->addTab(nwViewerPropScrollView, "Viewer");
+	tabWidget->addTab(nwViewerPropScrollView, "Viewer");
 
 
 	//Set up simulator tab
@@ -452,7 +454,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	//Set up monitor area at bottom of simulation tab
 	MonitorArea *simulationMonitorArea = new MonitorArea(networkDBInterface, simulationManager, simulationSplitterWidget);
 	simulationWidget->setMonitorArea(simulationMonitorArea);
-        tabWidget->addTab(simulationScrollView, "Simulation");
+	tabWidget->addTab(simulationScrollView, "Simulation");
 
 
 	//Set up archive tab
@@ -461,19 +463,21 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	archiveScrollArea->setWidget(archiveWidget);
 	tabWidget->addTab(archiveScrollArea, "Archives");
 
-        //Set up analysis tab
-       // AnalysisLoaderWidget* analysisLoaderWidget = new AnalysisLoaderWidget(this);
-	//tabWidget->addTab(analysisLoaderWidget, "Analysis");
+	//Set up analysis tab
+	AnalysisLoaderWidget* analysisLoaderWidget = new AnalysisLoaderWidget(this);
+	QScrollArea* analysisScrollArea = new QScrollArea(this);
+	analysisScrollArea->setWidget(analysisLoaderWidget);
+	tabWidget->addTab(analysisScrollArea, "Analysis");
 
 	//Set up layer widget connections
 	layerWidget->setConnectionWidget(connectionWidget);
-	
+
 	//Set up network viewer references
 	//networkViewer2->setNetworkViewerProperties((QWidget*)networkViewerProperties);
 
 	//Set up an accelerator to switch between the tabs
 	keyboardAccelerator = new Q3Accel( this );
-	
+
 	//Add all  the key combinations that will be required.
 	keyboardAccelerator->insertItem(Qt::Key_F1);
 	keyboardAccelerator->insertItem(Qt::Key_F2);
@@ -486,15 +490,15 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	//Finish off
 	QPixmap iconPixmap(workingDirectory + "/images/spikestream_icon_64.png" );
 	setIcon(iconPixmap);
-        setCentralWidget( mainSplitterWidget );
-        //setWindowState(Qt::WindowMaximized);
+	setCentralWidget( mainSplitterWidget );
+	//setWindowState(Qt::WindowMaximized);
 
 	//Get rid of splash screen if it is showing
 	if(splashScreen){
 		splashScreen->finish( this );
 		delete splashScreen;
 	}
-	
+
 	//Delete config loader
 	delete configLoader;
 }
@@ -505,7 +509,7 @@ SpikeStreamMainWindow::~SpikeStreamMainWindow(){
 	#ifdef MEMORY_DEBUG
 		cout<<"DELETING SPIKE STREAM MAIN WINDOW"<<endl;
 	#endif//MEMORY_DEBUG
-	
+
 	//First need to stop the simulation if it is running
 	if(simulationManager->isInitialised()){
 		simulationManager->destroySimulation();
@@ -514,7 +518,7 @@ SpikeStreamMainWindow::~SpikeStreamMainWindow(){
 		if(!threadFinished)
 			cerr<<"Simulation manager cannot be shut down cleanly within 10 seconds. Killing thread"<<endl;
 	}
-	
+
 	//Need to stop archive manager if it is running
 	if(archiveManager->isRunning()){
 		archiveManager->stopArchive();
@@ -570,7 +574,7 @@ void SpikeStreamMainWindow::reloadNeuronGroups(){
 
 /*! When viewing individual neurons this method sets the from
 	neuron number in the Simulation Widget, which can be used to
-	fire a neuron or select a neuron for monitoring during a 
+	fire a neuron or select a neuron for monitoring during a
 	simulation. */
 void SpikeStreamMainWindow::setFromNeuronID(unsigned int neurGrpID, unsigned int fromNeurNum){
 	simulationWidget->setFromNeuronID(neurGrpID, fromNeurNum);
@@ -613,25 +617,25 @@ void SpikeStreamMainWindow::about(){
 void SpikeStreamMainWindow::acceleratorKeyPressed(int acceleratorID){
 	//Get the key sequence
 	int keySequence = keyboardAccelerator->key(acceleratorID);
-	
+
 	//Change to a different tab
 	switch(keySequence){
-                case (Qt::Key_F1)://Edit tab
+		case (Qt::Key_F1)://Edit tab
 			simulationWidget->hideOpenWindows();
 			//archiveWidget->hideOpenWindows();
 			tabWidget->setCurrentPage(0);
 		break;
-                case (Qt::Key_F2)://Network viewer properties tab
+		case (Qt::Key_F2)://Network viewer properties tab
 			simulationWidget->hideOpenWindows();
 			//archiveWidget->hideOpenWindows();
 			tabWidget->setCurrentPage(1);
 		break;
-                case (Qt::Key_F3)://Simulation tab
+		case (Qt::Key_F3)://Simulation tab
 			simulationWidget->showOpenWindows();
 			//archiveWidget->hideOpenWindows();
 			tabWidget->setCurrentPage(2);
 		break;
-                case(Qt::Key_F4)://Archive tab
+		case(Qt::Key_F4)://Archive tab
 			simulationWidget->hideOpenWindows();
 			//archiveWidget->showOpenWindows();
 			tabWidget->setCurrentPage(3);
@@ -643,7 +647,7 @@ void SpikeStreamMainWindow::acceleratorKeyPressed(int acceleratorID){
 
 
 /*! Empties all databases except the Neuron, Synapse and Probe types. Useful when
-	an error has led to out of date information in one of the tables. However all 
+	an error has led to out of date information in one of the tables. However all
 	data will be lost if this method is called. */
 void SpikeStreamMainWindow::clearDatabases(){
 	/* Check that we do not have a simulation initialised. */
@@ -711,8 +715,8 @@ void SpikeStreamMainWindow::clearDatabases(){
 		//Next clear the parameter tables. Need to find these by looking in the appropriate Types tables
 		networkQuery.reset();
 		networkQuery<<"SELECT ParameterTableName FROM NeuronTypes";
-                StoreQueryResult neurTableNameRes = networkQuery.store();
-                for(StoreQueryResult::iterator paramTableIter = neurTableNameRes.begin(); paramTableIter != neurTableNameRes.end(); ++paramTableIter){
+		StoreQueryResult neurTableNameRes = networkQuery.store();
+		for(StoreQueryResult::iterator paramTableIter = neurTableNameRes.begin(); paramTableIter != neurTableNameRes.end(); ++paramTableIter){
 			Row tableNameRow (*paramTableIter);
 			networkQuery.reset();
 			networkQuery<<"DELETE FROM "<<(std::string)tableNameRow["ParameterTableName"];
@@ -721,8 +725,8 @@ void SpikeStreamMainWindow::clearDatabases(){
 
 		networkQuery.reset();
 		networkQuery<<"SELECT ParameterTableName FROM SynapseTypes";
-                StoreQueryResult synapseTableNameRes = networkQuery.store();
-                for(StoreQueryResult::iterator paramTableIter = synapseTableNameRes.begin(); paramTableIter != synapseTableNameRes.end(); ++paramTableIter){
+		StoreQueryResult synapseTableNameRes = networkQuery.store();
+		for(StoreQueryResult::iterator paramTableIter = synapseTableNameRes.begin(); paramTableIter != synapseTableNameRes.end(); ++paramTableIter){
 			Row tableNameRow (*paramTableIter);
 			networkQuery.reset();
 			networkQuery<<"DELETE FROM "<<(std::string)tableNameRow["ParameterTableName"];
@@ -731,8 +735,8 @@ void SpikeStreamMainWindow::clearDatabases(){
 
 		networkQuery.reset();
 		networkQuery<<"SELECT ParameterTableName FROM ProbeTypes";
-                StoreQueryResult probeTableNameRes = networkQuery.store();
-                for(StoreQueryResult::iterator paramTableIter = probeTableNameRes.begin(); paramTableIter != probeTableNameRes.end(); ++paramTableIter){
+		StoreQueryResult probeTableNameRes = networkQuery.store();
+		for(StoreQueryResult::iterator paramTableIter = probeTableNameRes.begin(); paramTableIter != probeTableNameRes.end(); ++paramTableIter){
 			Row tableNameRow (*paramTableIter);
 			networkQuery.reset();
 			networkQuery<<"DELETE FROM "<<(std::string)tableNameRow["ParameterTableName"];
@@ -804,7 +808,7 @@ void SpikeStreamMainWindow::clearDatabases(){
 }
 
 
-/*! Called when window is closed. 
+/*! Called when window is closed.
 	This is needed to invoke destructor of neuronapplication
 	Could run a check on whether the user really wants to quit.
 	However, this is not needed at present since everthing is stored in the database. */
@@ -820,7 +824,7 @@ void SpikeStreamMainWindow::closeEvent( QCloseEvent* ce ){
 }
 
 
-/*! Loads a neuron group and associated connections from a file. 
+/*! Loads a neuron group and associated connections from a file.
 	This should be a comma separated matrix of connection weights. */
 void SpikeStreamMainWindow::importConnectionMatrix(){
 	/* Check that we do not have a simulation initialised. */
@@ -842,7 +846,7 @@ void SpikeStreamMainWindow::importConnectionMatrix(){
 
 	//Get the file name
 	QString fileName = Q3FileDialog::getOpenFileName(defaultFileLocation, "All files (*.*)", this, "Load matrix dialog", "Choose a file to load" );
-        if(fileName.isNull())
+	if(fileName.isNull())
 		return;
 
 	//Unload archive if it is loaded. Database loading will invalidate the query if it changes the archive database.
@@ -855,7 +859,7 @@ void SpikeStreamMainWindow::importConnectionMatrix(){
 
 	ConnectionMatrixLoader* matrixLoader = new ConnectionMatrixLoader(networkDBInterface);
 	matrixLoader->loadConnectionMatrix(fileName);
-	
+
 	//Clean up database manager
 	delete matrixLoader;
 
@@ -898,7 +902,7 @@ void SpikeStreamMainWindow::loadDatabases(){
 
 	//Get the file name
 	QString fileName = Q3FileDialog::getOpenFileName(defaultFileLocation, "Zipped SQL (*.sql.tar.gz)", this, "load database dialog", "Choose a file to load" );
-        if(fileName.isNull())
+	if(fileName.isNull())
 		return;
 
 	//Unload archive if it is loaded. Database loading will invalidate the query if it changes the archive database.
@@ -915,7 +919,7 @@ void SpikeStreamMainWindow::loadDatabases(){
 
 	DatabaseManager* dbManager = new DatabaseManager(this, fileName, false, networkDBInterface, archiveDBInterface, patternDBInterface, deviceDBInterface);
 	dbManager->exec();
-	
+
 	//Clean up database manager
 	delete dbManager;
 
@@ -992,12 +996,12 @@ void SpikeStreamMainWindow::reloadPatterns(){
 }
 
 
-/*! Saves databases 
+/*! Saves databases
 	Allows user to choose file and then launches database manager so that user can choose
 	which databases to save. */
 void SpikeStreamMainWindow::saveDatabases(){
     QString fileName = Q3FileDialog::getSaveFileName(defaultFileLocation, "Zipped SQL (*.sql.tar.gz)", this, "save file dialog", "Choose a filename to save under" );
-        if(fileName.isNull())
+	if(fileName.isNull())
 		return;
 
 	//First do some sorting out on the name. The user may have typed .sql.gz at the end
@@ -1012,7 +1016,7 @@ void SpikeStreamMainWindow::saveDatabases(){
 		else
 			QFile::remove(fileName);
 	}
-		
+
 	//Save the file
 	#ifdef SAVE_DATABASES_DEBUG
 		cout<<"Saving databases in file: "<<fileName<<endl;

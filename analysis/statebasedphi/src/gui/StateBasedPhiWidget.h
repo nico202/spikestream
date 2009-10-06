@@ -1,26 +1,21 @@
-/*
- * Phi2AnalysisWidget.h
- *
- *  Created on: 23-Jun-2009
- *      Author: taropeg
- */
-
 #ifndef STATEBASEDPHIWIDGET_H
 #define STATEBASEDPHIWIDGET_H
 
-#include <qwidget.h>
+#include <QWidget>
+
+namespace spikestream {
+
+    class StateBasedPhiWidget : public QWidget {
+	    Q_OBJECT
+
+	    public:
+		    StateBasedPhiWidget(QWidget* parent = 0);
+		    ~StateBasedPhiWidget();
 
 
-class StateBasedPhiWidget : public QWidget {
-	Q_OBJECT
+	    private:
+    };
 
-	public:
-                StateBasedPhiWidget(QWidget*);
-                ~StateBasedPhiWidget();
+}
 
-
-	private:
-};
-
-
-#endif /* STATEBASEDPHIWIDGET_H */
+#endif // STATEBASEDPHIWIDGET_H
