@@ -15,10 +15,10 @@ namespace spikestream {
 	    DBInfo& operator=(const DBInfo &rhs);
 	    QString toString();
 
-	    QString getHost() {return host;}
-	    QString getUser() {return user;}
-	    QString getPassword() {return password;}
-	    QString getDatabase() {return database;}
+	    QString getHost() const {return host;}
+	    QString getUser() const {return user;}
+	    QString getPassword() const {return password;}
+	    QString getDatabase() const {return database;}
 
 	private:
 	    QString host;

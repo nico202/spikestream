@@ -10,15 +10,32 @@ OBJECTS_DIR = build/objects
 
 MOC_DIR = build/moc
 
-HEADERS = src/gui/StateBasedPhiWidget.h
 
-SOURCES = src/gui/StateBasedPhiWidget.cpp
+CONFIG += debug \
+	  warn_on \
+	  qt \
+	  opengl \
+	  thread \
+	  exceptions \
+	  stl
 
-CONFIG += plugin thread
+QT += xml opengl qt3support sql
 
 INCLUDEPATH += src \
-                $(SPIKESTREAM_ROOT)/library/include \
+		src/database \
+		$(SPIKESTREAM_ROOT)/library/include \
+		$(SPIKESTREAM_ROOT)/applicationlibrary/src \
+		$(SPIKESTREAM_ROOT)/applicationlibrary/src/widgets \
+		$(SPIKESTREAM_ROOT)/applicationlibrary/src/dialogs
+
+LIBS += -L$(SPIKESTREAM_ROOT)/lib -lspikestream -lspikestreamapplication
 
 
-LIBS += -L$(SPIKESTREAM_ROOT)/lib -lspikestream
+HEADERS = src/gui/StateBasedPhiWidget.h \
+	    src/database/StateBasedPhiAnalysisDao.h
+
+SOURCES = src/gui/StateBasedPhiWidget.cpp \
+	    src/database/StateBasedPhiAnalysisDao.cpp
+
+
 

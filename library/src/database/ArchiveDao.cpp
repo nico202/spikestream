@@ -84,6 +84,15 @@ unsigned int ArchiveDao::getMaxTimeStep(unsigned int archiveID){
 }
 
 
+/*! Returns the minimum time step in the archive */
+unsigned int ArchiveDao::getMinTimeStep(unsigned int archiveID){
+    QSqlQuery query = getQuery("SELECT MIN(TimeStep) FROM ArchiveData WHERE ArchiveID=" + QString::number(archiveID));
+    executeQuery(query);
+    query.next();
+    return Util::getUInt(query.value(0).toString());
+}
+
+
 /*! Returns a string containing the comma separated list of neuron IDs */
 QStringList ArchiveDao::getFiringNeuronIDs(unsigned int archiveID, unsigned int timeStep){
     QSqlQuery query = getQuery("SELECT FiringNeurons FROM ArchiveData WHERE TimeStep=" + QString::number(timeStep) + " AND ArchiveID=" + QString::number(archiveID));
