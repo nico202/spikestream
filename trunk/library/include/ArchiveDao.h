@@ -20,6 +20,7 @@ namespace spikestream {
 	    int getArchiveSize(unsigned int archiveID);
 	    QStringList getFiringNeuronIDs(unsigned int archiveID, unsigned int timeStep);
 	    unsigned int getMaxTimeStep(unsigned int archiveID);
+	    unsigned int getMinTimeStep(unsigned int archiveID);
 
 	};
 

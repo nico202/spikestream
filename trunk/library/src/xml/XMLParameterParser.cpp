@@ -93,7 +93,7 @@ bool XMLParameterParser::error (const QXmlParseException& parseEx){
 
 /*! Returns a default error string. */
 QString XMLParameterParser::errorString (){
-	return QString("ConnectionParameterViewer: Default error string");
+	return QString("Default error string");
 
 }
 

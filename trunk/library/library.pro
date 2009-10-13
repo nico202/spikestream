@@ -60,13 +60,15 @@ HEADERS += include/AbstractDao.h \
 	    include/DBInterface.h \
 	    include/NetworkDao.h \
 	    include/NetworkDaoThread.h \
-	    include/ArchiveDao.h
+	    include/ArchiveDao.h \
+	    include/AnalysisDao.h
 SOURCES += src/database/DBInfo.cpp \
 	    src/database/DBInterface.cpp \
 	    src/database/AbstractDao.cpp \
 	    src/database/NetworkDao.cpp \
 	    src/database/NetworkDaoThread.cpp \
-	    src/database/ArchiveDao.cpp
+	    src/database/ArchiveDao.cpp \
+	    src/database/AnalysisDao.cpp
 
 #----------------------------------------------#
 #---             exceptions                 ---#
@@ -91,7 +93,8 @@ HEADERS += include/Network.h \
 	    include/ConnectionGroup.h \
 	    include/ConnectionGroupInfo.h \
 	    include/Archive.h \
-	    include/ArchiveInfo.h
+	    include/ArchiveInfo.h \
+	    include/AnalysisInfo.h
 SOURCES += src/model/Network.cpp \
 	    src/model/NetworkInfo.cpp \
 	    src/model/NeuronGroup.cpp \
@@ -100,7 +103,8 @@ SOURCES += src/model/Network.cpp \
 	    src/model/ConnectionGroupInfo.cpp \
 	    src/model/Archive.cpp \
 	    src/model/ArchiveInfo.cpp \
-	    src/model/Connection.cpp
+	    src/model/Connection.cpp \
+	    src/model/AnalysisInfo.cpp
 
 #----------------------------------------------#
 #---                  xml                   ---#
