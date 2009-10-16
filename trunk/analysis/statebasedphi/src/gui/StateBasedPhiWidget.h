@@ -3,6 +3,7 @@
 
 //SpikeStream includes
 #include "AnalysisInfo.h"
+#include "AnalysisRunner.h"
 #include "StateBasedPhiAnalysisDao.h"
 using namespace spikestream;
 
@@ -26,10 +27,14 @@ namespace spikestream {
 		void checkToolBarEnabled();
 		void fixTimeStepSelection(int);
 		void loadAnalysis();
+		void loadArchiveTimeStepsIntoCombos();
 		void newAnalysis();
 		void selectParameters();
 		void startAnalysis();
 		void stopAnalysis();
+		void threadFinished();
+		void updateProgress(const QList< QList<unsigned int> >& progressList);
+		void updateResults();
 
 	    private:
 		//=====================  VARIABLES  =======================
@@ -42,17 +47,32 @@ namespace spikestream {
 		/*! Toolbar with controls for the widget */
 		QToolBar* toolBar;
 
+		/*! Allows user to select first time step to be analyzed */
 		QComboBox* fromTimeStepCombo;
+
+		/*! Allows user to select last time step to be analyzed */
 		QComboBox* toTimeStepCombo;
 
+		/*! Class responsible for running the analysis */
+		AnalysisRunner* analysisRunner;
 
 		/*! Information about the analysis */
 		AnalysisInfo analysisInfo;
+
+		/*! The task that is currently being undertaken */
+		int currentTask;
+
+		/*! Task not defined */
+		static const int UNDEFINED_TASK = 0;
+
+		/*! Task of State based phi analysis */
+		static const int ANALYSIS_TASK = 1;
 
 		//=====================  METHODS  =======================
 		bool analysisLoaded();
 		QStringList getTimeStepList(unsigned int min, unsigned int max);
 		QToolBar* getToolBar();
+		void initializeParameters();
     };
 
 }

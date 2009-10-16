@@ -17,6 +17,11 @@ namespace spikestream {
 
 	    unsigned int getID() const { return id; }
 	    QString getDescription() const { return description; }
+	    unsigned int getNumberOfThreads() { return numberOfThreads; }
+	    QHash<QString, double>& getParameterMap() { return parameterMap; }
+	    void reset();
+	    void setDescription(const QString& description) { this->description = description; }
+	    void setNumberOfThreads(unsigned int numThreads) { this->numberOfThreads = numThreads; }
 
 
 	private:
@@ -28,6 +33,7 @@ namespace spikestream {
 	    QString description;
 	    QHash<QString, double> parameterMap;
 	    unsigned int analysisType;
+	    unsigned int numberOfThreads;
     };
 
 }

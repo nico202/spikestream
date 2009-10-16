@@ -61,8 +61,8 @@ void LoadAnalysisDialog::okButtonPressed(){
 
     //Check that there is at least one selection
     if(indexes.size() == 0){
-	qCritical()<<"Selection is missing. Something has gone wrong here!";
-	reject();
+	qCritical()<<"No analysis selected.";
+	return;
     }
 
     //Extract the information about the analysis from the model
