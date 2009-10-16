@@ -11,6 +11,9 @@ namespace spikestream {
 	public:
 	    static int getInt(const QString& str);
 	    static unsigned int getUInt(const QString& str);
+	    static double getDouble(const QString& str);
+	    static int getRandom(int min, int max);
+	    static void seedRandom(int seed = 0);
 
     };
 

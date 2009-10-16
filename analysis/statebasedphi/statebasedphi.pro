@@ -32,10 +32,16 @@ LIBS += -L$(SPIKESTREAM_ROOT)/lib -lspikestream -lspikestreamapplication
 
 
 HEADERS = src/gui/StateBasedPhiWidget.h \
-	    src/database/StateBasedPhiAnalysisDao.h
+	    src/database/StateBasedPhiAnalysisDao.h \
+	    src/gui/StateBasedPhiParameterDialog.h \
+	    src/analysis/AnalysisRunner.h \
+	    src/analysis/AnalysisTimeStepThread.h
 
 SOURCES = src/gui/StateBasedPhiWidget.cpp \
-	    src/database/StateBasedPhiAnalysisDao.cpp
+	    src/database/StateBasedPhiAnalysisDao.cpp \
+	    src/gui/StateBasedPhiParameterDialog.cpp \
+	    src/analysis/AnalysisRunner.cpp \
+	    src/analysis/AnalysisTimeStepThread.cpp
 
 
 

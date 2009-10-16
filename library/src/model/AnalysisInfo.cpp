@@ -3,12 +3,7 @@ using namespace spikestream;
 
 /*! Empty constructor */
 AnalysisInfo::AnalysisInfo(){
-    this->id = 0;
-    this->networkID = 0;
-    this->archiveID = 0;
-    this->startDateTime = QDateTime::currentDateTime();
-    this->description = "Untitled";
-    this->analysisType = 0;
+    reset();
 }
 
 /*! Standard constructor */
@@ -52,3 +47,14 @@ AnalysisInfo& AnalysisInfo::operator=(const AnalysisInfo& rhs){
     return *this;
 }
 
+
+/*! Resets the information to default empty values */
+void AnalysisInfo::reset(){
+    this->id = 0;
+    this->networkID = 0;
+    this->archiveID = 0;
+    this->startDateTime = QDateTime::currentDateTime();
+    this->description = "Untitled";
+    this->analysisType = 0;
+    this->parameterMap.clear();
+}

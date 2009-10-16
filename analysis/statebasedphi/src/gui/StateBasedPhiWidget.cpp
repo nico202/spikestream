@@ -3,6 +3,7 @@
 #include "LoadAnalysisDialog.h"
 #include "SpikeStreamException.h"
 #include "StateBasedPhiWidget.h"
+#include "StateBasedPhiParameterDialog.h"
 using namespace spikestream;
 
 //Qt includes
@@ -52,7 +53,23 @@ StateBasedPhiWidget::StateBasedPhiWidget(QWidget *parent) : QWidget(parent){
 
     //Listen for events that affect whether the tool bar should be enabled or not.
     connect(Globals::getEventRouter(), SIGNAL(archiveChangedSignal()), this, SLOT(checkToolBarEnabled()));
+    connect(Globals::getEventRouter(), SIGNAL(archiveChangedSignal()), this, SLOT(loadArchiveTimeStepsIntoCombos()));
     connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(checkToolBarEnabled()));
+
+    //Set up class to run analysis
+    analysisRunner = new AnalysisRunner(
+	    Globals::getNetworkDao()->getDBInfo(),
+	    Globals::getArchiveDao()->getDBInfo(),
+	    Globals::getAnalysisDao()->getDBInfo()
+    );
+    connect(analysisRunner, SIGNAL(finished()), this, SLOT(threadFinished()));
+    connect(analysisRunner, SIGNAL(finished()), Globals::getEventRouter(), SLOT(analysisStopped()));
+    connect(analysisRunner, SIGNAL(progress(AnalysisProgress&)), this, SLOT(updateProgress(AnalysisProgress&)));
+    connect(analysisRunner, SIGNAL(complexFound()), this , SLOT(updateResults()));
+
+    //Initialize analysis parameters and other variables
+    initializeParameters();
+    currentTask = UNDEFINED_TASK;
 }
 
 
@@ -65,6 +82,15 @@ StateBasedPhiWidget::~StateBasedPhiWidget(){
 /*----------------------------------------------------------*/
 /*------                PRIVATE SLOTS                 ------*/
 /*----------------------------------------------------------*/
+
+/*! Checks to see if network or archive have been loaded */
+void StateBasedPhiWidget::checkToolBarEnabled(){
+    if(Globals::networkLoaded() && Globals::archiveLoaded())
+	toolBar->setEnabled(true);
+    else
+	toolBar->setEnabled(false);
+}
+
 
 /*! Corrects the time step selection combos so that the from is never greater than the to */
 void StateBasedPhiWidget::fixTimeStepSelection(int selectedIndex){
@@ -83,6 +109,21 @@ void StateBasedPhiWidget::fixTimeStepSelection(int selectedIndex){
 }
 
 
+/*! Loads up the minimum and maximum time step for the archive */
+void StateBasedPhiWidget::loadArchiveTimeStepsIntoCombos(){
+    if(!Globals::archiveLoaded())
+	return;
+
+    unsigned int minTimeStep = Globals::getArchiveDao()->getMinTimeStep(Globals::getArchive()->getID());
+    unsigned int maxTimeStep = Globals::getArchiveDao()->getMaxTimeStep(Globals::getArchive()->getID());
+    QStringList timeStepList = getTimeStepList(minTimeStep, maxTimeStep);
+    fromTimeStepCombo->clear();
+    fromTimeStepCombo->addItems(timeStepList);
+    toTimeStepCombo->clear();
+    toTimeStepCombo->addItems(timeStepList);
+}
+
+
 /*! Displays the load analysis dialog box so the user can select which analysis to load */
 void StateBasedPhiWidget::loadAnalysis(){
     try{
@@ -95,17 +136,6 @@ void StateBasedPhiWidget::loadAnalysis(){
 	    QSqlQueryModel* model = stateDao->getStateBasedPhiDataTableModel(analysisInfo.getID());
 	    analysisDataTableView->setModel(model);
 	    analysisDataTableView->show();
-
-	    //Get the minimum and maximum time step values and load them into the combo box
-	    unsigned int minTimeStep = Globals::getArchiveDao()->getMinTimeStep(Globals::getArchive()->getID());
-	    unsigned int maxTimeStep = Globals::getArchiveDao()->getMaxTimeStep(Globals::getArchive()->getID());
-	    QStringList timeStepList = getTimeStepList(minTimeStep, maxTimeStep);
-	    fromTimeStepCombo->clear();
-	    fromTimeStepCombo->addItems(timeStepList);
-	    toTimeStepCombo->clear();
-	    toTimeStepCombo->addItems(timeStepList);
-
-	    //Record fact that analysis is loaded
 	}
     }
     catch (SpikeStreamException& ex){
@@ -117,15 +147,9 @@ void StateBasedPhiWidget::loadAnalysis(){
 
 /*! Resets everything ready for a new analysis */
 void StateBasedPhiWidget::newAnalysis(){
-}
-
-
-/*! Checks to see if network or archive have been loaded */
-void StateBasedPhiWidget::checkToolBarEnabled(){
-    if(Globals::networkLoaded() && Globals::archiveLoaded())
-	toolBar->setEnabled(true);
-    else
-	toolBar->setEnabled(false);
+    //Reset the analysis info
+    analysisInfo.reset();
+    initializeParameters();
 }
 
 
@@ -133,23 +157,75 @@ void StateBasedPhiWidget::checkToolBarEnabled(){
     These cannot be edited once the analysis has been started - otherwise would have to associate
     a set of parameter with each time step */
 void StateBasedPhiWidget::selectParameters(){
-    //StateBasedPhiParameterDialog dialog(analysisDescription, parameterMap);
+    StateBasedPhiParameterDialog dialog(this, analysisInfo);
+    if(dialog.exec() == QDialog::Accepted ) {
+	//Copy the new information that has been set
+	analysisInfo = dialog.getInfo();
+    }
 }
 
 
 /*! Starts the analysis of the network for state-based phi */
 void StateBasedPhiWidget::startAnalysis(){
     //Check to see if the selected time steps are fully or partially present in the database
+    int firstTimeStep = Util::getInt(fromTimeStepCombo->currentText());
+    int lastTimeStep = Util::getInt(toTimeStepCombo->currentText());
 
     //Create a new analysis in the database if one is not loaded
     if(!analysisLoaded()){
-//	Globals::getAnalysisDao()->addAnalysis(analysisInfo);
+	Globals::getAnalysisDao()->addAnalysis(analysisInfo);
+
+	//Analysis id in analysisInfo should now be set
+	if(analysisInfo.getID() == 0){
+	    qCritical()<<"Analysis has not been added correctly";
+	    return;
+	}
     }
+
+    //Initialize class to run analysis
+    analysisRunner->prepareAnalysisTask(analysisInfo, firstTimeStep, lastTimeStep);
+    currentTask = ANALYSIS_TASK;
+    analysisRunner->start();
+    Globals::getEventRouter()->analysisStarted();
 }
 
 
 /*! Stops the analysis of the network. */
 void StateBasedPhiWidget::stopAnalysis(){
+    analysisRunner->stop();
+}
+
+
+/*! Called when the thread running the analysis finishes. */
+void StateBasedPhiWidget::threadFinished(){
+    //Check for errors
+    if(analysisRunner->isError()){
+	qCritical()<<analysisRunner->getErrorMessage();
+	currentTask = UNDEFINED_TASK;
+	return;
+    }
+
+    switch(currentTask){
+	case ANALYSIS_TASK:
+	    ;
+	break;
+	default:
+	    qCritical()<<"Current task not recognized: "<<currentTask;
+    }
+
+    currentTask = UNDEFINED_TASK;
+}
+
+
+/*! Update the progress tab
+    When the number of time steps completed matches the total number of time steps,
+    the second number the progress bar is removed from the progress tab. */
+void StateBasedPhiWidget::updateProgress(QList<AnalysisProgress>){
+}
+
+
+/*! Updates results table by reloading it from the database */
+void StateBasdPhiWidget::updateResults(){
 
 }
 
@@ -166,6 +242,7 @@ bool StateBasedPhiWidget::analysisLoaded(){
 }
 
 
+/*! Builds a list of time steps covering the specified range. */
 QStringList StateBasedPhiWidget::getTimeStepList(unsigned int min, unsigned int max){
     QStringList tmpStrList;
     for(unsigned int i=min; i<max; ++i)
@@ -210,5 +287,10 @@ QToolBar* StateBasedPhiWidget::getToolBar(){
 }
 
 
+/*! Sets initial state of parameters for a state based phi analysis */
+void StateBasedPhiWidget::initializeParameters(){
+    analysisInfo.getParameterMap()["Test param1"] = 0.4;
+    analysisInfo.getParameterMap()["Test param2"] = 1000;
+}
 
 
