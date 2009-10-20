@@ -24,16 +24,18 @@ namespace spikestream {
 		~StateBasedPhiWidget();
 
 	    private slots:
+		void archiveChanged();
 		void checkToolBarEnabled();
 		void fixTimeStepSelection(int);
 		void loadAnalysis();
 		void loadArchiveTimeStepsIntoCombos();
+		void networkChanged();
 		void newAnalysis();
 		void selectParameters();
 		void startAnalysis();
 		void stopAnalysis();
 		void threadFinished();
-		void updateProgress(const QList< QList<unsigned int> >& progressList);
+		void updateProgress(AnalysisProgress& progress);
 		void updateResults();
 
 	    private:
@@ -72,7 +74,7 @@ namespace spikestream {
 		bool analysisLoaded();
 		QStringList getTimeStepList(unsigned int min, unsigned int max);
 		QToolBar* getToolBar();
-		void initializeParameters();
+		void initializeAnalysisInfo();
     };
 
 }

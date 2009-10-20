@@ -21,9 +21,10 @@ StateBasedPhiParameterDialog::StateBasedPhiParameterDialog(QWidget* parent, cons
     QGridLayout* gridLayout = new QGridLayout();
     gridLayout->setMargin(10);
 
-    //Validator for double parameters
+    //Validators for double and integer parameters
     QDoubleValidator* doubleValidator = new QDoubleValidator(this);
     doubleValidator->setDecimals(5);
+    QIntValidator* intValidator = new QIntValidator(0, 50, this);
 
     //Add the description
     gridLayout->addWidget(new QLabel("Analysis description: "), 0, 0);
@@ -31,10 +32,10 @@ StateBasedPhiParameterDialog::StateBasedPhiParameterDialog(QWidget* parent, cons
     gridLayout->addWidget(descriptionEdit, 0, 1);
 
     //Add the number of threads
-    gridLayout->addWidget(new QLabel("Number of simultaneous threads: "), 0, 1);
+    gridLayout->addWidget(new QLabel("Number of simultaneous threads: "), 1, 0);
     numThreadsEdit = new QLineEdit(QString::number(info.getNumberOfThreads()));
     numThreadsEdit->setValidator(intValidator);
-    gridLayout->addWidget(numThreadsEdit);
+    gridLayout->addWidget(numThreadsEdit, 1, 1);
 
     //Add the parameters
     int cntr = 2;

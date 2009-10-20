@@ -5,6 +5,8 @@ using namespace spikestream;
 
 //Qt includes
 #include <QDebug>
+#include <QTime>
+
 
 /*! Converts the QString to an integer.
     Throws a number conversion exception if the conversion fails. */
@@ -63,7 +65,5 @@ void Util::seedRandom(int seed){
 }
 
 
-
-To get an integer in the range [0, x)
 
 

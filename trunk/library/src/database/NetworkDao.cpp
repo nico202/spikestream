@@ -10,7 +10,7 @@ using namespace spikestream;
 using namespace std;
 
 /*! Constructor. DBInfo is stored by AbstractDao */
-NetworkDao::NetworkDao(DBInfo& dbInfo) : AbstractDao(dbInfo){
+NetworkDao::NetworkDao(const DBInfo& dbInfo) : AbstractDao(dbInfo){
 
 }
 

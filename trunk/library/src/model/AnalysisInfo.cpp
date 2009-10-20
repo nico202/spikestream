@@ -48,6 +48,21 @@ AnalysisInfo& AnalysisInfo::operator=(const AnalysisInfo& rhs){
 }
 
 
+/*! Returns the parameter map in XML format */
+QString AnalysisInfo::getParameterXML() const{
+    QString tmpStr = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>";
+    tmpStr += "<analysis_parameters>";
+    for(QHash<QString, double>::const_iterator iter = parameterMap.begin(); iter != parameterMap.end(); ++iter){
+	tmpStr +="<parameter>";
+	tmpStr += "<name>" + iter.key() + "</name>";
+	tmpStr += "<value>" + QString::number(iter.value()) + "</value>";
+	tmpStr += "</parameter>";
+    }
+    tmpStr += "</analysis_parameters>";
+    return tmpStr;
+}
+
+
 /*! Resets the information to default empty values */
 void AnalysisInfo::reset(){
     this->id = 0;
@@ -57,4 +72,5 @@ void AnalysisInfo::reset(){
     this->description = "Untitled";
     this->analysisType = 0;
     this->parameterMap.clear();
+    this->numberOfThreads = 5;
 }

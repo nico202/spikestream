@@ -29,6 +29,15 @@ class TestDao : public QObject {
 	/*! Information about the SpikeStreamArchive database used in the tests */
 	DBInfo archiveDBInfo;
 
+	/*! Information about th SpikeStreamAnalysis database used in the tests */
+	DBInfo analysisDBInfo;
+
+	/*! SpikeStreamAnalysis database connection */
+	QSqlDatabase analysisDatabase;
+
+	/*! Name to statically access analysis database */
+	QString analysisDBRefName;
+
 	/*! SpikeStreamArchive database connection */
 	QSqlDatabase archiveDatabase;
 
@@ -58,12 +67,15 @@ class TestDao : public QObject {
 	QString getConnectionParameterXML();
 	QString getNeuronParameterXML();
 
-	void connectToDatabases(const QString& networkDBName, const QString& archiveDBName);
+	void connectToDatabases(const QString& networkDBName, const QString& archiveDBName, const QString& analysisDBName);
 	void cleanTestDatabases();
 	void closeDatabases();
 	void executeQuery(QSqlQuery& query);
 	void executeQuery(const QString& queryStr);
 	void executeArchiveQuery(const QString& queryStr);
+	void executeAnalysisQuery(const QString& queryStr);
+	QSqlQuery getAnalysisQuery();
+	QSqlQuery getAnalysisQuery(const QString& queryStr);
 	QSqlQuery getArchiveQuery();
 	QSqlQuery getArchiveQuery(const QString& queryStr);
 	QSqlQuery getQuery();
@@ -72,12 +84,12 @@ class TestDao : public QObject {
 	void resetTestArchive1();
 	void resetTestArchive2();
 
-	protected slots:
-	    //QTest methods
-	    virtual void cleanup();
-	    virtual void cleanupTestCase();
-	    virtual void init();
-	    virtual void initTestCase();
+    protected slots:
+	//QTest methods
+	virtual void cleanup();
+	virtual void cleanupTestCase();
+	virtual void init();
+	virtual void initTestCase();
 
 };
 

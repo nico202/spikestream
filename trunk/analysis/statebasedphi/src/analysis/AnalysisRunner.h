@@ -3,21 +3,16 @@
 
 //SpikeStream includes
 #include "AnalysisTimeStepThread.h"
+#include "AnalysisProgress.h"
 #include "DBInfo.h"
 
 //Qt includes
 #include <QHash>
 #include <QString>
 #include <QThread>
+#include <QMutex>
 
 namespace spikestream {
-
-    struct AnalysisProgress {
-	unsigned int timeStep;
-	unsigned int stepsCompleted;
-	unsigned int totalSteps;
-    };
-
 
     class AnalysisRunner : public QThread {
 	Q_OBJECT
@@ -28,17 +23,19 @@ namespace spikestream {
 	    QString getErrorMessage() { return errorMessage; }
 	    bool isError() { return error; }
 	    void prepareAnalysisTask(const AnalysisInfo& anaInfo, int firstTimeStep, int lastTimeStep);
+	    void reset();
 	    void run();
+	    void setError(const QString& message);
 	    void stop();
 
 	signals:
 	    void progress(AnalysisProgress& progress);
-	    void complexFoundSignal();
+	    void complexFound();
 
 	private slots:
-	    void complexFound();
-	    void progress(AnalysisProgress& progress);
 	    void threadFinished();
+	    void updateComplexes();
+	    void updateProgress(unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps);
 
 	private:
 	    //========================  VARAIBLES  =========================
@@ -70,8 +67,20 @@ namespace spikestream {
 	    int nextTimeStep;
 
 	    /*! Map of the currently running threads */
-	    QHash<unsigned int, AnalysisTimeStepThread*> subThreadMap;
+	    QHash<int, AnalysisTimeStepThread*> subThreadMap;
 
+	    /*! Mutex to make sure that we only process one thread finished
+		method at a time. */
+	    QMutex mutex;
+
+	    /*! Controls whether the thread is running or not */
+	    bool stopThread;
+
+	    //=========================  METHODS  ===========================
+	    void clearError();
+	    int getNextTimeStep();
+	    void startAnalysisTimeStepThread(int timeStep);
+	    bool subThreadsRunning();
     };
 
 }

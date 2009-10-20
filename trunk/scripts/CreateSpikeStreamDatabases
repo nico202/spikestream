@@ -23,6 +23,13 @@ ARCHIVE_PASSWORD=ekips
 ARCHIVE_DATABASE=SpikeStreamArchive
 ARCHIVE_TEST_DATABASE=SpikeStreamArchiveTest
 
+#----------- SpikeStreamAnalysis Database -------------
+ANALYSIS_HOST=localhost
+ANALYSIS_USER=SpikeStream
+ANALYSIS_PASSWORD=ekips
+ANALYSIS_DATABASE=SpikeStreamAnalysis
+ANALYSIS_TEST_DATABASE=SpikeStreamAnalysisTest
+
 #----------- SpikeStreamPattern Database -------------------
 PATTERNS_HOST=localhost
 PATTERNS_USER=SpikeStream
@@ -129,6 +136,17 @@ fi
 if ! mysql ${ARCHIVE_TEST_DATABASE} -h${ARCHIVE_HOST} -u${ARCHIVE_USER} -p${ARCHIVE_PASSWORD} < SpikeStreamArchiveTest.sql
 then 
 	echo "Error creating SpikeStreamArchiveTest database."
+	DATABASE_ERROR=true;
+fi
+
+if ! mysql ${ANALYSIS_DATABASE} -h${ANALYSIS_HOST} -u${ANALYSIS_USER} -p${ANALYSIS_PASSWORD} < SpikeStreamAnalysis.sql
+then 
+	echo "Error creating SpikeStreamAnalysis database."
+	DATABASE_ERROR=true;
+fi
+if ! mysql ${ANALYSIS_TEST_DATABASE} -h${ANALYSIS_HOST} -u${ANALYSIS_USER} -p${ANALYSIS_PASSWORD} < SpikeStreamAnalysisTest.sql
+then 
+	echo "Error creating SpikeStreamAnalysisTest database."
 	DATABASE_ERROR=true;
 fi
 
