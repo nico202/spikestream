@@ -111,6 +111,11 @@
 /*! First valid automatically generated ID in Archives database */
 #define START_ARCHIVE_ID 1
 
+
+/*! First valid automatically generated ID in Archives database */
+#define START_ANALYSIS_ID 1
+
+
 /*! First valid automatically generated ID for a weightless neuron pattern */
 #define START_WEIGHTLESS_TRAINING_PATTERN_ID 1
 

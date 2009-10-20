@@ -23,6 +23,7 @@ QT += xml opengl qt3support sql
 
 INCLUDEPATH += src \
 		src/database \
+		src/analysis \
 		$(SPIKESTREAM_ROOT)/library/include \
 		$(SPIKESTREAM_ROOT)/applicationlibrary/src \
 		$(SPIKESTREAM_ROOT)/applicationlibrary/src/widgets \
@@ -35,7 +36,8 @@ HEADERS = src/gui/StateBasedPhiWidget.h \
 	    src/database/StateBasedPhiAnalysisDao.h \
 	    src/gui/StateBasedPhiParameterDialog.h \
 	    src/analysis/AnalysisRunner.h \
-	    src/analysis/AnalysisTimeStepThread.h
+	    src/analysis/AnalysisTimeStepThread.h \
+	    src/analysis/AnalysisProgress.h
 
 SOURCES = src/gui/StateBasedPhiWidget.cpp \
 	    src/database/StateBasedPhiAnalysisDao.cpp \

@@ -2,6 +2,7 @@
 #define ANALYSISDAO_H
 
 #include "AbstractDao.h"
+#include "AnalysisInfo.h"
 using namespace spikestream;
 
 namespace spikestream {
@@ -11,6 +12,7 @@ namespace spikestream {
 	    AnalysisDao(const DBInfo& dbInfo);
 	    virtual ~AnalysisDao();
 
+	    void addAnalysis(AnalysisInfo& analysisInfo);
 	    QSqlQueryModel* getAnalysesTableModel(unsigned int networkID, unsigned int archiveID);
 
     };

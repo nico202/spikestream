@@ -11,7 +11,7 @@ MOC_DIR = build/moc
 INCLUDEPATH += src \
 		../include
 
-LIBS += -lspikestream -L$(SPIKESTREAM_ROOT)/lib  -lmysqlpp
+LIBS += -lspikestream -lspikestreamapplication -L$(SPIKESTREAM_ROOT)/lib
 
 QT += sql xml
 
@@ -27,7 +27,8 @@ HEADERS += src/TestRunner.h \
 	    src/TestXMLParameterParser.h \
 	    src/TestNetwork.h \
 	    src/TestNeuronGroup.h \
-	    src/TestArchiveDao.h
+	    src/TestArchiveDao.h \
+	    src/TestAnalysisDao.h
 
 SOURCES += src/Main.cpp \
 	    src/TestRunner.cpp \
@@ -37,6 +38,6 @@ SOURCES += src/Main.cpp \
 	    src/TestXMLParameterParser.cpp \
 	    src/TestNetwork.cpp \
 	    src/TestNeuronGroup.cpp \
-	    src/TestArchiveDao.cpp
-
+	    src/TestArchiveDao.cpp \
+	    src/TestAnalysisDao.cpp
 

@@ -18,14 +18,17 @@ namespace spikestream {
 	public:
 	    AnalysisTimeStepThread(const DBInfo& netDBInfo, const DBInfo& archDBInfo, const DBInfo& anaDBInfo);
 	    ~AnalysisTimeStepThread();
+	    void clearError();
+	    QString getErrorMessage() { return errorMessage; }
 	    int getTimeStep() { return timeStep; }
+	    bool isError() { return error; }
 	    void prepareTimeStepAnalysis(int timeStep);
 	    void run();
 	    void stop();
 
 	signals:
 	    void complexFound();
-	    void progress(unsigned int stepsCompleted, unsigned int totalSteps);
+	    void progress(unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps);
 
 	private:
 	    //========================  VARIABLES  ========================
@@ -33,16 +36,22 @@ namespace spikestream {
 	    bool threadRunning;
 
 	    /*! Wrapper around the network database */
-	    NetworkDao networkDao;
+	    NetworkDao* networkDao;
 
 	    /*! Wrapper around the archive database */
-	    ArchiveDao archiveDao;
+	    ArchiveDao* archiveDao;
 
 	    /*! Wrapper around the analysis database */
-	    StateBasedPhiDao analysisDao;
+	    StateBasedPhiAnalysisDao* analysisDao;
 
 	    /*! The time step that is being analyzed by this thread */
 	    int timeStep;
+
+	    /*! Records if an error has occurred */
+	    bool error;
+
+	    /*! Error message associated with an error */
+	    QString errorMessage;
 
     };
 

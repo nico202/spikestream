@@ -4,6 +4,7 @@
 #include "SpikeStreamException.h"
 #include "StateBasedPhiWidget.h"
 #include "StateBasedPhiParameterDialog.h"
+#include "Util.h"
 using namespace spikestream;
 
 //Qt includes
@@ -52,9 +53,9 @@ StateBasedPhiWidget::StateBasedPhiWidget(QWidget *parent) : QWidget(parent){
     stateDao = new StateBasedPhiAnalysisDao(Globals::getAnalysisDao()->getDBInfo());
 
     //Listen for events that affect whether the tool bar should be enabled or not.
-    connect(Globals::getEventRouter(), SIGNAL(archiveChangedSignal()), this, SLOT(checkToolBarEnabled()));
+    connect(Globals::getEventRouter(), SIGNAL(archiveChangedSignal()), this, SLOT(archiveChanged()));
     connect(Globals::getEventRouter(), SIGNAL(archiveChangedSignal()), this, SLOT(loadArchiveTimeStepsIntoCombos()));
-    connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(checkToolBarEnabled()));
+    connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(networkChanged()));
 
     //Set up class to run analysis
     analysisRunner = new AnalysisRunner(
@@ -68,7 +69,7 @@ StateBasedPhiWidget::StateBasedPhiWidget(QWidget *parent) : QWidget(parent){
     connect(analysisRunner, SIGNAL(complexFound()), this , SLOT(updateResults()));
 
     //Initialize analysis parameters and other variables
-    initializeParameters();
+    initializeAnalysisInfo();
     currentTask = UNDEFINED_TASK;
 }
 
@@ -82,6 +83,26 @@ StateBasedPhiWidget::~StateBasedPhiWidget(){
 /*----------------------------------------------------------*/
 /*------                PRIVATE SLOTS                 ------*/
 /*----------------------------------------------------------*/
+
+/*! Called when the archive changes and sets archive ID appropriately */
+void StateBasedPhiWidget::archiveChanged(){
+    checkToolBarEnabled();
+    if(Globals::archiveLoaded())
+	analysisInfo.setArchiveID(Globals::getArchive()->getID());
+    else
+	analysisInfo.setArchiveID(0);
+}
+
+
+/*! Called when the network changes and sets network ID appropriately */
+void StateBasedPhiWidget::networkChanged(){
+    checkToolBarEnabled();
+    if(Globals::networkLoaded())
+	analysisInfo.setNetworkID(Globals::getNetwork()->getID());
+    else
+	analysisInfo.setNetworkID(0);
+}
+
 
 /*! Checks to see if network or archive have been loaded */
 void StateBasedPhiWidget::checkToolBarEnabled(){
@@ -148,8 +169,7 @@ void StateBasedPhiWidget::loadAnalysis(){
 /*! Resets everything ready for a new analysis */
 void StateBasedPhiWidget::newAnalysis(){
     //Reset the analysis info
-    analysisInfo.reset();
-    initializeParameters();
+    initializeAnalysisInfo();
 }
 
 
@@ -167,26 +187,40 @@ void StateBasedPhiWidget::selectParameters(){
 
 /*! Starts the analysis of the network for state-based phi */
 void StateBasedPhiWidget::startAnalysis(){
+    //Double check that both a network and an analysis are loaded
+    if(!Globals::networkLoaded() || !Globals::archiveLoaded()){
+	qCritical()<<"Network and/or archive not loaded - cannot start analysis.";
+	return;
+    }
+
     //Check to see if the selected time steps are fully or partially present in the database
     int firstTimeStep = Util::getInt(fromTimeStepCombo->currentText());
     int lastTimeStep = Util::getInt(toTimeStepCombo->currentText());
 
     //Create a new analysis in the database if one is not loaded
-    if(!analysisLoaded()){
-	Globals::getAnalysisDao()->addAnalysis(analysisInfo);
+    try {
+	if(!analysisLoaded()){
+	    Globals::getAnalysisDao()->addAnalysis(analysisInfo);
 
-	//Analysis id in analysisInfo should now be set
-	if(analysisInfo.getID() == 0){
-	    qCritical()<<"Analysis has not been added correctly";
-	    return;
+	    //Analysis id in analysisInfo should now be set
+	    if(analysisInfo.getID() == 0){
+		qCritical()<<"Analysis has not been added correctly";
+		return;
+	    }
 	}
-    }
 
-    //Initialize class to run analysis
-    analysisRunner->prepareAnalysisTask(analysisInfo, firstTimeStep, lastTimeStep);
-    currentTask = ANALYSIS_TASK;
-    analysisRunner->start();
-    Globals::getEventRouter()->analysisStarted();
+	//Initialize class to run analysis
+	analysisRunner->prepareAnalysisTask(analysisInfo, firstTimeStep, lastTimeStep);
+	currentTask = ANALYSIS_TASK;
+	analysisRunner->start();
+	Globals::getEventRouter()->analysisStarted();
+    }
+    catch(SpikeStreamException& ex){
+	qCritical()<<ex.getMessage();
+
+	//We don't know if analysis runner has started or not, so set error just in case
+	analysisRunner->setError("Exception thrown starting task or adding analysis to database.");
+    }
 }
 
 
@@ -220,12 +254,12 @@ void StateBasedPhiWidget::threadFinished(){
 /*! Update the progress tab
     When the number of time steps completed matches the total number of time steps,
     the second number the progress bar is removed from the progress tab. */
-void StateBasedPhiWidget::updateProgress(QList<AnalysisProgress>){
+void StateBasedPhiWidget::updateProgress(AnalysisProgress& progress){
 }
 
 
 /*! Updates results table by reloading it from the database */
-void StateBasdPhiWidget::updateResults(){
+void StateBasedPhiWidget::updateResults(){
 
 }
 
@@ -245,7 +279,7 @@ bool StateBasedPhiWidget::analysisLoaded(){
 /*! Builds a list of time steps covering the specified range. */
 QStringList StateBasedPhiWidget::getTimeStepList(unsigned int min, unsigned int max){
     QStringList tmpStrList;
-    for(unsigned int i=min; i<max; ++i)
+    for(unsigned int i=min; i<=max; ++i)
 	tmpStrList.append(QString::number(i));
     return tmpStrList;
 }
@@ -288,7 +322,19 @@ QToolBar* StateBasedPhiWidget::getToolBar(){
 
 
 /*! Sets initial state of parameters for a state based phi analysis */
-void StateBasedPhiWidget::initializeParameters(){
+void StateBasedPhiWidget::initializeAnalysisInfo(){
+    //Initialize all values in the analysis info to default values
+    analysisInfo.reset();
+
+    //Set the network and archive id
+    if(Globals::networkLoaded())
+	analysisInfo.setNetworkID(Globals::getNetwork()->getID());
+    if(Globals::archiveLoaded())
+	analysisInfo.setArchiveID(Globals::getArchive()->getID());
+
+    //Set the type of analysis, 1 corresponds to a state based phi analysis
+    analysisInfo.setAnalysisType(1);
+
     analysisInfo.getParameterMap()["Test param1"] = 0.4;
     analysisInfo.getParameterMap()["Test param2"] = 1000;
 }

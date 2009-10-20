@@ -33,7 +33,7 @@ void TestDao::init(){
 
 /*! Called before all the tests */
 void TestDao::initTestCase(){
-    connectToDatabases("SpikeStreamNetworkTest", "SpikeStreamArchiveTest");
+    connectToDatabases("SpikeStreamNetworkTest", "SpikeStreamArchiveTest", "SpikeStreamAnalysisTest");
 }
 
 
@@ -43,7 +43,7 @@ void TestDao::initTestCase(){
 
 /*! Connects to the test database.
     FIXME: LOAD PARAMETERS FROM FILE. */
-void TestDao::connectToDatabases(const QString& networkDBName, const QString& archiveDBName){    //Set the database parameters to be used in the test
+void TestDao::connectToDatabases(const QString& networkDBName, const QString& archiveDBName, const QString& analysisDBName){    //Set the database parameters to be used in the test
     //Connect to the network database. This is the default database
     dbRefName = "NetworkTestDBRef";
     dbInfo = DBInfo("localhost", "SpikeStream", "ekips", networkDBName);
@@ -67,6 +67,18 @@ void TestDao::connectToDatabases(const QString& networkDBName, const QString& ar
     ok = archiveDatabase.open();
     if(!ok)
 	throw SpikeStreamDBException( QString("Cannot connect to archive database ") + archiveDBInfo.toString() + ". Error: " + archiveDatabase.lastError().text() );
+
+    //Connect to the analysis database
+    analysisDBRefName = "AnalysisTestDBRef";
+    analysisDBInfo = DBInfo("localhost", "SpikeStream", "ekips", analysisDBName);
+    analysisDatabase = QSqlDatabase::addDatabase("QMYSQL", analysisDBRefName);
+    analysisDatabase.setHostName(analysisDBInfo.getHost());
+    analysisDatabase.setDatabaseName(analysisDBInfo.getDatabase());
+    analysisDatabase.setUserName(analysisDBInfo.getUser());
+    analysisDatabase.setPassword(analysisDBInfo.getPassword());
+    ok = analysisDatabase.open();
+    if(!ok)
+	throw SpikeStreamDBException( QString("Cannot connect to analysis database ") + analysisDBInfo.toString() + ". Error: " + analysisDatabase.lastError().text() );
 }
 
 /*! Cleans up everything from the test networks database */
@@ -83,17 +95,23 @@ void TestDao::cleanTestDatabases(){
     //Clean up archive database
     executeArchiveQuery("DELETE FROM Archives");
     executeArchiveQuery("DELETE FROM ArchiveData");
+
+    //Clean up analysis database
+    executeAnalysisQuery("DELETE FROM Analyses");
+    executeAnalysisQuery("DELETE FROM StateBasedPhiData");
 }
+
 
 /*! Closes all the open databases.
     FIXME: THIS CURRENTLY GENERATES A WARNING ABOUT OPEN QUERIES */
 void TestDao::closeDatabases(){
     QSqlDatabase::removeDatabase(dbRefName);
     QSqlDatabase::removeDatabase(archiveDBRefName);
+    QSqlDatabase::removeDatabase(analysisDBRefName);
 }
 
 
-/*! Executes the query */
+/*! Executes query on network database*/
 void TestDao::executeQuery(QSqlQuery& query){
     bool result = query.exec();
     if(!result){
@@ -103,7 +121,7 @@ void TestDao::executeQuery(QSqlQuery& query){
 }
 
 
-/*! Executes the query */
+/*! Executes query on network database*/
 void TestDao::executeQuery(const QString& queryStr){
     QSqlQuery query = getQuery(queryStr);
     executeQuery(query);
@@ -113,6 +131,13 @@ void TestDao::executeQuery(const QString& queryStr){
 /*! Executes an archive query */
 void TestDao::executeArchiveQuery(const QString& queryStr){
     QSqlQuery query = getArchiveQuery(queryStr);
+    executeQuery(query);
+}
+
+
+/*! Executes an analysis query */
+void TestDao::executeAnalysisQuery(const QString& queryStr){
+    QSqlQuery query = getAnalysisQuery(queryStr);
     executeQuery(query);
 }
 
@@ -129,6 +154,20 @@ QSqlQuery TestDao::getQuery(const QString& queryStr){
     tmpQuery.prepare(queryStr);
     return tmpQuery;
 }
+
+/*! Returns a query object for the analysis database */
+QSqlQuery TestDao::getAnalysisQuery(){
+    return QSqlQuery(analysisDatabase);
+}
+
+
+/*! Returns a query object for the analysis database */
+QSqlQuery TestDao::getAnalysisQuery(const QString& queryStr){
+    QSqlQuery tmpQuery(analysisDatabase);
+    tmpQuery.prepare(queryStr);
+    return tmpQuery;
+}
+
 
 /*! Returns a query object for the archive database */
 QSqlQuery TestDao::getArchiveQuery(){

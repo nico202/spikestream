@@ -1,5 +1,9 @@
 #include "AnalysisRunner.h"
+#include "SpikeStreamException.h"
 using namespace spikestream;
+
+//Qt includes
+#include <QMutexLocker>
 
 
 /*! Constructor */
@@ -8,7 +12,6 @@ AnalysisRunner::AnalysisRunner(const DBInfo& netDBInfo, const DBInfo& archDBInfo
     this->networkDBInfo = netDBInfo;
     this->archiveDBInfo = archDBInfo;
     this->analysisDBInfo = anaDBInfo;
-
 }
 
 
@@ -22,9 +25,9 @@ AnalysisRunner::~AnalysisRunner(){
 /*-------------------------------------------------------------*/
 
 /*! Sets up the class ready to carry out the analysis */
-void AnalysisRunner::prepareAnalysisTask(const AnalysisInfo& analysisInfo, unsigned int firstTimeStep, unsigned int lastTimeStep){
+void AnalysisRunner::prepareAnalysisTask(const AnalysisInfo& analysisInfo, int firstTimeStep, int lastTimeStep){
     //Reset class
-    reset();
+    this->reset();
 
     //Check variables
     if(analysisInfo.getID() == 0)
@@ -37,7 +40,6 @@ void AnalysisRunner::prepareAnalysisTask(const AnalysisInfo& analysisInfo, unsig
     this->firstTimeStep = firstTimeStep;
     this->lastTimeStep = lastTimeStep;
     nextTimeStep = firstTimeStep;
-    numberSimultaneousThreads = analysisInfo.getNumberSimultaneousThreads();
 }
 
 
@@ -49,16 +51,22 @@ void AnalysisRunner::run(){
     stopThread = false;
 
     //Launch the first batch of threads
-    int threadCount = 0;
-    while(threadCount < anlysisInfo.getNumberSimultaneousTimesteps()){
-	int nextTimeStep = getNextTimeStep();
+   unsigned int threadCount = 0;
+   while(threadCount < analysisInfo.getNumberOfThreads()){
+	int tmpTimeStep = getNextTimeStep();
 
 	//No more time steps, break out of the launching loop
-	if(nextTimeStep == -1)
+	if(tmpTimeStep == -1)
 	    break;
 
 	//Start the thread running to analyze this time step
-	startAnalysisTimeStepThread(nextTimeStep);
+	try{
+	    startAnalysisTimeStepThread(tmpTimeStep);
+	    ++threadCount;
+	}
+	catch(SpikeStreamException& ex){
+	    setError(ex.getMessage());
+	}
     }
 
     /* Wait for the analysis to complete
@@ -86,8 +94,8 @@ void AnalysisRunner::stop(){
 /*-------------------------------------------------------------*/
 
 /*! Called when one of the sub threads emits a progress signal */
-void AnalysisRunner::updateProgress(AnalysisProgress& progress){
-    emit progress(progress);
+void AnalysisRunner::updateProgress(unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps){
+    //emit progress(prog);
 }
 
 
@@ -100,10 +108,10 @@ void AnalysisRunner::threadFinished(){
 
     /* Multiple sub threads could call this method simultaneously and mess things up
 	Lock mutex to make sure we only process one thread finished event at a time. */
-    QMutexLocker(mutex);
+    QMutexLocker(&this->mutex);
 
     //Get a reference to the thread that has stopped
-    AnalysisTimeStepThread* tmpSubThread = sender();
+    AnalysisTimeStepThread* tmpSubThread = (AnalysisTimeStepThread*) sender();
 
     //Remove it from the map of currently running threads
     int tmpTimeStep = tmpSubThread->getTimeStep();
@@ -111,38 +119,58 @@ void AnalysisRunner::threadFinished(){
 	setError("Thread with time step " + QString::number(tmpTimeStep) + " is not recorded as running.");
 	return;
     }
+
+    //Check for errors - have to do this before deleting the thread
+    bool subThreadError = false;
+    if(tmpSubThread->isError()){
+	setError(tmpSubThread->getErrorMessage());
+	subThreadError = true;
+    }
+
     //Delete the thread class and remove it from the map
     delete tmpSubThread;
     subThreadMap.remove(tmpTimeStep);
 
-    //Check for error messages
-    if(tmpSubThread->isError()){
-	setError(tmpSubThread->getErrorMessage());
+    //Return without starting any more threads if we have an error in the sub thread
+    if(subThreadError){
 	return;
     }
 
     //Determine if any time steps need to be analyzed
-    int nextTimeStep = getNextTimeStep();
-    if(nextTimeStep >= 0){
+    int tmpNextTimeStep = getNextTimeStep();
+    if(tmpNextTimeStep >= 0){
 	try{
-	    startAnalysisTimeStepThread(nextTimeStep);
+	    startAnalysisTimeStepThread(tmpNextTimeStep);
 	}
 	catch(SpikeStreamException& ex){
 	    setError(ex.getMessage());
 	}
     }
 
-    //Next time step is -1 when all of the time steps have been analyzed
+    //Next time step is -1. All of the time step threads have been launched and may have all finished
     else if(!subThreadsRunning()){//See if any threads are still running
-	//Stop this thread
+	//Stop this thread when no sub threads are running
 	stop();
     }
+}
+
+
+/*! Emits signal to update complexes */
+void AnalysisRunner::updateComplexes(){
+    emit complexFound();
 }
 
 
 /*-------------------------------------------------------------*/
 /*-------                PRIVATE METHODS                 ------*/
 /*-------------------------------------------------------------*/
+
+/*! Clears the error state */
+void AnalysisRunner::clearError(){
+    error = false;
+    errorMessage = "";
+}
+
 
 /*! Returns the next time step to be analyzed or -1 if no time steps remain
     to be analyzed. */
@@ -174,7 +202,7 @@ void AnalysisRunner::reset(){
 
 
 /*! Sets the thread into the error state */
-void AnalysisRunner::setError(QString message){
+void AnalysisRunner::setError(const QString& message){
     error = true;
     errorMessage = message;
 
@@ -187,19 +215,17 @@ void AnalysisRunner::setError(QString message){
 void AnalysisRunner::startAnalysisTimeStepThread(int timeStep){
     //Run some checks on the time step
     if(timeStep == -1){
-	setError("Trying to start a new thread with an invalid time step.");
-	return;
+	throw SpikeStreamException("Trying to start a new thread with an invalid time step.");
     }
     if(subThreadMap.contains(timeStep)){
-	setError("Trying to launch new thread to analyze time step " + QString::number(timeStep) + " which is already running.");
-	return;
+	throw SpikeStreamException("Trying to launch new thread to analyze time step " + QString::number(timeStep) + " which is already running.");
     }
 
     //Lanch the new thread and store its address in the map
     AnalysisTimeStepThread* newThread = new AnalysisTimeStepThread(networkDBInfo, archiveDBInfo, analysisDBInfo);
-    connect(newThread, SIGNAL(complexFound()), this, SLOT(complexFound()));
+    connect(newThread, SIGNAL(complexFound()), this, SLOT(updateComplexes()));
     connect(newThread, SIGNAL(finished()), this, SLOT(threadFinished()));
-    connect(newThread, SIGNAL(progress(AnalysisProgress&)), this, SLOT(progress(AnalysisProgress&)));
+    connect(newThread, SIGNAL(progress(unsigned int, unsigned int, unsigned int)), this, SLOT(updateProgress(unsigned int, unsigned int, unsigned int)));
     newThread->prepareTimeStepAnalysis(timeStep);
     newThread->start();
     subThreadMap[timeStep] = newThread;
@@ -212,3 +238,4 @@ bool AnalysisRunner::subThreadsRunning(){
 	return false;
     return true;
 }
+

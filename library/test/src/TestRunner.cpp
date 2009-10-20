@@ -1,5 +1,6 @@
 
 //SpikeStream includes
+#include "TestAnalysisDao.h"
 #include "TestArchiveDao.h"
 #include "TestRunner.h"
 #include "TestNetwork.h"
@@ -32,6 +33,9 @@ void TestRunner::runTests(){
 
     TestArchiveDao testArchiveDao;
     QTest::qExec(&testArchiveDao);
+
+    TestAnalysisDao testAnalysisDao;
+    QTest::qExec(&testAnalysisDao);
 }
 
 

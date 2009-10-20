@@ -17,6 +17,9 @@ CREATE DATABASE SpikeStreamArchiveTest;
 DROP DATABASE IF EXISTS SpikeStreamAnalysis;
 CREATE DATABASE SpikeStreamAnalysis;
 
+DROP DATABASE IF EXISTS SpikeStreamAnalysisTest;
+CREATE DATABASE SpikeStreamAnalysisTest;
+
 DROP DATABASE IF EXISTS SpikeStreamSimulation;
 CREATE DATABASE SpikeStreamSimulation;
 

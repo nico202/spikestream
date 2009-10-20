@@ -22,7 +22,7 @@ namespace spikestream{
 	the NetworkDaoThread class. */
     class NetworkDao : public AbstractDao {
 	public:
-	    NetworkDao(DBInfo& dbInfo);
+	    NetworkDao(const DBInfo& dbInfo);
 	    virtual ~NetworkDao();
 
 	    void addNetwork(NetworkInfo& netInfo);
