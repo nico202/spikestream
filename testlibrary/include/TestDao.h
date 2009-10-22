@@ -57,8 +57,12 @@ class TestDao : public QObject {
 	unsigned int testArchive1ID;
 	unsigned int testArchive2ID;
 
+	//Variables storing information about test analyses
+	unsigned int testAnalysis1ID;
+
 
 	//==========================  METHODS  ==========================
+	void addTestAnalysis1();
 	void addTestArchive1();
 	void addTestArchive2();
 	void addTestNetwork1();

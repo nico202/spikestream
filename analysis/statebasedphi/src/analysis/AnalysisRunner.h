@@ -29,8 +29,9 @@ namespace spikestream {
 	    void stop();
 
 	signals:
-	    void progress(AnalysisProgress& progress);
 	    void complexFound();
+	    void progress(unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps);
+	    void timeStepComplete(unsigned int timeStep);
 
 	private slots:
 	    void threadFinished();

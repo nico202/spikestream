@@ -22,7 +22,7 @@ namespace spikestream {
 	    QString getErrorMessage() { return errorMessage; }
 	    int getTimeStep() { return timeStep; }
 	    bool isError() { return error; }
-	    void prepareTimeStepAnalysis(int timeStep);
+	    void prepareTimeStepAnalysis(const AnalysisInfo& anaInfo, int timeStep);
 	    void run();
 	    void stop();
 
@@ -32,6 +32,15 @@ namespace spikestream {
 
 	private:
 	    //========================  VARIABLES  ========================
+	    /*! Information about the network database */
+	    DBInfo networkDBInfo;
+
+	    /*! Information about the archive database */
+	    DBInfo archiveDBInfo;
+
+	    /*! Information about the analysis database */
+	    DBInfo analysisDBInfo;
+
 	    /*! Records and controls thread running */
 	    bool threadRunning;
 
@@ -44,6 +53,9 @@ namespace spikestream {
 	    /*! Wrapper around the analysis database */
 	    StateBasedPhiAnalysisDao* analysisDao;
 
+	    /*! Information about the analysis being run */
+	    AnalysisInfo analysisInfo;
+
 	    /*! The time step that is being analyzed by this thread */
 	    int timeStep;
 
@@ -52,6 +64,9 @@ namespace spikestream {
 
 	    /*! Error message associated with an error */
 	    QString errorMessage;
+
+	    //=======================  METHODS  =======================
+	    void setError(const QString& message);
 
     };
 

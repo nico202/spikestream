@@ -4,6 +4,7 @@
 //SpikeStream includes
 #include "AnalysisInfo.h"
 #include "AnalysisRunner.h"
+#include "ProgressWidget.h"
 #include "StateBasedPhiAnalysisDao.h"
 using namespace spikestream;
 
@@ -35,7 +36,6 @@ namespace spikestream {
 		void startAnalysis();
 		void stopAnalysis();
 		void threadFinished();
-		void updateProgress(AnalysisProgress& progress);
 		void updateResults();
 
 	    private:
@@ -70,11 +70,17 @@ namespace spikestream {
 		/*! Task of State based phi analysis */
 		static const int ANALYSIS_TASK = 1;
 
+		/*! Displays progress bars for each of the threads analyzing time steps */
+		ProgressWidget* progressWidget;
+
+
 		//=====================  METHODS  =======================
 		bool analysisLoaded();
 		QStringList getTimeStepList(unsigned int min, unsigned int max);
 		QToolBar* getToolBar();
 		void initializeAnalysisInfo();
+		void loadAnalysisResults();
+		bool timeStepsAlreadyAnalyzed(int firstTimeStep, int lastTimeStep);
     };
 
 }

@@ -1,16 +1,20 @@
 <!DOCTYPE QtCreatorProject>
 <qtcreator>
  <data>
-  <variable>RunConfiguration0-Arguments</variable>
+  <variable>RunConfiguration0-CommandLineArguments</variable>
   <valuelist type="QVariantList" />
  </data>
  <data>
-  <variable>RunConfiguration0-Executable</variable>
-  <value type="QString" ></value>
+  <variable>RunConfiguration0-ProFile</variable>
+  <value type="QString" >test.pro</value>
  </data>
  <data>
   <variable>RunConfiguration0-RunConfiguration.name</variable>
-  <value type="QString" >Custom Executable</value>
+  <value type="QString" >test</value>
+ </data>
+ <data>
+  <variable>RunConfiguration0-UseDyldImageSuffix</variable>
+  <value type="bool" >false</value>
  </data>
  <data>
   <variable>RunConfiguration0-UseTerminal</variable>
@@ -21,20 +25,12 @@
   <valuelist type="QVariantList" />
  </data>
  <data>
-  <variable>RunConfiguration0-UserName</variable>
-  <value type="QString" ></value>
- </data>
- <data>
   <variable>RunConfiguration0-UserSetName</variable>
   <value type="bool" >false</value>
  </data>
  <data>
-  <variable>RunConfiguration0-WorkingDirectory</variable>
-  <value type="QString" >$BUILDDIR</value>
- </data>
- <data>
   <variable>RunConfiguration0-type</variable>
-  <value type="QString" >ProjectExplorer.CustomExecutableRunConfiguration</value>
+  <value type="QString" >Qt4ProjectManager.Qt4RunConfiguration</value>
  </data>
  <data>
   <variable>activeRunConfiguration</variable>
@@ -48,7 +44,15 @@
   <variable>buildConfiguration-Debug</variable>
   <valuemap type="QVariantMap" >
    <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >Debug</value>
-   <value key="QtVersionId" type="int" >3</value>
+   <value key="QtVersionId" type="int" >0</value>
+   <value key="addQDumper" type="" ></value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildConfiguration-Release</variable>
+  <valuemap type="QVariantMap" >
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >Release</value>
+   <value key="QtVersionId" type="int" >0</value>
    <value key="addQDumper" type="" ></value>
   </valuemap>
  </data>
@@ -148,15 +152,15 @@
 }</value>
    </valuelist>
    <valuelist key="abstractProcess.arguments" type="QVariantList" >
-    <value type="QString" >/home/taropeg/projects/spikestream/trunk/applicationlibrary/applicationlibrary.pro</value>
+    <value type="QString" >/home/taropeg/projects/spikestream/trunk/analysis/statebasedphi/test/test.pro</value>
     <value type="QString" >-spec</value>
     <value type="QString" >/usr/share/qt4/mkspecs/linux-g++</value>
     <value type="QString" >-r</value>
     <value type="QString" >CONFIG+=debug</value>
    </valuelist>
    <value key="abstractProcess.command" type="QString" >/usr/lib/qt4/bin/qmake</value>
-   <value key="abstractProcess.enabled" type="bool" >true</value>
-   <value key="abstractProcess.workingDirectory" type="QString" >/home/taropeg/projects/spikestream/trunk/applicationlibrary</value>
+   <value key="abstractProcess.enabled" type="bool" >false</value>
+   <value key="abstractProcess.workingDirectory" type="QString" >/home/taropeg/projects/spikestream/trunk/analysis/statebasedphi/test</value>
    <value key="buildConfiguration" type="int" >2</value>
   </valuemap>
  </data>
@@ -260,7 +264,7 @@
    </valuelist>
    <value key="abstractProcess.command" type="QString" >/usr/bin/make</value>
    <value key="abstractProcess.enabled" type="bool" >true</value>
-   <value key="abstractProcess.workingDirectory" type="QString" >/home/taropeg/projects/spikestream/trunk/applicationlibrary</value>
+   <value key="abstractProcess.workingDirectory" type="QString" >/home/taropeg/projects/spikestream/trunk/analysis/statebasedphi/test</value>
   </valuemap>
  </data>
  <data>
@@ -272,14 +276,14 @@
     <value type="QString" >CPU=i686</value>
     <value type="QString" >CSHEDIT=emacs</value>
     <value type="QString" >CVS_RSH=ssh</value>
-    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-2Z5n4VhTzL,guid=61768169b4d17ae1f60bba284adcb583</value>
+    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-RTO6xCd5eJ,guid=722644a5364cd7b5ca7058624ae0b534</value>
     <value type="QString" >DESKTOP_SESSION=default</value>
     <value type="QString" >DESKTOP_STARTUP_ID=</value>
     <value type="QString" >DISPLAY=:0.0</value>
     <value type="QString" >DM_CONTROL=/var/run/xdmctl</value>
     <value type="QString" >ENV=/etc/bash.bashrc</value>
     <value type="QString" >FROM_HEADER=</value>
-    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-sPGxqt/S.gpg-agent:3900:1</value>
+    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-XBXyZF/S.gpg-agent:4167:1</value>
     <value type="QString" >GS_LIB=/home/taropeg/.fonts</value>
     <value type="QString" >GTK2_RC_FILES=/etc/gtk-2.0/gtkrc:/usr/share/themes//QtCurve/gtk-2.0/gtkrc:/home/taropeg/.gtkrc-2.0-qtengine:/home/taropeg/.gtkrc-2.0:/home/taropeg/.kde4/share/config/gtkrc-2.0</value>
     <value type="QString" >GTK_IM_MODULE=cedilla</value>
@@ -304,7 +308,7 @@
     <value type="QString" >KDE_SESSION_UID=1000</value>
     <value type="QString" >KDE_SESSION_VERSION=4</value>
     <value type="QString" >LANG=en_GB.UTF-8</value>
-    <value type="QString" >LD_LIBRARY_PATH=/home/taropeg/qtsdk-2009.03/lib/qtcreator::/usr/local/qwt/lib:/home/taropeg/projects/spikestream/trunk/lib</value>
+    <value type="QString" >LD_LIBRARY_PATH=/home/taropeg/qtsdk-2009.03/lib/qtcreator::/usr/local/qwt/lib:/home/taropeg/projects/spikestream/trunk/lib:/home/taropeg/projects/spikestream/trunk/plugins/analysis</value>
     <value type="QString" >LESS=-M -I</value>
     <value type="QString" >LESSCLOSE=lessclose.sh %s %s</value>
     <value type="QString" >LESSKEY=/etc/lesskey.bin</value>
@@ -332,13 +336,13 @@
     <value type="QString" >QT_PLUGIN_PATH=/home/taropeg/.kde4/lib/kde4/plugins/:/usr/lib/kde4/plugins/</value>
     <value type="QString" >QT_SYSTEM_DIR=/usr/share/desktop-data</value>
     <value type="QString" >SDK_HOME=/usr/lib/jvm/java</value>
-    <value type="QString" >SESSION_MANAGER=local/linux-30aa:@/tmp/.ICE-unix/3996,unix/linux-30aa:/tmp/.ICE-unix/3996</value>
+    <value type="QString" >SESSION_MANAGER=local/linux-30aa:@/tmp/.ICE-unix/4262,unix/linux-30aa:/tmp/.ICE-unix/4262</value>
     <value type="QString" >SHELL=/bin/bash</value>
     <value type="QString" >SHLVL=1</value>
     <value type="QString" >SPIKESTREAM_ROOT=/home/taropeg/projects/spikestream/trunk</value>
-    <value type="QString" >SSH_AGENT_PID=3901</value>
+    <value type="QString" >SSH_AGENT_PID=4168</value>
     <value type="QString" >SSH_ASKPASS=/usr/lib/ssh/x11-ssh-askpass</value>
-    <value type="QString" >SSH_AUTH_SOCK=/tmp/ssh-vMTPj3757/agent.3757</value>
+    <value type="QString" >SSH_AUTH_SOCK=/tmp/ssh-XHLAL4058/agent.4058</value>
     <value type="QString" >TERM=xterm</value>
     <value type="QString" >TMPDIR=/tmp</value>
     <value type="QString" >USER=taropeg</value>
@@ -349,7 +353,7 @@
     <value type="QString" >XCURSOR_THEME=Oxygen_White</value>
     <value type="QString" >XDG_CONFIG_DIRS=/etc/xdg</value>
     <value type="QString" >XDG_DATA_DIRS=/usr/share:/etc/opt/kde3/share:/opt/kde3/share</value>
-    <value type="QString" >XDG_SESSION_COOKIE=1ad84edac528716ecbcd8e5b49dca96b-1255978369.311721-673719728</value>
+    <value type="QString" >XDG_SESSION_COOKIE=1ad84edac528716ecbcd8e5b49dca96b-1256240433.445944-128345635</value>
     <value type="QString" >XDM_MANAGED=method=classic</value>
     <value type="QString" >XKEYSYMDB=/usr/share/X11/XKeysymDB</value>
     <value type="QString" >XMODIFIERS=@im=local</value>
@@ -364,13 +368,33 @@
    </valuelist>
    <value key="abstractProcess.command" type="QString" >/usr/bin/make</value>
    <value key="abstractProcess.enabled" type="bool" >true</value>
-   <value key="abstractProcess.workingDirectory" type="QString" >/home/taropeg/projects/spikestream/trunk/applicationlibrary</value>
+   <value key="abstractProcess.workingDirectory" type="QString" >/home/taropeg/projects/spikestream/trunk/analysis/statebasedphi/test</value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildconfiguration-Release-buildstep0</variable>
+  <valuemap type="QVariantMap" >
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >Release</value>
+   <value key="buildConfiguration" type="int" >0</value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildconfiguration-Release-buildstep1</variable>
+  <valuemap type="QVariantMap" >
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >Release</value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildconfiguration-Release-cleanstep0</variable>
+  <valuemap type="QVariantMap" >
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString" >Release</value>
   </valuemap>
  </data>
  <data>
   <variable>buildconfigurations</variable>
   <valuelist type="QVariantList" >
    <value type="QString" >Debug</value>
+   <value type="QString" >Release</value>
   </valuelist>
  </data>
  <data>

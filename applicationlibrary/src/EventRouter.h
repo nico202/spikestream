@@ -14,11 +14,14 @@ namespace spikestream {
 	public:
 
 	public slots:
-	    void analysisStarted() { emit analysisStartedSignal(); }
+	    //Analysis slots
+	    void analysisStarted() { emit analysisStartedSignal(); emit analysisNotRunningSignal(false); }
+	    void analysisStopped() { emit analysisStoppedSignal(); emit analysisNotRunningSignal(true); }
 	    void archiveTimeStepChangedSlot() { emit archiveTimeStepChangedSignal(); }
 
 	signals:
 	    //Analysis signals
+	    void analysisNotRunningSignal(bool isNotRunning);//FIXME HORRIBLE
 	    void analysisStartedSignal();
 	    void analysisStoppedSignal();
 
@@ -46,9 +49,6 @@ namespace spikestream {
 
 	private slots:
 	    void archiveChangedSlot() { emit archiveChangedSignal(); }
-
-	    //Analysis slots
-	    void analysisStopped() { emit analysisStoppedSignal(); }
 
 	    //OpenGL slots
 	    void moveBackwardSlot() { emit moveBackwardSignal(); }

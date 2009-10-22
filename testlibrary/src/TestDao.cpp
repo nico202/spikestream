@@ -182,6 +182,18 @@ QSqlQuery TestDao::getArchiveQuery(const QString& queryStr){
     return tmpQuery;
 }
 
+void TestDao::addTestAnalysis1(){
+    //Add test archive - needed for valid archive and network ids
+    addTestArchive1();
+
+    //Add the test analysis and record its id
+    QString queryStr= "INSERT INTO Analyses (NetworkID, ArchiveID, StartTime, Description, Parameters, AnalysisTypeID) VALUES (";
+    queryStr += QString::number(testNetID) + ", " + QString::number(testArchive1ID) + ", 110110, 'test analysis description', '', 1)";
+    QSqlQuery query = getAnalysisQuery(queryStr);
+    executeQuery(query);
+    testAnalysis1ID = query.lastInsertId().toUInt();
+}
+
 
 void TestDao::addTestArchive1(){
     //Add test network - this is needed because we need a valid network ID
