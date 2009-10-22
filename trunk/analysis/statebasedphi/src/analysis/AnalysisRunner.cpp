@@ -12,6 +12,9 @@ AnalysisRunner::AnalysisRunner(const DBInfo& netDBInfo, const DBInfo& archDBInfo
     this->networkDBInfo = netDBInfo;
     this->archiveDBInfo = archDBInfo;
     this->analysisDBInfo = anaDBInfo;
+
+    //Initialize variables
+    stopThread = true;
 }
 
 
@@ -26,6 +29,11 @@ AnalysisRunner::~AnalysisRunner(){
 
 /*! Sets up the class ready to carry out the analysis */
 void AnalysisRunner::prepareAnalysisTask(const AnalysisInfo& analysisInfo, int firstTimeStep, int lastTimeStep){
+    if(subThreadsRunning())
+	throw SpikeStreamException("Cannot prepare analysis task when sub threads are running.");
+    if(stopThread == false)
+	throw SpikeStreamException("Cannot prepare analysis task when analysis thread is running.");
+
     //Reset class
     this->reset();
 
@@ -83,8 +91,10 @@ void AnalysisRunner::stop(){
     for(QHash<int, AnalysisTimeStepThread*>::iterator iter = subThreadMap.begin(); iter != subThreadMap.end(); ++iter){
 	iter.value()->stop();
 	iter.value()->wait();
+	delete iter.value();
     }
 
+    subThreadMap.clear();
     stopThread = true;
 }
 
@@ -95,7 +105,7 @@ void AnalysisRunner::stop(){
 
 /*! Called when one of the sub threads emits a progress signal */
 void AnalysisRunner::updateProgress(unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps){
-    //emit progress(prog);
+    emit progress(timeStep, stepsCompleted, totalSteps);
 }
 
 
@@ -120,21 +130,16 @@ void AnalysisRunner::threadFinished(){
 	return;
     }
 
-    //Check for errors - have to do this before deleting the thread
-    bool subThreadError = false;
+    //Check for errors - set error will delete all of the threads
     if(tmpSubThread->isError()){
 	setError(tmpSubThread->getErrorMessage());
-	subThreadError = true;
+	return;
     }
 
     //Delete the thread class and remove it from the map
     delete tmpSubThread;
     subThreadMap.remove(tmpTimeStep);
-
-    //Return without starting any more threads if we have an error in the sub thread
-    if(subThreadError){
-	return;
-    }
+    emit timeStepComplete(tmpTimeStep);
 
     //Determine if any time steps need to be analyzed
     int tmpNextTimeStep = getNextTimeStep();
@@ -193,6 +198,7 @@ int AnalysisRunner::getNextTimeStep(){
 
 /*! Resets this class ready for another analysis. All information should be cleared. */
 void AnalysisRunner::reset(){
+    subThreadMap.clear();
     stopThread = true;
     clearError();
     firstTimeStep = -1;
@@ -226,7 +232,7 @@ void AnalysisRunner::startAnalysisTimeStepThread(int timeStep){
     connect(newThread, SIGNAL(complexFound()), this, SLOT(updateComplexes()));
     connect(newThread, SIGNAL(finished()), this, SLOT(threadFinished()));
     connect(newThread, SIGNAL(progress(unsigned int, unsigned int, unsigned int)), this, SLOT(updateProgress(unsigned int, unsigned int, unsigned int)));
-    newThread->prepareTimeStepAnalysis(timeStep);
+    newThread->prepareTimeStepAnalysis(analysisInfo, timeStep);
     newThread->start();
     subThreadMap[timeStep] = newThread;
 }

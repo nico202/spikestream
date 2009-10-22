@@ -13,7 +13,10 @@ using namespace spikestream;
 #include <QLayout>
 #include <QDebug>
 #include <QIcon>
+#include <QMessageBox>
 #include <QSqlQueryModel>
+#include <QScrollArea>
+#include <QTabWidget>
 
 //Other includes
 #include <iostream>
@@ -37,17 +40,26 @@ extern "C" {
 /*! Constructor */
 StateBasedPhiWidget::StateBasedPhiWidget(QWidget *parent) : QWidget(parent){
     QVBoxLayout *mainVerticalBox = new QVBoxLayout(this);
+
+    //Add tool bar to top of widget
     toolBar = getToolBar();
-
-    //Can only carry out analysis if a network and archive are loaded
-    checkToolBarEnabled();
-
+    checkToolBarEnabled();//Can only carry out analysis if a network and archive are loaded
     mainVerticalBox->addWidget(toolBar);
+
+    //Create a tabbed widget to hold progress and results
+    QTabWidget* tabWidget = new QTabWidget(this);
 
     //Add the table view displaying the current analysis
     analysisDataTableView = new QTableView();
     analysisDataTableView->setMinimumSize(500, 300);
-    mainVerticalBox->addWidget(analysisDataTableView);
+    tabWidget->addTab(analysisDataTableView, "Results");
+
+    //Add widget displaying progress
+    progressWidget = new ProgressWidget(this);
+    QScrollArea* progressScrollArea = new QScrollArea(this);
+    progressScrollArea->setWidget(progressWidget);
+    tabWidget->addTab(progressScrollArea, "Progress");
+    mainVerticalBox->addWidget(tabWidget);
 
     //Create a state based phi analysis dao to be used by this class
     stateDao = new StateBasedPhiAnalysisDao(Globals::getAnalysisDao()->getDBInfo());
@@ -65,7 +77,8 @@ StateBasedPhiWidget::StateBasedPhiWidget(QWidget *parent) : QWidget(parent){
     );
     connect(analysisRunner, SIGNAL(finished()), this, SLOT(threadFinished()));
     connect(analysisRunner, SIGNAL(finished()), Globals::getEventRouter(), SLOT(analysisStopped()));
-    connect(analysisRunner, SIGNAL(progress(AnalysisProgress&)), this, SLOT(updateProgress(AnalysisProgress&)));
+    connect(analysisRunner, SIGNAL(progress(unsigned int, unsigned int, unsigned int)), progressWidget, SLOT(updateProgress(unsigned int, unsigned int, unsigned int)), Qt::QueuedConnection);
+    connect(analysisRunner, SIGNAL(timeStepComplete(unsigned int)), progressWidget, SLOT(timeStepComplete(unsigned int)));
     connect(analysisRunner, SIGNAL(complexFound()), this , SLOT(updateResults()));
 
     //Initialize analysis parameters and other variables
@@ -153,10 +166,7 @@ void StateBasedPhiWidget::loadAnalysis(){
 	if(loadAnalysisDialog.exec() == QDialog::Accepted ) {//Load the archive
 	    analysisInfo = loadAnalysisDialog.getAnalysisInfo();
 
-	    //Get the model with details about the selected analysis from the analysis table and display it in the view
-	    QSqlQueryModel* model = stateDao->getStateBasedPhiDataTableModel(analysisInfo.getID());
-	    analysisDataTableView->setModel(model);
-	    analysisDataTableView->show();
+	    loadAnalysisResults();
 	}
     }
     catch (SpikeStreamException& ex){
@@ -193,7 +203,7 @@ void StateBasedPhiWidget::startAnalysis(){
 	return;
     }
 
-    //Check to see if the selected time steps are fully or partially present in the database
+    //Get time steps to be analyzed
     int firstTimeStep = Util::getInt(fromTimeStepCombo->currentText());
     int lastTimeStep = Util::getInt(toTimeStepCombo->currentText());
 
@@ -209,7 +219,19 @@ void StateBasedPhiWidget::startAnalysis(){
 	    }
 	}
 
-	//Initialize class to run analysis
+	//Check for a time step conflict
+	if(timeStepsAlreadyAnalyzed(firstTimeStep, lastTimeStep)){
+	    //Check to see if user wants to overwrite time steps fully or partly analyzed
+	    QString confirmMsg = "Some or all of the time steps from " + QString::number(firstTimeStep);
+	    confirmMsg += " to " + QString::number(lastTimeStep) + " have already been fully or partly analyzed.\n";
+	    confirmMsg += "Do you want to overwrite the current results for these time steps in the database?";
+	    QMessageBox::StandardButton response = QMessageBox::warning(this, "Time step conflict", confirmMsg, QMessageBox::Ok | QMessageBox::Cancel);
+	    if(response != QMessageBox::Ok)
+		return;
+	}
+
+	//Initialize classes to run analysis
+	progressWidget->reset();
 	analysisRunner->prepareAnalysisTask(analysisInfo, firstTimeStep, lastTimeStep);
 	currentTask = ANALYSIS_TASK;
 	analysisRunner->start();
@@ -241,7 +263,7 @@ void StateBasedPhiWidget::threadFinished(){
 
     switch(currentTask){
 	case ANALYSIS_TASK:
-	    ;
+	    Globals::getEventRouter()->analysisStopped();
 	break;
 	default:
 	    qCritical()<<"Current task not recognized: "<<currentTask;
@@ -251,22 +273,16 @@ void StateBasedPhiWidget::threadFinished(){
 }
 
 
-/*! Update the progress tab
-    When the number of time steps completed matches the total number of time steps,
-    the second number the progress bar is removed from the progress tab. */
-void StateBasedPhiWidget::updateProgress(AnalysisProgress& progress){
-}
-
-
 /*! Updates results table by reloading it from the database */
 void StateBasedPhiWidget::updateResults(){
-
+    loadAnalysisResults();
 }
 
 
 /*-------------------------------------------------------------*/
 /*-------                PRIVATE METHODS                 ------*/
 /*-------------------------------------------------------------*/
+
 
 /*! Returns true if we are working with an analysis that already exists in the database */
 bool StateBasedPhiWidget::analysisLoaded(){
@@ -299,6 +315,7 @@ QToolBar* StateBasedPhiWidget::getToolBar(){
 
     tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/play.xpm"), "Start analysis", this);
     connect(tmpAction, SIGNAL(triggered()), this, SLOT(startAnalysis()));
+    connect(Globals::getEventRouter(), SIGNAL(analysisNotRunningSignal(bool)), tmpAction, SLOT(setEnabled(bool)));
     tmpToolBar->addAction (tmpAction);
 
     tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/stop.xpm"), "Stop analysis", this);
@@ -337,6 +354,27 @@ void StateBasedPhiWidget::initializeAnalysisInfo(){
 
     analysisInfo.getParameterMap()["Test param1"] = 0.4;
     analysisInfo.getParameterMap()["Test param2"] = 1000;
+}
+
+
+/*! Get the model with details about the selected analysis from the analysis table and display it in the view */
+void StateBasedPhiWidget::loadAnalysisResults(){
+    QSqlQueryModel* model = stateDao->getStateBasedPhiDataTableModel(analysisInfo.getID());
+    analysisDataTableView->setModel(model);
+    analysisDataTableView->show();
+}
+
+
+/*! Checks to see if any of the specified range of time steps already exist in the database */
+bool StateBasedPhiWidget::timeStepsAlreadyAnalyzed(int firstTimeStep, int lastTimeStep){
+    if(!analysisLoaded()){
+	return false;
+    }
+
+    int complexCount = stateDao->getComplexCount(analysisInfo.getID(), firstTimeStep, lastTimeStep);
+    if(complexCount > 0)
+	return true;
+    return false;
 }
 
 

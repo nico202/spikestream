@@ -9,9 +9,10 @@ OBJECTS_DIR = build/objects
 MOC_DIR = build/moc
 
 INCLUDEPATH += src \
-		../include
+		../include \
+		$(SPIKESTREAM_ROOT)/testlibrary/include
 
-LIBS += -lspikestream -lspikestreamapplication -L$(SPIKESTREAM_ROOT)/lib
+LIBS += -lspikestream -lspikestreamapplication -lspikestreamtest -L$(SPIKESTREAM_ROOT)/lib
 
 QT += sql xml
 
@@ -21,23 +22,24 @@ CONFIG += qtestlib
 #---            Test Files                  ---#
 #----------------------------------------------#
 HEADERS += src/TestRunner.h \
-	    src/TestDao.h \
 	    src/TestNetworkDao.h \
 	    src/TestNetworkDaoThread.h \
 	    src/TestXMLParameterParser.h \
 	    src/TestNetwork.h \
 	    src/TestNeuronGroup.h \
 	    src/TestArchiveDao.h \
-	    src/TestAnalysisDao.h
+	    src/TestAnalysisDao.h \
+	    src/TestUtil.h
 
 SOURCES += src/Main.cpp \
 	    src/TestRunner.cpp \
-	    src/TestDao.cpp \
 	    src/TestNetworkDao.cpp \
 	    src/TestNetworkDaoThread.cpp \
 	    src/TestXMLParameterParser.cpp \
 	    src/TestNetwork.cpp \
 	    src/TestNeuronGroup.cpp \
 	    src/TestArchiveDao.cpp \
-	    src/TestAnalysisDao.cpp
+	    src/TestAnalysisDao.cpp \
+	    src/TestUtil.cpp
+
 

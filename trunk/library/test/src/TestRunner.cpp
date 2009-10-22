@@ -8,6 +8,7 @@
 #include "TestNetworkDao.h"
 #include "TestNetworkDaoThread.h"
 #include "TestXMLParameterParser.h"
+#include "TestUtil.h"
 
 
 //Other includes
@@ -36,6 +37,9 @@ void TestRunner::runTests(){
 
     TestAnalysisDao testAnalysisDao;
     QTest::qExec(&testAnalysisDao);
+
+    TestUtil testUtil;
+    QTest::qExec(&testUtil);
 }
 
 
