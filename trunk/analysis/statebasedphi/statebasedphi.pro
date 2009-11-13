@@ -37,15 +37,18 @@ HEADERS = src/gui/StateBasedPhiWidget.h \
 	    src/gui/StateBasedPhiParameterDialog.h \
 	    src/analysis/AnalysisRunner.h \
 	    src/analysis/AnalysisTimeStepThread.h \
-	    src/analysis/AnalysisProgress.h \
-	    src/gui/ProgressWidget.h
+	    src/gui/ProgressWidget.h \
+	    src/analysis/PhiCalculator.h \
+	    src/analysis/SubsetManager.h
 
 SOURCES = src/gui/StateBasedPhiWidget.cpp \
 	    src/database/StateBasedPhiAnalysisDao.cpp \
 	    src/gui/StateBasedPhiParameterDialog.cpp \
 	    src/analysis/AnalysisRunner.cpp \
 	    src/analysis/AnalysisTimeStepThread.cpp \
-	    src/gui/ProgressWidget.cpp
+	    src/gui/ProgressWidget.cpp \
+	    src/analysis/PhiCalculator.cpp \
+	    src/analysis/SubsetManager.cpp
 
 
 

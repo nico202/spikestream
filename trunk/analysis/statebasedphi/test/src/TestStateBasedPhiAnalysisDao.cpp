@@ -27,18 +27,39 @@ void TestStateBasedPhiAnalysisDao::testAddComplex(){
 }
 
 
-void TestStateBasedPhiAnalysisDao::getStateBasedPhiDataTableModel(){
+void TestStateBasedPhiAnalysisDao::testDeleteTimeSteps(){
+    //Add test analysis and data
+    addTestAnalysis1();
+    addTestAnalysis1Data();
+
+    //Create class to be tested
+    StateBasedPhiAnalysisDao anaDao(analysisDBInfo);
+
+    //Check that there are three time steps in database
+    QSqlQuery query = getAnalysisQuery("SELECT COUNT(*) FROM StateBasedPhiData");
+    executeQuery(query);
+    query.next();
+    QCOMPARE(query.value(0).toInt(), (int)3);
+
+    //Delete 2 time steps
+    anaDao.deleteTimeSteps(2, 3);
+
+    //Should be 1 time step remaining
+    query = getAnalysisQuery("SELECT COUNT(*) FROM StateBasedPhiData");
+    executeQuery(query);
+    query.next();
+    QCOMPARE(query.value(0).toInt(), (int)1);
+}
+
+
+void TestStateBasedPhiAnalysisDao::testGetStateBasedPhiDataTableModel(){
 }
 
 
 void TestStateBasedPhiAnalysisDao::testGetComplexCount(){
-    //Add test analysis
+    //Add test analysis and data
     addTestAnalysis1();
-
-    //Add some data
-    executeAnalysisQuery("INSERT INTO StateBasedPhiData (AnalysisID, TimeStep, Phi, Neurons) VALUES (" + QString::number(testAnalysis1ID) + ", 1, 3.0, '256,311,21,4')");
-    executeAnalysisQuery("INSERT INTO StateBasedPhiData (AnalysisID, TimeStep, Phi, Neurons) VALUES (" + QString::number(testAnalysis1ID) + ", 2, 4.0, '1,2,3,4')");
-    executeAnalysisQuery("INSERT INTO StateBasedPhiData (AnalysisID, TimeStep, Phi, Neurons) VALUES (" + QString::number(testAnalysis1ID) + ", 3, 5.0, '5,6,7,8')");
+    addTestAnalysis1Data();
 
     //Create class to be tested and test it
     StateBasedPhiAnalysisDao anaDao(analysisDBInfo);
@@ -49,4 +70,13 @@ void TestStateBasedPhiAnalysisDao::testGetComplexCount(){
     complexCount = anaDao.getComplexCount(testAnalysis1ID+1, 1, 3);
     QCOMPARE(complexCount, (int)0);
 }
+
+
+/*! Adds test data to analysis 1 */
+void TestStateBasedPhiAnalysisDao::addTestAnalysis1Data(){
+    executeAnalysisQuery("INSERT INTO StateBasedPhiData (AnalysisID, TimeStep, Phi, Neurons) VALUES (" + QString::number(testAnalysis1ID) + ", 1, 3.0, '256,311,21,4')");
+    executeAnalysisQuery("INSERT INTO StateBasedPhiData (AnalysisID, TimeStep, Phi, Neurons) VALUES (" + QString::number(testAnalysis1ID) + ", 2, 4.0, '1,2,3,4')");
+    executeAnalysisQuery("INSERT INTO StateBasedPhiData (AnalysisID, TimeStep, Phi, Neurons) VALUES (" + QString::number(testAnalysis1ID) + ", 3, 5.0, '5,6,7,8')");
+}
+
 

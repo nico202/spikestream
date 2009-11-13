@@ -13,6 +13,7 @@ namespace spikestream {
 	    StateBasedPhiAnalysisDao(const DBInfo& dbInfo);
 	    virtual ~StateBasedPhiAnalysisDao();
 	    void addComplex(unsigned int analysisID, int timeStep, double phi, QList<unsigned int>& neuronIDList);
+	    void deleteTimeSteps(unsigned int firstTimeStep, unsigned int lastTimeStep);
 	    int getComplexCount(unsigned int analysisID, unsigned int firstTimeStep, unsigned int lastTimeStep);
 	    QSqlQueryModel* getStateBasedPhiDataTableModel(unsigned int analysisID);
     };

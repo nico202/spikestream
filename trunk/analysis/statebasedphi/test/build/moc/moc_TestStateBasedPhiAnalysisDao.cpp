@@ -23,7 +23,7 @@ static const uint qt_meta_data_TestStateBasedPhiAnalysisDao[] = {
        1,       // revision
        0,       // classname
        0,    0, // classinfo
-       3,   10, // methods
+       4,   10, // methods
        0,    0, // properties
        0,    0, // enums/sets
 
@@ -31,14 +31,16 @@ static const uint qt_meta_data_TestStateBasedPhiAnalysisDao[] = {
       30,   29,   29,   29, 0x08,
       47,   29,   29,   29, 0x08,
       69,   29,   29,   29, 0x08,
+      91,   29,   29,   29, 0x08,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_TestStateBasedPhiAnalysisDao[] = {
     "TestStateBasedPhiAnalysisDao\0\0"
-    "testAddComplex()\0testGetComplexCount()\0"
-    "getStateBasedPhiDataTableModel()\0"
+    "testAddComplex()\0testDeleteTimeSteps()\0"
+    "testGetComplexCount()\0"
+    "testGetStateBasedPhiDataTableModel()\0"
 };
 
 const QMetaObject TestStateBasedPhiAnalysisDao::staticMetaObject = {
@@ -67,10 +69,11 @@ int TestStateBasedPhiAnalysisDao::qt_metacall(QMetaObject::Call _c, int _id, voi
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
         case 0: testAddComplex(); break;
-        case 1: testGetComplexCount(); break;
-        case 2: getStateBasedPhiDataTableModel(); break;
+        case 1: testDeleteTimeSteps(); break;
+        case 2: testGetComplexCount(); break;
+        case 3: testGetStateBasedPhiDataTableModel(); break;
         }
-        _id -= 3;
+        _id -= 4;
     }
     return _id;
 }

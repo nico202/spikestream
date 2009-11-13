@@ -3,7 +3,6 @@
 
 //SpikeStream includes
 #include "AnalysisTimeStepThread.h"
-#include "AnalysisProgress.h"
 #include "DBInfo.h"
 
 //Qt includes
