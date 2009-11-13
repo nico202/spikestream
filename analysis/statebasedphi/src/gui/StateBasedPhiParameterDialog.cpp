@@ -43,11 +43,14 @@ StateBasedPhiParameterDialog::StateBasedPhiParameterDialog(QWidget* parent, cons
 	gridLayout->addWidget(new QLabel(iter.key()), cntr, 0);
 	QLineEdit* tmpEdit = new QLineEdit(QString::number(iter.value(), 'g', 10));//'g' sets the output similar to sprintf; 10 is the maximum precision
 	tmpEdit->setValidator(doubleValidator);
+	//Disable parameter editing if it is loaded from the database
+	if(analysisInfo.getID() != 0){
+	    tmpEdit->setEnabled(false);
+	}
 	gridLayout->addWidget(tmpEdit, cntr, 1);
 	editMap[iter.key()] = tmpEdit;
 	++cntr;
     }
-
     mainVerticalBox->addLayout(gridLayout);
 
     //Add Ok and Cancel buttons

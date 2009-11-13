@@ -187,10 +187,17 @@ void StateBasedPhiWidget::newAnalysis(){
     These cannot be edited once the analysis has been started - otherwise would have to associate
     a set of parameter with each time step */
 void StateBasedPhiWidget::selectParameters(){
+    //Record the current description
+    QString oldDescription = analysisInfo.getDescription();
+
     StateBasedPhiParameterDialog dialog(this, analysisInfo);
     if(dialog.exec() == QDialog::Accepted ) {
 	//Copy the new information that has been set
 	analysisInfo = dialog.getInfo();
+
+	//Update the description if it has changed
+	if(analysisInfo.getDescription() != oldDescription && analysisInfo.getDescription() != "")
+	    stateDao->updateDescription(analysisInfo.getID(), analysisInfo.getDescription());
     }
 }
 
@@ -228,6 +235,10 @@ void StateBasedPhiWidget::startAnalysis(){
 	    QMessageBox::StandardButton response = QMessageBox::warning(this, "Time step conflict", confirmMsg, QMessageBox::Ok | QMessageBox::Cancel);
 	    if(response != QMessageBox::Ok)
 		return;
+
+	    //Delete time steps from the database and refresh the list of complexes
+	    stateDao->deleteTimeSteps(firstTimeStep, lastTimeStep);
+	    loadAnalysisResults();
 	}
 
 	//Initialize classes to run analysis

@@ -49,9 +49,6 @@ void ProgressWidget::timeStepComplete(unsigned int timeStep){
 	qCritical()<<"Time step is claimed to be complete, but no time step found.";
 	return;
     }
-
-    progressBarMap[timeStep]->setValue(progressBarMap[timeStep]->maximum());
-qDebug()<<"MAX: "<<progressBarMap[timeStep]->maximum()<<" min "<<progressBarMap[timeStep]->minimum()<<" value: "<<progressBarMap[timeStep]->value();
 }
 
 
@@ -63,6 +60,7 @@ void ProgressWidget::updateProgress(unsigned int timeStep, unsigned int stepsCom
 
     //Check to see if we have a progress bar for this time step
     if(progressBarMap.contains(timeStep)){
+	qDebug()<<"TIME STEP: "<<timeStep<<" STEPS COMPLETED: "<<stepsCompleted<<" TOTAL STEPS: "<<totalSteps;
 	progressBarMap[timeStep]->setValue(stepsCompleted);
     }
     //Add new progress bar
@@ -85,7 +83,7 @@ void ProgressWidget::addProgressBar(unsigned int timeStep, unsigned int min, uns
     QProgressBar* progBar = new QProgressBar();
     progBar->setMinimumSize(100, 15);
     progBar->setBaseSize(100, 15);
-    progBar->setRange(min, max);
+    progBar->setRange(0, max);
     progBar->setValue(min);
     gridLayout->addWidget(new QLabel("Time step " + QString::number(timeStep) + ": "), progressBarMap.size(), 0);
     gridLayout->addWidget(progBar, progressBarMap.size(), 1);

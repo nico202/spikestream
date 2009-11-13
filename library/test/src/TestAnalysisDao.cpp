@@ -37,6 +37,26 @@ void TestAnalysisDao::testAddAnalysis(){
 
 }
 
+void TestAnalysisDao::testUpdateDescription(){
+    try{
+	//Add test analysis. This has description "test analysis description"
+	addTestAnalysis1();
+
+	//Invoke analysis dao to change description
+	AnalysisDao analysisDao(analysisDBInfo);
+	analysisDao.updateDescription(testAnalysis1ID, "new analysis description");
+
+	//Check new description is present in the database
+	QSqlQuery query = getAnalysisQuery("SELECT Description FROM Analyses WHERE AnalysisID=" + QString::number(testAnalysis1ID));
+	executeQuery(query);
+	query.next();
+	QCOMPARE(query.value(0).toString(), QString("new analysis description"));
+    }
+    catch(SpikeStreamException& ex){
+	QFAIL(ex.getMessage().toAscii());
+    }
+}
+
 
 
 void TestAnalysisDao::testGetAnalysesTableModel(){

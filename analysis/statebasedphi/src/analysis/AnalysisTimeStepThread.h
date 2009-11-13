@@ -30,8 +30,13 @@ namespace spikestream {
 	    void complexFound();
 	    void progress(unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps);
 
+	private slots:
+	    void updateComplexes();
+	    void updateProgress(unsign);
+
 	private:
 	    //========================  VARIABLES  ========================
+	    //FIXME - A NUMBER OF THESE CAN BE DELETED SINCE THEY ARE ONLY CREATED AN USED BY THE PHI CALCULATOR
 	    /*! Information about the network database */
 	    DBInfo networkDBInfo;
 

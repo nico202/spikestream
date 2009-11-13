@@ -32,6 +32,13 @@ void StateBasedPhiAnalysisDao::addComplex(unsigned int analysisID, int timeStep,
 }
 
 
+/*! Deletes time steps covering the specified range.
+    This range is inclusive, so first and last time steps will be deleted */
+void StateBasedPhiAnalysisDao::deleteTimeSteps(unsigned int firstTimeStep, unsigned int lastTimeStep){
+    executeQuery("DELETE FROM StateBasedPhiData WHERE TimeStep >= " + QString::number(firstTimeStep) + " AND TimeStep <= " + QString::number(lastTimeStep));
+}
+
+
 /*! Returns the number of complexes within a particular range of time steps */
 int StateBasedPhiAnalysisDao::getComplexCount(unsigned int analysisID, unsigned int firstTimeStep, unsigned int lastTimeStep){
     QString queryString = "SELECT COUNT(*) FROM StateBasedPhiData WHERE AnalysisID=" + QString::number(analysisID);

@@ -50,3 +50,9 @@ QSqlQueryModel* AnalysisDao::getAnalysesTableModel(unsigned int networkID, unsig
 }
 
 
+/*! Updates the analysis description */
+void AnalysisDao::updateDescription(unsigned int analysisID, const QString& newDescription){
+    executeQuery("UPDATE Analyses SET Description='" + newDescription + "' WHERE AnalysisID=" + QString::number(analysisID));
+}
+
+

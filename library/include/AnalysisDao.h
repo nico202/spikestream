@@ -14,6 +14,7 @@ namespace spikestream {
 
 	    void addAnalysis(AnalysisInfo& analysisInfo);
 	    QSqlQueryModel* getAnalysesTableModel(unsigned int networkID, unsigned int archiveID);
+	    void updateDescription(unsigned int analysisID, const QString& description);
 
     };
 

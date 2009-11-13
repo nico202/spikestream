@@ -13,8 +13,12 @@ class TestStateBasedPhiAnalysisDao : public TestDao {
 
 	private slots:
 	    void testAddComplex();
+	    void testDeleteTimeSteps();
 	    void testGetComplexCount();
-	    void getStateBasedPhiDataTableModel();
+	    void testGetStateBasedPhiDataTableModel();
+
+	private:
+	    void addTestAnalysis1Data();
 };
 
 #endif//TESTSTATEBASEDPHIANALYSISDAO_H
