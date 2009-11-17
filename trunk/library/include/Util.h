@@ -9,6 +9,7 @@ namespace spikestream {
     /*! Set of static utility methods intended eventually to supersede Utilities.h */
     class Util {
 	public:
+	    static void fillSelectionArray(bool* array, int arraySize, int selectionSize);
 	    static int getInt(const QString& str);
 	    static unsigned int getUInt(const QString& str);
 	    static double getDouble(const QString& str);

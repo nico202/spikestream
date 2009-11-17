@@ -1,4 +1,6 @@
 #include "PhiCalculator.h"
+#include "ProbabilityTable.h"
+#include "Util.h"
 using namespace spikestream;
 
 
@@ -51,7 +53,7 @@ double SubsetManager::getSubsetPhi(QList<unsigned int>& subsetNeurIDs){
 	while(!*stop && !permutationsComplete){
 
 	    //Use selection array to fill the list of neurons in the two partitions
-	    fillPartitionLists(aPartition, bPartition, partitionArray);
+	    fillPartitionLists(aPartition, bPartition, partitionArray, subsetSize, subsetNeurIDs);
 
 	    //Calculate phi on this bipartition
 	    newPhi = getPartitionPhi(aPartition, bPartition);
@@ -102,26 +104,103 @@ double SubsetManager::getSubsetPhi(QList<unsigned int>& subsetNeurIDs){
 /*-------                 PRIVATE METHODS                ------*/
 /*-------------------------------------------------------------*/
 
-/*! Fills an array to select k neurons out of n.
-	Need to fill it with the lowest value + 1 so that next_permutation runs through all values
-	before returning false. */
-void PhiCalculator::fillSelectionArray(bool* array, int arraySize, int selectionSize){
-    int nonSelectionSize = arraySize - selectionSize;
+/*! Converts a causal probability table, p(x1|x0) into the reverse, p(x0|x1) */
+void PhiCalculator::calculateReverseProbability(QList<unsigned int>& neuronIDList, const QString& firingPattern, ProbabilityTable& causalTable, ProbabilityTable& table){
 
-    //Add zeros at start of array up to the non-selection size
-    for(int i=0; i<nonSelectionSize; ++i)
-	selectionArray[i] = 0;
+}
 
-    //Add 1s to the rest of the array
-    for(int i=nonSelectionSize; i<arraySize; ++i)
-	selectionArray[i] = 1;
+
+/*! Converts the selection array into lists of the neuron ids in the A and B partitions */
+void PhiCalculator::fillPartitionLists(QList<unsigned int>& aPartition, QList<unsigned int>& bPartition, bool* partitionArray, int arrayLength, QList<unsigned int>& subsetNeurIDs){
+    for(int i=0; i<arrayLength; ++i){
+	if(partitionArray[i] == 1)
+	    aPartition.append(subsetNeurIDs[i]);
+	else
+	    bPartition.append(subsetNeurIDs[i]);
+    }
+}
+
+
+/*! Fills probability table with p(X0->x1) or equivalently, p(x0|x1)
+    Supply list of neurons and a string of 1's or 0's that indicates the corresponding neuron's firing state. */
+void  PhiCalculator::fillProbabilityTable(ProbabilityTable& table, QList<unsigned int> neurIDList, const QString& firingPattern){
+    //Run some checks on the data
+    if(table.numNeurons() != neurIDList.size())
+	throw SpikeStreamAnalysisException("Probability table size (" + QString::number(table.numNeurons()) + ") does not match neuron id list size  (" + QString::number(neurIDList.size()) + ")");
+    if(table.numNeurons() != firingPattern.size())
+	throw SpikeStreamAnalysisException("Probability table size (" + QString::number(table.numNeurons()) + ") does not match firing pattern size (" + QString::number(firingPattern.size()) + ")");
+
+    //Create table to hold p(x1|x0). This is needed to calculate the reverse probability p(x0|x1) via Bayes
+    ProbabilityTable causalProbTable(table.numNeurons());
+
+    //Fill p(x1|x0) table
+    QHash<QString, double>* probValTab = table.getProbabilityValueMap();
+    for(QHash<QString, double>::iterator iter = probValTab->begin(); iter != probValTab->end(); ++iter){
+	//Get probability that this state leads to the current state of the network
+	double causalProb = getCausalProbability(neurIDList, iter.key(), firingPattern);
+	causalProbTable.setProbability(iter.key(), causalProb);
+    }
+
+    //Calculate the reverse probability table using Bayes, p(x0|x1)
+    calculateReverseProbability(causalProbTable, table);//FIXME: RENAME!!
+}
+
+
+/*! Calculates the probability that the first specified firing pattern leads to the second, or p(x1|x0) */
+double PhiCalculator::getCausalProbability(QList<unsigned int>& neurIDList, const QString& initialPat, const QString& currentPat){
+    /* Probability of the first state leading to the second is the product of the probabilities of
+	the  transition for each neuron */
+    double totalProb = 1.0;
+
+    //Work through each neuron to get its probability
+    for(int i=0; i<neurIDList.size(); ++i){
+	unsigned int neurFiringState = Util::getUInt(secondPat.at(i));
+
+	//Run a couple of sanity checks
+	if(currentNeurFiringState != 0 && neurFiringState != 1)
+	    throw SpikeStreamAnalysisException("Current neuron firing state must be either 1 or 0");
+	if(!weightlessNeuronMap.contains(neurIDList[i]))
+	    throw SpikeStreamAnalysisException("Neuron ID cannot be found: " + QString::number(neuronIDList[i]));
+
+	//Get the probability that this pattern led to this firing state
+	double transitionProb = weightlessNeuronMap[neurIDList[i]].getProbability(neurIDList, initialPattern, neurFiringState);
+	totalProb *= transitionProb;
+    }
 }
 
 
 /*! Calculates the phi for the specified partition */
 double PhiCalculator::getPartitionPhi(QList<unsigned int>& aPartition, QList<unsigned int>& bPartition){
+    //Get a complete map of neurons firing at the current time step
+    QList<unsigned int> firingNeuronList = archiveDao->getFiringNeuronIDs(archiveID, timeStep);
 
+    //Get a list of all the neurons in the subset
+    QList<unsigned int> subsetList;
+    subsetList.append(aPartition);
+    subsetList.append(bPartition);
 
+    //Get p(X0->x1) for the whole subset
+    ProbabilityTable subsetProbTable(subsetList.size());
+    fillProbabilityTable(subsetProbTable);
+
+    //Get p(X0->x1) for the A partition
+    ProbabilityTable aProbTable = getProbabilityTable(aPartition);
+
+    //Get p(X0->x1) for the B partition
+    ProbabilityTable bProbTable = getProbabilityTable(bPartition);
+
+    //Calculate the relative entropy
+    double result = 0.0;
+    QHash<QString, double>* tmpProbMap = subsetProbTable.getValueMap();
+    for(int i=0; i<subsetProbTable.size(); ++i){
+	//Get the string of 1's and 0's corresponding to the A and B parts of the key
+	ProbabilityKey aKey = subsetProbTable[i].getSubKey(0, aPartition.size() - 1);
+	ProbabilityKey bKey = subsetProbTable[i].getSubKey(bPartition.size() - 1, subsetList.size() - 1);
+	result += subsetProbTable[i] * log (subsetProbTable[i] / (aProbTable.getProbability(aKey) * bProbTable.getProbability(bKey)));
+    }
+
+    //Return the result
+    return result;
 }
 
 

@@ -39,7 +39,10 @@ HEADERS = src/gui/StateBasedPhiWidget.h \
 	    src/analysis/AnalysisTimeStepThread.h \
 	    src/gui/ProgressWidget.h \
 	    src/analysis/PhiCalculator.h \
-	    src/analysis/SubsetManager.h
+	    src/analysis/SubsetManager.h \
+	    src/analysis/Subset.h \
+	    src/analysis/ProbabilityTable.h \
+	    src/analysis/WeightlessNeuron.h
 
 SOURCES = src/gui/StateBasedPhiWidget.cpp \
 	    src/database/StateBasedPhiAnalysisDao.cpp \
@@ -48,7 +51,10 @@ SOURCES = src/gui/StateBasedPhiWidget.cpp \
 	    src/analysis/AnalysisTimeStepThread.cpp \
 	    src/gui/ProgressWidget.cpp \
 	    src/analysis/PhiCalculator.cpp \
-	    src/analysis/SubsetManager.cpp
+	    src/analysis/SubsetManager.cpp \
+	    src/analysis/Subset.cpp \
+	    src/analysis/ProbabilityTable.cpp \
+	    src/analysis/WeightlessNeuron.cpp
 
 
 

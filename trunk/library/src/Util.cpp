@@ -8,6 +8,22 @@ using namespace spikestream;
 #include <QTime>
 
 
+/*! Fills an array to select k neurons out of n.
+	Need to fill it with the lowest value + 1 so that next_permutation runs through all values
+	before returning false. */
+void Util::fillSelectionArray(bool* array, int arraySize, int selectionSize){
+    int nonSelectionSize = arraySize - selectionSize;
+
+    //Add zeros at start of array up to the non-selection size
+    for(int i=0; i<nonSelectionSize; ++i)
+	selectionArray[i] = 0;
+
+    //Add 1s to the rest of the array
+    for(int i=nonSelectionSize; i<arraySize; ++i)
+	selectionArray[i] = 1;
+}
+
+
 /*! Converts the QString to an integer.
     Throws a number conversion exception if the conversion fails. */
 int Util::getInt(const QString& str){
