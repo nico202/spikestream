@@ -15,13 +15,6 @@ using namespace spikestream;
 
 namespace spikestream {
 
-    struct Subset {
-	mpz_class neurIdxs;
-	double phi;
-	int size;
-    };
-
-
     class PhiCalculator : public QObject {
 	Q_OBJECT
 
@@ -57,6 +50,10 @@ namespace spikestream {
 
 	    /*! List of all of the neuron IDs in the network */
 	    QList<unsigned int> neuronIDList;
+
+	    /*! Complete list of possible subsets
+		FIXME: COULD BE MADE MUCH MORE EFFICIENT IF THIS WAS ONLY THE CONNECTED SUBSETS */
+	    QList<Subset*> subsetList;
 
     };
 

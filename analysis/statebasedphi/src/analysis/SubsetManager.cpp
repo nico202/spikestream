@@ -12,6 +12,9 @@ SubsetManager::SubsetManager(const DBInfo& netDBInfo, const DBInfo& archDBInfo, 
     networkDao = new NetworkDao(netDBInfo);
     archiveDao = new ArchiveDao(archDBInfo);
     stateDao = new StateBasedPhiAnalysisDao(anaDBInfo);
+
+    //Create phi calculator
+    phiCalculator = new PhiCalculator();
 }
 
 
@@ -26,10 +29,12 @@ SubsetManager::~SubsetManager(){
 
 /*! Runs the phi calculations on the network for the specified time step */
 void SubsetManager::runCalculation(const bool * const stop){
+    //Store reference to stop in invoking class
     this->stop = stop;
 
-    //Set up class for the calculation
-    initialize();
+    //Get a complete list of the neuron IDs in the network
+    //FIXME: CHECK THAT THESE ARE SORTED IN ASCENDING ORDER
+    neuronIDList = networkDao->getNeuronIDs(analysisInfo.getNetworkID());
 
     //Generate a list of all possible connected subsets
     buildSubsetList();
@@ -47,10 +52,21 @@ void SubsetManager::runCalculation(const bool * const stop){
 /*-------                 PRIVATE METHODS                ------*/
 /*-------------------------------------------------------------*/
 
-/*!
-void SubsetManager::addConnectedSubsets(neuronIDList[i], subsetList){
-}
+/*! Adds subset corresponding to the current selection to the subset list */
+void SubsetManager::addSubset(bool* subsetSelectionArray, int arrayLength){
+    if(arrayLength != neuronIDList.size())
+	throw SpikeStreamAnalysisException("Array length does not match network size.");
 
+    //Create subset and add neurons
+    Subset* tmpSubset = new Subset();
+    for(int i=0; i<arrayLength; ++i){
+	if(subsetSelectionArray[i])
+	    subset->addNeuronIndex(i);
+    }
+
+    //Store subset in class
+    subsetList.append(tmpSubset);
+}
 
 
 /*! Builds a complete list of the possible subsets
@@ -58,27 +74,46 @@ void SubsetManager::addConnectedSubsets(neuronIDList[i], subsetList){
     This method works along the connections, generating all the subsets involving the first neuron
     and then the second neuron and so on... */
 void SubsetManager::buildSubsetList(){
-    QList<Subset> subsetList;
-    for(int i=0; i<neuronIDList.size() && !*stop; ++i){
-	addConnectedSubsets(neuronIDList[i], subsetList);
+    int networkSize = neuronIDList.size();
+
+    //Clear the current list of subsets
+    deleteSubsets();
+
+    //Create array to select subsets
+    bool subsetSelectionArray = new bool[networkSize];
+    int subsetSize = networkSize;
+    while(!*stop && subsetSize >= 2){
+	//Fill permutation array with initial selection
+	fillSelectionArray(subsetSelectionArray, networkSize, subsetSize);
+
+	//Work through all permutations at this subset size
+	bool permutationsComplete = false;
+	while(!*stop && !permutationsComplete){
+	    addSubset(subsetSelectionArray);
+    	    permutationsComplete = !next_permutation(&subsetSelectionArray[0], &subsetSelectionArray[networkSize]);
+	}
+
+	//Decrease the subset size
+	--subsetSize;
     }
 }
 
 
 /*! Works through the list of subsets and calculates the phi of each */
 void SubsetManager::calculateSubsetsPhi(){
-    //Create a class to carry out the calculations
-    PhiCalculator phiCalculator();
-
     //Calculate the phi of each subset
     for(int i=0; i<subsetList.size() && !*stop; ++i){
-	//Convert the 1's and 0's to neuron ids
-	QList<unsigned int> subsetNeurIDs;
-	getNeuronIDs(subsetList[i].neurIdxs, subsetList[i].size, subsetNeurIDs);
-
 	//Calculate phi on the subset
-	subsetList[i].phi = phiCalculator.getSubsetPhi(subsetNeurIDs);
+	subsetList[i].phi = phiCalculator.getSubsetPhi(subsetList[i]->getNeuronIDs());
     }
+}
+
+
+/*! Deletes the current subsets */
+void SubsetManager::deleteSubsets(){
+    for(int i=0; i<subsetList.size(); ++i)
+	delete subsetList[i];
+    subsetList.clear();
 }
 
 
@@ -95,22 +130,13 @@ void SubsetManager::identifyComplexes(){
 	bool isComplex = true;
 	for(int j=0; j<subsetList.size() && !*stop; ++j){
 
-	    //No point in checking whether the subset is contained within itself
-	    if(j != i){
+	    //Is the first subset contained in the second?
+	    if(subsetList[j].contains(subsetList[i])){
+		if(subsetList[i].phi < subsetList[j].phi){
+		    isComplex = false;//Will break out of outer loop and check next subset
 
-		//Second subset must be larger to contain it
-		if(subsetList[i].size < subsetList[j].size){
-
-		    //Check to see if first subset is contained in the second
-		    if( (subsetList[i].neurIdxs & subsetList[j].neurIdxs) == subsetList[i].neurIdxs ){
-
-			//Does the enclosing subset have a higher value of phi?
-			if(subsetList[i].phi < subsetList[j].phi){
-			    isComplex = false;
-			    break;//FIXME: CHECK THIS BREAK
-			}
-		    }
-
+		    //Break out of inner loop
+		    break;//FIXME: CHECK THIS BREAK
 		}
 	    }
 	}
@@ -119,7 +145,7 @@ void SubsetManager::identifyComplexes(){
 	   phi, then the current subset is a complex */
 	if(isComplex){
 	    //Store complex in database
-	    analysisDao->addComplex(analysisInfo.getID(), timeStep, getNeuronIDs(subsetList[i].neurIdxs), subsetList[i].phi);
+	    analysisDao->addComplex(analysisInfo.getID(), timeStep, subsetList[i]->getNeuronIDs(), subsetList[i].phi);
 
 	    //Inform other classes that a complex has been found
 	    emit complexFound();
@@ -128,33 +154,18 @@ void SubsetManager::identifyComplexes(){
 }
 
 
-/*! Set calculator into its initial state for the specified network */
-void SubsetManager::initialize(){
-    //Get a complete list of the neuron IDs in the network
-    //FIXME: CHECK THAT THESE ARE SORTED IN ASCENDING ORDER
-    neuronIDList = networkDao->getNeuronIDs(analysisInfo.getNetworkID());
+/*! Fills an array to select k neurons out of n.
+	Need to fill it with the lowest value + 1 so that next_permutation runs through all values
+	before returning false. */
+void SubsetManager::fillSelectionArray(bool* array, int arraySize, int selectionSize){
+    int nonSelectionSize = arraySize - selectionSize;
+
+    //Add zeros at start of array up to the non-selection size
+    for(int i=0; i<nonSelectionSize; ++i)
+	selectionArray[i] = 0;
+
+    //Add 1s to the rest of the array
+    for(int i=nonSelectionSize; i<arraySize; ++i)
+	selectionArray[i] = 1;
 }
-
-/*! Fills the supplied list with neuron ids.
-    The supplied mpz_class is interpreted as a list of 1's and zeros that correspond to positions
-    in the neuronIDList. If there is a 1 in the mpz_class, the neuron id is added; otherwise
-    the neuron id is not added. */
-void SubsetManager::getNeuronIDs(mpz_class neuronIndexes, int numNeur, QList<unsigned int>& subsetNeurIDs){
-    //Clear the list just in case
-    subsetNeurIDs.clear();
-
-    /* Variable used to work through the 1's and 0's in the neuronIndexes variable
-	Start with the 1 in the extreme right of the variable */
-    mpz_class andIndex = 1;
-    andIndex << numNeur;
-
-    for(int i=0; i<numNeur; ++i){
-	if(neuronIndexes & andIndex == 1){
-	    subsetNeurIDs.append(neuronIDList[i]);
-	}
-	//Shift position of the 1 to the right
-	andIndex >> 1;
-    }
-}
-
 
