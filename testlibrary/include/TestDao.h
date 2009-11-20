@@ -10,6 +10,8 @@ using namespace spikestream;
 #include <QTest>
 #include <QtSql>
 
+typedef unsigned char byte;
+
 /*! Contains general methods that are used for testing all data access objects (DAOs). */
 class TestDao : public QObject {
     Q_OBJECT
@@ -53,6 +55,13 @@ class TestDao : public QObject {
 	QList<unsigned int> testConnIDList;
 	QList<unsigned int> testNeurIDList;
 
+	unsigned int testNet2ID;
+	unsigned int neurGrp21ID;
+	unsigned int neurGrp22ID;
+	unsigned int connGrp21ID;
+	QList<unsigned int> testConnIDList2;
+	QList<unsigned int> testNeurIDList2;
+
 	//Variables storing information about test archives
 	unsigned int testArchive1ID;
 	unsigned int testArchive2ID;
@@ -66,8 +75,12 @@ class TestDao : public QObject {
 	void addTestArchive1();
 	void addTestArchive2();
 	void addTestNetwork1();
+	void addTestNetwork2();
 	unsigned int addTestConnection(unsigned int connGrpID, unsigned int fromID, unsigned int toID, float weight, float delay);
 	unsigned int addTestNeuron(unsigned int neurGrpID, float x, float y, float z);
+	void addWeightlessTestNetwork1();
+	void addWeightlessTrainingData(unsigned int neuronID, const QString& pattern, unsigned int output);
+	void addWeightlessPatternIndex(unsigned int connectionID, unsigned int index);
 	QString getConnectionParameterXML();
 	QString getNeuronParameterXML();
 
@@ -85,6 +98,7 @@ class TestDao : public QObject {
 	QSqlQuery getQuery();
 	QSqlQuery getQuery(const QString& queryStr);
 	void resetTestNetwork1();
+	void resetTestNetwork2();
 	void resetTestArchive1();
 	void resetTestArchive2();
 

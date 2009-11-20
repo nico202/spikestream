@@ -9,8 +9,7 @@ using namespace spikestream;
 
 /*! Constructor */
 ProbabilityTable::ProbabilityTable(int size){
-    this->numEntries = size;
-
+    this->numNeurons = size;
     buildProbabilityTable();
 }
 
@@ -44,7 +43,7 @@ QHash<QString, double>* ProbabilityTable::getProbabilityValueMap(){
 
 
 /*! Sets the entry in the probability table */
-void ProbabilityTable::setProbability(const QString& key, double value){
+void ProbabilityTable::set(const QString& key, double value){
     if(!probValueMap.contains(key)){
 	qDebug()<<"Probability table key cannot be found: "<<key;
 	throw SpikeStreamAnalysisException("Probability table key cannot be found");

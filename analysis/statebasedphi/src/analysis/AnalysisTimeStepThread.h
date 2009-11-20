@@ -32,7 +32,7 @@ namespace spikestream {
 
 	private slots:
 	    void updateComplexes();
-	    void updateProgress(unsign);
+	    void updateProgress(unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps);
 
 	private:
 	    //========================  VARIABLES  ========================

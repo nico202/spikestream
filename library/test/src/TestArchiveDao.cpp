@@ -60,8 +60,13 @@ void TestArchiveDao::testAddArchiveData(){
     ArchiveDao archiveDao (archiveDBInfo);
 
     //Invoke method being tested
-    archiveDao.addArchiveData(testArchive2ID, 1, "12,13,14,15");
-    archiveDao.addArchiveData(testArchive2ID, 3, "121,131,141,151");
+    try{
+	archiveDao.addArchiveData(testArchive2ID, 1, "12,13,14,15");
+	archiveDao.addArchiveData(testArchive2ID, 3, "121,131,141,151");
+    }
+    catch(SpikeStreamException ex){
+	QFAIL(ex.getMessage().toAscii());
+    }
 
     //Check data was added correctly
     QSqlQuery query = getArchiveQuery("SELECT ArchiveID, TimeStep, FiringNeurons FROM ArchiveData");

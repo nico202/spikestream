@@ -8,6 +8,7 @@
 #include "NetworkDao.h"
 #include "ArchiveDao.h"
 #include "StateBasedPhiAnalysisDao.h"
+#include "WeightlessNeuron.h"
 using namespace spikestream;
 
 //Qt includes
@@ -48,9 +49,13 @@ namespace spikestream {
 	    /*! Pointer to the stop variable in the controlling thread. */
 	    bool* stop;
 
+	    /*! Map containing all of the weightless neurons in the network */
+	    QHash<unsigned int, WeightlessNeuron*> weightlessNeuronMap;
+
 	    //=========================  METHODS  ==========================
 	    void fillSelectionArray(bool* array, int arraySize, int selectionSize);
 	    double getPartitionPhi(QList<unsigned int>& aPartition, QList<unsigned int>& bPartition);
+	    void loadWeightlessNeurons();
     };
 
 }

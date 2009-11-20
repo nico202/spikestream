@@ -20,6 +20,7 @@ namespace spikestream {
 	    QString getDescription() const { return description; }
 	    unsigned int getNetworkID() const { return networkID; }
 	    unsigned int getArchiveID() const { return archiveID; }
+	    double getParameter(const QString& paramKey);
 	    QDateTime getStartDateTime() const { return startDateTime; }
 	    unsigned int getNumberOfThreads() { return numberOfThreads; }
 	    QHash<QString, double>& getParameterMap() { return parameterMap; }

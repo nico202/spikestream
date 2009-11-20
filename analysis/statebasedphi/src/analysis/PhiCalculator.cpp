@@ -15,11 +15,17 @@ PhiCalculator::PhiCalculator(const DBInfo& netDBInfo, const DBInfo& archDBInfo, 
     networkDao = new NetworkDao(netDBInfo);
     archiveDao = new ArchiveDao(archDBInfo);
     stateDao = new StateBasedPhiAnalysisDao(anaDBInfo);
+
+    //Load up the complete set of weightless neurons
+    loadWeightlessNeurons();
 }
 
 
 /*! Destructor */
 PhiCalculator::~PhiCalculator(){
+    for(QHash<unsigned int, WeightlessNeuron*>::iterator iter = weightlessNeuronMap.begin(); iter != weightlessNeuronMap.end(); ++iter){
+	delete iter.value();
+    }
 }
 
 
@@ -104,9 +110,35 @@ double SubsetManager::getSubsetPhi(QList<unsigned int>& subsetNeurIDs){
 /*-------                 PRIVATE METHODS                ------*/
 /*-------------------------------------------------------------*/
 
-/*! Converts a causal probability table, p(x1|x0) into the reverse, p(x0|x1) */
-void PhiCalculator::calculateReverseProbability(QList<unsigned int>& neuronIDList, const QString& firingPattern, ProbabilityTable& causalTable, ProbabilityTable& table){
+/*! Converts a causal probability table, p(x1|x0) into the reverse, p(x0|x1)
+    using equation:
+		     p(s0->s1) = p(s1|s0) * pmax(s0)
+				--------------------
+					p(s1)
+    where p(s1) is given by:
+	    sum(s0)[  p(s1|s0) * pmax(s0)]
 
+*/
+void PhiCalculator::calculateReverseProbability(QList<unsigned int>& neuronIDList, const QString& firingPattern, ProbabilityTable& causalTable, ProbabilityTable& reverseTable){
+    //Run a couple of checks
+    if(causalTable.getNumberOfNeurons() != reverseTable.getNumberOfNeurons())
+	throw SpikeStreamAnalysisException("Size of causal and reverse tables do not match.");
+
+
+    //Work out pmax(s0)
+    double pMaxS0 = 1 / exp2(causalTable.getNumberOfNeurons());
+
+    //Work out p(s1)
+    double pS1 = 0.0;
+    for(QHash<QString, double>::iterator iter = causalTable.begin(); iter != causalTable.end(); ++iter){
+	pS1 += iter.value() * pMaxS0;
+    }
+
+    //Populate reverse table
+    for(QHash<QString, double>::iterator iter = causalTable.begin(); iter != causalTable.end(); ++iter){
+	newProb = (iter.value() * pMaxS0) / pS1;
+	reverseTable.set(iter.key(), newProb);
+    }
 }
 
 
@@ -142,30 +174,33 @@ void  PhiCalculator::fillProbabilityTable(ProbabilityTable& table, QList<unsigne
     }
 
     //Calculate the reverse probability table using Bayes, p(x0|x1)
-    calculateReverseProbability(causalProbTable, table);//FIXME: RENAME!!
+    calculateReverseProbability(causalProbTable, table);
 }
 
 
 /*! Calculates the probability that the first specified firing pattern leads to the second, or p(x1|x0) */
-double PhiCalculator::getCausalProbability(QList<unsigned int>& neurIDList, const QString& initialPat, const QString& currentPat){
+double PhiCalculator::getCausalProbability(QList<unsigned int>& neurIDList, const QString& x0Pattern, const QString& x1Pattern){
     /* Probability of the first state leading to the second is the product of the probabilities of
 	the  transition for each neuron */
     double totalProb = 1.0;
 
-    //Work through each neuron to get its probability
+    //Work through each neuron to get the probability that it is in state
     for(int i=0; i<neurIDList.size(); ++i){
-	unsigned int neurFiringState = Util::getUInt(secondPat.at(i));
+	unsigned int firingState = Util::getUInt(x1Pattern.at(i));
 
 	//Run a couple of sanity checks
-	if(currentNeurFiringState != 0 && neurFiringState != 1)
+	if(firingState != 0 && firingState != 1)
 	    throw SpikeStreamAnalysisException("Current neuron firing state must be either 1 or 0");
 	if(!weightlessNeuronMap.contains(neurIDList[i]))
 	    throw SpikeStreamAnalysisException("Neuron ID cannot be found: " + QString::number(neuronIDList[i]));
 
 	//Get the probability that this pattern led to this firing state
-	double transitionProb = weightlessNeuronMap[neurIDList[i]].getProbability(neurIDList, initialPattern, neurFiringState);
+	double transitionProb = weightlessNeuronMap[neurIDList[i]].getTransitionProbability(neurIDList, x0Pattern, firingState);
 	totalProb *= transitionProb;
     }
+
+    //Return the product of the transition probabilities for each neuron
+    return totalProb;
 }
 
 
@@ -201,6 +236,19 @@ double PhiCalculator::getPartitionPhi(QList<unsigned int>& aPartition, QList<uns
 
     //Return the result
     return result;
+}
+
+
+/*! Loads up all of the weightless neurons */
+void PhiCalculator::loadWeightlessNeurons(){
+    QList<unsigned int> neuronIDList = networkDao->getNeuronIDs(analysisInfo.getNetworkID());
+    foreach(unsigned int neurID, neuronIDList){
+	//Store neuron
+	weightlessNeuronMap[neurID] = networkDao->getWeightlessNeuron(neurID);
+
+	//Set parameters in neuron
+	weightlessNeuronMap[neurID]->setGeneralization(analysisInfo.getParameter("Generalization"));
+    }
 }
 
 

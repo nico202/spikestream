@@ -7,11 +7,14 @@ using namespace spikestream;
 #include <QDebug>
 #include <QTime>
 
+//Other includes
+#include "math.h"
+
 
 /*! Fills an array to select k neurons out of n.
 	Need to fill it with the lowest value + 1 so that next_permutation runs through all values
 	before returning false. */
-void Util::fillSelectionArray(bool* array, int arraySize, int selectionSize){
+void Util::fillSelectionArray(bool* selectionArray, int arraySize, int selectionSize){
     int nonSelectionSize = arraySize - selectionSize;
 
     //Add zeros at start of array up to the non-selection size
@@ -66,6 +69,13 @@ int Util::getRandom(int min, int max){
     int randomNum = min;
     randomNum += qrand() % (max - min);
     return randomNum;
+}
+
+
+/*! Rounds the double and returns it as an unsigned integer */
+unsigned int Util::rUInt(double num){
+    num = rint(num);
+    return (unsigned int) num;
 }
 
 
