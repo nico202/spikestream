@@ -3,6 +3,9 @@
 #include "SpikeStreamException.h"
 using namespace spikestream;
 
+//Qt includes
+#include <QDebug>
+
 void TestAnalysisDao::testAddAnalysis(){
     //Add network and archive
     addTestArchive1();

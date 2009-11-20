@@ -275,6 +275,50 @@ void TestDao::addTestNetwork1(){
 }
 
 
+void TestDao::addTestNetwork2(){
+    //Initialize everything to do with the test network
+    resetTestNetwork2();
+
+    //Add network with known properties
+    QSqlQuery query = getQuery("INSERT INTO Networks (Name, Description) VALUES ('testNetwork2Name', 'testNetwork2Description')");
+    executeQuery(query);
+    testNet2ID = query.lastInsertId().toUInt();
+
+    //Add two neuron groups
+    QString queryStr = "INSERT INTO NeuronGroups (NetworkID, Name, Description, Parameters, NeuronTypeID ) VALUES (";
+    queryStr += QString::number(testNet2ID) + ", " + "'name2-1', 'desc2-1', '" + getConnectionParameterXML() + "', 1)";
+    query = getQuery(queryStr);
+    executeQuery(query);
+    neurGrp21ID = query.lastInsertId().toUInt();
+
+    queryStr = "INSERT INTO NeuronGroups (NetworkID, Name, Description, Parameters, NeuronTypeID ) VALUES (";
+    queryStr += QString::number(testNet2ID) + ", " + "'name2-2', 'desc2-2', '" + getNeuronParameterXML() + "', 1)";
+    query = getQuery(queryStr);
+    executeQuery(query);
+    neurGrp22ID = query.lastInsertId().toUInt();
+
+    //Create connection group between the two neuron groups
+    queryStr = "INSERT INTO ConnectionGroups (NetworkID, Description, FromNeuronGroupID, ToNeuronGroupID, Parameters, SynapseTypeID ) VALUES (";
+    queryStr += QString::number(testNet2ID) + ", 'conngrpdesc21', " + QString::number(neurGrp21ID) + ", " + QString::number(neurGrp22ID) + ", '" + getConnectionParameterXML() + "', 1)";
+    query = getQuery(queryStr);
+    executeQuery(query);
+    connGrp21ID = query.lastInsertId().toUInt();
+
+    //Add neurons to the groups, storing database id in testNeurIDList
+    testNeurIDList2.clear();
+    testNeurIDList2.append(addTestNeuron(neurGrp21ID, 1, 1, 1));
+    testNeurIDList2.append(addTestNeuron(neurGrp21ID, 0, -1, 0));
+    testNeurIDList2.append(addTestNeuron(neurGrp21ID, 9, -4, 0));
+    testNeurIDList2.append(addTestNeuron(neurGrp22ID, 3, 3, 3));
+
+    //Add test connections
+    testConnIDList2.append(addTestConnection(connGrp21ID, testNeurIDList2[0], testNeurIDList2[1], 0.1, 1.1));
+    testConnIDList2.append(addTestConnection(connGrp21ID, testNeurIDList2[0], testNeurIDList2[2], 0.2, 1.2));
+    testConnIDList2.append(addTestConnection(connGrp21ID, testNeurIDList2[0], testNeurIDList2[3], 0.3, 1.3));
+    testConnIDList2.append(addTestConnection(connGrp21ID, testNeurIDList2[3], testNeurIDList2[2], 0.6, 1.6));
+}
+
+
 /*! Adds a test connection to the database */
 unsigned int TestDao::addTestConnection(unsigned int connGrpID, unsigned int fromID, unsigned int toID, float weight, float delay){
     QString queryStr = "INSERT INTO Connections ( ConnectionGroupID, FromNeuronID, ToNeuronID, Delay, Weight) VALUES (";
@@ -299,6 +343,75 @@ unsigned int TestDao::addTestNeuron(unsigned int neurGrpID, float x, float y, fl
     QSqlQuery query = getQuery(queryStr);
     executeQuery(query);
     return query.lastInsertId().toUInt();
+}
+
+
+/*! Converts pattern specifed as a string into a byte array and adds training to database */
+void TestDao::addWeightlessTrainingData(unsigned int neuronID, const QString& pattern, unsigned int output){
+    //Create a byte array with the training data
+    int arrSize;
+    if(pattern.size() % 8 == 0)
+	arrSize = pattern.size() / 8;
+    else
+	arrSize = pattern.size() / 8 + 1;
+    byte byteArr[arrSize];
+
+    //Initialize byte array and fill it with data from the string
+    for(int i=0; i<arrSize; ++i)
+	byteArr[i] = 0;
+    for(int i=0; i<pattern.size(); ++i){
+	if(pattern[i] == '1')
+	    byteArr[i] |= 1<<(i % 8);
+    }
+
+    //Add data to database
+    QByteArray tmpByteArray = QByteArray::fromRawData((char*) byteArr, arrSize);
+    QSqlQuery query = getQuery("INSERT INTO WeightlessNeuronTrainingPatterns (NeuronID, Pattern, Output) VALUES (" + QString::number(neuronID) + ", :PATTERNARRAY, " + QString::number(output) + ")");
+    query.bindValue(":PATTERNARRAY", tmpByteArray);
+    executeQuery(query);
+}
+
+
+/*! Adds the weightless pattern index to the database */
+void TestDao::addWeightlessPatternIndex(unsigned int connectionID, unsigned int index){
+    executeQuery("INSERT INTO WeightlessConnections (ConnectionID, PatternIndex) VALUES (" + QString::number(connectionID) + ", " + QString::number(index) + ")");
+}
+
+
+/*! Adds test network 1 with weightless information as well
+    Connections are:
+	0->1
+	0->2
+	0->3
+	4->3
+	4->1
+	3->2
+
+    Connections to neurons:
+	0:
+	1: 0->1, 4->1
+	2  0->2, 3->2
+	3: 0->3, 4->3
+	4:
+*/
+void TestDao::addWeightlessTestNetwork1(){
+    addTestNetwork1();
+
+    //Add pattern indexes - exact number does not matter for the moment
+    addWeightlessPatternIndex(testConnIDList[0], 0);
+    addWeightlessPatternIndex(testConnIDList[1], 0);
+    addWeightlessPatternIndex(testConnIDList[2], 0);
+    addWeightlessPatternIndex(testConnIDList[3], 1);
+    addWeightlessPatternIndex(testConnIDList[4], 1);
+    addWeightlessPatternIndex(testConnIDList[5], 1);
+
+    //Add training data
+    addWeightlessTrainingData(testNeurIDList[1], "10", 1);
+    addWeightlessTrainingData(testNeurIDList[1], "11", 1);
+    addWeightlessTrainingData(testNeurIDList[2], "00", 0);
+    addWeightlessTrainingData(testNeurIDList[2], "11", 0);
+    addWeightlessTrainingData(testNeurIDList[3], "10", 0);
+    addWeightlessTrainingData(testNeurIDList[3], "01", 0);
 }
 
 
@@ -343,5 +456,16 @@ void TestDao::resetTestNetwork1(){
     neurGrp1ID = 0;
     neurGrp2ID = 0;
     connGrp1ID = 0;
+}
+
+
+/*! Resets stored variables relating to the second test network. */
+void TestDao::resetTestNetwork2(){
+    testNeurIDList2.clear();
+    testConnIDList2.clear();
+    testNet2ID = 0;
+    neurGrp21ID = 0;
+    neurGrp22ID = 0;
+    connGrp21ID = 0;
 }
 

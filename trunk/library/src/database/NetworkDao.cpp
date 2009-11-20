@@ -2,6 +2,7 @@
 #include "GlobalVariables.h"
 #include "NetworkDao.h"
 #include "SpikeStreamDBException.h"
+#include "Util.h"
 #include "XMLParameterParser.h"
 using namespace spikestream;
 
@@ -177,5 +178,48 @@ QList<NeuronGroupInfo> NetworkDao::getNeuronGroupsInfo(unsigned int networkID){
 
 }
 
+
+/*! Returns a list of the neuron ids in the specified network */
+QList<unsigned int> NetworkDao::getNeuronIDs(unsigned int networkID){
+    QList<unsigned int> neurIDList;
+    QSqlQuery query = getQuery("SELECT NeuronID FROM Neurons WHERE NeuronGroupID IN (SELECT NeuronGroupID FROM NeuronGroups WHERE NetworkID=" + QString::number(networkID) + ")");
+    executeQuery(query);
+    for(int i=0; i<query.size(); ++i){
+	query.next();
+	neurIDList.append(Util::getUInt(query.value(0).toString()));
+    }
+    return neurIDList;
+}
+
+
+WeightlessNeuron* NetworkDao::getWeightlessNeuron(unsigned int neuronID){
+    //Query to select neurons connected to weightless neuron and the pattern index of each neuron
+    QSqlQuery query = getQuery("SELECT FromNeuronID, PatternIndex FROM Connections, WeightlessConnections WHERE ToNeuronID = XXX INNER JOIN ON ConnectionID");//FIXME!!
+    executeQuery(query);
+
+    //Store the pattern index of each neuron that connects to
+    QHash<unsigned int, unsigned int> tmpConMap;
+    for(int i=0; i<query.size(); ++i){
+	query.next();
+	tmpConMap[Util::getUInt(query.value(0).toString())] = Util::getUInt(query.value(1).toString());
+    }
+
+    //Create the weightless neuron
+    WeightlessNeuron* tmpWeightlessNeuron = new WeightlessNeuron(tmpConMap);
+
+    //Query to get the training patterns
+    query = getQuery("SELECT Pattern, Output FROM WeightlessNeuronTrainingPatterns WHERE NeuronID = " + QString::number(neuronID));
+    executeQuery(query);
+
+    //Add training patterns to neuron
+    for(int i=0; i<query.size(); ++i){
+	query.next();
+	QByteArray tmpByteArray = query.value(0).toByteArray();
+	tmpWeightlessNeuron->addTraining(tmpByteArray, Util::getUInt(query.value(1).toString()));
+    }
+
+    //Create and return the weigthless neuron
+    return tmpWeightlessNeuron;
+}
 
 

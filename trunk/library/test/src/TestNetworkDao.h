@@ -23,6 +23,8 @@ class TestNetworkDao : public TestDao {
 	    void testGetNeuronGroupBoundingBox();
 	    void testGetNetworksInfo();
 	    void testGetNeuronGroupsInfo();
+	    void testGetNeuronIDs();
+	    void testGetWeightlessNeuron();
 
 	private:
 

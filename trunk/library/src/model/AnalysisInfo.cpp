@@ -1,4 +1,5 @@
 #include "AnalysisInfo.h"
+#include "SpikeStreamAnalysisException.h"
 using namespace spikestream;
 
 /*! Empty constructor */
@@ -45,6 +46,14 @@ AnalysisInfo& AnalysisInfo::operator=(const AnalysisInfo& rhs){
     this->analysisType = rhs.analysisType;
 
     return *this;
+}
+
+
+/*! Returns the requested parameter or throws an exception if it does not exist. */
+double AnalysisInfo::getParameter(const QString& paramKey){
+    if(!parameterMap.contains(paramKey))
+	throw SpikeStreamAnalysisException("Parameter key '" + paramKey + "' is not present in the parameter map.");
+    return parameterMap[paramKey];
 }
 
 

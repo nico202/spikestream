@@ -9,6 +9,7 @@
 #include "NetworkInfo.h"
 #include "NeuronGroup.h"
 #include "NeuronGroupInfo.h"
+#include "WeightlessNeuron.h"
 using namespace spikestream;
 
 //Qt includes
@@ -31,11 +32,12 @@ namespace spikestream{
 	    void deleteNetwork(unsigned int networkID);
 	    QList<Connection> getConnections(unsigned int fromNeuronID, unsigned int toNeuronID);
 	    unsigned int getConnectionGroupSize(unsigned int connGrpID);
-	    Box getNeuronGroupBoundingBox(unsigned int neurGrpID);
-	    QList<NetworkInfo> getNetworksInfo();
-	    QList<NeuronGroupInfo> getNeuronGroupsInfo(unsigned int networkID);
 	    QList<ConnectionGroupInfo> getConnectionGroupsInfo(unsigned int networkID);
-
+	    QList<NetworkInfo> getNetworksInfo();
+	    Box getNeuronGroupBoundingBox(unsigned int neurGrpID);
+	    QList<NeuronGroupInfo> getNeuronGroupsInfo(unsigned int networkID);
+	    QList<unsigned int> getNeuronIDs(unsigned int networkID);
+	    WeightlessNeuron* getWeightlessNeuron(unsigned int neuronID);
 
 	private:
 	    //==========================  VARIABLES  ==========================

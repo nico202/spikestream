@@ -333,5 +333,45 @@ void TestNetworkDao::testGetNeuronGroupsInfo(){
 }
 
 
+void TestNetworkDao::testGetNeuronIDs(){
+    //Add test networks - only want to select neurons from the second
+    addTestNetwork1();
+    addTestNetwork2();
+
+    //Invoke method being tested
+    NetworkDao networkDao(dbInfo);
+    QList<unsigned int> neurIDList = networkDao.getNeuronIDs(testNet2ID);
+
+    //Check that list is correct
+    QCOMPARE(neurIDList.size(), 4);//4 test neurons in list
+
+    //Convert neurons in test network 2 into a map
+    QHash<unsigned int, bool> testNet2NeurMap;
+    foreach(unsigned int neurID, testNeurIDList2)
+	testNet2NeurMap[neurID] = true;
+
+    //Check that all neurons in list are in map
+    foreach(unsigned int neurID, neurIDList)
+	if(!testNet2NeurMap.contains(neurID))
+	    QFAIL("Neuron ID list contains neuron that is not in the network.");
+}
+
+
+void TestNetworkDao::testGetWeightlessNeuron(){
+    //Add test network
+    addWeightlessTestNetwork1();
+
+    //Invoke method being tested
+    NetworkDao networkDao(dbInfo);
+    WeightlessNeuron* neuron = networkDao.getWeightlessNeuron(testNeurIDList[1]);
+
+
+    //Check a second neuron
+    delete neuron;
+    neuron = networkDao.getWeightlessNeuron(testNeurIDList[1]);
+
+    //Clean up
+    delete neuron;
+}
 
 

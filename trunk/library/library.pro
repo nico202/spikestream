@@ -76,11 +76,13 @@ SOURCES += src/database/DBInfo.cpp \
 HEADERS += include/SpikeStreamDBException.h \
 	    include/SpikeStreamException.h \
 	    include/SpikeStreamXMLException.h \
-	    include/NumberConversionException.h
+	    include/NumberConversionException.h \
+	    include/SpikeStreamAnalysisException.h
 SOURCES += src/exceptions/SpikeStreamDBException.cpp \
 	    src/exceptions/SpikeStreamException.cpp \
 	    src/exceptions/SpikeStreamXMLException.cpp \
-	    src/exceptions/NumberConversionException.cpp
+	    src/exceptions/NumberConversionException.cpp \
+	    src/exceptions/SpikeStreamAnalysisException.cpp
 
 #----------------------------------------------#
 #---                model                   ---#
@@ -94,7 +96,8 @@ HEADERS += include/Network.h \
 	    include/ConnectionGroupInfo.h \
 	    include/Archive.h \
 	    include/ArchiveInfo.h \
-	    include/AnalysisInfo.h
+	    include/AnalysisInfo.h \
+	    include/WeightlessNeuron.h
 SOURCES += src/model/Network.cpp \
 	    src/model/NetworkInfo.cpp \
 	    src/model/NeuronGroup.cpp \
@@ -104,7 +107,8 @@ SOURCES += src/model/Network.cpp \
 	    src/model/Archive.cpp \
 	    src/model/ArchiveInfo.cpp \
 	    src/model/Connection.cpp \
-	    src/model/AnalysisInfo.cpp
+	    src/model/AnalysisInfo.cpp \
+	    src/model/WeightlessNeuron.cpp
 
 #----------------------------------------------#
 #---                  xml                   ---#
