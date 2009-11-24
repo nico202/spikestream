@@ -3,6 +3,8 @@
 
 //SpikeStream includes
 #include "TestDao.h"
+#include "WeightlessNeuron.h"
+using namespace spikestream;
 
 //Qt includes
 #include <QtTest>
@@ -27,7 +29,7 @@ class TestNetworkDao : public TestDao {
 	    void testGetWeightlessNeuron();
 
 	private:
-
+	    bool bitsEqual(byte* byteArr, const QString pattern, int output);
 };
 
 #endif//TESTNETWORKDAO_H

@@ -9,7 +9,7 @@ using namespace spikestream;
 
 /*! Constructor */
 ProbabilityTable::ProbabilityTable(int size){
-    this->numNeurons = size;
+    this->numElements = size;
     buildProbabilityTable();
 }
 
@@ -24,7 +24,7 @@ ProbabilityTable::~ProbabilityTable(){
 /*-------------------------------------------------------------*/
 
 /*! Returns the probability associated with the specifed key */
-double ProbabilityTable::getProbability(const QString& key){
+double ProbabilityTable::get(const QString& key){
     if(!probValueMap.contains(key)){
 	qDebug()<<"Probability table key cannot be found: "<<key;
 	throw SpikeStreamAnalysisException("Probability table key cannot be found");
@@ -32,13 +32,6 @@ double ProbabilityTable::getProbability(const QString& key){
 
     //Return the value associated with the key
     return probValueMap[key];
-}
-
-
-/*! Returns a pointer to the map containing the keys and entries.
-    NOTE: Not safe, but enables speedy access to data in probability table. */
-QHash<QString, double>* ProbabilityTable::getProbabilityValueMap(){
-    return &probValueMap;
 }
 
 
@@ -61,16 +54,16 @@ void ProbabilityTable::set(const QString& key, double value){
 /*! Constructs the complete probability table */
 void ProbabilityTable::buildProbabilityTable(){
     //Create array to carry out selection of all possibilites
-    bool selectionArray[numEntries];
+    bool selectionArray[numElements];
     int numOnes = 0;
-    while (numOnes <= numEntries){
-	Util::fillSelectionArray(&selectionArray, numEntries, numOnes);
-
+    while (numOnes <= numElements){
+	Util::fillSelectionArray(&selectionArray, numElements, numOnes);
 	bool permutationsComplete = false;
 	while(!permutationsComplete){
+
 	    //Create string for probability entry
 	    QString tmpKeyStr = "";
-	    for(int i=0; i<numEntries; ++i){
+	    for(int i=0; i<numElements; ++i){
 		if(selectionArray[i])
 		    tmpKeyStr += "1";
 		else
@@ -81,7 +74,7 @@ void ProbabilityTable::buildProbabilityTable(){
 	    probValueMap[tmpKeyStr] = 0.0;
 
 	   //Change the selection array
-	    permutationsComplete = !next_permutation(&selectionArray[0], &selectionArray[numEntries]);
+	   permutationsComplete = !next_permutation(&selectionArray[0], &selectionArray[numElements]);
 	}
 
 	//Increase the number of ones in the selection

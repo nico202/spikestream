@@ -6,6 +6,8 @@
 
 namespace spikestream {
 
+    typedef unsigned char byte;
+
     /*! Set of static utility methods intended eventually to supersede Utilities.h */
     class Util {
 	public:
@@ -14,6 +16,8 @@ namespace spikestream {
 	    static unsigned int getUInt(const QString& str);
 	    static double getDouble(const QString& str);
 	    static int getRandom(int min, int max);
+	    static void printByteArray(byte* byteArr, int arrLen);
+	    static void printByteArray(const QByteArray& byteArr);
 	    static unsigned int rUInt(double num);
 	    static void seedRandom(int seed = 0);
 

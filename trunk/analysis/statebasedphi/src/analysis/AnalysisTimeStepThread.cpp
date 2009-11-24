@@ -56,8 +56,8 @@ void AnalysisTimeStepThread::run(){
 
 	//Create the calculator to run the phi calculation on the time step
 	SubsetManager subsetManager(networkDBInfo, archiveDBInfo, analysisDBInfo, analysisInfo, timeStep);
-	connect(subsetManager, SIGNAL(complexFound()), this, SLOT(updateComplexes()));
-	connect(subsetManager, SIGNAL(progress(unsigned int, unsigned int, unsigned int)), this, SLOT(updateProgress(unsigned int, unsigned int, unsigned int)));
+	connect(&subsetManager, SIGNAL(complexFound()), this, SLOT(updateComplexes()));
+	connect(&subsetManager, SIGNAL(progress(unsigned int, unsigned int, unsigned int)), this, SLOT(updateProgress(unsigned int, unsigned int, unsigned int)));
 	subsetManager.runCalculation(&threadRunning);
 
 //	Util::seedRandom(timeStep * 100);

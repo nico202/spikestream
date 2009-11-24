@@ -9,6 +9,8 @@ using namespace spikestream;
 
 //Other includes
 #include "math.h"
+#include <iostream>
+using namespace std;
 
 
 /*! Fills an array to select k neurons out of n.
@@ -69,6 +71,35 @@ int Util::getRandom(int min, int max){
     int randomNum = min;
     randomNum += qrand() % (max - min);
     return randomNum;
+}
+
+
+/*! Prints out the byte array */
+void Util::printByteArray(byte* byteArr, int arrLen){
+    cout<<"Byte array: ";
+    for(int i=0; i< arrLen*8; ++i){
+	if(byteArr[i/8] & 1<<(i%8))
+	    cout<<"1";
+	else
+	    cout<<"0";
+    }
+    cout<<endl;
+}
+
+
+/*! Prints out the bits in a QByteArray */
+void Util::printByteArray(const QByteArray& byteArr){
+    cout<<"QByteArray: ";
+    for(int i=0; i< byteArr.size(); ++i){
+	byte tmpByte = (unsigned char) byteArr.at(i);
+	for(int j=0; j<8; ++j){
+	    if(tmpByte & 1<<j)
+		cout<<"1";
+	    else
+		cout<<"0";
+	}
+    }
+    cout<<endl;
 }
 
 

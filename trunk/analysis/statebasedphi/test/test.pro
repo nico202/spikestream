@@ -23,10 +23,12 @@ CONFIG += qtestlib
 #---            Test Files                  ---#
 #----------------------------------------------#
 HEADERS += src/TestRunner.h \
-	    src/TestStateBasedPhiAnalysisDao.h
+	    src/TestStateBasedPhiAnalysisDao.h \
+	    src/TestProbabilityTable.h
 
 SOURCES += src/Main.cpp \
 	    src/TestRunner.cpp \
-	    src/TestStateBasedPhiAnalysisDao.cpp
+	    src/TestStateBasedPhiAnalysisDao.cpp \
+	    src/TestProbabilityTable.cpp
 
 

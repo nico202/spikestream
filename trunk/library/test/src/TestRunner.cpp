@@ -17,7 +17,7 @@ using namespace std;
 
 /*! Runs all of the tests */
 void TestRunner::runTests(){
- /*   TestNetworkDao testNetworkDao;
+    TestNetworkDao testNetworkDao;
     QTest::qExec(&testNetworkDao);
 
     TestNetworkDaoThread testNetworkDaoThread;
@@ -39,7 +39,7 @@ void TestRunner::runTests(){
     QTest::qExec(&testAnalysisDao);
 
     TestUtil testUtil;
-    QTest::qExec(&testUtil);*/
+    QTest::qExec(&testUtil);
 
     TestWeightlessNeuron testWeightlessNeuron;
     QTest::qExec(&testWeightlessNeuron);

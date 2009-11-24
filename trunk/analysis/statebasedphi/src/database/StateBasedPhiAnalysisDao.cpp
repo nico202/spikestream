@@ -14,7 +14,7 @@ StateBasedPhiAnalysisDao::~StateBasedPhiAnalysisDao(){
 
 
 /*! Adds a complex to the database */
-void StateBasedPhiAnalysisDao::addComplex(unsigned int analysisID, int timeStep, double phi, QList<unsigned int>& neuronIDList){
+void StateBasedPhiAnalysisDao::addComplex(unsigned int analysisID, int timeStep, QList<unsigned int>& neuronIDList, double phi){
     if(neuronIDList.size() < 2)
 	throw SpikeStreamException("A complex must contain at least 2 neurons.");
 

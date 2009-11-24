@@ -8,11 +8,14 @@ namespace spikestream {
 
     class Subset {
 	public:
-	    Subset(int networkSize);
+	    Subset(const QList<unsigned int>* neuronIDListPtr);
 	    ~Subset();
 	    void addNeuronIndex(int index);
 	    bool contains(Subset* subset);
 	    QList<unsigned int> getNeuronIDs();
+	    double getPhi() { return phi; }
+	    void setPhi(double newPhi) { this->phi = newPhi; }
+	    int size() { return subsetSize; }
 
 	private:
 	    //=====================  VARIABLES  ===================
@@ -24,7 +27,7 @@ namespace spikestream {
 	    int neurIndxSize;
 
 	    /*! Pointer to the list of neuron ids in the network */
-	    unsigned int* neuronIDListPtr;
+	    const QList<unsigned int>* neuronIDListPtr;
 
 	    /*! The phi of the subset */
 	    double phi;

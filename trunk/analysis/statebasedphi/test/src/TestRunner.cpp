@@ -12,6 +12,9 @@ using namespace std;
 void TestRunner::runTests(){
     TestStateBasedPhiAnalysisDao testStateBasedPhiAnalysisDao;
     QTest::qExec(&testStateBasedPhiAnalysisDao);
+
+    TestProbabilityTable testProbabilityTable;
+    QTest::qExec(&testProbabilityTable);
 }
 
 

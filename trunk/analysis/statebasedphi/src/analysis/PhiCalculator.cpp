@@ -1,11 +1,18 @@
+//SpikeStream includes
 #include "PhiCalculator.h"
 #include "ProbabilityTable.h"
+#include "SpikeStreamAnalysisException.h"
 #include "Util.h"
 using namespace spikestream;
 
+//Other includes
+#include <algorithm>
+#include <iostream>
+using namespace std;
+
 
 /*! Constructor */
-PhiCalculator::PhiCalculator(const DBInfo& netDBInfo, const DBInfo& archDBInfo, const DBInfo& anaDBInfo, const AnalysisInfo& anaInfo, unsigned int timeStep, bool* stop){
+PhiCalculator::PhiCalculator(const DBInfo& netDBInfo, const DBInfo& archDBInfo, const DBInfo& anaDBInfo, const AnalysisInfo& anaInfo, unsigned int timeStep, const bool* stop){
     //Store variables
     this->analysisInfo = anaInfo;
     this->timeStep = timeStep;
@@ -16,8 +23,9 @@ PhiCalculator::PhiCalculator(const DBInfo& netDBInfo, const DBInfo& archDBInfo, 
     archiveDao = new ArchiveDao(archDBInfo);
     stateDao = new StateBasedPhiAnalysisDao(anaDBInfo);
 
-    //Load up the complete set of weightless neurons
+    //Load up the complete set of weightless neurons and the neurons firing at this time step
     loadWeightlessNeurons();
+    loadFiringNeurons();
 }
 
 
@@ -36,7 +44,7 @@ PhiCalculator::~PhiCalculator(){
 /*! Calculates and returns the phi of the specified subset.
     FIXME: NEED TO HANDLE THE NORMALIZATION FOR THE TOTAL PARTITION AND
     POSSIBILITY THAT MULTIPLE PARTITIONS HAVE THE SAME MINIMUM NORMALIZED PHI. */
-double SubsetManager::getSubsetPhi(QList<unsigned int>& subsetNeurIDs){
+double PhiCalculator::getSubsetPhi(QList<unsigned int>& subsetNeurIDs){
     //Convenience variable storing subset size
     int subsetSize = subsetNeurIDs.size();
 
@@ -46,12 +54,15 @@ double SubsetManager::getSubsetPhi(QList<unsigned int>& subsetNeurIDs){
     //Lists holding the two partitions
     QList<unsigned int> aPartition, bPartition;
 
+    //Variables used during calculation
+    double newPhi, minimumPhi, tmpNormFact, normalizationFactor;
+
     //Work through the bipartitions of the subset
     int aPartitionSize = subsetSize / 2;
-    while(partitionSize >= 1 && !*stop){
+    while(aPartitionSize >= 1 && !*stop){
 
 	//Fill selectionArray with 1s and 0s corresponding to the partition size
-	fillSelectionArray(partitionArray, subsetSize, aPartitionSize);
+	Util::fillSelectionArray(partitionArray, subsetSize, aPartitionSize);
 
 	//Work through all the combinations
 	bool permutationsComplete = false;
@@ -69,12 +80,14 @@ double SubsetManager::getSubsetPhi(QList<unsigned int>& subsetNeurIDs){
 		return 0.0;
 	    }
 
-	    //Normalize the new phi
+	    /* Normalize the new phi
+	       For a partition into two parts the normalization is the size of the smaller a priori
+	       repertoire, which has 2^n entries */
 	    if(aPartition.size() <= bPartition.size())
-		tmpNormFact = aPartition.size();
+		tmpNormFact = exp2((double)aPartition.size());
 	    else
-		tmpNormFact = bPartition.size();
-	    newPhi /= (double)tmpNormFact;
+		tmpNormFact = exp2((double)bPartition.size());
+	    newPhi /= tmpNormFact;
 
 	    //First time this loop has run, so store newPhi as current minimum
 	    if(firstTime){
@@ -94,21 +107,17 @@ double SubsetManager::getSubsetPhi(QList<unsigned int>& subsetNeurIDs){
 	}
 
 	//Analyze the next partition size
-	--partitionSize;
+	--aPartitionSize;
 
     }//Finished working through the partition sizes
 
     //Clean up the selection array
-    delete [] subsetSelectionArray;
+    delete [] partitionArray;
 
     //Return the non-normalized phi
     return minimumPhi *= normalizationFactor;
 }
 
-
-/*-------------------------------------------------------------*/
-/*-------                 PRIVATE METHODS                ------*/
-/*-------------------------------------------------------------*/
 
 /*! Converts a causal probability table, p(x1|x0) into the reverse, p(x0|x1)
     using equation:
@@ -119,14 +128,14 @@ double SubsetManager::getSubsetPhi(QList<unsigned int>& subsetNeurIDs){
 	    sum(s0)[  p(s1|s0) * pmax(s0)]
 
 */
-void PhiCalculator::calculateReverseProbability(QList<unsigned int>& neuronIDList, const QString& firingPattern, ProbabilityTable& causalTable, ProbabilityTable& reverseTable){
+void PhiCalculator::calculateReverseProbability(ProbabilityTable& causalTable, ProbabilityTable& reverseTable){
     //Run a couple of checks
-    if(causalTable.getNumberOfNeurons() != reverseTable.getNumberOfNeurons())
+    if(causalTable.getNumberOfElements() != reverseTable.getNumberOfElements())
 	throw SpikeStreamAnalysisException("Size of causal and reverse tables do not match.");
 
 
     //Work out pmax(s0)
-    double pMaxS0 = 1 / exp2(causalTable.getNumberOfNeurons());
+    double pMaxS0 = 1 / exp2(causalTable.getNumberOfElements());
 
     //Work out p(s1)
     double pS1 = 0.0;
@@ -135,6 +144,7 @@ void PhiCalculator::calculateReverseProbability(QList<unsigned int>& neuronIDLis
     }
 
     //Populate reverse table
+    double newProb;
     for(QHash<QString, double>::iterator iter = causalTable.begin(); iter != causalTable.end(); ++iter){
 	newProb = (iter.value() * pMaxS0) / pS1;
 	reverseTable.set(iter.key(), newProb);
@@ -142,60 +152,40 @@ void PhiCalculator::calculateReverseProbability(QList<unsigned int>& neuronIDLis
 }
 
 
-/*! Converts the selection array into lists of the neuron ids in the A and B partitions */
-void PhiCalculator::fillPartitionLists(QList<unsigned int>& aPartition, QList<unsigned int>& bPartition, bool* partitionArray, int arrayLength, QList<unsigned int>& subsetNeurIDs){
-    for(int i=0; i<arrayLength; ++i){
-	if(partitionArray[i] == 1)
-	    aPartition.append(subsetNeurIDs[i]);
-	else
-	    bPartition.append(subsetNeurIDs[i]);
-    }
-}
-
-
 /*! Fills probability table with p(X0->x1) or equivalently, p(x0|x1)
     Supply list of neurons and a string of 1's or 0's that indicates the corresponding neuron's firing state. */
-void  PhiCalculator::fillProbabilityTable(ProbabilityTable& table, QList<unsigned int> neurIDList, const QString& firingPattern){
+void  PhiCalculator::fillProbabilityTable(ProbabilityTable& probTable, QList<unsigned int> neurIDList){
     //Run some checks on the data
-    if(table.numNeurons() != neurIDList.size())
-	throw SpikeStreamAnalysisException("Probability table size (" + QString::number(table.numNeurons()) + ") does not match neuron id list size  (" + QString::number(neurIDList.size()) + ")");
-    if(table.numNeurons() != firingPattern.size())
-	throw SpikeStreamAnalysisException("Probability table size (" + QString::number(table.numNeurons()) + ") does not match firing pattern size (" + QString::number(firingPattern.size()) + ")");
+    if(probTable.getNumberOfElements() != neurIDList.size())
+	throw SpikeStreamAnalysisException("Probability table size (" + QString::number(probTable.getNumberOfElements()) + ") does not match neuron id list size  (" + QString::number(neurIDList.size()) + ")");
 
     //Create table to hold p(x1|x0). This is needed to calculate the reverse probability p(x0|x1) via Bayes
-    ProbabilityTable causalProbTable(table.numNeurons());
+    ProbabilityTable causalProbTable(probTable.getNumberOfElements());
 
     //Fill p(x1|x0) table
-    QHash<QString, double>* probValTab = table.getProbabilityValueMap();
-    for(QHash<QString, double>::iterator iter = probValTab->begin(); iter != probValTab->end(); ++iter){
+    for(QHash<QString, double>::iterator iter = probTable.begin(); iter != probTable.end(); ++iter){
 	//Get probability that this state leads to the current state of the network
-	double causalProb = getCausalProbability(neurIDList, iter.key(), firingPattern);
-	causalProbTable.setProbability(iter.key(), causalProb);
+	double causalProb = getCausalProbability(neurIDList, iter.key());
+	causalProbTable.set(iter.key(), causalProb);
     }
 
     //Calculate the reverse probability table using Bayes, p(x0|x1)
-    calculateReverseProbability(causalProbTable, table);
+    calculateReverseProbability(causalProbTable, probTable);
 }
 
 
 /*! Calculates the probability that the first specified firing pattern leads to the second, or p(x1|x0) */
-double PhiCalculator::getCausalProbability(QList<unsigned int>& neurIDList, const QString& x0Pattern, const QString& x1Pattern){
+double PhiCalculator::getCausalProbability(QList<unsigned int>& neurIDList, const QString& x0Pattern){
     /* Probability of the first state leading to the second is the product of the probabilities of
 	the  transition for each neuron */
     double totalProb = 1.0;
 
     //Work through each neuron to get the probability that it is in state
-    for(int i=0; i<neurIDList.size(); ++i){
-	unsigned int firingState = Util::getUInt(x1Pattern.at(i));
-
-	//Run a couple of sanity checks
-	if(firingState != 0 && firingState != 1)
-	    throw SpikeStreamAnalysisException("Current neuron firing state must be either 1 or 0");
-	if(!weightlessNeuronMap.contains(neurIDList[i]))
-	    throw SpikeStreamAnalysisException("Neuron ID cannot be found: " + QString::number(neuronIDList[i]));
+    foreach(unsigned int tmpNeurID,  neurIDList){
+	int firingState = getFiringState(tmpNeurID);
 
 	//Get the probability that this pattern led to this firing state
-	double transitionProb = weightlessNeuronMap[neurIDList[i]].getTransitionProbability(neurIDList, x0Pattern, firingState);
+	double transitionProb = weightlessNeuronMap[tmpNeurID]->getTransitionProbability(neurIDList, x0Pattern, firingState);
 	totalProb *= transitionProb;
     }
 
@@ -206,32 +196,37 @@ double PhiCalculator::getCausalProbability(QList<unsigned int>& neurIDList, cons
 
 /*! Calculates the phi for the specified partition */
 double PhiCalculator::getPartitionPhi(QList<unsigned int>& aPartition, QList<unsigned int>& bPartition){
-    //Get a complete map of neurons firing at the current time step
-    QList<unsigned int> firingNeuronList = archiveDao->getFiringNeuronIDs(archiveID, timeStep);
-
-    //Get a list of all the neurons in the subset
+    //Create a list of all the neurons in the subset
     QList<unsigned int> subsetList;
-    subsetList.append(aPartition);
-    subsetList.append(bPartition);
+    foreach(unsigned int tmpNeurID, aPartition)
+	subsetList.append(tmpNeurID);
+    foreach(unsigned int tmpNeurID, bPartition)
+	subsetList.append(tmpNeurID);
 
     //Get p(X0->x1) for the whole subset
-    ProbabilityTable subsetProbTable(subsetList.size());
-    fillProbabilityTable(subsetProbTable);
+    ProbabilityTable subProbTable(subsetList.size());
+    fillProbabilityTable(subProbTable, subsetList);
 
     //Get p(X0->x1) for the A partition
-    ProbabilityTable aProbTable = getProbabilityTable(aPartition);
+    ProbabilityTable aProbTable(aPartition.size());
+    fillProbabilityTable(aProbTable, aPartition);
 
     //Get p(X0->x1) for the B partition
-    ProbabilityTable bProbTable = getProbabilityTable(bPartition);
+    ProbabilityTable bProbTable(bPartition.size());
+    fillProbabilityTable(bProbTable, bPartition);
 
     //Calculate the relative entropy
-    double result = 0.0;
-    QHash<QString, double>* tmpProbMap = subsetProbTable.getValueMap();
-    for(int i=0; i<subsetProbTable.size(); ++i){
-	//Get the string of 1's and 0's corresponding to the A and B parts of the key
-	ProbabilityKey aKey = subsetProbTable[i].getSubKey(0, aPartition.size() - 1);
-	ProbabilityKey bKey = subsetProbTable[i].getSubKey(bPartition.size() - 1, subsetList.size() - 1);
-	result += subsetProbTable[i] * log (subsetProbTable[i] / (aProbTable.getProbability(aKey) * bProbTable.getProbability(bKey)));
+    double result = 0.0, subsetProb;
+    //Work through the A partition
+    for(QHash<QString, double>::iterator aIter = aProbTable.begin(); aIter != aProbTable.end(); ++aIter){
+	//Work through the B partition
+	for(QHash<QString, double>::iterator bIter =bProbTable.begin(); bIter != bProbTable.end(); ++bIter){
+	    /* Calculation is
+		SUM[ p(i)log2( p(i) / (pA(i) * pB(i)))
+	    */
+	    subsetProb = subProbTable.get(aIter.key() + bIter.key());//Combine the A and B keys to get the p(s0->s1) for whole subset
+	    result += subsetProb * log2( subsetProb / (aIter.value() * bIter.value()));
+	}
     }
 
     //Return the result
@@ -239,8 +234,20 @@ double PhiCalculator::getPartitionPhi(QList<unsigned int>& aPartition, QList<uns
 }
 
 
+/*! Loads up the neurons firing at this time step. */
+void PhiCalculator::loadFiringNeurons(){
+    firingNeuronMap.clear();
+    QStringList neurIDStrList = archiveDao->getFiringNeuronIDs(analysisInfo.getArchiveID(), timeStep);
+    QStringListIterator iter(neurIDStrList);
+    while (iter.hasNext()){
+	firingNeuronMap[ Util::getUInt(iter.next()) ] = true;
+    }
+}
+
+
 /*! Loads up all of the weightless neurons */
 void PhiCalculator::loadWeightlessNeurons(){
+    weightlessNeuronMap.clear();
     QList<unsigned int> neuronIDList = networkDao->getNeuronIDs(analysisInfo.getNetworkID());
     foreach(unsigned int neurID, neuronIDList){
 	//Store neuron
@@ -252,3 +259,28 @@ void PhiCalculator::loadWeightlessNeurons(){
 }
 
 
+/*! Converts the selection array into lists of the neuron ids in the A and B partitions */
+void PhiCalculator::fillPartitionLists(QList<unsigned int>& aPartition, QList<unsigned int>& bPartition, bool* partitionArray, int partitionArrayLength, QList<unsigned int>& subsetNeurIDs){
+    for(int i=0; i<partitionArrayLength; ++i){
+	if(partitionArray[i] == 1)
+	    aPartition.append(subsetNeurIDs[i]);
+	else
+	    bPartition.append(subsetNeurIDs[i]);
+    }
+
+    //Sanity check
+    if( (aPartition.size() + bPartition.size()) != subsetNeurIDs.size())
+	throw SpikeStreamAnalysisException("The size of the two partitions does not match the size of the entire subset.");
+}
+
+
+int PhiCalculator::getFiringState(unsigned int neurID){
+    //Run sanity check
+    if(!weightlessNeuronMap.contains(neurID))
+	throw SpikeStreamAnalysisException("Neuron ID cannot be found: " + QString::number(neurID));
+
+    //Get firing state, check it and return
+    if(firingNeuronMap.contains(neurID))
+	return 1;
+    return 0;
+}

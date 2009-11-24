@@ -1,11 +1,15 @@
 //SpikeStream includes
-#include "SpikeStreamAnalysisException.h"
+#include "SpikeStreamException.h"
 #include "Util.h"
 #include "WeightlessNeuron.h"
 using namespace spikestream;
 
+//Qt includes
+#include <QDebug>
+
 //Other includes
 #include <algorithm>
+#include <iostream>
 using namespace std;
 
 /*! I think this is an array where each number represents the Hamming distance
@@ -44,6 +48,9 @@ WeightlessNeuron::WeightlessNeuron(QHash<unsigned int, unsigned int>& connection
 	trainingDataLength = connectionMap.size() / 8 + 1;
     else
 	trainingDataLength = connectionMap.size() / 8 + 2;
+
+    //Default setting for hamming threshold
+    hammingThreshold = 0;
 }
 
 
@@ -62,7 +69,7 @@ WeightlessNeuron::~WeightlessNeuron(){
 /*! Adds the array of bytes to the training data set */
 void WeightlessNeuron::addTraining(QByteArray& newData, unsigned int output){
     if( (newData.size() + 1) != trainingDataLength)
-	throw SpikeStreamAnalysisException("New  training data length " + QString::number(newData.size() + 1) + " does not match current training data length " + QString::number(trainingDataLength));
+	throw SpikeStreamException("New  training data length " + QString::number(newData.size() + 1) + " does not match current training data length " + QString::number(trainingDataLength));
 
     //Store the data
     byte* newTrainingArray = new byte[trainingDataLength];
@@ -79,14 +86,14 @@ void WeightlessNeuron::addTraining(QByteArray& newData, unsigned int output){
     1 or 0 depending on whether the stored output matches the specified output.
     If there is more than one match within the Hamming distance, then a random series of 1's
     and 0's is output, so the probability of 1 and 0 are both 0.5 */
-double WeightlessNeuron::getFiringStateProbability(byte inPatArr[], int inPatArrLen, byte firingState){
+double WeightlessNeuron::getFiringStateProbability(byte inPatArr[], int inPatArrLen, int firingState){
     if(inPatArrLen != (trainingDataLength - 1) )
-	throw SpikeStreamException("Training data length does not match pattern length");
+	throw SpikeStreamException("Training data length " + QString::number(trainingDataLength-1) + " does not match pattern length " + QString::number(inPatArrLen));
 
     //Work through all of the training patterns
     bool firstTime = true;
     byte currentResponse;
-    unsigned int hamDist, minDist;
+    unsigned int minDist;
     byte* trainingPattern;
     QHash<int, byte> minDistIndxMap;
     for(int listIndx=0; listIndx<trainingData.size(); ++listIndx){
@@ -94,6 +101,7 @@ double WeightlessNeuron::getFiringStateProbability(byte inPatArr[], int inPatArr
 
 	/* Work through all of the bytes in the input pattern and calculate
 	    the total hamming distance between the input pattern and the stored pattern */
+	unsigned int hamDist = 0;
 	for(int i=0; i<inPatArrLen; ++i){
 	    hamDist += lookup[inPatArr[i] ^ trainingPattern[i + 1]];
 	    if(hamDist > hammingThreshold)
@@ -107,11 +115,13 @@ double WeightlessNeuron::getFiringStateProbability(byte inPatArr[], int inPatArr
 	    firstTime = false;
 	}
 	else{
+	    //Set this pattern to be the current minimum
 	    if(hamDist < minDist){
 		minDist = hamDist;
 		minDistIndxMap.clear();
 		minDistIndxMap[listIndx] = currentResponse;
 	    }
+	    //Add the index of this pattern to the map if it has the same Hamming distance
 	    else if(hamDist == minDist){
 		minDistIndxMap[listIndx] = currentResponse;
 	    }
@@ -145,10 +155,10 @@ double WeightlessNeuron::getFiringStateProbability(byte inPatArr[], int inPatArr
 
 
 /*! Returns the probability that the initial pattern led the neuron to be in the specified firing state */
-double WeightlessNeuron::getTransitionProbability(const QList<unsigned int>& neurIDList, const QString& s0Pattern, bool firingState){
+double WeightlessNeuron::getTransitionProbability(const QList<unsigned int>& neurIDList, const QString& s0Pattern, int firingState){
     //Run checks on the data
     if(neurIDList.size() != s0Pattern.size())
-	throw SpikeStreamAnalysisException("Neuron ID list size does not match the size of the s0 pattern.");
+	throw SpikeStreamException("Neuron ID list size does not match the size of the s0 pattern.");
 
     /* Start pattern corresponds to a list of neuron ids, but need the pattern that corresponds
 	to the connections to this neuron. FiringNeuronIndexMap links an index in the input pattern
@@ -165,6 +175,8 @@ double WeightlessNeuron::getTransitionProbability(const QList<unsigned int>& neu
 	}
     }
     int missingNeuronCount = connectionMap.size() - firingNeuronIndexMap.size();
+    if(missingNeuronCount <0)
+	throw SpikeStreamException("Error in transition probability calculation. Missing neuron count is less than zero.");
 
     //Array used to select all combinations of missing neurons
     bool missingNeurSelectionArr[missingNeuronCount];
@@ -174,8 +186,8 @@ double WeightlessNeuron::getTransitionProbability(const QList<unsigned int>& neu
     byte inPattArr [inPattArrSize];
 
     //Variable to sum the output probabilities for each partially random input string
-    bool tmpProbOut = 0.0;
-    int randomStringCount;
+    double tmpProbOut = 0.0;
+    int randomStringCount = 0;
 
     //Work through all firing combinations of the undefined input neurons
     int numOnes = 0;
@@ -190,7 +202,7 @@ double WeightlessNeuron::getTransitionProbability(const QList<unsigned int>& neu
 	    buildInputPattern(inPattArr, inPattArrSize, missingNeurSelectionArr, missingNeuronCount, firingNeuronIndexMap);
 
 	    //Sum the probability that it has the specified output and keep track of the number of calculations
-	    tmpProbOut += getFiringStateProbability(inPattArr, connectionMap.size(), firingState);
+	    tmpProbOut += getFiringStateProbability(inPattArr, inPattArrSize, firingState);
 	    ++randomStringCount;
 
 	    //Change the selection array
@@ -208,7 +220,7 @@ double WeightlessNeuron::getTransitionProbability(const QList<unsigned int>& neu
 
 /*! Sets the generalization of the neuron */
 void WeightlessNeuron::setGeneralization(double generalization){
-    hammingThreshold = Util::rUInt(1.0 - ((double)connectionMap.size() * generalization));
+    hammingThreshold = Util::rUInt((double)connectionMap.size() * (1.0 - generalization));
 }
 
 
@@ -229,11 +241,8 @@ void WeightlessNeuron::buildInputPattern(byte inPatArr[], int inPatArrSize, bool
 	or with the actual firing state of the neuron, which is stored in the firingNeuronIndexMap */
     int selIndx = 0;
     for(int inputIndx=0; inputIndx < numberOfConnections; ++inputIndx){
-	//Run a couple of sanity checks
-	if(selIndx >= selArrSize)
-	    throw SpikeStreamAnalysisException("Selection index out of range");
 	if(inputIndx / 8 > inPatArrSize)
-	    throw SpikeStreamAnalysisException("Input pattern array index out of range");
+	    throw SpikeStreamException("Input pattern array index out of range.");
 
 	if(firingNeuronIndexMap.contains(inputIndx)){
 	    //Set bit in the byte array to 1 or 0 depending on whether it is 1 or 0 in the map of relevant neuron firing states
@@ -242,13 +251,31 @@ void WeightlessNeuron::buildInputPattern(byte inPatArr[], int inPatArrSize, bool
 	    }
 	}
 	else{
+	    if(selIndx >= selArrSize)
+		throw SpikeStreamException("Selection index out of range. Actual=" + QString::number(selIndx) + "; maximum=" + QString::number(selArrSize));
+
 	    //Set bit in the byte array to 1 if it is set to 1 in selection array
 	    if(selArr[selIndx]){
 		inPatArr[ inputIndx/8 ] |= 1<<(inputIndx % 8);
-		++selIndx;
 	    }
+	    ++selIndx;
 	}
     }
 }
 
+void WeightlessNeuron::printSelectionArray(bool selArr[], int arrSize){
+    for(int i=0; i<arrSize; ++i){
+	if(selArr[i])
+	    cout<<"1";
+	else
+	    cout<<"0";
+    }
+    cout<<endl;
+}
+
+
+void WeightlessNeuron::printTraining(){
+    foreach(byte* byteArr, trainingData)
+	Util::printByteArray(byteArr, trainingDataLength);
+}
 
