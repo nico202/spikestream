@@ -8,9 +8,7 @@ using namespace spikestream;
 #include <iostream>
 using namespace std;
 
-//void TestNetworkDao::init(){
-//    cout<<"HELLO FROM INIT"<<endl;
-//}
+
 /*----------------------------------------------------------*/
 /*-----                     TESTS                      -----*/
 /*----------------------------------------------------------*/
@@ -363,15 +361,55 @@ void TestNetworkDao::testGetWeightlessNeuron(){
 
     //Invoke method being tested
     NetworkDao networkDao(dbInfo);
-    WeightlessNeuron* neuron = networkDao.getWeightlessNeuron(testNeurIDList[1]);
+    try{
+	WeightlessNeuron* neuron = networkDao.getWeightlessNeuron(testNeurIDList[1]);
+	QHash<unsigned int, unsigned int> conMap = neuron->getConnectionMap();
+	QCOMPARE(conMap.size(), (int)2);
+	QCOMPARE(conMap[testNeurIDList[0]], (unsigned int)0);
+	QCOMPARE(conMap[testNeurIDList[4]], (unsigned int)1);
+	QList<byte*> trainingDataList = neuron->getTrainingData();
+	QCOMPARE(trainingDataList.size(), (int)2);
+	QVERIFY( bitsEqual(trainingDataList[0], "10000000", 1) );
+	QVERIFY( bitsEqual(trainingDataList[1], "11000000", 1) );
+	delete neuron;
 
-
-    //Check a second neuron
-    delete neuron;
-    neuron = networkDao.getWeightlessNeuron(testNeurIDList[1]);
-
-    //Clean up
-    delete neuron;
+	//Check a second neuron
+	neuron = networkDao.getWeightlessNeuron(testNeurIDList[2]);
+	conMap = neuron->getConnectionMap();
+	QCOMPARE(conMap.size(), (int)2);
+	QCOMPARE(conMap[testNeurIDList[0]], (unsigned int)0);
+	QCOMPARE(conMap[testNeurIDList[3]], (unsigned int)1);
+	trainingDataList = neuron->getTrainingData();
+	QCOMPARE(trainingDataList.size(), (int)2);
+	QVERIFY( bitsEqual(trainingDataList[0], "00000000", 0) );
+	QVERIFY( bitsEqual(trainingDataList[1], "11000000", 0) );
+	delete neuron;
+    }
+    catch(SpikeStreamException ex){
+	QFAIL(ex.getMessage().toAscii());
+    }
+    catch(...){
+	QFAIL("Unrecognized exception thrown.");
+    }
 }
 
+
+/*----------------------------------------------------------*/
+/*-----              PRIVATE METHODS                   -----*/
+/*----------------------------------------------------------*/
+
+bool TestNetworkDao::bitsEqual(byte* byteArr, const QString bitPattStr, int output){
+    if(byteArr[0] != output)
+	return false;
+
+    for(int i=0; i<bitPattStr.length(); ++i){
+	if(bitPattStr[i] == '1' && (byteArr[1 + i/8] & ( 1<<(i % 8) )))//1 is equal
+	    ;//do nothing
+	else if(bitPattStr[i] == '0' && !(byteArr[1 + i/8] & ( 1<<(i % 8) )))//0 is equal
+	    ;//Do nothing
+	else
+	    return false;//String and byte array do not match
+    }
+    return true;
+}
 

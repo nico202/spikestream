@@ -5,6 +5,9 @@
 #include <iostream>
 using namespace std;
 
+/*! Convenient to define unsigned char as byte to save typing */
+typedef unsigned char byte;
+
 
 /*----------------------------------------------------------*/
 /*-----                INIT AND CLEANUP                -----*/
@@ -361,7 +364,7 @@ void TestDao::addWeightlessTrainingData(unsigned int neuronID, const QString& pa
 	byteArr[i] = 0;
     for(int i=0; i<pattern.size(); ++i){
 	if(pattern[i] == '1')
-	    byteArr[i] |= 1<<(i % 8);
+	    byteArr[i/8] |= 1<<(i % 8);
     }
 
     //Add data to database

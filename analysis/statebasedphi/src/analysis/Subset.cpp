@@ -1,9 +1,11 @@
+//SpikeStream includes
+#include "SpikeStreamAnalysisException.h"
 #include "Subset.h"
 using namespace spikestream;
 
 
 /*! Constructor */
-Subset::Subset(QList<unsigned int>* neuronIDListPtr){
+Subset::Subset(const QList<unsigned int>* neuronIDListPtr){
     this->neuronIDListPtr = neuronIDListPtr;
     networkSize = neuronIDListPtr->size();
     subsetSize = 0;
@@ -43,7 +45,7 @@ void Subset::addNeuronIndex(int index){
 	throw SpikeStreamAnalysisException("Array index out of bounds when adding neuron index.");
 
     //Flip the bit corresponding to the index
-    neurIndxArray[arrayPos] &= 1<<bitPos;
+    neurIndxArray[arrayPos] |= 1<<bitPos;
 
     //Record the current size
     ++subsetSize;
@@ -79,15 +81,12 @@ QList<unsigned int> Subset::getNeuronIDs(){
     QList<unsigned int> tmpList;
 
     //Work through the indexes and add each neuron id to the list.
-    unsigned int andIndex = 1;
     for(int i=0; i<neurIndxSize; ++i){
 	//Work through all of the bits in the integer
 	for(int j=0; j<32; ++j){
-	    if(neurIndxArray[i] & andIndex){
+	    if(neurIndxArray[i] & 1<<j){
 		tmpList.append( (*neuronIDListPtr)[i*32 + j] );
 	    }
-	    //Shift position of the 1 to the left
-	    andIndex << 1;
 	}
     }
 

@@ -11,13 +11,14 @@ namespace spikestream {
 	    double get(const QString& key);
 	    QHash<QString, double>::iterator begin() { return probValueMap.begin(); }
 	    QHash<QString, double>::iterator end() { return probValueMap.end(); }
-	    int getNumberOfNeurons() { return numNeurons; }
+	    int getNumberOfElements() { return numElements; }
+	    int getNumberOfRows() { return probValueMap.size(); }
 	    void set(const QString& key, double value);
 
 	private:
 	    //======================  VARIABLES  ======================
 	    /*! Size of the table */
-	    int numNeurons;
+	    int numElements;
 
 	    /*! Map linking QString key, which is a series of 1's and 0's with the probability value */
 	    QHash<QString, double> probValueMap;

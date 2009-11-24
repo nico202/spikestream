@@ -194,7 +194,7 @@ QList<unsigned int> NetworkDao::getNeuronIDs(unsigned int networkID){
 
 WeightlessNeuron* NetworkDao::getWeightlessNeuron(unsigned int neuronID){
     //Query to select neurons connected to weightless neuron and the pattern index of each neuron
-    QSqlQuery query = getQuery("SELECT FromNeuronID, PatternIndex FROM Connections, WeightlessConnections WHERE ToNeuronID = XXX INNER JOIN ON ConnectionID");//FIXME!!
+    QSqlQuery query = getQuery("SELECT cons.FromNeuronID, weiCons.PatternIndex FROM Connections cons INNER JOIN WeightlessConnections weiCons ON cons.ConnectionID=weiCons.ConnectionID WHERE cons.ToNeuronID=" + QString::number(neuronID));
     executeQuery(query);
 
     //Store the pattern index of each neuron that connects to

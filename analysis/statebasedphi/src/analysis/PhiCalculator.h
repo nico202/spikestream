@@ -8,6 +8,7 @@
 #include "NetworkDao.h"
 #include "ArchiveDao.h"
 #include "StateBasedPhiAnalysisDao.h"
+#include "ProbabilityTable.h"
 #include "WeightlessNeuron.h"
 using namespace spikestream;
 
@@ -20,9 +21,15 @@ namespace spikestream {
 	Q_OBJECT
 
 	public:
-	    PhiCalculator(const DBInfo& netDBInfo, const DBInfo& archDBInfo, const DBInfo& anaDBInfo, const AnalysisInfo& anaInfo, unsigned int timeStep);
+	    PhiCalculator(const DBInfo& netDBInfo, const DBInfo& archDBInfo, const DBInfo& anaDBInfo, const AnalysisInfo& anaInfo, unsigned int timeStep, const bool* stop);
 	    ~PhiCalculator();
+	    void calculateReverseProbability(ProbabilityTable& causalTable, ProbabilityTable& reverseTable);
+	    void fillPartitionLists(QList<unsigned int>& aPartition, QList<unsigned int>& bPartition, bool* partitionArray, int arrayLength, QList<unsigned int>& subsetNeurIDs);
+	    void fillProbabilityTable(ProbabilityTable& table, QList<unsigned int> neurIDList);
+	    double getCausalProbability(QList<unsigned int>& neurIDList, const QString& x0Pattern);
 	    double getSubsetPhi(QList<unsigned int>& subsetNeurIDs);
+	    double getPartitionPhi(QList<unsigned int>& aPartition, QList<unsigned int>& bPartition);
+	    void loadWeightlessNeurons();
 
 	signals:
 	    void complexFound();
@@ -47,15 +54,17 @@ namespace spikestream {
 	    int timeStep;
 
 	    /*! Pointer to the stop variable in the controlling thread. */
-	    bool* stop;
+	    const bool* stop;
 
 	    /*! Map containing all of the weightless neurons in the network */
 	    QHash<unsigned int, WeightlessNeuron*> weightlessNeuronMap;
 
+	    /*! Map of the neurons firing at this time step */
+	    QHash<unsigned int, bool> firingNeuronMap;
+
 	    //=========================  METHODS  ==========================
-	    void fillSelectionArray(bool* array, int arraySize, int selectionSize);
-	    double getPartitionPhi(QList<unsigned int>& aPartition, QList<unsigned int>& bPartition);
-	    void loadWeightlessNeurons();
+	    int getFiringState(unsigned int neurID);
+	    void loadFiringNeurons();
     };
 
 }

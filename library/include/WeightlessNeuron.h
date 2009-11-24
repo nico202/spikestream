@@ -14,10 +14,12 @@ namespace spikestream {
 	    WeightlessNeuron(QHash<unsigned int, unsigned int>& connectionMap);
 	    ~WeightlessNeuron();
 	    void addTraining(QByteArray& newData, unsigned int output);
-	    double getFiringStateProbability(byte inPatArr[], int inPatArrLen, byte firingState);
+	    QHash<unsigned int, unsigned int> getConnectionMap() { return connectionMap; }
+	    double getFiringStateProbability(byte inPatArr[], int inPatArrLen, int firingState);
+	    unsigned int getHammingThreshold() { return hammingThreshold; }
 	    QList<byte*> getTrainingData() { return trainingData; }
 	    int getTrainingDataLength() { return trainingDataLength; }
-	    double getTransitionProbability(const QList<unsigned int>& neurIDList, const QString& x0Pattern, bool firingState);
+	    double getTransitionProbability(const QList<unsigned int>& neurIDList, const QString& x0Pattern, int firingState);
 	    void setGeneralization(double generalization);
 
 	private:
@@ -37,6 +39,8 @@ namespace spikestream {
 
 	    //====================  METHODS  =====================
 	    void buildInputPattern(byte inPatArr[], int inPatArrSize, bool selArr[], int selArrSize, QHash<unsigned int, byte>& firingNeuronIndexMap);
+	    void printSelectionArray(bool selArr[], int arrSize);
+	    void printTraining();
     };
 
 }

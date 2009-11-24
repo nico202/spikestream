@@ -10,7 +10,6 @@ using namespace spikestream;
 #include <QTest>
 #include <QtSql>
 
-typedef unsigned char byte;
 
 /*! Contains general methods that are used for testing all data access objects (DAOs). */
 class TestDao : public QObject {
