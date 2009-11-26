@@ -1,6 +1,10 @@
 #ifndef PROBABILITYTABLE_H
 #define PROBABILITYTABLE_H
 
+//Qt includes
+#include <QString>
+#include <QHash>
+
 namespace spikestream {
 
     /*! Holds a list of entries for different states, e.g. 11010, 11000, etc. */

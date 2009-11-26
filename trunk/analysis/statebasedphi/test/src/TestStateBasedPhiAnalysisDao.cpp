@@ -12,7 +12,7 @@ void TestStateBasedPhiAnalysisDao::testAddComplex(){
     neuronIDList.append(23);
     neuronIDList.append(27);
     neuronIDList.append(35);
-    anaDao.addComplex(testAnalysis1ID, 7, 3.45, neuronIDList);
+    anaDao.addComplex(testAnalysis1ID, 7,neuronIDList, 3.45);
 
     //Check complex was added correctly.
     QSqlQuery query = getAnalysisQuery("SELECT ComplexID, AnalysisID, TimeStep, Phi, Neurons FROM StateBasedPhiData");

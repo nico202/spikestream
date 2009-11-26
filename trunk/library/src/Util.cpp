@@ -13,19 +13,17 @@ using namespace spikestream;
 using namespace std;
 
 
-/*! Fills an array to select k neurons out of n.
-	Need to fill it with the lowest value + 1 so that next_permutation runs through all values
-	before returning false. */
+/*! Fills an array to select k neurons out of n. */
 void Util::fillSelectionArray(bool* selectionArray, int arraySize, int selectionSize){
     int nonSelectionSize = arraySize - selectionSize;
 
     //Add zeros at start of array up to the non-selection size
     for(int i=0; i<nonSelectionSize; ++i)
-	selectionArray[i] = 0;
+	selectionArray[i] = false;
 
     //Add 1s to the rest of the array
     for(int i=nonSelectionSize; i<arraySize; ++i)
-	selectionArray[i] = 1;
+	selectionArray[i] = true;
 }
 
 
@@ -74,6 +72,19 @@ int Util::getRandom(int min, int max){
 }
 
 
+/*! Prints out a bool array  */
+void Util::printBoolArray(bool arr[], int arrLen){
+    cout<<"Bool Array: ";
+    for(int i=0; i< arrLen; ++i){
+	if(arr[i])
+	    cout<<"1";
+	else
+	    cout<<"0";
+    }
+    cout<<endl;
+}
+
+
 /*! Prints out the byte array */
 void Util::printByteArray(byte* byteArr, int arrLen){
     cout<<"Byte array: ";
@@ -100,6 +111,15 @@ void Util::printByteArray(const QByteArray& byteArr){
 	}
     }
     cout<<endl;
+}
+
+
+/*! Rounds the given double to the specified number of decimal places. */
+double Util::rDouble(double num, int numPlaces){
+    double tempDoub = num * ( pow(10.0, (double)numPlaces) );
+    tempDoub = rint(tempDoub);
+    tempDoub /= ( pow(10.0, (double)numPlaces) );
+    return tempDoub;
 }
 
 

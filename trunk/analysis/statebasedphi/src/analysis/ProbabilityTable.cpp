@@ -1,10 +1,15 @@
 //SpikeStream includes
 #include "ProbabilityTable.h"
+#include "SpikeStreamAnalysisException.h"
 #include "Util.h"
 using namespace spikestream;
 
 //Qt includes
 #include <QDebug>
+
+//Other includes
+#include <algorithm>
+using namespace std;
 
 
 /*! Constructor */
@@ -57,7 +62,7 @@ void ProbabilityTable::buildProbabilityTable(){
     bool selectionArray[numElements];
     int numOnes = 0;
     while (numOnes <= numElements){
-	Util::fillSelectionArray(&selectionArray, numElements, numOnes);
+	Util::fillSelectionArray(selectionArray, numElements, numOnes);
 	bool permutationsComplete = false;
 	while(!permutationsComplete){
 
@@ -79,6 +84,7 @@ void ProbabilityTable::buildProbabilityTable(){
 
 	//Increase the number of ones in the selection
 	++numOnes;
+    }
 }
 
 

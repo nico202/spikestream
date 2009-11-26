@@ -9,6 +9,7 @@ Subset::Subset(const QList<unsigned int>* neuronIDListPtr){
     this->neuronIDListPtr = neuronIDListPtr;
     networkSize = neuronIDListPtr->size();
     subsetSize = 0;
+    phi = 0.0;
 
     if(networkSize % 32 == 0)
 	neurIndxSize = networkSize / 32;
@@ -72,6 +73,9 @@ bool Subset::contains(Subset* subset){
 	if( (neurIndxArray[i] & subset->neurIndxArray[i]) != subset->neurIndxArray[i])
 	    return false;
     }
+
+    //Subsets match if we have reached this point
+    return true;
 }
 
 
@@ -80,12 +84,12 @@ QList<unsigned int> Subset::getNeuronIDs(){
     //List to hold the ids
     QList<unsigned int> tmpList;
 
-    //Work through the indexes and add each neuron id to the list.
+    //Work through the ints and add each neuron id to the list.
     for(int i=0; i<neurIndxSize; ++i){
 	//Work through all of the bits in the integer
 	for(int j=0; j<32; ++j){
 	    if(neurIndxArray[i] & 1<<j){
-		tmpList.append( (*neuronIDListPtr)[i*32 + j] );
+		tmpList.append( neuronIDListPtr->at(i*32 + j) );
 	    }
 	}
     }

@@ -22,6 +22,7 @@ namespace spikestream {
 
 	public:
 	    PhiCalculator(const DBInfo& netDBInfo, const DBInfo& archDBInfo, const DBInfo& anaDBInfo, const AnalysisInfo& anaInfo, unsigned int timeStep, const bool* stop);
+	    PhiCalculator();
 	    ~PhiCalculator();
 	    void calculateReverseProbability(ProbabilityTable& causalTable, ProbabilityTable& reverseTable);
 	    void fillPartitionLists(QList<unsigned int>& aPartition, QList<unsigned int>& bPartition, bool* partitionArray, int arrayLength, QList<unsigned int>& subsetNeurIDs);
@@ -30,6 +31,8 @@ namespace spikestream {
 	    double getSubsetPhi(QList<unsigned int>& subsetNeurIDs);
 	    double getPartitionPhi(QList<unsigned int>& aPartition, QList<unsigned int>& bPartition);
 	    void loadWeightlessNeurons();
+	    void setWeightlessNeuronMap(QHash<unsigned int, WeightlessNeuron*> newMap);
+	    void setFiringNeuronMap(QHash<unsigned int, bool> newMap);
 
 	signals:
 	    void complexFound();
@@ -63,6 +66,7 @@ namespace spikestream {
 	    QHash<unsigned int, bool> firingNeuronMap;
 
 	    //=========================  METHODS  ==========================
+	    void deleteWeightlessNeurons();
 	    int getFiringState(unsigned int neurID);
 	    void loadFiringNeurons();
     };

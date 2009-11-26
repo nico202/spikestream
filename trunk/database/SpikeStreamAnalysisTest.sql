@@ -35,13 +35,13 @@ INSERT INTO AnalysisTypes (AnalysisTypeID, Description) VALUES (1, "State-based 
 /* PhiAnalysisData
 	The data associated with a phi analysis description. */
 CREATE TABLE StateBasedPhiData (
-	ClusterID MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
+	ComplexID MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	AnalysisID SMALLINT UNSIGNED NOT NULL,
 	TimeStep INT UNSIGNED NOT NULL, /* The time step of the firing pattern. */
 	Phi DOUBLE NOT NULL,
 	Neurons LONGTEXT NOT NULL,
 
-	PRIMARY KEY (ClusterID),
+	PRIMARY KEY (ComplexID),
 	INDEX AnalysisIDIndex(AnalysisID),
 	FOREIGN KEY AnalysisID_FK(AnalysisID) REFERENCES Analyses(AnalysisID) ON DELETE CASCADE
 )

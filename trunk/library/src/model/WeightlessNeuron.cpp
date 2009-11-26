@@ -90,6 +90,10 @@ double WeightlessNeuron::getFiringStateProbability(byte inPatArr[], int inPatArr
     if(inPatArrLen != (trainingDataLength - 1) )
 	throw SpikeStreamException("Training data length " + QString::number(trainingDataLength-1) + " does not match pattern length " + QString::number(inPatArrLen));
 
+    //Return 0.5 if there is no training data - there will be no matches with the incoming pattern.
+    if(trainingData.size() == 0)
+	return 0.5;
+
     //Work through all of the training patterns
     bool firstTime = true;
     byte currentResponse;

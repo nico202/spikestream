@@ -11,7 +11,7 @@ using namespace spikestream;
 using namespace std;
 
 
-/*! Constructor */
+/*! Standard constructor */
 PhiCalculator::PhiCalculator(const DBInfo& netDBInfo, const DBInfo& archDBInfo, const DBInfo& anaDBInfo, const AnalysisInfo& anaInfo, unsigned int timeStep, const bool* stop){
     //Store variables
     this->analysisInfo = anaInfo;
@@ -29,11 +29,23 @@ PhiCalculator::PhiCalculator(const DBInfo& netDBInfo, const DBInfo& archDBInfo, 
 }
 
 
+/*! Empty constructor for unit testing */
+PhiCalculator::PhiCalculator(){
+    timeStep = -1;
+    networkDao = NULL;
+    archiveDao = NULL;
+    stateDao = NULL;
+
+    //Fix stop variable so that class is always running
+    bool* tmpStop = new bool;
+    *tmpStop = false;
+    stop = tmpStop;
+}
+
+
 /*! Destructor */
 PhiCalculator::~PhiCalculator(){
-    for(QHash<unsigned int, WeightlessNeuron*>::iterator iter = weightlessNeuronMap.begin(); iter != weightlessNeuronMap.end(); ++iter){
-	delete iter.value();
-    }
+    deleteWeightlessNeurons();
 }
 
 
@@ -59,7 +71,7 @@ double PhiCalculator::getSubsetPhi(QList<unsigned int>& subsetNeurIDs){
 
     //Work through the bipartitions of the subset
     int aPartitionSize = subsetSize / 2;
-    while(aPartitionSize >= 1 && !*stop){
+    while(aPartitionSize >= 0 && !*stop){
 
 	//Fill selectionArray with 1s and 0s corresponding to the partition size
 	Util::fillSelectionArray(partitionArray, subsetSize, aPartitionSize);
@@ -81,12 +93,15 @@ double PhiCalculator::getSubsetPhi(QList<unsigned int>& subsetNeurIDs){
 	    }
 
 	    /* Normalize the new phi
+	       If calculation is being run on the entire subset (aPartition.size() ==0), then
 	       For a partition into two parts the normalization is the size of the smaller a priori
 	       repertoire, which has 2^n entries */
-	    if(aPartition.size() <= bPartition.size())
-		tmpNormFact = exp2((double)aPartition.size());
-	    else
-		tmpNormFact = exp2((double)bPartition.size());
+	    if(aPartition.size() == 0)//Entire subset
+		tmpNormFact = (double)bPartition.size();
+	    else if(aPartition.size() <= bPartition.size())//A is the smaller partition
+		tmpNormFact = (double)aPartition.size();
+	    else//B is the smaller partition
+		tmpNormFact = (double)bPartition.size();
 	    newPhi /= tmpNormFact;
 
 	    //First time this loop has run, so store newPhi as current minimum
@@ -184,7 +199,7 @@ double PhiCalculator::getCausalProbability(QList<unsigned int>& neurIDList, cons
     foreach(unsigned int tmpNeurID,  neurIDList){
 	int firingState = getFiringState(tmpNeurID);
 
-	//Get the probability that this pattern led to this firing state
+	//Get the probability that the x0 pattern led to this firing state
 	double transitionProb = weightlessNeuronMap[tmpNeurID]->getTransitionProbability(neurIDList, x0Pattern, firingState);
 	totalProb *= transitionProb;
     }
@@ -196,6 +211,39 @@ double PhiCalculator::getCausalProbability(QList<unsigned int>& neurIDList, cons
 
 /*! Calculates the phi for the specified partition */
 double PhiCalculator::getPartitionPhi(QList<unsigned int>& aPartition, QList<unsigned int>& bPartition){
+    if(aPartition.size() == 0 && bPartition.size() == 0)
+	throw SpikeStreamAnalysisException("Both A and B partitions contain zero neurons");
+
+    //Handle case where the partition is the whole partition
+    if(aPartition.size() == 0 || bPartition.size() == 0){
+	//Build probability table using either A or B partition (whichever is non zero)
+	ProbabilityTable* probTable;
+	if(aPartition.size() == 0){
+	    probTable = new ProbabilityTable(bPartition.size());
+	    fillProbabilityTable(*probTable, bPartition);
+	}
+	else{
+	    probTable = new ProbabilityTable(aPartition.size());
+	    fillProbabilityTable(*probTable, aPartition);
+	}
+
+	//Calculate phi on whole subset
+	double result = 0.0;
+	double pMaxX0 = 1.0 / exp2((double) probTable->getNumberOfElements());
+	for(QHash<QString, double>::iterator iter = probTable->begin(); iter != probTable->end(); ++iter){
+	    /* Calculation is
+		SUM[ p(i)log2( p(i) / pmax(X0))
+	    */
+	    if(iter.value() != 0.0)//Avoid log of zero multiplied by zero, which is not a number
+		result += iter.value() * log2( iter.value() / pMaxX0 );
+	}
+	//Return result for whole subset
+	delete probTable;
+	return result;
+    }
+
+    //If we have reached this point, calculation is for a division of the subset into two non-zero partitions
+
     //Create a list of all the neurons in the subset
     QList<unsigned int> subsetList;
     foreach(unsigned int tmpNeurID, aPartition)
@@ -225,7 +273,8 @@ double PhiCalculator::getPartitionPhi(QList<unsigned int>& aPartition, QList<uns
 		SUM[ p(i)log2( p(i) / (pA(i) * pB(i)))
 	    */
 	    subsetProb = subProbTable.get(aIter.key() + bIter.key());//Combine the A and B keys to get the p(s0->s1) for whole subset
-	    result += subsetProb * log2( subsetProb / (aIter.value() * bIter.value()));
+	    if(subsetProb != 0.0)//Avoid log of zero multiplied by zero, which is not a number
+		result += subsetProb * log2( subsetProb / (aIter.value() * bIter.value()));
 	}
     }
 
@@ -234,8 +283,21 @@ double PhiCalculator::getPartitionPhi(QList<unsigned int>& aPartition, QList<uns
 }
 
 
+/*! Deletes all of the weightless neurons currently stored in this class */
+void PhiCalculator::deleteWeightlessNeurons(){
+    for(QHash<unsigned int, WeightlessNeuron*>::iterator iter = weightlessNeuronMap.begin(); iter != weightlessNeuronMap.end(); ++iter){
+	delete iter.value();
+    }
+    weightlessNeuronMap.clear();
+}
+
+
 /*! Loads up the neurons firing at this time step. */
 void PhiCalculator::loadFiringNeurons(){
+    if(archiveDao == NULL){
+	throw SpikeStreamAnalysisException("Archive dao has not been set. Empty constructor should only be used for unit testing.");
+    }
+
     firingNeuronMap.clear();
     QStringList neurIDStrList = archiveDao->getFiringNeuronIDs(analysisInfo.getArchiveID(), timeStep);
     QStringListIterator iter(neurIDStrList);
@@ -247,7 +309,11 @@ void PhiCalculator::loadFiringNeurons(){
 
 /*! Loads up all of the weightless neurons */
 void PhiCalculator::loadWeightlessNeurons(){
-    weightlessNeuronMap.clear();
+    if(networkDao == NULL){
+	throw SpikeStreamAnalysisException("Archive dao has not been set. Empty constructor should only be used for unit testing.");
+    }
+
+    deleteWeightlessNeurons();
     QList<unsigned int> neuronIDList = networkDao->getNeuronIDs(analysisInfo.getNetworkID());
     foreach(unsigned int neurID, neuronIDList){
 	//Store neuron
@@ -261,8 +327,11 @@ void PhiCalculator::loadWeightlessNeurons(){
 
 /*! Converts the selection array into lists of the neuron ids in the A and B partitions */
 void PhiCalculator::fillPartitionLists(QList<unsigned int>& aPartition, QList<unsigned int>& bPartition, bool* partitionArray, int partitionArrayLength, QList<unsigned int>& subsetNeurIDs){
+    aPartition.clear();
+    bPartition.clear();
+
     for(int i=0; i<partitionArrayLength; ++i){
-	if(partitionArray[i] == 1)
+	if(partitionArray[i])
 	    aPartition.append(subsetNeurIDs[i]);
 	else
 	    bPartition.append(subsetNeurIDs[i]);
@@ -283,4 +352,15 @@ int PhiCalculator::getFiringState(unsigned int neurID){
     if(firingNeuronMap.contains(neurID))
 	return 1;
     return 0;
+}
+
+
+void PhiCalculator::setWeightlessNeuronMap(QHash<unsigned int, WeightlessNeuron*> newMap){
+    deleteWeightlessNeurons();
+    weightlessNeuronMap = newMap;
+}
+
+
+void PhiCalculator::setFiringNeuronMap(QHash<unsigned int, bool> newMap){
+    firingNeuronMap = newMap;
 }
