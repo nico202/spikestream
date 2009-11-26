@@ -42,6 +42,7 @@ SOURCES += src/Main.cpp \
 	    src/TestArchiveDao.cpp \
 	    src/TestAnalysisDao.cpp \
 	    src/TestUtil.cpp \
-	    src/TestWeightlessNeuron.cpp
+	    src/TestWeightlessNeuron.cpp \
+
 
 

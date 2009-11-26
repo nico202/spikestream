@@ -2,6 +2,9 @@
 //SpikeStream includes
 #include "TestRunner.h"
 #include "TestStateBasedPhiAnalysisDao.h"
+#include "TestSubset.h"
+#include "TestProbabilityTable.h"
+#include "TestPhiCalculator.h"
 
 
 //Other includes
@@ -15,6 +18,12 @@ void TestRunner::runTests(){
 
     TestProbabilityTable testProbabilityTable;
     QTest::qExec(&testProbabilityTable);
+
+    TestSubset testSubset;
+    QTest::qExec(&testSubset);
+
+    TestPhiCalculator testPhiCalculator;
+    QTest::qExec(&testPhiCalculator);
 }
 
 

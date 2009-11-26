@@ -9,7 +9,8 @@ class TestProbabilityTable : public QObject {
 
     private slots:
 	void testBuildTable();
-	void testSet();
+	void testIterator();
+	void testSetGet();
 
 };
 

@@ -9,6 +9,7 @@ class TestUtil : public QObject {
 
     private slots:
 	void testFillSelectionArray();
+	void testRDouble();
 	void testRandom();
 
 };

@@ -18,6 +18,8 @@ namespace spikestream {
 	    static int getRandom(int min, int max);
 	    static void printByteArray(byte* byteArr, int arrLen);
 	    static void printByteArray(const QByteArray& byteArr);
+	    static void printBoolArray(bool arr[], int arrLen);
+	    static double rDouble(double num, int numPlaces);
 	    static unsigned int rUInt(double num);
 	    static void seedRandom(int seed = 0);
 
