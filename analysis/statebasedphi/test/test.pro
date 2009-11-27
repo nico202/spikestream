@@ -28,7 +28,9 @@ HEADERS += src/TestRunner.h \
 	    src/TestProbabilityTable.h \
 	    src/TestSubset.h \
 	    src/TestPhiCalculator.h \
-	    src/PhiUtil.h
+	    src/PhiUtil.h \
+	    src/TestSubsetManager.h \
+	    src/StateBasedPhiAnalysisDaoDuck.h
 
 SOURCES += src/Main.cpp \
 	    src/TestRunner.cpp \
@@ -36,6 +38,8 @@ SOURCES += src/Main.cpp \
 	    src/TestProbabilityTable.cpp \
 	    src/TestSubset.cpp \
 	    src/TestPhiCalculator.cpp \
-	    src/PhiUtil.cpp
+	    src/PhiUtil.cpp \
+	    src/TestSubsetManager.cpp \
+	    src/StateBasedPhiAnalysisDaoDuck.cpp
 
 

@@ -68,6 +68,7 @@ double PhiCalculator::getSubsetPhi(QList<unsigned int>& subsetNeurIDs){
 
     //Variables used during calculation
     double newPhi, minimumPhi, tmpNormFact, normalizationFactor;
+    bool firstTime = true;
 
     //Work through the bipartitions of the subset
     int aPartitionSize = subsetSize / 2;
@@ -78,7 +79,6 @@ double PhiCalculator::getSubsetPhi(QList<unsigned int>& subsetNeurIDs){
 
 	//Work through all the combinations
 	bool permutationsComplete = false;
-	bool firstTime = true;
 	while(!*stop && !permutationsComplete){
 
 	    //Use selection array to fill the list of neurons in the two partitions

@@ -10,6 +10,7 @@ namespace spikestream {
     class AnalysisDao : public AbstractDao {
 	public:
 	    AnalysisDao(const DBInfo& dbInfo);
+	    AnalysisDao();
 	    virtual ~AnalysisDao();
 
 	    void addAnalysis(AnalysisInfo& analysisInfo);

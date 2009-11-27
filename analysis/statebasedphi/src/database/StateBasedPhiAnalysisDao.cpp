@@ -2,9 +2,13 @@
 #include "StateBasedPhiAnalysisDao.h"
 using namespace spikestream;
 
-/*! Constructor */
+/*! Standard Constructor */
 StateBasedPhiAnalysisDao::StateBasedPhiAnalysisDao(const DBInfo& dbInfo) : AnalysisDao(dbInfo){
+}
 
+
+/*! Empty constructor for unit testing */
+StateBasedPhiAnalysisDao::StateBasedPhiAnalysisDao(){
 }
 
 

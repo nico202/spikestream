@@ -5,7 +5,7 @@
 unsigned int AbstractDao::dbCounter = 0;
 
 
-/*! Constructor. Creats connection with unique name. */
+/*! Standard constructor. Creats connection with unique name. */
 AbstractDao::AbstractDao(const DBInfo& dbInfo){
     //Store the information about the database
     this->dbInfo = dbInfo;
@@ -15,6 +15,11 @@ AbstractDao::AbstractDao(const DBInfo& dbInfo){
 
     //Connect to the database
     connectToDatabase();
+}
+
+
+/*! Empty constructor for unit testing */
+AbstractDao::AbstractDao(){
 }
 
 
