@@ -5,6 +5,7 @@
 #include "TestSubset.h"
 #include "TestProbabilityTable.h"
 #include "TestPhiCalculator.h"
+#include "TestSubsetManager.h"
 
 
 //Other includes
@@ -24,6 +25,9 @@ void TestRunner::runTests(){
 
     TestPhiCalculator testPhiCalculator;
     QTest::qExec(&testPhiCalculator);
+
+    TestSubsetManager testSubsetManager;
+    QTest::qExec(&testSubsetManager);
 }
 
 

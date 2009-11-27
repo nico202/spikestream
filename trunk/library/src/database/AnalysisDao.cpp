@@ -8,8 +8,13 @@ using namespace spikestream;
 #include <QDebug>
 
 
-/*! Constructor */
+/*! Standard constructor */
 AnalysisDao::AnalysisDao(const DBInfo& dbInfo) : AbstractDao(dbInfo){
+}
+
+
+/*! Empty constructor for unit testing */
+AnalysisDao::AnalysisDao(){
 }
 
 

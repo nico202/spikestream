@@ -165,6 +165,36 @@ void TestPhiCalculator::testGetPartitionPhi(){
 	bList.append(3);
 	bList.append(4);
 	QCOMPARE(phiCalc->getPartitionPhi(aList, bList), 2.0);
+
+	//Clean up
+	delete phiCalc;
+
+	//Create an instance of PhiCalculator set up for phi test network 2
+	phiCalc = PhiUtil::buildPhiTestNetwork2();
+
+	//Get phi for subset 2,3,5
+	aList.clear();
+	bList.clear();
+	bList.append(2);
+	bList.append(3);
+	bList.append(5);
+	QCOMPARE(Util::rDouble(phiCalc->getPartitionPhi(aList, bList), 3), 1.082);
+
+	//Get phi for partition of subset into 2,5 | 3
+	aList.clear();
+	bList.clear();
+	aList.append(3);
+	bList.append(2);
+	bList.append(5);
+	QCOMPARE(Util::rDouble(phiCalc->getPartitionPhi(aList, bList), 3), 0.082);
+
+	//Check reverse is the same for partition of subset into 3 | 2,5
+	aList.clear();
+	bList.clear();
+	aList.append(2);
+	aList.append(5);
+	bList.append(3);
+	QCOMPARE(Util::rDouble(phiCalc->getPartitionPhi(aList, bList), 3), 0.082);
     }
     catch(SpikeStreamException& ex){
 	QFAIL(ex.getMessage().toAscii());
@@ -229,6 +259,19 @@ void TestPhiCalculator::testGetSubsetPhi(){
 	subsetList.append(6);
 	QCOMPARE(phiCalc2->getSubsetPhi(subsetList), 1.0);
 
+	//Calculate phi for subset with neurons 2,3,5
+	subsetList.clear();
+	subsetList.append(2);
+	subsetList.append(3);
+	subsetList.append(5);
+	QCOMPARE(phiCalc2->getSubsetPhi(subsetList), 0.0);
+
+	//Calculate phi for subset with neurons 2,3,6
+	subsetList.clear();
+	subsetList.append(2);
+	subsetList.append(3);
+	subsetList.append(6);
+	QCOMPARE(Util::rDouble(phiCalc2->getSubsetPhi(subsetList), 3), 0.585);
     }
     catch(SpikeStreamException& ex){
 	QFAIL(ex.getMessage().toAscii());

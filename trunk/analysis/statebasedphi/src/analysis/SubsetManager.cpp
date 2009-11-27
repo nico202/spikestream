@@ -6,9 +6,10 @@ using namespace spikestream;
 
 //Other includes
 #include <algorithm>
+#include <iostream>
 using namespace std;
 
-/*! Constructor */
+/*! Standard Constructor */
 SubsetManager::SubsetManager(const DBInfo& netDBInfo, const DBInfo& archDBInfo, const DBInfo& anaDBInfo, const AnalysisInfo& anaInfo, unsigned int timeStep){
     //Store variables
     this->analysisInfo = anaInfo;
@@ -21,6 +22,20 @@ SubsetManager::SubsetManager(const DBInfo& netDBInfo, const DBInfo& archDBInfo, 
 
     //Create phi calculator
     phiCalculator = new PhiCalculator(netDBInfo, archDBInfo, anaDBInfo, anaInfo, timeStep, stop);
+}
+
+
+/*! Empty constructor for unit testing */
+SubsetManager::SubsetManager(){
+    timeStep = -1;
+    networkDao = NULL;
+    archiveDao = NULL;
+    stateDao = NULL;
+
+    //Fix stop variable so that class is always running
+    bool* tmpStop = new bool;
+    *tmpStop = false;
+    stop = tmpStop;
 }
 
 
@@ -64,39 +79,52 @@ void SubsetManager::buildSubsetList(){
 }
 
 
+/*! Works through the list of subsets and calculates the phi of each */
+void SubsetManager::calculateSubsetsPhi(){
+    //Calculate the phi of each subset
+    for(int i=0; i<subsetList.size() && !*stop; ++i){
+	//Calculate phi on the subset
+	QList<unsigned int> tmpNeurIDs = subsetList[i]->getNeuronIDs();
+	subsetList[i]->setPhi(phiCalculator->getSubsetPhi(tmpNeurIDs));
+    }
+}
+
+
 /*! Takes each subset and determines whether it is contained within another subset
     of higher phi. The subset is a complex if no enclosing higher phi subset
     can be found */
 void SubsetManager::identifyComplexes(){
-
     //Check each subset to see if it contained within another subset of higher phi
     for(int tstIndx=0; tstIndx<subsetList.size() && !*stop; ++tstIndx){
 
-	/* Work through all of the other subsets to see if the subset is contained within it and has
-	   higher phi. If it cannot find an enclosing subset with higher phi, then it is a complex. */
-	bool isComplex = true;
-	for(int containsIndx=0; containsIndx<subsetList.size() && !*stop; ++containsIndx){
+	//Complexes must have phi greater than zero
+	if(subsetList[tstIndx]->getPhi() > 0.0){
+	    /* Work through all of the other subsets to see if the subset is contained within it and has
+	       higher phi. If it cannot find an enclosing subset with higher phi, then it is a complex. */
+	    bool isComplex = true;
+	    for(int containsIndx=0; containsIndx<subsetList.size() && !*stop; ++containsIndx){
 
-	    //Is the first subset contained in the second?
-	    if(subsetList[containsIndx]->contains(subsetList[tstIndx])){
-		if(subsetList[tstIndx]->getPhi() < subsetList[containsIndx]->getPhi()){
-		    isComplex = false;//Will break out of outer loop and check next subset
+		//Is the first subset contained in the second?
+		if(subsetList[containsIndx]->contains(subsetList[tstIndx])){
+		    if(subsetList[tstIndx]->getPhi() < subsetList[containsIndx]->getPhi()){
+			isComplex = false;//Will break out of outer loop and check next subset
 
-		    //Break out of inner loop
-		    break;//FIXME: CHECK THIS BREAK
+			//Break out of inner loop
+			break;//FIXME: CHECK THIS BREAK
+		    }
 		}
 	    }
-	}
 
-	/* All the other subsets have been checked. If no enclosing subset has been found with higher
-	   phi, then the current subset is a complex */
-	if(isComplex){
-	    //Store complex in database
-	    QList<unsigned int> subNeurIDs = subsetList[tstIndx]->getNeuronIDs();
-	    stateDao->addComplex(analysisInfo.getID(), timeStep, subNeurIDs, subsetList[tstIndx]->getPhi());
+	    /* All the other subsets have been checked. If no enclosing subset has been found with higher
+	       phi, then the current subset is a complex */
+	    if(isComplex){
+		//Store complex in database
+		QList<unsigned int> subNeurIDs = subsetList[tstIndx]->getNeuronIDs();
+		stateDao->addComplex(analysisInfo.getID(), timeStep, subNeurIDs, subsetList[tstIndx]->getPhi());
 
-	    //Inform other classes that a complex has been found
-	    emit complexFound();
+		//Inform other classes that a complex has been found
+		emit complexFound();
+	    }
 	}
     }
 }
@@ -108,7 +136,6 @@ void SubsetManager::runCalculation(const bool * const stop){
     this->stop = stop;
 
     //Get a complete list of the neuron IDs in the network
-    //FIXME: CHECK THAT THESE ARE SORTED IN ASCENDING ORDER
     neuronIDList = networkDao->getNeuronIDs(analysisInfo.getNetworkID());
 
     //Generate a list of all possible connected subsets
@@ -144,17 +171,6 @@ void SubsetManager::addSubset(bool subsetSelectionArray[], int arrayLength){
 }
 
 
-/*! Works through the list of subsets and calculates the phi of each */
-void SubsetManager::calculateSubsetsPhi(){
-    //Calculate the phi of each subset
-    for(int i=0; i<subsetList.size() && !*stop; ++i){
-	//Calculate phi on the subset
-	QList<unsigned int> tmpNeurIDs = subsetList[i]->getNeuronIDs();
-	subsetList[i]->setPhi(phiCalculator->getSubsetPhi(tmpNeurIDs));
-    }
-}
-
-
 /*! Deletes the current subsets */
 void SubsetManager::deleteSubsets(){
     for(int i=0; i<subsetList.size(); ++i)
@@ -163,5 +179,15 @@ void SubsetManager::deleteSubsets(){
 }
 
 
+/*! Prints out the current list of subsets */
+void SubsetManager::printSubsets(){
+    cout<<"--------------------  SUBSETS  --------------------"<<endl;
+    foreach(Subset* subset, subsetList){
+	QList<unsigned int> neurIDList = subset->getNeuronIDs();
+	foreach(unsigned int neurID, neurIDList)
+	    cout<<neurID<<", ";
+	cout<<" phi="<<subset->getPhi()<<endl;
+    }
+}
 
 

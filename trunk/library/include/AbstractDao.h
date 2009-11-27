@@ -13,6 +13,7 @@ using namespace spikestream;
 class AbstractDao {
     public:
 	AbstractDao(const DBInfo& dbInfo);
+	AbstractDao();
 	virtual ~AbstractDao();
 	DBInfo getDBInfo();
 

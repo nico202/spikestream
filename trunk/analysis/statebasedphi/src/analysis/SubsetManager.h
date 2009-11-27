@@ -21,10 +21,17 @@ namespace spikestream {
 
 	public:
 	    SubsetManager(const DBInfo& netDBInfo, const DBInfo& archDBInfo, const DBInfo& anaDBInfo, const AnalysisInfo& anaInfo, unsigned int timeStep);
+	    SubsetManager();
 	    ~SubsetManager();
 	    void buildSubsetList();
+	    void calculateSubsetsPhi();
+	    QList<Subset*> getSubsetList() { return subsetList; }
 	    void identifyComplexes();
+	    void printSubsets();
 	    void runCalculation(const bool * const stop);
+	    void setNeuronIDList (QList<unsigned int>& neurIDList)  { this->neuronIDList = neurIDList; }
+	    void setPhiCalculator(PhiCalculator* phiCalc) { this->phiCalculator = phiCalc; }
+	    void setStateDao (StateBasedPhiAnalysisDao* stateDao) { this->stateDao = stateDao; }
 
 	signals:
 	    void complexFound();
@@ -63,7 +70,6 @@ namespace spikestream {
 
 	    //========================  METHODS  ============================
 	    void addSubset(bool subsetSelectionArray[], int arrayLength);
-	    void calculateSubsetsPhi();
 	    void deleteSubsets();
     };
 
