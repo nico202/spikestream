@@ -80,9 +80,11 @@ SOURCES += src/analysis/AnalysisLoaderWidget.cpp
 #---              dialogs folder            ---#
 #----------------------------------------------#
 HEADERS += src/dialogs/NRMImportDialog.h \
-	    src/dialogs/LoadAnalysisDialog.h
+	    src/dialogs/LoadAnalysisDialog.h \
+	    src/dialogs/PluginsDialog.h
 SOURCES += src/dialogs/NRMImportDialog.cpp \
-	    src/dialogs/LoadAnalysisDialog.cpp
+	    src/dialogs/LoadAnalysisDialog.cpp \
+	    src/dialogs/PluginsDialog.cpp
 
 #----------------------------------------------#
 #---            exceptions folder           ---#
@@ -94,9 +96,13 @@ SOURCES += src/exceptions/NRMException.cpp
 #---              widgets folder            ---#
 #----------------------------------------------#
 HEADERS += src/widgets/NetworksWidget.h \
-	    src/widgets/ArchiveWidget_V2.h
+	    src/widgets/ArchiveWidget_V2.h \
+	    src/widgets/NeuronGroupWidget.h \
+	    src/widgets/ConnectionWidget_V2.h
 SOURCES += src/widgets/NetworksWidget.cpp \
-	    src/widgets/ArchiveWidget_V2.cpp
+	    src/widgets/ArchiveWidget_V2.cpp \
+	    src/widgets/NeuronGroupWidget.cpp \
+	    src/widgets/ConnectionWidget_V2.cpp
 
 #----------------------------------------------#
 #---               src folder               ---#

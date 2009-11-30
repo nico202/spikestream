@@ -4,6 +4,7 @@
 #include "NetworkDaoThread.h"
 #include "SpikeStreamException.h"
 #include "NetworkInfo.h"
+#include "Neuron.h"
 using namespace spikestream;
 
 #include <iostream>
@@ -28,10 +29,10 @@ void TestNetworkDaoThread::testAddConnectionGroup(){
 	//Add from neuron group
 	NeuronGroup fromGrp( NeuronGroupInfo(0, "fromNeuronGroup1Name", "fromNeuronGroup1Desc", QHash<QString, double>(), 1) );
 	NeuronMap* neurMap = fromGrp.getNeuronMap();
-	(*neurMap)[1] = new Point3D(0, 0, 0);
-	(*neurMap)[2] = new Point3D(0, 1, 0);
-	(*neurMap)[3] = new Point3D(1, 0, 0);
-	(*neurMap)[4] = new Point3D(1, 1, 0);
+	(*neurMap)[1] = new Neuron(0, 0, 0);
+	(*neurMap)[2] = new Neuron(0, 1, 0);
+	(*neurMap)[3] = new Neuron(1, 0, 0);
+	(*neurMap)[4] = new Neuron(1, 1, 0);
 	NetworkDaoThread netDaoThread(dbInfo);
 	netDaoThread.prepareAddNeuronGroup(netInfo.getID(), &fromGrp);
 	runThread(netDaoThread);
@@ -39,10 +40,10 @@ void TestNetworkDaoThread::testAddConnectionGroup(){
 	//Add to neuron group
 	NeuronGroup toGrp( NeuronGroupInfo(0, "toNeuronGroup1Name", "toNeuronGroup1Desc", QHash<QString, double>(), 1) );
 	neurMap = toGrp.getNeuronMap();
-	(*neurMap)[1] = new Point3D(0, 0, 10);
-	(*neurMap)[2] = new Point3D(0, 3, 10);
-	(*neurMap)[3] = new Point3D(2, 0, 10);
-	(*neurMap)[4] = new Point3D(1, 7, 10);
+	(*neurMap)[1] = new Neuron(0, 0, 10);
+	(*neurMap)[2] = new Neuron(0, 3, 10);
+	(*neurMap)[3] = new Neuron(2, 0, 10);
+	(*neurMap)[4] = new Neuron(1, 7, 10);
 	netDaoThread.prepareAddNeuronGroup(netInfo.getID(), &toGrp);
 	runThread(netDaoThread);
 
@@ -117,10 +118,10 @@ void TestNetworkDaoThread::testAddNeuronGroup(){
 	paramMap["param2"] = 0.6;
 	NeuronGroup neurGrp(NeuronGroupInfo(0, "testNeuronGroup1Name", "testNeuronGroup1Desc", paramMap, 1));
 	NeuronMap* neurMap = neurGrp.getNeuronMap();
-	(*neurMap)[1] = new Point3D(0, 0, 0);
-	(*neurMap)[2] = new Point3D(0, 1, 0);
-	(*neurMap)[3] = new Point3D(1, 0, 0);
-	(*neurMap)[4] = new Point3D(1, 1, 1);
+	(*neurMap)[1] = new Neuron(0, 0, 0);
+	(*neurMap)[2] = new Neuron(0, 1, 0);
+	(*neurMap)[3] = new Neuron(1, 0, 0);
+	(*neurMap)[4] = new Neuron(1, 1, 1);
 
 	//Add the neuron group
 	NetworkDaoThread netDaoThread(dbInfo);
@@ -244,16 +245,16 @@ void TestNetworkDaoThread::testLoadNeurons(){
     QCOMPARE(neurGrp2.size(), (int)2);
 
     //Check the ids and location in neuron group 1 are correct
-    QHash<unsigned int, Point3D*>* neurGrpMap = neurGrp1.getNeuronMap();
-    QCOMPARE((*neurGrpMap)[ testNeurIDList[0] ]->xPos, -1.0f);
-    QCOMPARE((*neurGrpMap)[ testNeurIDList[0] ]->zPos, -6.0f);
-    QCOMPARE((*neurGrpMap)[ testNeurIDList[2] ]->yPos, -4.0f);
+    QHash<unsigned int, Neuron*>* neurGrpMap = neurGrp1.getNeuronMap();
+    QCOMPARE((*neurGrpMap)[ testNeurIDList[0] ]->getXPos(), -1.0f);
+    QCOMPARE((*neurGrpMap)[ testNeurIDList[0] ]->getZPos(), -6.0f);
+    QCOMPARE((*neurGrpMap)[ testNeurIDList[2] ]->getYPos(), -4.0f);
 
     //Check the ids and location in neuron group 2 are correct
     neurGrpMap = neurGrp2.getNeuronMap();
-    QCOMPARE((*neurGrpMap)[ testNeurIDList[3] ]->xPos, 0.0f);
-    QCOMPARE((*neurGrpMap)[ testNeurIDList[3] ]->zPos, 10.0f);
-    QCOMPARE((*neurGrpMap)[ testNeurIDList[4] ]->yPos, -7.0f);
+    QCOMPARE((*neurGrpMap)[ testNeurIDList[3] ]->getXPos(), 0.0f);
+    QCOMPARE((*neurGrpMap)[ testNeurIDList[3] ]->getZPos(), 10.0f);
+    QCOMPARE((*neurGrpMap)[ testNeurIDList[4] ]->getYPos(), -7.0f);
 }
 
 

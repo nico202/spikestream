@@ -2,6 +2,7 @@
 #include "Globals.h"
 #include "NetworkDao.h"
 #include "NetworksWidget.h"
+#include "PluginsDialog.h"
 #include "SpikeStreamException.h"
 #include "Util.h"
 using namespace spikestream;
@@ -21,6 +22,13 @@ NetworksWidget::NetworksWidget(QWidget* parent) : QWidget(parent){
 
     QVBoxLayout* verticalBox = new QVBoxLayout(this, 2, 2);
 
+    //Add button to launch networks dialog
+    QPushButton* addNetworksButton = new QPushButton("Add Networks");
+    addNetworksButton->setMaximumSize(120, 30);
+    connect (addNetworksButton, SIGNAL(clicked()), this, SLOT(addNetworks()));
+    verticalBox->addWidget(addNetworksButton);
+
+    //Add grid holding networks
     gridLayout = new QGridLayout();
     gridLayout->setMargin(10);
     gridLayout->setColumnMinimumWidth(0, 50);//ID
@@ -56,6 +64,14 @@ NetworksWidget::~NetworksWidget(){
 /*----------------------------------------------------------*/
 /*-----                 PRIVATE SLOTS                  -----*/
 /*----------------------------------------------------------*/
+
+/*! Shows a plugins dialog to enable the user to add a network */
+void NetworksWidget::addNetworks(){
+    PluginsDialog* pluginsDialog = new PluginsDialog(this, "/plugins/networks", "Add Network");
+    pluginsDialog->exec();
+    delete pluginsDialog;
+}
+
 
 /*! Deletes a network */
 void NetworksWidget::deleteNetwork(){

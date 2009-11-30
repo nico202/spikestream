@@ -30,11 +30,12 @@ NeuronGroup::~NeuronGroup(){
 
 /*! Adds a neuron to the group using a temporary ID. This ID is replaced
     by the actual ID when the group is added to the network and database. */
-void NeuronGroup::addNeuron(float xPos, float yPos, float zPos){
-    Point3D* tmpPoint = new Point3D(xPos, yPos, zPos);
+Neuron* NeuronGroup::addNeuron(float xPos, float yPos, float zPos){
+    Neuron* tmpNeuron = new Neuron(xPos, yPos, zPos);
     if(neuronMap->contains(neuronMap->size()))
 	throw SpikeStreamException("Temporary neuron ID conflicts with neuron ID already in group.");
-    (*neuronMap)[(unsigned int) neuronMap->size()] = tmpPoint;
+    (*neuronMap)[(unsigned int) neuronMap->size()] = tmpNeuron;
+    return tmpNeuron;
 }
 
 
@@ -71,17 +72,28 @@ bool NeuronGroup::contains(unsigned int neurID){
 bool NeuronGroup::contains(unsigned int neurID, float x, float y, float z){
     if(!neuronMap->contains(neurID))
 	return false;;
-    if((*neuronMap)[neurID]->xPos != x || (*neuronMap)[neurID]->yPos != y || (*neuronMap)[neurID]->zPos != z)
+    if((*neuronMap)[neurID]->getXPos() != x || (*neuronMap)[neurID]->getYPos() != y || (*neuronMap)[neurID]->getZPos() != z)
 	return false;
     return true;
 }
 
 
+/*! Returns the ID of the neuron at a specified location */
+unsigned int NeuronGroup::getNeuronAtLocation(const Point3D& point){
+    NeuronMap::iterator mapEnd = neuronMap->end();//Saves accessing this function multiple times
+    for(NeuronMap::iterator iter=neuronMap->begin(); iter != mapEnd; ++iter){
+	if(iter.value()->getLocation() == point)
+	    return iter.key();
+    }
+    throw SpikeStreamException("No neuron at location "+ point.toString());
+}
+
+
 /*! Returns the location of the neuron with the specified ID */
-Point3D* NeuronGroup::getNeuronLocation(unsigned int neuronID){
+Point3D& NeuronGroup::getNeuronLocation(unsigned int neuronID){
     if(!neuronMap->contains(neuronID))
 	throw SpikeStreamException("Neuron ID '" + QString::number(neuronID) + "' could not be found.");
-    return (*neuronMap)[neuronID];
+    return (*neuronMap)[neuronID]->getLocation();
 }
 
 

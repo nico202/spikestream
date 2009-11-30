@@ -1,6 +1,6 @@
 #include "TestNeuronGroup.h"
 #include "NeuronGroup.h"
-#include "Point3D.h"
+#include "Neuron.h"
 using namespace spikestream;
 
 
@@ -24,17 +24,17 @@ void TestNeuronGroup::testAddLayer(){
 
     //First neuron should be at the layer location (2, 3, 4);
     QVERIFY(neuronMap->contains(2));
-    Point3D* neuronPoint = (*neuronMap)[2];
-    QCOMPARE(neuronPoint->xPos, 2.0f);
-    QCOMPARE(neuronPoint->yPos, 3.0f);
-    QCOMPARE(neuronPoint->zPos, 4.0f);
+    Neuron* tmpNeuron = (*neuronMap)[2];
+    QCOMPARE(tmpNeuron->getXPos(), 2.0f);
+    QCOMPARE(tmpNeuron->getYPos(), 3.0f);
+    QCOMPARE(tmpNeuron->getZPos(), 4.0f);
 
     //Twelfth neuron should be at (2, 13, 4)
     QVERIFY(neuronMap->contains(12));
-    neuronPoint = (*neuronMap)[12];
-    QCOMPARE(neuronPoint->xPos, 2.0f);
-    QCOMPARE(neuronPoint->yPos, 13.0f);
-    QCOMPARE(neuronPoint->zPos, 4.0f);
+    tmpNeuron = (*neuronMap)[12];
+    QCOMPARE(tmpNeuron->getXPos(), 2.0f);
+    QCOMPARE(tmpNeuron->getYPos(), 13.0f);
+    QCOMPARE(tmpNeuron->getZPos(), 4.0f);
 
 }
 
@@ -51,22 +51,22 @@ void TestNeuronGroup::testAddNeuron(){
 
     //Neurons should have been added with temporary ids starting from zero
     QVERIFY(neuronMap->contains(0));
-    Point3D* neuronPoint = (*neuronMap)[0];
-    QCOMPARE(neuronPoint->xPos, 23.0f);
-    QCOMPARE(neuronPoint->yPos, 27.0f);
-    QCOMPARE(neuronPoint->zPos, 12.0f);
+    Neuron* tmpNeuron = (*neuronMap)[0];
+    QCOMPARE(tmpNeuron->getXPos(), 23.0f);
+    QCOMPARE(tmpNeuron->getYPos(), 27.0f);
+    QCOMPARE(tmpNeuron->getZPos(), 12.0f);
 
     QVERIFY(neuronMap->contains(1));
-    neuronPoint = (*neuronMap)[1];
-    QCOMPARE(neuronPoint->xPos, 230.0f);
-    QCOMPARE(neuronPoint->yPos, 270.0f);
-    QCOMPARE(neuronPoint->zPos, 120.0f);
+    tmpNeuron = (*neuronMap)[1];
+    QCOMPARE(tmpNeuron->getXPos(), 230.0f);
+    QCOMPARE(tmpNeuron->getYPos(), 270.0f);
+    QCOMPARE(tmpNeuron->getZPos(), 120.0f);
 
     QVERIFY(neuronMap->contains(2));
-    neuronPoint = (*neuronMap)[2];
-    QCOMPARE(neuronPoint->xPos, 2334.0f);
-    QCOMPARE(neuronPoint->yPos, 2745.0f);
-    QCOMPARE(neuronPoint->zPos, 1245.0f);
+    tmpNeuron = (*neuronMap)[2];
+    QCOMPARE(tmpNeuron->getXPos(), 2334.0f);
+    QCOMPARE(tmpNeuron->getYPos(), 2745.0f);
+    QCOMPARE(tmpNeuron->getZPos(), 1245.0f);
 }
 
 

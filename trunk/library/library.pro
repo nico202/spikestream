@@ -35,7 +35,6 @@ HEADERS = include/ConfigLoader.h \
 	    include/RGBColor.h \
 	    include/SimulationTypes.h \
 	    include/Box.h \
-	    include/Point3D.h \
 	    include/Utilities.h \
 	    include/Util.h
 
@@ -97,7 +96,9 @@ HEADERS += include/Network.h \
 	    include/Archive.h \
 	    include/ArchiveInfo.h \
 	    include/AnalysisInfo.h \
-	    include/WeightlessNeuron.h
+	    include/WeightlessNeuron.h \
+	    include/Neuron.h \
+	    include/Point3D.h
 SOURCES += src/model/Network.cpp \
 	    src/model/NetworkInfo.cpp \
 	    src/model/NeuronGroup.cpp \
@@ -108,7 +109,9 @@ SOURCES += src/model/Network.cpp \
 	    src/model/ArchiveInfo.cpp \
 	    src/model/Connection.cpp \
 	    src/model/AnalysisInfo.cpp \
-	    src/model/WeightlessNeuron.cpp
+	    src/model/WeightlessNeuron.cpp \
+	    src/model/Neuron.cpp \
+	    src/model/Point3D.cpp
 
 #----------------------------------------------#
 #---                  xml                   ---#

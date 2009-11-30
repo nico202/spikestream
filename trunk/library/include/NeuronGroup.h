@@ -3,10 +3,10 @@
 
 //SpikeStream includes
 #include "NeuronGroupInfo.h"
-#include "Point3D.h"
+#include "Neuron.h"
 using namespace spikestream;
 
-typedef QHash<unsigned int, Point3D*> NeuronMap;
+typedef QHash<unsigned int, Neuron*> NeuronMap;
 
 namespace spikestream {
 
@@ -15,16 +15,19 @@ namespace spikestream {
 	    NeuronGroup(const NeuronGroupInfo& info);
 	    ~NeuronGroup();
 	    void addLayer(int width, int height, int xPos, int yPos, int zPos);
-	    void addNeuron(float xPos, float yPos, float zPos);
+	    Neuron* addNeuron(float xPos, float yPos, float zPos);
+	    NeuronMap::iterator begin() { return neuronMap->begin(); }
+	    NeuronMap::iterator end() { return neuronMap->end(); }
 	    void clearNeurons();
 	    bool contains(unsigned int neurID);
 	    bool contains(unsigned int neurID, float x, float y, float z);
 	    unsigned int getID() { return info.getID(); }
+	    unsigned int getNeuronAtLocation(const Point3D& location);
 	    unsigned int getStartNeuronID() { return startNeuronID; }
 	    NeuronGroupInfo getInfo() {return info;}
 	    QList<unsigned int> getNeuronIDs() { return neuronMap->keys(); }
 	    NeuronMap* getNeuronMap() { return neuronMap; }
-	    Point3D* getNeuronLocation(unsigned int neuronID);
+	    Point3D& getNeuronLocation(unsigned int neuronID);
 	    bool isLoaded() { return loaded; }
 	    void setLoaded(bool loaded) { this->loaded = loaded; }
 	    void setID(unsigned int id){ info.setID(id); }

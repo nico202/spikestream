@@ -25,6 +25,7 @@ namespace spikestream {
 	    void networkChanged();
 
 	private slots:
+	    void addNetworks();
 	    void checkLoadingProgress();
 	    void deleteNetwork();
 	    void loadNetwork();

@@ -3,6 +3,7 @@
 #include "NetworkDaoThread.h"
 #include "SpikeStreamException.h"
 #include "SpikeStreamDBException.h"
+#include "Neuron.h"
 using namespace spikestream;
 
 #include <iostream>
@@ -302,9 +303,9 @@ void NetworkDaoThread::addNeuronGroups(){
 	for(NeuronMap::iterator iter=neurMap->begin(); iter != mapEnd; ++iter){
 	    QString queryStr("INSERT INTO Neurons (NeuronGroupID, X, Y, Z) VALUES (");
 	    queryStr += QString::number(neuronGroup->getID()) + ", ";
-	    queryStr += QString::number(iter.value()->xPos) + ", ";
-	    queryStr += QString::number(iter.value()->yPos) + ", ";
-	    queryStr += QString::number(iter.value()->zPos) + ")";
+	    queryStr += QString::number(iter.value()->getXPos()) + ", ";
+	    queryStr += QString::number(iter.value()->getYPos()) + ", ";
+	    queryStr += QString::number(iter.value()->getZPos()) + ")";
 	    query = getQuery(queryStr);
 	    executeQuery(query);
 
@@ -315,6 +316,9 @@ void NetworkDaoThread::addNeuronGroups(){
 		return;
 	    }
 	    (*newNeurMap)[lastInsertID] = iter.value();
+
+	    //Store the id in the neuron
+	    iter.value()->setID(lastInsertID);
 
 	    /* Store the first neuron id in the group.
 		NOTE: Most neuron groups are stored with continuously increasing IDs, but
@@ -387,12 +391,12 @@ void NetworkDaoThread::loadNeurons(){
 	QSqlQuery query = getQuery("SELECT NeuronID, X, Y, Z FROM Neurons WHERE NeuronGroupID = " + QString::number((*iter)->getID()) + " ORDER BY NeuronID");
 	executeQuery(query);
 	while ( query.next() ) {
-	    Point3D* tmpPoint = new Point3D(
+	    Neuron* tmpNeuron = new Neuron(
 			query.value(1).toString().toFloat(),//X
 			query.value(2).toString().toFloat(),//Y
 			query.value(3).toString().toFloat()//Z
 	    );
-	    (*tmpNeurMap)[query.value(0).toUInt()] = tmpPoint;
+	    (*tmpNeurMap)[query.value(0).toUInt()] = tmpNeuron;
 
 	    //Store the start neuron id - useful when neurons are stored continuously, which is usually but not always the case
 	    if(firstTime){

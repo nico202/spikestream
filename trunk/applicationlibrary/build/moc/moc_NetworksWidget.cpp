@@ -23,7 +23,7 @@ static const uint qt_meta_data_spikestream__NetworksWidget[] = {
        1,       // revision
        0,       // classname
        0,    0, // classinfo
-       5,   10, // methods
+       6,   10, // methods
        0,    0, // properties
        0,    0, // enums/sets
 
@@ -32,18 +32,19 @@ static const uint qt_meta_data_spikestream__NetworksWidget[] = {
 
  // slots: signature, parameters, type, tag, flags
       46,   28,   28,   28, 0x08,
-      69,   28,   28,   28, 0x08,
-      85,   28,   28,   28, 0x08,
+      60,   28,   28,   28, 0x08,
+      83,   28,   28,   28, 0x08,
       99,   28,   28,   28, 0x08,
+     113,   28,   28,   28, 0x08,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_spikestream__NetworksWidget[] = {
     "spikestream::NetworksWidget\0\0"
-    "networkChanged()\0checkLoadingProgress()\0"
-    "deleteNetwork()\0loadNetwork()\0"
-    "loadNetworkList()\0"
+    "networkChanged()\0addNetworks()\0"
+    "checkLoadingProgress()\0deleteNetwork()\0"
+    "loadNetwork()\0loadNetworkList()\0"
 };
 
 const QMetaObject spikestream::NetworksWidget::staticMetaObject = {
@@ -72,12 +73,13 @@ int spikestream::NetworksWidget::qt_metacall(QMetaObject::Call _c, int _id, void
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
         case 0: networkChanged(); break;
-        case 1: checkLoadingProgress(); break;
-        case 2: deleteNetwork(); break;
-        case 3: loadNetwork(); break;
-        case 4: loadNetworkList(); break;
+        case 1: addNetworks(); break;
+        case 2: checkLoadingProgress(); break;
+        case 3: deleteNetwork(); break;
+        case 4: loadNetwork(); break;
+        case 5: loadNetworkList(); break;
         }
-        _id -= 5;
+        _id -= 6;
     }
     return _id;
 }

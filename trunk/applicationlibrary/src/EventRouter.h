@@ -18,6 +18,7 @@ namespace spikestream {
 	    void analysisStarted() { emit analysisStartedSignal(); emit analysisNotRunningSignal(false); }
 	    void analysisStopped() { emit analysisStoppedSignal(); emit analysisNotRunningSignal(true); }
 	    void archiveTimeStepChangedSlot() { emit archiveTimeStepChangedSignal(); }
+	    void reloadSlot() { emit reloadSignal(); }
 
 	signals:
 	    //Analysis signals
@@ -66,7 +67,6 @@ namespace spikestream {
 	    void networkChangedSlot() { emit networkChangedSignal(); }
 	    void networkDisplayChangedSlot() { emit networkDisplayChangedSignal(); }
 	    void networkListChangedSlot() { emit networkListChangedSignal(); }
-	    void reloadSlot() { emit reloadSignal(); }
 
     };
 

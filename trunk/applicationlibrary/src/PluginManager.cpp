@@ -10,7 +10,7 @@
 #include <QtDebug>
 
 /*! Constructor */
-PluginManager::PluginManager(QString& pluginFold) throw(SpikeStreamException*){
+PluginManager::PluginManager(QString& pluginFold) throw(SpikeStreamException){
     //Store widget and plugin folder
     this->pluginFolder = pluginFold;
 
@@ -28,19 +28,19 @@ PluginManager::~PluginManager(){
 /*----------                  PUBLIC METHODS                          -------------*/
 /*---------------------------------------------------------------------------------*/
 /*! Returns a list of names of the available plugins */
-QStringList PluginManager::getPluginNames() throw(SpikeStreamException*){
+QStringList PluginManager::getPluginNames() throw(SpikeStreamException){
     return pluginFunctionMap.keys();
 }
 
 
 /*! Returns plugin as  QWidget */
-QWidget* PluginManager::getPlugin(QString pluginName) throw(SpikeStreamException*){
+QWidget* PluginManager::getPlugin(QString pluginName) throw(SpikeStreamException){
     if(pluginFunctionMap.contains(pluginName)){
 	 QWidget* tempWidget = pluginFunctionMap[pluginName]();
 	 qDebug()<<"Getting new plugin with name "<<pluginName<<endl;
 	 return tempWidget;
     }
-    throw new SpikeStreamException("ClassLoader: CANNOT FIND OR RESOLVE CLASS FOR NEURON TYPE: ");
+    throw SpikeStreamException("ClassLoader: CANNOT FIND OR RESOLVE CLASS: ");
 }
 
 
@@ -52,7 +52,7 @@ void PluginManager::loadPlugins(){
     filters << "*.so";
     pluginDirectory.setNameFilters(filters);
     QStringList fileList = pluginDirectory.entryList();
-    qDebug()<<"Available analysis plugins: "<<fileList;
+    qDebug()<<"Path: "<<pluginFolder<<". Available plugins: "<<fileList;
 
     //Load functions pointing to each plugin
     for(QList<QString>::iterator fileIter = fileList.begin(); fileIter != fileList.end(); ++fileIter){
@@ -63,7 +63,7 @@ void PluginManager::loadPlugins(){
 	void *hndl = dlopen(filePath.toStdString().data(), RTLD_NOW);
 	if(hndl == NULL){
 	    QString errorString(dlerror());
-	    throw new SpikeStreamException("Cannot open plugin file path. Error: " + errorString);
+	    throw SpikeStreamException("Cannot open plugin file path. Error: " + errorString);
 	}
 
 	//Get functions to create the widget and to get the widget's name
@@ -82,7 +82,7 @@ void PluginManager::loadPlugins(){
 	    pluginFunctionMap[tmpPluginName] = createPluginFunction;
 	}
 	else{
-	    throw new SpikeStreamException("Failed to obtain required functions from library " + *fileIter);
+	    throw SpikeStreamException("Failed to obtain required functions from library " + *fileIter);
 	}
     }
 
