@@ -53,22 +53,22 @@ static const uint qt_meta_data_spikestream__EventRouter[] = {
      468,   25,   25,   25, 0x0a,
      486,   25,   25,   25, 0x0a,
      504,   25,   25,   25, 0x0a,
-     533,   25,   25,   25, 0x08,
-     554,   25,   25,   25, 0x08,
-     573,   25,   25,   25, 0x08,
-     591,   25,   25,   25, 0x08,
+     533,   25,   25,   25, 0x0a,
+     546,   25,   25,   25, 0x08,
+     567,   25,   25,   25, 0x08,
+     586,   25,   25,   25, 0x08,
      604,   25,   25,   25, 0x08,
-     619,   25,   25,   25, 0x08,
-     634,   25,   25,   25, 0x08,
-     650,   25,   25,   25, 0x08,
-     666,   25,   25,   25, 0x08,
-     681,   25,   25,   25, 0x08,
-     698,   25,   25,   25, 0x08,
-     715,   25,   25,   25, 0x08,
-     733,   25,   25,   25, 0x08,
-     754,   25,   25,   25, 0x08,
-     782,   25,   25,   25, 0x08,
-     807,   25,   25,   25, 0x08,
+     617,   25,   25,   25, 0x08,
+     632,   25,   25,   25, 0x08,
+     647,   25,   25,   25, 0x08,
+     663,   25,   25,   25, 0x08,
+     679,   25,   25,   25, 0x08,
+     694,   25,   25,   25, 0x08,
+     711,   25,   25,   25, 0x08,
+     728,   25,   25,   25, 0x08,
+     746,   25,   25,   25, 0x08,
+     767,   25,   25,   25, 0x08,
+     795,   25,   25,   25, 0x08,
 
        0        // eod
 };
@@ -88,7 +88,7 @@ static const char qt_meta_stringdata_spikestream__EventRouter[] = {
     "networkDisplayChangedSignal()\0"
     "networkListChangedSignal()\0reloadSignal()\0"
     "analysisStarted()\0analysisStopped()\0"
-    "archiveTimeStepChangedSlot()\0"
+    "archiveTimeStepChangedSlot()\0reloadSlot()\0"
     "archiveChangedSlot()\0moveBackwardSlot()\0"
     "moveForwardSlot()\0moveUpSlot()\0"
     "moveDownSlot()\0moveLeftSlot()\0"
@@ -96,7 +96,7 @@ static const char qt_meta_stringdata_spikestream__EventRouter[] = {
     "rotateUpSlot()\0rotateDownSlot()\0"
     "rotateLeftSlot()\0rotateRightSlot()\0"
     "networkChangedSlot()\0networkDisplayChangedSlot()\0"
-    "networkListChangedSlot()\0reloadSlot()\0"
+    "networkListChangedSlot()\0"
 };
 
 const QMetaObject spikestream::EventRouter::staticMetaObject = {
@@ -147,22 +147,22 @@ int spikestream::EventRouter::qt_metacall(QMetaObject::Call _c, int _id, void **
         case 20: analysisStarted(); break;
         case 21: analysisStopped(); break;
         case 22: archiveTimeStepChangedSlot(); break;
-        case 23: archiveChangedSlot(); break;
-        case 24: moveBackwardSlot(); break;
-        case 25: moveForwardSlot(); break;
-        case 26: moveUpSlot(); break;
-        case 27: moveDownSlot(); break;
-        case 28: moveLeftSlot(); break;
-        case 29: moveRightSlot(); break;
-        case 30: resetViewSlot(); break;
-        case 31: rotateUpSlot(); break;
-        case 32: rotateDownSlot(); break;
-        case 33: rotateLeftSlot(); break;
-        case 34: rotateRightSlot(); break;
-        case 35: networkChangedSlot(); break;
-        case 36: networkDisplayChangedSlot(); break;
-        case 37: networkListChangedSlot(); break;
-        case 38: reloadSlot(); break;
+        case 23: reloadSlot(); break;
+        case 24: archiveChangedSlot(); break;
+        case 25: moveBackwardSlot(); break;
+        case 26: moveForwardSlot(); break;
+        case 27: moveUpSlot(); break;
+        case 28: moveDownSlot(); break;
+        case 29: moveLeftSlot(); break;
+        case 30: moveRightSlot(); break;
+        case 31: resetViewSlot(); break;
+        case 32: rotateUpSlot(); break;
+        case 33: rotateDownSlot(); break;
+        case 34: rotateLeftSlot(); break;
+        case 35: rotateRightSlot(); break;
+        case 36: networkChangedSlot(); break;
+        case 37: networkDisplayChangedSlot(); break;
+        case 38: networkListChangedSlot(); break;
         }
         _id -= 39;
     }

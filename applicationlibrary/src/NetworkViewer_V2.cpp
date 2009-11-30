@@ -192,7 +192,7 @@ void NetworkViewer_V2::resizeGL(int screenWidth, int screenHeight){
     checkOpenGLErrors();
 }
 
-void NetworkViewer_V2::mouseDoubleClickEvent (QMouseEvent * event ){
+void NetworkViewer_V2::mouseDoubleClickEvent (QMouseEvent * ){
     cout<<"Mouse double click: "<<endl;
 //    If you derive a class from QGLWidget you can reimplement
 //mouseMoveEvent(QMouseEvent *event).
@@ -434,9 +434,9 @@ void NetworkViewer_V2::drawConnections(){
     if(!Globals::networkLoaded())
 	return;
 
-    //Local variables declared once here to save processing
-    Point3D* fromNeurPoint;
-    Point3D* toNeurPoint;
+    //Local variables declared once here to save processing. These point to the points stored in the neurons
+    Point3D* fromNeuronPoint;
+    Point3D* toNeuronPoint;
 
     //Get pointer to network that is to be drawn and its associated display
     Network* network = Globals::getNetwork();
@@ -467,8 +467,8 @@ void NetworkViewer_V2::drawConnections(){
 
 		//Get the position of the from and to neurons
 		//FIXME: THIS COULD BE SPEEDED UP BY STORING THE POSITION IN Connection AT THE COST OF SOME LOADING COMPLEXITY
-		fromNeurPoint = fromNeuronGroup->getNeuronLocation((*conIter)->fromNeuronID);
-		toNeurPoint = toNeuronGroup->getNeuronLocation((*conIter)->toNeuronID);
+		fromNeuronPoint = &fromNeuronGroup->getNeuronLocation((*conIter)->fromNeuronID);
+		toNeuronPoint = &toNeuronGroup->getNeuronLocation((*conIter)->toNeuronID);
 
 		//Set the colour
 		if((*conIter)->weight >= 0)
@@ -477,8 +477,8 @@ void NetworkViewer_V2::drawConnections(){
 		    glColor3f(negativeConnectionColor.red, negativeConnectionColor.green, negativeConnectionColor.blue);
 
 		//Draw the neuron
-		glVertex3f(fromNeurPoint->xPos, fromNeurPoint->yPos, fromNeurPoint->zPos);
-		glVertex3f(toNeurPoint->xPos, toNeurPoint->yPos, toNeurPoint->zPos);
+		glVertex3f(fromNeuronPoint->getXPos(), fromNeuronPoint->getYPos(), fromNeuronPoint->getZPos());
+		glVertex3f(toNeuronPoint->getXPos(), toNeuronPoint->getYPos(), toNeuronPoint->getZPos());
 
 	    }
 	}
@@ -534,7 +534,7 @@ void NetworkViewer_V2::drawNeurons(){
 		}
 
 		//Draw the neuron
-		glVertex3f(neurIter.value()->xPos, neurIter.value()->yPos, neurIter.value()->zPos);
+		glVertex3f(neurIter.value()->getXPos(), neurIter.value()->getYPos(), neurIter.value()->getZPos());
 	    }
 	}
     //End the drawing of points in OpenGL

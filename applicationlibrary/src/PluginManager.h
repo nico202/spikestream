@@ -19,11 +19,11 @@ typedef QString (*GetPluginNameFunctionType)();
 
 class PluginManager {
   public:
-    PluginManager(QString& pluginFolder) throw(SpikeStreamException*);
+    PluginManager(QString& pluginFolder) throw(SpikeStreamException);
     ~PluginManager();
 
-    QStringList getPluginNames() throw(SpikeStreamException*);
-    QWidget* getPlugin(QString pluginName) throw(SpikeStreamException*);
+    QStringList getPluginNames() throw(SpikeStreamException);
+    QWidget* getPlugin(QString pluginName) throw(SpikeStreamException);
 
 
   private:

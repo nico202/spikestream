@@ -1,25 +1,3 @@
-/***************************************************************************
- *   SpikeStream Application                                               *
- *   Copyright (C) 2007 by David Gamez                                     *
- *   david@davidgamez.eu                                                   *
- *   Version 0.1                                                           *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
-
 //SpikeStream includes
 #include "AnalysisLoaderWidget.h"
 #include "SpikeStreamMainWindow.h"
@@ -38,6 +16,8 @@
 #include "SpikeStreamException.h"
 #include "NetworksWidget.h"
 #include "ArchiveWidget_V2.h"
+#include "NeuronGroupWidget.h"
+#include "ConnectionWidget_V2.h"
 using namespace spikestream;
 
 //Qt includes
@@ -408,8 +388,8 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 
 	//Set up editor window and add to tab widget
 	QSplitter *layerSplitterWidget = new QSplitter( tabWidget);
-	layerWidget = new LayerWidget(layerSplitterWidget, networkDBInterface, deviceDBInterface);
-	connectionWidget = new ConnectionWidget(layerSplitterWidget, networkDBInterface, deviceDBInterface);
+	NeuronGroupWidget* neuronGroupWidget = new NeuronGroupWidget(layerSplitterWidget);
+	ConnectionWidget_V2* connectionWidget_V2 = new ConnectionWidget_V2(layerSplitterWidget);
 	layerSplitterWidget->setOrientation(Qt::Vertical);
 	tabWidget->addTab(layerSplitterWidget, "Editor");
 
@@ -486,7 +466,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	tabWidget->addTab(analysisScrollArea, "Analysis");
 
 	//Set up layer widget connections
-	layerWidget->setConnectionWidget(connectionWidget);
+	//layerWidget->setConnectionWidget(connectionWidget);
 
 	//Set up network viewer references
 	//networkViewer2->setNetworkViewerProperties((QWidget*)networkViewerProperties);
@@ -584,7 +564,7 @@ void SpikeStreamMainWindow::reloadConnections(){
 void SpikeStreamMainWindow::reloadNeuronGroups(){
 	networkViewerProperties->reloadNeuronGroups();
 	simulationWidget->reloadNeuronGroups();
-	connectionWidget->reloadConnections();
+	//connectionWidget->reloadConnections();
 }
 
 
@@ -608,16 +588,16 @@ void SpikeStreamMainWindow::setToNeuronID(unsigned int toNeurNum){
 /*! When simulation is destroyed this passes this information
 	on to other widgets. */
 void SpikeStreamMainWindow::simulationDestroyed(){
-	connectionWidget->simulationDestroyed();
-	layerWidget->simulationDestroyed();
+	//connectionWidget->simulationDestroyed();
+	//layerWidget->simulationDestroyed();
 }
 
 
 /*! When simulation is initialised this passes this information
 	on to other widgets. */
 void SpikeStreamMainWindow::simulationInitialised(){
-	connectionWidget->simulationInitialised();
-	layerWidget->simulationInitialised();
+	//connectionWidget->simulationInitialised();
+	//layerWidget->simulationInitialised();
 }
 
 
@@ -974,8 +954,8 @@ void SpikeStreamMainWindow::reloadEverything(){
 
     //Manual reload of classes  not connected to the signal FIXME: REPLACE WITH SIGNAL MECHANISM
 	try{
-		layerWidget->reloadNeuronGroups();
-		connectionWidget->reloadConnections();
+		//layerWidget->reloadNeuronGroups();
+		//connectionWidget->reloadConnections();
 		simulationWidget->reloadNeuronGroups();
 		simulationWidget->reloadConnectionGroups();
 		networkViewerProperties->reloadConnections();

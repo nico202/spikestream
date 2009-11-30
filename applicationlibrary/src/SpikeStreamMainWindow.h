@@ -30,11 +30,8 @@
 #include "SimulationManager.h"
 #include "SimulationWidget.h"
 #include "ArchiveManager.h"
-#include "ConnectionWidget.h"
-#include "LayerWidget.h"
 #include "BusyDialog.h"
 #include "SpikeStreamApplication.h"
-//#include "ArchiveWidget.h"
 
 //Qt includes
 #include <q3mainwindow.h>
@@ -66,12 +63,12 @@ class SpikeStreamMainWindow: public Q3MainWindow {
 		void setFromNeuronID(unsigned int neurGrpID, unsigned int fromNeurID);
 		void setToNeuronID(unsigned int toNeurID);
 		void setSplashScreenMessage(QString);
-		void simulationDestroyed();	
+		void simulationDestroyed();
 		void simulationInitialised();
 
 
 		//======================== VARIABLES ===================================
-		/*! Static reference to the main application to invoke global methods 
+		/*! Static reference to the main application to invoke global methods
 			to reload neuron groups etc. */
 		static SpikeStreamMainWindow* spikeStrMainWin;
 
@@ -89,8 +86,8 @@ class SpikeStreamMainWindow: public Q3MainWindow {
 
 	signals:
 		void reload();
-	
-	
+
+
 	private slots:
 		void about();
 		void acceleratorKeyPressed(int acceleratorID);
@@ -120,12 +117,9 @@ class SpikeStreamMainWindow: public Q3MainWindow {
 		NetworkViewer_V2* networkViewer2;
 		NetworkViewerProperties *networkViewerProperties;
 		SimulationWidget *simulationWidget;
-		ConnectionWidget *connectionWidget;
-		LayerWidget *layerWidget;
-		//ArchiveWidget *archiveWidget;
 		QTabWidget *tabWidget;
 		Q3Accel* keyboardAccelerator;
-	
+
 		/*! Default location for looking for image files, scripts, etc.*/
 		QString defaultFileLocation;
 
