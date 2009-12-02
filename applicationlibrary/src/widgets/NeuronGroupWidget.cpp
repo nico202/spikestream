@@ -1,11 +1,14 @@
 //SpikeStream includes
+#include "NeuronGroupModel.h"
 #include "NeuronGroupWidget.h"
+#include "NeuronGroupTableView.h"
 #include "PluginsDialog.h"
 using namespace spikestream;
 
 //Qt includes
 #include <QLayout>
 #include <QPushButton>
+#include <QTableView>
 
 
 /*! Constructor */
@@ -18,6 +21,11 @@ NeuronGroupWidget::NeuronGroupWidget(QWidget* parent)  : QWidget(parent) {
     addNeuronsButton->setMaximumSize(150, 30);
     connect (addNeuronsButton, SIGNAL(clicked()), this, SLOT(addNeurons()));
     verticalBox->addWidget(addNeuronsButton);
+
+    //Construct table view and model
+    QAbstractTableModel* neuronGroupModel = new NeuronGroupModel();
+    QTableView* neuronGroupView = new NeuronGroupTableView(neuronGroupModel);
+    verticalBox->addWidget(neuronGroupView);
 }
 
 

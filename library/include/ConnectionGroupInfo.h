@@ -17,13 +17,12 @@ namespace spikestream {
 	    ~ConnectionGroupInfo();
 	    ConnectionGroupInfo& operator=(const ConnectionGroupInfo& rhs);
 
-	    unsigned int getID() { return id; }
-	    QString getDescription() { return description; }
-	    unsigned int getFromNeuronGroupID() { return fromNeuronGroupID; }
-	    unsigned int getToNeuronGroupID() { return toNeuronGroupID; }
-	    unsigned int getSynapseType() { return synapseType; }
+	    unsigned int getID() const { return id; }
+	    QString getDescription() const { return description; }
+	    unsigned int getFromNeuronGroupID() const { return fromNeuronGroupID; }
+	    unsigned int getToNeuronGroupID() const { return toNeuronGroupID; }
+	    unsigned int getSynapseType() const { return synapseType; }
 	    QHash<QString, double> getParameterMap() { return parameterMap; }
-	    unsigned int getNumberOfConnections() { return numberOfConnections; }
 	    QString getParameterXML();
 
 	    void setID(unsigned int id) { this->id = id; }
@@ -47,9 +46,6 @@ namespace spikestream {
 
 	    /*! Parameters of the connection */
 	    QHash<QString, double> parameterMap;
-
-	    /*! Number of connections in the group */
-	    unsigned int numberOfConnections;
 
     };
 

@@ -223,9 +223,8 @@ void NetworkDaoThread::addConnectionGroups(){
 	    return;
 
 	//Add connections to database
-	QList<Connection*>* connList = connectionGroup->getConnections();
-	ConnectionList::iterator endConnList = connList->end();
-	for(ConnectionList::iterator iter = connList->begin(); iter != endConnList; ++iter){
+	ConnectionList::const_iterator endConGrp = connectionGroup->end();
+	for(ConnectionList::const_iterator iter = connectionGroup->begin(); iter != endConGrp; ++iter){
 	    //Build query string
 	    queryStr = "INSERT INTO Connections ( ConnectionGroupID, FromNeuronID, ToNeuronID, Delay, Weight) VALUES (";
 	    queryStr += QString::number(connectionGroup->getID()) + ", ";

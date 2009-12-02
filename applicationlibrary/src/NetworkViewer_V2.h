@@ -80,9 +80,6 @@ namespace spikestream {
 
 	    void viewClippingVolume_Horizontal(Box& clipVolume);
 	    void viewClippingVolume_Vertical(Box& clipVolume);
-	    void zoomDefaultView();
-	    void zoomAboveNeuronGroup(unsigned int neuronGroupID);
-	    void zoomToNeuronGroup(unsigned int neuronGroupID);
 
 	private:
 	    //=======================  VARIABLES  ========================
@@ -152,6 +149,10 @@ namespace spikestream {
 	    void rotateVector(GLfloat x, GLfloat y, GLfloat z, GLfloat result[]);
 	    void rotateXAxis(float angle);
 	    void rotateZAxis(float angle);
+	    void setZoomLevel();
+	    void zoomDefaultView();
+	    void zoomAboveNeuronGroup(unsigned int neuronGroupID);
+	    void zoomToNeuronGroup(unsigned int neuronGroupID);
 
     };
 

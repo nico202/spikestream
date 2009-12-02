@@ -131,6 +131,24 @@ bool Network::containsNeuron(unsigned int neurID){
 }
 
 
+/*! Returns a complete list of connection group infos */
+QList<ConnectionGroupInfo> Network::getConnectionGroupsInfo(){
+    QList<ConnectionGroupInfo> tmpList;
+    for(QHash<unsigned int, ConnectionGroup*>::iterator iter = connGrpMap.begin(); iter != connGrpMap.end(); ++iter)
+	tmpList.append(iter.value()->getInfo());
+    return tmpList;
+}
+
+
+/*! Returns a complete list of neuron group infos */
+QList<NeuronGroupInfo> Network::getNeuronGroupsInfo(){
+    QList<NeuronGroupInfo> tmpList;
+    for(QHash<unsigned int, NeuronGroup*>::iterator iter = neurGrpMap.begin(); iter != neurGrpMap.end(); ++iter)
+	tmpList.append(iter.value()->getInfo());
+    return tmpList;
+}
+
+
 /*! Returns the number of neurons that connect to the specified neuron */
 int Network::getNumberOfToConnections(unsigned int neuronID){
     //Check neuron id is in the network
@@ -298,8 +316,6 @@ void Network::connectionThreadFinished(){
 	errorMessage += "Connection Loading Error: '" + connectionNetworkDaoThread->getErrorMessage() + "'. ";
 	error = true;
     }
-
-    //Switch on the currentConnectionTask if necessary
 
     //Reset task
     currentConnectionTask = -1;

@@ -1,5 +1,7 @@
 //SpikeStream includes
 #include "ConnectionWidget_V2.h"
+#include "ConnectionGroupModel.h"
+#include "ConnectionGroupTableView.h"
 #include "PluginsDialog.h"
 using namespace spikestream;
 
@@ -18,6 +20,11 @@ ConnectionWidget_V2::ConnectionWidget_V2(QWidget* parent)  : QWidget(parent) {
     addConnectionsButton->setMaximumSize(150, 30);
     connect (addConnectionsButton, SIGNAL(clicked()), this, SLOT(addConnections()));
     verticalBox->addWidget(addConnectionsButton);
+
+    //Construct table view and model
+    QAbstractTableModel* connGroupModel = new ConnectionGroupModel();
+    QTableView* connGroupView = new ConnectionGroupTableView(connGroupModel);
+    verticalBox->addWidget(connGroupView);
 }
 
 

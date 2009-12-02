@@ -11,6 +11,9 @@ NetworkDisplay::NetworkDisplay(){
     //Inform other classes when the display has changed
     connect(this, SIGNAL(networkDisplayChanged()), Globals::getEventRouter(), SLOT(networkDisplayChangedSlot()), Qt:: QueuedConnection);
 
+    //Listen for changes to network viewer
+    connect(Globals::getEventRouter(), SIGNAL(networkViewChangedSignal()), this, SLOT(clearZoom()));
+
     //Set the default colors and store addresses in a map to prevent deletion
     defaultNeuronColor.set(0.0f, 0.0f, 0.0f);
     defaultColorMap[&defaultNeuronColor] = true;
@@ -51,6 +54,22 @@ void NetworkDisplay::networkChanged(){
 
 
 /*----------------------------------------------------------*/
+/*-----                 PRIVATE SLOTS                  -----*/
+/*----------------------------------------------------------*/
+
+/*! Clears the zoom status. This should be done automatically whenever
+    the 3D network perspective is altered by the user. */
+void NetworkDisplay::clearZoom(){
+    int oldZoomStatus = zoomStatus;
+    zoomStatus = NO_ZOOM;
+
+    //Inform other classs about the change
+    if(oldZoomStatus != NO_ZOOM)
+	emit networkDisplayChanged();
+}
+
+
+/*----------------------------------------------------------*/
 /*-----                PUBLIC METHODS                  -----*/
 /*----------------------------------------------------------*/
 
@@ -63,6 +82,25 @@ void NetworkDisplay::clearNeuronColorMap(){
 	    delete iter.value();
     }
     neuronColorMap->clear();
+
+    //Inform other classes that the display has changed
+    emit networkDisplayChanged();
+}
+
+
+/*! Returns true if the specified connection group is currently visible */
+bool NetworkDisplay::connectionGroupVisible(unsigned int conGrpID){
+    if(connGrpDisplayMap.contains(conGrpID))
+	return true;
+    return false;
+}
+
+
+/*! Returns true if the specified neuron group is currently visible */
+bool NetworkDisplay::neuronGroupVisible(unsigned int neurGrpID){
+    if(neurGrpDisplayMap.contains(neurGrpID))
+	return true;
+    return false;
 }
 
 
@@ -70,6 +108,22 @@ void NetworkDisplay::lockMutex(){
     mutex.lock();
 }
 
+
+/*! Sets the visibility of the specified connection group */
+void NetworkDisplay::setConnectionGroupVisibility(unsigned int conGrpID, bool visible){
+    if(visible){
+	connGrpDisplayMap[conGrpID] = true;
+    }
+    else{
+	connGrpDisplayMap.remove(conGrpID);
+    }
+
+    //Inform other classes that the display has changed
+    emit networkDisplayChanged();
+}
+
+
+/*! Sets the map containing specified neuron colours */
 void NetworkDisplay::setNeuronColorMap(QHash<unsigned int, RGBColor*>* newMap){
     //Obtain and lock the mutex
     QMutexLocker locker(&mutex);
@@ -80,6 +134,23 @@ void NetworkDisplay::setNeuronColorMap(QHash<unsigned int, RGBColor*>* newMap){
 
     //Point map to new map
     neuronColorMap = newMap;
+
+    //Inform other classes that the display has changed
+    emit networkDisplayChanged();
+}
+
+
+/*! Sets the visibility of the specified neuron group */
+void NetworkDisplay::setNeuronGroupVisibility(unsigned int neurGrpID, bool visible){
+    if(visible){
+	neurGrpDisplayMap[neurGrpID] = true;
+    }
+    else{
+	neurGrpDisplayMap.remove(neurGrpID);
+    }
+
+    //Inform other classes that the display has changed
+    emit networkDisplayChanged();
 }
 
 
@@ -111,8 +182,31 @@ void NetworkDisplay::setVisibleNeuronGroupIDs(const QList<unsigned int>& neurGrp
     emit networkDisplayChanged();
 }
 
+
 void NetworkDisplay::unlockMutex(){
     mutex.unlock();
+}
+
+
+/*! Returns true if a specified zoom setting has been applied */
+bool NetworkDisplay::isZoomEnabled(){
+    if(zoomStatus == NO_ZOOM)
+	return false;
+    return true;
+}
+
+
+/*! Sets the zoom of the 3D network viewer and emits a signal if
+    the zoom settings have changed */
+void NetworkDisplay::setZoom(unsigned int neurGrpID, int status){
+    int oldStatus = zoomStatus;
+    unsigned int oldNeurGrpID = zoomNeuronGroupID;
+    zoomStatus = status;
+    zoomNeuronGroupID = neurGrpID;
+
+    //Inform other classes if display has changed
+    if(oldStatus != zoomStatus|| oldNeurGrpID != neurGrpID)
+	emit networkDisplayChanged();
 }
 
 

@@ -19,6 +19,7 @@ namespace spikestream {
 	    void analysisStopped() { emit analysisStoppedSignal(); emit analysisNotRunningSignal(true); }
 	    void archiveTimeStepChangedSlot() { emit archiveTimeStepChangedSignal(); }
 	    void reloadSlot() { emit reloadSignal(); }
+	    void networkDisplayChangedSlot() { emit networkDisplayChangedSignal(); }
 
 	signals:
 	    //Analysis signals
@@ -46,26 +47,26 @@ namespace spikestream {
 	    void networkChangedSignal();
 	    void networkDisplayChangedSignal();
 	    void networkListChangedSignal();
+	    void networkViewChangedSignal();
 	    void reloadSignal();
 
 	private slots:
 	    void archiveChangedSlot() { emit archiveChangedSignal(); }
 
 	    //OpenGL slots
-	    void moveBackwardSlot() { emit moveBackwardSignal(); }
-	    void moveForwardSlot() { emit moveForwardSignal(); }
-	    void moveUpSlot() { emit moveUpSignal(); }
-	    void moveDownSlot() { emit moveDownSignal(); }
-	    void moveLeftSlot() { emit moveLeftSignal(); }
-	    void moveRightSlot() { emit moveRightSignal(); }
-	    void resetViewSlot() { emit resetViewSignal(); }
-	    void rotateUpSlot() { emit rotateUpSignal(); }
-	    void rotateDownSlot() { emit rotateDownSignal(); }
-	    void rotateLeftSlot() { emit rotateLeftSignal(); }
-	    void rotateRightSlot() { emit rotateRightSignal(); }
+	    void moveBackwardSlot() { emit moveBackwardSignal(); emit networkViewChangedSignal(); }
+	    void moveForwardSlot() { emit moveForwardSignal(); emit networkViewChangedSignal(); }
+	    void moveUpSlot() { emit moveUpSignal(); emit networkViewChangedSignal(); }
+	    void moveDownSlot() { emit moveDownSignal(); emit networkViewChangedSignal(); }
+	    void moveLeftSlot() { emit moveLeftSignal(); emit networkViewChangedSignal(); }
+	    void moveRightSlot() { emit moveRightSignal(); emit networkViewChangedSignal(); }
+	    void resetViewSlot() { emit resetViewSignal(); emit networkViewChangedSignal(); }
+	    void rotateUpSlot() { emit rotateUpSignal(); emit networkViewChangedSignal(); }
+	    void rotateDownSlot() { emit rotateDownSignal(); emit networkViewChangedSignal(); }
+	    void rotateLeftSlot() { emit rotateLeftSignal(); emit networkViewChangedSignal(); }
+	    void rotateRightSlot() { emit rotateRightSignal(); emit networkViewChangedSignal(); }
 
 	    void networkChangedSlot() { emit networkChangedSignal(); }
-	    void networkDisplayChangedSlot() { emit networkDisplayChangedSignal(); }
 	    void networkListChangedSlot() { emit networkListChangedSignal(); }
 
     };
