@@ -23,7 +23,7 @@ static const uint qt_meta_data_spikestream__EventRouter[] = {
        1,       // revision
        0,       // classname
        0,    0, // classinfo
-      39,   10, // methods
+      40,   10, // methods
        0,    0, // properties
        0,    0, // enums/sets
 
@@ -48,27 +48,28 @@ static const uint qt_meta_data_spikestream__EventRouter[] = {
      396,   25,   25,   25, 0x05,
      426,   25,   25,   25, 0x05,
      453,   25,   25,   25, 0x05,
+     480,   25,   25,   25, 0x05,
 
  // slots: signature, parameters, type, tag, flags
-     468,   25,   25,   25, 0x0a,
-     486,   25,   25,   25, 0x0a,
-     504,   25,   25,   25, 0x0a,
-     533,   25,   25,   25, 0x0a,
-     546,   25,   25,   25, 0x08,
-     567,   25,   25,   25, 0x08,
-     586,   25,   25,   25, 0x08,
-     604,   25,   25,   25, 0x08,
-     617,   25,   25,   25, 0x08,
-     632,   25,   25,   25, 0x08,
-     647,   25,   25,   25, 0x08,
-     663,   25,   25,   25, 0x08,
-     679,   25,   25,   25, 0x08,
-     694,   25,   25,   25, 0x08,
-     711,   25,   25,   25, 0x08,
-     728,   25,   25,   25, 0x08,
-     746,   25,   25,   25, 0x08,
-     767,   25,   25,   25, 0x08,
-     795,   25,   25,   25, 0x08,
+     495,   25,   25,   25, 0x0a,
+     513,   25,   25,   25, 0x0a,
+     531,   25,   25,   25, 0x0a,
+     560,   25,   25,   25, 0x0a,
+     573,   25,   25,   25, 0x0a,
+     601,   25,   25,   25, 0x08,
+     622,   25,   25,   25, 0x08,
+     641,   25,   25,   25, 0x08,
+     659,   25,   25,   25, 0x08,
+     672,   25,   25,   25, 0x08,
+     687,   25,   25,   25, 0x08,
+     702,   25,   25,   25, 0x08,
+     718,   25,   25,   25, 0x08,
+     734,   25,   25,   25, 0x08,
+     749,   25,   25,   25, 0x08,
+     766,   25,   25,   25, 0x08,
+     783,   25,   25,   25, 0x08,
+     801,   25,   25,   25, 0x08,
+     822,   25,   25,   25, 0x08,
 
        0        // eod
 };
@@ -86,17 +87,18 @@ static const char qt_meta_stringdata_spikestream__EventRouter[] = {
     "rotateDownSignal()\0rotateLeftSignal()\0"
     "rotateRightSignal()\0networkChangedSignal()\0"
     "networkDisplayChangedSignal()\0"
-    "networkListChangedSignal()\0reloadSignal()\0"
+    "networkListChangedSignal()\0"
+    "networkViewChangedSignal()\0reloadSignal()\0"
     "analysisStarted()\0analysisStopped()\0"
     "archiveTimeStepChangedSlot()\0reloadSlot()\0"
+    "networkDisplayChangedSlot()\0"
     "archiveChangedSlot()\0moveBackwardSlot()\0"
     "moveForwardSlot()\0moveUpSlot()\0"
     "moveDownSlot()\0moveLeftSlot()\0"
     "moveRightSlot()\0resetViewSlot()\0"
     "rotateUpSlot()\0rotateDownSlot()\0"
     "rotateLeftSlot()\0rotateRightSlot()\0"
-    "networkChangedSlot()\0networkDisplayChangedSlot()\0"
-    "networkListChangedSlot()\0"
+    "networkChangedSlot()\0networkListChangedSlot()\0"
 };
 
 const QMetaObject spikestream::EventRouter::staticMetaObject = {
@@ -143,28 +145,29 @@ int spikestream::EventRouter::qt_metacall(QMetaObject::Call _c, int _id, void **
         case 16: networkChangedSignal(); break;
         case 17: networkDisplayChangedSignal(); break;
         case 18: networkListChangedSignal(); break;
-        case 19: reloadSignal(); break;
-        case 20: analysisStarted(); break;
-        case 21: analysisStopped(); break;
-        case 22: archiveTimeStepChangedSlot(); break;
-        case 23: reloadSlot(); break;
-        case 24: archiveChangedSlot(); break;
-        case 25: moveBackwardSlot(); break;
-        case 26: moveForwardSlot(); break;
-        case 27: moveUpSlot(); break;
-        case 28: moveDownSlot(); break;
-        case 29: moveLeftSlot(); break;
-        case 30: moveRightSlot(); break;
-        case 31: resetViewSlot(); break;
-        case 32: rotateUpSlot(); break;
-        case 33: rotateDownSlot(); break;
-        case 34: rotateLeftSlot(); break;
-        case 35: rotateRightSlot(); break;
-        case 36: networkChangedSlot(); break;
-        case 37: networkDisplayChangedSlot(); break;
-        case 38: networkListChangedSlot(); break;
+        case 19: networkViewChangedSignal(); break;
+        case 20: reloadSignal(); break;
+        case 21: analysisStarted(); break;
+        case 22: analysisStopped(); break;
+        case 23: archiveTimeStepChangedSlot(); break;
+        case 24: reloadSlot(); break;
+        case 25: networkDisplayChangedSlot(); break;
+        case 26: archiveChangedSlot(); break;
+        case 27: moveBackwardSlot(); break;
+        case 28: moveForwardSlot(); break;
+        case 29: moveUpSlot(); break;
+        case 30: moveDownSlot(); break;
+        case 31: moveLeftSlot(); break;
+        case 32: moveRightSlot(); break;
+        case 33: resetViewSlot(); break;
+        case 34: rotateUpSlot(); break;
+        case 35: rotateDownSlot(); break;
+        case 36: rotateLeftSlot(); break;
+        case 37: rotateRightSlot(); break;
+        case 38: networkChangedSlot(); break;
+        case 39: networkListChangedSlot(); break;
         }
-        _id -= 39;
+        _id -= 40;
     }
     return _id;
 }
@@ -285,8 +288,14 @@ void spikestream::EventRouter::networkListChangedSignal()
 }
 
 // SIGNAL 19
-void spikestream::EventRouter::reloadSignal()
+void spikestream::EventRouter::networkViewChangedSignal()
 {
     QMetaObject::activate(this, &staticMetaObject, 19, 0);
+}
+
+// SIGNAL 20
+void spikestream::EventRouter::reloadSignal()
+{
+    QMetaObject::activate(this, &staticMetaObject, 20, 0);
 }
 QT_END_MOC_NAMESPACE

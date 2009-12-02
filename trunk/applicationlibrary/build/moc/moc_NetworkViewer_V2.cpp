@@ -23,7 +23,7 @@ static const uint qt_meta_data_spikestream__NetworkViewer_V2[] = {
        1,       // revision
        0,       // classname
        0,    0, // classinfo
-      18,   10, // methods
+      15,   10, // methods
        0,    0, // properties
        0,    0, // enums/sets
 
@@ -43,9 +43,6 @@ static const uint qt_meta_data_spikestream__NetworkViewer_V2[] = {
      170,   30,   30,   30, 0x08,
      195,  184,   30,   30, 0x08,
      231,  184,   30,   30, 0x08,
-     265,   30,   30,   30, 0x08,
-     297,  283,   30,   30, 0x08,
-     324,  283,   30,   30, 0x08,
 
        0        // eod
 };
@@ -58,9 +55,6 @@ static const char qt_meta_stringdata_spikestream__NetworkViewer_V2[] = {
     "rotateDown()\0rotateLeft()\0rotateRight()\0"
     "clipVolume\0viewClippingVolume_Horizontal(Box&)\0"
     "viewClippingVolume_Vertical(Box&)\0"
-    "zoomDefaultView()\0neuronGroupID\0"
-    "zoomAboveNeuronGroup(uint)\0"
-    "zoomToNeuronGroup(uint)\0"
 };
 
 const QMetaObject spikestream::NetworkViewer_V2::staticMetaObject = {
@@ -103,11 +97,8 @@ int spikestream::NetworkViewer_V2::qt_metacall(QMetaObject::Call _c, int _id, vo
         case 12: rotateRight(); break;
         case 13: viewClippingVolume_Horizontal((*reinterpret_cast< Box(*)>(_a[1]))); break;
         case 14: viewClippingVolume_Vertical((*reinterpret_cast< Box(*)>(_a[1]))); break;
-        case 15: zoomDefaultView(); break;
-        case 16: zoomAboveNeuronGroup((*reinterpret_cast< uint(*)>(_a[1]))); break;
-        case 17: zoomToNeuronGroup((*reinterpret_cast< uint(*)>(_a[1]))); break;
         }
-        _id -= 18;
+        _id -= 15;
     }
     return _id;
 }

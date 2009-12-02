@@ -20,7 +20,10 @@ INCLUDEPATH += src \
 		src/analysis \
 		src/exceptions \
 		src/nrm \
+		src/delegates \
 		src/dialogs \
+		src/models \
+		src/views \
 		src/widgets \
 		$(SPIKESTREAM_ROOT)/library/include \
 		/usr/include/mysql \
@@ -91,6 +94,22 @@ SOURCES += src/dialogs/NRMImportDialog.cpp \
 #----------------------------------------------#
 HEADERS += src/exceptions/NRMException.h
 SOURCES += src/exceptions/NRMException.cpp
+
+#----------------------------------------------#
+#---              models folder             ---#
+#----------------------------------------------#
+HEADERS += src/models/NeuronGroupModel.h \
+	    src/models/ConnectionGroupModel.h
+SOURCES += src/models/NeuronGroupModel.cpp \
+	    src/models/ConnectionGroupModel.cpp
+
+#----------------------------------------------#
+#---              views folder             ---#
+#----------------------------------------------#
+HEADERS += src/views/NeuronGroupTableView.h \
+	    src/views/ConnectionGroupTableView.h
+SOURCES += src/views/NeuronGroupTableView.cpp \
+	    src/views/ConnectionGroupTableView.cpp
 
 #----------------------------------------------#
 #---              widgets folder            ---#

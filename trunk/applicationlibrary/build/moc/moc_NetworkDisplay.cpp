@@ -23,7 +23,7 @@ static const uint qt_meta_data_spikestream__NetworkDisplay[] = {
        1,       // revision
        0,       // classname
        0,    0, // classinfo
-       2,   10, // methods
+       3,   10, // methods
        0,    0, // properties
        0,    0, // enums/sets
 
@@ -32,6 +32,7 @@ static const uint qt_meta_data_spikestream__NetworkDisplay[] = {
 
  // slots: signature, parameters, type, tag, flags
       53,   28,   28,   28, 0x0a,
+      70,   28,   28,   28, 0x08,
 
        0        // eod
 };
@@ -39,6 +40,7 @@ static const uint qt_meta_data_spikestream__NetworkDisplay[] = {
 static const char qt_meta_stringdata_spikestream__NetworkDisplay[] = {
     "spikestream::NetworkDisplay\0\0"
     "networkDisplayChanged()\0networkChanged()\0"
+    "clearZoom()\0"
 };
 
 const QMetaObject spikestream::NetworkDisplay::staticMetaObject = {
@@ -68,8 +70,9 @@ int spikestream::NetworkDisplay::qt_metacall(QMetaObject::Call _c, int _id, void
         switch (_id) {
         case 0: networkDisplayChanged(); break;
         case 1: networkChanged(); break;
+        case 2: clearZoom(); break;
         }
-        _id -= 2;
+        _id -= 3;
     }
     return _id;
 }

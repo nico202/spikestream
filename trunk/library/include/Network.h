@@ -38,16 +38,20 @@ namespace spikestream {
 	    Box getBoundingBox();
 	    unsigned int getID() { return info.getID(); }
 	    QString getErrorMessage() { return  errorMessage; }
-	    Box getNeuronGroupBoundingBox(unsigned int neurGrpID);
+	    int getConnectionGroupCount() { return connGrpMap.size(); }
+	    ConnectionGroup* getConnectionGroup(unsigned int id);
+	    ConnectionGroupInfo getConnectionGroupInfo(unsigned int id);
+	    QList<ConnectionGroupInfo> getConnectionGroupsInfo();
 	    int getNumberOfToConnections(unsigned int neuronID);
 	    int getTotalNumberOfSteps() { return totalNumberOfSteps; }
 	    int getNumberOfCompletedSteps();
+	    int getNeuronGroupCount() { return neurGrpMap.size(); }
+	    Box getNeuronGroupBoundingBox(unsigned int neurGrpID);
 	    QList<unsigned int> getNeuronGroupIDs();
 	    QList<unsigned int> getConnectionGroupIDs();
 	    NeuronGroup* getNeuronGroup(unsigned int id);
 	    NeuronGroupInfo getNeuronGroupInfo(unsigned int id);
-	    ConnectionGroup* getConnectionGroup(unsigned int id);
-	    ConnectionGroupInfo getConnectionGroupInfo(unsigned int id);
+	    QList<NeuronGroupInfo> getNeuronGroupsInfo();
 	    bool isBusy();
 	    bool isError() { return error; }
 	    bool isLocked() { return info.isLocked(); }

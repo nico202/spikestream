@@ -97,6 +97,9 @@ void NetworkViewer_V2::paintGL(){
     //Store current matrix state
     glPushMatrix();
 
+    //Set zoom level
+    setZoomLevel();
+
     //Position the camera appropriately
     positionCamera();
 
@@ -315,35 +318,6 @@ void NetworkViewer_V2::reset(){
 }
 
 
-/*! Resets the view so all neural networks can be seen. */
-void NetworkViewer_V2::zoomDefaultView(){
-    viewClippingVolume_Horizontal(defaultClippingVol);
-}
-
-
-/*! Moves viewing position above selected layer and resizes it appropriately
-	Don't need to set viewStateChanged here since the viewing angle is
-	outside of the main list. */
-void NetworkViewer_V2::zoomAboveNeuronGroup(unsigned int neuronGroupID){
-    if(!Globals::networkLoaded())
-	return;
-    Box neurGrpBox = Globals::getNetwork()->getNeuronGroupBoundingBox(neuronGroupID);
-    viewClippingVolume_Vertical(neurGrpBox);
-    updateGL();
-}
-
-
-/*! Moves viewing position beside selected layer and resizes it appropriately
-	Don't need to set viewStateChanged here since the viewing angle is
-	outside of the main list. */
-void NetworkViewer_V2::zoomToNeuronGroup(unsigned int neuronGroupID){
-    if(!Globals::networkLoaded())
-	return;
-    Box neurGrpBox = Globals::getNetwork()->getNeuronGroupBoundingBox(neuronGroupID);
-    viewClippingVolume_Horizontal(neurGrpBox);
-    updateGL();
-}
-
 
 /*----------------------------------------------------------*/
 /*-----                PRIVATE METHODS                 -----*/
@@ -461,9 +435,9 @@ void NetworkViewer_V2::drawConnections(){
 	    NeuronGroup* toNeuronGroup = network->getNeuronGroup(conGrp->getToNeuronGroupID());
 
 	    //Draw all the connections in the group
-	    QList<Connection*>* conList = conGrp->getConnections();
-	    QList<Connection*>::iterator endConList = conList->end();
-	    for(QList<Connection*>::iterator conIter = conList->begin(); conIter != endConList; ++ conIter){
+	    qDebug()<<"con grp id: "<<conGrp->getID()<<"; CON group SIZE: "<<conGrp->size();
+	    QList<Connection*>::const_iterator endConGrp = conGrp->end();
+	    for(QList<Connection*>::const_iterator conIter = conGrp->begin(); conIter != endConGrp; ++ conIter){
 
 		//Get the position of the from and to neurons
 		//FIXME: THIS COULD BE SPEEDED UP BY STORING THE POSITION IN Connection AT THE COST OF SOME LOADING COMPLEXITY
@@ -812,4 +786,49 @@ void NetworkViewer_V2::viewClippingVolume_Vertical(Box& clipVolume){
     cameraMatrix[9] = 1.0f;
     cameraMatrix[10] = 0.0f;
 }
+
+
+void NetworkViewer_V2::setZoomLevel(){
+    if(Globals::getNetworkDisplay()->isZoomEnabled()){
+	unsigned int tmpZoomNeurGrpID = Globals::getNetworkDisplay()->getZoomNeuronGroupID();
+	if(tmpZoomNeurGrpID == 0)
+	    zoomDefaultView();
+	else{
+	    if(Globals::getNetworkDisplay()->getZoomStatus() == NetworkDisplay::ZOOM_SIDE)
+		zoomToNeuronGroup(tmpZoomNeurGrpID);
+	    else if (Globals::getNetworkDisplay()->getZoomStatus() == NetworkDisplay::ZOOM_ABOVE)
+		zoomAboveNeuronGroup(tmpZoomNeurGrpID);
+	}
+    }
+}
+
+
+
+/*! Resets the view so all neural networks can be seen. */
+void NetworkViewer_V2::zoomDefaultView(){
+    viewClippingVolume_Horizontal(defaultClippingVol);
+}
+
+
+/*! Moves viewing position above selected layer and resizes it appropriately
+	Don't need to set viewStateChanged here since the viewing angle is
+	outside of the main list. */
+void NetworkViewer_V2::zoomAboveNeuronGroup(unsigned int neuronGroupID){
+    if(!Globals::networkLoaded())
+	return;
+    Box neurGrpBox = Globals::getNetwork()->getNeuronGroupBoundingBox(neuronGroupID);
+    viewClippingVolume_Vertical(neurGrpBox);
+}
+
+
+/*! Moves viewing position beside selected layer and resizes it appropriately
+	Don't need to set viewStateChanged here since the viewing angle is
+	outside of the main list. */
+void NetworkViewer_V2::zoomToNeuronGroup(unsigned int neuronGroupID){
+    if(!Globals::networkLoaded())
+	return;
+    Box neurGrpBox = Globals::getNetwork()->getNeuronGroupBoundingBox(neuronGroupID);
+    viewClippingVolume_Horizontal(neurGrpBox);
+}
+
 

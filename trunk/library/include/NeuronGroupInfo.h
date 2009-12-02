@@ -14,12 +14,12 @@ namespace spikestream {
 	    NeuronGroupInfo& operator=(const NeuronGroupInfo& rhs);
 	    ~NeuronGroupInfo();
 
-	    unsigned int getID() { return id; }
-	    QString getName() { return name; }
-	    QString getDescription() { return description; }
+	    unsigned int getID() const { return id; }
+	    QString getName() const { return name; }
+	    QString getDescription() const { return description; }
 	    QHash<QString, double> getParameterMap() { return parameterMap; }
 	    QString getParameterXML();
-	    unsigned int getNeuronType() { return neuronType; }
+	    unsigned int getNeuronType() const { return neuronType; }
 
 	    void setID(unsigned int id) { this->id = id; }
 

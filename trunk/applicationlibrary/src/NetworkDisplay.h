@@ -21,6 +21,7 @@ namespace spikestream {
 	    NetworkDisplay();
 	    ~NetworkDisplay();
 	    void clearNeuronColorMap();
+	    bool connectionGroupVisible(unsigned int connGrpID);
 	    QHash<unsigned int, RGBColor*>& getNeuronColorMap() { return *neuronColorMap; }
 	    RGBColor* getDefaultNeuronColor() { return &defaultNeuronColor; }
 	    RGBColor* getFiringNeuronColor() { return &firingNeuronColor; }
@@ -28,12 +29,33 @@ namespace spikestream {
 	    RGBColor* getPositiveConnectionColor(){ return &positiveConnectionColor; }
 	    QList<unsigned int> getVisibleConnectionGroupIDs() { return connGrpDisplayMap.keys(); }
 	    QList<unsigned int> getVisibleNeuronGroupIDs() { return neurGrpDisplayMap.keys(); }
+
+	    unsigned int getZoomNeuronGroupID() { return zoomNeuronGroupID; }
+	    bool isZoomEnabled();
+	    int getZoomStatus () { return zoomStatus; }
+	    void setZoom(unsigned int neurGrpID, int status);
+
+
 	    void lockMutex();
+	    bool neuronGroupVisible(unsigned int neurGrpID);
+	    void setConnectionGroupVisibility(unsigned int conGrpID, bool visible);
 	    void setDefaultNeuronColor(RGBColor& color) { defaultNeuronColor = color; }
 	    void setNeuronColorMap(QHash<unsigned int, RGBColor*>* newMap);
+	    void setNeuronGroupVisibility(unsigned int neurGrpID, bool visible);
 	    void setVisibleConnectionGroupIDs(const QList<unsigned int>& connGrpIDs);
 	    void setVisibleNeuronGroupIDs(const QList<unsigned int>& neurGrpIDs);
 	    void unlockMutex();
+
+	    //=========================  VARIABLES  =========================
+	    /*! Zoom disabled */
+	    static const int NO_ZOOM = 0;
+
+	    /*! Zoom to side of network or neuron group */
+	    static const int ZOOM_SIDE = 1;
+
+	    /*! Zoom to top of neuron group */
+	    static const int ZOOM_ABOVE = 2;
+
 
 	signals:
 	    void networkDisplayChanged();
@@ -41,15 +63,18 @@ namespace spikestream {
 	public slots:
 	    void networkChanged();
 
+	private slots:
+	    void clearZoom();
+
 	private:
 	    //========================  VARIABLES  ========================
 	    /*! Mutex preventing changes to the display whilst it is being rendered. */
 	    QMutex mutex;
 
-	    /*! List of visible connection groups */
+	    /*! Visible connection groups */
 	    QHash<unsigned int, bool> connGrpDisplayMap;
 
-	    /*! List of visible neuron groups */
+	    /*! Visible neuron groups */
 	    QHash<unsigned int, bool> neurGrpDisplayMap;
 
 	    /*! Map specifying the color of each neuron */
@@ -70,6 +95,10 @@ namespace spikestream {
 	    /*! Map recording the addresses of default colors, so that they don't get deleted
 		when the neuron color map is cleared. */
 	    QHash<RGBColor*, bool> defaultColorMap;
+
+	    unsigned int zoomNeuronGroupID;
+	    int zoomStatus;
+
 
 	    //=========================  METHODS  =========================
 

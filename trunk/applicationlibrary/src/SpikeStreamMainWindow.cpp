@@ -388,8 +388,8 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 
 	//Set up editor window and add to tab widget
 	QSplitter *layerSplitterWidget = new QSplitter( tabWidget);
-	NeuronGroupWidget* neuronGroupWidget = new NeuronGroupWidget(layerSplitterWidget);
-	ConnectionWidget_V2* connectionWidget_V2 = new ConnectionWidget_V2(layerSplitterWidget);
+	new NeuronGroupWidget(layerSplitterWidget);
+	new ConnectionWidget_V2(layerSplitterWidget);
 	layerSplitterWidget->setOrientation(Qt::Vertical);
 	tabWidget->addTab(layerSplitterWidget, "Editor");
 
