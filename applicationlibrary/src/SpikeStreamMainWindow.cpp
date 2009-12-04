@@ -18,6 +18,8 @@
 #include "ArchiveWidget_V2.h"
 #include "NeuronGroupWidget.h"
 #include "ConnectionWidget_V2.h"
+#include "NetworkViewer_V2.h"
+#include "NetworkViewerProperties_V2.h"
 using namespace spikestream;
 
 //Qt includes
@@ -408,7 +410,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	}
 
 	//networkViewer = new NetworkViewer(mainSplitterWidget, splashScreen, networkDBInterface, maxAutoLoadConnGrpSize);
-	networkViewer2 = new NetworkViewer_V2(mainSplitterWidget);
+	NetworkViewer_V2* networkViewer2 = new NetworkViewer_V2(mainSplitterWidget);
 	networkViewer2->setMinimumSize(200, 60);
 	networkViewer2->setBaseSize(700, 60);
 
@@ -418,8 +420,8 @@ SpikeStreamMainWindow::SpikeStreamMainWindow(SpikeStreamApplication *ssApp) : Q3
 	Q3VBox* nwViewerPropViewBox = new Q3VBox(nwViewerPropScrollView->viewport());
 	nwViewerPropViewBox->setMinimumSize(1000,800);
 	nwViewerPropScrollView->addChild(nwViewerPropViewBox);
-	networkViewerProperties = new NetworkViewerProperties(nwViewerPropViewBox, networkViewer2, networkDBInterface);
-	networkViewerProperties->setMinimumSize(800, 600);
+	new NetworkViewerProperties_V2(nwViewerPropViewBox);
+	//networkViewerProperties2->setMinimumSize(800, 600);
 	tabWidget->addTab(nwViewerPropScrollView, "Viewer");
 
 
@@ -539,30 +541,30 @@ SpikeStreamMainWindow::~SpikeStreamMainWindow(){
 //------------------------------ PUBLIC METHODS ----------------------------
 //--------------------------------------------------------------------------
 
-/*! Returns a reference to the network viewer. */
-NetworkViewer_V2* SpikeStreamMainWindow::getNetworkViewer(){
-	return networkViewer2;
-}
+///*! Returns a reference to the network viewer. */
+//NetworkViewer_V2* SpikeStreamMainWindow::getNetworkViewer(){
+//	return networkViewer2;
+//}
 
 
 /*! Reloads just the details about the connections assuming that the connection
 	groups have remained the same. */
 void SpikeStreamMainWindow::reloadConnectionDetails(){
-	networkViewerProperties->reloadConnectionDetails();
+	//networkViewerProperties->reloadConnectionDetails();
 }
 
 
 
 /*! Reloads connections after a class has made changes to the database. */
 void SpikeStreamMainWindow::reloadConnections(){
-	networkViewerProperties->reloadConnections();
+	//networkViewerProperties->reloadConnections();
 	simulationWidget->reloadConnectionGroups();
 }
 
 
 /*! Reloads neurons after a change has been made to the database. */
 void SpikeStreamMainWindow::reloadNeuronGroups(){
-	networkViewerProperties->reloadNeuronGroups();
+	//networkViewerProperties->reloadNeuronGroups();
 	simulationWidget->reloadNeuronGroups();
 	//connectionWidget->reloadConnections();
 }
@@ -958,9 +960,9 @@ void SpikeStreamMainWindow::reloadEverything(){
 		//connectionWidget->reloadConnections();
 		simulationWidget->reloadNeuronGroups();
 		simulationWidget->reloadConnectionGroups();
-		networkViewerProperties->reloadConnections();
-		networkViewerProperties->reloadNeuronGroups();
-		networkViewer2->reloadEverything();
+		//networkViewerProperties->reloadConnections();
+		//networkViewerProperties->reloadNeuronGroups();
+		//networkViewer2->reloadEverything();
 	}
 	catch (const BadQuery& er) {// Handle any query errors
 		cerr<<"SpikeStreamMainWindow: MYSQL QUERY EXCEPTION \""<<er.what()<<"\""<<endl;

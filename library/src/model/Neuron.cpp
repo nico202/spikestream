@@ -11,6 +11,17 @@ Neuron::Neuron(float xPos, float yPos, float zPos){
 }
 
 
+/*! Constructor */
+Neuron::Neuron(unsigned int id, float xPos, float yPos, float zPos){
+    this->id = id;
+    location.setXPos(xPos);
+    location.setYPos(yPos);
+    location.setZPos(zPos);
+    id = 0;
+}
+
+
+
 /*! Destructor */
 Neuron::~Neuron(){
 }

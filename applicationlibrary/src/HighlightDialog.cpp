@@ -79,12 +79,12 @@ HighlightDialog::HighlightDialog(QWidget* parent, NetworkViewer_V2* nwViewer) : 
 	buttonBox->addWidget(clearButton);
 	connect (clearButton, SIGNAL(clicked()), this, SLOT(clearButtonPressed()));
 
-	QPushButton *closeButton = new QPushButton("Close", this);	
+	QPushButton *closeButton = new QPushButton("Close", this);
 	buttonBox->addWidget(closeButton);
 	connect (closeButton, SIGNAL(clicked()), this, SLOT(closeButtonPressed()));
 	mainVBox->addLayout(buttonBox);
 
-	//Set size	
+	//Set size
 	this->resize(600, 400);
 
 }
@@ -112,18 +112,18 @@ void HighlightDialog::addHighlightButtonPressed(){
 	QString neurIDStr = neuronIDText->text();
 
 	//Get rid of all white space
-	for(unsigned int i=0; i<neurIDStr.length(); ++i){
+	for(int i=0; i<neurIDStr.length(); ++i){
 		if(neurIDStr.at(i).isSpace()){
 			neurIDStr.remove(i, 1);
 			--i;
 		}
 	}
 	QStringList tempStringList = QStringList::split(",", neurIDStr);
-	
+
 	//Add neuron IDs to the highlight map in the network viewer
 	try{
 		unsigned int tmpNeuronID;
-		for(unsigned int i=0; i< tempStringList.size(); ++i){
+		for(int i=0; i< tempStringList.size(); ++i){
 			tmpNeuronID = Utilities::getUInt(tempStringList[i].ascii());
 			networkViewer->addHighlight(tmpNeuronID, tmpColor);
 		}
@@ -170,7 +170,7 @@ void HighlightDialog::colorButtonPressed(){
 
 /*! Displays an error message. */
 void HighlightDialog::showError(const QString& errMsg){
-        cerr<<errMsg.toStdString()<<endl;
+	cerr<<errMsg.toStdString()<<endl;
 	QMessageBox::critical(this, "Highlight Dialog Error", errMsg);
 }
 

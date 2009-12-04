@@ -1,11 +1,14 @@
 //SpikeStream includes
 #include "EventRouter.h"
 #include "Globals.h"
+#include "GlobalVariables.h"
 #include "NetworkViewer_V2.h"
+#include "SpikeStreamException.h"
 using namespace spikestream;
 
 //Qt includes
 #include <QDebug>
+#include <QMouseEvent>
 
 //Other includes
 #include <iostream>
@@ -123,7 +126,7 @@ void NetworkViewer_V2::paintGL(){
 	    //Draw the axes
 	    drawAxes();
 
-	    //Draw the neurons
+	    //Draw the neurons without names
 	    drawNeurons();
 
 	    //Draw the connections
@@ -195,31 +198,64 @@ void NetworkViewer_V2::resizeGL(int screenWidth, int screenHeight){
     checkOpenGLErrors();
 }
 
-void NetworkViewer_V2::mouseDoubleClickEvent (QMouseEvent * ){
-    cout<<"Mouse double click: "<<endl;
-//    If you derive a class from QGLWidget you can reimplement
-//mouseMoveEvent(QMouseEvent *event).
-//Use something like this (stolen from the red book p152):
-//
-//  // Get the cursor and convert to model coordinates
-//  QPoint cursor = event->pos();
-//  GLint viewport[4];
-//  GLdouble mvmatrix[16], projmatrix[16];
-//  GLint realy;
-//  GLdouble wx, wy, wz;
-//
-//  // Convert to model coordinates
-//  glGetIntegerv(GL_VIEWPORT, viewport);
-//  glGetDoublev(GL_MODELVIEW_MATRIX, mvmatrix);
-//  glGetDoublev(GL_PROJECTION_MATRIX, projmatrix);
-//
-//  realy = viewport[3] - (GLint) cursor.y() - 1;
-//  gluUnProject((GLdouble) cursor.x(), (GLdouble) realy, 0.0,
-//    mvmatrix, projmatrix, viewport, &wx, &wy, &wz);
-//
-//Note the above assumes the point you're asking for is at 0 in
-//the Z plane.
+/*! Adapted from: http://www.lighthouse3d.com/opengl/picking/index.php?openglway */
+void NetworkViewer_V2::mouseDoubleClickEvent (QMouseEvent* event){
+    //Window coordinates in OpenGL start in the bottom left, so have to subtract the window height
+    int mouseYPos = height() - event->y();
+    int mouseXPos = event->x();
 
+    //Create the select buffer
+    int SELECT_BUFFER_SIZE = 512;
+    GLuint selectBuffer[SELECT_BUFFER_SIZE];
+    glSelectBuffer(SELECT_BUFFER_SIZE,selectBuffer);
+
+    //Get the current viewport
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT,viewport);
+
+    //Start picking
+    glRenderMode(GL_SELECT);
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    gluPickMatrix(event->x(), mouseYPos, 10, 10, viewport);
+
+    float ratio = (float)viewport[2] / (float)viewport[3];
+    gluPerspective(45, ratio, 0.1, 1000);
+    glMatrixMode(GL_MODELVIEW);
+
+    //Render neurons with names
+    //Store current matrix state
+    glPushMatrix();
+
+    //Set zoom level
+    setZoomLevel();
+
+    //Position the camera appropriately
+    positionCamera();
+
+    //Draw the neurons
+    drawNeurons();
+
+    //Restore the matrix state
+    glPopMatrix();
+
+    // returning to normal rendering mode
+    int hitCount = glRenderMode(GL_RENDER);
+
+    if(hitCount != 0){//Neuron selected
+	unsigned int selectedNeuronID = getSelectedNeuron(selectBuffer, hitCount, SELECT_BUFFER_SIZE);
+	Globals::getNetworkDisplay()->setSingleNeuronID(selectedNeuronID);
+    }
+    else{
+	Globals::getNetworkDisplay()->setSingleNeuronID(0);
+    }
+
+    //Restore render mode and the original projection matrix
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glFlush();
 }
 
 
@@ -420,6 +456,17 @@ void NetworkViewer_V2::drawConnections(){
     RGBColor positiveConnectionColor = *netDisplay->getPositiveConnectionColor();
     RGBColor negativeConnectionColor = *netDisplay->getNegativeConnectionColor();
 
+    //Sort out the connection mode
+    unsigned int neuronID=0, fromNeuronID=0, toNeuronID=0;
+    unsigned int connectionMode = netDisplay->getConnectionMode();
+    if(connectionMode & SHOW_SINGLE_NEURON_CONNECTIONS)
+	neuronID = netDisplay->getSingleNeuronID();
+    else if(connectionMode & SHOW_BETWEEN_NEURON_CONNECTIONS){
+	fromNeuronID = netDisplay->getBetweenFromNeuronID();
+	toNeuronID = netDisplay->getBetweenToNeuronID();
+    }
+    bool drawConnection;
+
     //Start drawing lines
     glBegin(GL_LINES);
 
@@ -435,25 +482,51 @@ void NetworkViewer_V2::drawConnections(){
 	    NeuronGroup* toNeuronGroup = network->getNeuronGroup(conGrp->getToNeuronGroupID());
 
 	    //Draw all the connections in the group
-	    qDebug()<<"con grp id: "<<conGrp->getID()<<"; CON group SIZE: "<<conGrp->size();
 	    QList<Connection*>::const_iterator endConGrp = conGrp->end();
 	    for(QList<Connection*>::const_iterator conIter = conGrp->begin(); conIter != endConGrp; ++ conIter){
 
-		//Get the position of the from and to neurons
-		//FIXME: THIS COULD BE SPEEDED UP BY STORING THE POSITION IN Connection AT THE COST OF SOME LOADING COMPLEXITY
-		fromNeuronPoint = &fromNeuronGroup->getNeuronLocation((*conIter)->fromNeuronID);
-		toNeuronPoint = &toNeuronGroup->getNeuronLocation((*conIter)->toNeuronID);
+		//Decide if connection should be drawn, depending on the connection mode and neuron id
+		drawConnection = true;
+		if(connectionMode & CONNECTION_MODE_ENABLED){
+		    //Decide whether to draw connection based on from and to neuron id
+		    if(connectionMode & SHOW_SINGLE_NEURON_CONNECTIONS){//Single neuron connection mode
+			if( (connectionMode & SHOW_ALL_NEURON_CONNECTIONS) && ( (*conIter)->fromNeuronID != neuronID && (*conIter)->toNeuronID != neuronID))
+			    drawConnection = false;
+			else if( (connectionMode & SHOW_FROM_NEURON_CONNECTIONS) && (*conIter)->fromNeuronID != neuronID)
+			    drawConnection = false;
+			else if( (connectionMode & SHOW_TO_NEURON_CONNECTIONS) && (*conIter)->toNeuronID != neuronID)
+			    drawConnection = false;
+		    }
+		    else if(connectionMode & SHOW_BETWEEN_NEURON_CONNECTIONS){
+			if( (*conIter)->fromNeuronID != fromNeuronID && (*conIter)->toNeuronID != toNeuronID){
+			    drawConnection = false;
+			}
+		    }
 
-		//Set the colour
-		if((*conIter)->weight >= 0)
-		    glColor3f(positiveConnectionColor.red, positiveConnectionColor.green, positiveConnectionColor.blue);
-		else
-		    glColor3f(negativeConnectionColor.red, negativeConnectionColor.green, negativeConnectionColor.blue);
+		    //Decide whether to draw connection based on its weight
+		    if( (*conIter)->weight >= 0 && !(connectionMode & SHOW_POSITIVE_CONNECTIONS) )
+			drawConnection = false;
+		    if( (*conIter)->weight < 0 && !(connectionMode & SHOW_NEGATIVE_CONNECTIONS))
+			drawConnection = false;
+		}
 
-		//Draw the neuron
-		glVertex3f(fromNeuronPoint->getXPos(), fromNeuronPoint->getYPos(), fromNeuronPoint->getZPos());
-		glVertex3f(toNeuronPoint->getXPos(), toNeuronPoint->getYPos(), toNeuronPoint->getZPos());
+		//Draw the connection
+		if(drawConnection){
+		    //Get the position of the from and to neurons
+		    //FIXME: THIS COULD BE SPEEDED UP BY STORING THE POSITION IN Connection AT THE COST OF SOME LOADING COMPLEXITY
+		    fromNeuronPoint = &fromNeuronGroup->getNeuronLocation((*conIter)->fromNeuronID);
+		    toNeuronPoint = &toNeuronGroup->getNeuronLocation((*conIter)->toNeuronID);
 
+		    //Set the colour
+		    if((*conIter)->weight >= 0)
+			glColor3f(positiveConnectionColor.red, positiveConnectionColor.green, positiveConnectionColor.blue);
+		    if((*conIter)->weight < 0)
+			glColor3f(negativeConnectionColor.red, negativeConnectionColor.green, negativeConnectionColor.blue);
+
+		    //Draw the connection
+		    glVertex3f(fromNeuronPoint->getXPos(), fromNeuronPoint->getYPos(), fromNeuronPoint->getZPos());
+		    glVertex3f(toNeuronPoint->getXPos(), toNeuronPoint->getYPos(), toNeuronPoint->getZPos());
+		}
 	    }
 	}
 
@@ -470,7 +543,7 @@ void NetworkViewer_V2::drawNeurons(){
 	return;
 
     //Local variables
-    RGBColor* tmpColor;
+    RGBColor *tmpColor, tmpColor2;
 
     //Get pointer to network that is to be drawn and its associated display
     Network* network = Globals::getNetwork();
@@ -485,8 +558,8 @@ void NetworkViewer_V2::drawNeurons(){
     //Set the size of points in OpenGL
     glPointSize(5.0f);
 
-    //Start point drawing of neurons in OpenGL
-    glBegin(GL_POINTS);
+	glInitNames();
+
 
 	//Work through the neuron groups listed in the view vector
 	QList<unsigned int> neuronGrpIDs = Globals::getNetworkDisplay()->getVisibleNeuronGroupIDs();
@@ -499,7 +572,11 @@ void NetworkViewer_V2::drawNeurons(){
 	    for(NeuronMap::iterator neurIter = neuronMap->begin(); neurIter != neurMapEnd; ++neurIter){
 
 		//Set the color of the neuron
-		if(neuronColorMap.contains(neurIter.key())){
+		if(netDisplay->getSingleNeuronID() == (*neurIter)->getID() ){
+		    tmpColor2 = netDisplay->getSingleNeuronColor();
+		    glColor3f(tmpColor2.red, tmpColor2.green, tmpColor2.blue);
+		}
+		else if(neuronColorMap.contains(neurIter.key())){
 		    tmpColor = neuronColorMap[neurIter.key()];
 		    glColor3f(tmpColor->red, tmpColor->green, tmpColor->blue);
 		}
@@ -508,11 +585,13 @@ void NetworkViewer_V2::drawNeurons(){
 		}
 
 		//Draw the neuron
-		glVertex3f(neurIter.value()->getXPos(), neurIter.value()->getYPos(), neurIter.value()->getZPos());
+		glPushName((*neurIter)->getID());
+		glBegin(GL_POINTS);
+		    glVertex3f(neurIter.value()->getXPos(), neurIter.value()->getYPos(), neurIter.value()->getZPos());
+		glEnd();
+		glPopName();
 	    }
 	}
-    //End the drawing of points in OpenGL
-    glEnd();
 }
 
 
@@ -588,6 +667,50 @@ void NetworkViewer_V2::fillRotationMatrix(float angle, float x, float y, float z
     rotationMatrix[7] = 0.0f;
     rotationMatrix[11] = 0.0f;
     rotationMatrix[15] = 1.0f;
+}
+
+
+/*! Identifies the closest neuron to the viewer within the select buffer.
+    Returns an invalid neuron ID if no hits are present */
+unsigned int NetworkViewer_V2::getSelectedNeuron(GLuint selectBuffer[], int hitCount, int bufferSize){
+    if(hitCount == 0)
+	return 0;
+    if(hitCount * 4 > bufferSize)
+	throw SpikeStreamException("Hit data overflows buffer");
+
+
+    GLuint nameCount, *ptr, minZ, minZName=0, currentMinZ, name;
+    ptr = selectBuffer;
+    minZ = 0xffffffff;
+    for(int i=0; i<hitCount; ++i){
+	//First field is the number of names
+	nameCount = *ptr;
+	if(nameCount != 1)
+	    throw SpikeStreamException("Unnamed object selected or multiple names associated with the same object.");
+
+	//Second field is minimum depth for this record
+	++ptr;
+	currentMinZ = *ptr;
+
+	//Third field is the maximum depth for this record
+	++ptr;
+
+	//Remaining field for this record is the name - should only be 1 name if we have got this far
+	++ptr;
+	name = *ptr;
+
+	if(currentMinZ < minZ){
+	    minZ = currentMinZ;
+	    minZName = name;
+	}
+
+	//Increase pointer to the next hit if it exists
+	++ptr;
+    }
+
+    //Return the name with the minimum z
+    return minZName;
+
 }
 
 

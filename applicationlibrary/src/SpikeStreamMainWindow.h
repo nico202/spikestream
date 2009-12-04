@@ -25,8 +25,6 @@
 
 //SpikeStream includes
 #include "DBInterface.h"
-#include "NetworkViewer_V2.h"
-#include "NetworkViewerProperties.h"
 #include "SimulationManager.h"
 #include "SimulationWidget.h"
 #include "ArchiveManager.h"
@@ -56,7 +54,7 @@ class SpikeStreamMainWindow: public Q3MainWindow {
 	public:
 		SpikeStreamMainWindow(SpikeStreamApplication *ssApp);
 		~SpikeStreamMainWindow();
-		NetworkViewer_V2* getNetworkViewer();
+		//NetworkViewer_V2* getNetworkViewer();
 		void reloadConnectionDetails();
 		void reloadConnections();
 		void reloadNeuronGroups();
@@ -114,8 +112,7 @@ class SpikeStreamMainWindow: public Q3MainWindow {
 		//Store references to classes that we need to access
 		SimulationManager* simulationManager;
 		ArchiveManager* archiveManager;
-		NetworkViewer_V2* networkViewer2;
-		NetworkViewerProperties *networkViewerProperties;
+//		NetworkViewer_V2* networkViewer2;
 		SimulationWidget *simulationWidget;
 		QTabWidget *tabWidget;
 		Q3Accel* keyboardAccelerator;
