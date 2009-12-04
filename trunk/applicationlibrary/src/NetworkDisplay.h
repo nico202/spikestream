@@ -22,29 +22,40 @@ namespace spikestream {
 	    ~NetworkDisplay();
 	    void clearNeuronColorMap();
 	    bool connectionGroupVisible(unsigned int connGrpID);
+	    unsigned int getConnectionMode() { return connectionMode; }
 	    QHash<unsigned int, RGBColor*>& getNeuronColorMap() { return *neuronColorMap; }
 	    RGBColor* getDefaultNeuronColor() { return &defaultNeuronColor; }
 	    RGBColor* getFiringNeuronColor() { return &firingNeuronColor; }
+	    RGBColor& getSingleNeuronColor() { return singleNeuronColor; }
 	    RGBColor* getNegativeConnectionColor(){ return &negativeConnectionColor; }
 	    RGBColor* getPositiveConnectionColor(){ return &positiveConnectionColor; }
 	    QList<unsigned int> getVisibleConnectionGroupIDs() { return connGrpDisplayMap.keys(); }
 	    QList<unsigned int> getVisibleNeuronGroupIDs() { return neurGrpDisplayMap.keys(); }
-
 	    unsigned int getZoomNeuronGroupID() { return zoomNeuronGroupID; }
-	    bool isZoomEnabled();
 	    int getZoomStatus () { return zoomStatus; }
-	    void setZoom(unsigned int neurGrpID, int status);
-
-
+	    bool isZoomEnabled();
 	    void lockMutex();
 	    bool neuronGroupVisible(unsigned int neurGrpID);
+	    void setConnectionModeFlag(unsigned int flag);
+	    void unsetConnectionModeFlag(unsigned int flag);
 	    void setConnectionGroupVisibility(unsigned int conGrpID, bool visible);
 	    void setDefaultNeuronColor(RGBColor& color) { defaultNeuronColor = color; }
 	    void setNeuronColorMap(QHash<unsigned int, RGBColor*>* newMap);
 	    void setNeuronGroupVisibility(unsigned int neurGrpID, bool visible);
 	    void setVisibleConnectionGroupIDs(const QList<unsigned int>& connGrpIDs);
 	    void setVisibleNeuronGroupIDs(const QList<unsigned int>& neurGrpIDs);
+	    void setZoom(unsigned int neurGrpID, int status);
 	    void unlockMutex();
+
+
+	    unsigned int getSingleNeuronID() { return singleNeuronID; }
+	    unsigned int getBetweenFromNeuronID() { return betweenFromNeuronID; }
+	    unsigned int getBetweenToNeuronID() { return betweenToNeuronID; }
+
+	    void setSingleNeuronID(unsigned int id);
+	    void setBetweenFromNeuronID(unsigned int id);
+	    void setBetweenToNeuronID(unsigned int id);
+
 
 	    //=========================  VARIABLES  =========================
 	    /*! Zoom disabled */
@@ -83,6 +94,9 @@ namespace spikestream {
 	    /*! Default color of a neuron */
 	    RGBColor defaultNeuronColor;
 
+	    /*! Color of single neuron whose connections are being shown */
+	    RGBColor singleNeuronColor;
+
 	    /*! Postive connection color */
 	    RGBColor positiveConnectionColor;
 
@@ -96,12 +110,29 @@ namespace spikestream {
 		when the neuron color map is cleared. */
 	    QHash<RGBColor*, bool> defaultColorMap;
 
+	    /*! When zoom status is not NO_ZOOM this variable holds the neuron group that is zoomed.
+		When set to zero the viewer zooms to show the whole network.*/
 	    unsigned int zoomNeuronGroupID;
+
+	    /*! Sets whether viewer should zoom in on a specific neuron group */
 	    int zoomStatus;
+
+	    /*! Connection mode. Each bit in this unsigned integer codes a different aspect
+		of the mode. Need to AND it with the different modes to see if they are set or not */
+	    unsigned int connectionMode;
+
+	    /*! Neuron id used in SHOW_SINGLE_NEURON_CONNECTIONS mode */
+	    unsigned int singleNeuronID;
+
+	    /*! From neuron id used in SHOW_BETWEEN_NEURON_CONNECTIONS mode */
+	    unsigned int betweenFromNeuronID;
+
+	    /*! From neuron id used in SHOW_BETWEEN_NEURON_CONNECTIONS mode */
+	    unsigned int betweenToNeuronID;
 
 
 	    //=========================  METHODS  =========================
-
+	    void checkConnectionModeFlag(unsigned int flag);
 
     };
 

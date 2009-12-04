@@ -1,5 +1,7 @@
 #include "Globals.h"
+#include "GlobalVariables.h"
 #include "NetworkDisplay.h"
+#include "SpikeStreamException.h"
 using namespace spikestream;
 
 
@@ -17,6 +19,7 @@ NetworkDisplay::NetworkDisplay(){
     //Set the default colors and store addresses in a map to prevent deletion
     defaultNeuronColor.set(0.0f, 0.0f, 0.0f);
     defaultColorMap[&defaultNeuronColor] = true;
+    singleNeuronColor.set(0.0f, 1.0f, 0.0f);
     negativeConnectionColor.set(0.0f, 0.0f, 1.0f);
     defaultColorMap[&negativeConnectionColor] = true;
     positiveConnectionColor.set(1.0f, 0.0f, 0.0f);
@@ -26,6 +29,13 @@ NetworkDisplay::NetworkDisplay(){
 
     //Initialize color map
     neuronColorMap = new QHash<unsigned int, RGBColor*>();
+
+    //Default connection mode settings
+    connectionMode = 0;
+    setConnectionModeFlag(SHOW_POSITIVE_CONNECTIONS);
+    setConnectionModeFlag(SHOW_NEGATIVE_CONNECTIONS);
+    setConnectionModeFlag(SHOW_ALL_NEURON_CONNECTIONS);
+    singleNeuronID = 0;
 }
 
 
@@ -188,6 +198,19 @@ void NetworkDisplay::unlockMutex(){
 }
 
 
+void NetworkDisplay::setConnectionModeFlag(unsigned int flag){
+    checkConnectionModeFlag(flag);
+    connectionMode |= flag;
+}
+
+
+void NetworkDisplay::unsetConnectionModeFlag(unsigned int flag){
+    checkConnectionModeFlag(flag);
+    //Flip the bits in the flag and then AND it with the connection mode
+    connectionMode &= ~flag;
+}
+
+
 /*! Returns true if a specified zoom setting has been applied */
 bool NetworkDisplay::isZoomEnabled(){
     if(zoomStatus == NO_ZOOM)
@@ -209,7 +232,54 @@ void NetworkDisplay::setZoom(unsigned int neurGrpID, int status){
 	emit networkDisplayChanged();
 }
 
+FIXME!!
+
+void NetworkDisplay::setSingleNeuronID(unsigned int id){
+    this->singleNeuronID = id;
+    //Switch off connection mode if neuron id is invalid
+    if(id == 0){
+	unsetConnectionModeFlag(CONNECTION_MODE_ENABLED);
+	unsetConnectionModeFlag(SHOW_SINGLE_NEURON_CONNECTIONS);
+    }
+    //Turn on connection mode
+    else{
+	setConnectionModeFlag(SHOW_SINGLE_NEURON_CONNECTIONS);
+    }
+
+    emit networkDisplayChanged();
+}
+
+
+void NetworkDisplay::setBetweenFromNeuronID(unsigned int id){
+    this->betweenFromNeuronID = id;
+    emit networkDisplayChanged();
+}
+
+void NetworkDisplay::setBetweenToNeuronID(unsigned int id){
+    this->betweenToNeuronID = id;
+    emit networkDisplayChanged();
+}
+
 
 /*----------------------------------------------------------*/
 /*-----               PRIVATE METHODS                  -----*/
 /*----------------------------------------------------------*/
+
+void NetworkDisplay::checkConnectionModeFlag(unsigned int flag){
+    if(flag == SHOW_SINGLE_NEURON_CONNECTIONS)
+	return;
+    if(flag == SHOW_BETWEEN_NEURON_CONNECTIONS)
+	return;
+    if(flag == SHOW_POSITIVE_CONNECTIONS)
+	return;
+    if(flag == SHOW_NEGATIVE_CONNECTIONS)
+	return;
+    if(flag == SHOW_FROM_NEURON_CONNECTIONS)
+	return;
+    if(flag == SHOW_TO_NEURON_CONNECTIONS)
+	return;
+    if(flag == SHOW_ALL_NEURON_CONNECTIONS)
+	return;
+    throw SpikeStreamException("Connection mode flag not recognized: " + QString::number(flag));
+}
+

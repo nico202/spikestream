@@ -117,11 +117,13 @@ SOURCES += src/views/NeuronGroupTableView.cpp \
 HEADERS += src/widgets/NetworksWidget.h \
 	    src/widgets/ArchiveWidget_V2.h \
 	    src/widgets/NeuronGroupWidget.h \
-	    src/widgets/ConnectionWidget_V2.h
+	    src/widgets/ConnectionWidget_V2.h \
+	    src/widgets/NetworkViewerProperties_V2.h
 SOURCES += src/widgets/NetworksWidget.cpp \
 	    src/widgets/ArchiveWidget_V2.cpp \
 	    src/widgets/NeuronGroupWidget.cpp \
-	    src/widgets/ConnectionWidget_V2.cpp
+	    src/widgets/ConnectionWidget_V2.cpp \
+	    src/widgets/NetworkViewerProperties_V2.cpp
 
 #----------------------------------------------#
 #---               src folder               ---#
@@ -139,14 +141,12 @@ HEADERS += src/ArchiveManager.h \
 	   src/ConnectionParameterViewer.h \
 	   src/ConnectionPropertiesDialog.h \
 	   src/ConnectionTableItem.h \
-	   src/ConnectionWidget.h \
 	   src/Debug.h \
 	   src/EditNeuronParametersDialog.h \
 	   src/EditSynapseParametersDialog.h \
 	   src/GlobalParametersDialog.h \
 	   src/LayerManager.h \
 	   src/LayerPropertiesDialog.h \
-	   src/LayerWidget.h \
 	   src/LoadArchiveDialog.h \
 	   src/MonitorArea.h \
 	   src/MonitorWindow.h \
@@ -196,13 +196,11 @@ SOURCES += src/ArchiveManager.cpp \
 	   src/ConnectionParameterViewer.cpp \
 	   src/ConnectionPropertiesDialog.cpp \
 	   src/ConnectionTableItem.cpp \
-	   src/ConnectionWidget.cpp \
 	   src/EditNeuronParametersDialog.cpp \
 	   src/EditSynapseParametersDialog.cpp \
 	   src/GlobalParametersDialog.cpp \
 	   src/LayerManager.cpp \
 	   src/LayerPropertiesDialog.cpp \
-	   src/LayerWidget.cpp \
 	   src/LoadArchiveDialog.cpp \
 	   src/MonitorArea.cpp \
 	   src/MonitorWindow.cpp \

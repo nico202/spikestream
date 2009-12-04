@@ -391,6 +391,7 @@ void NetworkDaoThread::loadNeurons(){
 	executeQuery(query);
 	while ( query.next() ) {
 	    Neuron* tmpNeuron = new Neuron(
+			query.value(0).toUInt(),//ID
 			query.value(1).toString().toFloat(),//X
 			query.value(2).toString().toFloat(),//Y
 			query.value(3).toString().toFloat()//Z

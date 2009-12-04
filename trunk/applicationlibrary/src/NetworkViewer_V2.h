@@ -144,6 +144,7 @@ namespace spikestream {
 	    void drawConnections();
 	    void drawNeurons();
 	    void fillRotationMatrix(float angle, float x, float y, float z);
+	    unsigned int getSelectedNeuron(GLuint selectBuffer[], int hitCount, int bufferSize);
 	    void initialiseCameraParameters();
 	    void positionCamera();
 	    void rotateVector(GLfloat x, GLfloat y, GLfloat z, GLfloat result[]);
