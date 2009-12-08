@@ -33,6 +33,7 @@ namespace spikestream{
 	    QList<Connection> getConnections(unsigned int fromNeuronID, unsigned int toNeuronID);
 	    unsigned int getConnectionGroupSize(unsigned int connGrpID);
 	    QList<ConnectionGroupInfo> getConnectionGroupsInfo(unsigned int networkID);
+	    QList<Connection*> getConnections(unsigned int connectionMode, unsigned int singleNeuronID, unsigned int toNeuronID);
 	    QList<NetworkInfo> getNetworksInfo();
 	    Box getNeuronGroupBoundingBox(unsigned int neurGrpID);
 	    QList<NeuronGroupInfo> getNeuronGroupsInfo(unsigned int networkID);

@@ -100,7 +100,6 @@ bool NeuronGroupModel::setData(const QModelIndex& index, const QVariant&, int) {
     if(index.column() == zoomCol){
 	unsigned int tmpNeurGrpID = neurGrpInfoList[index.row()].getID();
 	NetworkDisplay* netDisplay = Globals::getNetworkDisplay();
-
 	//We are already zoomed on this neuron
 	if (netDisplay->isZoomEnabled() && netDisplay->getZoomNeuronGroupID() == tmpNeurGrpID){
 	    if(netDisplay->getZoomStatus() == NetworkDisplay::ZOOM_SIDE)//We are zoomed into neuron group from the side

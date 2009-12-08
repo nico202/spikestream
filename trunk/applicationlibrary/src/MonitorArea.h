@@ -28,7 +28,6 @@
 #include "MonitorWindow.h"
 #include "NetworkMonitor.h"
 #include "SimulationManager.h"
-#include "ArchiveManager.h"
 #include "NeuronGroup.h"
 #include "SpikeStreamApplication.h"
 
@@ -39,10 +38,10 @@
 
 
 //------------------------- Monitor Area ----------------------------------
-/*! Extends QDockArea and holds a number of monitor windows with the 
+/*! Extends QDockArea and holds a number of monitor windows with the
 	possibility of arranging them and undocking them, etc.
 
-	NOTE Had problems creating QDockWindows at runtime, so instead create 
+	NOTE Had problems creating QDockWindows at runtime, so instead create
 	all of them at once and then add NetworkMonitors to them and hide/show
 	them as required.This creates a limit on the number of monitoring windows
 	that can be used at one time, which is set in GlobalVariables.h. */
@@ -74,7 +73,7 @@ class MonitorArea : public Q3DockArea {
 		SimulationManager *simulationManager;
 		ArchiveManager *archiveManager;
 		SpikeStreamApplication *spikeStrApp;
-		
+
 		/*! Array holding references to all the monitor windows.*/
 		MonitorWindow **monitorWindowArray;
 
@@ -83,12 +82,12 @@ class MonitorArea : public Q3DockArea {
 
 		/*! Holds references to all the network monitors.*/
 		map<unsigned int, NetworkMonitor*> networkMonitorMap;
-		
-		/*! Records whether this monitor area is monitoring a simulation 
+
+		/*! Records whether this monitor area is monitoring a simulation
 			or playing back an archive */
 		bool simulationMode;
 
-		/*! Used to determine whether the windows should be arranged 
+		/*! Used to determine whether the windows should be arranged
 			automatically, this records whether this is the first undock
 			of the monitor area. */
 		bool firstTimeUndock;

@@ -351,11 +351,13 @@ void NetworkDaoThread::loadConnections(){
 	(*iter)->clearConnections();
 
 	//Load connections into group
-	QSqlQuery query = getQuery("SELECT ConnectionID, FromNeuronID, ToNeuronID, Delay, Weight, TempWeight FROM Connections WHERE ConnectionGroupID = " + QString::number((*iter)->getID()));
+	unsigned int tmpConGrpID = (*iter)->getID();
+	QSqlQuery query = getQuery("SELECT ConnectionID, FromNeuronID, ToNeuronID, Delay, Weight, TempWeight FROM Connections WHERE ConnectionGroupID = " + QString::number(tmpConGrpID));
 	executeQuery(query);
 	while ( query.next() ) {
 	    Connection* tmpConn = new Connection(
 			query.value(0).toUInt(),//ConnectionID
+			tmpConGrpID,//Connection Group ID
 			query.value(1).toUInt(),//FromNeuronID
 			query.value(2).toUInt(),//ToNeuronID
 			query.value(3).toString().toFloat(),//Delay

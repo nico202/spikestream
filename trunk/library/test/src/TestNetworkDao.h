@@ -19,7 +19,8 @@ class TestNetworkDao : public TestDao {
 	    void testAddWeightlessConnection();
 	    void testAddWeightlessNeuronTrainingPattern();
 	    void testDeleteNetwork();
-	    void testGetConnections();
+	    void testGetConnections1();
+	    void testGetConnections2();
 	    void testGetConnectionGroupsInfo();
 	    void testGetConnectionGroupSize();
 	    void testGetNeuronGroupBoundingBox();

@@ -1,4 +1,5 @@
 //SpikeStream includes
+#include "GlobalVariables.h"
 #include "SpikeStreamException.h"
 #include "TestNetworkDao.h"
 #include "NetworkDao.h"
@@ -127,7 +128,7 @@ void TestNetworkDao::testDeleteNetwork(){
 }
 
 
-void TestNetworkDao::testGetConnections(){
+void TestNetworkDao::testGetConnections1(){
     //Add a test network to give us a valid connection id
     addTestNetwork1();
 
@@ -145,6 +146,83 @@ void TestNetworkDao::testGetConnections(){
     QCOMPARE(conList[0].toNeuronID, testNeurIDList[3]);
     QCOMPARE(conList[0].delay, 1.4f);
     QCOMPARE(conList[0].weight, 0.4f);
+}
+
+
+void TestNetworkDao::testGetConnections2(){
+    //Add the test network
+    addTestNetwork1();
+
+    //The network dao being tested
+    NetworkDao networkDao(dbInfo);
+
+    //Test all connections mode
+    unsigned int connectionMode = 0;
+    QList<Connection*> conList = networkDao.getConnections(connectionMode, testNeurIDList[0], 0);
+    QCOMPARE(conList.size(), (int)0);
+
+    //Test single neuron all connections
+    connectionMode = 0;
+    connectionMode |= CONNECTION_MODE_ENABLED;
+    conList = networkDao.getConnections(connectionMode, testNeurIDList[0], 0);
+    QCOMPARE(conList.size(), (int)3);
+    QCOMPARE(conList[0]->fromNeuronID, testNeurIDList[0]);
+    QCOMPARE(conList[0]->toNeuronID, testNeurIDList[1]);
+    QCOMPARE(conList[1]->toNeuronID, testNeurIDList[2]);
+    QCOMPARE(conList[2]->toNeuronID, testNeurIDList[3]);
+
+    //Test single neuron from connections
+    connectionMode = 0;
+    connectionMode |= CONNECTION_MODE_ENABLED;
+    connectionMode |= SHOW_FROM_CONNECTIONS;
+    conList = networkDao.getConnections(connectionMode, testNeurIDList[4], 0);
+    QCOMPARE(conList.size(), (int)2);
+    QCOMPARE(conList[0]->fromNeuronID, testNeurIDList[4]);
+    QCOMPARE(conList[1]->fromNeuronID, testNeurIDList[4]);
+    QCOMPARE(conList[1]->toNeuronID, testNeurIDList[3]);
+    QCOMPARE(conList[0]->toNeuronID, testNeurIDList[1]);
+
+    //Test single neuron to connections
+    connectionMode = 0;
+    connectionMode |= CONNECTION_MODE_ENABLED;
+    connectionMode |= SHOW_TO_CONNECTIONS;
+    conList = networkDao.getConnections(connectionMode, testNeurIDList[3], 0);
+    QCOMPARE(conList.size(), (int)2);
+    QCOMPARE(conList[0]->fromNeuronID, testNeurIDList[0]);
+    QCOMPARE(conList[1]->fromNeuronID, testNeurIDList[4]);
+    QCOMPARE(conList[1]->toNeuronID, testNeurIDList[3]);
+    QCOMPARE(conList[0]->toNeuronID, testNeurIDList[3]);
+
+    //Test between connections
+    connectionMode = 0;
+    connectionMode |= CONNECTION_MODE_ENABLED;
+    connectionMode |= SHOW_BETWEEN_CONNECTIONS;
+    conList = networkDao.getConnections(connectionMode, testNeurIDList[3], testNeurIDList[2]);
+    QCOMPARE(conList.size(), (int)1);
+    QCOMPARE(conList[0]->fromNeuronID, testNeurIDList[3]);
+    QCOMPARE(conList[0]->toNeuronID, testNeurIDList[2]);
+
+    //Test weight filtering
+    testConnIDList.append(addTestConnection(connGrp1ID, testNeurIDList[3], testNeurIDList[1], -1.95, 1.6));
+    connectionMode = 0;
+    connectionMode |= CONNECTION_MODE_ENABLED;
+    connectionMode |= SHOW_FROM_CONNECTIONS;
+    connectionMode |= SHOW_POSITIVE_CONNECTIONS;
+    conList = networkDao.getConnections(connectionMode, testNeurIDList[3], 0);
+    QCOMPARE(conList.size(), (int)1);
+    QCOMPARE(conList[0]->fromNeuronID, testNeurIDList[3]);
+    QCOMPARE(conList[0]->toNeuronID, testNeurIDList[2]);
+    QCOMPARE(conList[0]->weight, 0.6f);
+
+    connectionMode = 0;
+    connectionMode |= CONNECTION_MODE_ENABLED;
+    connectionMode |= SHOW_FROM_CONNECTIONS;
+    connectionMode |= SHOW_NEGATIVE_CONNECTIONS;
+    conList = networkDao.getConnections(connectionMode, testNeurIDList[3], 0);
+    QCOMPARE(conList.size(), (int)1);
+    QCOMPARE(conList[0]->fromNeuronID, testNeurIDList[3]);
+    QCOMPARE(conList[0]->toNeuronID, testNeurIDList[1]);
+    QCOMPARE(conList[0]->weight, -1.95f);
 }
 
 
