@@ -99,17 +99,21 @@ SOURCES += src/exceptions/NRMException.cpp
 #---              models folder             ---#
 #----------------------------------------------#
 HEADERS += src/models/NeuronGroupModel.h \
-	    src/models/ConnectionGroupModel.h
+	    src/models/ConnectionGroupModel.h \
+	    src/models/ConnectionsModel.h
 SOURCES += src/models/NeuronGroupModel.cpp \
-	    src/models/ConnectionGroupModel.cpp
+	    src/models/ConnectionGroupModel.cpp \
+	    src/models/ConnectionsModel.cpp
 
 #----------------------------------------------#
 #---              views folder             ---#
 #----------------------------------------------#
 HEADERS += src/views/NeuronGroupTableView.h \
-	    src/views/ConnectionGroupTableView.h
+	    src/views/ConnectionGroupTableView.h \
+	    src/views/ConnectionsTableView.h
 SOURCES += src/views/NeuronGroupTableView.cpp \
-	    src/views/ConnectionGroupTableView.cpp
+	    src/views/ConnectionGroupTableView.cpp \
+	    src/views/ConnectionsTableView.cpp
 
 #----------------------------------------------#
 #---              widgets folder            ---#
@@ -128,53 +132,9 @@ SOURCES += src/widgets/NetworksWidget.cpp \
 #----------------------------------------------#
 #---               src folder               ---#
 #----------------------------------------------#
-HEADERS += src/ArchiveManager.h \
-	   src/ArchiveStatistic.h \
-	   src/ArchiveStatisticsDialog.h \
-	   src/ArchiveWidget.h \
-	   src/BusyDialog.h \
-	   src/ConnectionCheckTableItem.h \
-	   src/ConnectionGroupHolder.h \
-	   src/ConnectionHolder.h \
-	   src/ConnectionManager.h \
-	   src/ConnectionParameterTable.h \
-	   src/ConnectionParameterViewer.h \
-	   src/ConnectionPropertiesDialog.h \
-	   src/ConnectionTableItem.h \
-	   src/Debug.h \
-	   src/EditNeuronParametersDialog.h \
-	   src/EditSynapseParametersDialog.h \
-	   src/GlobalParametersDialog.h \
-	   src/LayerManager.h \
-	   src/LayerPropertiesDialog.h \
-	   src/LoadArchiveDialog.h \
-	   src/MonitorArea.h \
-	   src/MonitorWindow.h \
-	   src/NameDialog.h \
-	   src/NetworkDataXmlHandler.h \
-	   src/NetworkModelXmlHandler.h \
-	   src/NetworkMonitor.h \
-	   src/NetworkViewerProperties.h \
-	   src/NeuronGroup.h \
-	   src/NeuronGroupHolder.h \
-	   src/NeuronParametersDialog.h \
-	   src/NoiseParametersDialog.h \
-	   src/ParameterTable.h \
-	   src/PatternManager.h \
-	   src/ScriptRunner.h \
-	   src/SimulationManager.h \
-	   src/SimulationWidget.h \
-	   src/SpikeStreamApplication.h \
+HEADERS += src/SpikeStreamApplication.h \
 	   src/SpikeStreamMainWindow.h \
-	   src/SynapseParametersDialog.h \
-	   src/Tester.h \
 	   src/DatabaseManager.h \
-	   src/PatternDialog.h \
-	   src/MonitorDataset.h \
-	   src/MonitorDataPlotter.h \
-	   src/MonitorXmlHandler.h \
-	   src/ProbeDialog.h \
-	   src/ViewModelDialog.h \
 	   src/ConnectionMatrixLoader.h \
 	   src/HighlightDialog.h \
 	   src/PluginManager.h \
@@ -184,50 +144,9 @@ HEADERS += src/ArchiveManager.h \
 	   src/NetworkDisplay.h \
 	   src/ArchivePlayerThread.h
 
-SOURCES += src/ArchiveManager.cpp \
-	   src/ArchiveStatistic.cpp \
-	   src/ArchiveStatisticsDialog.cpp \
-	   src/ArchiveWidget.cpp \
-	   src/BusyDialog.cpp \
-	   src/ConnectionCheckTableItem.cpp \
-	   src/ConnectionGroupHolder.cpp \
-	   src/ConnectionManager.cpp \
-	   src/ConnectionParameterTable.cpp \
-	   src/ConnectionParameterViewer.cpp \
-	   src/ConnectionPropertiesDialog.cpp \
-	   src/ConnectionTableItem.cpp \
-	   src/EditNeuronParametersDialog.cpp \
-	   src/EditSynapseParametersDialog.cpp \
-	   src/GlobalParametersDialog.cpp \
-	   src/LayerManager.cpp \
-	   src/LayerPropertiesDialog.cpp \
-	   src/LoadArchiveDialog.cpp \
-	   src/MonitorArea.cpp \
-	   src/MonitorWindow.cpp \
-	   src/NameDialog.cpp \
-	   src/NetworkDataXmlHandler.cpp \
-	   src/NetworkModelXmlHandler.cpp \
-	   src/NetworkMonitor.cpp \
-	   src/NetworkViewerProperties.cpp \
-	   src/NeuronGroupHolder.cpp \
-	   src/NeuronParametersDialog.cpp \
-	   src/NoiseParametersDialog.cpp \
-	   src/ParameterTable.cpp \
-	   src/PatternManager.cpp \
-	   src/ScriptRunner.cpp \
-	   src/SimulationManager.cpp \
-	   src/SimulationWidget.cpp \
-	   src/SpikeStreamApplication.cpp \
+SOURCES += src/SpikeStreamApplication.cpp \
 	   src/SpikeStreamMainWindow.cpp \
-	   src/SynapseParametersDialog.cpp \
-	   src/Tester.cpp \
 	   src/DatabaseManager.cpp \
-	   src/PatternDialog.cpp \
-	   src/MonitorDataset.cpp \
-	   src/MonitorDataPlotter.cpp \
-	   src/MonitorXmlHandler.cpp \
-	   src/ProbeDialog.cpp \
-	   src/ViewModelDialog.cpp \
 	   src/ConnectionMatrixLoader.cpp \
 	   src/HighlightDialog.cpp \
 	   src/PluginManager.cpp \

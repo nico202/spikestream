@@ -1,33 +1,7 @@
-/***************************************************************************
- *   SpikeStream Application                                               *
- *   Copyright (C) 2007 by David Gamez                                     *
- *   david@davidgamez.eu                                                   *
- *   Version 0.1                                                           *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
-
 #ifndef SPIKESTREAMMAINWINDOW_H
 #define SPIKESTREAMMAINWINDOW_H
 
 //SpikeStream includes
-#include "DBInterface.h"
-#include "SimulationManager.h"
-#include "SimulationWidget.h"
-#include "ArchiveManager.h"
 #include "BusyDialog.h"
 #include "SpikeStreamApplication.h"
 
@@ -48,7 +22,7 @@
 	communication between them and for loading and saving databases.*/
 //--------------------------------------------------------------------------
 
-class SpikeStreamMainWindow: public Q3MainWindow {
+class SpikeStreamMainWindow: public QMainWindow {
     Q_OBJECT
 
 	public:
@@ -110,10 +84,8 @@ class SpikeStreamMainWindow: public Q3MainWindow {
 		DBInterface* deviceDBInterface;
 
 		//Store references to classes that we need to access
-		SimulationManager* simulationManager;
-		ArchiveManager* archiveManager;
-//		NetworkViewer_V2* networkViewer2;
-		SimulationWidget *simulationWidget;
+		//SimulationManager* simulationManager;
+		//SimulationWidget *simulationWidget;
 		QTabWidget *tabWidget;
 		Q3Accel* keyboardAccelerator;
 

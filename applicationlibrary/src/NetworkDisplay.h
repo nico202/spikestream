@@ -27,6 +27,7 @@ namespace spikestream {
 	    RGBColor* getDefaultNeuronColor() { return &defaultNeuronColor; }
 	    RGBColor* getFiringNeuronColor() { return &firingNeuronColor; }
 	    RGBColor& getSingleNeuronColor() { return singleNeuronColor; }
+	    RGBColor& getToNeuronColor() { return toNeuronColor; }
 	    RGBColor* getNegativeConnectionColor(){ return &negativeConnectionColor; }
 	    RGBColor* getPositiveConnectionColor(){ return &positiveConnectionColor; }
 	    QList<unsigned int> getVisibleConnectionGroupIDs() { return connGrpDisplayMap.keys(); }
@@ -49,13 +50,16 @@ namespace spikestream {
 
 
 	    unsigned int getSingleNeuronID() { return singleNeuronID; }
-	    unsigned int getBetweenFromNeuronID() { return betweenFromNeuronID; }
-	    unsigned int getBetweenToNeuronID() { return betweenToNeuronID; }
+	    unsigned int getToNeuronID() { return toNeuronID; }
+	    void setSelectedNeuronID(unsigned int id, bool ctrlBtnDown=false);
 
-	    void setSingleNeuronID(unsigned int id);
-	    void setBetweenFromNeuronID(unsigned int id);
-	    void setBetweenToNeuronID(unsigned int id);
+	    void showPositiveConnections();
+	    void showNegativeConnections();
+	    void clearWeightFiltering();
 
+	    void showFromConnections();
+	    void showToConnections();
+	    void clearDirectionFiltering();
 
 	    //=========================  VARIABLES  =========================
 	    /*! Zoom disabled */
@@ -97,6 +101,9 @@ namespace spikestream {
 	    /*! Color of single neuron whose connections are being shown */
 	    RGBColor singleNeuronColor;
 
+	    /*! Color of to neuron when showing connections between neurons*/
+	    RGBColor toNeuronColor;
+
 	    /*! Postive connection color */
 	    RGBColor positiveConnectionColor;
 
@@ -124,11 +131,8 @@ namespace spikestream {
 	    /*! Neuron id used in SHOW_SINGLE_NEURON_CONNECTIONS mode */
 	    unsigned int singleNeuronID;
 
-	    /*! From neuron id used in SHOW_BETWEEN_NEURON_CONNECTIONS mode */
-	    unsigned int betweenFromNeuronID;
-
-	    /*! From neuron id used in SHOW_BETWEEN_NEURON_CONNECTIONS mode */
-	    unsigned int betweenToNeuronID;
+	    /*! To neuron id used in SHOW_BETWEEN_NEURON_CONNECTIONS mode */
+	    unsigned int toNeuronID;
 
 
 	    //=========================  METHODS  =========================

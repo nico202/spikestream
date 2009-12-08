@@ -19,7 +19,6 @@ NetworkDisplay::NetworkDisplay(){
     //Set the default colors and store addresses in a map to prevent deletion
     defaultNeuronColor.set(0.0f, 0.0f, 0.0f);
     defaultColorMap[&defaultNeuronColor] = true;
-    singleNeuronColor.set(0.0f, 1.0f, 0.0f);
     negativeConnectionColor.set(0.0f, 0.0f, 1.0f);
     defaultColorMap[&negativeConnectionColor] = true;
     positiveConnectionColor.set(1.0f, 0.0f, 0.0f);
@@ -27,15 +26,17 @@ NetworkDisplay::NetworkDisplay(){
     firingNeuronColor.set(1.0f, 0.0f, 1.0f);
     defaultColorMap[&firingNeuronColor] = true;
 
+    //Colours not in colour map
+    singleNeuronColor.set(0.0f, 1.0f, 0.0f);
+    toNeuronColor.set(1.0f, 0.0f, 1.0f);
+
     //Initialize color map
     neuronColorMap = new QHash<unsigned int, RGBColor*>();
 
     //Default connection mode settings
     connectionMode = 0;
-    setConnectionModeFlag(SHOW_POSITIVE_CONNECTIONS);
-    setConnectionModeFlag(SHOW_NEGATIVE_CONNECTIONS);
-    setConnectionModeFlag(SHOW_ALL_NEURON_CONNECTIONS);
     singleNeuronID = 0;
+    toNeuronID = 0;
 }
 
 
@@ -54,12 +55,20 @@ void NetworkDisplay::networkChanged(){
     connGrpDisplayMap.clear();
     neurGrpDisplayMap.clear();
     clearNeuronColorMap();
+    unsetConnectionModeFlag(CONNECTION_MODE_ENABLED);
+    singleNeuronID = 0;
+    toNeuronID = 0;
+    zoomStatus = NO_ZOOM;
+    zoomNeuronGroupID = 0;
 
     //Make the neuron groups visible by default
     if(Globals::networkLoaded()){
 	setVisibleNeuronGroupIDs(Globals::getNetwork()->getNeuronGroupIDs());
 	setVisibleConnectionGroupIDs(Globals::getNetwork()->getConnectionGroupIDs());
     }
+
+    //Inform other classes about the change
+    emit networkDisplayChanged();
 }
 
 
@@ -232,53 +241,124 @@ void NetworkDisplay::setZoom(unsigned int neurGrpID, int status){
 	emit networkDisplayChanged();
 }
 
-FIXME!!
 
-void NetworkDisplay::setSingleNeuronID(unsigned int id){
-    this->singleNeuronID = id;
+/*! Called when the user double clicks on a neuron */
+void NetworkDisplay::setSelectedNeuronID(unsigned int id, bool ctrlBtnDown){
+    //Connection mode is disabled and id is valid
+    if( !(connectionMode & CONNECTION_MODE_ENABLED) && id != 0){
+	setConnectionModeFlag(CONNECTION_MODE_ENABLED);
+	singleNeuronID = id;
+	toNeuronID = 0;
+    }
+
     //Switch off connection mode if neuron id is invalid
-    if(id == 0){
+    else if ( (connectionMode & CONNECTION_MODE_ENABLED) && id == 0){
 	unsetConnectionModeFlag(CONNECTION_MODE_ENABLED);
-	unsetConnectionModeFlag(SHOW_SINGLE_NEURON_CONNECTIONS);
-    }
-    //Turn on connection mode
-    else{
-	setConnectionModeFlag(SHOW_SINGLE_NEURON_CONNECTIONS);
+	unsetConnectionModeFlag(SHOW_BETWEEN_CONNECTIONS);
+	singleNeuronID = 0;
+	toNeuronID = 0;
     }
 
+    //Connection mode is enabled for a single neuron
+    else if( (connectionMode & CONNECTION_MODE_ENABLED) && !(connectionMode & SHOW_BETWEEN_CONNECTIONS) ){
+	//If a different neuron has been double clicked and control button is down
+	if(singleNeuronID != id && ctrlBtnDown){
+	    toNeuronID = id;
+	    setConnectionModeFlag(SHOW_BETWEEN_CONNECTIONS);
+	    return;
+	}
+	//Control button is not down - select a different neuron
+	else if(singleNeuronID != id && !ctrlBtnDown){
+	    singleNeuronID = id;
+	}
+    }
+
+    //In between connection mode
+    else if( (connectionMode & CONNECTION_MODE_ENABLED) && (connectionMode & SHOW_BETWEEN_CONNECTIONS) ){
+	//A neuron has been double clicked without the control button or the first neuron is also selected as the second neuron
+	if( !ctrlBtnDown || singleNeuronID == id ){
+	    unsetConnectionModeFlag(SHOW_BETWEEN_CONNECTIONS);
+	    singleNeuronID = id;
+	    toNeuronID = 0;
+	}
+	//User has double clicked on a different between neuron
+	else if (id != toNeuronID){
+	    toNeuronID = id;
+	}
+    }
+
     emit networkDisplayChanged();
 }
 
 
-void NetworkDisplay::setBetweenFromNeuronID(unsigned int id){
-    this->betweenFromNeuronID = id;
+
+/*! Sets display to only show positive connections */
+void NetworkDisplay::showPositiveConnections() {
+    setConnectionModeFlag(SHOW_POSITIVE_CONNECTIONS);
+    unsetConnectionModeFlag(SHOW_NEGATIVE_CONNECTIONS);
     emit networkDisplayChanged();
 }
 
-void NetworkDisplay::setBetweenToNeuronID(unsigned int id){
-    this->betweenToNeuronID = id;
+
+/*! Sets display to only show negative connections */
+void NetworkDisplay::showNegativeConnections() {
+    setConnectionModeFlag(SHOW_NEGATIVE_CONNECTIONS);
+    unsetConnectionModeFlag(SHOW_POSITIVE_CONNECTIONS);
     emit networkDisplayChanged();
 }
+
+
+/*! Sets display to show both positive and negative weights */
+void NetworkDisplay::clearWeightFiltering() {
+    unsetConnectionModeFlag(SHOW_NEGATIVE_CONNECTIONS);
+    unsetConnectionModeFlag(SHOW_POSITIVE_CONNECTIONS);
+    emit networkDisplayChanged();
+}
+
+
+/*! Sets display to only show from connections */
+void NetworkDisplay::showFromConnections() {
+    setConnectionModeFlag(SHOW_FROM_CONNECTIONS);
+    unsetConnectionModeFlag(SHOW_TO_CONNECTIONS);
+    emit networkDisplayChanged();
+}
+
+
+/*! Sets display to only show to connections */
+void NetworkDisplay::showToConnections() {
+    setConnectionModeFlag(SHOW_TO_CONNECTIONS);
+    unsetConnectionModeFlag(SHOW_FROM_CONNECTIONS);
+    emit networkDisplayChanged();
+}
+
+
+/*! Sets the display to show both positive and negative connections */
+void NetworkDisplay::clearDirectionFiltering(){
+    unsetConnectionModeFlag(SHOW_FROM_CONNECTIONS);
+    unsetConnectionModeFlag(SHOW_TO_CONNECTIONS);
+    emit networkDisplayChanged();
+}
+
 
 
 /*----------------------------------------------------------*/
 /*-----               PRIVATE METHODS                  -----*/
 /*----------------------------------------------------------*/
 
+
+/*! Checks that a particular connection mode flag is valid and throws an exception if not */
 void NetworkDisplay::checkConnectionModeFlag(unsigned int flag){
-    if(flag == SHOW_SINGLE_NEURON_CONNECTIONS)
+    if(flag == CONNECTION_MODE_ENABLED)
 	return;
-    if(flag == SHOW_BETWEEN_NEURON_CONNECTIONS)
+    if(flag == SHOW_BETWEEN_CONNECTIONS)
 	return;
     if(flag == SHOW_POSITIVE_CONNECTIONS)
 	return;
     if(flag == SHOW_NEGATIVE_CONNECTIONS)
 	return;
-    if(flag == SHOW_FROM_NEURON_CONNECTIONS)
+    if(flag == SHOW_FROM_CONNECTIONS)
 	return;
-    if(flag == SHOW_TO_NEURON_CONNECTIONS)
-	return;
-    if(flag == SHOW_ALL_NEURON_CONNECTIONS)
+    if(flag == SHOW_TO_CONNECTIONS)
 	return;
     throw SpikeStreamException("Connection mode flag not recognized: " + QString::number(flag));
 }

@@ -39,7 +39,7 @@ int main( int argc, char ** argv ) {
 	SpikeStreamApplication spikeStrApp(argc, argv);
 
 	//Start up main window of application
-	SpikeStreamMainWindow *spikeStrMainWin = new SpikeStreamMainWindow(&spikeStrApp);
+	SpikeStreamMainWindow *spikeStrMainWin = new SpikeStreamMainWindow();
 	spikeStrMainWin->setCaption( "SpikeStream" );
 	spikeStrMainWin->show();
 

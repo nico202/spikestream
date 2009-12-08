@@ -56,6 +56,10 @@ NetworkViewer_V2::NetworkViewer_V2(QWidget* parent) : QGLWidget(parent) {
     connect(Globals::getEventRouter(), SIGNAL(rotateLeftSignal()), this, SLOT(rotateLeft()), Qt::QueuedConnection);
     connect(Globals::getEventRouter(), SIGNAL(rotateRightSignal()), this, SLOT(rotateRight()), Qt::QueuedConnection);
 
+    //Set size of widget
+    setMinimumSize(200, 60);
+    setBaseSize(700, 60);
+
     //Set display to initial state
     reset();
 }
@@ -204,6 +208,13 @@ void NetworkViewer_V2::mouseDoubleClickEvent (QMouseEvent* event){
     int mouseYPos = height() - event->y();
     int mouseXPos = event->x();
 
+    //Determine if control button is down
+    bool ctrlBtnDown = false;
+    if(event->modifiers() & Qt::ControlModifier){
+	ctrlBtnDown = true;
+	qDebug()<<"CONTROL BUTTON DOWN: "<<ctrlBtnDown;
+    }
+
     //Create the select buffer
     int SELECT_BUFFER_SIZE = 512;
     GLuint selectBuffer[SELECT_BUFFER_SIZE];
@@ -218,7 +229,7 @@ void NetworkViewer_V2::mouseDoubleClickEvent (QMouseEvent* event){
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
-    gluPickMatrix(event->x(), mouseYPos, 10, 10, viewport);
+    gluPickMatrix(mouseXPos, mouseYPos, 15, 15, viewport);
 
     float ratio = (float)viewport[2] / (float)viewport[3];
     gluPerspective(45, ratio, 0.1, 1000);
@@ -245,10 +256,10 @@ void NetworkViewer_V2::mouseDoubleClickEvent (QMouseEvent* event){
 
     if(hitCount != 0){//Neuron selected
 	unsigned int selectedNeuronID = getSelectedNeuron(selectBuffer, hitCount, SELECT_BUFFER_SIZE);
-	Globals::getNetworkDisplay()->setSingleNeuronID(selectedNeuronID);
+	Globals::getNetworkDisplay()->setSelectedNeuronID(selectedNeuronID, ctrlBtnDown);
     }
     else{
-	Globals::getNetworkDisplay()->setSingleNeuronID(0);
+	Globals::getNetworkDisplay()->setSelectedNeuronID(0);
     }
 
     //Restore render mode and the original projection matrix
@@ -457,13 +468,12 @@ void NetworkViewer_V2::drawConnections(){
     RGBColor negativeConnectionColor = *netDisplay->getNegativeConnectionColor();
 
     //Sort out the connection mode
-    unsigned int neuronID=0, fromNeuronID=0, toNeuronID=0;
+    unsigned int singleNeuronID=0, toNeuronID=0;
     unsigned int connectionMode = netDisplay->getConnectionMode();
-    if(connectionMode & SHOW_SINGLE_NEURON_CONNECTIONS)
-	neuronID = netDisplay->getSingleNeuronID();
-    else if(connectionMode & SHOW_BETWEEN_NEURON_CONNECTIONS){
-	fromNeuronID = netDisplay->getBetweenFromNeuronID();
-	toNeuronID = netDisplay->getBetweenToNeuronID();
+    if(connectionMode & CONNECTION_MODE_ENABLED){
+	singleNeuronID = netDisplay->getSingleNeuronID();
+	if(connectionMode & SHOW_BETWEEN_CONNECTIONS)
+	    toNeuronID = netDisplay->getToNeuronID();
     }
     bool drawConnection;
 
@@ -488,25 +498,34 @@ void NetworkViewer_V2::drawConnections(){
 		//Decide if connection should be drawn, depending on the connection mode and neuron id
 		drawConnection = true;
 		if(connectionMode & CONNECTION_MODE_ENABLED){
-		    //Decide whether to draw connection based on from and to neuron id
-		    if(connectionMode & SHOW_SINGLE_NEURON_CONNECTIONS){//Single neuron connection mode
-			if( (connectionMode & SHOW_ALL_NEURON_CONNECTIONS) && ( (*conIter)->fromNeuronID != neuronID && (*conIter)->toNeuronID != neuronID))
-			    drawConnection = false;
-			else if( (connectionMode & SHOW_FROM_NEURON_CONNECTIONS) && (*conIter)->fromNeuronID != neuronID)
-			    drawConnection = false;
-			else if( (connectionMode & SHOW_TO_NEURON_CONNECTIONS) && (*conIter)->toNeuronID != neuronID)
-			    drawConnection = false;
-		    }
-		    else if(connectionMode & SHOW_BETWEEN_NEURON_CONNECTIONS){
-			if( (*conIter)->fromNeuronID != fromNeuronID && (*conIter)->toNeuronID != toNeuronID){
+		    //Single neuron mode
+		    if( !(connectionMode & SHOW_BETWEEN_CONNECTIONS) ){
+			//Show only connections from a single neuron
+			if(connectionMode & SHOW_FROM_CONNECTIONS){
+			    if( (*conIter)->fromNeuronID != singleNeuronID)
+				drawConnection = false;
+			}
+			//Show only connections to a single neuron
+			else if(connectionMode & SHOW_TO_CONNECTIONS){
+			    if( (*conIter)->toNeuronID != singleNeuronID)
+				drawConnection = false;
+			}
+			//Show from and to connections to a single neuron
+			else if( ((*conIter)->fromNeuronID != singleNeuronID) && ((*conIter)->toNeuronID != singleNeuronID) ){
 			    drawConnection = false;
 			}
 		    }
+		    //Between neuron mode
+		    else{
+			//Only show connections from first neuron to second
+			if( (*conIter)->fromNeuronID != singleNeuronID || (*conIter)->toNeuronID != toNeuronID)
+			    drawConnection = false;
+		    }
 
 		    //Decide whether to draw connection based on its weight
-		    if( (*conIter)->weight >= 0 && !(connectionMode & SHOW_POSITIVE_CONNECTIONS) )
+		    if( (*conIter)->weight < 0 && (connectionMode & SHOW_POSITIVE_CONNECTIONS) )
 			drawConnection = false;
-		    if( (*conIter)->weight < 0 && !(connectionMode & SHOW_NEGATIVE_CONNECTIONS))
+		    if( (*conIter)->weight >= 0 && (connectionMode & SHOW_NEGATIVE_CONNECTIONS))
 			drawConnection = false;
 		}
 
@@ -549,6 +568,9 @@ void NetworkViewer_V2::drawNeurons(){
     Network* network = Globals::getNetwork();
     NetworkDisplay* netDisplay = Globals::getNetworkDisplay();
 
+    //Connection mode
+    unsigned int connectionMode = netDisplay->getConnectionMode();
+
     //Default neuron colour
     RGBColor defaultNeuronColor = *netDisplay->getDefaultNeuronColor();
 
@@ -572,9 +594,18 @@ void NetworkViewer_V2::drawNeurons(){
 	    for(NeuronMap::iterator neurIter = neuronMap->begin(); neurIter != neurMapEnd; ++neurIter){
 
 		//Set the color of the neuron
-		if(netDisplay->getSingleNeuronID() == (*neurIter)->getID() ){
-		    tmpColor2 = netDisplay->getSingleNeuronColor();
-		    glColor3f(tmpColor2.red, tmpColor2.green, tmpColor2.blue);
+		if(connectionMode & CONNECTION_MODE_ENABLED){
+		    if(netDisplay->getSingleNeuronID() == (*neurIter)->getID() ){
+			tmpColor2 = netDisplay->getSingleNeuronColor();
+			glColor3f(tmpColor2.red, tmpColor2.green, tmpColor2.blue);
+		    }
+		    else if(netDisplay->getToNeuronID() == (*neurIter)->getID() ){
+			tmpColor2 = netDisplay->getToNeuronColor();
+			glColor3f(tmpColor2.red, tmpColor2.green, tmpColor2.blue);
+		    }
+		    else{
+			glColor3f(defaultNeuronColor.red, defaultNeuronColor.green, defaultNeuronColor.blue);
+		    }
 		}
 		else if(neuronColorMap.contains(neurIter.key())){
 		    tmpColor = neuronColorMap[neurIter.key()];

@@ -125,11 +125,8 @@
 /*! Show connections to/from a single neuron */
 #define CONNECTION_MODE_ENABLED 1
 
-/*! Show connections to/from a single neuron */
-#define SHOW_SINGLE_NEURON_CONNECTIONS 2
-
 /*! Show connections between two neurons */
-#define SHOW_BETWEEN_NEURON_CONNECTIONS 4
+#define SHOW_BETWEEN_CONNECTIONS 4
 
 /*! Show positive connections */
 #define SHOW_POSITIVE_CONNECTIONS 8
@@ -138,13 +135,11 @@
 #define SHOW_NEGATIVE_CONNECTIONS 16
 
 /*! Show all connections from a single neuron */
-#define SHOW_FROM_NEURON_CONNECTIONS 32
+#define SHOW_FROM_CONNECTIONS 32
 
 /*! Show all connections to a single neuron */
-#define SHOW_TO_NEURON_CONNECTIONS 64
+#define SHOW_TO_CONNECTIONS 64
 
-/*! Show all connections to and from a single neuron */
-#define SHOW_ALL_NEURON_CONNECTIONS 128
 
 
 /*! Commenting or uncommenting this define determines whether

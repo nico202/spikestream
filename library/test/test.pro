@@ -12,7 +12,7 @@ INCLUDEPATH += src \
 		../include \
 		$(SPIKESTREAM_ROOT)/testlibrary/include
 
-LIBS += -lspikestream -lspikestreamapplication -lspikestreamtest -L$(SPIKESTREAM_ROOT)/lib
+LIBS += -lspikestream -lmysqlpp -lspikestreamtest -L$(SPIKESTREAM_ROOT)/lib
 
 QT += sql xml
 

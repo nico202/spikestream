@@ -76,17 +76,18 @@ unsigned int NetworkDao::addWeightlessNeuronTrainingPattern(unsigned int neuronI
 
 /*! Returns all of the connections from the specified neuron to the specified neuron. */
 QList<Connection> NetworkDao::getConnections(unsigned int fromNeuronID, unsigned int toNeuronID){
-    QSqlQuery query = getQuery("SELECT ConnectionID, Delay, Weight, TempWeight FROM Connections WHERE FromNeuronID=" + QString::number(fromNeuronID) + " AND ToNeuronID="+ QString::number(toNeuronID));
+    QSqlQuery query = getQuery("SELECT ConnectionID, ConnectionGroupID, Delay, Weight, TempWeight FROM Connections WHERE FromNeuronID=" + QString::number(fromNeuronID) + " AND ToNeuronID="+ QString::number(toNeuronID));
     executeQuery(query);
     QList<Connection> conList;
     while ( query.next() ) {
 	Connection tmpCon(
 		query.value(0).toUInt(),//ConnectionID
+		query.value(1).toUInt(),//Connection group id
 		fromNeuronID,//FromNeuronID
 		toNeuronID,//ToNeuronID
-		query.value(1).toString().toFloat(),//Delay
-		query.value(2).toString().toFloat(),//Weight
-		query.value(3).toString().toFloat()//tempWeight
+		query.value(2).toString().toFloat(),//Delay
+		query.value(3).toString().toFloat(),//Weight
+		query.value(4).toString().toFloat()//tempWeight
 	);
 	conList.append(tmpCon);
     }
@@ -114,6 +115,61 @@ QList<ConnectionGroupInfo> NetworkDao::getConnectionGroupsInfo(unsigned int netw
 	);
     }
     return tmpList;
+}
+
+
+/*! Returns a list of connections filtered according to the connection mode */
+QList<Connection*> NetworkDao::getConnections(unsigned int connectionMode, unsigned int singleNeuronID, unsigned int toNeuronID){
+    QList<Connection*> conList;
+    //Return empty list if connection mode is disabled
+    if( !(connectionMode & CONNECTION_MODE_ENABLED) )
+	return conList;
+
+    QString queryStr = "SELECT ConnectionID, ConnectionGroupID, FromNeuronID, ToNeuronID, Delay, Weight, TempWeight FROM Connections WHERE ";
+
+    //Filter by weight
+    if(connectionMode & SHOW_POSITIVE_CONNECTIONS)
+	queryStr += "Weight >= 0 AND ";
+    else if(connectionMode & SHOW_NEGATIVE_CONNECTIONS)
+	queryStr += "Weight < 0 AND ";
+
+    //Filter by from or to in single neuron connection mode
+    if( !(connectionMode & SHOW_BETWEEN_CONNECTIONS) ){
+	if(connectionMode & SHOW_FROM_CONNECTIONS){
+	    queryStr += "FromNeuronID=" + QString::number(singleNeuronID) + " ";
+	}
+	else if(connectionMode & SHOW_TO_CONNECTIONS){
+	    queryStr += "ToNeuronID=" + QString::number(singleNeuronID) + " ";
+	}
+	else{
+	    queryStr += "(FromNeuronID=" + QString::number(singleNeuronID) + " OR ToNeuronID=" + QString::number(singleNeuronID) + ") ";
+	}
+    }
+    //Showing connections between two neurons
+    else{
+	queryStr += "FromNeuronID=" + QString::number(singleNeuronID) + " AND ToNeuronID=" + QString::number(toNeuronID);
+    }
+
+    //Execute query
+    QSqlQuery query = getQuery(queryStr);
+    executeQuery(query);
+
+    //Add returned connections to the list
+    while ( query.next() ) {
+	Connection* tmpConn = new Connection(
+		query.value(0).toUInt(),//ConnectionID
+		query.value(1).toUInt(),//Connection Group ID
+		query.value(2).toUInt(),//FromNeuronID
+		query.value(3).toUInt(),//ToNeuronID
+		query.value(4).toString().toFloat(),//Delay
+		query.value(5).toString().toFloat(),//Weight
+		query.value(6).toString().toFloat()//tempWeight
+		);
+	conList.append(tmpConn);
+    }
+
+    //Return the list
+    return conList;
 }
 
 

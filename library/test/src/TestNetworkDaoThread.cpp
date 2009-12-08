@@ -85,7 +85,7 @@ void TestNetworkDaoThread::testAddConnectionGroup(){
 
 	//Check that connections were added correctly
 	QCOMPARE(connGrp.isLoaded(), true);
-	for(ConnectionList::iterator iter = connGrp.getConnections()->begin(); iter != connGrp.getConnections()->end(); ++iter){
+	for(ConnectionList::const_iterator iter = connGrp.begin(); iter != connGrp.end(); ++iter){
 	    query = getQuery("SELECT ConnectionGroupID, FromNeuronID, ToNeuronID, Delay, Weight FROM Connections WHERE ConnectionID = " + QString::number((*iter)->id));
 	    executeQuery(query);
 	    query.next();
@@ -193,8 +193,8 @@ void TestNetworkDaoThread::testLoadConnections(){
     runThread(networkDaoThread);
 
     //Check that connections were correctly loaded.
-    QList<Connection*>* allConnList = connGrp.getConnections();
-    QCOMPARE(allConnList->size(), 6);
+    QList<Connection*> allConnList = connGrp.getConnections();
+    QCOMPARE(allConnList.size(), 6);
     QVERIFY(connGrp.isLoaded());
 
     //Should be three connections from the first neuron in the list
