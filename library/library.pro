@@ -18,9 +18,7 @@ CONFIG += debug \
 QT += sql xml
 
 
-INCLUDEPATH += include \
-		/usr/include/mysql \
-		/usr/local/include/mysql++
+INCLUDEPATH += include
 
 HEADERS = include/ConfigLoader.h \
 	    include/ConnectionType.h \
@@ -56,13 +54,11 @@ SOURCES = src/ConfigLoader.cpp \
 #----------------------------------------------#
 HEADERS += include/AbstractDao.h \
 	    include/DBInfo.h \
-	    include/DBInterface.h \
 	    include/NetworkDao.h \
 	    include/NetworkDaoThread.h \
 	    include/ArchiveDao.h \
 	    include/AnalysisDao.h
 SOURCES += src/database/DBInfo.cpp \
-	    src/database/DBInterface.cpp \
 	    src/database/AbstractDao.cpp \
 	    src/database/NetworkDao.cpp \
 	    src/database/NetworkDaoThread.cpp \

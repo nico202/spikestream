@@ -89,7 +89,7 @@ void AnalysisRunner::run(){
 void AnalysisRunner::stop(){
     //Halt all of the other threads and wait for them to finish
     for(QHash<int, AnalysisTimeStepThread*>::iterator iter = subThreadMap.begin(); iter != subThreadMap.end(); ++iter){
-	iter.value()->stop();
+	iter.value()->stopThread();
 	iter.value()->wait();
 	delete iter.value();
     }
@@ -104,8 +104,9 @@ void AnalysisRunner::stop(){
 /*-------------------------------------------------------------*/
 
 /*! Called when one of the sub threads emits a progress signal */
-void AnalysisRunner::updateProgress(unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps){
-    emit progress(timeStep, stepsCompleted, totalSteps);
+void AnalysisRunner::updateProgress(const QString& msg, unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps){
+    qDebug()<<"ANALYSIS RUNNER PROGRESS: "<<msg;
+    emit progress(msg, timeStep, stepsCompleted, totalSteps);
 }
 
 
@@ -231,7 +232,7 @@ void AnalysisRunner::startAnalysisTimeStepThread(int timeStep){
     AnalysisTimeStepThread* newThread = new AnalysisTimeStepThread(networkDBInfo, archiveDBInfo, analysisDBInfo);
     connect(newThread, SIGNAL(complexFound()), this, SLOT(updateComplexes()));
     connect(newThread, SIGNAL(finished()), this, SLOT(threadFinished()));
-    connect(newThread, SIGNAL(progress(unsigned int, unsigned int, unsigned int)), this, SLOT(updateProgress(unsigned int, unsigned int, unsigned int)));
+    connect(newThread, SIGNAL(progress(const QString&, unsigned int, unsigned int, unsigned int)), this, SLOT(updateProgress(const QString&, unsigned int, unsigned int, unsigned int)));
     newThread->prepareTimeStepAnalysis(analysisInfo, timeStep);
     newThread->start();
     subThreadMap[timeStep] = newThread;

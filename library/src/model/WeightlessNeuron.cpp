@@ -38,16 +38,22 @@ byte lookup[] = {
 
 
 /*! Constructor */
-WeightlessNeuron::WeightlessNeuron(QHash<unsigned int, unsigned int>& connectionMap){
+WeightlessNeuron::WeightlessNeuron(QHash<unsigned int, QList<unsigned int> >& connectionMap, unsigned int id){
     //Store variables
+    this->id = id;
     this->connectionMap = connectionMap;
+
+    //Calculate number of connections to this neuron
+    numberOfConnections = 0;
+    for(QHash<unsigned int, QList<unsigned int> >::iterator iter = connectionMap.begin(); iter != connectionMap.end(); ++iter)
+	numberOfConnections += iter.value().size();
 
     /* Calculate training data length
        Each bit stores an input with a byte at the beginning for the result */
-    if(connectionMap.size() % 8 == 0)
-	trainingDataLength = connectionMap.size() / 8 + 1;
+    if(numberOfConnections % 8 == 0)
+	trainingDataLength = numberOfConnections / 8 + 1;
     else
-	trainingDataLength = connectionMap.size() / 8 + 2;
+	trainingDataLength = numberOfConnections / 8 + 2;
 
     //Default setting for hamming threshold
     hammingThreshold = 0;
@@ -173,12 +179,14 @@ double WeightlessNeuron::getTransitionProbability(const QList<unsigned int>& neu
     for(int i=0; i<neurIDList.size(); ++i){
 	//Neuron in list is connected to this neuron
 	if(connectionMap.contains(neurIDList[i])){
-	    //Set the part of the input pattern to the state corresponding to the neuron's state
-	    int neuronIndex = connectionMap[neurIDList[i]];
-	    firingNeuronIndexMap[neuronIndex] = Util::getUInt(s0Pattern[i]);
+	    /* Set the part of the input pattern to the state corresponding to the neuron's state
+	       This may have to be done several times if there are several connections between two neurons */
+	    foreach(unsigned int tmpNeurIndex, connectionMap[neurIDList[i]]){
+		firingNeuronIndexMap[tmpNeurIndex] = Util::getUInt(s0Pattern[i]);
+	    }
 	}
     }
-    int missingNeuronCount = connectionMap.size() - firingNeuronIndexMap.size();
+    int missingNeuronCount = numberOfConnections - firingNeuronIndexMap.size();
     if(missingNeuronCount <0)
 	throw SpikeStreamException("Error in transition probability calculation. Missing neuron count is less than zero.");
 
@@ -224,7 +232,7 @@ double WeightlessNeuron::getTransitionProbability(const QList<unsigned int>& neu
 
 /*! Sets the generalization of the neuron */
 void WeightlessNeuron::setGeneralization(double generalization){
-    hammingThreshold = Util::rUInt((double)connectionMap.size() * (1.0 - generalization));
+    hammingThreshold = Util::rUInt((double)numberOfConnections * (1.0 - generalization));
 }
 
 
@@ -235,8 +243,6 @@ void WeightlessNeuron::setGeneralization(double generalization){
 /*! Constructs a byte array that can be used to compare with the trained arrays stored
     in the neuron */
 void WeightlessNeuron::buildInputPattern(byte inPatArr[], int inPatArrSize, bool selArr[], int selArrSize, QHash<unsigned int, byte>& firingNeuronIndexMap){
-    int numberOfConnections = connectionMap.size();
-
     //Clear inPatArr
     for(int i=0; i<inPatArrSize; ++i)
 	inPatArr[i] = 0;
@@ -264,6 +270,13 @@ void WeightlessNeuron::buildInputPattern(byte inPatArr[], int inPatArrSize, bool
 	    }
 	    ++selIndx;
 	}
+    }
+}
+
+void WeightlessNeuron::printConnectionMap(){
+    for(QHash<unsigned int, QList<unsigned int> >::iterator iter = connectionMap.begin(); iter != connectionMap.end(); ++iter){
+	foreach(unsigned int tmpPattIndx, iter.value())
+	    cout<<"Connection from "<<iter.key()<<" pattern index "<<tmpPattIndx<<endl;
     }
 }
 

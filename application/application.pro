@@ -20,8 +20,6 @@ INCLUDEPATH += src \
 		$(SPIKESTREAM_ROOT)/applicationlibrary/src/dialogs \
 		$(SPIKESTREAM_ROOT)/applicationlibrary/src/widgets \
 		$(SPIKESTREAM_ROOT)/library/include \
-		/usr/include/mysql \
-		/usr/local/include/mysql++ \
 		/usr/local/qwt/include
 
 CONFIG += debug \

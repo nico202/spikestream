@@ -12,7 +12,7 @@ using namespace std;
 void TestNRMTrainingLoader::testLoadTraining(){
 
 	//Start by loading up the configuration file that matches the training data
-	const char* configFileName = "../application/test/test_files/training/test_training_8.cfg";
+	const char* configFileName = "../applicationlibrary/test/test_files/training/test_training_8.cfg";
 	NRMConfigLoader configLoader;
 	try{
 		configLoader.loadConfig(configFileName);
@@ -23,7 +23,7 @@ void TestNRMTrainingLoader::testLoadTraining(){
 	NRMNetwork* network = configLoader.getNetwork();
 
 	//Load up the test configuration
-	const char* trainingFileName = "../application/test/test_files/training/test_training_8.ntr";
+	const char* trainingFileName = "../applicationlibrary/test/test_files/training/test_training_8.ntr";
 	NRMTrainingLoader trainingLoader(configLoader.getNetwork());
 	try{
 		trainingLoader.loadTraining(trainingFileName);

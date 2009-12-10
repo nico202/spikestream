@@ -3,11 +3,7 @@
 #include "SpikeStreamMainWindow.h"
 #include "Utilities.h"
 #include "GlobalVariables.h"
-#include "DatabaseManager.h"
-#include "PatternDialog.h"
-#include "ProbeDialog.h"
 #include "ConfigLoader.h"
-#include "ConnectionMatrixLoader.h"
 #include "Globals.h"
 #include "NRMImportDialog.h"
 #include "SpikeStreamException.h"
@@ -26,19 +22,14 @@ using namespace spikestream;
 #include <qmenubar.h>
 #include <qmessagebox.h>
 #include <qapplication.h>
-#include <q3accel.h>
 #include <qfile.h>
-#include <q3scrollview.h>
-#include <q3vbox.h>
-#include <q3filedialog.h>
 //Added by qt3to4:
 #include <QCloseEvent>
 #include <Q3PopupMenu>
-
-
-
 #include <QDebug>
 #include <QScrollArea>
+#include <Q3ScrollView>
+#include <Q3VBox>
 
 //Other includes
 #include <string>
@@ -48,7 +39,7 @@ using namespace std;
 /*! Constructor. */
 SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow( 0, "SpikeStream - Analysis", Qt::WDestructiveClose ){
     //Get the working directory, which should be defined by the SPIKESTREAM_ROOT variable
-    workingDirectory = getenv("SPIKESTREAM_ROOT");
+    QString workingDirectory = getenv("SPIKESTREAM_ROOT");
 
     //Working directory is essential, so exit if it is not defined.
     if( workingDirectory == ""){
@@ -127,8 +118,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow( 0, "SpikeStream - 
     }
 
     //Get the default location for saving and loading databases
-    defaultFileLocation = configLoader->getCharData("default_file_location");
-    Globals::setWorkingDirectory(defaultFileLocation);
+    Globals::setWorkingDirectory(configLoader->getCharData("default_file_location"));
 
     //Actions
     //Add OpenGL actions
@@ -244,7 +234,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow( 0, "SpikeStream - 
 	errorString += "\"";
 	QMessageBox::critical( 0, "Config Error", errorString);
     }
-    NetworkViewer_V2* networkViewer2 = new NetworkViewer_V2(mainSplitterWidget);
+    new NetworkViewer_V2(mainSplitterWidget);
 
     //Set up viewer tab
     Q3ScrollView* nwViewerPropScrollView = new Q3ScrollView(this);
@@ -264,18 +254,28 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow( 0, "SpikeStream - 
     AnalysisLoaderWidget* analysisLoaderWidget = new AnalysisLoaderWidget(this);
     QScrollArea* analysisScrollArea = new QScrollArea(this);
     analysisScrollArea->setWidget(analysisLoaderWidget);
-
-    //Set up an accelerator to switch between the tabs
-    keyboardAccelerator = new Q3Accel( this );
+    tabWidget->addTab(analysisScrollArea, "Analysis");
 
     //Add all  the key combinations that will be required.
-    keyboardAccelerator->insertItem(Qt::Key_F1);
-    keyboardAccelerator->insertItem(Qt::Key_F2);
-    keyboardAccelerator->insertItem(Qt::Key_F3);
-    keyboardAccelerator->insertItem(Qt::Key_F4);
+    QAction* showNetworkWidgetAction = new QAction(this);
+    showNetworkWidgetAction->setShortcut(QKeySequence(Qt::Key_F1));
+    connect(showNetworkWidgetAction, SIGNAL(triggered()), this, SLOT(showNetworkWidget()));
+    this->addAction(showNetworkWidgetAction);
 
-    //Connect up accelerator with the method that will process the key events
-    connect (keyboardAccelerator, SIGNAL(activated(int)), this, SLOT(acceleratorKeyPressed(int)));
+    QAction* showEditorWidgetAction = new QAction(this);
+    showEditorWidgetAction->setShortcut(QKeySequence(Qt::Key_F2));
+    connect(showEditorWidgetAction, SIGNAL(triggered()), this, SLOT(showEditorWidget()));
+    this->addAction(showEditorWidgetAction);
+
+    QAction* showArchiveWidgetAction = new QAction(this);
+    showArchiveWidgetAction->setShortcut(QKeySequence(Qt::Key_F3));
+    connect(showArchiveWidgetAction, SIGNAL(triggered()), this, SLOT(showArchiveWidget()));
+    this->addAction(showArchiveWidgetAction);
+
+    QAction* showAnalysisWidgetAction = new QAction(this);
+    showAnalysisWidgetAction->setShortcut(QKeySequence(Qt::Key_F4));
+    connect(showAnalysisWidgetAction, SIGNAL(triggered()), this, SLOT(showAnalysisWidget()));
+    this->addAction(showAnalysisWidgetAction);
 
     //Finish off
     QPixmap iconPixmap(workingDirectory + "/images/spikestream_icon_64.png" );
@@ -296,143 +296,42 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow( 0, "SpikeStream - 
 
 /*! Destructor. */
 SpikeStreamMainWindow::~SpikeStreamMainWindow(){
-#ifdef MEMORY_DEBUG
-    cout<<"DELETING SPIKE STREAM MAIN WINDOW"<<endl;
-#endif//MEMORY_DEBUG
-
-    //First need to stop the simulation if it is running
-    //	if(simulationManager->isInitialised()){
-    //		simulationManager->destroySimulation();
-    //		cout<<"Waiting for simulation to finish"<<endl;
-    //		bool threadFinished = simulationManager->wait(10000);
-    //		if(!threadFinished)
-    //			cerr<<"Simulation manager cannot be shut down cleanly within 10 seconds. Killing thread"<<endl;
-    //	}
-
-    //Need to stop archive manager if it is running
-    //	if(archiveManager->isRunning()){
-    //		archiveManager->stopArchive();
-    //		cout<<"Waiting for archive manager to finish"<<endl;
-    //		bool threadFinished = archiveManager->wait(10000);
-    //		if(!threadFinished)
-    //			cerr<<"Archive manager cannot be shut down cleanly within 10 seconds. Killing thread"<<endl;
-    //	}
-
-    //Delete all the database handling classes
-    delete networkDBInterface;
-    delete archiveDBInterface;
-    delete patternDBInterface;
-    delete deviceDBInterface;
-
     //Clean up globals - everything stored in globals is cleaned up by globals
     Globals::cleanUp();
 }
 
 
-//--------------------------------------------------------------------------
-//------------------------------ PUBLIC METHODS ----------------------------
-//--------------------------------------------------------------------------
-
-///*! Returns a reference to the network viewer. */
-//NetworkViewer_V2* SpikeStreamMainWindow::getNetworkViewer(){
-//	return networkViewer2;
-//}
-
-
-/*! Reloads just the details about the connections assuming that the connection
-	groups have remained the same. */
-void SpikeStreamMainWindow::reloadConnectionDetails(){
-    //networkViewerProperties->reloadConnectionDetails();
-}
-
-
-
-/*! Reloads connections after a class has made changes to the database. */
-void SpikeStreamMainWindow::reloadConnections(){
-    //networkViewerProperties->reloadConnections();
-    //simulationWidget->reloadConnectionGroups();
-}
-
-
-/*! Reloads neurons after a change has been made to the database. */
-void SpikeStreamMainWindow::reloadNeuronGroups(){
-    //networkViewerProperties->reloadNeuronGroups();
-    //simulationWidget->reloadNeuronGroups();
-    //connectionWidget->reloadConnections();
-}
-
-
-/*! When viewing individual neurons this method sets the from
-	neuron number in the Simulation Widget, which can be used to
-	fire a neuron or select a neuron for monitoring during a
-	simulation. */
-void SpikeStreamMainWindow::setFromNeuronID(unsigned int neurGrpID, unsigned int fromNeurNum){
-    //simulationWidget->setFromNeuronID(neurGrpID, fromNeurNum);
-}
-
-
-/*! When viewing individual neurons this method sets the to
-	neuron number in the Simulation Widget, which can be used to
-	select a synapse for monitoring during a simulation. */
-void SpikeStreamMainWindow::setToNeuronID(unsigned int toNeurNum){
-    //simulationWidget->setToNeuronID(toNeurNum);
-}
-
-
-/*! When simulation is destroyed this passes this information
-	on to other widgets. */
-void SpikeStreamMainWindow::simulationDestroyed(){
-    //connectionWidget->simulationDestroyed();
-    //layerWidget->simulationDestroyed();
-}
-
-
-/*! When simulation is initialised this passes this information
-	on to other widgets. */
-void SpikeStreamMainWindow::simulationInitialised(){
-    //connectionWidget->simulationInitialised();
-    //layerWidget->simulationInitialised();
-}
-
-
-//-------------------------------------------------------------------------
-//----------------------------------- SLOTS -------------------------------
-//-------------------------------------------------------------------------
+/*----------------------------------------------------------*/
+/*-----                PRIVATE SLOTS                   -----*/
+/*----------------------------------------------------------*/
 
 /*! Displays brief information about the application. */
 void SpikeStreamMainWindow::about(){
     QMessageBox::about( this, "About", "SpikeStream\nVersion 0.1 beta\nCreated by David Gamez: david@davidgamez.eu");
 }
 
-void SpikeStreamMainWindow::acceleratorKeyPressed(int acceleratorID){
-    //Get the key sequence
-    int keySequence = keyboardAccelerator->key(acceleratorID);
 
-    //Change to a different tab
-    switch(keySequence){
-		case (Qt::Key_F1)://Edit tab
-		    //simulationWidget->hideOpenWindows();
-		    //archiveWidget->hideOpenWindows();
-		    tabWidget->setCurrentPage(0);
-		    break;
-		case (Qt::Key_F2)://Network viewer properties tab
-		    //simulationWidget->hideOpenWindows();
-		    //archiveWidget->hideOpenWindows();
-		    tabWidget->setCurrentPage(1);
-		    break;
-		case (Qt::Key_F3)://Simulation tab
-		    //simulationWidget->showOpenWindows();
-		    //archiveWidget->hideOpenWindows();
-		    tabWidget->setCurrentPage(2);
-		    break;
-		case(Qt::Key_F4)://Archive tab
-		    //simulationWidget->hideOpenWindows();
-		    //archiveWidget->showOpenWindows();
-		    tabWidget->setCurrentPage(3);
-		    break;
-		default:
-		    cerr<<"SpikeStreamMainWindow: KEY SEQUENCE NOT RECOGNIZED: "<<keySequence<<endl;
-		}
+/*! Displays the analysis widget */
+void SpikeStreamMainWindow::showAnalysisWidget(){
+    tabWidget->setCurrentPage(3);
+}
+
+
+/*! Displays the archive widget */
+void SpikeStreamMainWindow::showArchiveWidget(){
+    tabWidget->setCurrentPage(2);
+}
+
+
+/*! Displays the editor widget */
+void SpikeStreamMainWindow::showEditorWidget(){
+    tabWidget->setCurrentPage(1);
+}
+
+
+/*! Displays the networks widget */
+void SpikeStreamMainWindow::showNetworkWidget(){
+    tabWidget->setCurrentPage(0);
 }
 
 
@@ -440,161 +339,7 @@ void SpikeStreamMainWindow::acceleratorKeyPressed(int acceleratorID){
 	an error has led to out of date information in one of the tables. However all
 	data will be lost if this method is called. */
 void SpikeStreamMainWindow::clearDatabases(){
-    /* Check that we do not have a simulation initialised. */
-    //	if(SimulationManager::isInitialised()){
-    //		QMessageBox::warning(this, "Load Databases", "Databases cannot be loaded when a simulation is initialised.\nDestroy the simulation and try again.");
-    //		return;
-    //	}
-
-    /* Check that playback of an archive is not currently in progress. */
-    //	if(ArchiveManager::isRunning()){
-    //		QMessageBox::warning(this, "Load Databases", "Databases cannot be loaded when an archive is being played back.\nStop archive playback and try again.");
-    //		return;
-    //	}
-
-
-    //Check that user wants to overwrite current database
-    int response = QMessageBox::warning(this, "Clear Databases", "This will overwrite all data in all databases except NeuronTypes, SynapseTypes and ProbeTypes.\nDo you want to continue?", QMessageBox::Yes, QMessageBox::No, 0);
-    if(response != QMessageBox::Yes)
-	return;
-
-    //Unload archive if it is loaded. Database clearing will invalidate the query.
-    //	archiveWidget->unloadArchive();
-
-    //Execute queries to clear all databases
-    try{
-
-	//Clear NeuralNetwork database
-	Query networkQuery = networkDBInterface->getQuery();
-
-	//First do all the straightforward clearing
-	networkQuery.reset();
-	networkQuery<<"DELETE FROM Connections";
-	networkQuery.execute();
-
-	networkQuery.reset();
-	networkQuery<<"DELETE FROM ConnectionGroups";
-	networkQuery.execute();
-
-	networkQuery.reset();
-	networkQuery<<"DELETE FROM Neurons";
-	networkQuery.execute();
-
-	networkQuery.reset();
-	networkQuery<<"DELETE FROM NeuronGroups";
-	networkQuery.execute();
-
-	networkQuery.reset();
-	networkQuery<<"DELETE FROM Probes";
-	networkQuery.execute();
-
-	networkQuery.reset();
-	networkQuery<<"DELETE FROM NoiseParameters";
-	networkQuery.execute();
-
-	networkQuery.reset();
-	networkQuery<<"DELETE FROM GlobalParameters";
-	networkQuery.execute();
-
-	//Add single blank row to global parameters
-	networkQuery.reset();
-	networkQuery<<"INSERT INTO GlobalParameters () VALUES ()";
-	networkQuery.execute();
-
-
-	//Next clear the parameter tables. Need to find these by looking in the appropriate Types tables
-	networkQuery.reset();
-	networkQuery<<"SELECT ParameterTableName FROM NeuronTypes";
-	StoreQueryResult neurTableNameRes = networkQuery.store();
-	for(StoreQueryResult::iterator paramTableIter = neurTableNameRes.begin(); paramTableIter != neurTableNameRes.end(); ++paramTableIter){
-	    Row tableNameRow (*paramTableIter);
-	    networkQuery.reset();
-	    networkQuery<<"DELETE FROM "<<(std::string)tableNameRow["ParameterTableName"];
-	    networkQuery.execute();
-	}
-
-	networkQuery.reset();
-	networkQuery<<"SELECT ParameterTableName FROM SynapseTypes";
-	StoreQueryResult synapseTableNameRes = networkQuery.store();
-	for(StoreQueryResult::iterator paramTableIter = synapseTableNameRes.begin(); paramTableIter != synapseTableNameRes.end(); ++paramTableIter){
-	    Row tableNameRow (*paramTableIter);
-	    networkQuery.reset();
-	    networkQuery<<"DELETE FROM "<<(std::string)tableNameRow["ParameterTableName"];
-	    networkQuery.execute();
-	}
-
-	networkQuery.reset();
-	networkQuery<<"SELECT ParameterTableName FROM ProbeTypes";
-	StoreQueryResult probeTableNameRes = networkQuery.store();
-	for(StoreQueryResult::iterator paramTableIter = probeTableNameRes.begin(); paramTableIter != probeTableNameRes.end(); ++paramTableIter){
-	    Row tableNameRow (*paramTableIter);
-	    networkQuery.reset();
-	    networkQuery<<"DELETE FROM "<<(std::string)tableNameRow["ParameterTableName"];
-	    networkQuery.execute();
-	}
-
-
-	//Clear NeuralArchive database
-	Query archiveQuery = archiveDBInterface->getQuery();
-
-	archiveQuery.reset();
-	archiveQuery<<"DELETE FROM NetworkData";
-	archiveQuery.execute();
-
-	archiveQuery.reset();
-	archiveQuery<<"DELETE FROM NetworkModels";
-	archiveQuery.execute();
-
-
-	//Clear Patterns database
-	Query patternsQuery = patternDBInterface->getQuery();
-
-	patternsQuery.reset();
-	patternsQuery<<"DELETE FROM PatternData";
-	patternsQuery.execute();
-
-	patternsQuery.reset();
-	patternsQuery<<"DELETE FROM PatternDescriptions";
-	patternsQuery.execute();
-
-
-	//Clear Devices database
-	Query devicesQuery = deviceDBInterface->getQuery();
-
-	devicesQuery.reset();
-	devicesQuery<<"DELETE FROM Devices";
-	devicesQuery.execute();
-
-	devicesQuery.reset();
-	devicesQuery<<"DELETE FROM SIMNOSSpikeReceptors";
-	devicesQuery.execute();
-
-	devicesQuery.reset();
-	devicesQuery<<"DELETE FROM SIMNOSComponents";
-	devicesQuery.execute();
-
-	devicesQuery.reset();
-	devicesQuery<<"DELETE FROM SynchronizationDelay";
-	devicesQuery.execute();
-
-	//Refresh display
-	reloadEverything();
-
-    }
-    catch (const BadQuery& er) {// Handle any query errors
-	cerr<<"SpikeStreamMainWindow: MYSQL QUERY EXCEPTION \""<<er.what()<<"\""<<endl;
-	QString errorString = "Bad query when clearing databases: \"";
-	errorString += er.what();
-	errorString += "\"";
-	QMessageBox::critical( 0, "Clear Databases Error", errorString);
-    }
-    catch (const Exception& er) {// Catch-all for any other MySQL++ exceptions
-	cerr<<"SpikeStreamMainWindow: MYSQL EXCEPTION \""<<er.what()<<"\""<<endl;
-	QString errorString = "Exception thrown clearing databases: \"";
-	errorString += er.what();
-	errorString += "\"";
-	QMessageBox::critical( 0, "Clear Databases Error", errorString);
-    }
+    qWarning()<<"Clear databases method not implemented";
 }
 
 
@@ -603,13 +348,6 @@ void SpikeStreamMainWindow::clearDatabases(){
 	Could run a check on whether the user really wants to quit.
 	However, this is not needed at present since everthing is stored in the database. */
 void SpikeStreamMainWindow::closeEvent( QCloseEvent* ce ){
-    //If simulation is initialised, check that user really wants to quit
-    //	if(simulationManager->isInitialised()){
-    //		int response = QMessageBox::warning(this, "Quit SpikeStream?", "Simulation is still initialised.\nDo you want to quit?", QMessageBox::Yes, QMessageBox::No, 0);
-    //		if(response != QMessageBox::Yes){
-    //			return;
-    //		}
-    //	}
     ce->accept();
 }
 
@@ -617,44 +355,23 @@ void SpikeStreamMainWindow::closeEvent( QCloseEvent* ce ){
 /*! Loads a neuron group and associated connections from a file.
 	This should be a comma separated matrix of connection weights. */
 void SpikeStreamMainWindow::importConnectionMatrix(){
-    /* Check that we do not have a simulation initialised. */
-    //	if(SimulationManager::isInitialised()){
-    //		QMessageBox::warning(this, "Import Connection Matrix", "Matrix cannot be loaded when a simulation is initialised.\nDestroy the simulation and try again.");
-    //		return;
-    //	}
+    qWarning()<<"Import connection matrix method not implemented";
+//    //Warn user about limitations
+//    int response = QMessageBox::warning(this, "Import ConnectionMatrix", "This is a preliminary method that will try create a new layer at position (0,0,0) with the default neuron and synapse types\n Make sure there is enough space for the new layer.\nDo you want to continue?", QMessageBox::Yes, QMessageBox::No, 0);
+//    if(response != QMessageBox::Yes)
+//	return;
+//
+//    //Get the file name
+//    QString fileName = Q3FileDialog::getOpenFileName(defaultFileLocation, "All files (*.*)", this, "Load matrix dialog", "Choose a file to load" );
+//    if(fileName.isNull())
+//	return;
+//
+//    ConnectionMatrixLoader* matrixLoader = new ConnectionMatrixLoader(networkDBInterface);
+//    matrixLoader->loadConnectionMatrix(fileName);
+//
+//    //Clean up matrix loader
+//    delete matrixLoader;
 
-    /* Check that playback of an archive is not currently in progress. */
-    //	if(ArchiveManager::isRunning()){
-    //		QMessageBox::warning(this, "Import Connection Matrix", "Matrix cannot be loaded when an archive is being played back.\nStop archive playback and try again.");
-    //		return;
-    //	}
-
-    //Warn user about limitations
-    int response = QMessageBox::warning(this, "Import ConnectionMatrix", "This is a preliminary method that will try create a new layer at position (0,0,0) with the default neuron and synapse types\n Make sure there is enough space for the new layer.\nDo you want to continue?", QMessageBox::Yes, QMessageBox::No, 0);
-    if(response != QMessageBox::Yes)
-	return;
-
-    //Get the file name
-    QString fileName = Q3FileDialog::getOpenFileName(defaultFileLocation, "All files (*.*)", this, "Load matrix dialog", "Choose a file to load" );
-    if(fileName.isNull())
-	return;
-
-    //Unload archive if it is loaded. Database loading will invalidate the query if it changes the archive database.
-    //	archiveWidget->unloadArchive();
-
-    //Load from the file
-#ifdef LOAD_MATRIX_DEBUG
-    cout<<"Loading connection matrix from file: "<<fileName<<endl;
-#endif//LOAD_MATRIX_DEBUG
-
-    ConnectionMatrixLoader* matrixLoader = new ConnectionMatrixLoader(networkDBInterface);
-    matrixLoader->loadConnectionMatrix(fileName);
-
-    //Clean up database manager
-    delete matrixLoader;
-
-    //Reload the graphics
-    reloadEverything();
 }
 
 
@@ -663,160 +380,22 @@ void SpikeStreamMainWindow::importNRMNetwork(){
     NRMImportDialog* nrmDialog = new NRMImportDialog(this);
     nrmDialog->exec();
     delete nrmDialog;
-    //PatternDialog* patternDialog = new PatternDialog(this, patternDBInterface);
-    //patternDialog->exec();
-    //delete patternDialog;
 }
 
 
 /*! Loads databases from a file selected by the user.
 	Launches database manager, which allows user to select which database to load. */
 void SpikeStreamMainWindow::loadDatabases(){
-    /* Check that we do not have a simulation initialised. */
-    //	if(SimulationManager::isInitialised()){
-    //		QMessageBox::warning(this, "Load Databases", "Databases cannot be loaded when a simulation is initialised.\nDestroy the simulation and try again.");
-    //		return;
-    //	}
-
-    /* Check that playback of an archive is not currently in progress. */
-    //	if(ArchiveManager::isRunning()){
-    //		QMessageBox::warning(this, "Load Databases", "Databases cannot be loaded when an archive is being played back.\nStop archive playback and try again.");
-    //		return;
-    //	}
-
-
-    //Check that user wants to overwrite current database
-    int response = QMessageBox::warning(this, "Load Databases", "This will overwrite all data in the databases that are loaded including Neuron, Synapse and Probe types.\nDo you want to continue?", QMessageBox::Yes, QMessageBox::No, 0);
-    if(response != QMessageBox::Yes)
-	return;
-
-    //Get the file name
-    QString fileName = Q3FileDialog::getOpenFileName(defaultFileLocation, "Zipped SQL (*.sql.tar.gz)", this, "load database dialog", "Choose a file to load" );
-    if(fileName.isNull())
-	return;
-
-    //Unload archive if it is loaded. Database loading will invalidate the query if it changes the archive database.
-    //	archiveWidget->unloadArchive();
-
-    //Do some sorting out on the name. The user may have typed .sql.zip at the end
-    if(!fileName.endsWith(NEURON_APPLICATION_FILE_EXTENSION))
-	fileName += NEURON_APPLICATION_FILE_EXTENSION;
-
-    //Load from the file
-#ifdef LOAD_DATABASES_DEBUG
-    cout<<"Loading databases from file: "<<fileName<<endl;
-#endif//SAVE_DATABASES_DEBUG
-
-    DatabaseManager* dbManager = new DatabaseManager(this, fileName, false, networkDBInterface, archiveDBInterface, patternDBInterface, deviceDBInterface);
-    dbManager->exec();
-
-    //Clean up database manager
-    delete dbManager;
-
-    //Reload the graphics
-    reloadEverything();
+    qWarning()<<"Load database method not implemented";
 }
 
-
-/*! Launches the pattern manager, which is used to load and delete patterns from the database. */
-void SpikeStreamMainWindow::managePatterns(){
-    PatternDialog* patternDialog = new PatternDialog(this, patternDBInterface);
-    patternDialog->exec();
-    delete patternDialog;
-}
-
-
-/*! Launches a probe manager, which enables the user to add or remove probes. */
-void SpikeStreamMainWindow::manageProbes(){
-    ProbeDialog* probeDialog = new ProbeDialog(this, networkDBInterface);
-    probeDialog->exec();
-    delete probeDialog;
-}
-
-
-/*! Menu item triggers this, which reloads the device table in the simulation widget. */
-void SpikeStreamMainWindow::reloadDevices(){
-    //simulationWidget->reloadDevices();
-
-}
-
-
-/*! Reloads neuron groups and connections from the database. */
-void SpikeStreamMainWindow::reloadEverything(){
-    //Emit a signal. NOTE: Better way of handling this and saves keeping endless references
-    emit reload();
-
-    //Manual reload of classes  not connected to the signal FIXME: REPLACE WITH SIGNAL MECHANISM
-    try{
-	//layerWidget->reloadNeuronGroups();
-	//connectionWidget->reloadConnections();
-	//simulationWidget->reloadNeuronGroups();
-	//simulationWidget->reloadConnectionGroups();
-	//networkViewerProperties->reloadConnections();
-	//networkViewerProperties->reloadNeuronGroups();
-	//networkViewer2->reloadEverything();
-    }
-    catch (const BadQuery& er) {// Handle any query errors
-	cerr<<"SpikeStreamMainWindow: MYSQL QUERY EXCEPTION \""<<er.what()<<"\""<<endl;
-	QString errorString = "Bad query reloading everything: \"";
-	errorString += er.what();
-	errorString += "\"";
-	QMessageBox::critical( 0, "Reload Error", errorString);
-    }
-    catch (const Exception& er) {// Catch-all for any other MySQL++ exceptions
-	cerr<<"SpikeStreamMainWindow: MYSQL EXCEPTION \""<<er.what()<<"\""<<endl;
-	QString errorString = "Exception thrown reloading everything: \"";
-	errorString += er.what();
-	errorString += "\"";
-	QMessageBox::critical( 0, "Reload Error", errorString);
-    }
-    catch (std::exception& er) {// Catch-all for any other MySQL++ exceptions
-	cerr<<"SpikeStreamMainWindow: MYSQL EXCEPTION \""<<er.what()<<"\""<<endl;
-	QString errorString = "Exception thrown reloading everything: \"";
-	errorString += er.what();
-	errorString += "\"";
-	QMessageBox::critical( 0, "Reload Error", errorString);
-    }
-}
-
-
-/*! Reloads patterns after they have been added or deleted. */
-void SpikeStreamMainWindow::reloadPatterns(){
-    //simulationWidget->reloadPatterns();
-}
 
 
 /*! Saves databases
 	Allows user to choose file and then launches database manager so that user can choose
 	which databases to save. */
 void SpikeStreamMainWindow::saveDatabases(){
-    QString fileName = Q3FileDialog::getSaveFileName(defaultFileLocation, "Zipped SQL (*.sql.tar.gz)", this, "save file dialog", "Choose a filename to save under" );
-    if(fileName.isNull())
-	return;
-
-    //First do some sorting out on the name. The user may have typed .sql.gz at the end
-    if(!fileName.endsWith(NEURON_APPLICATION_FILE_EXTENSION))
-	fileName += NEURON_APPLICATION_FILE_EXTENSION;
-
-    //See if the file already exists and check if user wants to save if it does
-    if(QFile::exists(fileName)){
-	int response = QMessageBox::question(this, "Overwrite File?", "This file already exists.\nDo you want to overwrite it?", "Yes", "No", QString::null, 1, 0);
-	if(response == 1)
-	    return;
-	else
-	    QFile::remove(fileName);
-    }
-
-    //Save the file
-#ifdef SAVE_DATABASES_DEBUG
-    cout<<"Saving databases in file: "<<fileName<<endl;
-#endif//SAVE_DATABASES_DEBUG
-
-    DatabaseManager* dbManager = new DatabaseManager(this, fileName, true, networkDBInterface, archiveDBInterface, patternDBInterface, deviceDBInterface);
-    dbManager->exec();
-
-    //Clean up dbManager
-    delete dbManager;
+    qWarning()<<"Save databases method not implementd";
 }
 
 

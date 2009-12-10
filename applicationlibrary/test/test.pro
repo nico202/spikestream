@@ -1,4 +1,4 @@
-TARGET = testspikestream
+TARGET = testspikestreamapplication
 
 VERSION = 0.2
 
@@ -12,7 +12,8 @@ INCLUDEPATH += .src \
 		../src \
 		../src/exceptions \
 		../src/nrm
-LIBS += -lgmp
+
+LIBS += -lspikestreamapplication -L$(SPIKESTREAM_ROOT)/lib
 
 CONFIG += qtestlib
 
@@ -35,27 +36,5 @@ SOURCES += src/Main.cpp \
 	    src/TestNRMConnection.cpp \
 	    src/TestNRMDataSetImporter.cpp \
 	    src/TestNRMDataImporter.cpp
-
-#----------------------------------------------#
-#---          Files used in tests           ---#
-#----------------------------------------------#
-SOURCES += ../src/nrm/NRMNetwork.cpp \
-	    ../src/nrm/NRMConfigLoader.cpp \
-	    ../src/nrm/NRMTrainingLoader.cpp \
-	    ../src/exceptions/NRMException.cpp \
-	    ../src/nrm/NRMLayer.cpp \
-	    ../src/nrm/NRMNeuralLayer.cpp \
-	    ../src/nrm/NRMInputLayer.cpp \
-	    ../src/nrm/NRMConnection.cpp \
-	    ../src/nrm/NRMNeuron.cpp \
-	    ../src/nrm/NRMRandom.cpp \
-	    ../src/nrm/NRMDataSet.cpp \
-	    ../src/nrm/NRMDataSetImporter.cpp \
-	    ../src/nrm/NRMDataImporter.cpp
-
-
-
-
-
 
 

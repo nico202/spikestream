@@ -18,7 +18,7 @@ void TestNRMConnection::testCreateConnections(){
 	NRMConfigLoader configLoader;
 
 	//Load up the test configuration
-	const char* fileName = "../application/test/test_files/connection_building/test_connectionbuilding_1.cfg";
+	const char* fileName = "../applicationlibrary/test/test_files/connection_building/test_connectionbuilding_1.cfg";
 	try{
 		configLoader.loadConfig(fileName);
 	}

@@ -34,8 +34,9 @@ namespace spikestream {
 	    void setStateDao (StateBasedPhiAnalysisDao* stateDao) { this->stateDao = stateDao; }
 
 	signals:
+	    void test();
 	    void complexFound();
-	    void progress(unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps);
+	    void progress(const QString& msg, unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps);
 
 
 	private:
@@ -68,9 +69,16 @@ namespace spikestream {
 	    /*! Class that carries out the phi calculations */
 	    PhiCalculator* phiCalculator;
 
+	    /*! Keeps track of the number of completed progress steps */
+	    unsigned int progressCounter;
+
+	    /*! Stores the number of steps of progress that need to be completed */
+	    unsigned int numberOfProgressSteps;
+
 	    //========================  METHODS  ============================
 	    void addSubset(bool subsetSelectionArray[], int arrayLength);
 	    void deleteSubsets();
+	    void updateProgress(const QString& msg);
     };
 
 }

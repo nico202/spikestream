@@ -24,15 +24,16 @@ namespace spikestream {
 	    bool isError() { return error; }
 	    void prepareTimeStepAnalysis(const AnalysisInfo& anaInfo, int timeStep);
 	    void run();
-	    void stop();
+	    void stopThread();
 
 	signals:
 	    void complexFound();
-	    void progress(unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps);
+	    void progress(const QString& msg, unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps);
 
 	private slots:
+	    void test();
 	    void updateComplexes();
-	    void updateProgress(unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps);
+	    void updateProgress(const QString& msg, unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps);
 
 	private:
 	    //========================  VARIABLES  ========================
@@ -47,7 +48,7 @@ namespace spikestream {
 	    DBInfo analysisDBInfo;
 
 	    /*! Records and controls thread running */
-	    bool threadRunning;
+	    bool stop;
 
 	    /*! Wrapper around the network database */
 	    NetworkDao* networkDao;

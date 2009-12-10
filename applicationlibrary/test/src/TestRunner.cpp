@@ -14,20 +14,20 @@ using namespace std;
 
 /*! Runs all of the tests */
 void TestRunner::runTests(){
-//	TestNRMConfigLoader testNRMConfigLoader;
-//	QTest::qExec(&testNRMConfigLoader);
-//
-//	TestNRMConnection testNRMConnection;
-//	QTest::qExec(&testNRMConnection);
-//
-//	TestNRMTrainingLoader testNRMTrainingLoader;
-//	QTest::qExec(&testNRMTrainingLoader);
-//
-//	TestNRMRandom testNRMRandom;
-//	QTest::qExec(&testNRMRandom);
-//
-//	TestNRMDataSetImporter testNRMDataSetImporter;
-//	QTest::qExec(&testNRMDataSetImporter);
+	TestNRMConfigLoader testNRMConfigLoader;
+	QTest::qExec(&testNRMConfigLoader);
+
+	TestNRMConnection testNRMConnection;
+	QTest::qExec(&testNRMConnection);
+
+	TestNRMTrainingLoader testNRMTrainingLoader;
+	QTest::qExec(&testNRMTrainingLoader);
+
+	TestNRMRandom testNRMRandom;
+	QTest::qExec(&testNRMRandom);
+
+	TestNRMDataSetImporter testNRMDataSetImporter;
+	QTest::qExec(&testNRMDataSetImporter);
 
 	TestNRMDataImporter testNRMDataImporter;
 	QTest::qExec(&testNRMDataImporter);

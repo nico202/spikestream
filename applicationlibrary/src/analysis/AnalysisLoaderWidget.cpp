@@ -3,6 +3,7 @@
 #include "AnalysisLoaderWidget.h"
 #include "Globals.h"
 #include "PluginManager.h"
+using namespace spikestream;
 
 //Qt includes
 #include <QLabel>

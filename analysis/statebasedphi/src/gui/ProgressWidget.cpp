@@ -55,7 +55,7 @@ void ProgressWidget::timeStepComplete(unsigned int timeStep){
 /*! Update the progress bar corresponding to the time step
     When the number of time steps completed matches the total number of time steps,
     the progress bar is removed. */
-void ProgressWidget::updateProgress(unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps){
+void ProgressWidget::updateProgress(const QString& msg, unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps){
     QMutexLocker locker(&mutex);
 
     //Check to see if we have a progress bar for this time step

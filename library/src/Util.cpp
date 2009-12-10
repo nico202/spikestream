@@ -53,7 +53,6 @@ unsigned int Util::getUInt(const QString& str){
     Throws a number conversion exception if the conversion fails. */
 double Util::getDouble(const QString& str){
     bool ok = true;
-    qDebug()<<"STRING IS: "<<str;
     double newDouble = str.toDouble(&ok);
     if(!ok)
 	throw NumberConversionException("Error converting " + str + " to double.");

@@ -253,10 +253,6 @@ void NRMDataImporter::addConnections(){
 
     }//Finished working through all of the NRM neural layers
 
-    //Add connections to network
-    //FIXME: THIS SHOULD BE DONE IN THE SAME WAY AS NEURON GROUPS
-    network->addConnectionGroups(newConnectionGrpsList);
-
     //Add connections to the database
     networkDaoThread->prepareAddConnectionGroups(network->getID(), newConnectionGrpsList);
     networkDaoThread->start();
@@ -266,8 +262,13 @@ void NRMDataImporter::addConnections(){
     networkDaoThread->wait();
 
     //Check for errors
-    if(networkDaoThread->isError())
+    if(networkDaoThread->isError()){
 	setError(networkDaoThread->getErrorMessage());
+    }
+    else{
+	//Add connections to network
+	network->addConnectionGroups(newConnectionGrpsList);
+    }
 }
 
 
@@ -348,25 +349,36 @@ void NRMDataImporter::addTraining(){
 		throw SpikeStreamException("Training pattern length does not match the number of connections. neuronConnectionList size=" + QString::number(neuronConnectionList.size()) + "; training pattern length=" + QString::number(trainingArrayLength-1));
 	    }
 
+	    //Map to handle duplicate connections between neurons
+	    QHash<unsigned int, int> duplicateMap;
+
 	    //Add indexes to the database
-	    unsigned int numberOfAddedConnections = 0;//A check on the addition of multiple connections between neurons
 	    for(int patIndex = 0; patIndex < neuronConnectionList.size(); ++patIndex){
+		unsigned int tmpFromNeurID = neuronConnectionList[patIndex];
+
 		//Get the connections between these two neurons from the database
-		QList<Connection> tmpConList = networkDao.getConnections(neuronConnectionList[patIndex], neuronID);
+		QList<Connection> tmpConList = networkDao.getConnections(tmpFromNeurID, neuronID);
 
-		//Add the index of the weightless connection to the database using the id of the connection
-		for(int tmpConCtr = 0; tmpConCtr < tmpConList.size(); ++tmpConCtr){
-		    networkDao.addWeightlessConnection(tmpConList[tmpConCtr].getID(), patIndex);
-		    ++numberOfAddedConnections;
+		//Check that there is at least one connection
+		if(tmpConList.isEmpty())
+		    throw SpikeStreamException( "No matching connection found in database from " + QString::number(tmpFromNeurID) + " to " + QString::number(neuronID) );
 
-		    //Increase the pattern index if we have more than one
-		    if(tmpConCtr < (tmpConList.size()-1))
-			++patIndex;
+		/* Add the index of the weightless connection to the database using the id of the connection
+		   In the case of multiple connections between neurons, need to use the first connection id for the
+		   first connection, the second connection id for the second connection and so on */
+		if(duplicateMap.contains(tmpFromNeurID)){
+		    //Double check size
+		    if(duplicateMap[tmpFromNeurID] >= tmpConList.size())
+			throw SpikeStreamException("Duplicate map entry for neuron " + QString::number(tmpFromNeurID) + " is out of range.");
+
+		    networkDao.addWeightlessConnection(tmpConList[ duplicateMap[tmpFromNeurID] ].getID(), patIndex);
+		    ++duplicateMap[tmpFromNeurID];//Increase the index that will be used next time the duplicate is encountered
+		}
+		else{
+		    networkDao.addWeightlessConnection(tmpConList[0].getID(), patIndex);
+		    duplicateMap[tmpFromNeurID] = 1;
 		}
 	    }
-	    //Check number of added connections is correct.
-	    if(numberOfAddedConnections != neuronConnectionList.size())
-		throw SpikeStreamException("Number of added connections does not match the number of connections.");
 	}
     }
 }
@@ -376,6 +388,13 @@ void NRMDataImporter::addTraining(){
 void NRMDataImporter::clearError(){
     errorMessage = "";
     error = false;
+}
+
+
+/*! Prints out a connection list */
+void NRMDataImporter::printConnections(QList<Connection>& connectionList){
+    foreach(Connection tmpCon, connectionList)
+	tmpCon.print();
 }
 
 

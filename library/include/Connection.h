@@ -11,6 +11,7 @@ namespace spikestream {
 	    Connection (unsigned int id, unsigned int conGrpID, unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight, float tempWeight);
 	    Connection(const Connection& conn);
 	    Connection& operator=(const Connection& rhs);
+	    void print();
 
 	    unsigned int getID() { return id; }
 	    unsigned int getConnectionGroupID() { return connectionGroupID; }

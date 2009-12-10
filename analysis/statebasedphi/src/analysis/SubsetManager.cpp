@@ -4,13 +4,16 @@
 #include "Util.h"
 using namespace spikestream;
 
+//Qt includes
+#include <QDebug>
+
 //Other includes
 #include <algorithm>
 #include <iostream>
 using namespace std;
 
 /*! Standard Constructor */
-SubsetManager::SubsetManager(const DBInfo& netDBInfo, const DBInfo& archDBInfo, const DBInfo& anaDBInfo, const AnalysisInfo& anaInfo, unsigned int timeStep){
+SubsetManager::SubsetManager(const DBInfo& netDBInfo, const DBInfo& archDBInfo, const DBInfo& anaDBInfo, const AnalysisInfo& anaInfo, unsigned int timeStep) : QObject() {
     //Store variables
     this->analysisInfo = anaInfo;
     this->timeStep = timeStep;
@@ -75,6 +78,9 @@ void SubsetManager::buildSubsetList(){
 
 	//Decrease the subset size
 	--subsetSize;
+
+	//Inform other classes about progress
+	updateProgress("Building subset list. " + QString::number(networkSize - subsetSize) + " out of " + QString::number(networkSize-1));
     }
 }
 
@@ -86,6 +92,9 @@ void SubsetManager::calculateSubsetsPhi(){
 	//Calculate phi on the subset
 	QList<unsigned int> tmpNeurIDs = subsetList[i]->getNeuronIDs();
 	subsetList[i]->setPhi(phiCalculator->getSubsetPhi(tmpNeurIDs));
+
+	//Inform main application about the progress
+	updateProgress( "Calculating subset phi. " + QString::number(i) + " out of " + QString::number(subsetList.size()) );
     }
 }
 
@@ -126,6 +135,9 @@ void SubsetManager::identifyComplexes(){
 		emit complexFound();
 	    }
 	}
+
+	//Inform main application about progress
+	updateProgress("Identifying complexes. " + QString::number(tstIndx) + " out of " + QString::number(subsetList.size()));
     }
 }
 
@@ -134,9 +146,13 @@ void SubsetManager::identifyComplexes(){
 void SubsetManager::runCalculation(const bool * const stop){
     //Store reference to stop in invoking class
     this->stop = stop;
-
+emit test();
     //Get a complete list of the neuron IDs in the network
     neuronIDList = networkDao->getNeuronIDs(analysisInfo.getNetworkID());
+
+    //Record the number of steps that need to be completed and initialize progress counter
+    numberOfProgressSteps = subsetList.size() * 2 + neuronIDList.size() - 1;
+    progressCounter = 0;
 
     //Generate a list of all possible connected subsets
     buildSubsetList();
@@ -190,4 +206,13 @@ void SubsetManager::printSubsets(){
     }
 }
 
+/*! Informs other classes about progess with the calculation */
+void SubsetManager::updateProgress(const QString& msg){
+    ++progressCounter;
+    if(progressCounter > numberOfProgressSteps)
+	throw SpikeStreamAnalysisException("Progress counter out of range.");
+qDebug()<<"SUBSET MANAGER PROGRESS: "<<msg;
+
+    emit progress(msg, timeStep, progressCounter, numberOfProgressSteps);
+}
 

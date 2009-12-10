@@ -1,5 +1,6 @@
 #include "Globals.h"
 #include "SpikeStreamException.h"
+using namespace spikestream;
 
 //Declare static variables
 AnalysisDao* Globals::analysisDao = NULL;

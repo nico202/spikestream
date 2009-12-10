@@ -34,33 +34,33 @@ bool PhiUtil::bitsEqual(byte* byteArr, QString bitPattStr, int output){
    the network specified in Balduzzi and Tononi (2008), Figure 3. */
 PhiCalculator* PhiUtil::buildPhiTestNetwork1(){
     //Same con map can be used for all neurons since the neurons copy its contents
-    QHash<unsigned int, unsigned int> conMap;
+    QHash<unsigned int, QList<unsigned int> > conMap;
     QHash<unsigned int, WeightlessNeuron*> weightlessNeuronMap;
 
     //Build neuron 1 - it copies the output from neuron 2
-    conMap[2] = 0;
-    weightlessNeuronMap[1] = new WeightlessNeuron(conMap);
+    conMap[2].append(0);
+    weightlessNeuronMap[1] = new WeightlessNeuron(conMap, 0);
     addTraining(*weightlessNeuronMap[1], "0", 0);
     addTraining(*weightlessNeuronMap[1], "1", 1);
 
     //Build neuron 2 - it copies the output from neuron 1
     conMap.clear();
-    conMap[1] = 0;
-    weightlessNeuronMap[2] = new WeightlessNeuron(conMap);
+    conMap[1].append(0);
+    weightlessNeuronMap[2] = new WeightlessNeuron(conMap, 0);
     addTraining(*weightlessNeuronMap[2], "0", 0);
     addTraining(*weightlessNeuronMap[2], "1", 1);
 
     //Build neuron 3 - it copies the output from neuron 4
     conMap.clear();
-    conMap[4] = 0;
-    weightlessNeuronMap[3] = new WeightlessNeuron(conMap);
+    conMap[4].append(0);
+    weightlessNeuronMap[3] = new WeightlessNeuron(conMap, 0);
     addTraining(*weightlessNeuronMap[3], "0", 0);
     addTraining(*weightlessNeuronMap[3], "1", 1);
 
     //Build neuron 4 - it copies the output from neuron 3
     conMap.clear();
-    conMap[3] = 0;
-    weightlessNeuronMap[4] = new WeightlessNeuron(conMap);
+    conMap[3].append(0);
+    weightlessNeuronMap[4] = new WeightlessNeuron(conMap, 0);
     addTraining(*weightlessNeuronMap[4], "0", 0);
     addTraining(*weightlessNeuronMap[4], "1", 1);
 
@@ -81,13 +81,13 @@ PhiCalculator* PhiUtil::buildPhiTestNetwork1(){
    the network specified in Balduzzi and Tononi (2008), Figure 6. */
 PhiCalculator* PhiUtil::buildPhiTestNetwork2(){
     //Same con map can be used for all neurons since the neurons copy its contents
-    QHash<unsigned int, unsigned int> conMap;
+    QHash<unsigned int, QList<unsigned int> > conMap;
     QHash<unsigned int, WeightlessNeuron*> weightlessNeuronMap;
 
     //Build neuron 1 - it is an AND gate receiving input from 2 and 3
-    conMap[2] = 0;
-    conMap[3] = 1;
-    weightlessNeuronMap[1] = new WeightlessNeuron(conMap);
+    conMap[2].append(0);
+    conMap[3].append(1);
+    weightlessNeuronMap[1] = new WeightlessNeuron(conMap, 0);
     addTraining(*weightlessNeuronMap[1], "00", 0);
     addTraining(*weightlessNeuronMap[1], "01", 0);
     addTraining(*weightlessNeuronMap[1], "10", 0);
@@ -95,9 +95,9 @@ PhiCalculator* PhiUtil::buildPhiTestNetwork2(){
 
     //Build neuron 2 - it is an AND gate receiving input from 1 and 3
     conMap.clear();
-    conMap[1] = 0;
-    conMap[3] = 1;
-    weightlessNeuronMap[2] = new WeightlessNeuron(conMap);
+    conMap[1].append(0);
+    conMap[3].append(1);
+    weightlessNeuronMap[2] = new WeightlessNeuron(conMap, 0);
     addTraining(*weightlessNeuronMap[2], "00", 0);
     addTraining(*weightlessNeuronMap[2], "01", 0);
     addTraining(*weightlessNeuronMap[2], "10", 0);
@@ -105,9 +105,9 @@ PhiCalculator* PhiUtil::buildPhiTestNetwork2(){
 
     //Build neuron 3 - it is an AND gate receiving input from 1 and 2
     conMap.clear();
-    conMap[1] = 0;
-    conMap[2] = 1;
-    weightlessNeuronMap[3] = new WeightlessNeuron(conMap);
+    conMap[1].append(0);
+    conMap[2].append(1);
+    weightlessNeuronMap[3] = new WeightlessNeuron(conMap, 0);
     addTraining(*weightlessNeuronMap[3], "00", 0);
     addTraining(*weightlessNeuronMap[3], "01", 0);
     addTraining(*weightlessNeuronMap[3], "10", 0);
@@ -115,22 +115,22 @@ PhiCalculator* PhiUtil::buildPhiTestNetwork2(){
 
     //Build neuron 4 - it copies the output from neuron 1
     conMap.clear();
-    conMap[1] = 0;
-    weightlessNeuronMap[4] = new WeightlessNeuron(conMap);
+    conMap[1].append(0);
+    weightlessNeuronMap[4] = new WeightlessNeuron(conMap, 0);
     addTraining(*weightlessNeuronMap[4], "0", 0);
     addTraining(*weightlessNeuronMap[4], "1", 1);
 
     //Build neuron 5 - it copies the output from neuron 2
     conMap.clear();
-    conMap[2] = 0;
-    weightlessNeuronMap[5] = new WeightlessNeuron(conMap);
+    conMap[2].append(0);
+    weightlessNeuronMap[5] = new WeightlessNeuron(conMap, 0);
     addTraining(*weightlessNeuronMap[5], "0", 0);
     addTraining(*weightlessNeuronMap[5], "1", 1);
 
     //Build neuron 6 - it copies the output from neuron 3
     conMap.clear();
-    conMap[3] = 0;
-    weightlessNeuronMap[6] = new WeightlessNeuron(conMap);
+    conMap[3].append(0);
+    weightlessNeuronMap[6] = new WeightlessNeuron(conMap, 0);
     addTraining(*weightlessNeuronMap[6], "0", 0);
     addTraining(*weightlessNeuronMap[6], "1", 1);
 

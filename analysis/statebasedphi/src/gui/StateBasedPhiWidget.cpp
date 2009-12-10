@@ -77,7 +77,7 @@ StateBasedPhiWidget::StateBasedPhiWidget(QWidget *parent) : QWidget(parent){
     );
     connect(analysisRunner, SIGNAL(finished()), this, SLOT(threadFinished()));
     connect(analysisRunner, SIGNAL(finished()), Globals::getEventRouter(), SLOT(analysisStopped()));
-    connect(analysisRunner, SIGNAL(progress(unsigned int, unsigned int, unsigned int)), progressWidget, SLOT(updateProgress(unsigned int, unsigned int, unsigned int)), Qt::QueuedConnection);
+    connect(analysisRunner, SIGNAL(progress(const QString&, unsigned int, unsigned int, unsigned int)), progressWidget, SLOT(updateProgress(const QString&, unsigned int, unsigned int, unsigned int)), Qt::QueuedConnection);
     connect(analysisRunner, SIGNAL(timeStepComplete(unsigned int)), progressWidget, SLOT(timeStepComplete(unsigned int)));
     connect(analysisRunner, SIGNAL(complexFound()), this , SLOT(updateResults()));
 
@@ -363,8 +363,8 @@ void StateBasedPhiWidget::initializeAnalysisInfo(){
     //Set the type of analysis, 1 corresponds to a state based phi analysis
     analysisInfo.setAnalysisType(1);
 
-    analysisInfo.getParameterMap()["Test param1"] = 0.4;
-    analysisInfo.getParameterMap()["Test param2"] = 1000;
+    //Set parameters
+    analysisInfo.getParameterMap()["Generalization"] = 1.0;
 }
 
 

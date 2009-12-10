@@ -21,7 +21,7 @@ namespace spikestream {
 
 	private slots:
 	    void timeStepComplete(unsigned int timeStep);
-	    void updateProgress(unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps);
+	    void updateProgress(const QString& msg, unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps);
 
 
 	private:

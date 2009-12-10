@@ -11,10 +11,11 @@ namespace spikestream {
 
     class WeightlessNeuron {
 	public:
-	    WeightlessNeuron(QHash<unsigned int, unsigned int>& connectionMap);
+	    WeightlessNeuron(QHash<unsigned int, QList<unsigned int> >& connectionMap, unsigned int id);
 	    ~WeightlessNeuron();
 	    void addTraining(QByteArray& newData, unsigned int output);
-	    QHash<unsigned int, unsigned int> getConnectionMap() { return connectionMap; }
+	    QHash<unsigned int, QList<unsigned int> > getConnectionMap() { return connectionMap; }
+	    int getNumberOfConnections() { return numberOfConnections; }
 	    double getFiringStateProbability(byte inPatArr[], int inPatArrLen, int firingState);
 	    unsigned int getHammingThreshold() { return hammingThreshold; }
 	    QList<byte*> getTrainingData() { return trainingData; }
@@ -24,9 +25,15 @@ namespace spikestream {
 
 	private:
 	    //===================  VARIABLES  ===================
+	    /*! Id of the neuron */
+	    unsigned int id;
+
 	    /*! Map linking each position in the pattern string with
 		a neuron id. Key is the connected neuron id; value is the index in the pattern string. */
-	    QHash<unsigned int, unsigned int> connectionMap;
+	    QHash<unsigned int, QList<unsigned int> > connectionMap;
+
+	    /*! Number of connections to this weightless neuron. This has to be calculated from the connection map */
+	    int numberOfConnections;
 
 	    /*! List of training arrays */
 	    QList<byte*> trainingData;
@@ -39,6 +46,7 @@ namespace spikestream {
 
 	    //====================  METHODS  =====================
 	    void buildInputPattern(byte inPatArr[], int inPatArrSize, bool selArr[], int selArrSize, QHash<unsigned int, byte>& firingNeuronIndexMap);
+	    void printConnectionMap();
 	    void printSelectionArray(bool selArr[], int arrSize);
 	    void printTraining();
     };

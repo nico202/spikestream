@@ -1,6 +1,9 @@
 #include "Connection.h"
 using namespace spikestream;
 
+//Other includes
+#include <iostream>
+using namespace std;
 
 Connection::Connection (unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight, float tempWeight){
     id = 0;
@@ -51,3 +54,11 @@ Connection& Connection::operator=(const Connection& rhs){
 
     return *this;
 }
+
+
+/*! Prints out the connection */
+void Connection::print(){
+   cout<<"Connection: id="<<id<<"; connectionGroupID="<<connectionGroupID<<"; fromNeuronID="<<fromNeuronID;
+   cout<<" toNeuronID="<<toNeuronID<<"; delay="<<delay<<"; weight="<<weight<<"; tempWeight="<<tempWeight<<endl;
+}
+

@@ -253,15 +253,20 @@ WeightlessNeuron* NetworkDao::getWeightlessNeuron(unsigned int neuronID){
     QSqlQuery query = getQuery("SELECT cons.FromNeuronID, weiCons.PatternIndex FROM Connections cons INNER JOIN WeightlessConnections weiCons ON cons.ConnectionID=weiCons.ConnectionID WHERE cons.ToNeuronID=" + QString::number(neuronID));
     executeQuery(query);
 
-    //Store the pattern index of each neuron that connects to
-    QHash<unsigned int, unsigned int> tmpConMap;
+    /* Store the pattern index of each neuron that connects to
+	There may be several connections between neurons, so connection map contains a list of connections for each neuron
+	instead of a single entry */
+    QHash<unsigned int, QList<unsigned int> > tmpConMap;
+    unsigned int tmpFromNeurID, tmpPatternIndex;
     for(int i=0; i<query.size(); ++i){
 	query.next();
-	tmpConMap[Util::getUInt(query.value(0).toString())] = Util::getUInt(query.value(1).toString());
+	tmpFromNeurID = Util::getUInt(query.value(0).toString());
+	tmpPatternIndex = Util::getUInt(query.value(1).toString());
+	tmpConMap[tmpFromNeurID].append(tmpPatternIndex);
     }
 
     //Create the weightless neuron
-    WeightlessNeuron* tmpWeightlessNeuron = new WeightlessNeuron(tmpConMap);
+    WeightlessNeuron* tmpWeightlessNeuron = new WeightlessNeuron(tmpConMap, neuronID);
 
     //Query to get the training patterns
     query = getQuery("SELECT Pattern, Output FROM WeightlessNeuronTrainingPatterns WHERE NeuronID = " + QString::number(neuronID));
@@ -277,5 +282,11 @@ WeightlessNeuron* NetworkDao::getWeightlessNeuron(unsigned int neuronID){
     //Create and return the weigthless neuron
     return tmpWeightlessNeuron;
 }
+
+
+
+
+
+
 
 
