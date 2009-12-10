@@ -86,6 +86,9 @@ Network::~Network(){
 /*! Adds a connection group to the network without saving it to the database.
     #FIXME#: MAKE THIS WORK IN THE SAME WAY AS A NEURON GROUP. WILL HAVE TO CHANGE NRM IMPORTER WHEN THIS IS DONE. */
 void Network::addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList){
+    if(isLocked())//Check if network is editable or not
+	throw SpikeStreamException("Cannot add connection groups to a locked network.");
+
     for(QList<ConnectionGroup*>::iterator iter = connectionGroupList.begin(); iter != connectionGroupList.end(); ++iter){
 	if(connGrpMap.contains((*iter)->getID()))
 	    throw SpikeStreamException("Connection group with ID " + QString::number((*iter)->getID()) + " is already present in the network.");

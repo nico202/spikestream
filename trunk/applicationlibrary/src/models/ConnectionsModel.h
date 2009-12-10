@@ -23,7 +23,6 @@ namespace spikestream {
 	    int rowCount(const QModelIndex& parent = QModelIndex()) const;
 
 	private slots:
-	    void networkChanged();
 	    void networkDisplayChanged();
 
 	private:

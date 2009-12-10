@@ -441,10 +441,10 @@ void TestNetworkDao::testGetWeightlessNeuron(){
     NetworkDao networkDao(dbInfo);
     try{
 	WeightlessNeuron* neuron = networkDao.getWeightlessNeuron(testNeurIDList[1]);
-	QHash<unsigned int, unsigned int> conMap = neuron->getConnectionMap();
+	QHash<unsigned int, QList<unsigned int> > conMap = neuron->getConnectionMap();
 	QCOMPARE(conMap.size(), (int)2);
-	QCOMPARE(conMap[testNeurIDList[0]], (unsigned int)0);
-	QCOMPARE(conMap[testNeurIDList[4]], (unsigned int)1);
+	QCOMPARE(conMap[testNeurIDList[0]][0], (unsigned int)0);
+	QCOMPARE(conMap[testNeurIDList[4]][0], (unsigned int)1);
 	QList<byte*> trainingDataList = neuron->getTrainingData();
 	QCOMPARE(trainingDataList.size(), (int)2);
 	QVERIFY( bitsEqual(trainingDataList[0], "10000000", 1) );
@@ -455,8 +455,8 @@ void TestNetworkDao::testGetWeightlessNeuron(){
 	neuron = networkDao.getWeightlessNeuron(testNeurIDList[2]);
 	conMap = neuron->getConnectionMap();
 	QCOMPARE(conMap.size(), (int)2);
-	QCOMPARE(conMap[testNeurIDList[0]], (unsigned int)0);
-	QCOMPARE(conMap[testNeurIDList[3]], (unsigned int)1);
+	QCOMPARE(conMap[testNeurIDList[0]][0], (unsigned int)0);
+	QCOMPARE(conMap[testNeurIDList[3]][0], (unsigned int)1);
 	trainingDataList = neuron->getTrainingData();
 	QCOMPARE(trainingDataList.size(), (int)2);
 	QVERIFY( bitsEqual(trainingDataList[0], "00000000", 0) );

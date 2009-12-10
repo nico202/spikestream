@@ -72,6 +72,7 @@ namespace spikestream {
 	    void addConnections();
 	    void addTraining();
 	    void clearError();
+	    void printConnections(QList<Connection>& connectionList);
 	    void setError(const QString& errMsg);
     };
 

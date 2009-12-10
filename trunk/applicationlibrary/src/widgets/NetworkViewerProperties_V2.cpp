@@ -78,6 +78,8 @@ NetworkViewerProperties_V2::NetworkViewerProperties_V2(QWidget* parent) : QWidge
     //Add table view and model
     QAbstractTableModel* connectionsModel = new ConnectionsModel();
     QTableView* connectionsView = new ConnectionsTableView(connectionsModel);
+    connectionsView->setMaximumWidth(500);
+    connectionsView->setMinimumHeight(500);
     mainVerticalBox->addWidget(connectionsView);
     mainVerticalBox->addStretch(5);
 

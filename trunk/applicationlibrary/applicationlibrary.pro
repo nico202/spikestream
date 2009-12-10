@@ -12,8 +12,6 @@ MOC_DIR = build/moc
 
 LIBS += -lqwt -L/usr/local/qwt/lib \
 	-lspikestream -L$(SPIKESTREAM_ROOT)/lib \
-	-lmysqlpp \
-	-lpvm3 \
 	-lgmp
 
 INCLUDEPATH += src \
@@ -26,8 +24,6 @@ INCLUDEPATH += src \
 		src/views \
 		src/widgets \
 		$(SPIKESTREAM_ROOT)/library/include \
-		/usr/include/mysql \
-		/usr/local/include/mysql++ \
 		/usr/local/qwt/include
 
 CONFIG += debug \
@@ -134,8 +130,6 @@ SOURCES += src/widgets/NetworksWidget.cpp \
 #----------------------------------------------#
 HEADERS += src/SpikeStreamApplication.h \
 	   src/SpikeStreamMainWindow.h \
-	   src/DatabaseManager.h \
-	   src/ConnectionMatrixLoader.h \
 	   src/HighlightDialog.h \
 	   src/PluginManager.h \
 	   src/Globals.h \
@@ -146,8 +140,6 @@ HEADERS += src/SpikeStreamApplication.h \
 
 SOURCES += src/SpikeStreamApplication.cpp \
 	   src/SpikeStreamMainWindow.cpp \
-	   src/DatabaseManager.cpp \
-	   src/ConnectionMatrixLoader.cpp \
 	   src/HighlightDialog.cpp \
 	   src/PluginManager.cpp \
 	   src/Globals.cpp \

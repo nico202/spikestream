@@ -74,13 +74,13 @@ void TestPhiCalculator::testGetCausalProbability(){
     /* Create three weightless neurons
 	n1 and n2 are connected to n3
 	n3 is trained with 00->1; 11->0 */
-    QHash<unsigned int, unsigned int> conMap;
+    QHash<unsigned int, QList<unsigned int> > conMap;
     QHash<unsigned int, WeightlessNeuron*> weightlessNeuronMap;
-    weightlessNeuronMap[1] = new WeightlessNeuron(conMap);
-    weightlessNeuronMap[2] = new WeightlessNeuron(conMap);
-    conMap[1] = 0;
-    conMap[2] = 1;
-    weightlessNeuronMap[3] = new WeightlessNeuron(conMap);
+    weightlessNeuronMap[1] = new WeightlessNeuron(conMap, 0);
+    weightlessNeuronMap[2] = new WeightlessNeuron(conMap, 0);
+    conMap[1][0] = 0;
+    conMap[2][0] = 1;
+    weightlessNeuronMap[3] = new WeightlessNeuron(conMap, 0);
 
     //Add two pieces of training data to n3
     PhiUtil::addTraining(*weightlessNeuronMap[3], "00", 1);

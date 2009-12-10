@@ -22,7 +22,7 @@ void TestNRMConfigLoader::init(){
 
 
 void TestNRMConfigLoader::testLoadInputs(){
-	QString fileName = workingDirectory + "/application/test/test_files/multiple_input_test.cfg";
+	QString fileName = workingDirectory + "/applicationlibrary/test/test_files/multiple_input_test.cfg";
 
 	//Load up the test configuration
 	NRMConfigLoader configLoader;
@@ -38,7 +38,7 @@ void TestNRMConfigLoader::testLoadInputs(){
 
 	//Check config version is supported
 	QCOMPARE(network->getConfigVersion(), 26);
-	
+
 	//Check that the details about the layers have been correctly loaded
 	QList<NRMInputLayer*> allInputList = network->getAllInputs();
 	QCOMPARE(allInputList.size(), 5);
@@ -58,7 +58,7 @@ void TestNRMConfigLoader::testLoadInputs(){
 
 
 void TestNRMConfigLoader::testLoadNeuralLayers(){
-	const char* fileName = "../application/test/test_files/multiple_neural_test.cfg";
+	const char* fileName = "../applicationlibrary/test/test_files/multiple_neural_test.cfg";
 
 	//Load up the test configuration
 	NRMConfigLoader configLoader;
@@ -94,151 +94,150 @@ void TestNRMConfigLoader::testLoadNeuralLayers(){
 
 /*! Checks that connection parameters are loaded correctly */
 void TestNRMConfigLoader::testLoadConnectionParameters(){
-        const char* fileName;
+	const char* fileName;
 	NRMNeuralLayer* neuralLayer;
 	NRMConfigLoader configLoader;
 	NRMConnection* conn;
 
 	//Load up the test configuration
-	fileName = "../application/test/test_files/connection_parameters/randomdist_lincols_12conns.cfg";
+	fileName = "../applicationlibrary/test/test_files/connection_parameters/randomdist_lincols_12conns.cfg";
 	try{
-		configLoader.loadConfig(fileName);
+	    configLoader.loadConfig(fileName);
+
+	    //Get the neural layer with the connections
+	    neuralLayer = configLoader.getNetwork()->getNeuralLayerById(0);
+
+	    //Check connection parameters
+	    conn = neuralLayer->getConnectionById(0);
+	    QCOMPARE(conn->conParams.colScheme, (unsigned int)1);
+	    QCOMPARE(conn->conParams.numCons, (unsigned int)12);
+	    QCOMPARE(conn->conParams.randomCon, true);
+
+	    //Reset config loader
+	    configLoader.reset();
+	}
+	catch(NRMException& ex){
+	    QFAIL(ex.getMessage());
+	}
+
+	//Load up the test configuration
+	fileName = "../applicationlibrary/test/test_files/connection_parameters/iconic_4w5h_flipvertical_6conns.cfg";
+	try{
+	    configLoader.loadConfig(fileName);
+
+	    //Get the loaded network
+	    neuralLayer = configLoader.getNetwork()->getNeuralLayerById(0);
+
+	    //Check connection parameters
+	    conn = neuralLayer->getConnectionById(0);
+	    QCOMPARE(conn->conParams.randomCon, true);
+	    QCOMPARE(conn->conParams.iconicMap, true);
+	    QCOMPARE(conn->conParams.colScheme, (unsigned int)1);
+	    QCOMPARE(conn->conParams.numCons, (unsigned int)6);
+	    QCOMPARE(conn->conParams.rWidth, (unsigned int)4);
+	    QCOMPARE(conn->conParams.rHeight, (unsigned int)5);
+
+	    //Reset config loader
+	    configLoader.reset();
 	}
 	catch(NRMException& ex){
 		QFAIL(ex.getMessage());
 	}
-
-	//Get the neural layer with the connections
-	neuralLayer = configLoader.getNetwork()->getNeuralLayerById(0);
-
-	//Check connection parameters
-	conn = neuralLayer->getConnectionById(0);
-	QCOMPARE(conn->conParams.colScheme, (unsigned int)1);
-	QCOMPARE(conn->conParams.numCons, (unsigned int)12);
-	QCOMPARE(conn->conParams.randomCon, true);
-
-	//Reset config loader
-	configLoader.reset();
 
 
 	//Load up the test configuration
-	fileName = "../application/test/test_files/connection_parameters/iconic_4w5h_flipvertical_6conns.cfg";
+	fileName = "../applicationlibrary/test/test_files/connection_parameters/global_spatial_9-10-11-12_7conns.cfg";
 	try{
-		configLoader.loadConfig(fileName);
+	    configLoader.loadConfig(fileName);
+
+	    //Get the loaded network
+	    neuralLayer = configLoader.getNetwork()->getNeuralLayerById(0);
+
+	    //Check connection parameters
+	    conn = neuralLayer->getConnectionById(0);
+	    QCOMPARE(conn->conParams.randomCon, true);
+	    QCOMPARE(conn->conParams.iconicMap, false);
+	    QCOMPARE(conn->conParams.globalMap, true);
+	    QCOMPARE(conn->conParams.spatialAlignment, true);
+	    QCOMPARE(conn->conParams.colScheme, (unsigned int)1);
+	    QCOMPARE(conn->conParams.numCons, (unsigned int)7);
+	    QCOMPARE(conn->conParams.sWidth, (unsigned int)9);
+	    QCOMPARE(conn->conParams.sHeight, (unsigned int)10);
+	    QCOMPARE(conn->conParams.sLeft, (unsigned int)11);
+	    QCOMPARE(conn->conParams.sTop, (unsigned int)12);
+
+	    //Reset config loader
+	    configLoader.reset();
 	}
 	catch(NRMException& ex){
 		QFAIL(ex.getMessage());
 	}
-
-	//Get the loaded network
-	neuralLayer = configLoader.getNetwork()->getNeuralLayerById(0);
-
-	//Check connection parameters
-	conn = neuralLayer->getConnectionById(0);
-	QCOMPARE(conn->conParams.randomCon, true);
-	QCOMPARE(conn->conParams.iconicMap, true);
-	QCOMPARE(conn->conParams.colScheme, (unsigned int)1);
-	QCOMPARE(conn->conParams.numCons, (unsigned int)6);
-	QCOMPARE(conn->conParams.rWidth, (unsigned int)4);
-	QCOMPARE(conn->conParams.rHeight, (unsigned int)5);
-
-	//Reset config loader
-	configLoader.reset();
 
 
 	//Load up the test configuration
-	fileName = "../application/test/test_files/connection_parameters/global_spatial_9-10-11-12_7conns.cfg";
+	fileName = "../applicationlibrary/test/test_files/connection_parameters/seg_segrev_rancols_11conns.cfg";
 	try{
-		configLoader.loadConfig(fileName);
+	    configLoader.loadConfig(fileName);
+
+	    //Get the loaded network
+	    neuralLayer = configLoader.getNetwork()->getNeuralLayerById(0);
+
+	    //Check connection parameters
+	    conn = neuralLayer->getConnectionById(0);
+	    QCOMPARE(conn->conParams.randomCon, true);
+	    QCOMPARE(conn->conParams.iconicMap, false);
+	    QCOMPARE(conn->conParams.globalMap, false);
+	    QCOMPARE(conn->conParams.segmentedMap, true);
+	    QCOMPARE(conn->conParams.segRev, true);
+	    QCOMPARE(conn->conParams.colScheme, (unsigned int)0);
+	    QCOMPARE(conn->conParams.numCons, (unsigned int)11);
+	    QCOMPARE(conn->conParams.rWidth, (unsigned int)1);
+	    QCOMPARE(conn->conParams.rHeight, (unsigned int)1);
+
+	    //Reset config loader
+	    configLoader.reset();
 	}
 	catch(NRMException& ex){
 		QFAIL(ex.getMessage());
 	}
-
-	//Get the loaded network
-	neuralLayer = configLoader.getNetwork()->getNeuralLayerById(0);
-
-	//Check connection parameters
-	conn = neuralLayer->getConnectionById(0);
-	QCOMPARE(conn->conParams.randomCon, true);
-	QCOMPARE(conn->conParams.iconicMap, false);
-	QCOMPARE(conn->conParams.globalMap, true);
-	QCOMPARE(conn->conParams.spatialAlignment, true);
-	QCOMPARE(conn->conParams.colScheme, (unsigned int)1);
-	QCOMPARE(conn->conParams.numCons, (unsigned int)7);
-	QCOMPARE(conn->conParams.sWidth, (unsigned int)9);
-	QCOMPARE(conn->conParams.sHeight, (unsigned int)10);
-	QCOMPARE(conn->conParams.sLeft, (unsigned int)11);
-	QCOMPARE(conn->conParams.sTop, (unsigned int)12);
-
-	//Reset config loader
-	configLoader.reset();
 
 
 	//Load up the test configuration
-	fileName = "../application/test/test_files/connection_parameters/seg_segrev_rancols_11conns.cfg";
+	fileName = "../applicationlibrary/test/test_files/connection_parameters/2connections.cfg";
 	try{
-		configLoader.loadConfig(fileName);
+	    configLoader.loadConfig(fileName);
+
+	    //Get the loaded network
+	    neuralLayer = configLoader.getNetwork()->getNeuralLayerById(0);
+
+	    //Check the first set of connection parameters
+	    conn = neuralLayer->getConnectionById(0);
+	    QCOMPARE(conn->conParams.randomCon, false);
+	    QCOMPARE(conn->conParams.fullCon, true);
+	    QCOMPARE(conn->conParams.iconicMap, false);
+	    QCOMPARE(conn->conParams.globalMap, true);
+	    QCOMPARE(conn->conParams.segmentedMap, false);
+	    QCOMPARE(conn->conParams.segRev, true);
+	    QCOMPARE(conn->conParams.colScheme, (unsigned int)0);
+	    QCOMPARE(conn->conParams.numCons, (unsigned int)76832);
+
+	    //Check the second set of connection parameters
+	    conn = neuralLayer->getConnectionById(1);
+	    QCOMPARE(conn->conParams.randomCon, true);
+	    QCOMPARE(conn->conParams.iconicMap, false);
+	    QCOMPARE(conn->conParams.globalMap, true);
+	    QCOMPARE(conn->conParams.segmentedMap, false);
+	    QCOMPARE(conn->conParams.segRev, true);
+	    QCOMPARE(conn->conParams.colScheme, (unsigned int)1);
+	    QCOMPARE(conn->conParams.numCons, (unsigned int)13);
+	    //QCOMPARE(conn->conParams.rWidth, (unsigned int)1);
+	    //QCOMPARE(conn->conParams.rHeight, (unsigned int)1);
+
+	    //Reset config loader
+	    configLoader.reset();
 	}
 	catch(NRMException& ex){
 		QFAIL(ex.getMessage());
 	}
-
-	//Get the loaded network
-	neuralLayer = configLoader.getNetwork()->getNeuralLayerById(0);
-
-	//Check connection parameters
-	conn = neuralLayer->getConnectionById(0);
-	QCOMPARE(conn->conParams.randomCon, true);
-	QCOMPARE(conn->conParams.iconicMap, false);
-	QCOMPARE(conn->conParams.globalMap, false);
-	QCOMPARE(conn->conParams.segmentedMap, true);
-	QCOMPARE(conn->conParams.segRev, true);
-	QCOMPARE(conn->conParams.colScheme, (unsigned int)0);
-	QCOMPARE(conn->conParams.numCons, (unsigned int)11);
-	QCOMPARE(conn->conParams.rWidth, (unsigned int)1);
-	QCOMPARE(conn->conParams.rHeight, (unsigned int)1);
-
-	//Reset config loader
-	configLoader.reset();
-
-
-	//Load up the test configuration
-	fileName = "../application/test/test_files/connection_parameters/2connections.cfg";
-	try{
-		configLoader.loadConfig(fileName);
-	}
-	catch(NRMException& ex){
-		QFAIL(ex.getMessage());
-	}
-
-	//Get the loaded network
-	neuralLayer = configLoader.getNetwork()->getNeuralLayerById(0);
-
-	//Check the first set of connection parameters
-	conn = neuralLayer->getConnectionById(0);
-	QCOMPARE(conn->conParams.randomCon, false);
-	QCOMPARE(conn->conParams.fullCon, true);
-	QCOMPARE(conn->conParams.iconicMap, false);
-	QCOMPARE(conn->conParams.globalMap, true);
-	QCOMPARE(conn->conParams.segmentedMap, false);
-	QCOMPARE(conn->conParams.segRev, true);
-	QCOMPARE(conn->conParams.colScheme, (unsigned int)0);
-	QCOMPARE(conn->conParams.numCons, (unsigned int)76832);
-
-	//Check the second set of connection parameters
-	conn = neuralLayer->getConnectionById(1);
-	QCOMPARE(conn->conParams.randomCon, true);
-	QCOMPARE(conn->conParams.iconicMap, false);
-	QCOMPARE(conn->conParams.globalMap, true);
-	QCOMPARE(conn->conParams.segmentedMap, false);
-	QCOMPARE(conn->conParams.segRev, true);
-	QCOMPARE(conn->conParams.colScheme, (unsigned int)1);
-	QCOMPARE(conn->conParams.numCons, (unsigned int)13);
-	//QCOMPARE(conn->conParams.rWidth, (unsigned int)1);
-	//QCOMPARE(conn->conParams.rHeight, (unsigned int)1);
-
-	//Reset config loader
-	configLoader.reset();
 
 }

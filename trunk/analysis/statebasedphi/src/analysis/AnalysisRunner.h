@@ -29,13 +29,13 @@ namespace spikestream {
 
 	signals:
 	    void complexFound();
-	    void progress(unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps);
+	    void progress(const QString& msg, unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps);
 	    void timeStepComplete(unsigned int timeStep);
 
 	private slots:
 	    void threadFinished();
 	    void updateComplexes();
-	    void updateProgress(unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps);
+	    void updateProgress(const QString& msg, unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps);
 
 	private:
 	    //========================  VARAIBLES  =========================

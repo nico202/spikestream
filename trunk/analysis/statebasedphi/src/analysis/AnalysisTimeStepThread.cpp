@@ -45,48 +45,32 @@ void AnalysisTimeStepThread::prepareTimeStepAnalysis(const AnalysisInfo& anaInfo
 
 /*! Run method inherited from QThread */
 void AnalysisTimeStepThread::run(){
-    threadRunning = true;
+    stop = false;
     clearError();
 
     try{
-	//Create the data access objects
-//	networkDao = new NetworkDao(networkDBInfo);
-//	archiveDao = new ArchiveDao(archiveDBInfo);
-//	analysisDao = new StateBasedPhiAnalysisDao(analysisDBInfo);
-
 	//Create the calculator to run the phi calculation on the time step
-	SubsetManager subsetManager(networkDBInfo, archiveDBInfo, analysisDBInfo, analysisInfo, timeStep);
-	connect(&subsetManager, SIGNAL(complexFound()), this, SLOT(updateComplexes()));
-	connect(&subsetManager, SIGNAL(progress(unsigned int, unsigned int, unsigned int)), this, SLOT(updateProgress(unsigned int, unsigned int, unsigned int)));
-	subsetManager.runCalculation(&threadRunning);
-
-//	Util::seedRandom(timeStep * 100);
-//	int numberOfSteps = Util::getRandom(0, 50);
-//
-//	for(int i=0; i<numberOfSteps; ++i){
-//	    usleep(1000000 * timeStep);//Sleep for 100 milliseconds
-//	    QList<unsigned int> tmpNeuronList;
-//	    for(int j=0; j< 10; ++j){
-//		tmpNeuronList.append(Util::getRandom(0, 1000));
-//	    }
-//	    analysisDao->addComplex(analysisInfo.getID(), timeStep, 0.66, tmpNeuronList);
-//	    emit complexFound();
-//	    emit progress(timeStep, i+1, numberOfSteps);
-//	    if(!threadRunning)
-//		return;
-//	}
+	SubsetManager* subsetManager = new SubsetManager(networkDBInfo, archiveDBInfo, analysisDBInfo, analysisInfo, timeStep);
+	connect(subsetManager, SIGNAL(complexFound()), this, SLOT(updateComplexes()));
+	connect(subsetManager, SIGNAL(progress(const QString&, unsigned int, unsigned int, unsigned int)), this, SLOT(updateProgress(const QString&, unsigned int, unsigned int, unsigned int)));
+	connect(subsetManager, SIGNAL(test()), this, SLOT(test()));
+	subsetManager->runCalculation(&stop);
+	delete subsetManager;
     }
     catch(SpikeStreamException& ex){
 	setError(ex.getMessage());
     }
 
-    threadRunning = false;
+    stop = true;
 }
 
+void AnalysisTimeStepThread::test(){
+  qDebug()<<"TEST SLOT CALLED";
+}
 
 /*! Stops the analysis */
-void AnalysisTimeStepThread::stop(){
-    threadRunning = false;
+void AnalysisTimeStepThread::stopThread(){
+    stop = true;
 }
 
 
@@ -101,8 +85,9 @@ void AnalysisTimeStepThread::updateComplexes(){
 
 
 /*! Emits a signal indicating that progress has been made */
-void AnalysisTimeStepThread::updateProgress(unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps){
-    emit progress(timeStep, stepsCompleted, totalSteps);
+void AnalysisTimeStepThread::updateProgress(const QString& msg, unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps){
+   qDebug()<<"ANALYSIS TIME STEP THREAD PROGRESS: "<<msg;
+    emit progress(msg, timeStep, stepsCompleted, totalSteps);
 }
 
 
@@ -116,6 +101,6 @@ void AnalysisTimeStepThread::setError(const QString& message){
     errorMessage = message;
 
     //exit this thread
-    stop();
+    stopThread();
 }
 

@@ -27,7 +27,7 @@
 #include "ConnectionType.h"
 #include "NeuronGroupType.h"
 
-//Qt includes 
+//Qt includes
 #include <qmessagebox.h>
 #include <qfile.h>
 //Added by qt3to4:
@@ -77,7 +77,7 @@ bool ConnectionMatrixLoader::loadConnectionMatrix(QString& fileName){
 	connectionCount = 0;
 	rowNum = 0;
 	errorState = false;
-	
+
 	//Need to create neuron and connection groups once we know size
 	bool firstLine = true;
 
@@ -92,7 +92,7 @@ bool ConnectionMatrixLoader::loadConnectionMatrix(QString& fileName){
 		while ( !stream.atEnd() && !errorState) {
 			fileLine = stream.readLine(); // line of text excluding '\n'
 			#ifdef LOAD_CONNECTION_MATRIX_DEBUG
-                                cout<<"Reading line: \""<<fileLine.toStdString()<<"\""<<endl;
+				cout<<"Reading line: \""<<fileLine.toStdString()<<"\""<<endl;
 			#endif//LOAD_PATTERN_DEBUG
 
 			//Get the line and split it into neuron ids.
@@ -114,7 +114,7 @@ bool ConnectionMatrixLoader::loadConnectionMatrix(QString& fileName){
 					deleteDatabaseEntries(neurGrpID, connGrpID);
 					return false;
 				}
-	
+
 				//Create connection group to add connections
 				createConnectionGroup(fileName);
 				if(connGrpID == 0 || errorState){//An error has occured
@@ -161,9 +161,9 @@ bool ConnectionMatrixLoader::loadConnectionMatrix(QString& fileName){
 				//Find the appropriate table
 				query.reset();
 				query<<"SELECT ParameterTableName FROM SynapseTypes WHERE TypeID = "<<synapseType;
-                                StoreQueryResult tableNameRes = query.store();
+				StoreQueryResult tableNameRes = query.store();
 				Row tableNameRow (*tableNameRes.begin());//Should only be 1 row
-			
+
 				//Add an entry for this connection group to the appropriate table
 				query.reset();
 				query<<"INSERT INTO "<<(std::string)tableNameRow["ParameterTableName"]<<" (ConnGrpID) VALUES ("<<connGrpID<<")";
@@ -194,7 +194,7 @@ bool ConnectionMatrixLoader::loadConnectionMatrix(QString& fileName){
 			deleteDatabaseEntries(neurGrpID, connGrpID);
 			return false;
 		}
-		
+
 		#ifdef LOAD_CONNECTION_MATRIX_DEBUG
 			cout<<"Connection matrix loading complete. "<<connectionCount<<" connections loaded. "<<endl;
 		#endif//LOAD_PATTERN_DEBUG
@@ -221,11 +221,11 @@ void ConnectionMatrixLoader::addConnections(QStringList& neuronIDList){
 
 		/* Work through all the connections between the current row number and the
 			column numbers.*/
-		for(unsigned int colNum=0; colNum<neuronIDList.size(); ++colNum){
+		for(int colNum=0; colNum<neuronIDList.size(); ++colNum){
 			connWeight = Utilities::getDouble(neuronIDList[colNum].ascii());//Weight between 0.0 and 1.0
 			connWeight *= 127.0;//Weight between 0.0 and 127.0
 			if(connWeight > 0){
-				/* Add a connection. This is between the neuron id at the current row 
+				/* Add a connection. This is between the neuron id at the current row
 					and the neuron id at colNum.*/
 				query.reset();
 				query<<"INSERT INTO Connections (PreSynapticNeuronID, PostSynapticNeuronID, Delay, Weight, ConnGrpID) VALUES ("<<(startNeurID + rowNum)<<", "<<(startNeurID + colNum)<<", "<<0<<", "<<connWeight<<", "<<connGrpID<<")";
@@ -268,7 +268,7 @@ void ConnectionMatrixLoader::createConnectionGroup(const QString& fileName){
 	//Add file name as the only parameter
 	xmlStrStream<<"<parameter>";
 	xmlStrStream<<"<description>"<<"Connection Matrix file name"<<"</description>";
-        xmlStrStream<<"<value>"<<fileName.toStdString()<<"</value>";
+	xmlStrStream<<"<value>"<<fileName.toStdString()<<"</value>";
 	xmlStrStream<<"</parameter>";
 	xmlStrStream<<"</connection_parameters>";
 
@@ -278,19 +278,19 @@ void ConnectionMatrixLoader::createConnectionGroup(const QString& fileName){
 		//Find the first synapse type
 		query.reset();
 		query<<"SELECT MIN(TypeID) from SynapseTypes";
-                StoreQueryResult minTypeIDRes = query.store();
+		StoreQueryResult minTypeIDRes = query.store();
 		Row minTypeIDRow(*(minTypeIDRes.begin()));
 		synapseType = Utilities::getUInt((std::string)minTypeIDRow["MIN(TypeID)"]);
 
 		//Create connection group
 		query.reset();
-                query<<"INSERT INTO ConnectionGroups (FromNeuronGrpID, ToNeuronGrpID, ConnType, SynapseType, Parameters) VALUES ("<<neurGrpID<<", "<<neurGrpID<<", "<<ConnectionType::SimpleCortex<<", "<<synapseType<<", "<<mysqlpp::quote<<xmlStrStream.str()<<" )";
-                query.exec();
-		
+		query<<"INSERT INTO ConnectionGroups (FromNeuronGrpID, ToNeuronGrpID, ConnType, SynapseType, Parameters) VALUES ("<<neurGrpID<<", "<<neurGrpID<<", "<<ConnectionType::SimpleCortex<<", "<<synapseType<<", "<<mysqlpp::quote<<xmlStrStream.str()<<" )";
+		query.exec();
+
 		//Get the automatically generated ConnGrpID so that it can be added to the new connections
 		query.reset();
 		query<<"SELECT MAX(ConnGrpID) from ConnectionGroups";
-                StoreQueryResult grpIDResult = query.store();
+		StoreQueryResult grpIDResult = query.store();
 		Row row(*(grpIDResult.begin()));
 		connGrpID = Utilities::getUInt((string)row["MAX(ConnGrpID)"]);
 	}
@@ -340,17 +340,17 @@ void ConnectionMatrixLoader::createNeuronGroup(){
 		//Get all layers with this z coordinate
 		query.reset();
 		query<<"SELECT NeuronID FROM Neurons WHERE X >="<<0<<" AND X <= "<<neurGrpWidth<<" AND Y >= "<<0<<" AND Y <= "<<neurGrpLength<<" AND Z = "<<0;
-                StoreQueryResult zLayerResult = query.store();
+		StoreQueryResult zLayerResult = query.store();
 		if(zLayerResult.size() > 0){
 			showError("ConnectionMatrixLoader: CONFLICT WITH EXISTING LAYERS");
 			return;
 		}
-	
+
 		//Only reach this point if there are no conflicts with existing layers
 		//Get the first neuron type in the NeuronTypes database
 		query.reset();
 		query<<"SELECT MIN(TypeID) from NeuronTypes";
-                StoreQueryResult minTypeIDRes = query.store();
+		StoreQueryResult minTypeIDRes = query.store();
 		Row minTypeIDRow(*(minTypeIDRes.begin()));
 		neuronType = Utilities::getUInt((std::string)minTypeIDRow["MIN(TypeID)"]);
 
@@ -358,16 +358,16 @@ void ConnectionMatrixLoader::createNeuronGroup(){
 		query.reset();
 		query<<"INSERT INTO NeuronGroups (Name, NeuronGrpType, NeuronType, X, Y, Z, Width, Length, Spacing, TaskID) VALUES (\""<<"Untitled"<<"\", "<<NeuronGroupType::RectangularLayer2D<<", "<<neuronType<<", "<<0<<", "<<0<<", "<<0<<", "<<neurGrpWidth<<", "<<neurGrpLength<<", "<<1<<", -1)";
 		query.execute();
-		
+
 		//Now need to get the automatically generated NeuronGrpID so that it can be added to the neurons in the new layers
 		query.reset();
 		query<<"SELECT MAX(NeuronGrpID) from NeuronGroups";
-                StoreQueryResult neurGrpIDRes = query.store();
+		StoreQueryResult neurGrpIDRes = query.store();
 		Row neurGrpIDRow(*(neurGrpIDRes.begin()));
 		neurGrpID = Utilities::getUInt((std::string)neurGrpIDRow["MAX(NeuronGrpID)"]);
 
-		/* Add neurons to neuron database. 
-			This adds them in a scanning pattern moving horizontally along the x axis 
+		/* Add neurons to neuron database.
+			This adds them in a scanning pattern moving horizontally along the x axis
 			before moving to the next line */
 		for(unsigned int i=0; i<neurGrpLength; ++i){
 			for(unsigned int j=0; j<neurGrpWidth; ++j){
@@ -381,7 +381,7 @@ void ConnectionMatrixLoader::createNeuronGroup(){
 		//Get the lowest neuron id in this group.
 		query.reset();
 		query<<"SELECT MIN(NeuronID) from Neurons WHERE NeuronGrpID = "<<neurGrpID;
-                StoreQueryResult startIDRes = query.store();
+		StoreQueryResult startIDRes = query.store();
 		Row startIDRow(*(startIDRes.begin()));
 		startNeurID = Utilities::getUInt((std::string)startIDRow["MIN(NeuronID)"]);
 
@@ -389,15 +389,15 @@ void ConnectionMatrixLoader::createNeuronGroup(){
 		//Find the appropriate table
 		query.reset();
 		query<<"SELECT ParameterTableName FROM NeuronTypes WHERE TypeID = "<<neuronType;
-                StoreQueryResult tableNameRes = query.store();
+		StoreQueryResult tableNameRes = query.store();
 		Row tableNameRow (*tableNameRes.begin());//Should only be 1 row
-                neurParamTable = ((std::string)tableNameRow["ParameterTableName"]).data();
-		
+		neurParamTable = ((std::string)tableNameRow["ParameterTableName"]).data();
+
 		//Now add an entry for this neuron group to the appropriate table
 		query.reset();
-                query<<"INSERT INTO "<<neurParamTable.toStdString()<<" (NeuronGrpID) VALUES ("<<neurGrpID<<")";
+		query<<"INSERT INTO "<<neurParamTable.toStdString()<<" (NeuronGrpID) VALUES ("<<neurGrpID<<")";
 		query.execute();
-	
+
 		//Add entry for this layer to the noise parameters table
 		query.reset();
 		query<<"INSERT INTO NoiseParameters (NeuronGrpID) VALUES ("<<neurGrpID<<")";
@@ -452,7 +452,7 @@ void ConnectionMatrixLoader::deleteDatabaseEntries(unsigned int nGrpID, unsigned
 			//Delete parameters if they have been added
 			if(neurParamTable != ""){
 				query.reset();
-                                query<<"DELETE FROM "<<neurParamTable.toStdString()<<" WHERE NeuronGrpID = "<<nGrpID;
+				query<<"DELETE FROM "<<neurParamTable.toStdString()<<" WHERE NeuronGrpID = "<<nGrpID;
 				query.execute();
 			}
 
@@ -464,7 +464,7 @@ void ConnectionMatrixLoader::deleteDatabaseEntries(unsigned int nGrpID, unsigned
 			//Reset neurGrpID
 			neurGrpID = 0;
 		}
-	
+
 		//Check to see if connection group has been created
 		if(connGrpID > 0){
 			//Delete connections
@@ -514,7 +514,7 @@ void ConnectionMatrixLoader::showError(const char* errMsg){
 /*! Writes error message to std out and shows message box with error.
 	NOTE Not thread safe.*/
 void ConnectionMatrixLoader::showError(const QString& errMsg){
-        cerr<<errMsg.toStdString()<<endl;
+	cerr<<errMsg.toStdString()<<endl;
 	QMessageBox::critical( 0, "Connection Matrix Loader Error", errMsg);
 	errorState = true;
 }

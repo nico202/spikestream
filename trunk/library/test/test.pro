@@ -1,4 +1,4 @@
-TARGET = testspikestream
+TARGET = testspikestreamlibrary
 
 VERSION = 0.2
 
@@ -12,7 +12,7 @@ INCLUDEPATH += src \
 		../include \
 		$(SPIKESTREAM_ROOT)/testlibrary/include
 
-LIBS += -lspikestream -lmysqlpp -lspikestreamtest -L$(SPIKESTREAM_ROOT)/lib
+LIBS += -lspikestream -lspikestreamtest -L$(SPIKESTREAM_ROOT)/lib
 
 QT += sql xml
 

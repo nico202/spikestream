@@ -13,7 +13,7 @@ void TestNRMDataSetImporter::init(){
 
 void TestNRMDataSetImporter::testLoadDataSet(){
     NRMDataSetImporter importer;
-    QString fileName = workingDirectory + "/application/test/test_files/datasets/test2.set";
+    QString fileName = workingDirectory + "/applicationlibrary/test/test_files/datasets/test2.set";
 
     importer.loadDataSet(fileName.toAscii());
 

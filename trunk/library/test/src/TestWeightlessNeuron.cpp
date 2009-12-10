@@ -47,11 +47,11 @@ void TestWeightlessNeuron::testLookup(){
 void TestWeightlessNeuron::testAddTraining(){
     /* Create connection map and use it to create neuron.
 	neurons with ids 10 ...19 are in their respective positions in the connection map */
-    QHash<unsigned int, unsigned int> connMap;
+    QHash<unsigned int, QList<unsigned int> > connMap;
     for(int i=0; i<10; ++i){
-	connMap[i+10] = i;
+	connMap[i+10].append(i);
     }
-    WeightlessNeuron tstNeuron(connMap);
+    WeightlessNeuron tstNeuron(connMap, 0);
 
     //Check length of training data
     QCOMPARE(tstNeuron.getTrainingDataLength(), 3);
@@ -70,11 +70,11 @@ void TestWeightlessNeuron::testAddTraining(){
 
 void TestWeightlessNeuron::testGetFiringStateProbability(){
     //Build a weightless neuron with four neurons
-    QHash<unsigned int, unsigned int> connMap;
+    QHash<unsigned int, QList<unsigned int> > connMap;
     for(int i=0; i<4; ++i){
-	connMap[i] = i;
+	connMap[i].append(i);
     }
-    WeightlessNeuron tstNeuron(connMap);
+    WeightlessNeuron tstNeuron(connMap, 0);
 
     //Set generalization to 3/4. Patterns should match on at least three places
     tstNeuron.setGeneralization(0.75);
@@ -122,11 +122,11 @@ void TestWeightlessNeuron::testGetFiringStateProbability(){
 
 void TestWeightlessNeuron::testGetTransitionProbability(){
     //Build a weightless neuron with four neurons, ids 1,2,3,4
-    QHash<unsigned int, unsigned int> connMap;
+    QHash<unsigned int, QList<unsigned int> > connMap;
     for(int i=1; i<5; ++i){
-	connMap[i] = i-1;
+	connMap[i].append(i-1);
     }
-    WeightlessNeuron tstNeuron(connMap);
+    WeightlessNeuron tstNeuron(connMap, 0);
 
     //Add two pieces of training data
     addTraining(tstNeuron, "0011", 1);
@@ -158,11 +158,11 @@ void TestWeightlessNeuron::testGetTransitionProbability(){
 
 
     //Build a weightless neuron with five neurons, ids 23,24,25,26,27
-    QHash<unsigned int, unsigned int> connMap2;
+    QHash<unsigned int, QList<unsigned int> > connMap2;
     for(int i=0; i<5; ++i){
-	connMap2[i+23] = i;
+	connMap2[i+23].append(i);
     }
-    WeightlessNeuron tstNeuron2(connMap2);
+    WeightlessNeuron tstNeuron2(connMap2, 0);
 
     //Add one piece of training data
     addTraining(tstNeuron2, "11000", 1);
@@ -190,17 +190,53 @@ void TestWeightlessNeuron::testGetTransitionProbability(){
     catch(SpikeStreamException& ex){
 	QFAIL(ex.getMessage().toAscii());
     }
+
+
+    //Build a weightless neuron with three input neurons, ids 1,2,3 There are three connections from neuron 2
+    QHash<unsigned int, QList<unsigned int> > connMap3;
+    connMap3[1].append(0);
+    connMap3[2].append(1);
+    connMap3[3].append(2);
+    connMap3[2].append(3);
+    connMap3[2].append(4);
+
+    WeightlessNeuron tstNeuron3(connMap3, 0);
+    QCOMPARE(tstNeuron3.getNumberOfConnections(), (int)5);
+
+    //Add  training data
+    addTraining(tstNeuron3, "01011", 1);//Output 1 when 2 is firing and other neurons are quiescent
+    addTraining(tstNeuron3, "10100", 1);//Output 0 when 1 and 3 are firing and 2 is are quiescent
+
+    //Build neuron id list and corresponding firing pattern
+    QList<unsigned int> neurIDList3;
+    neurIDList3.append(1);
+    neurIDList3.append(2);
+    neurIDList3.append(3);
+    QString s0Patt3a = "010";//Neuron 2 is firing
+    QString s0Patt3b = "101";//Neurons 1 and 3 are firing
+    QString s0Patt3c = "000";//No neurons firing
+
+    try{
+	//Check transition probability
+	tstNeuron3.setGeneralization(1.0);
+	QCOMPARE(tstNeuron3.getTransitionProbability(neurIDList3,s0Patt3a, 1), 1.0);
+	QCOMPARE(tstNeuron3.getTransitionProbability(neurIDList3,s0Patt3b, 1), 1.0);
+	QCOMPARE(tstNeuron3.getTransitionProbability(neurIDList3,s0Patt3c, 1), 0.5);
+    }
+    catch(SpikeStreamException& ex){
+	QFAIL(ex.getMessage().toAscii());
+    }
 }
 
 
 void TestWeightlessNeuron::testSetGeneralization(){
     /* Create connection map and use it to create neuron.
 	neurons with ids 10 ...19 are in their respective positions in the connection map */
-    QHash<unsigned int, unsigned int> connMap;
+    QHash<unsigned int, QList<unsigned int> > connMap;
     for(int i=0; i<12; ++i){
-	connMap[i+10] = i;
+	connMap[i+10].append(i);
     }
-    WeightlessNeuron tstNeuron(connMap);
+    WeightlessNeuron tstNeuron(connMap, 0);
 
     //Set generalization to 0.25
     tstNeuron.setGeneralization(0.25);
