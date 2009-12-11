@@ -45,11 +45,13 @@ void AnalysisTimeStepThread::prepareTimeStepAnalysis(const AnalysisInfo& anaInfo
 
 /*! Run method inherited from QThread */
 void AnalysisTimeStepThread::run(){
+    qDebug()<<"Analysis Time Step Thread Started";
+
     stop = false;
     clearError();
 
     try{
-	//Create the calculator to run the phi calculation on the time step
+        //Create the calculator to run the phi calculation on the time step
 	SubsetManager* subsetManager = new SubsetManager(networkDBInfo, archiveDBInfo, analysisDBInfo, analysisInfo, timeStep);
 	connect(subsetManager, SIGNAL(complexFound()), this, SLOT(updateComplexes()));
 	connect(subsetManager, SIGNAL(progress(const QString&, unsigned int, unsigned int, unsigned int)), this, SLOT(updateProgress(const QString&, unsigned int, unsigned int, unsigned int)));
@@ -62,6 +64,8 @@ void AnalysisTimeStepThread::run(){
     }
 
     stop = true;
+
+    qDebug()<<"Analysis time step thread stopped.";
 }
 
 void AnalysisTimeStepThread::test(){

@@ -21,7 +21,7 @@ namespace spikestream {
 	    QStringList getFiringNeuronIDs(unsigned int archiveID, unsigned int timeStep);
 	    unsigned int getMaxTimeStep(unsigned int archiveID);
 	    unsigned int getMinTimeStep(unsigned int archiveID);
-
+            bool networkIsLocked(unsigned int networkID);
 	};
 
 }

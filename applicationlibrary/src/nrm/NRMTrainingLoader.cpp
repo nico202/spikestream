@@ -7,6 +7,7 @@
 //Other includes
 #include <iostream>
 #include <sstream>
+#include <stdio.h>
 using namespace std;
 
 /*! Constructor */

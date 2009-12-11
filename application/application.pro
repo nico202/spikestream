@@ -10,7 +10,7 @@ DESTDIR = $(SPIKESTREAM_ROOT)/bin
 
 OBJECTS_DIR = build/objects
 
-LIBS += -lspikestreamapplication -L$(SPIKESTREAM_ROOT)/lib
+LIBS += -lspikestream -lspikestreamapplication -L$(SPIKESTREAM_ROOT)/lib
 
 INCLUDEPATH += src \
 		$(SPIKESTREAM_ROOT)/applicationlibrary/src \
