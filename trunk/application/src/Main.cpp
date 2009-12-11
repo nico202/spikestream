@@ -9,6 +9,7 @@ using namespace spikestream;
 
 //Other includes
 #include <iostream>
+#include <stdio.h>
 using namespace std;
 
 

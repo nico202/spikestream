@@ -2,6 +2,7 @@
 #define NETWORK_H
 
 //SpikeStream includes
+#include "ArchiveDao.h"
 #include "Box.h"
 #include "NetworkDao.h"
 #include "NetworkDaoThread.h"
@@ -25,8 +26,8 @@ namespace spikestream {
 	Q_OBJECT
 
 	public:
-	    Network(NetworkDao* networkDao, const QString& name, const QString& description);
-	    Network(const NetworkInfo& networkInfo, NetworkDao* networkDao);
+            Network(NetworkDao* networkDao, ArchiveDao* archiveDao, const QString& name, const QString& description);
+            Network(const NetworkInfo& networkInfo, NetworkDao* networkDao, ArchiveDao* archiveDao);
 	    ~Network();
 
 	    void addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList);
@@ -76,6 +77,8 @@ namespace spikestream {
 		of neurons and connections on request.
 		NOTE: This will have to be changed if the network is passed between threads. */
 	    NetworkDao* networkDao;
+
+            ArchiveDao* archiveDao;
 
 	    /*! Hash map of the neuron groups in the network */
 	    QHash<unsigned int, NeuronGroup*> neurGrpMap;

@@ -10,7 +10,7 @@ OBJECTS_DIR = build/objects
 
 MOC_DIR = build/moc
 
-LIBS += -lqwt -L/usr/local/qwt/lib \
+LIBS += -lqwt -L/usr/local/qwt-5.2.0/lib \
 	-lspikestream -L$(SPIKESTREAM_ROOT)/lib \
 	-lgmp
 

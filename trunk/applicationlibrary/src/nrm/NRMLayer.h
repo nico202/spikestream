@@ -3,7 +3,7 @@
 
 
 //Other imports
-#import <string>
+#include <string>
 using namespace std;
 
 namespace nrm {

@@ -154,7 +154,7 @@ void ArchiveWidget_V2::loadArchiveList(){
 
     /* Check to see if network is locked. Networks associated with archives should always be locked
        FIXME: ONLY A WARNING GENERATED AT PRESENT */
-    if(!Globals::getNetwork()->isLocked())
+    if(!Globals::getArchiveDao()->networkIsLocked(Globals::getNetwork()->getID()))
 	qWarning()<<"NETWORK IS UNLOCKED. Networks associated with archives should be locked.";
 
     //Copy archive infos into map

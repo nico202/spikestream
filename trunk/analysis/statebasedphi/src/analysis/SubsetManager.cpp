@@ -25,6 +25,7 @@ SubsetManager::SubsetManager(const DBInfo& netDBInfo, const DBInfo& archDBInfo, 
 
     //Create phi calculator
     phiCalculator = new PhiCalculator(netDBInfo, archDBInfo, anaDBInfo, anaInfo, timeStep, stop);
+    qDebug()<<"Subset manager created.";
 }
 
 
@@ -46,6 +47,8 @@ SubsetManager::SubsetManager(){
 SubsetManager::~SubsetManager(){
     deleteSubsets();
     delete phiCalculator;
+
+    qDebug()<<"Subset manager destroyed.";
 }
 
 
