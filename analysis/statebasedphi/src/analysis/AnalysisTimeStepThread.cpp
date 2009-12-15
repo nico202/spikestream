@@ -8,6 +8,10 @@ using namespace spikestream;
 //Qt includes
 #include <QDebug>
 
+//Other includes
+#include <iostream>
+using namespace std;
+
 
 /*! Constructor */
 AnalysisTimeStepThread::AnalysisTimeStepThread(const DBInfo& netDBInfo, const DBInfo& archDBInfo, const DBInfo& anaDBInfo){
@@ -23,6 +27,7 @@ AnalysisTimeStepThread::AnalysisTimeStepThread(const DBInfo& netDBInfo, const DB
 
 /*! Destructor */
 AnalysisTimeStepThread::~AnalysisTimeStepThread(){
+    qDebug()<<"Destroying AnalysisTimeStepThread";
 }
 
 /*-------------------------------------------------------------*/
@@ -51,11 +56,10 @@ void AnalysisTimeStepThread::run(){
     clearError();
 
     try{
-        //Create the calculator to run the phi calculation on the time step
+	//Create the calculator to run the phi calculation on the time step
 	SubsetManager* subsetManager = new SubsetManager(networkDBInfo, archiveDBInfo, analysisDBInfo, analysisInfo, timeStep);
-	connect(subsetManager, SIGNAL(complexFound()), this, SLOT(updateComplexes()));
-	connect(subsetManager, SIGNAL(progress(const QString&, unsigned int, unsigned int, unsigned int)), this, SLOT(updateProgress(const QString&, unsigned int, unsigned int, unsigned int)));
-	connect(subsetManager, SIGNAL(test()), this, SLOT(test()));
+	connect(subsetManager, SIGNAL(complexFound()), this, SLOT(updateComplexes()), Qt::DirectConnection);
+	connect(subsetManager, SIGNAL(progress(const QString&, unsigned int, unsigned int, unsigned int)), this, SLOT(updateProgress(const QString&, unsigned int, unsigned int, unsigned int)), Qt::DirectConnection);
 	subsetManager->runCalculation(&stop);
 	delete subsetManager;
     }
@@ -68,9 +72,6 @@ void AnalysisTimeStepThread::run(){
     qDebug()<<"Analysis time step thread stopped.";
 }
 
-void AnalysisTimeStepThread::test(){
-  qDebug()<<"TEST SLOT CALLED";
-}
 
 /*! Stops the analysis */
 void AnalysisTimeStepThread::stopThread(){
@@ -90,7 +91,6 @@ void AnalysisTimeStepThread::updateComplexes(){
 
 /*! Emits a signal indicating that progress has been made */
 void AnalysisTimeStepThread::updateProgress(const QString& msg, unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps){
-   qDebug()<<"ANALYSIS TIME STEP THREAD PROGRESS: "<<msg;
     emit progress(msg, timeStep, stepsCompleted, totalSteps);
 }
 

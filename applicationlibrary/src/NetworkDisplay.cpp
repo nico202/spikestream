@@ -16,19 +16,21 @@ NetworkDisplay::NetworkDisplay(){
     //Listen for changes to network viewer
     connect(Globals::getEventRouter(), SIGNAL(networkViewChangedSignal()), this, SLOT(clearZoom()));
 
-    //Set the default colors and store addresses in a map to prevent deletion
-    defaultNeuronColor.set(0.0f, 0.0f, 0.0f);
-    defaultColorMap[&defaultNeuronColor] = true;
-    negativeConnectionColor.set(0.0f, 0.0f, 1.0f);
-    defaultColorMap[&negativeConnectionColor] = true;
-    positiveConnectionColor.set(1.0f, 0.0f, 0.0f);
-    defaultColorMap[&positiveConnectionColor] = true;
+    /* Set colours of neurons that are used multiple times and need to be stored in the default
+	map to prevent deletion */
     firingNeuronColor.set(1.0f, 0.0f, 1.0f);
     defaultColorMap[&firingNeuronColor] = true;
+    highlightNeuronColor.set(1.0f, 1.0f, 0.0f);
+    defaultColorMap[&highlightNeuronColor] = true;
 
-    //Colours not in colour map
+    //Set neuron colours that are used directly by NetworkViewer and do not need to be stored in map
+    defaultNeuronColor.set(0.0f, 0.0f, 0.0f);
     singleNeuronColor.set(0.0f, 1.0f, 0.0f);
     toNeuronColor.set(1.0f, 0.0f, 1.0f);
+
+    //Connection colors do not need to be stored at present
+    positiveConnectionColor.set(1.0f, 0.0f, 0.0f);
+    negativeConnectionColor.set(0.0f, 0.0f, 1.0f);
 
     //Initialize color map
     neuronColorMap = new QHash<unsigned int, RGBColor*>();
@@ -91,6 +93,50 @@ void NetworkDisplay::clearZoom(){
 /*----------------------------------------------------------*/
 /*-----                PUBLIC METHODS                  -----*/
 /*----------------------------------------------------------*/
+
+/*! Adds highlight neurons. If the color is already set it is deleted and replaced with the
+    new color.  */
+void NetworkDisplay::addHighlightNeurons(const QList<unsigned int>& neuronIDs, RGBColor* color){
+    //Obtain and lock the mutex
+    QMutexLocker locker(&mutex);
+
+    foreach(unsigned int neurID, neuronIDs){
+	//Add color if it is not already in the map
+	if(!neuronColorMap->contains(neurID)){
+	    (*neuronColorMap)[neurID] = color;
+	}
+	//Replace the color
+	else{
+	    //Delete the color associated with the neuron id if it is not a default color
+	    if(!defaultColorMap.contains( (*neuronColorMap)[neurID]) )
+		delete (*neuronColorMap)[neurID];
+	    //Set the color in the map
+	    (*neuronColorMap)[neurID] = color;
+	}
+    }
+
+    //Inform other classes that the display has changed
+    emit networkDisplayChanged();
+}
+
+
+/*! Removes highlight neurons */
+void NetworkDisplay::removeHighlightNeurons(const QList<unsigned int>& neuronIDs){
+    foreach(unsigned int neurID, neuronIDs){
+	if(neuronColorMap->contains(neurID)){
+	    //Delete the color associated with the neuron id if it is not a default color
+	    if(!defaultColorMap.contains( (*neuronColorMap)[neurID]) )
+		delete (*neuronColorMap)[neurID];
+
+	    //Remove the entry for the neuron
+	    neuronColorMap->remove(neurID);
+	}
+    }
+
+    //Inform other classes that the display has changed
+    emit networkDisplayChanged();
+}
+
 
 /*! Clears all of the entries in the neuron color map */
 void NetworkDisplay::clearNeuronColorMap(){

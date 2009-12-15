@@ -15,7 +15,7 @@ class TestStateBasedPhiAnalysisDao : public TestDao {
 	    void testAddComplex();
 	    void testDeleteTimeSteps();
 	    void testGetComplexCount();
-	    void testGetStateBasedPhiDataTableModel();
+	    void testGetComplexes();
 
 	private:
 	    void addTestAnalysis1Data();

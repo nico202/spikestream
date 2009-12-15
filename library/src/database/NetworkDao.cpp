@@ -201,12 +201,12 @@ unsigned int NetworkDao::getConnectionGroupSize(unsigned int connGrpID){
 
 /*! Returns a list of information about the available networks. */
 QList<NetworkInfo> NetworkDao::getNetworksInfo(){
-    QSqlQuery query = getQuery("SELECT NetworkID, Name, Description, Locked FROM Networks");
+    QSqlQuery query = getQuery("SELECT NetworkID, Name, Description FROM Networks");
     executeQuery(query);
     QList<NetworkInfo> tmpList;
     for(int i=0; i<query.size(); ++i){
 	query.next();
-	tmpList.append( NetworkInfo(query.value(0).toUInt(), query.value(1).toString(), query.value(2).toString(), query.value(3).toBool()));
+	tmpList.append( NetworkInfo(query.value(0).toUInt(), query.value(1).toString(), query.value(2).toString()));
     }
     return tmpList;
 }

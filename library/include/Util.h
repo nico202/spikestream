@@ -3,6 +3,10 @@
 
 //Qt includes
 #include <QString>
+#include <QList>
+
+//Other includes
+#include <gmpxx.h>
 
 namespace spikestream {
 
@@ -11,9 +15,11 @@ namespace spikestream {
     /*! Set of static utility methods intended eventually to supersede Utilities.h */
     class Util {
 	public:
+	    static mpf_class factorial(unsigned int num);
 	    static void fillSelectionArray(bool* array, int arraySize, int selectionSize);
 	    static int getInt(const QString& str);
 	    static unsigned int getUInt(const QString& str);
+	    static QList<unsigned int> getUIntList(const QString& str);
 	    static double getDouble(const QString& str);
 	    static int getRandom(int min, int max);
 	    static void printByteArray(byte* byteArr, int arrLen);

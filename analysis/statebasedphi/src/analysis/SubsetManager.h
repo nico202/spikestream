@@ -34,7 +34,6 @@ namespace spikestream {
 	    void setStateDao (StateBasedPhiAnalysisDao* stateDao) { this->stateDao = stateDao; }
 
 	signals:
-	    void test();
 	    void complexFound();
 	    void progress(const QString& msg, unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps);
 
@@ -78,6 +77,7 @@ namespace spikestream {
 	    //========================  METHODS  ============================
 	    void addSubset(bool subsetSelectionArray[], int arrayLength);
 	    void deleteSubsets();
+	    unsigned int getMaxSubsetListSize(int numberOfNeurons);
 	    void updateProgress(const QString& msg);
     };
 

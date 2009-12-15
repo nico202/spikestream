@@ -20,7 +20,7 @@ void TestNetworkDao::testAddNetwork(){
     NetworkDao networkDao (dbInfo);
 
     //Information about the network to be added
-    NetworkInfo netInfo(0, "test1Name","test3Description", 0);
+    NetworkInfo netInfo(0, "test1Name","test3Description");
     try{
 	//Invoke method that is being tested
 	networkDao.addNetwork(netInfo);

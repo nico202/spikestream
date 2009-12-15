@@ -3,6 +3,8 @@
 
 //SpikeStream includes
 #include "AnalysisInfo.h"
+#include "AnalysesModel.h"
+#include "AnalysesTableView.h"
 using namespace spikestream;
 
 //Qt includes
@@ -22,20 +24,17 @@ namespace spikestream {
 	   const AnalysisInfo& getAnalysisInfo();
 
 	private slots:
+	   void deleteButtonPressed();
 	    void okButtonPressed();
-	    void selectionChanged( const QModelIndex & current, const QModelIndex & previous);
 
 	private:
 	    //====================  VARIABLES  =======================
-	    /*! The table displaying the analyses available for this network */
-	     QTableView* analysisTableView;
-
-	     QItemSelectionModel *selectionModel;
-
-	     QSqlQueryModel* model;
-
-	     /*! Holds information about the currently loaded analysis if there is one. */
+	     /*! Holds information about the currently selected analysis if there is one.
+		If dialog is accepted the calling class should request this with getAnalysisInfo(). */
 	     AnalysisInfo analysisInfo;
+
+	     /*! Model */
+	     AnalysesModel* analysesModel;
     };
 
 }

@@ -5,6 +5,9 @@ using namespace spikestream;
 //Qt includes
 #include <QMutexLocker>
 
+//Other includes
+#include <iostream>
+using namespace std;
 
 /*! Constructor */
 AnalysisRunner::AnalysisRunner(const DBInfo& netDBInfo, const DBInfo& archDBInfo, const DBInfo& anaDBInfo){
@@ -20,6 +23,7 @@ AnalysisRunner::AnalysisRunner(const DBInfo& netDBInfo, const DBInfo& archDBInfo
 
 /*! Destructor */
 AnalysisRunner::~AnalysisRunner(){
+    qDebug()<<"Destroying AnalysisRunner";
 }
 
 
@@ -108,7 +112,6 @@ void AnalysisRunner::stop(){
 
 /*! Called when one of the sub threads emits a progress signal */
 void AnalysisRunner::updateProgress(const QString& msg, unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps){
-    qDebug()<<"ANALYSIS RUNNER PROGRESS: "<<msg;
     emit progress(msg, timeStep, stepsCompleted, totalSteps);
 }
 
@@ -143,6 +146,8 @@ void AnalysisRunner::threadFinished(){
     //Delete the thread class and remove it from the map
     delete tmpSubThread;
     subThreadMap.remove(tmpTimeStep);
+
+    //Inform listening classes that the analysis of this time step is now complete.
     emit timeStepComplete(tmpTimeStep);
 
     //Determine if any time steps need to be analyzed

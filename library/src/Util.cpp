@@ -6,11 +6,21 @@ using namespace spikestream;
 //Qt includes
 #include <QDebug>
 #include <QTime>
+#include <QStringList>
 
 //Other includes
 #include "math.h"
 #include <iostream>
 using namespace std;
+
+/*! Returns the factorial of a number */
+mpf_class Util::factorial (unsigned int num){
+	mpz_class result=1;
+	for (unsigned int i=1; i<=num; ++i)
+		result *= i;
+	return result;
+}
+
 
 
 /*! Fills an array to select k neurons out of n. */
@@ -46,6 +56,16 @@ unsigned int Util::getUInt(const QString& str){
     if(!ok)
 	throw NumberConversionException("Error converting " + str + " to unsigned integer.");
     return newInt;
+}
+
+
+/*! Converts a string containing a comma separated list of unsigned integers into  a qlist of unsigned ints  */
+QList<unsigned int> Util::getUIntList(const QString& str){
+    QStringList strList = str.split(",", QString::SkipEmptyParts);
+    QList<unsigned int> uIntList;
+    foreach(QString tmpStr, strList)
+	uIntList.append(Util::getUInt(tmpStr.trimmed()));
+    return uIntList;
 }
 
 

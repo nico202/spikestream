@@ -142,7 +142,7 @@ void NRMImportDialog::addNetwork(){
     newNetwork = NULL;
     try{
 	//Create network
-	newNetwork = new Network(Globals::getNetworkDao(), networkName->text(), networkDescription->text());
+	newNetwork = new Network(Globals::getNetworkDao(), Globals::getArchiveDao(), networkName->text(), networkDescription->text());
 	connect(newNetwork, SIGNAL(taskFinished()), this, SLOT(threadFinished()));
 	showBusyPage("Adding neurons to database...");
 

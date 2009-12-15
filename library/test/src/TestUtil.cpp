@@ -1,6 +1,7 @@
 //SpikeStream includes
 #include "TestUtil.h"
 #include "Util.h"
+#include "NumberConversionException.h"
 using namespace spikestream;
 
 //Qt includes
@@ -35,6 +36,40 @@ void TestUtil::testFillSelectionArray(){
     QCOMPARE(selArr[5], false);
     QCOMPARE(selArr[6], false);
 }
+
+
+void TestUtil::testGetUIntList(){
+    //Check an empty list
+    QList<unsigned int> tstList = Util::getUIntList("");
+    QCOMPARE(tstList.size(), 0);
+
+    //Check a good list
+    tstList = Util::getUIntList("33, 56");
+    QCOMPARE(tstList.size(), (int)2);
+    QCOMPARE(tstList.at(0), (unsigned int)33);
+    QCOMPARE(tstList.at(1), (unsigned int)56);
+
+    //Check it fails on a dodgy list
+    bool exceptionThrown = false;
+    try{
+	tstList = Util::getUIntList("33, -56");
+    }
+    catch(NumberConversionException& ex){
+	exceptionThrown = true;
+    }
+    QVERIFY(exceptionThrown);
+
+    //Check it fails on another dodgy list
+    exceptionThrown = false;
+    try{
+	tstList = Util::getUIntList("678, 533.2, 56");
+    }
+    catch(NumberConversionException& ex){
+	exceptionThrown = true;
+    }
+    QVERIFY(exceptionThrown);
+}
+
 
 
 void TestUtil::testRDouble(){

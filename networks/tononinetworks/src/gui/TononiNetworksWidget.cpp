@@ -21,7 +21,7 @@ extern "C" {
 
     /*! Returns a descriptive name for this widget */
     QString getName(){
-	return QString("Tononi Test Widget");
+	return QString("Tononi Networks");
     }
 }
 

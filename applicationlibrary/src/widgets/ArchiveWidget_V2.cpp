@@ -151,12 +151,6 @@ void ArchiveWidget_V2::loadArchiveList(){
 	gridLayout->addWidget(new QLabel("No archives in database"), 0, 0);
     }
 
-
-    /* Check to see if network is locked. Networks associated with archives should always be locked
-       FIXME: ONLY A WARNING GENERATED AT PRESENT */
-    if(!Globals::getArchiveDao()->networkIsLocked(Globals::getNetwork()->getID()))
-	qWarning()<<"NETWORK IS UNLOCKED. Networks associated with archives should be locked.";
-
     //Copy archive infos into map
     for(int i=0; i<archiveInfoList.size(); ++i){
 	archiveInfoMap[archiveInfoList[i].getID()] = archiveInfoList[i];

@@ -1,5 +1,6 @@
 #include "SpikeStreamException.h"
 #include "StateBasedPhiAnalysisDao.h"
+#include "Util.h"
 using namespace spikestream;
 
 /*! Standard Constructor */
@@ -55,13 +56,24 @@ int StateBasedPhiAnalysisDao::getComplexCount(unsigned int analysisID, unsigned 
 
 
 /*! Returns a model corresponding to the state based phi data table for a particular analysis */
-QSqlQueryModel* StateBasedPhiAnalysisDao::getStateBasedPhiDataTableModel(unsigned int analysisID){
-    QString queryString = "SELECT ComplexID, TimeStep, Phi, Neurons FROM StateBasedPhiData WHERE AnalysisID=" + QString::number(analysisID);
-    QSqlQuery query = getQuery(queryString);
+QList<Complex> StateBasedPhiAnalysisDao::getComplexes(unsigned int analysisID){
+    //Query database for matching complexes
+    QSqlQuery query = getQuery( "SELECT ComplexID, TimeStep, Phi, Neurons FROM StateBasedPhiData WHERE AnalysisID=" + QString::number(analysisID));
     executeQuery(query);
-    QSqlQueryModel *model = new QSqlQueryModel();
-    model->setQuery(query);
-    return model;
+
+    //Add complexes to list
+    QList<Complex> complexList;
+    while(query.next()){
+	QList<unsigned int> neuronIDList = Util::getUIntList(query.value(3).toString());
+	Complex tmpComplex(
+		Util::getUInt(query.value(0).toString()),//ID
+		Util::getUInt(query.value(1).toString()),//Time step
+		Util::getDouble(query.value(2).toString()),//Phi
+		neuronIDList//Neuron IDs
+	);
+	complexList.append(tmpComplex);
+    }
+    return complexList;
 }
 
 

@@ -9,7 +9,9 @@ using namespace spikestream;
 
 //Other includes
 #include <algorithm>
+#include <gmpxx.h>
 #include <iostream>
+#include <sstream>
 using namespace std;
 
 /*! Standard Constructor */
@@ -40,6 +42,10 @@ SubsetManager::SubsetManager(){
     bool* tmpStop = new bool;
     *tmpStop = false;
     stop = tmpStop;
+
+    //Set up progress so that it does not affect tests
+    progressCounter = 0;
+    numberOfProgressSteps = 0xffff;
 }
 
 
@@ -47,6 +53,13 @@ SubsetManager::SubsetManager(){
 SubsetManager::~SubsetManager(){
     deleteSubsets();
     delete phiCalculator;
+
+    if(networkDao != NULL)
+	delete networkDao;
+    if(archiveDao != NULL)
+	delete archiveDao;
+    if(stateDao != NULL)
+	delete stateDao;
 
     qDebug()<<"Subset manager destroyed.";
 }
@@ -97,7 +110,7 @@ void SubsetManager::calculateSubsetsPhi(){
 	subsetList[i]->setPhi(phiCalculator->getSubsetPhi(tmpNeurIDs));
 
 	//Inform main application about the progress
-	updateProgress( "Calculating subset phi. " + QString::number(i) + " out of " + QString::number(subsetList.size()) );
+	updateProgress( "Calculating subset phi. " + QString::number(i+1) + " out of " + QString::number(subsetList.size()) );
     }
 }
 
@@ -136,11 +149,13 @@ void SubsetManager::identifyComplexes(){
 
 		//Inform other classes that a complex has been found
 		emit complexFound();
+
+		qDebug()<<"COMPLEX FOUND: NeuronIDs="<<subNeurIDs<<"; phi="<<subsetList[tstIndx]->getPhi();
 	    }
 	}
 
 	//Inform main application about progress
-	updateProgress("Identifying complexes. " + QString::number(tstIndx) + " out of " + QString::number(subsetList.size()));
+	updateProgress("Identifying complexes. " + QString::number(tstIndx + 1) + " out of " + QString::number(subsetList.size()));
     }
 }
 
@@ -149,12 +164,13 @@ void SubsetManager::identifyComplexes(){
 void SubsetManager::runCalculation(const bool * const stop){
     //Store reference to stop in invoking class
     this->stop = stop;
-emit test();
+    phiCalculator->setStop(stop);
+
     //Get a complete list of the neuron IDs in the network
     neuronIDList = networkDao->getNeuronIDs(analysisInfo.getNetworkID());
 
     //Record the number of steps that need to be completed and initialize progress counter
-    numberOfProgressSteps = subsetList.size() * 2 + neuronIDList.size() - 1;
+    numberOfProgressSteps = 2 * getMaxSubsetListSize(neuronIDList.size()) + neuronIDList.size() - 1;
     progressCounter = 0;
 
     //Generate a list of all possible connected subsets
@@ -198,6 +214,26 @@ void SubsetManager::deleteSubsets(){
 }
 
 
+/*! Works out the maximum size of the subset list. Used for indicating progress with the calculation. */
+unsigned int SubsetManager::getMaxSubsetListSize(int numberOfNeurons){
+
+    //Work through all the possible subset sizes of the network
+    mpf_class numberOfSubsets = 0;
+    for(int subSize = 2; subSize <= numberOfNeurons; ++subSize){
+
+	/* Each subset size can be selected in a number of different ways from the network. */
+	numberOfSubsets += Util::factorial(numberOfNeurons) / ( Util::factorial(subSize) * Util::factorial(numberOfNeurons - subSize) );
+    }
+
+    if(numberOfSubsets > 0xffffffff){
+	ostringstream strStream;
+	strStream<<"This network has "<<numberOfSubsets<<" subsets. This exceeds the supported number and would take an extremely long time to run.";
+	throw SpikeStreamAnalysisException(strStream.str().data());
+    }
+    return numberOfSubsets.get_si();
+}
+
+
 /*! Prints out the current list of subsets */
 void SubsetManager::printSubsets(){
     cout<<"--------------------  SUBSETS  --------------------"<<endl;
@@ -214,7 +250,6 @@ void SubsetManager::updateProgress(const QString& msg){
     ++progressCounter;
     if(progressCounter > numberOfProgressSteps)
 	throw SpikeStreamAnalysisException("Progress counter out of range.");
-qDebug()<<"SUBSET MANAGER PROGRESS: "<<msg;
 
     emit progress(msg, timeStep, progressCounter, numberOfProgressSteps);
 }

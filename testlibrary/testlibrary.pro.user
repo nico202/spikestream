@@ -69,14 +69,14 @@
     <value type="QString" >CPU=i686</value>
     <value type="QString" >CSHEDIT=emacs</value>
     <value type="QString" >CVS_RSH=ssh</value>
-    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-RZlEgqfGBE,guid=0e1568e1e1c44b703d86110d4b1f82d2</value>
+    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-8noUp3REXP,guid=d134ecd26e692ad2a3d210c24b2213dd</value>
     <value type="QString" >DESKTOP_SESSION=default</value>
     <value type="QString" >DESKTOP_STARTUP_ID=</value>
     <value type="QString" >DISPLAY=:0.0</value>
     <value type="QString" >DM_CONTROL=/var/run/xdmctl</value>
     <value type="QString" >ENV=/etc/bash.bashrc</value>
     <value type="QString" >FROM_HEADER=</value>
-    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-oduKYo/S.gpg-agent:3914:1</value>
+    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-FIjaEA/S.gpg-agent:4070:1</value>
     <value type="QString" >GS_LIB=/home/taropeg/.fonts</value>
     <value type="QString" >GTK2_RC_FILES=/etc/gtk-2.0/gtkrc:/usr/share/themes//QtCurve/gtk-2.0/gtkrc:/home/taropeg/.gtkrc-2.0-qtengine:/home/taropeg/.gtkrc-2.0:/home/taropeg/.kde4/share/config/gtkrc-2.0</value>
     <value type="QString" >GTK_IM_MODULE=cedilla</value>
@@ -129,13 +129,13 @@
     <value type="QString" >QT_PLUGIN_PATH=/home/taropeg/.kde4/lib/kde4/plugins/:/usr/lib/kde4/plugins/</value>
     <value type="QString" >QT_SYSTEM_DIR=/usr/share/desktop-data</value>
     <value type="QString" >SDK_HOME=/usr/lib/jvm/java</value>
-    <value type="QString" >SESSION_MANAGER=local/linux-30aa:@/tmp/.ICE-unix/4322,unix/linux-30aa:/tmp/.ICE-unix/4322</value>
+    <value type="QString" >SESSION_MANAGER=local/linux-30aa:@/tmp/.ICE-unix/4277,unix/linux-30aa:/tmp/.ICE-unix/4277</value>
     <value type="QString" >SHELL=/bin/bash</value>
     <value type="QString" >SHLVL=1</value>
     <value type="QString" >SPIKESTREAM_ROOT=/home/taropeg/projects/spikestream/trunk</value>
-    <value type="QString" >SSH_AGENT_PID=3918</value>
+    <value type="QString" >SSH_AGENT_PID=4071</value>
     <value type="QString" >SSH_ASKPASS=/usr/lib/ssh/x11-ssh-askpass</value>
-    <value type="QString" >SSH_AUTH_SOCK=/tmp/ssh-sUvWH3612/agent.3612</value>
+    <value type="QString" >SSH_AUTH_SOCK=/tmp/ssh-zVsFr3826/agent.3826</value>
     <value type="QString" >TERM=xterm</value>
     <value type="QString" >TMPDIR=/tmp</value>
     <value type="QString" >USER=taropeg</value>
@@ -146,7 +146,7 @@
     <value type="QString" >XCURSOR_THEME=Oxygen_White</value>
     <value type="QString" >XDG_CONFIG_DIRS=/etc/xdg</value>
     <value type="QString" >XDG_DATA_DIRS=/usr/share:/etc/opt/kde3/share:/opt/kde3/share</value>
-    <value type="QString" >XDG_SESSION_COOKIE=1ad84edac528716ecbcd8e5b49dca96b-1260356294.561721-971961132</value>
+    <value type="QString" >XDG_SESSION_COOKIE=1ad84edac528716ecbcd8e5b49dca96b-1260524506.420088-796413847</value>
     <value type="QString" >XDM_MANAGED=method=classic</value>
     <value type="QString" >XKEYSYMDB=/usr/share/X11/XKeysymDB</value>
     <value type="QString" >XMODIFIERS=@im=local</value>
@@ -163,7 +163,7 @@
     <value type="QString" >CONFIG+=debug</value>
    </valuelist>
    <value key="abstractProcess.command" type="QString" >/usr/lib/qt4/bin/qmake</value>
-   <value key="abstractProcess.enabled" type="bool" >false</value>
+   <value key="abstractProcess.enabled" type="bool" >true</value>
    <value key="abstractProcess.workingDirectory" type="QString" >/home/taropeg/projects/spikestream/trunk/testlibrary</value>
    <value key="buildConfiguration" type="int" >2</value>
   </valuemap>
@@ -177,14 +177,14 @@
     <value type="QString" >CPU=i686</value>
     <value type="QString" >CSHEDIT=emacs</value>
     <value type="QString" >CVS_RSH=ssh</value>
-    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-RZlEgqfGBE,guid=0e1568e1e1c44b703d86110d4b1f82d2</value>
+    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-8noUp3REXP,guid=d134ecd26e692ad2a3d210c24b2213dd</value>
     <value type="QString" >DESKTOP_SESSION=default</value>
     <value type="QString" >DESKTOP_STARTUP_ID=</value>
     <value type="QString" >DISPLAY=:0.0</value>
     <value type="QString" >DM_CONTROL=/var/run/xdmctl</value>
     <value type="QString" >ENV=/etc/bash.bashrc</value>
     <value type="QString" >FROM_HEADER=</value>
-    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-oduKYo/S.gpg-agent:3914:1</value>
+    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-FIjaEA/S.gpg-agent:4070:1</value>
     <value type="QString" >GS_LIB=/home/taropeg/.fonts</value>
     <value type="QString" >GTK2_RC_FILES=/etc/gtk-2.0/gtkrc:/usr/share/themes//QtCurve/gtk-2.0/gtkrc:/home/taropeg/.gtkrc-2.0-qtengine:/home/taropeg/.gtkrc-2.0:/home/taropeg/.kde4/share/config/gtkrc-2.0</value>
     <value type="QString" >GTK_IM_MODULE=cedilla</value>
@@ -237,13 +237,13 @@
     <value type="QString" >QT_PLUGIN_PATH=/home/taropeg/.kde4/lib/kde4/plugins/:/usr/lib/kde4/plugins/</value>
     <value type="QString" >QT_SYSTEM_DIR=/usr/share/desktop-data</value>
     <value type="QString" >SDK_HOME=/usr/lib/jvm/java</value>
-    <value type="QString" >SESSION_MANAGER=local/linux-30aa:@/tmp/.ICE-unix/4322,unix/linux-30aa:/tmp/.ICE-unix/4322</value>
+    <value type="QString" >SESSION_MANAGER=local/linux-30aa:@/tmp/.ICE-unix/4277,unix/linux-30aa:/tmp/.ICE-unix/4277</value>
     <value type="QString" >SHELL=/bin/bash</value>
     <value type="QString" >SHLVL=1</value>
     <value type="QString" >SPIKESTREAM_ROOT=/home/taropeg/projects/spikestream/trunk</value>
-    <value type="QString" >SSH_AGENT_PID=3918</value>
+    <value type="QString" >SSH_AGENT_PID=4071</value>
     <value type="QString" >SSH_ASKPASS=/usr/lib/ssh/x11-ssh-askpass</value>
-    <value type="QString" >SSH_AUTH_SOCK=/tmp/ssh-sUvWH3612/agent.3612</value>
+    <value type="QString" >SSH_AUTH_SOCK=/tmp/ssh-zVsFr3826/agent.3826</value>
     <value type="QString" >TERM=xterm</value>
     <value type="QString" >TMPDIR=/tmp</value>
     <value type="QString" >USER=taropeg</value>
@@ -254,7 +254,7 @@
     <value type="QString" >XCURSOR_THEME=Oxygen_White</value>
     <value type="QString" >XDG_CONFIG_DIRS=/etc/xdg</value>
     <value type="QString" >XDG_DATA_DIRS=/usr/share:/etc/opt/kde3/share:/opt/kde3/share</value>
-    <value type="QString" >XDG_SESSION_COOKIE=1ad84edac528716ecbcd8e5b49dca96b-1260356294.561721-971961132</value>
+    <value type="QString" >XDG_SESSION_COOKIE=1ad84edac528716ecbcd8e5b49dca96b-1260524506.420088-796413847</value>
     <value type="QString" >XDM_MANAGED=method=classic</value>
     <value type="QString" >XKEYSYMDB=/usr/share/X11/XKeysymDB</value>
     <value type="QString" >XMODIFIERS=@im=local</value>
@@ -280,14 +280,14 @@
     <value type="QString" >CPU=i686</value>
     <value type="QString" >CSHEDIT=emacs</value>
     <value type="QString" >CVS_RSH=ssh</value>
-    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-Gk5ywsiUL1,guid=01f29929e85d3a9e2c6b539d4b1e14cb</value>
+    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-PUFo7Z0XDE,guid=ce0195f293deda3c7ffe8f1b4b20c309</value>
     <value type="QString" >DESKTOP_SESSION=default</value>
     <value type="QString" >DESKTOP_STARTUP_ID=</value>
     <value type="QString" >DISPLAY=:0.0</value>
     <value type="QString" >DM_CONTROL=/var/run/xdmctl</value>
     <value type="QString" >ENV=/etc/bash.bashrc</value>
     <value type="QString" >FROM_HEADER=</value>
-    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-OtqgC3/S.gpg-agent:3902:1</value>
+    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-zrg7oy/S.gpg-agent:3846:1</value>
     <value type="QString" >GS_LIB=/home/taropeg/.fonts</value>
     <value type="QString" >GTK2_RC_FILES=/etc/gtk-2.0/gtkrc:/usr/share/themes//QtCurve/gtk-2.0/gtkrc:/home/taropeg/.gtkrc-2.0-qtengine:/home/taropeg/.gtkrc-2.0:/home/taropeg/.kde4/share/config/gtkrc-2.0</value>
     <value type="QString" >GTK_IM_MODULE=cedilla</value>
@@ -340,13 +340,13 @@
     <value type="QString" >QT_PLUGIN_PATH=/home/taropeg/.kde4/lib/kde4/plugins/:/usr/lib/kde4/plugins/</value>
     <value type="QString" >QT_SYSTEM_DIR=/usr/share/desktop-data</value>
     <value type="QString" >SDK_HOME=/usr/lib/jvm/java</value>
-    <value type="QString" >SESSION_MANAGER=local/linux-30aa:@/tmp/.ICE-unix/4075,unix/linux-30aa:/tmp/.ICE-unix/4075</value>
+    <value type="QString" >SESSION_MANAGER=local/linux-30aa:@/tmp/.ICE-unix/3942,unix/linux-30aa:/tmp/.ICE-unix/3942</value>
     <value type="QString" >SHELL=/bin/bash</value>
     <value type="QString" >SHLVL=1</value>
     <value type="QString" >SPIKESTREAM_ROOT=/home/taropeg/projects/spikestream/trunk</value>
-    <value type="QString" >SSH_AGENT_PID=3903</value>
+    <value type="QString" >SSH_AGENT_PID=3847</value>
     <value type="QString" >SSH_ASKPASS=/usr/lib/ssh/x11-ssh-askpass</value>
-    <value type="QString" >SSH_AUTH_SOCK=/tmp/ssh-vzGoH3796/agent.3796</value>
+    <value type="QString" >SSH_AUTH_SOCK=/tmp/ssh-WKUKS3737/agent.3737</value>
     <value type="QString" >TERM=xterm</value>
     <value type="QString" >TMPDIR=/tmp</value>
     <value type="QString" >USER=taropeg</value>
@@ -357,7 +357,7 @@
     <value type="QString" >XCURSOR_THEME=Oxygen_White</value>
     <value type="QString" >XDG_CONFIG_DIRS=/etc/xdg</value>
     <value type="QString" >XDG_DATA_DIRS=/usr/share:/etc/opt/kde3/share:/opt/kde3/share</value>
-    <value type="QString" >XDG_SESSION_COOKIE=1ad84edac528716ecbcd8e5b49dca96b-1260262600.851645-888325893</value>
+    <value type="QString" >XDG_SESSION_COOKIE=1ad84edac528716ecbcd8e5b49dca96b-1260438275.335659-55550573</value>
     <value type="QString" >XDM_MANAGED=method=classic</value>
     <value type="QString" >XKEYSYMDB=/usr/share/X11/XKeysymDB</value>
     <value type="QString" >XMODIFIERS=@im=local</value>

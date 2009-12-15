@@ -22,7 +22,7 @@ TononiNetworkBuilder::~TononiNetworkBuilder(){
 /*! Adds Balduzzi and Tononi (2008), Figure 6 */
 void TononiNetworkBuilder::addBalduzziTononiFigure6(const QString& networkName){
     //Add a network
-    NetworkInfo netInfo(0, networkName, "Balduzzi and Tononi(2008) Figure 6", false);
+    NetworkInfo netInfo(0, networkName, "Balduzzi and Tononi(2008) Figure 6");
     Globals::getNetworkDao()->addNetwork(netInfo);
 
     //Build neuron group - store neurons in order in a list
@@ -118,14 +118,5 @@ void TononiNetworkBuilder::addBalduzziTononiFigure6(const QString& networkName){
 
 }
 
-
-/*! Runs the supplied thread and checks for errors */
-void TononiNetworkBuilder::runThread(NetworkDaoThread& thread){
-    thread.start();
-    thread.wait();
-    if(thread.isError()){
-	throw SpikeStreamException(thread.getErrorMessage());
-    }
-}
 
 

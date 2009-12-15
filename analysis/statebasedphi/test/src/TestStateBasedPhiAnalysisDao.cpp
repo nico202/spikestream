@@ -52,10 +52,6 @@ void TestStateBasedPhiAnalysisDao::testDeleteTimeSteps(){
 }
 
 
-void TestStateBasedPhiAnalysisDao::testGetStateBasedPhiDataTableModel(){
-}
-
-
 void TestStateBasedPhiAnalysisDao::testGetComplexCount(){
     //Add test analysis and data
     addTestAnalysis1();
@@ -69,6 +65,27 @@ void TestStateBasedPhiAnalysisDao::testGetComplexCount(){
     QCOMPARE(complexCount, (int)1);
     complexCount = anaDao.getComplexCount(testAnalysis1ID+1, 1, 3);
     QCOMPARE(complexCount, (int)0);
+}
+
+
+void TestStateBasedPhiAnalysisDao::testGetComplexes(){
+    //Add test analysis and data
+    addTestAnalysis1();
+    addTestAnalysis1Data();
+
+    //Invoke test method
+    StateBasedPhiAnalysisDao anaDao(analysisDBInfo);
+    QList<Complex> cmplxList = anaDao.getComplexes(testAnalysis1ID);
+
+    //Check that complex information is correct
+    QCOMPARE(cmplxList.size(), 3);
+    QCOMPARE(cmplxList.at(0).getPhi(), 3.0);
+    QCOMPARE(cmplxList.at(1).getTimeStep(), (unsigned int)2);
+    QList<unsigned int> neuronIDList = cmplxList.at(2).getNeuronIDs();
+    QCOMPARE(neuronIDList.size(), 4);
+    QCOMPARE(neuronIDList.at(3), (unsigned int)8);
+
+    //FIXME: CHECK COMPLEX IDS ARE CORRECT
 }
 
 

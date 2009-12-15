@@ -17,6 +17,7 @@ CONFIG += debug \
 
 QT += sql xml
 
+LIBS += -lgmpxx
 
 INCLUDEPATH += include
 

@@ -20,6 +20,7 @@ using namespace spikestream;
 namespace spikestream {
     class Globals {
     public:
+	static bool analysisLoaded();
 	static bool archiveLoaded();
 	static void cleanUp();
 	static AnalysisDao* getAnalysisDao();
@@ -33,6 +34,7 @@ namespace spikestream {
 	static QString getWorkingDirectory();
 	static bool isRendering();
 	static bool networkLoaded();
+	static void setAnalysisID(unsigned int id);
 
 	/* Friend classes that are allowed to change the state of Globals
 	by accessing private setter methods*/
@@ -64,6 +66,9 @@ namespace spikestream {
 
 	/*! The current loaded archive */
 	static Archive* archive;
+
+	/*! The id of the current analysis */
+	static unsigned int analysisID;
 
 	/*! Class controlling how the current network is displayed */
 	static NetworkDisplay* networkDisplay;

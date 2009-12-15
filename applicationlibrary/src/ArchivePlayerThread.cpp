@@ -160,6 +160,12 @@ QHash<unsigned int, RGBColor*>* ArchivePlayerThread::getNeuronColorMap(int timeS
     //Build new highlight map from list of IDs
     RGBColor* neuronColor = Globals::getNetworkDisplay()->getFiringNeuronColor();
     QHash<unsigned int, RGBColor*>* newHighlightMap = new QHash<unsigned int, RGBColor*>();
+
+    //Return empty map if no neurons are firing at this time step
+    if(neuronIDList.isEmpty())
+	return newHighlightMap;
+
+    //Fill map with neuron ids
     QStringListIterator iter(neuronIDList);
     while (iter.hasNext()){
 	(*newHighlightMap)[Util::getUInt(iter.next())] = neuronColor;

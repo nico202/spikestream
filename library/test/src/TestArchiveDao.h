@@ -19,6 +19,7 @@ class TestArchiveDao : public TestDao {
 	    void testGetArchiveSize();
 	    void testGetFiringNeuronIDs();
 	    void testGetMaxTimeStep();
+	    void testNetworkIsLocked();
 
 };
 

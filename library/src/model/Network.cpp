@@ -9,9 +9,10 @@ using namespace spikestream;
 using namespace std;
 
 /*! Constructor that creates a new network and adds it to the database */
-Network::Network(NetworkDao* networkDao, const QString& name, const QString& description){
+Network::Network(NetworkDao* networkDao, ArchiveDao* archiveDao, const QString& name, const QString& description){
     //Store information
     this->networkDao = networkDao;
+    this->archiveDao = archiveDao;
     this->info.setName(name);
     this->info.setDescription(description);
 
@@ -32,10 +33,11 @@ Network::Network(NetworkDao* networkDao, const QString& name, const QString& des
 
 
 /*! Constructor when using an existing network */
-Network::Network(const NetworkInfo& networkInfo, NetworkDao* networkDao){
+Network::Network(const NetworkInfo& networkInfo, NetworkDao* networkDao, ArchiveDao* archiveDao){
     //Store information
     this->info = networkInfo;
     this->networkDao = networkDao;
+    this->archiveDao = archiveDao;
 
     //Check that network ID is valid
     if(info.getID() == INVALID_NETWORK_ID){
@@ -85,8 +87,8 @@ Network::~Network(){
 
 /*! Adds a connection group to the network without saving it to the database.
     #FIXME#: MAKE THIS WORK IN THE SAME WAY AS A NEURON GROUP. WILL HAVE TO CHANGE NRM IMPORTER WHEN THIS IS DONE. */
-void Network::addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList){
-    if(isLocked())//Check if network is editable or not
+void Network::addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList, bool checkNetworkLocked){
+    if(checkNetworkLocked && isLocked())//Check if network is editable or not
 	throw SpikeStreamException("Cannot add connection groups to a locked network.");
 
     for(QList<ConnectionGroup*>::iterator iter = connectionGroupList.begin(); iter != connectionGroupList.end(); ++iter){
@@ -275,6 +277,12 @@ ConnectionGroupInfo Network::getConnectionGroupInfo(unsigned int id){
 /*! Returns the number of steps that have been completed so far during a load operation. */
 int Network::getNumberOfCompletedSteps(){
     return connectionNetworkDaoThread->getNumberOfCompletedSteps() + neuronNetworkDaoThread->getNumberOfCompletedSteps();
+}
+
+
+/*! Returns true if the network is not editable because it is associated with archives */
+bool Network::isLocked(){
+    return archiveDao->networkIsLocked(getID());
 }
 
 

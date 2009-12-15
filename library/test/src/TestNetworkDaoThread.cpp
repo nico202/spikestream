@@ -20,7 +20,7 @@ void TestNetworkDaoThread::testAddConnectionGroup(){
     try{
 	/* Add network - slightly sloppy to use the network dao method, but it has been tested elsewhere
 	    and we need a network because of foreign key constraints */
-	NetworkInfo netInfo(0, "test3Name", "test3Description",  0);
+	NetworkInfo netInfo(0, "test3Name", "test3Description");
 	NetworkDao networkDao (dbInfo);
 	networkDao.addNetwork(netInfo);
 
@@ -108,7 +108,7 @@ void TestNetworkDaoThread::testAddNeuronGroup(){
 	/* Add network to get a valid id.
 	    Slightly sloppy to use the network dao method, but it has been tested elsewhere
 		and we need a network because of foreign key constraints */
-	NetworkInfo netInfo(0, "test2Name","test3Description", 0);
+	NetworkInfo netInfo(0, "test2Name","test3Description");
 	NetworkDao networkDao(dbInfo);
 	networkDao.addNetwork(netInfo);
 
