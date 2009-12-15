@@ -40,6 +40,50 @@ void TestAnalysisDao::testAddAnalysis(){
 
 }
 
+
+void TestAnalysisDao::testDeleteAnalysis(){
+    //Add test analysis
+    addTestAnalysis1();
+
+    //Check analysis has been added
+    QSqlQuery query = getAnalysisQuery("SELECT * FROM Analyses WHERE AnalysisID=" + QString::number(testAnalysis1ID));
+    executeQuery(query);
+    QCOMPARE(query.size(), (int)1);
+
+    //Invoke method to delete analysis
+    AnalysisDao anaDao(analysisDBInfo);
+    anaDao.deleteAnalysis(testAnalysis1ID);
+
+    //Check analysis has been deleted
+    query = getAnalysisQuery("SELECT * FROM Analyses WHERE AnalysisID=" + QString::number(testAnalysis1ID));
+    executeQuery(query);
+    QCOMPARE(query.size(), (int)0);
+}
+
+
+void TestAnalysisDao::testGetAnalysesInfo(){
+    //Add test analysis
+    addTestAnalysis1();
+
+    //Invoke method to get a list of analyses
+    try{
+	AnalysisDao anaDao(analysisDBInfo);
+	QList<AnalysisInfo> analysisInfoList = anaDao.getAnalysesInfo(testNetID, testArchive1ID);
+
+	//Check correct information has been returned
+	QCOMPARE(analysisInfoList.size(), (int)1);
+	QCOMPARE(analysisInfoList.at(0).getID(), testAnalysis1ID);
+	QCOMPARE(analysisInfoList.at(0).getDescription(), QString("test analysis description"));
+	QCOMPARE(analysisInfoList.at(0).getNetworkID(), testNetID);
+	QCOMPARE(analysisInfoList.at(0).getArchiveID(), testArchive1ID);
+    }
+    catch(SpikeStreamException& ex){
+	QFAIL(ex.getMessage().toAscii());
+    }
+}
+
+
+
 void TestAnalysisDao::testUpdateDescription(){
     try{
 	//Add test analysis. This has description "test analysis description"
@@ -61,8 +105,4 @@ void TestAnalysisDao::testUpdateDescription(){
 }
 
 
-
-void TestAnalysisDao::testGetAnalysesTableModel(){
-
-}
 

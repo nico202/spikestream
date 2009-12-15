@@ -169,7 +169,7 @@ void NetworksWidget::loadNetworkList(){
 
 	//Set labels and buttons depending on whether it is the current network
 	if(currentNetworkID == networkInfoList[i].getID()){
-	    if(networkInfoList[i].isLocked()){
+	    if(Globals::getArchiveDao()->networkIsLocked(currentNetworkID)){
 		idLabel->setStyleSheet( "QLabel { color: #F08080; font-weight: bold; font-style: italic; }");
 		nameLabel->setStyleSheet( "QLabel { color: #F08080; font-weight: bold; font-style: italic; }");
 		descriptionLabel->setStyleSheet( "QLabel { color: #F08080; font-weight: bold; font-style: italic; }");
@@ -181,7 +181,7 @@ void NetworksWidget::loadNetworkList(){
 	    }
 	    loadButton->setEnabled(false);
 	}
-	else if (networkInfoList[i].isLocked()) {
+	else if (Globals::getArchiveDao()->networkIsLocked(currentNetworkID)) {
 	    idLabel->setStyleSheet( "QLabel { color: #777777; font-style: italic; }");
 	    nameLabel->setStyleSheet( "QLabel { color: #777777; font-style: italic; }");
 	    descriptionLabel->setStyleSheet( "QLabel { color: #777777; font-style: italic; }");
@@ -233,7 +233,7 @@ void NetworksWidget::loadNetwork(NetworkInfo& netInfo){
 	   Network is set to null because an exception thrown during construction
 	   prevents object being created */
 	newNetwork = NULL;
-	newNetwork = new Network(netInfo, Globals::getNetworkDao());
+	newNetwork = new Network(netInfo, Globals::getNetworkDao(), Globals::getArchiveDao());
 
 	//Start network loading, all the heavy work is done by separate threads
 	newNetwork->load();

@@ -2,17 +2,12 @@
 #define STATEBASEDPHIANALYSISDAODUCK_H
 
 //SpikeStream includes
+#include "Complex.h"
 #include "StateBasedPhiAnalysisDao.h"
 using namespace spikestream;
 
 //Qt includes
 #include <QList>
-
-/*! Holds information about a complex */
-struct Complex {
-    QList<unsigned int> neuronIDs;
-    double phi;
-};
 
 
 /*! Class injected for testing into SubsetManager */

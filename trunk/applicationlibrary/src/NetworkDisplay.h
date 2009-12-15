@@ -20,12 +20,16 @@ namespace spikestream {
 	public:
 	    NetworkDisplay();
 	    ~NetworkDisplay();
+
+	    void addHighlightNeurons(const QList<unsigned int>& neuronIDs, RGBColor* color);
+	    void removeHighlightNeurons(const QList<unsigned int>& neuronIDs);
 	    void clearNeuronColorMap();
 	    bool connectionGroupVisible(unsigned int connGrpID);
 	    unsigned int getConnectionMode() { return connectionMode; }
 	    QHash<unsigned int, RGBColor*>& getNeuronColorMap() { return *neuronColorMap; }
 	    RGBColor* getDefaultNeuronColor() { return &defaultNeuronColor; }
 	    RGBColor* getFiringNeuronColor() { return &firingNeuronColor; }
+	    RGBColor* getHighlightNeuronColor() { return &highlightNeuronColor; }
 	    RGBColor& getSingleNeuronColor() { return singleNeuronColor; }
 	    RGBColor& getToNeuronColor() { return toNeuronColor; }
 	    RGBColor* getNegativeConnectionColor(){ return &negativeConnectionColor; }
@@ -112,6 +116,9 @@ namespace spikestream {
 
 	    /*! Color of a firing neuron during archive playback */
 	    RGBColor firingNeuronColor;
+
+	    /*! Default color for highlighting a neuron */
+	    RGBColor highlightNeuronColor;
 
 	    /*! Map recording the addresses of default colors, so that they don't get deleted
 		when the neuron color map is cleared. */

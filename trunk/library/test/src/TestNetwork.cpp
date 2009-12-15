@@ -11,7 +11,8 @@ void TestNetwork::testGetBoundingBox(){
     addTestNetwork1();
 
     NetworkDao networkDao(dbInfo);
-    Network network(NetworkInfo(testNetID, "undefined net name", "undefined net description", 0), &networkDao);
+    ArchiveDao archiveDao(archiveDBInfo);
+    Network network(NetworkInfo(testNetID, "undefined net name", "undefined net description"), &networkDao, &archiveDao);
 
     //Check bounding box around neuron group 1
     Box box = network.getBoundingBox();

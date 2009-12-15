@@ -2,6 +2,7 @@
 #define STATEBASEDPHIANALYSISDAO_H
 
 #include "AnalysisDao.h"
+#include "Complex.h"
 #include "DBInfo.h"
 using namespace spikestream;
 
@@ -16,7 +17,7 @@ namespace spikestream {
 	    virtual void addComplex(unsigned int analysisID, int timeStep, QList<unsigned int>& neuronIDList, double phi);
 	    void deleteTimeSteps(unsigned int firstTimeStep, unsigned int lastTimeStep);
 	    int getComplexCount(unsigned int analysisID, unsigned int firstTimeStep, unsigned int lastTimeStep);
-	    QSqlQueryModel* getStateBasedPhiDataTableModel(unsigned int analysisID);
+	    QList<Complex> getComplexes(unsigned int analysisID);
     };
 
 }

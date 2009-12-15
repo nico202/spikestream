@@ -3,6 +3,7 @@
 using namespace spikestream;
 
 //Declare static variables
+unsigned int Globals::analysisID = 0;
 AnalysisDao* Globals::analysisDao = NULL;
 Archive* Globals::archive = NULL;
 ArchiveDao* Globals::archiveDao = NULL;
@@ -18,6 +19,14 @@ QString Globals::workingDirectory = "";
 /*---------------------------------------------------------------------------------*/
 /*----------                  PUBLIC METHODS                          -------------*/
 /*---------------------------------------------------------------------------------*/
+
+/*! Returns true if an analysis is loaded */
+bool Globals::analysisLoaded(){
+    if(analysisID == 0)
+	return false;
+    return true;
+}
+
 
 /*! Returns true if an archive is loaded.
     Should always check with this method before requesting the archive because it
@@ -116,6 +125,12 @@ bool Globals::networkLoaded(){
 /*! Returns true if OpenGL rendering is in progress */
 bool Globals::isRendering() {
     return rendering;
+}
+
+
+/*! Sets the analysis id. An id of 0 indicates that no analysis is loaded. */
+void Globals::setAnalysisID(unsigned int id){
+    Globals::analysisID = id;
 }
 
 

@@ -4,6 +4,8 @@
 //SpikeStream includes
 #include "AnalysisInfo.h"
 #include "AnalysisRunner.h"
+#include "FullResultsModel.h"
+#include "FullResultsTableView.h"
 #include "ProgressWidget.h"
 #include "StateBasedPhiAnalysisDao.h"
 using namespace spikestream;
@@ -73,9 +75,11 @@ namespace spikestream {
 		/*! Displays progress bars for each of the threads analyzing time steps */
 		ProgressWidget* progressWidget;
 
+		/*! Model for displaying table of results */
+		FullResultsModel* fullResultsModel;
+
 
 		//=====================  METHODS  =======================
-		bool analysisLoaded();
 		QStringList getTimeStepList(unsigned int min, unsigned int max);
 		QToolBar* getToolBar();
 		void initializeAnalysisInfo();

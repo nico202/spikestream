@@ -22,8 +22,8 @@ StateBasedPhiAnalysisDaoDuck::~StateBasedPhiAnalysisDaoDuck(){
 /*! Instead of storing complex in database the complex is stored in a list for testing */
 void StateBasedPhiAnalysisDaoDuck::addComplex(unsigned int, int, QList<unsigned int>& neuronIDList, double phi){
     Complex cmplx;
-    cmplx.neuronIDs = neuronIDList;
-    cmplx.phi = phi;
+    cmplx.setNeuronIDs(neuronIDList);
+    cmplx.setPhi(phi);
     complexList.append(cmplx);
 }
 

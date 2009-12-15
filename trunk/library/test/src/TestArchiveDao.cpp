@@ -202,4 +202,19 @@ void TestArchiveDao::testGetMaxTimeStep(){
 }
 
 
+void TestArchiveDao::testNetworkIsLocked(){
+    //Add test network without any archive data
+    addTestNetwork1();
+
+    //Network should be unlocked
+    ArchiveDao archiveDao(archiveDBInfo);
+    QCOMPARE(archiveDao.networkIsLocked(testNetID), false);
+
+    //Add archive
+    addTestArchive2();
+
+    //Network should be locked
+    QCOMPARE(archiveDao.networkIsLocked(testNetID), true);
+}
+
 

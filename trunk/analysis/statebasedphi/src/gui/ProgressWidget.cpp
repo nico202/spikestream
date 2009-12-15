@@ -3,7 +3,6 @@ using namespace spikestream;
 
 //Qt includes
 #include <QDebug>
-#include <QLabel>
 #include <QMutexLocker>
 
 /*! Constructor */
@@ -36,8 +35,13 @@ void ProgressWidget::reset(){
 	if(bar !=0){
 	    bar->widget()->deleteLater();
 	}
+	QLayoutItem* details = gridLayout->itemAtPosition(row, 2);
+	if(details !=0){
+	    details->widget()->deleteLater();
+	}
     }
     progressBarMap.clear();
+    progressDetailsMap.clear();
 }
 
 
@@ -60,8 +64,8 @@ void ProgressWidget::updateProgress(const QString& msg, unsigned int timeStep, u
 
     //Check to see if we have a progress bar for this time step
     if(progressBarMap.contains(timeStep)){
-	qDebug()<<"TIME STEP: "<<timeStep<<" STEPS COMPLETED: "<<stepsCompleted<<" TOTAL STEPS: "<<totalSteps;
 	progressBarMap[timeStep]->setValue(stepsCompleted);
+	progressDetailsMap[timeStep]->setText(msg);
     }
     //Add new progress bar
     else{
@@ -80,6 +84,7 @@ void ProgressWidget::addProgressBar(unsigned int timeStep, unsigned int min, uns
 	return;
     }
 
+    //Progress bar
     QProgressBar* progBar = new QProgressBar();
     progBar->setMinimumSize(100, 15);
     progBar->setBaseSize(100, 15);
@@ -88,6 +93,13 @@ void ProgressWidget::addProgressBar(unsigned int timeStep, unsigned int min, uns
     gridLayout->addWidget(new QLabel("Time step " + QString::number(timeStep) + ": "), progressBarMap.size(), 0);
     gridLayout->addWidget(progBar, progressBarMap.size(), 1);
     progressBarMap[timeStep] = progBar;
+
+    //Progress details
+    QLabel* progDetails = new QLabel();
+    progDetails->setMinimumSize(250, 15);
+    progDetails->setBaseSize(250, 15);
+    gridLayout->addWidget(progDetails, progressDetailsMap.size(), 2);
+    progressDetailsMap[timeStep] = progDetails;
 }
 
 

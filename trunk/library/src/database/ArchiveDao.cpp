@@ -32,7 +32,7 @@ void ArchiveDao::addArchive(ArchiveInfo& archInfo){
 }
 
 
-/*! Adds data to the archive with the specified ID */
+/*! Adds data to the archive with the specified ID.*/
 void ArchiveDao::addArchiveData(unsigned int archiveID, unsigned int timeStep, const QString& firingNeuronString){
     executeQuery("INSERT INTO ArchiveData(ArchiveID, TimeStep, FiringNeurons) VALUES (" + QString::number(archiveID) + ", " + QString::number(timeStep) + ", '"  + firingNeuronString + "')");
 }
@@ -103,7 +103,7 @@ QStringList ArchiveDao::getFiringNeuronIDs(unsigned int archiveID, unsigned int 
 
     //Return the list of firing neuron ids
     query.next();
-    return query.value(0).toString().split(",");
+    return query.value(0).toString().split(",", QString::SkipEmptyParts);
 }
 
 
@@ -114,8 +114,8 @@ bool ArchiveDao::networkIsLocked(unsigned int networkID){
     executeQuery(query);
     query.next();
     if(query.value(0).toUInt() == 0)
-        return true;
-    return false;
+	return false;
+    return true;
 }
 
 

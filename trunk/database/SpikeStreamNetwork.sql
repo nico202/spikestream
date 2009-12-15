@@ -16,7 +16,6 @@ CREATE TABLE Networks (
     NetworkID SMALLINT NOT NULL AUTO_INCREMENT,
     Name CHAR(250) NOT NULL DEFAULT "Untitled",
     Description CHAR(250) NOT NULL DEFAULT "Untitled",
-	Locked BOOLEAN NOT NULL DEFAULT 0,/*Set to true when the network is associated with archived simulation run data */
     PRIMARY KEY (NetworkID),
     INDEX NetworkIDIndex(NetworkID)
 )

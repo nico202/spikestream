@@ -33,6 +33,7 @@ namespace spikestream {
 	    void loadWeightlessNeurons();
 	    void setWeightlessNeuronMap(QHash<unsigned int, WeightlessNeuron*> newMap);
 	    void setFiringNeuronMap(QHash<unsigned int, bool> newMap);
+	    void setStop(const bool* stop) { this->stop = stop; }
 
 	signals:
 	    void complexFound();

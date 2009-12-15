@@ -26,11 +26,11 @@ namespace spikestream {
 	Q_OBJECT
 
 	public:
-            Network(NetworkDao* networkDao, ArchiveDao* archiveDao, const QString& name, const QString& description);
-            Network(const NetworkInfo& networkInfo, NetworkDao* networkDao, ArchiveDao* archiveDao);
+	    Network(NetworkDao* networkDao, ArchiveDao* archiveDao, const QString& name, const QString& description);
+	    Network(const NetworkInfo& networkInfo, NetworkDao* networkDao, ArchiveDao* archiveDao);
 	    ~Network();
 
-	    void addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList);
+	    void addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList, bool checkNetworkLocked=true);
 	    void addNeuronGroups(QList<NeuronGroup*>& neuronGroupList);
 	    void cancel();
 	    void clearError() { error = false; errorMessage = ""; }
@@ -55,7 +55,7 @@ namespace spikestream {
 	    QList<NeuronGroupInfo> getNeuronGroupsInfo();
 	    bool isBusy();
 	    bool isError() { return error; }
-	    bool isLocked() { return info.isLocked(); }
+	    bool isLocked();
 	    void load();
 	    bool neuronGroupIsLoaded(unsigned int neurGrpID);
 	    void setNetworkDao(NetworkDao* netDao) { this->networkDao = netDao; }
@@ -78,7 +78,10 @@ namespace spikestream {
 		NOTE: This will have to be changed if the network is passed between threads. */
 	    NetworkDao* networkDao;
 
-            ArchiveDao* archiveDao;
+	    /*! Access to the database layer. Stored here to enable network to prevent modifications
+		if it is associated with archives.
+		NOTE: This will have to be changed if the network is passed between threads. */
+	    ArchiveDao* archiveDao;
 
 	    /*! Hash map of the neuron groups in the network */
 	    QHash<unsigned int, NeuronGroup*> neurGrpMap;

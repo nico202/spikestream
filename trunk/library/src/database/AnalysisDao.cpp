@@ -2,6 +2,8 @@
 #include "AnalysisDao.h"
 #include "GlobalVariables.h"
 #include "SpikeStreamDBException.h"
+#include "Util.h"
+#include "XMLParameterParser.h"
 using namespace spikestream;
 
 //Qt includes
@@ -44,14 +46,38 @@ void AnalysisDao::addAnalysis(AnalysisInfo& analysisInfo){
 }
 
 
-/*! Returns a table model describing all of the analyses for the specified network and archive */
-QSqlQueryModel* AnalysisDao::getAnalysesTableModel(unsigned int networkID, unsigned int archiveID){
-    QSqlQueryModel *model = new QSqlQueryModel;
-    QString queryString = "SELECT AnalysisID, FROM_UNIXTIME(StartTime), Description, Parameters, AnalysisTypeID FROM Analyses WHERE NetworkID=" + QString::number(networkID) + " AND ArchiveID=" + QString::number(archiveID);
-    QSqlQuery query = getQuery(queryString);
+/*! Deletes the analysis with the specified ID. Does nothing if no analysis with this ID is in the database */
+void AnalysisDao::deleteAnalysis(unsigned int analysisID){
+    executeQuery("DELETE FROM Analyses WHERE AnalysisID = " + QString::number(analysisID));
+}
+
+
+/*! Returns a list of information about analyses matching the network and archive ID */
+QList<AnalysisInfo> AnalysisDao::getAnalysesInfo(unsigned int networkID, unsigned int archiveID){
+    QSqlQuery query = getQuery("SELECT AnalysisID, StartTime, Description, Parameters, AnalysisTypeID FROM Analyses WHERE NetworkID=" + QString::number(networkID) + " AND ArchiveID=" + QString::number(archiveID));
     executeQuery(query);
-    model->setQuery(query);
-    return model;
+    QList<AnalysisInfo> tmpList;
+    for(int i=0; i<query.size(); ++i){
+	query.next();
+
+	//Extract the parameters
+	XMLParameterParser parser;
+	QHash<QString, double> paramMap = parser.getParameterMap(query.value(3).toString());
+
+	//Create the analysis info and add it to the list
+	tmpList.append(
+		AnalysisInfo(
+			Util::getUInt(query.value(0).toString()),//AnalysisID
+			networkID,
+			archiveID,
+			QDateTime::fromTime_t(Util::getUInt(query.value(1).toString())),//Date time
+			query.value(2).toString(),//Description
+			paramMap,//Parameter map
+			Util::getUInt(query.value(4).toString())//Analysis type
+		)
+	);
+    }
+    return tmpList;
 }
 
 

@@ -12,7 +12,8 @@ INCLUDEPATH += src \
 		$(SPIKESTREAM_ROOT)/library/include \
 		$(SPIKESTREAM_ROOT)/testlibrary/include \
 		$(SPIKESTREAM_ROOT)/analysis/statebasedphi/src/database \
-		$(SPIKESTREAM_ROOT)/analysis/statebasedphi/src/analysis
+		$(SPIKESTREAM_ROOT)/analysis/statebasedphi/src/analysis \
+		$(SPIKESTREAM_ROOT)/analysis/statebasedphi/src/models
 
 LIBS += -lstatebasedphi -L$(SPIKESTREAM_ROOT)/plugins/analysis -lspikestreamtest -L$(SPIKESTREAM_ROOT)/lib
 

@@ -14,7 +14,8 @@ namespace spikestream {
 	    virtual ~AnalysisDao();
 
 	    void addAnalysis(AnalysisInfo& analysisInfo);
-	    QSqlQueryModel* getAnalysesTableModel(unsigned int networkID, unsigned int archiveID);
+	    void deleteAnalysis(unsigned int analysisID);
+	    QList<AnalysisInfo> getAnalysesInfo(unsigned int networkID, unsigned int archiveID);
 	    void updateDescription(unsigned int analysisID, const QString& description);
 
     };

@@ -78,8 +78,8 @@ void TestPhiCalculator::testGetCausalProbability(){
     QHash<unsigned int, WeightlessNeuron*> weightlessNeuronMap;
     weightlessNeuronMap[1] = new WeightlessNeuron(conMap, 0);
     weightlessNeuronMap[2] = new WeightlessNeuron(conMap, 0);
-    conMap[1][0] = 0;
-    conMap[2][0] = 1;
+    conMap[1].append(0);
+    conMap[2].append(1);
     weightlessNeuronMap[3] = new WeightlessNeuron(conMap, 0);
 
     //Add two pieces of training data to n3

@@ -2,6 +2,7 @@
 #define PROGRESSWIDGET_H
 
 //Qt includes
+#include <QLabel>
 #include <QLayout>
 #include <QHash>
 #include <QProgressBar>
@@ -28,6 +29,9 @@ namespace spikestream {
 	    //===================  VARIABLES  ======================
 	    /*! Holds a reference to each progress bar to update the progress */
 	    QHash<unsigned int, QProgressBar*> progressBarMap;
+
+	    /*! Holds a reference to each progress details label to update the progress */
+	    QHash<unsigned int, QLabel*> progressDetailsMap;
 
 	    /*! The layout organizing the widget */
 	    QGridLayout* gridLayout;

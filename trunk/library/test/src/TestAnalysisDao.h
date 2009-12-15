@@ -13,7 +13,8 @@ class TestAnalysisDao : public TestDao {
 
 	private slots:
 	    void testAddAnalysis();
-	    void testGetAnalysesTableModel();
+	    void testDeleteAnalysis();
+	    void testGetAnalysesInfo();
 	    void testUpdateDescription();
 };
 

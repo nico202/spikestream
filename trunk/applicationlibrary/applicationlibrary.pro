@@ -10,7 +10,7 @@ OBJECTS_DIR = build/objects
 
 MOC_DIR = build/moc
 
-LIBS += -lqwt -L/usr/local/qwt-5.2.0/lib \
+LIBS += -lqwt -L/usr/local/qwt/lib \
 	-lspikestream -L$(SPIKESTREAM_ROOT)/lib \
 	-lgmp
 
@@ -96,20 +96,24 @@ SOURCES += src/exceptions/NRMException.cpp
 #----------------------------------------------#
 HEADERS += src/models/NeuronGroupModel.h \
 	    src/models/ConnectionGroupModel.h \
-	    src/models/ConnectionsModel.h
+	    src/models/ConnectionsModel.h \
+	    src/models/AnalysesModel.h
 SOURCES += src/models/NeuronGroupModel.cpp \
 	    src/models/ConnectionGroupModel.cpp \
-	    src/models/ConnectionsModel.cpp
+	    src/models/ConnectionsModel.cpp \
+	    src/models/AnalysesModel.cpp
 
 #----------------------------------------------#
 #---              views folder             ---#
 #----------------------------------------------#
 HEADERS += src/views/NeuronGroupTableView.h \
 	    src/views/ConnectionGroupTableView.h \
-	    src/views/ConnectionsTableView.h
+	    src/views/ConnectionsTableView.h \
+	    src/views/AnalysesTableView.h
 SOURCES += src/views/NeuronGroupTableView.cpp \
 	    src/views/ConnectionGroupTableView.cpp \
-	    src/views/ConnectionsTableView.cpp
+	    src/views/ConnectionsTableView.cpp \
+	    src/views/AnalysesTableView.cpp
 
 #----------------------------------------------#
 #---              widgets folder            ---#
@@ -136,7 +140,8 @@ HEADERS += src/SpikeStreamApplication.h \
 	   src/EventRouter.h \
 	   src/NetworkViewer_V2.h \
 	   src/NetworkDisplay.h \
-	   src/ArchivePlayerThread.h
+	   src/ArchivePlayerThread.h \
+	   src/NetworksBuilder.h
 
 SOURCES += src/SpikeStreamApplication.cpp \
 	   src/SpikeStreamMainWindow.cpp \
@@ -146,4 +151,5 @@ SOURCES += src/SpikeStreamApplication.cpp \
 	   src/EventRouter.cpp \
 	   src/NetworkViewer_V2.cpp \
 	   src/NetworkDisplay.cpp \
-	   src/ArchivePlayerThread.cpp
+	   src/ArchivePlayerThread.cpp \
+	   src/NetworksBuilder.cpp

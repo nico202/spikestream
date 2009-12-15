@@ -3,6 +3,7 @@
 
 //SpikeStream includes
 #include "NetworkDaoThread.h"
+#include "NetworksBuilder.h"
 using namespace spikestream;
 
 //Qt includes
@@ -10,7 +11,7 @@ using namespace spikestream;
 
 namespace spikestream {
 
-    class TononiNetworkBuilder {
+    class TononiNetworkBuilder : public NetworksBuilder {
 	public:
 	    TononiNetworkBuilder();
 	    ~TononiNetworkBuilder();
@@ -18,7 +19,7 @@ namespace spikestream {
 
 	private:
 	    //===================  METHODS  ======================
-	    void runThread(NetworkDaoThread& thread);
+
     };
 
 }

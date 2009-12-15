@@ -125,10 +125,11 @@ bool TestSubsetManager::complexExists(QList<Complex>& complexList, const QString
     foreach(Complex complex, complexList){
 	//Check phi and neuron ids
 	//Ignore subsets that are the wrong size
-	if( (complex.phi == phi) && (complex.neuronIDs.size() == neuronIDMap.size()) ){
+	if( (complex.getPhi() == phi) && (complex.getNeuronIDs().size() == neuronIDMap.size()) ){
 	    //Check that all of the neurons in the subset are in the map
 	    bool match = true;
-	    foreach(unsigned int cmplxNeurID, complex.neuronIDs){
+	    QList<unsigned int> neurIDList = complex.getNeuronIDs();
+	    foreach(unsigned int cmplxNeurID, neurIDList){
 		if(!neuronIDMap.contains(cmplxNeurID)){
 		    match = false;
 		    break;

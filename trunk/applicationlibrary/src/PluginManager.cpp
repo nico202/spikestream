@@ -63,7 +63,7 @@ void PluginManager::loadPlugins(){
 	void *hndl = dlopen(filePath.toStdString().data(), RTLD_NOW);
 	if(hndl == NULL){
 	    QString errorString(dlerror());
-	    throw SpikeStreamException("Cannot open plugin file path. Error: " + errorString);
+	    qCritical()<<"Cannot open plugin file path. Error: "<<errorString;
 	}
 
 	//Get functions to create the widget and to get the widget's name

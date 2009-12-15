@@ -267,7 +267,7 @@ void NRMDataImporter::addConnections(){
     }
     else{
 	//Add connections to network
-	network->addConnectionGroups(newConnectionGrpsList);
+	network->addConnectionGroups(newConnectionGrpsList, false);
     }
 }
 

@@ -10,7 +10,6 @@ OBJECTS_DIR = build/objects
 
 MOC_DIR = build/moc
 
-
 CONFIG += debug \
 	  warn_on \
 	  qt \
@@ -24,12 +23,16 @@ QT += xml opengl qt3support sql
 INCLUDEPATH += src \
 		src/database \
 		src/analysis \
+		src/models \
+		src/views \
 		$(SPIKESTREAM_ROOT)/library/include \
 		$(SPIKESTREAM_ROOT)/applicationlibrary/src \
 		$(SPIKESTREAM_ROOT)/applicationlibrary/src/widgets \
-		$(SPIKESTREAM_ROOT)/applicationlibrary/src/dialogs
+		$(SPIKESTREAM_ROOT)/applicationlibrary/src/dialogs \
+		$(SPIKESTREAM_ROOT)/applicationlibrary/src/models \
+		$(SPIKESTREAM_ROOT)/applicationlibrary/src/views
 
-LIBS += -L$(SPIKESTREAM_ROOT)/lib -lspikestream -lspikestreamapplication
+LIBS += -lgmpxx -L$(SPIKESTREAM_ROOT)/lib -lspikestream -lspikestreamapplication
 
 
 HEADERS = src/gui/StateBasedPhiWidget.h \
@@ -53,6 +56,17 @@ SOURCES = src/gui/StateBasedPhiWidget.cpp \
 	    src/analysis/SubsetManager.cpp \
 	    src/analysis/Subset.cpp \
 	    src/analysis/ProbabilityTable.cpp
+
+
+#==================  MODELS  =====================
+HEADERS += src/models/FullResultsModel.h \
+	    src/models/Complex.h
+SOURCES += src/models/FullResultsModel.cpp \
+	    src/models/Complex.cpp
+
+#==================  VIEWS  =====================
+HEADERS += src/views/FullResultsTableView.h
+SOURCES += src/views/FullResultsTableView.cpp
 
 
 

@@ -1,14 +1,16 @@
 #include "Globals.h"
 #include "LoadAnalysisDialog.h"
 #include "Util.h"
-#include "XMLParameterParser.h"
+#include "SpikeStreamException.h"
 using namespace spikestream;
 
 //Qt includes
 #include <QDebug>
 #include <QLayout>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QItemSelectionModel>
+
 
 /*! Constructor */
 LoadAnalysisDialog::LoadAnalysisDialog(QWidget* parent) : QDialog(parent) {
@@ -20,33 +22,24 @@ LoadAnalysisDialog::LoadAnalysisDialog(QWidget* parent) : QDialog(parent) {
 
     QVBoxLayout *mainVerticalBox = new QVBoxLayout(this);
 
-    //Add the table view displaying the current analysis
-    analysisTableView = new QTableView();
-    unsigned int networkID = Globals::getNetwork()->getID();
-    unsigned int archiveID = Globals::getArchive()->getID();
-    model = Globals::getAnalysisDao()->getAnalysesTableModel(networkID, archiveID);
-    analysisTableView->setModel(model);
-    this->setMinimumWidth(400);//FIXME -THIS DOES NOT SEEM TO WORK
+    //Create model and add view
+    analysesModel = new AnalysesModel();
+    QTableView* analysesTableView = new AnalysesTableView(analysesModel);
+    analysesTableView->setMinimumSize(600, 300);
+    mainVerticalBox->addWidget(analysesTableView);
 
-    //Select the first row
-    selectionModel = analysisTableView->selectionModel();
-    QModelIndex firstCellIndex = model->index(0, 0, QModelIndex());
-    QItemSelection selection(firstCellIndex, firstCellIndex);
-    selectionModel->select(selection, QItemSelectionModel::Select | QItemSelectionModel::Rows);
-
-    //Listen for changes to implement row selection
-    connect(selectionModel, SIGNAL(currentChanged (const QModelIndex &, const QModelIndex &)), this, SLOT(selectionChanged( const QModelIndex &, const QModelIndex & )));
-
-    mainVerticalBox->addWidget(analysisTableView);
-
-    QHBoxLayout *okCanButtonBox = new QHBoxLayout();
-    QPushButton *okPushButton = new QPushButton("Ok", this, "okButton");
-    QPushButton *cancelPushButton = new QPushButton("Cancel", this, "cancelButton");
-    okCanButtonBox->addWidget(okPushButton);
-    okCanButtonBox->addWidget(cancelPushButton);
-    mainVerticalBox->addLayout(okCanButtonBox);
+    //Add buttons
+    QHBoxLayout* buttonBox = new QHBoxLayout();
+    QPushButton* okPushButton = new QPushButton("Ok");
+    buttonBox->addWidget(okPushButton);
+    QPushButton* deletePushButton = new QPushButton("Delete selected analyses");
+    buttonBox->addWidget(deletePushButton);
+    QPushButton* cancelPushButton = new QPushButton("Cancel");
+    buttonBox->addWidget(cancelPushButton);
+    mainVerticalBox->addLayout(buttonBox);
 
     connect (okPushButton, SIGNAL(clicked()), this, SLOT(okButtonPressed()));
+    connect (deletePushButton, SIGNAL(clicked()), this, SLOT(deleteButtonPressed()));
     connect (cancelPushButton, SIGNAL(clicked()), this, SLOT(reject()));
 }
 
@@ -56,59 +49,67 @@ LoadAnalysisDialog::~LoadAnalysisDialog(){
 }
 
 
-void LoadAnalysisDialog::okButtonPressed(){
-    QModelIndexList indexes = analysisTableView->selectionModel()->selectedIndexes();
+/*----------------------------------------------------------*/
+/*-----                PUBLIC METHODS                  -----*/
+/*----------------------------------------------------------*/
 
-    //Check that there is at least one selection
-    if(indexes.size() == 0){
-	qCritical()<<"No analysis selected.";
+/*! Returns the analysis info. This method should not be invoked if the
+    user has cancelled the operation. */
+const AnalysisInfo& LoadAnalysisDialog::getAnalysisInfo(){
+    if(analysisInfo.getID() == 0)
+	throw SpikeStreamException("Analysis info ID is 0. This method should not be called if the user has cancelled selection of analysis.");
+    return analysisInfo;
+}
+
+
+/*----------------------------------------------------------*/
+/*-----                PRIVATE SLOTS                   -----*/
+/*----------------------------------------------------------*/
+
+/*! Stores the currently selected analysis.
+    Produces an error message if the user has not selected a single analysis. */
+void LoadAnalysisDialog::okButtonPressed(){
+    QList<AnalysisInfo> selectedAnalysisList = analysesModel->getSelectedAnalyses();
+
+    //Check that there is exactly one selection
+    if(selectedAnalysisList.size() != 1){
+	qCritical()<<"A single analysis must be selected for loading.";
 	return;
     }
 
-    //Extract the information about the analysis from the model
-    QModelIndex tmpIndex = model->index(indexes[0].row(), 0, QModelIndex());
-    unsigned int analysisID = Util::getUInt(model->data(tmpIndex).toString());
-    tmpIndex = model->index(indexes[0].row(), 1, QModelIndex());
-    QDateTime dateTime = QDateTime::fromString(model->data(tmpIndex).toString());
-    tmpIndex = model->index(indexes[0].row(), 2, QModelIndex());
-    QString description = model->data(tmpIndex).toString();
-    tmpIndex = model->index(indexes[0].row(), 3, QModelIndex());
-    QString paramString = model->data(tmpIndex).toString();
-    QHash<QString, double> paramMap;
-    if(paramString != ""){
-	XMLParameterParser parser;
-	paramMap = parser.getParameterMap(paramString);
-    }
-    tmpIndex = model->index(indexes[0].row(), 4, QModelIndex());
-    unsigned int analysisType = Util::getUInt(model->data(tmpIndex).toString());
-
-    //Create class holding all of this information
-    analysisInfo = AnalysisInfo(
-	analysisID,
-	Globals::getNetwork()->getID(),
-	Globals::getArchive()->getID(),
-	dateTime,
-	description,
-	paramMap,
-	analysisType
-    );
-
+    //Store the selected analysis and accept dialog
+    analysisInfo = selectedAnalysisList.at(0);
     this->accept();
 }
 
 
-void LoadAnalysisDialog::selectionChanged( const QModelIndex & currentIndex, const QModelIndex&){
-    QModelIndex fromIndex = model->index(currentIndex.row(), 0, QModelIndex());
-    QModelIndex toIndex = model->index(currentIndex.row(), 4, QModelIndex());
+/*! Deletes the selected analyses after requesting confirmation from user */
+void LoadAnalysisDialog::deleteButtonPressed(){
+    QList<AnalysisInfo> selectedAnalysisList = analysesModel->getSelectedAnalyses();
 
-    QItemSelection selection(fromIndex, toIndex);
-    selectionModel->select(selection, QItemSelectionModel::Select | QItemSelectionModel::Rows | QItemSelectionModel::Current );
-    qDebug()<<"SELECTION SIZE: "<<selectionModel->selectedIndexes().size();
+    //Check that there is at least one selection
+    if(selectedAnalysisList.size() == 0){
+	return;
+    }
+
+    //Confirm that user wants to delete the analyses
+    QMessageBox msgBox;
+    msgBox.setText("Deleting Analyses");
+    msgBox.setInformativeText("Are you sure that you want to delete " + QString::number(selectedAnalysisList.size()) + " analyses? This step cannot be undone.");
+    msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+    msgBox.setDefaultButton(QMessageBox::Cancel);
+    int ret = msgBox.exec();
+    if(ret != QMessageBox::Ok)
+	return;
+
+    //Delete the analyses
+    foreach(AnalysisInfo anaInfo, selectedAnalysisList){
+	Globals::getAnalysisDao()->deleteAnalysis(anaInfo.getID());
+    }
+
+    //Reload the model
+    analysesModel->reload();
 }
 
-
-const AnalysisInfo& LoadAnalysisDialog::getAnalysisInfo(){
-    return analysisInfo;
-}
 
 
