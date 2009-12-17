@@ -18,12 +18,15 @@ ConnectionGroup::~ConnectionGroup(){
 
 
 /*! Adds a connection to the group */
-void ConnectionGroup::addConnection(Connection* newConn){
+Connection* ConnectionGroup::addConnection(Connection* newConn){
     connectionList.append(newConn);
 
     //Store connection data in easy to access format
     fromConnectionMap[newConn->fromNeuronID].append(newConn);
     toConnectionMap[newConn->toNeuronID].append(newConn);
+
+    //Return pointer to connection
+    return newConn;
 }
 
 

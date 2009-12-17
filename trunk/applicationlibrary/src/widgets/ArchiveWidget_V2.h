@@ -19,7 +19,7 @@ namespace spikestream{
 	Q_OBJECT
 
 	public:
-	    ArchiveWidget_V2(QWidget* parent);
+	    ArchiveWidget_V2(QWidget* parent=0);
 	    ~ArchiveWidget_V2();
 
 	signals:

@@ -16,7 +16,7 @@ namespace spikestream {
 	    ~ConnectionGroup();
 	    void clearConnections();
 
-	    void addConnection(Connection* newConn);
+	    Connection* addConnection(Connection* newConn);
 	    ConnectionList::const_iterator begin();
 	    ConnectionList::const_iterator end();
 	    ConnectionList getConnections() { return connectionList; }

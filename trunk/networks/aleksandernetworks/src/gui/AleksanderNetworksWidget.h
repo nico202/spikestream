@@ -6,8 +6,11 @@
 using namespace spikestream;
 
 //Qt includes
-#include <QWidget>
+#include <QLayout>
 #include <QLineEdit>
+#include <QPushButton>
+#include <QString>
+#include <QWidget>
 
 namespace spikestream {
 
@@ -19,7 +22,7 @@ namespace spikestream {
 	    ~AleksanderNetworksWidget();
 
 	private slots:
-	    void add4NeuronNetworks1();
+	    void addNetwork();
 
 	private:
 	    //======================  VARIABLES  =======================
@@ -30,6 +33,8 @@ namespace spikestream {
 	    QLineEdit* networkName;
 
 	    //======================  METHODS  =========================
+	    QPushButton* addNetworkButton(QGridLayout* gridLayout, const QString& description);
+	    QString getNetworkName();
     };
 
 }

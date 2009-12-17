@@ -1,6 +1,7 @@
 //SpikeStream includes
 #include "FullResultsModel.h"
 #include "Globals.h"
+#include "SpikeStreamException.h"
 using namespace spikestream;
 
 //Qt includes
@@ -12,6 +13,9 @@ FullResultsModel::FullResultsModel(const AnalysisInfo* analysisInfo, StateBasedP
     //Store references
     this->analysisInfo = analysisInfo;
     this->stateDao = stateDao;
+
+    //initialise variables
+    complexDisplayIndex = -1;
 }
 
 
@@ -60,7 +64,7 @@ QVariant FullResultsModel::data(const QModelIndex & index, int role) const{
 
     if (role == Qt::DecorationRole){
 	if(index.column() == viewCol ){
-	    if( complexDisplayMap.contains( complexList.at(index.row()).getID() ) )
+	    if( complexDisplayIndex == index.row() )
 		return QIcon(Globals::getSpikeStreamRoot() + "/images/visible.xpm");
 	    return QIcon(Globals::getSpikeStreamRoot() + "/images/hidden.xpm");
 	}
@@ -110,11 +114,7 @@ bool FullResultsModel::setData(const QModelIndex& index, const QVariant&, int) {
 
     //Change visibility of complex
     if(index.column() == viewCol){
-	unsigned int tmpComplexID = complexList[index.row()].getID();
-	if(complexDisplayMap.contains(tmpComplexID))
-	    setVisibility(complexList[index.row()], false);
-	else
-	    setVisibility(complexList[index.row()], true);
+	setVisibleComplex(index.row());
 
 	//Emit signal that data has changed and return true to indicate data set succesfully.
 	emit dataChanged(index, index);
@@ -135,18 +135,26 @@ void FullResultsModel::reload(){
 	return;
     }
 
-    //Get the current list of complexes and store ids in a map
+    //Get the current list of complexes
     QList<Complex> newComplexList = stateDao->getComplexes(analysisInfo->getID());
-    QHash<unsigned int, bool> newComplexMap;
-    foreach(Complex tmpCmplx, newComplexList){
-	newComplexMap[tmpCmplx.getID()] = true;
-    }
 
-    //Hide any complexes that are not in the new list
-    foreach(Complex tmpCmplx, complexList){//Work through old complexes
-	//Hide complex if it is being shown and not in the new list
-	if( complexDisplayMap.contains(tmpCmplx.getID()) && !newComplexMap.contains(tmpCmplx.getID()) ){
-	    setVisibility(tmpCmplx, false);
+    //Get Id of currently displayed complex
+    if(complexDisplayIndex > 0){
+	unsigned int visComplexID = complexList[complexDisplayIndex].getID();
+
+	//Determine if this complex is in the new list
+	int newComplexDisplayIndex = -1;
+	for(int i=0; i<newComplexList.size(); ++i){
+	    if(visComplexID == newComplexList[i].getID()){
+		newComplexDisplayIndex = i;
+		break;
+	    }
+	}
+
+	//If complex could not be found, hide complex
+	if(newComplexDisplayIndex < 0){
+	    setVisibility(complexList[complexDisplayIndex], false);
+	    complexDisplayIndex = -1;
 	}
     }
 
@@ -164,28 +172,47 @@ void FullResultsModel::reload(){
 
 /*! Clears all information stored about complexes and resets the highlight map */
 void FullResultsModel::clearComplexes(){
-    //Hide all complexes
-    foreach(Complex tmpCmplx, complexList){
-	setVisibility(tmpCmplx, false);
-    }
+    //Hide visible complex
+    if(complexDisplayIndex > 0)
+	setVisibility(complexList[complexDisplayIndex], false);
 
     //Clean up the data structures
     complexList.clear();
-    complexDisplayMap.clear();
+    complexDisplayIndex = -1;
+}
+
+
+void FullResultsModel::setVisibleComplex(int index){
+    if(index >= complexList.size())
+	throw SpikeStreamException("Complex display index is out of range.");
+
+    //Hide complex if it is already visible
+    if(index == complexDisplayIndex){
+	setVisibility(complexList[complexDisplayIndex], false);
+    }
+    //Hide currently visible complex
+    else if(index < 0 && complexDisplayIndex > 0){
+	setVisibility(complexList[complexDisplayIndex], false);
+	complexDisplayIndex = -1;
+    }
+    //Different column clicked
+    else{
+	setVisibility(complexList[complexDisplayIndex], false);
+	setVisibility(complexList[index], true);
+	complexDisplayIndex = index;
+    }
 }
 
 
 /*! Sets the visibility of the complex with the specified id */
 void FullResultsModel::setVisibility(Complex& complex, bool makeVisible){
-    //Complex is visible and we want to hide it
-    if(complexDisplayMap.contains(complex.getID()) && !makeVisible){
+    //Hide complex
+    if(!makeVisible){
 	Globals::getNetworkDisplay()->removeHighlightNeurons(complex.getNeuronIDs());
-	complexDisplayMap.remove(complex.getID());
     }
-    //Complex is hidden and we want to show it
-    else if(!complexDisplayMap.contains(complex.getID()) && makeVisible){
+    //Show complex
+    else {
 	Globals::getNetworkDisplay()->addHighlightNeurons(complex.getNeuronIDs(), Globals::getNetworkDisplay()->getHighlightNeuronColor());
-	complexDisplayMap[complex.getID()] = true;
     }
 }
 

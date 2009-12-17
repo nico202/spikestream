@@ -60,11 +60,12 @@ StateBasedPhiWidget::StateBasedPhiWidget(QWidget *parent) : QWidget(parent){
     //Add the model and view displaying the current analysis
     fullResultsModel = new FullResultsModel(&analysisInfo, stateDao);
     QTableView* fullResultsTableView = new FullResultsTableView(fullResultsModel);
-    fullResultsTableView->setMinimumSize(500, 300);
+    fullResultsTableView->setMinimumSize(500, 500);
     tabWidget->addTab(fullResultsTableView, "Results");
 
     //Add widget displaying progress
     progressWidget = new ProgressWidget(this);
+    progressWidget->setMinimumSize(500, 500);
     QScrollArea* progressScrollArea = new QScrollArea(this);
     progressScrollArea->setWidget(progressWidget);
     tabWidget->addTab(progressScrollArea, "Progress");
@@ -188,6 +189,9 @@ void StateBasedPhiWidget::newAnalysis(){
 
     //Reload model
     fullResultsModel->reload();
+
+    //Reset progress widget
+    progressWidget->reset();
 }
 
 

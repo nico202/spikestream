@@ -42,12 +42,37 @@ AleksanderNetworksWidget::AleksanderNetworksWidget(){
     gridLayout->addWidget(networkName, 0, 1);
 
     //Add buttons for each network
-    gridLayout->addWidget(new QLabel("Aleksander 4 neuron network 1"), 1, 0);
-    QPushButton* addButton = new QPushButton("Add");
-    addButton->setMaximumSize(120, 30);
-    connect (addButton, SIGNAL(clicked()), this, SLOT(add4NeuronNetworks1()));
-    gridLayout->addWidget(addButton, 1, 1);
+    //Network 1
+    QPushButton* newButton = addNetworkButton(gridLayout, "4 neurons. A<->B; C<->D. AND");
+    connect (newButton, SIGNAL(clicked()), this, SLOT(addNetwork()));
 
+    //Network 2
+    newButton = addNetworkButton(gridLayout, "4 neurons. A<->B; A->C; C<->D. AND");
+    connect (newButton, SIGNAL(clicked()), this, SLOT(addNetwork()));
+
+    newButton = addNetworkButton(gridLayout, "4 neurons. A<->B; A->C; C<->D. XOR");
+    connect (newButton, SIGNAL(clicked()), this, SLOT(addNetwork()));
+
+    //Network 3
+    newButton = addNetworkButton(gridLayout, "4 neurons. A<->B; A<->C; C<->D. AND");
+    connect (newButton, SIGNAL(clicked()), this, SLOT(addNetwork()));
+
+    newButton = addNetworkButton(gridLayout, "4 neurons. A<->B; A<->C; C<->D. XOR");
+    connect (newButton, SIGNAL(clicked()), this, SLOT(addNetwork()));
+
+    //Network 4
+    newButton = addNetworkButton(gridLayout, "4 neurons. A<->B; A<->C; B<->D; C<->D. AND");
+    connect (newButton, SIGNAL(clicked()), this, SLOT(addNetwork()));
+
+    newButton = addNetworkButton(gridLayout, "4 neurons. A<->B; A<->C; B<->D; C<->D. XOR");
+    connect (newButton, SIGNAL(clicked()), this, SLOT(addNetwork()));
+
+    //Network 5
+    newButton = addNetworkButton(gridLayout, "4 neurons. A<->B; A<->C; A<->D; B<->C; B<->D; C<->D. AND");
+    connect (newButton, SIGNAL(clicked()), this, SLOT(addNetwork()));
+
+    newButton = addNetworkButton(gridLayout, "4 neurons. A<->B; A<->C; A<->D; B<->C; B<->D; C<->D. XOR");
+    connect (newButton, SIGNAL(clicked()), this, SLOT(addNetwork()));
 }
 
 
@@ -56,12 +81,39 @@ AleksanderNetworksWidget::~AleksanderNetworksWidget(){
 }
 
 
-void AleksanderNetworksWidget::add4NeuronNetworks1(){
+void AleksanderNetworksWidget::addNetwork(){
+    QString netDesc = sender()->objectName();
     try{
-	QString netName = networkName->text();
-	if(netName == "")
-	    netName = "Unnamed";
-	networkBuilder->add4NeuronNetworks1(netName);
+	if(netDesc == "4 neurons. A<->B; C<->D. AND")
+	    networkBuilder->add4NeuronNetwork1(getNetworkName(), netDesc);
+
+	else if(netDesc == "4 neurons. A<->B; A->C; C<->D. AND")
+	    networkBuilder->add4NeuronNetwork2_AND(getNetworkName(), netDesc);
+
+	else if(netDesc == "4 neurons. A<->B; A->C; C<->D. XOR")
+	    networkBuilder->add4NeuronNetwork2_XOR(getNetworkName(), netDesc);
+
+	else if(netDesc == "4 neurons. A<->B; A<->C; C<->D. AND")
+	    networkBuilder->add4NeuronNetwork3_AND(getNetworkName(), netDesc);
+
+	else if(netDesc == "4 neurons. A<->B; A<->C; C<->D. XOR")
+	    networkBuilder->add4NeuronNetwork3_XOR(getNetworkName(), netDesc);
+
+	else if(netDesc == "4 neurons. A<->B; A<->C; B<->D; C<->D. AND")
+	    networkBuilder->add4NeuronNetwork4_AND(getNetworkName(), netDesc);
+
+	else if(netDesc == "4 neurons. A<->B; A<->C; B<->D; C<->D. XOR")
+	    networkBuilder->add4NeuronNetwork4_XOR(getNetworkName(), netDesc);
+
+	else if(netDesc == "4 neurons. A<->B; A<->C; A<->D; B<->C; B<->D; C<->D. AND")
+	    networkBuilder->add4NeuronNetwork5_AND(getNetworkName(), netDesc);
+
+	else if(netDesc == "4 neurons. A<->B; A<->C; A<->D; B<->C; B<->D; C<->D. XOR")
+	    networkBuilder->add4NeuronNetwork5_XOR(getNetworkName(), netDesc);
+
+	else
+	    throw SpikeStreamException("Network descrption not recognized: " + netDesc);
+
 	Globals::getEventRouter()->reloadSlot();
     }
     catch(SpikeStreamException& ex){
@@ -71,7 +123,22 @@ void AleksanderNetworksWidget::add4NeuronNetworks1(){
 
 
 
+QString AleksanderNetworksWidget::getNetworkName(){
+    if(networkName->text() == "")
+	return QString("Unnamed");
+    return networkName->text();
+}
 
+
+QPushButton* AleksanderNetworksWidget::addNetworkButton(QGridLayout* gridLayout, const QString& description){
+    int row = gridLayout->rowCount();
+    gridLayout->addWidget(new QLabel(description), row, 0);
+    QPushButton* addButton = new QPushButton("Add");
+    addButton->setObjectName(description);
+    addButton->setMaximumSize(120, 30);
+    gridLayout->addWidget(addButton, row, 1);
+    return addButton;
+}
 
 
 

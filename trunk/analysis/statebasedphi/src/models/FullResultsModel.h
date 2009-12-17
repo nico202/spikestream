@@ -31,8 +31,9 @@ namespace spikestream {
 	    /*! List containing the information about the complexes that are currently loaded. */
 	    QList<Complex> complexList;
 
-	    /*! Map controlling which complexes are currently visible */
-	    QHash<unsigned int, bool> complexDisplayMap;
+	    /*! The index in the complexList of which complex is visible.
+		Set to -1 if no complexes are visible */
+	    int complexDisplayIndex;
 
 	    /*! Details about the analysis.
 		Points to the analysis info held in the containing class. */
@@ -51,6 +52,7 @@ namespace spikestream {
 
 	    //=====================  METHODS  ======================
 	    void clearComplexes();
+	    void setVisibleComplex(int index);
 	    void setVisibility(Complex& complex, bool visible);
     };
 

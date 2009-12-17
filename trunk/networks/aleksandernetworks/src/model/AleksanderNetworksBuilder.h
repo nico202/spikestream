@@ -15,13 +15,40 @@ namespace spikestream {
 	public:
 	    AleksanderNetworksBuilder();
 	    ~AleksanderNetworksBuilder();
-	    void add4NeuronNetworks1(const QString& networkName);
+	    void add4NeuronNetwork1(const QString& networkName, const QString& networkDescription);
+	    void add4NeuronNetwork2_AND(const QString& networkName, const QString& networkDescription);
+	    void add4NeuronNetwork2_XOR(const QString& networkName, const QString& networkDescription);
+	    void add4NeuronNetwork3_AND(const QString& networkName, const QString& networkDescription);
+	    void add4NeuronNetwork3_XOR(const QString& networkName, const QString& networkDescription);
+	    void add4NeuronNetwork4_AND(const QString& networkName, const QString& networkDescription);
+	    void add4NeuronNetwork4_XOR(const QString& networkName, const QString& networkDescription);
+	    void add4NeuronNetwork5_AND(const QString& networkName, const QString& networkDescription);
+	    void add4NeuronNetwork5_XOR(const QString& networkName, const QString& networkDescription);
 
 	private:
+	    //====================  VARIABLES  ========================
+	    /*! Map holding neurons in the network */
+	    QHash<unsigned int, Neuron*> neuronMap;
+
+	    NeuronGroup* neuronGroup;
+
+	    unsigned int networkID;
+
 	    //======================  METHODS  ========================
+	    void addConnectionGroup(unsigned int networkID, ConnectionGroup& connGrp);
+	    void add4NeuronBasicNetwork(const QString& networkName, const QString& networkDescription);
 	    void add4NeuronFiringPatterns(unsigned int networkID, NeuronMap& neuronMap);
+	    void reset();
     };
 
 }
 
 #endif//ALEKSANDERNETWORKSBUILDER_H
+
+
+
+
+
+
+
+

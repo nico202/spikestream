@@ -20,7 +20,7 @@ NetworkDisplay::NetworkDisplay(){
 	map to prevent deletion */
     firingNeuronColor.set(1.0f, 0.0f, 1.0f);
     defaultColorMap[&firingNeuronColor] = true;
-    highlightNeuronColor.set(1.0f, 1.0f, 0.0f);
+    highlightNeuronColor.set(0.0f, 1.0f, 1.0f);
     defaultColorMap[&highlightNeuronColor] = true;
 
     //Set neuron colours that are used directly by NetworkViewer and do not need to be stored in map

@@ -209,8 +209,8 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow( 0, "SpikeStream - 
     tabWidget = new QTabWidget(mainSplitterWidget);
 
     //Add networks tab
-    NetworksWidget* networksWidget = new NetworksWidget(this);
-    QScrollArea* networksScrollArea = new QScrollArea(this);
+    NetworksWidget* networksWidget = new NetworksWidget();
+    QScrollArea* networksScrollArea = new QScrollArea();
     networksScrollArea->setWidget(networksWidget);
     tabWidget->addTab(networksScrollArea, "Networks");
 
@@ -237,22 +237,20 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow( 0, "SpikeStream - 
     new NetworkViewer_V2(mainSplitterWidget);
 
     //Set up viewer tab
-    Q3ScrollView* nwViewerPropScrollView = new Q3ScrollView(this);
-    Q3VBox* nwViewerPropViewBox = new Q3VBox(nwViewerPropScrollView->viewport());
-    nwViewerPropViewBox->setMinimumSize(1000,800);
-    nwViewerPropScrollView->addChild(nwViewerPropViewBox);
-    new NetworkViewerProperties_V2(nwViewerPropViewBox);
-    tabWidget->addTab(nwViewerPropScrollView, "Viewer");
+    NetworkViewerProperties_V2* networkViewerProperties_V2 = new NetworkViewerProperties_V2();
+    QScrollArea* networkViewPropsScrollArea = new QScrollArea();
+    networkViewPropsScrollArea->setWidget(networkViewerProperties_V2);
+    tabWidget->addTab(networkViewPropsScrollArea, "Viewer");
 
     //Set up archive tab
-    ArchiveWidget_V2* archiveWidget = new ArchiveWidget_V2(this);
-    QScrollArea* archiveScrollArea = new QScrollArea(this);
+    ArchiveWidget_V2* archiveWidget = new ArchiveWidget_V2();
+    QScrollArea* archiveScrollArea = new QScrollArea();
     archiveScrollArea->setWidget(archiveWidget);
     tabWidget->addTab(archiveScrollArea, "Archives");
 
     //Set up analysis tab
-    AnalysisLoaderWidget* analysisLoaderWidget = new AnalysisLoaderWidget(this);
-    QScrollArea* analysisScrollArea = new QScrollArea(this);
+    AnalysisLoaderWidget* analysisLoaderWidget = new AnalysisLoaderWidget();
+    QScrollArea* analysisScrollArea = new QScrollArea();
     analysisScrollArea->setWidget(analysisLoaderWidget);
     tabWidget->addTab(analysisScrollArea, "Analysis");
 
