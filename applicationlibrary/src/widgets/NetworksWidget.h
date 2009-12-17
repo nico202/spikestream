@@ -18,7 +18,7 @@ namespace spikestream {
 	Q_OBJECT
 
 	public:
-	    NetworksWidget(QWidget *parent);
+	    NetworksWidget(QWidget *parent=0);
 	    ~NetworksWidget();
 
 	signals:

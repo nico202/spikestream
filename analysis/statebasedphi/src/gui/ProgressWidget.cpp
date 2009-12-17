@@ -11,7 +11,6 @@ ProgressWidget::ProgressWidget(QWidget* parent) : QWidget(parent) {
     gridLayout = new QGridLayout();
     mainVerticalBox->addLayout(gridLayout);
     mainVerticalBox->addStretch(5);
-    this->setMinimumSize(300, 300);
 }
 
 
@@ -21,7 +20,7 @@ ProgressWidget::~ProgressWidget(){
 
 
 /*-------------------------------------------------------------*/
-/*-------                 PRIVATE SLOTS                  ------*/
+/*-------                 PUBLIC METHODS                 ------*/
 /*-------------------------------------------------------------*/
 
 /*! Clears all of the progress indicators */
@@ -44,6 +43,10 @@ void ProgressWidget::reset(){
     progressDetailsMap.clear();
 }
 
+
+/*-------------------------------------------------------------*/
+/*-------                 PRIVATE SLOTS                  ------*/
+/*-------------------------------------------------------------*/
 
 /*! Removes progress information for the specified time step */
 void ProgressWidget::timeStepComplete(unsigned int timeStep){
@@ -96,8 +99,8 @@ void ProgressWidget::addProgressBar(unsigned int timeStep, unsigned int min, uns
 
     //Progress details
     QLabel* progDetails = new QLabel();
-    progDetails->setMinimumSize(250, 15);
-    progDetails->setBaseSize(250, 15);
+    progDetails->setMinimumSize(300, 15);
+    progDetails->setBaseSize(300, 15);
     gridLayout->addWidget(progDetails, progressDetailsMap.size(), 2);
     progressDetailsMap[timeStep] = progDetails;
 }

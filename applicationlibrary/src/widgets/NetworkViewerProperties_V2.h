@@ -13,7 +13,7 @@ namespace spikestream {
 	Q_OBJECT
 
 	public:
-	    NetworkViewerProperties_V2(QWidget* parent);
+	    NetworkViewerProperties_V2(QWidget* parent=0);
 	    ~NetworkViewerProperties_V2();
 
 	private slots:

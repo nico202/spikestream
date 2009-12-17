@@ -11,7 +11,7 @@ class AnalysisLoaderWidget : public QWidget {
   Q_OBJECT
 
     public:
-	AnalysisLoaderWidget(QWidget* parent);
+	AnalysisLoaderWidget(QWidget* parent=0);
 	~AnalysisLoaderWidget();
 
     private slots:
