@@ -10,8 +10,7 @@ OBJECTS_DIR = build/objects
 
 MOC_DIR = build/moc
 
-LIBS += -lqwt -L/usr/local/qwt/lib \
-	-lspikestream -L$(SPIKESTREAM_ROOT)/lib \
+LIBS += -lspikestream -L$(SPIKESTREAM_ROOT)/lib \
 	-lgmp
 
 INCLUDEPATH += src \
@@ -23,8 +22,7 @@ INCLUDEPATH += src \
 		src/models \
 		src/views \
 		src/widgets \
-		$(SPIKESTREAM_ROOT)/library/include \
-		/usr/local/qwt/include
+                $(SPIKESTREAM_ROOT)/library/include
 
 CONFIG += debug \
 	  warn_on \

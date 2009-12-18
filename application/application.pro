@@ -19,8 +19,7 @@ INCLUDEPATH += src \
 		$(SPIKESTREAM_ROOT)/applicationlibrary/src/nrm \
 		$(SPIKESTREAM_ROOT)/applicationlibrary/src/dialogs \
 		$(SPIKESTREAM_ROOT)/applicationlibrary/src/widgets \
-		$(SPIKESTREAM_ROOT)/library/include \
-		/usr/local/qwt/include
+                $(SPIKESTREAM_ROOT)/library/include
 
 CONFIG += debug \
 	  warn_on \

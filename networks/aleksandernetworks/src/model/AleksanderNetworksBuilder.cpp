@@ -41,10 +41,10 @@ void AleksanderNetworksBuilder::add4NeuronNetwork1(const QString& networkName, c
 
     //Add weightless connections. Only 1 connection per neuron, so pattern index is zero in all cases
     NetworkDao* networkDao = Globals::getNetworkDao();
-    networkDao->addWeightlessConnection(abCon->getID(), 0);
     networkDao->addWeightlessConnection(baCon->getID(), 0);
-    networkDao->addWeightlessConnection(cdCon->getID(), 0);
+    networkDao->addWeightlessConnection(abCon->getID(), 0);
     networkDao->addWeightlessConnection(dcCon->getID(), 0);
+    networkDao->addWeightlessConnection(cdCon->getID(), 0);
 
     //Add training
     addTraining(neuronMap[1]->getID(), "0", 0);
@@ -58,7 +58,8 @@ void AleksanderNetworksBuilder::add4NeuronNetwork1(const QString& networkName, c
 }
 
 
-/*! Adds network with 4 neurons. Connections: A<->B; A->C; C<->D. AND */
+/*! Adds network with 4 neurons. Connections: A<->B; A->C; C<->D
+     and an AND function in C. */
 void AleksanderNetworksBuilder::add4NeuronNetwork2_AND(const QString& networkName, const QString& networkDescription){
     //Add neurons and archives
     add4NeuronBasicNetwork(networkName, networkDescription);
@@ -78,8 +79,8 @@ void AleksanderNetworksBuilder::add4NeuronNetwork2_AND(const QString& networkNam
 
     //Add weightless connections.1 connection to A, B and D
     NetworkDao* networkDao = Globals::getNetworkDao();
-    networkDao->addWeightlessConnection(abCon->getID(), 0);
     networkDao->addWeightlessConnection(baCon->getID(), 0);
+    networkDao->addWeightlessConnection(abCon->getID(), 0);
     networkDao->addWeightlessConnection(cdCon->getID(), 0);
 
     //2 connections to C;
@@ -100,23 +101,190 @@ void AleksanderNetworksBuilder::add4NeuronNetwork2_AND(const QString& networkNam
 }
 
 
+/*! Adds network with 4 neurons. Connections: A<->B; A->C; C<->D
+     and an AND function in C. */
 void AleksanderNetworksBuilder::add4NeuronNetwork2_XOR(const QString& networkName, const QString& networkDescription){
+    //Add neurons and archives
+    add4NeuronBasicNetwork(networkName, networkDescription);
 
+    //Build the connection group that is to be added
+    QHash<QString, double> paramMap;
+    ConnectionGroupInfo connGrpInfo(0, "Connection Group", neuronGroup->getID(), neuronGroup->getID(),  paramMap, 2);
+    ConnectionGroup connGrp(connGrpInfo);
+
+    //Add connections
+    Connection* abCon = connGrp.addConnection( new Connection(neuronMap[1]->getID(), neuronMap[2]->getID(),  0,  0,  0) );//A->B
+    Connection* acCon = connGrp.addConnection( new Connection(neuronMap[1]->getID(), neuronMap[3]->getID(),  0,  0,  0) );//A->C
+    Connection* baCon = connGrp.addConnection( new Connection(neuronMap[2]->getID(), neuronMap[1]->getID(),  0,  0,  0) );//B->A
+    Connection* cdCon = connGrp.addConnection( new Connection(neuronMap[3]->getID(), neuronMap[4]->getID(),  0,  0,  0) );//C->D
+    Connection* dcCon = connGrp.addConnection( new Connection(neuronMap[4]->getID(), neuronMap[3]->getID(),  0,  0,  0) );//D->C
+    addConnectionGroup(networkID, connGrp);
+
+    //Add weightless connections.1 connection to A, B and D
+    NetworkDao* networkDao = Globals::getNetworkDao();
+    networkDao->addWeightlessConnection(baCon->getID(), 0);
+    networkDao->addWeightlessConnection(abCon->getID(), 0);
+    networkDao->addWeightlessConnection(cdCon->getID(), 0);
+
+    //2 connections to C;
+    networkDao->addWeightlessConnection(acCon->getID(), 0);
+    networkDao->addWeightlessConnection(dcCon->getID(), 1);
+
+    //Add XOR training. C has two inputs, the rest have one.
+    addTraining(neuronMap[1]->getID(), "0", 0);
+    addTraining(neuronMap[1]->getID(), "1", 1);
+    addTraining(neuronMap[2]->getID(), "0", 0);
+    addTraining(neuronMap[2]->getID(), "1", 1);
+    addTraining(neuronMap[3]->getID(), "00", 0);
+    addTraining(neuronMap[3]->getID(), "01", 1);
+    addTraining(neuronMap[3]->getID(), "10", 1);
+    addTraining(neuronMap[3]->getID(), "11", 0);
+    addTraining(neuronMap[4]->getID(), "0", 0);
+    addTraining(neuronMap[4]->getID(), "1", 1);
 }
 
 
+/*! Adds network with 4 neurons. Connections: A<->B; A<->C; C<->D
+     and an AND functions in A and C. */
 void AleksanderNetworksBuilder::add4NeuronNetwork3_AND(const QString& networkName, const QString& networkDescription){
+    //Add neurons and archives
+    add4NeuronBasicNetwork(networkName, networkDescription);
 
+    //Build the connection group that is to be added
+    QHash<QString, double> paramMap;
+    ConnectionGroupInfo connGrpInfo(0, "Connection Group", neuronGroup->getID(), neuronGroup->getID(),  paramMap, 2);
+    ConnectionGroup connGrp(connGrpInfo);
+
+    //Add connections
+    Connection* abCon = connGrp.addConnection( new Connection(neuronMap[1]->getID(), neuronMap[2]->getID(),  0,  0,  0) );//A->B
+    Connection* acCon = connGrp.addConnection( new Connection(neuronMap[1]->getID(), neuronMap[3]->getID(),  0,  0,  0) );//A->C
+    Connection* baCon = connGrp.addConnection( new Connection(neuronMap[2]->getID(), neuronMap[1]->getID(),  0,  0,  0) );//B->A
+    Connection* caCon = connGrp.addConnection( new Connection(neuronMap[3]->getID(), neuronMap[1]->getID(),  0,  0,  0) );//C->A
+    Connection* cdCon = connGrp.addConnection( new Connection(neuronMap[3]->getID(), neuronMap[4]->getID(),  0,  0,  0) );//C->D
+    Connection* dcCon = connGrp.addConnection( new Connection(neuronMap[4]->getID(), neuronMap[3]->getID(),  0,  0,  0) );//D->C
+    addConnectionGroup(networkID, connGrp);
+
+    //Add weightless connections.1 connection to B and D
+    NetworkDao* networkDao = Globals::getNetworkDao();
+    networkDao->addWeightlessConnection(abCon->getID(), 0);
+    networkDao->addWeightlessConnection(cdCon->getID(), 0);
+
+    //2 connections to A and C;
+    networkDao->addWeightlessConnection(baCon->getID(), 0);
+    networkDao->addWeightlessConnection(caCon->getID(), 1);
+    networkDao->addWeightlessConnection(acCon->getID(), 0);
+    networkDao->addWeightlessConnection(dcCon->getID(), 1);
+
+    //Add AND training.A and C have two inputs, the rest have one.
+    addTraining(neuronMap[1]->getID(), "00", 0);
+    addTraining(neuronMap[1]->getID(), "01", 0);
+    addTraining(neuronMap[1]->getID(), "10", 0);
+    addTraining(neuronMap[1]->getID(), "11", 1);
+    addTraining(neuronMap[2]->getID(), "0", 0);
+    addTraining(neuronMap[2]->getID(), "1", 1);
+    addTraining(neuronMap[3]->getID(), "00", 0);
+    addTraining(neuronMap[3]->getID(), "01", 0);
+    addTraining(neuronMap[3]->getID(), "10", 0);
+    addTraining(neuronMap[3]->getID(), "11", 1);
+    addTraining(neuronMap[4]->getID(), "0", 0);
+    addTraining(neuronMap[4]->getID(), "1", 1);
 }
 
 
+/*! Adds network with 4 neurons. Connections: A<->B; A<->C; C<->D
+     and XOR functions in A and C. */
 void AleksanderNetworksBuilder::add4NeuronNetwork3_XOR(const QString& networkName, const QString& networkDescription){
+    //Add neurons and archives
+    add4NeuronBasicNetwork(networkName, networkDescription);
 
+    //Build the connection group that is to be added
+    QHash<QString, double> paramMap;
+    ConnectionGroupInfo connGrpInfo(0, "Connection Group", neuronGroup->getID(), neuronGroup->getID(),  paramMap, 2);
+    ConnectionGroup connGrp(connGrpInfo);
+
+    //Add connections
+    Connection* abCon = connGrp.addConnection( new Connection(neuronMap[1]->getID(), neuronMap[2]->getID(),  0,  0,  0) );//A->B
+    Connection* acCon = connGrp.addConnection( new Connection(neuronMap[1]->getID(), neuronMap[3]->getID(),  0,  0,  0) );//A->C
+    Connection* baCon = connGrp.addConnection( new Connection(neuronMap[2]->getID(), neuronMap[1]->getID(),  0,  0,  0) );//B->A
+    Connection* caCon = connGrp.addConnection( new Connection(neuronMap[3]->getID(), neuronMap[1]->getID(),  0,  0,  0) );//C->A
+    Connection* cdCon = connGrp.addConnection( new Connection(neuronMap[3]->getID(), neuronMap[4]->getID(),  0,  0,  0) );//C->D
+    Connection* dcCon = connGrp.addConnection( new Connection(neuronMap[4]->getID(), neuronMap[3]->getID(),  0,  0,  0) );//D->C
+    addConnectionGroup(networkID, connGrp);
+
+    //Add weightless connections.1 connection to B and D
+    NetworkDao* networkDao = Globals::getNetworkDao();
+    networkDao->addWeightlessConnection(abCon->getID(), 0);
+    networkDao->addWeightlessConnection(cdCon->getID(), 0);
+
+    //2 connections to A and C;
+    networkDao->addWeightlessConnection(baCon->getID(), 0);
+    networkDao->addWeightlessConnection(caCon->getID(), 1);
+    networkDao->addWeightlessConnection(acCon->getID(), 0);
+    networkDao->addWeightlessConnection(dcCon->getID(), 1);
+
+    //Add XOR training.A and C have two inputs, the rest have one.
+    addTraining(neuronMap[1]->getID(), "00", 0);
+    addTraining(neuronMap[1]->getID(), "01", 1);
+    addTraining(neuronMap[1]->getID(), "10", 1);
+    addTraining(neuronMap[1]->getID(), "11", 0);
+    addTraining(neuronMap[2]->getID(), "0", 0);
+    addTraining(neuronMap[2]->getID(), "1", 1);
+    addTraining(neuronMap[3]->getID(), "00", 0);
+    addTraining(neuronMap[3]->getID(), "01", 1);
+    addTraining(neuronMap[3]->getID(), "10", 1);
+    addTraining(neuronMap[3]->getID(), "11", 0);
+    addTraining(neuronMap[4]->getID(), "0", 0);
+    addTraining(neuronMap[4]->getID(), "1", 1);
 }
 
 
-void AleksanderNetworksBuilder::add4NeuronNetwork4_AND(const QString& networkName, const QString& networkDescription){
 
+/*! Adds network with 4 neurons. Connections: A<->B; A<->C; B<->D; C<->D
+     and XOR functions in A and C. */
+void AleksanderNetworksBuilder::add4NeuronNetwork4_AND(const QString& networkName, const QString& networkDescription){
+    //Add neurons and archives
+    add4NeuronBasicNetwork(networkName, networkDescription);
+
+    //Build the connection group that is to be added
+    QHash<QString, double> paramMap;
+    ConnectionGroupInfo connGrpInfo(0, "Connection Group", neuronGroup->getID(), neuronGroup->getID(),  paramMap, 2);
+    ConnectionGroup connGrp(connGrpInfo);
+
+    //Add connections
+    Connection* abCon = connGrp.addConnection( new Connection(neuronMap[1]->getID(), neuronMap[2]->getID(),  0,  0,  0) );//A->B
+    Connection* acCon = connGrp.addConnection( new Connection(neuronMap[1]->getID(), neuronMap[3]->getID(),  0,  0,  0) );//A->C
+    Connection* baCon = connGrp.addConnection( new Connection(neuronMap[2]->getID(), neuronMap[1]->getID(),  0,  0,  0) );//B->A
+    Connection* bdCon = connGrp.addConnection( new Connection(neuronMap[2]->getID(), neuronMap[4]->getID(),  0,  0,  0) );//B->D
+    Connection* caCon = connGrp.addConnection( new Connection(neuronMap[3]->getID(), neuronMap[1]->getID(),  0,  0,  0) );//C->A
+    Connection* cdCon = connGrp.addConnection( new Connection(neuronMap[3]->getID(), neuronMap[4]->getID(),  0,  0,  0) );//C->D
+    Connection* dbCon = connGrp.addConnection( new Connection(neuronMap[4]->getID(), neuronMap[2]->getID(),  0,  0,  0) );//D->B
+    Connection* dcCon = connGrp.addConnection( new Connection(neuronMap[4]->getID(), neuronMap[3]->getID(),  0,  0,  0) );//D->C
+    addConnectionGroup(networkID, connGrp);
+
+    //Add weightless connections. All neurons have two connections
+    NetworkDao* networkDao = Globals::getNetworkDao();
+    networkDao->addWeightlessConnection(baCon->getID(), 0);
+    networkDao->addWeightlessConnection(caCon->getID(), 1);
+    networkDao->addWeightlessConnection(abCon->getID(), 0);
+    networkDao->addWeightlessConnection(dbCon->getID(), 1);
+    networkDao->addWeightlessConnection(acCon->getID(), 0);
+    networkDao->addWeightlessConnection(dcCon->getID(), 1);
+    networkDao->addWeightlessConnection(bdCon->getID(), 0);
+    networkDao->addWeightlessConnection(cdCon->getID(), 1);
+
+    //Add AND training.A and C have two inputs, the rest have one.
+    addTraining(neuronMap[1]->getID(), "00", 0);
+    addTraining(neuronMap[1]->getID(), "01", 0);
+    addTraining(neuronMap[1]->getID(), "10", 0);
+    addTraining(neuronMap[1]->getID(), "11", 1);
+    addTraining(neuronMap[2]->getID(), "0", 0);
+    addTraining(neuronMap[2]->getID(), "1", 1);
+    addTraining(neuronMap[3]->getID(), "00", 0);
+    addTraining(neuronMap[3]->getID(), "01", 0);
+    addTraining(neuronMap[3]->getID(), "10", 0);
+    addTraining(neuronMap[3]->getID(), "11", 1);
+    addTraining(neuronMap[4]->getID(), "0", 0);
+    addTraining(neuronMap[4]->getID(), "1", 1);
 }
 
 

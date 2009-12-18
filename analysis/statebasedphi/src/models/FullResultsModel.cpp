@@ -116,8 +116,8 @@ bool FullResultsModel::setData(const QModelIndex& index, const QVariant&, int) {
     if(index.column() == viewCol){
 	setVisibleComplex(index.row());
 
-	//Emit signal that data has changed and return true to indicate data set succesfully.
-	emit dataChanged(index, index);
+        //Call reset to reload table becaus other rows could have been affected
+        reset();
 	return true;
     }
 
@@ -189,15 +189,18 @@ void FullResultsModel::setVisibleComplex(int index){
     //Hide complex if it is already visible
     if(index == complexDisplayIndex){
 	setVisibility(complexList[complexDisplayIndex], false);
+        complexDisplayIndex = -1;
     }
-    //Hide currently visible complex
+    //Hide any currently visible complex
     else if(index < 0 && complexDisplayIndex > 0){
 	setVisibility(complexList[complexDisplayIndex], false);
 	complexDisplayIndex = -1;
     }
     //Different column clicked
     else{
-	setVisibility(complexList[complexDisplayIndex], false);
+        //Hide current column
+        if(complexDisplayIndex >=0)
+            setVisibility(complexList[complexDisplayIndex], false);
 	setVisibility(complexList[index], true);
 	complexDisplayIndex = index;
     }
