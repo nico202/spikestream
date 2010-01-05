@@ -5,8 +5,8 @@
 #include <QApplication>
 
 //Other includes
-#include <sys/time.h>
 
+	#include <sys/time.h>
 
 
 namespace spikestream {
@@ -14,47 +14,51 @@ namespace spikestream {
     /*! Inherits from QApplication so that it can filter out XEvents during
 	slow renders. Is the QApplication for the application. */
     class SpikeStreamApplication : public QApplication {
-	Q_OBJECT
+		Q_OBJECT
 
-    public:
-	SpikeStreamApplication(int & argc, char ** argv);
-	~SpikeStreamApplication();
+		public:
+			SpikeStreamApplication(int & argc, char ** argv);
+			~SpikeStreamApplication();
 
-    protected:
-	//Inherited from QApplication
-	bool x11EventFilter( XEvent * );
+		protected:
+			#ifdef LINUX32_SPIKESTREAM
+				//Inherited from QApplication - Linux specific
+				bool x11EventFilter( XEvent * );
+			#endif//LINUX32_SPIKESTREAM
 
-    private slots:
-	void startRender();
-	void stopRender();
+		private slots:
+			void startRender();
+			void stopRender();
 
-    private:
-	//============================ VARIABLES ==============================
-	/*! Records the duration of each render.*/
-	unsigned int renderDuration_ms;
+		private:
+			//============================ VARIABLES ==============================
+			/*! Records the duration of each render.*/
+			unsigned int renderDuration_ms;
 
-	/*! Records the time of the last key press at the start of the render.*/
-	unsigned int startRenderKeyEventTime;
+			/*! Records the time of the last key press at the start of the render.*/
+			unsigned int startRenderKeyEventTime;
 
-	/*! Records the time of each key press event.*/
-	unsigned int keyEventTime;
-
-	/*! Time structure to record the start of the render.*/
-	timeval startRenderTime;
-
-	/*! Time structure to record the end of the render.*/
-	timeval stopRenderTime;
-
-	/*! Records when rendering is in progress.*/
-	bool rendering;
+			/*! Records the time of each key press event.*/
+			unsigned int keyEventTime;
 
 
-	//============================ METHODS ================================
-	/*! Declare copy constructor private so it cannot be used inadvertently.*/
-	SpikeStreamApplication(const SpikeStreamApplication&);
+				/*! Time structure to record the start of the render.*/
+				timeval startRenderTime;
 
-	/*! Declare assignment private so it cannot be used inadvertently.*/
-	SpikeStreamApplication operator=(const SpikeStreamApplication&);
+				/*! Time structure to record the end of the render.*/
+				timeval stopRenderTime;
+
+
+			/*! Records when rendering is in progress.*/
+			bool rendering;
+
+
+			//============================ METHODS ================================
+			/*! Declare copy constructor private so it cannot be used inadvertently.*/
+			SpikeStreamApplication(const SpikeStreamApplication&);
+
+			/*! Declare assignment private so it cannot be used inadvertently.*/
+			SpikeStreamApplication operator=(const SpikeStreamApplication&);
 
     };
 }

@@ -13,48 +13,48 @@ using namespace spikestream;
 using namespace std;
 
 
+/*! Function to handle QDebug messages */
 void logMessageOutput(QtMsgType type, const char *msg){
     switch (type) {
-	 case QtDebugMsg:
-	cout<<"Debug: "<<msg<<endl;
+	case QtDebugMsg:
+		cout<<"Debug: "<<msg<<endl;
 	break;
-	 case QtWarningMsg:
-	QMessageBox::warning( 0, "Warning", msg);
-	fprintf(stderr, "Warning: %s\n", msg);
+	case QtWarningMsg:
+		QMessageBox::warning( 0, "Warning", msg);
+		fprintf(stderr, "Warning: %s\n", msg);
 	break;
-	 case QtCriticalMsg:
-	QMessageBox::critical( 0, "Critical Error", msg);
-	fprintf(stderr, "Critical: %s\n", msg);
+	case QtCriticalMsg:
+		QMessageBox::critical( 0, "Critical Error", msg);
+		fprintf(stderr, "Critical: %s\n", msg);
 	break;
-	 case QtFatalMsg:
-	QMessageBox::critical( 0, "Fatal Error", msg);
-	fprintf(stderr, "Fatal: %s\n", msg);
-	abort();
+	case QtFatalMsg:
+		QMessageBox::critical( 0, "Fatal Error", msg);
+		fprintf(stderr, "Fatal: %s\n", msg);
+		abort();
     }
 }
+
 
 //-------------------------- Main ------------------------------------------
 /*! Main method for simulator that launches the application. */
 //--------------------------------------------------------------------------
 
 int main( int argc, char ** argv ) {
+	//Install message handler for logging
+	qInstallMsgHandler(logMessageOutput);
 
-    //Install message handler for logging
-    qInstallMsgHandler(logMessageOutput);
+	//Create QApplication
+	SpikeStreamApplication spikeStrApp(argc, argv);
 
+	//Start up main window of application
+	SpikeStreamMainWindow *spikeStrMainWin = new SpikeStreamMainWindow();
+	spikeStrMainWin->setCaption( "SpikeStream - Analysis" );
+	spikeStrMainWin->show();
 
-    //Create QApplication
-    SpikeStreamApplication spikeStrApp(argc, argv);
+	//Listen for window closing events
+	spikeStrApp.connect( &spikeStrApp, SIGNAL(lastWindowClosed()), &spikeStrApp, SLOT(quit()) );
 
-    //Start up main window of application
-    SpikeStreamMainWindow *spikeStrMainWin = new SpikeStreamMainWindow();
-    spikeStrMainWin->setCaption( "SpikeStream - Analysis" );
-    spikeStrMainWin->show();
-
-    //Listen for window closing events
-    spikeStrApp.connect( &spikeStrApp, SIGNAL(lastWindowClosed()), &spikeStrApp, SLOT(quit()) );
-
-    //Execute application
-    return spikeStrApp.exec();
+	//Execute application
+	return spikeStrApp.exec();
 }
 

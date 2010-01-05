@@ -8,6 +8,7 @@
 //Other includes
 #include <gmpxx.h>
 
+
 namespace spikestream {
 
     typedef unsigned char byte;

@@ -10,19 +10,43 @@ OBJECTS_DIR = build/objects
 
 MOC_DIR = build/moc
 
-LIBS += -lspikestream -L$(SPIKESTREAM_ROOT)/lib \
-	-lgmp
+#----------------------------------------------#
+#---                DEFINES                 ---#
+#----------------------------------------------#
+unix {
+	DEFINES += LINUX32_SPIKESTREAM
+}
+win32 {
+	DEFINES += WIN32_SPIKESTREAM
+}
 
+#----------------------------------------------#
+#---               LIBRARIES                ---#
+#----------------------------------------------#
+unix {
+	LIBS += -lspikestream -L$(SPIKESTREAM_ROOT)/lib -lgmp
+}
+win32 {
+	LIBS += -lspikestream0 -L$(SPIKESTREAM_ROOT)/lib -lgmp -L$(SPIKESTREAM_ROOT)/extlib/gmp/lib
+}
+
+#----------------------------------------------#
+#---                INCLUDE                 ---#
+#----------------------------------------------#
 INCLUDEPATH += src \
-		src/analysis \
-		src/exceptions \
-		src/nrm \
-		src/delegates \
-		src/dialogs \
-		src/models \
-		src/views \
-		src/widgets \
-                $(SPIKESTREAM_ROOT)/library/include
+				src/analysis \
+				src/exceptions \
+				src/nrm \
+				src/delegates \
+				src/dialogs \
+				src/models \
+				src/views \
+				src/widgets \
+				$(SPIKESTREAM_ROOT)/library/include 
+win32 {
+	INCLUDEPATH += $(SPIKESTREAM_ROOT)/extlib/gmp/include
+}
+
 
 CONFIG += debug \
 	  warn_on \
@@ -133,7 +157,7 @@ SOURCES += src/widgets/NetworksWidget.cpp \
 HEADERS += src/SpikeStreamApplication.h \
 	   src/SpikeStreamMainWindow.h \
 	   src/HighlightDialog.h \
-	   src/PluginManager.h \
+	   src/PluginManager_V2.h \
 	   src/Globals.h \
 	   src/EventRouter.h \
 	   src/NetworkViewer_V2.h \
@@ -144,10 +168,12 @@ HEADERS += src/SpikeStreamApplication.h \
 SOURCES += src/SpikeStreamApplication.cpp \
 	   src/SpikeStreamMainWindow.cpp \
 	   src/HighlightDialog.cpp \
-	   src/PluginManager.cpp \
+	   src/PluginManager_V2.cpp \
 	   src/Globals.cpp \
 	   src/EventRouter.cpp \
 	   src/NetworkViewer_V2.cpp \
 	   src/NetworkDisplay.cpp \
 	   src/ArchivePlayerThread.cpp \
 	   src/NetworksBuilder.cpp
+
+

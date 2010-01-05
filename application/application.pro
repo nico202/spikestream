@@ -10,7 +10,7 @@ DESTDIR = $(SPIKESTREAM_ROOT)/bin
 
 OBJECTS_DIR = build/objects
 
-LIBS += -lspikestream -lspikestreamapplication -L$(SPIKESTREAM_ROOT)/lib
+LIBS += -lspikestream0 -lspikestreamapplication0 -L$(SPIKESTREAM_ROOT)/lib
 
 INCLUDEPATH += src \
 		$(SPIKESTREAM_ROOT)/applicationlibrary/src \
@@ -27,7 +27,8 @@ CONFIG += debug \
 	  opengl \
 	  thread \
 	  exceptions \
-	  stl
+	  stl \
+	  console
 
 QT += xml opengl qt3support sql
 

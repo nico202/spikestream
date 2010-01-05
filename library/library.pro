@@ -10,17 +10,32 @@ OBJECTS_DIR = build/objects
 
 MOC_DIR = build/moc
 
-CONFIG += debug \
-	  warn_on \
-	  thread \
-	  exceptions
+CONFIG += debug warn_on thread exceptions
 
 QT += sql xml
 
+
+#----------------------------------------------#
+#---               LIBRARIES                ---#
+#----------------------------------------------#
 LIBS += -lgmpxx
+win32 {
+	LIBS += -lgmp -L$(SPIKESTREAM_ROOT)/extlib/gmp/lib
+}
 
+
+#----------------------------------------------#
+#---                INCLUDE                 ---#
+#----------------------------------------------#
 INCLUDEPATH += include
+win32 {
+	INCLUDEPATH += $(SPIKESTREAM_ROOT)/extlib/gmp/include
+}
 
+
+#----------------------------------------------#
+#---                  src                   ---#
+#----------------------------------------------#
 HEADERS = include/ConfigLoader.h \
 	    include/ConnectionType.h \
 	    include/DeviceMessages.h \

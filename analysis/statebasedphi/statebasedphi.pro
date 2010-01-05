@@ -20,6 +20,9 @@ CONFIG += debug \
 
 QT += xml opengl qt3support sql
 
+#----------------------------------------------#
+#---                INCLUDE                 ---#
+#----------------------------------------------#
 INCLUDEPATH += src \
 		src/database \
 		src/analysis \
@@ -31,8 +34,17 @@ INCLUDEPATH += src \
 		$(SPIKESTREAM_ROOT)/applicationlibrary/src/dialogs \
 		$(SPIKESTREAM_ROOT)/applicationlibrary/src/models \
 		$(SPIKESTREAM_ROOT)/applicationlibrary/src/views
+win32 {
+	INCLUDEPATH += $(SPIKESTREAM_ROOT)/extlib/gmp/include
+}
 
+#----------------------------------------------#
+#---               LIBRARIES                ---#
+#----------------------------------------------#
 LIBS += -lgmpxx -L$(SPIKESTREAM_ROOT)/lib -lspikestream -lspikestreamapplication
+win32 {
+	LIBS += -lgmp -L$(SPIKESTREAM_ROOT)/extlib/gmp/lib
+}
 
 
 HEADERS = src/gui/StateBasedPhiWidget.h \

@@ -3,9 +3,19 @@
 using namespace spikestream;
 
 //Other includes
-#include <X11/Xlib.h>
+#ifdef LINUX32_SPIKESTREAM
+	#include <X11/Xlib.h>
+#endif
 #include <iostream>
 using namespace std;
+
+//Inform user about the build
+#ifdef LINUX32_SPIKESTREAM
+	#warning Linux 32 build of SpikeStreamApplication
+#endif
+#ifdef WIN32_SPIKESTREAM
+	#warning Windows 32 build of SpikeStreamApplication
+#endif
 
 
 /*! Constructor. */
@@ -57,20 +67,22 @@ void SpikeStreamApplication::stopRender(){
 	rendering. Since display lists are used, have no control during the render
 	so have to look for events that were generated during the time window of
 	the render. This method is specific to Linux. */
-bool SpikeStreamApplication::x11EventFilter( XEvent * xEvent){
+#ifdef LINUX32_SPIKESTREAM
+	bool SpikeStreamApplication::x11EventFilter( XEvent * xEvent){
 
-	//Look for events from the keyboard
-	if(xEvent->type == KeyPress || xEvent->type == KeyRelease){
-		//Record time of key event
-		keyEventTime = xEvent->xkey.time;
+		//Look for events from the keyboard
+		if(xEvent->type == KeyPress || xEvent->type == KeyRelease){
+			//Record time of key event
+			keyEventTime = xEvent->xkey.time;
 
-		//If the key event arrived during the render, ignore it.
-		if((keyEventTime - startRenderKeyEventTime) < renderDuration_ms){
-			return true;
+			//If the key event arrived during the render, ignore it.
+			if((keyEventTime - startRenderKeyEventTime) < renderDuration_ms){
+				return true;
+			}
 		}
+		return false;
 	}
-	return false;
-}
+#endif//LINUX32_SPIKESTREAM
 
 
 
