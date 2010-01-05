@@ -472,6 +472,31 @@ void TestNetworkDao::testGetWeightlessNeuron(){
 }
 
 
+void TestNetworkDao::testGetNeuronGroupID(){
+    //Add test networks - only want to select neurons from the second
+    addTestNetwork1();
+    addTestNetwork2();
+
+    //Get id of neuron from second network
+    NetworkDao networkDao(dbInfo);
+    QCOMPARE(networkDao.getNeuronGroupID(testNeurIDList2[0]), neurGrp21ID);
+}
+
+
+void TestNetworkDao::testIsWeightlessNeuron(){
+    //Add test networks
+    addWeightlessTestNetwork1();
+    addTestNetwork2();
+
+    //Create test class
+    NetworkDao networkDao(dbInfo);
+
+    //Neuron in group 1 should be weightless
+    QVERIFY(networkDao.isWeightlessNeuron(testNeurIDList[0]));
+    QVERIFY(!networkDao.isWeightlessNeuron(testNeurIDList2[0]));
+}
+
+
 /*----------------------------------------------------------*/
 /*-----              PRIVATE METHODS                   -----*/
 /*----------------------------------------------------------*/

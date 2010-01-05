@@ -27,7 +27,6 @@ SubsetManager::SubsetManager(const DBInfo& netDBInfo, const DBInfo& archDBInfo, 
 
     //Create phi calculator
     phiCalculator = new PhiCalculator(netDBInfo, archDBInfo, anaDBInfo, anaInfo, timeStep, stop);
-    qDebug()<<"Subset manager created.";
 }
 
 
@@ -60,8 +59,6 @@ SubsetManager::~SubsetManager(){
 	delete archiveDao;
     if(stateDao != NULL)
 	delete stateDao;
-
-    qDebug()<<"Subset manager destroyed.";
 }
 
 
@@ -150,7 +147,7 @@ void SubsetManager::identifyComplexes(){
 		//Inform other classes that a complex has been found
 		emit complexFound();
 
-		qDebug()<<"COMPLEX FOUND: NeuronIDs="<<subNeurIDs<<"; phi="<<subsetList[tstIndx]->getPhi();
+		//qDebug()<<"COMPLEX FOUND: NeuronIDs="<<subNeurIDs<<"; phi="<<subsetList[tstIndx]->getPhi();
 	    }
 	}
 

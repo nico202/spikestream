@@ -6,6 +6,7 @@
 #include "NetworkDisplay.h"
 #include "EventRouter.h"
 #include "NetworkViewerProperties_V2.h"
+#include "SpikeStreamException.h"
 using namespace spikestream;
 
 //Qt includes
@@ -44,6 +45,10 @@ NetworkViewerProperties_V2::NetworkViewerProperties_V2(QWidget* parent) : QWidge
     QHBoxLayout* fromToSingleBox = new QHBoxLayout();
     fromToSingleBox->addSpacing(20);
     fromToSingleBox->addWidget(fromToCombo);
+    truthTableButton = new QPushButton("Truth Table");
+    truthTableButton->setVisible(false);
+    connect(truthTableButton, SIGNAL(clicked()), this, SLOT(showTruthTable()));
+    fromToSingleBox->addWidget(truthTableButton);
     fromToSingleBox->addStretch(5);
     mainVerticalBox->addLayout(fromToSingleBox);
 
@@ -89,6 +94,8 @@ NetworkViewerProperties_V2::NetworkViewerProperties_V2(QWidget* parent) : QWidge
     //Listen for changes in the network display
     connect(Globals::getEventRouter(), SIGNAL(networkDisplayChangedSignal()), this, SLOT(networkDisplayChanged()));
 
+    //Construct truth table dialog
+    truthTableDialog = new TruthTableDialog();
 }
 
 
@@ -139,8 +146,20 @@ void NetworkViewerProperties_V2::posNegSelectionChanged(int index){
     }
 }
 
+
+/*! Shows a dialog with the truth table for the selected neuron */
+void NetworkViewerProperties_V2::showTruthTable(){
+    //Get neuron id.
+    unsigned int tmpNeurID = Globals::getNetworkDisplay()->getSingleNeuronID();
+    if(tmpNeurID == 0)
+	throw SpikeStreamException("Truth table cannot be displayed for an invalid neuron ID");
+
+    //Show non modal dialog
+    truthTableDialog->show(tmpNeurID);
+}
+
 /*----------------------------------------------------------*/
-/*-----                PRIVATE SLOTS                   -----*/
+/*-----               PRIVATE METHODS                  -----*/
 /*----------------------------------------------------------*/
 
 void NetworkViewerProperties_V2::showAllConnections(){
@@ -157,6 +176,7 @@ void NetworkViewerProperties_V2::showAllConnections(){
     toNeuronIDLabel->setText("");
     fromLabel->setEnabled(false);
     toLabel->setEnabled(false);
+    truthTableButton->setVisible(false);
 }
 
 
@@ -174,14 +194,19 @@ void NetworkViewerProperties_V2::showBetweenConnections(){
     singleNeuronIDLabel->setText("");
     fromLabel->setEnabled(true);
     toLabel->setEnabled(true);
+    truthTableButton->setVisible(false);
 }
 
 
 void NetworkViewerProperties_V2::showSingleConnections(){
+    //Id of the single neuron
+    unsigned int singleNeuronID = Globals::getNetworkDisplay()->getSingleNeuronID();
+
+    //Set up graphical components appropriately
     conSingleNeurButt->setChecked(true);
     conSingleNeurButt->setEnabled(true);
     singleNeuronIDLabel->setEnabled(true);
-    singleNeuronIDLabel->setText(QString::number(Globals::getNetworkDisplay()->getSingleNeuronID()));
+    singleNeuronIDLabel->setText(QString::number(singleNeuronID));
     fromToCombo->setEnabled(true);
     fromNeuronIDLabel->setEnabled(false);
     fromNeuronIDLabel->setText("");
@@ -191,7 +216,14 @@ void NetworkViewerProperties_V2::showSingleConnections(){
     conBetweenNeurButt->setEnabled(false);
     fromLabel->setEnabled(false);
     toLabel->setEnabled(false);
+
+    //Show button to launch truth table dialog if to neuron connections are shown and it is a weightless neuron
+    if(Globals::getNetworkDao()->isWeightlessNeuron(singleNeuronID) && fromToCombo->currentText() == "To")
+	truthTableButton->setVisible(true);
+    else
+	truthTableButton->setVisible(false);
 }
+
 
 
 

@@ -27,7 +27,6 @@ AnalysisTimeStepThread::AnalysisTimeStepThread(const DBInfo& netDBInfo, const DB
 
 /*! Destructor */
 AnalysisTimeStepThread::~AnalysisTimeStepThread(){
-    qDebug()<<"Destroying AnalysisTimeStepThread";
 }
 
 /*-------------------------------------------------------------*/
@@ -50,8 +49,6 @@ void AnalysisTimeStepThread::prepareTimeStepAnalysis(const AnalysisInfo& anaInfo
 
 /*! Run method inherited from QThread */
 void AnalysisTimeStepThread::run(){
-    qDebug()<<"Analysis Time Step Thread Started";
-
     stop = false;
     clearError();
 
@@ -68,8 +65,6 @@ void AnalysisTimeStepThread::run(){
     }
 
     stop = true;
-
-    qDebug()<<"Analysis time step thread stopped.";
 }
 
 

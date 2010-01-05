@@ -46,6 +46,14 @@ PhiCalculator::PhiCalculator(){
 /*! Destructor */
 PhiCalculator::~PhiCalculator(){
     deleteWeightlessNeurons();
+
+    //Clean up databases
+    if(networkDao != NULL)
+	delete networkDao;
+    if(archiveDao != NULL)
+	delete archiveDao;
+    if(stateDao != NULL)
+	delete stateDao;
 }
 
 

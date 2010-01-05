@@ -30,8 +30,10 @@ namespace spikestream {
 	    /*! Map holding neurons in the network */
 	    QHash<unsigned int, Neuron*> neuronMap;
 
+	    /*! Aleksander networks consist of a single neuron group */
 	    NeuronGroup* neuronGroup;
 
+	    /*! ID of the network being added */
 	    unsigned int networkID;
 
 	    //======================  METHODS  ========================

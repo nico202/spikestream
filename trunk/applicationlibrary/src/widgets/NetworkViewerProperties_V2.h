@@ -1,11 +1,16 @@
 #ifndef NETWORKVIEWERPROPERTIES_V2
 #define NETWORKVIEWERPROPERTIES_V2
 
+//SpikeStream includes
+#include "TruthTableDialog.h"
+using namespace spikestream;
+
 //Qt includes
 #include <QComboBox>
 #include <QLabel>
 #include <QWidget>
 #include <QRadioButton>
+#include <QPushButton>
 
 namespace spikestream {
 
@@ -20,7 +25,7 @@ namespace spikestream {
 	    void fromToSelectionChanged(int index);
 	    void networkDisplayChanged();
 	    void posNegSelectionChanged(int index);
-
+	    void showTruthTable();
 
 	private:
 	    //=======================  VARIABLES  =======================
@@ -53,6 +58,12 @@ namespace spikestream {
 
 	    /*! Keep reference to label saying "to" to enable and disable it */
 	    QLabel* toLabel;
+
+	    /*! Button to launch truth table dialog when to connections are shown and when neuron type is appropriate */
+	    QPushButton* truthTableButton;
+
+	    /*! Non modal dialog to display truth table associated with a neuron */
+	    TruthTableDialog* truthTableDialog;
 
 	    //=======================  METHODS  =========================
 	    void showAllConnections();

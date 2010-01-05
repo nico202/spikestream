@@ -212,7 +212,6 @@ void NetworkViewer_V2::mouseDoubleClickEvent (QMouseEvent* event){
     bool ctrlBtnDown = false;
     if(event->modifiers() & Qt::ControlModifier){
 	ctrlBtnDown = true;
-	qDebug()<<"CONTROL BUTTON DOWN: "<<ctrlBtnDown;
     }
 
     //Create the select buffer

@@ -10,11 +10,12 @@ using namespace spikestream;
 #include <QtTest>
 #include <QString>
 
+typedef unsigned char byte;
+
 class TestNetworkDao : public TestDao {
 	Q_OBJECT
 
 	private slots:
-    //void init();
 	    void testAddNetwork();
 	    void testAddWeightlessConnection();
 	    void testAddWeightlessNeuronTrainingPattern();
@@ -27,7 +28,9 @@ class TestNetworkDao : public TestDao {
 	    void testGetNetworksInfo();
 	    void testGetNeuronGroupsInfo();
 	    void testGetNeuronIDs();
+	    void testGetNeuronGroupID();
 	    void testGetWeightlessNeuron();
+	    void testIsWeightlessNeuron();
 
 	private:
 	    bool bitsEqual(byte* byteArr, const QString pattern, int output);

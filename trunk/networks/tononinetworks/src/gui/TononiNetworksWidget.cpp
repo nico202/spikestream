@@ -31,8 +31,11 @@ TononiNetworksWidget::TononiNetworksWidget(){
     //Create class that will be used to build networks
     networkBuilder = new TononiNetworkBuilder();
 
+    //Layout to manage whole widget
+    QVBoxLayout* mainVBox = new QVBoxLayout(this);
+
     //Layout using grid layout
-    QGridLayout* gridLayout = new QGridLayout(this);
+    QGridLayout* gridLayout = new QGridLayout();
     gridLayout->setMargin(10);
 
     //Field to enable user to enter network name
@@ -47,6 +50,9 @@ TononiNetworksWidget::TononiNetworksWidget(){
     addButton->setMaximumSize(120, 30);
     connect (addButton, SIGNAL(clicked()), this, SLOT(addBalduzziTononiFigure6()));
     gridLayout->addWidget(addButton, 1, 1);
+
+    mainVBox->addLayout(gridLayout);
+    mainVBox->addStretch(5);
 
 }
 

@@ -36,9 +36,11 @@ namespace spikestream{
 	    QList<Connection*> getConnections(unsigned int connectionMode, unsigned int singleNeuronID, unsigned int toNeuronID);
 	    QList<NetworkInfo> getNetworksInfo();
 	    Box getNeuronGroupBoundingBox(unsigned int neurGrpID);
+	    unsigned int getNeuronGroupID(unsigned int neuronID);
 	    QList<NeuronGroupInfo> getNeuronGroupsInfo(unsigned int networkID);
 	    QList<unsigned int> getNeuronIDs(unsigned int networkID);
 	    WeightlessNeuron* getWeightlessNeuron(unsigned int neuronID);
+	    bool isWeightlessNeuron(unsigned int neuronID);
 
 	private:
 	    //==========================  VARIABLES  ==========================

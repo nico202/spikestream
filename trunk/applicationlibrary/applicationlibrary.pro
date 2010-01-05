@@ -42,7 +42,7 @@ INCLUDEPATH += src \
 				src/models \
 				src/views \
 				src/widgets \
-				$(SPIKESTREAM_ROOT)/library/include 
+				$(SPIKESTREAM_ROOT)/library/include
 win32 {
 	INCLUDEPATH += $(SPIKESTREAM_ROOT)/extlib/gmp/include
 }
@@ -102,10 +102,12 @@ SOURCES += src/analysis/AnalysisLoaderWidget.cpp
 #----------------------------------------------#
 HEADERS += src/dialogs/NRMImportDialog.h \
 	    src/dialogs/LoadAnalysisDialog.h \
-	    src/dialogs/PluginsDialog.h
+	    src/dialogs/PluginsDialog.h \
+	    src/dialogs/TruthTableDialog.h
 SOURCES += src/dialogs/NRMImportDialog.cpp \
 	    src/dialogs/LoadAnalysisDialog.cpp \
-	    src/dialogs/PluginsDialog.cpp
+	    src/dialogs/PluginsDialog.cpp \
+	    src/dialogs/TruthTableDialog.cpp
 
 #----------------------------------------------#
 #---            exceptions folder           ---#
@@ -119,11 +121,13 @@ SOURCES += src/exceptions/NRMException.cpp
 HEADERS += src/models/NeuronGroupModel.h \
 	    src/models/ConnectionGroupModel.h \
 	    src/models/ConnectionsModel.h \
-	    src/models/AnalysesModel.h
+	    src/models/AnalysesModel.h \
+	    src/models/TruthTableModel.h
 SOURCES += src/models/NeuronGroupModel.cpp \
 	    src/models/ConnectionGroupModel.cpp \
 	    src/models/ConnectionsModel.cpp \
-	    src/models/AnalysesModel.cpp
+	    src/models/AnalysesModel.cpp \
+	    src/models/TruthTableModel.cpp
 
 #----------------------------------------------#
 #---              views folder             ---#
@@ -131,11 +135,13 @@ SOURCES += src/models/NeuronGroupModel.cpp \
 HEADERS += src/views/NeuronGroupTableView.h \
 	    src/views/ConnectionGroupTableView.h \
 	    src/views/ConnectionsTableView.h \
-	    src/views/AnalysesTableView.h
+	    src/views/AnalysesTableView.h \
+	    src/views/TruthTableView.h
 SOURCES += src/views/NeuronGroupTableView.cpp \
 	    src/views/ConnectionGroupTableView.cpp \
 	    src/views/ConnectionsTableView.cpp \
-	    src/views/AnalysesTableView.cpp
+	    src/views/AnalysesTableView.cpp \
+	    src/views/TruthTableView.cpp
 
 #----------------------------------------------#
 #---              widgets folder            ---#

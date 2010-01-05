@@ -400,6 +400,9 @@ void TestDao::addWeightlessPatternIndex(unsigned int connectionID, unsigned int 
 void TestDao::addWeightlessTestNetwork1(){
     addTestNetwork1();
 
+    //Change the neuron group type
+    executeQuery("UPDATE NeuronGroups SET NeuronTypeID=2 WHERE NetworkID=" + QString::number(testNetID));
+
     //Add pattern indexes - exact number does not matter for the moment
     addWeightlessPatternIndex(testConnIDList[0], 0);
     addWeightlessPatternIndex(testConnIDList[1], 0);
