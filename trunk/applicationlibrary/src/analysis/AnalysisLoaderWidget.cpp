@@ -2,7 +2,7 @@
 //SpikeStream includes
 #include "AnalysisLoaderWidget.h"
 #include "Globals.h"
-#include "PluginManager.h"
+#include "PluginManager_V2.h"
 using namespace spikestream;
 
 //Qt includes
@@ -19,7 +19,7 @@ AnalysisLoaderWidget::AnalysisLoaderWidget(QWidget* parent) : QWidget(parent) {
     try{
 	//Get list of available analysis plugins
 	QString pluginPath = Globals::getSpikeStreamRoot() + "/plugins/analysis";
-	PluginManager* pluginManager = new PluginManager(pluginPath);
+	PluginManager_V2* pluginManager = new PluginManager_V2(pluginPath);
 	QStringList pluginList = pluginManager->getPluginNames();
 
 	//Add list to combo box

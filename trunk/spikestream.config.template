@@ -2,35 +2,23 @@
 #Each configuration item must have a unique name.
 #SpikeStream needs to be restarted for any changes to take effect
 
-#PARAMETERS FOR NEURAL NETWORK DATABASE
-neuralNetworkHost = localhost
-neuralNetworkUser = SpikeStream
-neuralNetworkPassword = password
-neuralNetworkDatabase = NeuralNetwork
+#PARAMETERS FOR NETWORK DATABASE
+spikeStreamNetworkHost = localhost
+spikeStreamNetworkUser = SpikeStream
+spikeStreamNetworkPassword = password
+spikeStreamNetworkDatabase = SpikeStreamNetwork
 
 #PARAMETERS FOR ARCHIVE DATABASE
-archiveHost = localhost
-archiveUser = SpikeStream
-archivePassword = password
-archiveDatabase = NeuralArchive
+spikeStreamArchiveHost = localhost
+spikeStreamArchiveUser = SpikeStream
+spikeStreamArchivePassword = password
+spikeStreamArchiveDatabase = SpikeStreamArchive
 
-#PARAMETERS FOR PATTERN DATABASE
-patternHost = localhost
-patternUser = SpikeStream
-patternPassword = password
-patternDatabase = Patterns
-
-#PARAMETERS FOR DEVICE DATABASE
-deviceHost = localhost
-deviceUser = SpikeStream
-devicePassword = password
-deviceDatabase = Devices
-
-#PARAMETERS FOR NETWORK ANALYSIS DATABASE
-networkAnalysisHost = localhost
-networkAnalysisUser = SpikeStream
-networkAnalysisPassword = password
-networkAnalysisDatabase = NetworkAnalysis
+#PARAMETERS FOR ANALYSIS DATABASE
+spikeStreamAnalysisHost = localhost
+spikeStreamAnalysisUser = SpikeStream
+spikeStreamAnalysisPassword = password
+spikeStreamAnalysisDatabase = SpikeStreamAnalysis
 
 #LOGGING PARAMETERS
 #Log file parameters
