@@ -1,6 +1,9 @@
 #include "AbstractDao.h"
 #include "SpikeStreamDBException.h"
 
+//Qt includes
+#include <QDebug>
+
 //Declare static variables
 unsigned int AbstractDao::dbCounter = 0;
 

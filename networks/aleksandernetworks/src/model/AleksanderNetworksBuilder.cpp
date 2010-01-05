@@ -308,8 +308,10 @@ void AleksanderNetworksBuilder::reset(){
     networkID = 0;
 
     //Clean up neuron group
-    if(neuronGroup != NULL)
+    if(neuronGroup != NULL){
 	delete neuronGroup;
+	neuronGroup = NULL;
+    }
 
     //Clean up neuron map
     for(QHash<unsigned int, Neuron*>::iterator iter = neuronMap.begin(); iter != neuronMap.end(); ++iter)

@@ -13,9 +13,9 @@ namespace spikestream {
 	    void addTraining(QByteArray& newData, unsigned int output);
 	    QHash<unsigned int, QList<unsigned int> > getConnectionMap() { return connectionMap; }
 	    int getNumberOfConnections() { return numberOfConnections; }
-		double getFiringStateProbability(unsigned char inPatArr[], int inPatArrLen, int firingState);
+	    double getFiringStateProbability(unsigned char inPatArr[], int inPatArrLen, int firingState);
 	    unsigned int getHammingThreshold() { return hammingThreshold; }
-		QList<unsigned char*> getTrainingData() { return trainingData; }
+	    QList<unsigned char*> getTrainingData() { return trainingData; }
 	    int getTrainingDataLength() { return trainingDataLength; }
 	    double getTransitionProbability(const QList<unsigned int>& neurIDList, const QString& x0Pattern, int firingState);
 	    void setGeneralization(double generalization);
@@ -26,14 +26,14 @@ namespace spikestream {
 	    unsigned int id;
 
 	    /*! Map linking each position in the pattern string with
-		a neuron id. Key is the connected neuron id; value is the index in the pattern string. */
+		    a neuron id. Key is the connected neuron id; value is the index in the pattern string. */
 	    QHash<unsigned int, QList<unsigned int> > connectionMap;
 
 	    /*! Number of connections to this weightless neuron. This has to be calculated from the connection map */
 	    int numberOfConnections;
 
 	    /*! List of training arrays */
-		QList<unsigned char*> trainingData;
+	    QList<unsigned char*> trainingData;
 
 	    /*! Length of each array of training data */
 	    int trainingDataLength;
@@ -42,7 +42,7 @@ namespace spikestream {
 	    unsigned int hammingThreshold;
 
 	    //====================  METHODS  =====================
-		void buildInputPattern(unsigned char inPatArr[], int inPatArrSize, bool selArr[], int selArrSize, QHash<unsigned int, unsigned char>& firingNeuronIndexMap);
+	    void buildInputPattern(unsigned char inPatArr[], int inPatArrSize, bool selArr[], int selArrSize, QHash<unsigned int, unsigned char>& firingNeuronIndexMap);
 	    void printConnectionMap();
 	    void printSelectionArray(bool selArr[], int arrSize);
 	    void printTraining();

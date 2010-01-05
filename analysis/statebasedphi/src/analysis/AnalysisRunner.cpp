@@ -23,7 +23,6 @@ AnalysisRunner::AnalysisRunner(const DBInfo& netDBInfo, const DBInfo& archDBInfo
 
 /*! Destructor */
 AnalysisRunner::~AnalysisRunner(){
-    qDebug()<<"Destroying AnalysisRunner";
 }
 
 

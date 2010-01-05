@@ -41,6 +41,9 @@ LoadAnalysisDialog::LoadAnalysisDialog(QWidget* parent) : QDialog(parent) {
     connect (okPushButton, SIGNAL(clicked()), this, SLOT(okButtonPressed()));
     connect (deletePushButton, SIGNAL(clicked()), this, SLOT(deleteButtonPressed()));
     connect (cancelPushButton, SIGNAL(clicked()), this, SLOT(reject()));
+
+    //Automatically hide when network display changes
+    connect(Globals::getEventRouter(), SIGNAL(networkDisplayChangedSignal()), this, SLOT(hide()));
 }
 
 

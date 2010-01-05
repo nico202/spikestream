@@ -16,29 +16,31 @@ typedef QWidget* (*CreatePluginFunctionType)();
 /*! The type of the function used to create neurons. */
 typedef QString (*GetPluginNameFunctionType)();
 
+namespace spikestream {
 
-class PluginManager_V2 {
-  public:
-	PluginManager_V2(QString& pluginFolder) throw(SpikeStreamException);
-	~PluginManager_V2();
+    class PluginManager_V2 {
+	public:
+	    PluginManager_V2(QString& pluginFolder) throw(SpikeStreamException);
+	    ~PluginManager_V2();
 
-    QStringList getPluginNames() throw(SpikeStreamException);
-    QWidget* getPlugin(QString pluginName) throw(SpikeStreamException);
-
-
-  private:
-    //============================== VARIABLES ============================
-    /*! Location where plugins are stored. */
-    QString pluginFolder;
-
-    /*! Map holding function pointers that create neurons of each type.*/
-    QHash<QString, CreatePluginFunctionType> pluginFunctionMap;
+	    QStringList getPluginNames() throw(SpikeStreamException);
+	    QWidget* getPlugin(QString pluginName) throw(SpikeStreamException);
 
 
-    //=============================== METHODS =============================
-    void loadPlugins();
+	private:
+	    //============================== VARIABLES ============================
+	    /*! Location where plugins are stored. */
+	    QString pluginFolder;
 
-};
+	    /*! Map holding function pointers that create neurons of each type.*/
+	    QHash<QString, CreatePluginFunctionType> pluginFunctionMap;
 
+
+	    //=============================== METHODS =============================
+	    void loadPlugins();
+
+    };
+
+}
 
 #endif // PLUGINMANAGER_V2_H

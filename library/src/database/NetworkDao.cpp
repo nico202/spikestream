@@ -284,6 +284,30 @@ WeightlessNeuron* NetworkDao::getWeightlessNeuron(unsigned int neuronID){
 }
 
 
+/*! Returns the neuron group containing the specified neuron */
+unsigned int NetworkDao::getNeuronGroupID(unsigned int neuronID){
+    QSqlQuery query = getQuery("SELECT NeuronGroupID FROM Neurons WHERE NeuronID = " + QString::number(neuronID));
+    executeQuery(query);
+    query.next();
+    return Util::getUInt(query.value(0).toString());
+}
+
+
+/*! Returns true if the neuron is weightless.
+    Uses the string "Weightless Neuron" rather than the ID, which may change. */
+bool NetworkDao::isWeightlessNeuron(unsigned int neuronID){
+    unsigned int tmpNeurGrpID = getNeuronGroupID(neuronID);
+
+    //Query to select neuron type description
+    QSqlQuery query = getQuery("SELECT neurType.Description FROM NeuronTypes neurType INNER JOIN NeuronGroups neurGrps ON neurType.NeuronTypeID=neurGrps.NeuronTypeID WHERE neurGrps.NeuronGroupID=" + QString::number(tmpNeurGrpID));
+    executeQuery(query);
+
+    //Check to see if it is weightless
+    query.next();
+    if(query.value(0).toString().toUpper() == "WEIGHTLESS NEURON")
+	return true;
+    return false;
+}
 
 
 
