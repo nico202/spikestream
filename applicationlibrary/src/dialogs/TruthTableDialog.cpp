@@ -4,6 +4,7 @@
 using namespace spikestream;
 
 //Qt includes
+#include <QDebug>
 #include <QLayout>
 #include <QPushButton>
 
@@ -41,6 +42,7 @@ TruthTableDialog::~TruthTableDialog(){
 
 /*! Shows the dialog with the truth table for the specified neuron id */
 void TruthTableDialog::show(unsigned int neuronID){
+    this->setWindowTitle("Truth Table for Neuron " + QString::number(neuronID));
     truthTableModel->setNeuronID(neuronID);
     this->setVisible(true);
 }

@@ -16,9 +16,13 @@ namespace spikestream {
 	public:
 	    TruthTableView(TruthTableModel* model);
 	    ~TruthTableView();
-	    void resizeHeaders();
 
 	private slots:
+	    void resizeHeaders();
+
+	private:
+	    //=====================  VARIABLES  =======================
+	    TruthTableModel* truthTableModel;
 
     };
 

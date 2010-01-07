@@ -12,9 +12,12 @@ TruthTableView::TruthTableView(TruthTableModel* model) : QTableView() {
     setSelectionMode(QAbstractItemView::NoSelection);
 
     //Set the model for this view and show it
+    truthTableModel = model;
     setModel(model);
     show();
-    resizeHeaders();
+
+    //Listen for resize events
+    connect(model, SIGNAL(modelReset()), this, SLOT(resizeHeaders()));
 }
 
 
@@ -26,7 +29,14 @@ TruthTableView::~TruthTableView(){
 /*! Sets up the size of the headers. */
 void TruthTableView::resizeHeaders(){
     QHeaderView* hHeader = horizontalHeader();
-    hHeader->setMinimumSectionSize(10);
+
+    //Resize columns
+    if(truthTableModel->columnCount() > 0){
+	for(int i=0; i<truthTableModel->columnCount()-1; ++i)
+	    hHeader->resizeSection(hHeader->logicalIndex(i), 20);//Neuron ID column
+	hHeader->resizeSection(hHeader->logicalIndex(truthTableModel->columnCount()-1), 50);//Output column
+    }
+
     hHeader->setDefaultAlignment(Qt::AlignLeft);
 }
 

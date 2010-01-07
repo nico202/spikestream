@@ -55,10 +55,10 @@ int StateBasedPhiAnalysisDao::getComplexCount(unsigned int analysisID, unsigned 
 }
 
 
-/*! Returns a model corresponding to the state based phi data table for a particular analysis */
+/*! Returns a list of complexes corresponding to the state based phi data table for a particular analysis */
 QList<Complex> StateBasedPhiAnalysisDao::getComplexes(unsigned int analysisID){
     //Query database for matching complexes
-    QSqlQuery query = getQuery( "SELECT ComplexID, TimeStep, Phi, Neurons FROM StateBasedPhiData WHERE AnalysisID=" + QString::number(analysisID));
+    QSqlQuery query = getQuery( "SELECT ComplexID, TimeStep, Phi, Neurons FROM StateBasedPhiData WHERE AnalysisID=" + QString::number(analysisID) + " ORDER BY TimeStep");
     executeQuery(query);
 
     //Add complexes to list

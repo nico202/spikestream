@@ -202,7 +202,6 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow( 0, "SpikeStream - 
     menuBar()->insertItem("Help", helpMenu);
     helpMenu->insertItem("About", this , SLOT(about()), Qt::Key_F12);
 
-
     //Set up panes
     //Set up main splitter, which will divide graphical view from editor/viewer/simulator windows
     QSplitter *mainSplitterWidget = new QSplitter(this);
