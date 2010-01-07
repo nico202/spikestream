@@ -30,6 +30,7 @@ namespace spikestream {
 		void archiveChanged();
 		void checkToolBarEnabled();
 		void fixTimeStepSelection(int);
+		void exportAnalysis();
 		void loadAnalysis();
 		void loadArchiveTimeStepsIntoCombos();
 		void networkChanged();

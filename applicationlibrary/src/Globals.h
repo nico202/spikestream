@@ -24,6 +24,7 @@ namespace spikestream {
 	static bool archiveLoaded();
 	static void cleanUp();
 	static AnalysisDao* getAnalysisDao();
+	static unsigned int getAnalysisID();
 	static Archive* getArchive();
 	static ArchiveDao* getArchiveDao();
 	static EventRouter* getEventRouter() {return eventRouter; }

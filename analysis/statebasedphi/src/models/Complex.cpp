@@ -52,6 +52,7 @@ QString Complex::getNeuronIDString() const{
     QString tmpStr;
     foreach(unsigned int neurID, neuronIDs)
 	tmpStr += QString::number(neurID) + ",";
+    tmpStr.truncate(tmpStr.size() - 1);
     return  tmpStr;
 }
 
