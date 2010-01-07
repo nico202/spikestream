@@ -42,29 +42,33 @@ win32 {
 	LIBS += -lgmp -L$(SPIKESTREAM_ROOT)/extlib/gmp/lib
 }
 
-
+#====================  GUI  =====================
 HEADERS = src/gui/StateBasedPhiWidget.h \
-	    src/database/StateBasedPhiAnalysisDao.h \
 	    src/gui/StateBasedPhiParameterDialog.h \
-	    src/analysis/AnalysisRunner.h \
-	    src/analysis/AnalysisTimeStepThread.h \
 	    src/gui/ProgressWidget.h \
+	    src/gui/ExportAnalysisDialog.h
+SOURCES = src/gui/StateBasedPhiWidget.cpp \
+	    src/gui/StateBasedPhiParameterDialog.cpp \
+	    src/gui/ProgressWidget.cpp \
+	    src/gui/ExportAnalysisDialog.cpp
+
+#==================  ANALYSIS  ===================
+HEADERS += src/analysis/AnalysisRunner.h \
+	    src/analysis/AnalysisTimeStepThread.h \
 	    src/analysis/PhiCalculator.h \
 	    src/analysis/SubsetManager.h \
 	    src/analysis/Subset.h \
 	    src/analysis/ProbabilityTable.h
-
-SOURCES = src/gui/StateBasedPhiWidget.cpp \
-	    src/database/StateBasedPhiAnalysisDao.cpp \
-	    src/gui/StateBasedPhiParameterDialog.cpp \
-	    src/analysis/AnalysisRunner.cpp \
+SOURCES += src/analysis/AnalysisRunner.cpp \
 	    src/analysis/AnalysisTimeStepThread.cpp \
-	    src/gui/ProgressWidget.cpp \
 	    src/analysis/PhiCalculator.cpp \
 	    src/analysis/SubsetManager.cpp \
 	    src/analysis/Subset.cpp \
 	    src/analysis/ProbabilityTable.cpp
 
+#==================  DATABASE  ===================
+HEADERS += src/database/StateBasedPhiAnalysisDao.h
+SOURCES += src/database/StateBasedPhiAnalysisDao.cpp
 
 #==================  MODELS  =====================
 HEADERS += src/models/FullResultsModel.h \

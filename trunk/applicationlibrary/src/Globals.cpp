@@ -66,6 +66,12 @@ AnalysisDao* Globals::getAnalysisDao(){
 }
 
 
+/*! Returns the ID of the currently loaded analysis or zero if no analysis is loaded */
+unsigned int Globals::getAnalysisID(){
+    return analysisID;
+}
+
+
 /*! Returns the current archive */
 Archive* Globals::getArchive(){
     if(archive == NULL)

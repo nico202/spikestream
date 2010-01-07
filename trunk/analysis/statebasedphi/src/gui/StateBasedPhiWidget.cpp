@@ -1,4 +1,5 @@
 //SpikeStream includes
+#include "ExportAnalysisDialog.h"
 #include "FullResultsTableView.h"
 #include "Globals.h"
 #include "LoadAnalysisDialog.h"
@@ -106,6 +107,14 @@ StateBasedPhiWidget::~StateBasedPhiWidget(){
 void StateBasedPhiWidget::archiveChanged(){
     //The analyses are archive specific, so create a new analysis
     newAnalysis();
+}
+
+
+/*! Exports data from the analysis */
+void StateBasedPhiWidget::exportAnalysis(){
+    //Show dialog to select the analysis the user wants to load
+    ExportAnalysisDialog exportAnalysisDialog(this);
+    exportAnalysisDialog.exec();
 }
 
 
@@ -322,12 +331,17 @@ QStringList StateBasedPhiWidget::getTimeStepList(unsigned int min, unsigned int 
 QToolBar* StateBasedPhiWidget::getToolBar(){
     QToolBar* tmpToolBar = new QToolBar(this);
 
-    QAction* tmpAction = new QAction(QIcon(), "Open", this);
+    QAction* tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/open.png"), "Open", this);
     connect(tmpAction, SIGNAL(triggered()), this, SLOT(loadAnalysis()));
     tmpToolBar->addAction (tmpAction);
 
-    tmpAction = new QAction(QIcon(), "New", this);
+    tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/new.png"), "New", this);
     connect(tmpAction, SIGNAL(triggered()), this, SLOT(newAnalysis()));
+    tmpToolBar->addAction (tmpAction);
+
+    tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/save.png"), "Export analysis", this);
+    connect(tmpAction, SIGNAL(triggered()), this, SLOT(exportAnalysis()));
+    connect(Globals::getEventRouter(), SIGNAL(analysisNotRunningSignal(bool)), tmpAction, SLOT(setEnabled(bool)));
     tmpToolBar->addAction (tmpAction);
 
     tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/play.xpm"), "Start analysis", this);
