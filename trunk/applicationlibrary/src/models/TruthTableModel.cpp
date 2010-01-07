@@ -18,6 +18,7 @@ TruthTableModel::TruthTableModel() : QAbstractTableModel(){
 
 /*! Destructor */
 TruthTableModel::~TruthTableModel(){
+    qDebug()<<"DELETING TRUTH TABLE MODEL";
 }
 
 
@@ -46,7 +47,6 @@ QVariant TruthTableModel::data(const QModelIndex & index, int role) const{
 
     //Return appropriate data
     if (role == Qt::DisplayRole){
-	cout<<"DATA: ("<<index.row()<<","<<index.column()<<") value: "<<dataList.at(index.row()).at(index.column())<<endl;
 	return dataList.at(index.row()).at(index.column());
     }
 
@@ -64,7 +64,6 @@ QVariant TruthTableModel::headerData(int section, Qt::Orientation orientation, i
     if (orientation == Qt::Horizontal){
 	if(section < headerList.size())
 	    return headerList.at(section);
-
 	if(section == headerList.size())
 	    return "Output";
     }
@@ -80,6 +79,8 @@ int TruthTableModel::rowCount(const QModelIndex&) const{
 }
 
 
+/*! Sets the id of the neuron whose truth table is being displayed.
+    Loads up the data from the neuron in a way that is easy to access for display. */
 void TruthTableModel::setNeuronID(unsigned int neuronID){
     //Reset the class
     clearModelData();
@@ -106,20 +107,25 @@ void TruthTableModel::setNeuronID(unsigned int neuronID){
     //Add training data to list
     for(int i=0; i<trainingDataList.size(); ++i){//Work through the arrays of training data
 	QList<unsigned int> tmpList;
-	for(int j=0; j<headerList.size() + 1; ++j){
-	    tmpList.append(trainingDataList.at(i)[j/8 + 1] & 1<<j%8);
+	for(int j=0; j<neuron->getNumberOfConnections(); ++j){//Work through all of the connections
+	    if(trainingDataList.at(i)[j/8 + 1] & 1<<(j%8))
+		tmpList.append(1);
+	    else
+		tmpList.append(0);
 	}
 
 	//Add output
-	tmpList.append((unsigned int)trainingDataList[0]);
+	tmpList.append(trainingDataList.at(i)[0]);
 
 	//Store list
 	dataList.append(tmpList);
     }
-    cout<<"DATA LIST SIZE: "<<dataList.size()<<" header siaze: "<<headerList.size() + 1<<endl;
 
     //Clean up
     delete neuron;
+
+    //Inform view about changes
+    reset();
 
 }
 

@@ -88,14 +88,14 @@ NetworkViewerProperties_V2::NetworkViewerProperties_V2(QWidget* parent) : QWidge
     mainVerticalBox->addWidget(connectionsView);
     mainVerticalBox->addStretch(5);
 
-    //Initial state is to show all connections
-    showAllConnections();
-
     //Listen for changes in the network display
     connect(Globals::getEventRouter(), SIGNAL(networkDisplayChangedSignal()), this, SLOT(networkDisplayChanged()));
 
     //Construct truth table dialog
-    truthTableDialog = new TruthTableDialog();
+    truthTableDialog = new TruthTableDialog(this);
+
+    //Initial state is to show all connections
+    showAllConnections();
 }
 
 
@@ -158,6 +158,7 @@ void NetworkViewerProperties_V2::showTruthTable(){
     truthTableDialog->show(tmpNeurID);
 }
 
+
 /*----------------------------------------------------------*/
 /*-----               PRIVATE METHODS                  -----*/
 /*----------------------------------------------------------*/
@@ -177,6 +178,7 @@ void NetworkViewerProperties_V2::showAllConnections(){
     fromLabel->setEnabled(false);
     toLabel->setEnabled(false);
     truthTableButton->setVisible(false);
+    truthTableDialog->hide();
 }
 
 
@@ -195,6 +197,7 @@ void NetworkViewerProperties_V2::showBetweenConnections(){
     fromLabel->setEnabled(true);
     toLabel->setEnabled(true);
     truthTableButton->setVisible(false);
+    truthTableDialog->hide();
 }
 
 
@@ -218,10 +221,24 @@ void NetworkViewerProperties_V2::showSingleConnections(){
     toLabel->setEnabled(false);
 
     //Show button to launch truth table dialog if to neuron connections are shown and it is a weightless neuron
-    if(Globals::getNetworkDao()->isWeightlessNeuron(singleNeuronID) && fromToCombo->currentText() == "To")
-	truthTableButton->setVisible(true);
-    else
+    if(Globals::getNetworkDao()->isWeightlessNeuron(singleNeuronID)){
+	//Update neuron in truth table dialog if it is visible
+	if(truthTableDialog->isVisible())
+	    truthTableDialog->show(singleNeuronID);
+
+	//Show button to display dialog if it is not already visible
+	if(fromToCombo->currentText() == "To"){
+	    truthTableButton->setVisible(true);
+	}
+	else{
+	    truthTableButton->setVisible(false);
+	    truthTableDialog->hide();
+	}
+    }
+    else{
 	truthTableButton->setVisible(false);
+	truthTableDialog->hide();
+    }
 }
 
 
