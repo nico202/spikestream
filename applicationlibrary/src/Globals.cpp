@@ -1,6 +1,11 @@
+//SpikeStream includes
 #include "Globals.h"
 #include "SpikeStreamException.h"
 using namespace spikestream;
+
+//Qt includes
+#include <QDateTime>
+
 
 //Declare static variables
 unsigned int Globals::analysisID = 0;
@@ -14,6 +19,7 @@ NetworkDisplay* Globals::networkDisplay = new NetworkDisplay();
 bool Globals::rendering = false;
 QString Globals::spikeStreamRoot = "";
 QString Globals::workingDirectory = "";
+unsigned int Globals::timerStart_sec = 0;
 
 
 /*---------------------------------------------------------------------------------*/
@@ -137,6 +143,19 @@ bool Globals::isRendering() {
 /*! Sets the analysis id. An id of 0 indicates that no analysis is loaded. */
 void Globals::setAnalysisID(unsigned int id){
     Globals::analysisID = id;
+}
+
+
+/*! Stores the current time in seconds */
+void Globals::startTimer(){
+    timerStart_sec = QDateTime::currentDateTime().toTime_t();
+}
+
+
+/*! Returns the number of seconds that have elapsed since the timer started */
+unsigned int Globals::timeElapsed(){
+    unsigned int currTime_sec = QDateTime::currentDateTime().toTime_t();
+    return currTime_sec - timerStart_sec;
 }
 
 

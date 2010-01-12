@@ -162,13 +162,13 @@ void PhiCalculator::calculateReverseProbability(ProbabilityTable& causalTable, P
 
     //Work out p(s1)
     double pS1 = 0.0;
-    for(QHash<QString, double>::iterator iter = causalTable.begin(); iter != causalTable.end(); ++iter){
+    for(QHash<QString, double>::iterator iter = causalTable.begin(); iter != causalTable.end() && !*stop; ++iter){
 	pS1 += iter.value() * pMaxS0;
     }
 
     //Populate reverse table
     double newProb;
-    for(QHash<QString, double>::iterator iter = causalTable.begin(); iter != causalTable.end(); ++iter){
+    for(QHash<QString, double>::iterator iter = causalTable.begin(); iter != causalTable.end() && !*stop; ++iter){
 	newProb = (iter.value() * pMaxS0) / pS1;
 	reverseTable.set(iter.key(), newProb);
     }
@@ -186,7 +186,7 @@ void  PhiCalculator::fillProbabilityTable(ProbabilityTable& probTable, QList<uns
     ProbabilityTable causalProbTable(probTable.getNumberOfElements());
 
     //Fill p(x1|x0) table
-    for(QHash<QString, double>::iterator iter = probTable.begin(); iter != probTable.end(); ++iter){
+    for(QHash<QString, double>::iterator iter = probTable.begin(); iter != probTable.end() && !*stop; ++iter){
 	//Get probability that this state leads to the current state of the network
 	double causalProb = getCausalProbability(neurIDList, iter.key());
 	causalProbTable.set(iter.key(), causalProb);
@@ -222,6 +222,10 @@ double PhiCalculator::getPartitionPhi(QList<unsigned int>& aPartition, QList<uns
     if(aPartition.size() == 0 && bPartition.size() == 0)
 	throw SpikeStreamAnalysisException("Both A and B partitions contain zero neurons");
 
+    //Check for stop
+    if(*stop)
+	return 0.0;
+
     //Handle case where the partition is the whole partition
     if(aPartition.size() == 0 || bPartition.size() == 0){
 	//Build probability table using either A or B partition (whichever is non zero)
@@ -235,10 +239,14 @@ double PhiCalculator::getPartitionPhi(QList<unsigned int>& aPartition, QList<uns
 	    fillProbabilityTable(*probTable, aPartition);
 	}
 
+	//Check for stop
+	if(*stop)
+	    return 0.0;
+
 	//Calculate phi on whole subset
 	double result = 0.0;
 	double pMaxX0 = 1.0 / exp2((double) probTable->getNumberOfElements());
-	for(QHash<QString, double>::iterator iter = probTable->begin(); iter != probTable->end(); ++iter){
+	for(QHash<QString, double>::iterator iter = probTable->begin(); iter != probTable->end() && !*stop; ++iter){
 	    /* Calculation is
 		SUM[ p(i)log2( p(i) / pmax(X0))
 	    */
@@ -263,9 +271,17 @@ double PhiCalculator::getPartitionPhi(QList<unsigned int>& aPartition, QList<uns
     ProbabilityTable subProbTable(subsetList.size());
     fillProbabilityTable(subProbTable, subsetList);
 
+    //Check for stop
+    if(*stop)
+	return 0.0;
+
     //Get p(X0->x1) for the A partition
     ProbabilityTable aProbTable(aPartition.size());
     fillProbabilityTable(aProbTable, aPartition);
+
+    //Check for stop
+    if(*stop)
+	return 0.0;
 
     //Get p(X0->x1) for the B partition
     ProbabilityTable bProbTable(bPartition.size());
@@ -274,9 +290,9 @@ double PhiCalculator::getPartitionPhi(QList<unsigned int>& aPartition, QList<uns
     //Calculate the relative entropy
     double result = 0.0, subsetProb;
     //Work through the A partition
-    for(QHash<QString, double>::iterator aIter = aProbTable.begin(); aIter != aProbTable.end(); ++aIter){
+    for(QHash<QString, double>::iterator aIter = aProbTable.begin(); aIter != aProbTable.end() && !*stop; ++aIter){
 	//Work through the B partition
-	for(QHash<QString, double>::iterator bIter =bProbTable.begin(); bIter != bProbTable.end(); ++bIter){
+	for(QHash<QString, double>::iterator bIter =bProbTable.begin(); bIter != bProbTable.end() && !*stop; ++bIter){
 	    /* Calculation is
 		SUM[ p(i)log2( p(i) / (pA(i) * pB(i)))
 	    */
