@@ -19,8 +19,8 @@ class TestWeightlessNeuron : public QObject {
 
     private:
 	void addTraining(WeightlessNeuron& neuron, QString trainingPattern, int output);
-	bool bitsEqual(byte* byteArr, QString bitPattStr, int output);
-	void fillByteArray(byte*& byteArr, int& arrLen, QString byteStr);
+	bool bitsEqual(unsigned char* byteArr, QString bitPattStr, int output);
+	void fillByteArray(unsigned char*& byteArr, int& arrLen, QString byteStr);
 };
 
 #endif//TESTWEIGHTLESSNEURON_H

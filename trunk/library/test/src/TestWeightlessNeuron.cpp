@@ -265,7 +265,7 @@ void TestWeightlessNeuron::addTraining(WeightlessNeuron& neuron, QString trainin
 }
 
 
-bool TestWeightlessNeuron::bitsEqual(byte* byteArr, QString bitPattStr, int output){
+bool TestWeightlessNeuron::bitsEqual(unsigned char* byteArr, QString bitPattStr, int output){
     if(byteArr[0] != output)
 	return false;
 
@@ -281,7 +281,7 @@ bool TestWeightlessNeuron::bitsEqual(byte* byteArr, QString bitPattStr, int outp
 }
 
 
-void TestWeightlessNeuron::fillByteArray(byte*& byteArr, int& arrLen, QString byteStr){
+void TestWeightlessNeuron::fillByteArray(unsigned char*& byteArr, int& arrLen, QString byteStr){
     if(byteStr.length() % 8 == 0)
 	arrLen = byteStr.length() / 8;
     else
