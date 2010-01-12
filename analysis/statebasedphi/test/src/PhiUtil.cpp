@@ -5,7 +5,7 @@ using namespace spikestream;
 
 /*! Adds the trainign pattern to the weightless neuron */
 void PhiUtil::addTraining(WeightlessNeuron& neuron, QString trainingPattern, int output){
-    byte* byteArr;
+    unsigned char* byteArr;
     int arrLen;
     fillByteArray(byteArr, arrLen, trainingPattern);
     QByteArray qByteArr = QByteArray::fromRawData((const char*)byteArr, arrLen);
@@ -15,7 +15,7 @@ void PhiUtil::addTraining(WeightlessNeuron& neuron, QString trainingPattern, int
 
 
 /*! Returns true if the string of 1s and 0s matches the 1s and 0s in the byte array and the output */
-bool PhiUtil::bitsEqual(byte* byteArr, QString bitPattStr, int output){
+bool PhiUtil::bitsEqual(unsigned char* byteArr, QString bitPattStr, int output){
     if(byteArr[0] != output)
 	return false;
 
@@ -148,12 +148,12 @@ PhiCalculator* PhiUtil::buildPhiTestNetwork2(){
 }
 
 
-void PhiUtil::fillByteArray(byte*& byteArr, int& arrLen, QString byteStr){
+void PhiUtil::fillByteArray(unsigned char*& byteArr, int& arrLen, QString byteStr){
     if(byteStr.length() % 8 == 0)
 	arrLen = byteStr.length() / 8;
     else
 	arrLen = byteStr.length() / 8 + 1;
-    byteArr = new byte[arrLen];
+    byteArr = new unsigned char[arrLen];
 
     //Initialize array
     for(int i=0; i<arrLen; ++i)
