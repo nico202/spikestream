@@ -163,6 +163,8 @@ void StateBasedPhiWidget::loadArchiveTimeStepsIntoCombos(){
     fromTimeStepCombo->addItems(timeStepList);
     toTimeStepCombo->clear();
     toTimeStepCombo->addItems(timeStepList);
+    if(fromTimeStepCombo->count() > 0)
+	fromTimeStepCombo->setCurrentIndex(0);
 }
 
 
@@ -344,12 +346,12 @@ QToolBar* StateBasedPhiWidget::getToolBar(){
     connect(Globals::getEventRouter(), SIGNAL(analysisNotRunningSignal(bool)), tmpAction, SLOT(setEnabled(bool)));
     tmpToolBar->addAction (tmpAction);
 
-    tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/play.xpm"), "Start analysis", this);
+    tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/play.png"), "Start analysis", this);
     connect(tmpAction, SIGNAL(triggered()), this, SLOT(startAnalysis()));
     connect(Globals::getEventRouter(), SIGNAL(analysisNotRunningSignal(bool)), tmpAction, SLOT(setEnabled(bool)));
     tmpToolBar->addAction (tmpAction);
 
-    tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/stop.xpm"), "Stop analysis", this);
+    tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/stop.png"), "Stop analysis", this);
     connect(tmpAction, SIGNAL(triggered()), this, SLOT(stopAnalysis()));
     tmpToolBar->addAction (tmpAction);
 

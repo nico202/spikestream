@@ -427,7 +427,7 @@ void ArchiveWidget_V2::loadArchive(ArchiveInfo& archiveInfo){
     emit archiveChanged();
 
     //Set the time step labels
-    timeStepLabel->setText("0");
+    timeStepLabel->setText(QString::number(Globals::getArchiveDao()->getMinTimeStep(newArchive->getID())));
     maxTimeStepLabel->setText(QString::number(Globals::getArchiveDao()->getMaxTimeStep(newArchive->getID())));
 
     //Enable the transport controls
