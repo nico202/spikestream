@@ -89,6 +89,12 @@ void AbstractDao::connectToDatabase(){
     database.setDatabaseName(this->dbInfo.getDatabase());
     database.setUserName(this->dbInfo.getUser());
     database.setPassword(this->dbInfo.getPassword());
+
+    //Set connection options to prevent it from timing out
+   database.setConnectOptions("MYSQL_OPT_RECONNECT=1");
+    //database.setConnectOptions("CLIENT_SSL=1;CLIENT_IGNORE_SPACE=1");
+
+    //Open database connection
     bool ok = database.open();
     if(!ok)
 	throw SpikeStreamDBException( QString("Cannot connect to database ") + this->dbInfo.toString() + ". Error: " + database.lastError().text() );

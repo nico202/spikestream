@@ -208,7 +208,7 @@ void StateBasedPhiWidget::newAnalysis(){
 
 /*! Selects the parameters to be used for the analysis, including the description.
     These cannot be edited once the analysis has been started - otherwise would have to associate
-    a set of parameter with each time step */
+    a set of parameters with each time step */
 void StateBasedPhiWidget::selectParameters(){
     //Record the current description
     QString oldDescription = analysisInfo.getDescription();
@@ -392,7 +392,8 @@ void StateBasedPhiWidget::initializeAnalysisInfo(){
     analysisInfo.setAnalysisType(1);
 
     //Set parameters
-    analysisInfo.getParameterMap()["Generalization"] = 1.0;
+    analysisInfo.getParameterMap()["generalization"] = 1.0;
+    analysisInfo.getParameterMap()["ignore_disconnected_subsets"] = 1.0;
 }
 
 

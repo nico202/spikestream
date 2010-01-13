@@ -30,6 +30,10 @@ namespace spikestream{
 	    void addWeightlessConnection(unsigned int connectionID, unsigned int patternIndex);
 	    unsigned int addWeightlessNeuronTrainingPattern(unsigned int neuronID, const unsigned char* patternArray, bool output, unsigned int patternArraySize);
 	    void deleteNetwork(unsigned int networkID);
+	    void getAllFromConnections(unsigned int networkID, QHash<unsigned int, QHash<unsigned int, bool> >& connMap);
+	    void getAllToConnections(unsigned int networkID, QHash<unsigned int, QHash<unsigned int, bool> >& connMap);
+	    QList<unsigned int> getFromConnections(unsigned int fromNeuronID);
+	    QList<unsigned int> getToConnections(unsigned int toNeuronID);
 	    QList<Connection> getConnections(unsigned int fromNeuronID, unsigned int toNeuronID);
 	    unsigned int getConnectionGroupSize(unsigned int connGrpID);
 	    QList<ConnectionGroupInfo> getConnectionGroupsInfo(unsigned int networkID);

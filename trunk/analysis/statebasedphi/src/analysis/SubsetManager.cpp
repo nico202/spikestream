@@ -166,6 +166,12 @@ void SubsetManager::runCalculation(const bool * const stop){
     //Get a complete list of the neuron IDs in the network
     neuronIDList = networkDao->getNeuronIDs(analysisInfo.getNetworkID());
 
+    //Get a complete map of the connections in the network, if required
+    if( analysisInfo.getParameter("ignore_disconnected_subsets") ){
+	networkDao->getAllFromConnections(analysisInfo.getNetworkID(), fromConnectionMap);
+	networkDao->getAllToConnections(analysisInfo.getNetworkID(), toConnectionMap);
+    }
+
     //Record the number of steps that need to be completed and initialize progress counter
     numberOfProgressSteps = 2 * getMaxSubsetListSize(neuronIDList.size()) + neuronIDList.size() - 1;
     progressCounter = 0;
@@ -198,8 +204,17 @@ void SubsetManager::addSubset(bool subsetSelectionArray[], int arrayLength){
 	    tmpSubset->addNeuronIndex(i);
     }
 
-    //Store subset in class
-    subsetList.append(tmpSubset);
+    if(analysisInfo.getParameter("ignore_disconnected_subsets")){
+	qDebug()<<"USING IGNORE DISCONNECTED SUBSETS PARAMETER";
+	if( subsetConnected(tmpSubset->getNeuronIDs()) ){
+	    //Store subset in class
+	    subsetList.append(tmpSubset);
+	}
+    }
+    else{
+	//Store subset in class
+	subsetList.append(tmpSubset);
+    }
 }
 
 
@@ -241,6 +256,17 @@ void SubsetManager::printSubsets(){
 	cout<<" phi="<<subset->getPhi()<<endl;
     }
 }
+
+
+/*! Returns true if all of the neurons have at least one connection to the other neurons in the subset */
+bool SubsetManager::subsetConnected(QList<unsigned int> neuronIDs){
+    foreach(unsigned int neuronID, neuronIDs){
+	if(fromConnectionMap[neuronID].isEmpty() && toConnectionMap[neuronID].isEmpty())
+	    return false;
+    }
+    return true;
+}
+
 
 /*! Informs other classes about progess with the calculation */
 void SubsetManager::updateProgress(const QString& msg){
