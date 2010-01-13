@@ -118,6 +118,84 @@ QList<ConnectionGroupInfo> NetworkDao::getConnectionGroupsInfo(unsigned int netw
 }
 
 
+/*! Fills the supplied nested hash map with all the connections made FROM a neuron to other neurons.
+    The key is the FROM neuron id, the value is a second map whose key is the TO neuron id and whose
+    value is a boolean always set to true. */
+void NetworkDao::getAllFromConnections(unsigned int networkID, QHash<unsigned int, QHash<unsigned int, bool> >& connMap){
+    //Reset the map
+    connMap.clear();
+
+    //Get a list of all the neuron ids in the network
+    QList<unsigned int> neuronIDList = getNeuronIDs(networkID);
+
+    //Work through all of the neurons in the network
+    foreach(unsigned int neuronID, neuronIDList){
+	//Add the connections FROM this neuron id TO other neurons
+	QHash<unsigned int, bool> tmpFromConMap;
+	QList<unsigned int> fromConList = getFromConnections(neuronID);
+	foreach(unsigned int fromConNeurID, fromConList)
+	    tmpFromConMap[fromConNeurID] = true;
+	connMap.insert(neuronID, tmpFromConMap);
+    }
+}
+
+
+/*! Fills the supplied nested  hash map with all the connections made TO each neuron from other neurons.
+    The key is the TO neuron id, the value is a second map whose key is the FROM neuron id and whose
+    value is a boolean always set to true.  */
+void NetworkDao::getAllToConnections(unsigned int networkID, QHash<unsigned int, QHash<unsigned int, bool> >& connMap){
+    //Reset the map
+    connMap.clear();
+
+    //Get a list of all the neuron ids in the network
+    QList<unsigned int> neuronIDList = getNeuronIDs(networkID);
+
+    //Work through all of the neurons in th network
+    foreach(unsigned int neuronID, neuronIDList){
+	//Add the connections FROM this neuron id TO other neurons
+	QHash<unsigned int, bool> tmpToConMap;
+	QList<unsigned int> toConList = getToConnections(neuronID);
+	foreach(unsigned int toConNeurID, toConList)
+	    tmpToConMap[toConNeurID] = true;
+	connMap.insert(neuronID, tmpToConMap);
+    }
+}
+
+
+/*! Returns a list of all the connections FROM the specified neuron */
+QList<unsigned int> NetworkDao::getFromConnections(unsigned int fromNeuronID){
+    QSqlQuery query = getQuery("SELECT ToNeuronID FROM Connections WHERE FromNeuronID=" + QString::number(fromNeuronID));
+    executeQuery(query);
+
+    //Add neuron ids to list
+    QList<unsigned int> conList;
+    while(query.next()){
+	unsigned int neurID = Util::getUInt(query.value(0).toString());
+	conList.append(neurID);
+    }
+
+    //Return list
+    return conList;
+}
+
+
+/*! Returns a list of all the connections TO the specified neuron */
+QList<unsigned int> NetworkDao::getToConnections(unsigned int toNeuronID){
+    QSqlQuery query = getQuery("SELECT FromNeuronID FROM Connections WHERE ToNeuronID=" + QString::number(toNeuronID));
+    executeQuery(query);
+
+    //Add neuron ids to list
+    QList<unsigned int> conList;
+    while(query.next()){
+	unsigned int neurID = Util::getUInt(query.value(0).toString());
+	conList.append(neurID);
+    }
+
+    //Return list
+    return conList;
+}
+
+
 /*! Returns a list of connections filtered according to the connection mode */
 QList<Connection*> NetworkDao::getConnections(unsigned int connectionMode, unsigned int singleNeuronID, unsigned int toNeuronID){
     QList<Connection*> conList;

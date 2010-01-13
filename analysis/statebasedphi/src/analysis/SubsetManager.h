@@ -61,6 +61,14 @@ namespace spikestream {
 	    /*! List of all of the neuron IDs in the network */
 	    QList<unsigned int> neuronIDList;
 
+	    /*! Nested  maps containing all of each neuron's from connections.
+		Used for filtering out subsets with a disconnected neuron, which have zero phi */
+	    QHash<unsigned int, QHash<unsigned int, bool> > fromConnectionMap;
+
+	    /*! Nested  maps containing each neuron's to connections.
+		Used for filtering out subsets with a disconnected neuron, which have zero phi */
+	    QHash<unsigned int, QHash<unsigned int, bool> > toConnectionMap;
+
 	    /*! Complete list of possible subsets
 		FIXME: COULD BE MADE MUCH MORE EFFICIENT IF THIS WAS ONLY THE CONNECTED SUBSETS */
 	    QList<Subset*> subsetList;
@@ -78,6 +86,7 @@ namespace spikestream {
 	    void addSubset(bool subsetSelectionArray[], int arrayLength);
 	    void deleteSubsets();
 	    unsigned int getMaxSubsetListSize(int numberOfNeurons);
+	    bool subsetConnected(QList<unsigned int> neuronIDs);
 	    void updateProgress(const QString& msg);
     };
 

@@ -5,6 +5,9 @@
 #include "NetworkDao.h"
 using namespace spikestream;
 
+//Qt includes
+#include <QHash>
+
 //Other includes
 #include <iostream>
 using namespace std;
@@ -223,6 +226,80 @@ void TestNetworkDao::testGetConnections2(){
     QCOMPARE(conList[0]->fromNeuronID, testNeurIDList[3]);
     QCOMPARE(conList[0]->toNeuronID, testNeurIDList[1]);
     QCOMPARE(conList[0]->weight, -1.95f);
+}
+
+
+/*! Connections in test network 1 are:
+	0->1    4->3
+	0->2    4->1
+	0->3    3->2
+    Numbers are the index of the neuron id in testNeurIDList. */
+void TestNetworkDao::testGetAllFromConnections(){
+    //Add the test network
+    addTestNetwork1();
+
+    //Create the network dao and run test method
+    NetworkDao networkDao (dbInfo);
+    QHash<unsigned int, QHash<unsigned int, bool> > fromConMap;
+    networkDao.getAllFromConnections(testNetID, fromConMap);
+    QCOMPARE(fromConMap[testNeurIDList[0]].size(), (int)3);
+    QCOMPARE(fromConMap[testNeurIDList[1]].size(), (int)0);
+    QCOMPARE(fromConMap[testNeurIDList[2]].size(), (int)0);
+    QCOMPARE(fromConMap[testNeurIDList[3]].size(), (int)1);
+    QCOMPARE(fromConMap[testNeurIDList[4]].size(), (int)2);
+
+}
+
+
+/*! Connections in test network 1 are:
+	0->1    4->3
+	0->2    4->1
+	0->3    3->2
+    Numbers are the index of the neuron id in testNeurIDList. */
+void TestNetworkDao::testGetAllToConnections(){
+}
+
+
+/*! Connections in test network 1 are:
+	0->1    4->3
+	0->2    4->1
+	0->3    3->2
+    Numbers are the index of the neuron id in testNeurIDList. */
+void TestNetworkDao::testGetFromConnections(){
+    //Add the test network
+    addTestNetwork1();
+
+    //Create the network dao and run test method
+    NetworkDao networkDao (dbInfo);
+    QList<unsigned int> fromConList = networkDao.getFromConnections(testNeurIDList.at(0));
+    QCOMPARE(fromConList.size(), (int)3);
+    QCOMPARE(fromConList.at(0), (unsigned int)testNeurIDList[1]);
+    QCOMPARE(fromConList.at(0), (unsigned int)testNeurIDList[2]);
+    QCOMPARE(fromConList.at(0), (unsigned int)testNeurIDList[3]);
+
+    fromConList = networkDao.getFromConnections(testNeurIDList.at(2));
+    QCOMPARE(fromConList.size(), (int)0);
+}
+
+
+/*! Connections in test network 1 are:
+	0->1    4->3
+	0->2    4->1
+	0->3    3->2
+    Numbers are the index of the neuron id in testNeurIDList. */
+void TestNetworkDao::testGetToConnections(){
+    //Add the test network
+    addTestNetwork1();
+
+    //Create the network dao and run test method
+    NetworkDao networkDao (dbInfo);
+    QList<unsigned int> toConList = networkDao.getToConnections(testNeurIDList.at(1));
+    QCOMPARE(toConList.size(), (int)2);
+    QCOMPARE(toConList.at(0), (unsigned int)testNeurIDList[0]);
+    QCOMPARE(toConList.at(0), (unsigned int)testNeurIDList[4]);
+
+    toConList = networkDao.getToConnections(testNeurIDList.at(4));
+    QCOMPARE(toConList.size(), (int)0);
 }
 
 

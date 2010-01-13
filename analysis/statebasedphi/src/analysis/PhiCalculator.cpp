@@ -344,7 +344,7 @@ void PhiCalculator::loadWeightlessNeurons(){
 	weightlessNeuronMap[neurID] = networkDao->getWeightlessNeuron(neurID);
 
 	//Set parameters in neuron
-	weightlessNeuronMap[neurID]->setGeneralization(analysisInfo.getParameter("Generalization"));
+	weightlessNeuronMap[neurID]->setGeneralization(analysisInfo.getParameter("generalization"));
     }
 }
 
