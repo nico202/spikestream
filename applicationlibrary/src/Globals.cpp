@@ -12,6 +12,7 @@ unsigned int Globals::analysisID = 0;
 AnalysisDao* Globals::analysisDao = NULL;
 Archive* Globals::archive = NULL;
 ArchiveDao* Globals::archiveDao = NULL;
+bool Globals::archivePlaying = false;
 EventRouter* Globals::eventRouter = new EventRouter();
 Network* Globals::network = NULL;
 NetworkDao* Globals::networkDao = NULL;
@@ -140,6 +141,12 @@ bool Globals::isRendering() {
 }
 
 
+/*! Returns true if archive playback is in progress */
+bool Globals::isArchivePlaying() {
+    return archivePlaying;
+}
+
+
 /*! Sets the analysis id. An id of 0 indicates that no analysis is loaded. */
 void Globals::setAnalysisID(unsigned int id){
     Globals::analysisID = id;
@@ -191,6 +198,12 @@ void Globals::setArchiveDao(ArchiveDao* archiveDao){
 	delete archiveDao;
 
     Globals::archiveDao = archiveDao;
+}
+
+
+/*! Sets whether archive playback is taking place */
+void Globals::setArchivePlaying(bool archivePlaying){
+    Globals::archivePlaying = archivePlaying;
 }
 
 

@@ -26,6 +26,7 @@ namespace spikestream {
 	    QString getErrorMessage();
 	    bool isError();
 	    void play(unsigned int startTimeStep, unsigned int archiveID, unsigned int frameRate);
+	    void step(unsigned int startTimeStep, unsigned int archiveID);
 	    void setFrameRate(unsigned int frameRate);
 	    void stop();
 
@@ -63,6 +64,9 @@ namespace spikestream {
 
 	    /*! Mutex controlling access to variables */
 	    QMutex mutex;
+
+	    /*! In step mode the run method only advances by one step */
+	    bool stepMode;
 
 
 	    //============================  METHODS  =============================
