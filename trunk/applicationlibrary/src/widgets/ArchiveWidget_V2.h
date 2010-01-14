@@ -7,6 +7,7 @@
 using namespace spikestream;
 
 //Qt includes
+#include <QToolBar>
 #include <QWidget>
 #include <QLayout>
 #include <QHash>
@@ -32,9 +33,9 @@ namespace spikestream{
 	    void loadArchive();
 	    void loadArchiveList();
 	    void rewindButtonPressed();
-	    void playButtonToggled(bool on);
+	    void playButtonPressed();
 	    void stepButtonPressed();
-	    void fastForwardButtonToggled(bool on);
+	    void fastForwardButtonPressed();
 	    void stopButtonPressed();
 	    void frameRateComboChanged(int);
 
@@ -49,7 +50,7 @@ namespace spikestream{
 	    QGridLayout* gridLayout;
 
 	    /*! Widget holding transport controls */
-	    QWidget* transportControlWidget;
+	    QToolBar* toolBar;
 
 	    /*! Used to ignore button events when button state is changed programatically */
 	    bool ignoreButton;
@@ -60,11 +61,14 @@ namespace spikestream{
 	    /*! Records if the rewind button was used to stop the playback thread */
 	    bool rewind;
 
-	    QPushButton* playButton;
-	    QPushButton* stopButton;
-	    QPushButton* stepButton;
-	    QPushButton* fastForwardButton;
-	    QPushButton* rewindButton;
+	    /*! Records if the step button was used to stop the playback thread */
+	    bool step;
+
+	    /*! Records if any of the neuron firing patterns have been displayed.
+		Important for the step function to display the first pattern in the archive */
+	    bool archiveOpen;
+
+
 	    QComboBox* frameRateCombo;
 
 	    QLabel* timeStepLabel;
@@ -79,10 +83,11 @@ namespace spikestream{
 	    const static int delButCol = 5;
 
 	    //========================  METHODS  =========================
-	    void buildTransportControls();
+	    QToolBar* getToolBar();
 	    void loadArchive(ArchiveInfo& archiveInfo);
 	    void reset();
 	    void rewindArchive();
+	    void stepArchive();
 
     };
 }

@@ -34,9 +34,11 @@ namespace spikestream {
 	    static NetworkDisplay* getNetworkDisplay();
 	    static QString getSpikeStreamRoot();
 	    static QString getWorkingDirectory();
+	    static bool isArchivePlaying();
 	    static bool isRendering();
 	    static bool networkLoaded();
 	    static void setAnalysisID(unsigned int id);
+	    static void setArchivePlaying(bool archivePlaying);
 	    static void startTimer();
 	    static unsigned int timeElapsed();
 
@@ -85,6 +87,9 @@ namespace spikestream {
 
 	    /*! The time at which the timer starts */
 	    static unsigned int timerStart_sec;
+
+	    /*! Is archive playback in progress */
+	    static bool archivePlaying;
 
 	    //======================  METHODS  ============================
 	    static void setAnalysisDao(AnalysisDao* analysisDao);

@@ -17,6 +17,7 @@ ArchivePlayerThread::ArchivePlayerThread(DBInfo archiveDBInfo) {
     archiveDao = NULL;
     archiveID = 0;
     updateInterval_ms = 1000;
+    stepMode = false;
 }
 
 
@@ -43,9 +44,19 @@ bool ArchivePlayerThread::isError(){
 
 /*! Starts the archive playing */
 void ArchivePlayerThread::play(unsigned int startTimeStep, unsigned int archiveID, unsigned int frameRate){
+    stepMode = false;
     this->startTimeStep = startTimeStep;
     this->archiveID = archiveID;
     this->setFrameRate(frameRate);
+    start();
+}
+
+
+/*! Causes archive to advance by one step */
+void ArchivePlayerThread::step(unsigned int startTimeStep, unsigned int archiveID){
+    stepMode = true;
+    this->startTimeStep = startTimeStep;
+    this->archiveID = archiveID;
     start();
 }
 
@@ -61,6 +72,7 @@ void ArchivePlayerThread::setFrameRate(unsigned int frameRate){
 /*! Causes the player to exit from its run loop and stop */
 void ArchivePlayerThread::stop(){
     stopThread = true;
+    stepMode = false;
 }
 
 
@@ -90,6 +102,12 @@ void ArchivePlayerThread::run(){
     //Get the maximum time step so we know when to stop
     unsigned int lastTimeStep = archiveDao->getMaxTimeStep(archiveID);
 
+    if(timeStep > lastTimeStep){
+	setError("Play time step is greater than the maximum time step.");
+    }
+
+    Globals::setArchivePlaying(true);
+
     while(!stopThread){
 	//Record the current time
 	startTime = QTime::currentTime();
@@ -109,26 +127,34 @@ void ArchivePlayerThread::run(){
 	    ++timeStep;
 	    if(timeStep > lastTimeStep){
 		stopThread = true;
-		return;
 	    }
-
-	    //Lock mutex so that update time interval cannot change during this calculation
-	    mutex.lock();
-
-	    //Sleep if task was completed in less than the prescribed interval
-	    elapsedTime_ms = startTime.msecsTo(QTime::currentTime());
-	    if(elapsedTime_ms < updateInterval_ms){
-		 //Sleep for remaning time
-		 usleep(1000 * (updateInterval_ms - elapsedTime_ms));
+	    //Only display one time step in step mode
+	    else if (stepMode){
+		stopThread = true;
+		stepMode = false;
 	    }
+	    //Sleep until the next time step
+	    else {
+		//Lock mutex so that update time interval cannot change during this calculation
+		mutex.lock();
 
-	    //Unlock mutex
-	    mutex.unlock();
+		//Sleep if task was completed in less than the prescribed interval
+		elapsedTime_ms = startTime.msecsTo(QTime::currentTime());
+		if(elapsedTime_ms < updateInterval_ms){
+		     //Sleep for remaning time
+		     usleep(1000 * (updateInterval_ms - elapsedTime_ms));
+		}
+
+		//Unlock mutex
+		mutex.unlock();
+	    }
 	}
 	catch(SpikeStreamException &ex){
 	    setError(ex.getMessage());
 	}
     }
+
+    Globals::setArchivePlaying(false);
 
     //Clear archive dao
     delete archiveDao;
