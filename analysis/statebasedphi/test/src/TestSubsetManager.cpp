@@ -14,6 +14,7 @@ void TestSubsetManager::testBuildSubsetList(){
     //Create test class
     SubsetManager subsetManager;
     subsetManager.setPhiCalculator(new PhiCalculator());
+    subsetManager.setAnalysisInfo(getAnalysisInfo());
 
     //Check that correct subsets were built
     try{
@@ -59,8 +60,9 @@ void TestSubsetManager::testIdentifyComplexes(){
     SubsetManager subsetManager;
     PhiCalculator* phiCalc = PhiUtil::buildPhiTestNetwork1();
     subsetManager.setPhiCalculator(phiCalc);
-    StateBasedPhiAnalysisDaoDuck stateDaoDuck;
-    subsetManager.setStateDao(&stateDaoDuck);
+    StateBasedPhiAnalysisDaoDuck* stateDaoDuck = new StateBasedPhiAnalysisDaoDuck();
+    subsetManager.setStateDao(stateDaoDuck);
+    subsetManager.setAnalysisInfo(getAnalysisInfo());
     QList<unsigned int> neuronIDList;
 
     //Check that correct subsets were built
@@ -74,7 +76,7 @@ void TestSubsetManager::testIdentifyComplexes(){
 	subsetManager.identifyComplexes();
 
 	//Check complexes are correct
-	QList<Complex> complexList = stateDaoDuck.getComplexList();
+	QList<Complex> complexList = stateDaoDuck->getComplexList();
 	QVERIFY( complexExists(complexList, "1,2", 2.0) );
 	QVERIFY( complexExists(complexList, "3,4", 2.0) );
 
@@ -84,7 +86,7 @@ void TestSubsetManager::testIdentifyComplexes(){
 	//Set up test class for network 2
 	PhiCalculator* phiCalc = PhiUtil::buildPhiTestNetwork2();
 	subsetManager.setPhiCalculator(phiCalc);
-	stateDaoDuck.reset();
+	stateDaoDuck->reset();
 	neuronIDList.clear();
 	for(unsigned int i=1; i<=6; ++i)
 	    neuronIDList.append(i);
@@ -94,7 +96,7 @@ void TestSubsetManager::testIdentifyComplexes(){
 	subsetManager.identifyComplexes();
 
 	//Check complexes exist
-	complexList = stateDaoDuck.getComplexList();
+	complexList = stateDaoDuck->getComplexList();
 	QVERIFY( complexExists(complexList, "1,2,3", 3.0) );
 	QVERIFY( complexExists(complexList, "3,6", 1.0) );
 	QVERIFY( complexExists(complexList, "2,5", 1.0) );
@@ -106,6 +108,46 @@ void TestSubsetManager::testIdentifyComplexes(){
     catch(SpikeStreamException& ex){
 	QFAIL(ex.getMessage().toAscii());
     }
+}
+
+
+void TestSubsetManager::testSubsetConnected(){
+    //Create from and to connection maps
+    QHash<unsigned int, QHash<unsigned int, bool> > fromConMap;
+    QHash<unsigned int, QHash<unsigned int, bool> > toConMap;
+
+    /* Build connections as follows
+	1->2   3->2 */
+    fromConMap[1][2] = true;
+    fromConMap[3][2] = true;
+    toConMap[2][1] = true;
+    toConMap[2][3] = true;
+
+    //Create test class and set connection maps
+    SubsetManager subsetManager;
+    subsetManager.setFromConnectionMap(fromConMap);
+    subsetManager.setToConnectionMap(toConMap);
+
+    //Create three subsets, two connected, one not
+    QList<unsigned int> subset1;
+    subset1.append(1);
+    subset1.append(2);
+    subset1.append(3);
+
+    QList<unsigned int> subset2;
+    subset2.append(1);
+    subset2.append(2);
+    subset2.append(3);
+    subset2.append(4);
+
+    QList<unsigned int> subset3;
+    subset3.append(1);
+    subset3.append(3);
+
+    //Test the method
+    QCOMPARE( subsetManager.subsetConnected(subset1), true);
+    QCOMPARE( subsetManager.subsetConnected(subset2), false);
+    QCOMPARE( subsetManager.subsetConnected(subset3), false);
 }
 
 
@@ -140,6 +182,19 @@ bool TestSubsetManager::complexExists(QList<Complex>& complexList, const QString
 	}
     }
     return false;
+}
+
+
+/*! Builds an analysis info with the appropriate parameters */
+AnalysisInfo TestSubsetManager::getAnalysisInfo(){
+    AnalysisInfo info;
+
+    //Set parameters
+    info.getParameterMap()["generalization"] = 1.0;
+    info.getParameterMap()["ignore_disconnected_subsets"] = 0.0;
+
+    //Return
+    return info;
 }
 
 

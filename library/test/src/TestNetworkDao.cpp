@@ -247,7 +247,6 @@ void TestNetworkDao::testGetAllFromConnections(){
     QCOMPARE(fromConMap[testNeurIDList[2]].size(), (int)0);
     QCOMPARE(fromConMap[testNeurIDList[3]].size(), (int)1);
     QCOMPARE(fromConMap[testNeurIDList[4]].size(), (int)2);
-
 }
 
 
@@ -257,6 +256,18 @@ void TestNetworkDao::testGetAllFromConnections(){
 	0->3    3->2
     Numbers are the index of the neuron id in testNeurIDList. */
 void TestNetworkDao::testGetAllToConnections(){
+    //Add the test network
+    addTestNetwork1();
+
+    //Create the network dao and run test method
+    NetworkDao networkDao (dbInfo);
+    QHash<unsigned int, QHash<unsigned int, bool> > toConMap;
+    networkDao.getAllToConnections(testNetID, toConMap);
+    QCOMPARE(toConMap[testNeurIDList[0]].size(), (int)0);
+    QCOMPARE(toConMap[testNeurIDList[1]].size(), (int)2);
+    QCOMPARE(toConMap[testNeurIDList[2]].size(), (int)2);
+    QCOMPARE(toConMap[testNeurIDList[3]].size(), (int)2);
+    QCOMPARE(toConMap[testNeurIDList[4]].size(), (int)0);
 }
 
 
@@ -274,8 +285,8 @@ void TestNetworkDao::testGetFromConnections(){
     QList<unsigned int> fromConList = networkDao.getFromConnections(testNeurIDList.at(0));
     QCOMPARE(fromConList.size(), (int)3);
     QCOMPARE(fromConList.at(0), (unsigned int)testNeurIDList[1]);
-    QCOMPARE(fromConList.at(0), (unsigned int)testNeurIDList[2]);
-    QCOMPARE(fromConList.at(0), (unsigned int)testNeurIDList[3]);
+    QCOMPARE(fromConList.at(1), (unsigned int)testNeurIDList[2]);
+    QCOMPARE(fromConList.at(2), (unsigned int)testNeurIDList[3]);
 
     fromConList = networkDao.getFromConnections(testNeurIDList.at(2));
     QCOMPARE(fromConList.size(), (int)0);
@@ -296,7 +307,7 @@ void TestNetworkDao::testGetToConnections(){
     QList<unsigned int> toConList = networkDao.getToConnections(testNeurIDList.at(1));
     QCOMPARE(toConList.size(), (int)2);
     QCOMPARE(toConList.at(0), (unsigned int)testNeurIDList[0]);
-    QCOMPARE(toConList.at(0), (unsigned int)testNeurIDList[4]);
+    QCOMPARE(toConList.at(1), (unsigned int)testNeurIDList[4]);
 
     toConList = networkDao.getToConnections(testNeurIDList.at(4));
     QCOMPARE(toConList.size(), (int)0);

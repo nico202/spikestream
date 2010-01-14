@@ -17,7 +17,7 @@ INCLUDEPATH += src \
 
 LIBS += -lstatebasedphi -L$(SPIKESTREAM_ROOT)/plugins/analysis -lspikestreamtest -L$(SPIKESTREAM_ROOT)/lib
 
-QT += sql
+QT += xml opengl qt3support sql
 
 CONFIG += qtestlib
 
