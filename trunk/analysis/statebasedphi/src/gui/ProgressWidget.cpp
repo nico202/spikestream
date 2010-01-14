@@ -69,12 +69,12 @@ void ProgressWidget::updateProgress(const QString& msg, unsigned int timeStep, u
 
     //Check to see if we have a progress bar for this time step
     if(progressBarMap.contains(timeStep)){
-//	progressBarMap[timeStep]->setValue(stepsCompleted);
-//	progressDetailsMap[timeStep]->setText(msg);
+	progressBarMap[timeStep]->setValue(stepsCompleted);
+	progressDetailsMap[timeStep]->setText(msg);
     }
     //Add new progress bar
     else{
-	//addProgressBar(timeStep, stepsCompleted, totalSteps);
+	addProgressBar(timeStep, stepsCompleted, totalSteps);
     }
 }
 

@@ -29,9 +29,13 @@ namespace spikestream {
 	    void identifyComplexes();
 	    void printSubsets();
 	    void runCalculation(const bool * const stop);
+	    void setAnalysisInfo(const AnalysisInfo analysisInfo) { this->analysisInfo = analysisInfo; }
+	    void setFromConnectionMap(QHash<unsigned int, QHash<unsigned int, bool> > fromConMap) { this->fromConnectionMap = fromConMap; }
 	    void setNeuronIDList (QList<unsigned int>& neurIDList)  { this->neuronIDList = neurIDList; }
 	    void setPhiCalculator(PhiCalculator* phiCalc) { this->phiCalculator = phiCalc; }
 	    void setStateDao (StateBasedPhiAnalysisDao* stateDao) { this->stateDao = stateDao; }
+	    void setToConnectionMap(QHash<unsigned int, QHash<unsigned int, bool> > toConMap) { this->toConnectionMap = toConMap; }
+	    bool subsetConnected(QList<unsigned int> neuronIDs);
 
 	signals:
 	    void complexFound();
@@ -69,8 +73,10 @@ namespace spikestream {
 		Used for filtering out subsets with a disconnected neuron, which have zero phi */
 	    QHash<unsigned int, QHash<unsigned int, bool> > toConnectionMap;
 
-	    /*! Complete list of possible subsets
-		FIXME: COULD BE MADE MUCH MORE EFFICIENT IF THIS WAS ONLY THE CONNECTED SUBSETS */
+	    /*! Records the total number of subsets without filtering the disconnected ones for debugging */
+	    unsigned int totalSubsetCount;
+
+	    /*! Complete list of possible subsets */
 	    QList<Subset*> subsetList;
 
 	    /*! Class that carries out the phi calculations */
@@ -86,7 +92,6 @@ namespace spikestream {
 	    void addSubset(bool subsetSelectionArray[], int arrayLength);
 	    void deleteSubsets();
 	    unsigned int getMaxSubsetListSize(int numberOfNeurons);
-	    bool subsetConnected(QList<unsigned int> neuronIDs);
 	    void updateProgress(const QString& msg);
     };
 

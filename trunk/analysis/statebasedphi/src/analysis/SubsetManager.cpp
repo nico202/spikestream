@@ -102,12 +102,12 @@ void SubsetManager::buildSubsetList(){
 void SubsetManager::calculateSubsetsPhi(){
     //Calculate the phi of each subset
     for(int i=0; i<subsetList.size() && !*stop; ++i){
+	//Inform main application about the progress
+	updateProgress( "Calculating subset phi. " + QString::number(i+1) + " out of " + QString::number(subsetList.size()) );
+
 	//Calculate phi on the subset
 	QList<unsigned int> tmpNeurIDs = subsetList[i]->getNeuronIDs();
 	subsetList[i]->setPhi(phiCalculator->getSubsetPhi(tmpNeurIDs));
-
-	//Inform main application about the progress
-	updateProgress( "Calculating subset phi. " + QString::number(i+1) + " out of " + QString::number(subsetList.size()) );
     }
 }
 
@@ -179,12 +179,40 @@ void SubsetManager::runCalculation(const bool * const stop){
     //Generate a list of all possible connected subsets
     buildSubsetList();
 
+    //Fix the number of progress steps if we are ignoring disconnected subsets
+    if(analysisInfo.getParameter("ignore_disconnected_subsets")){
+	qDebug()<<"IGNORE DISCONNECTED SUBSETS PARAMETER. Number of possible subsets: "<<totalSubsetCount<<". Current subset list size: "<<subsetList.size();
+	numberOfProgressSteps -= totalSubsetCount - subsetList.size();
+    }
+
     //Calculate the phi of each of these subsets
     calculateSubsetsPhi();
 
     //Identify which of the subsets are complexes
     identifyComplexes();
 
+}
+
+
+/*! Returns true if all of the neurons have at least one connection to the other neurons in the subset */
+bool SubsetManager::subsetConnected(QList<unsigned int> neuronIDs){
+    //Work through each neuron id
+    foreach(unsigned int neuronID, neuronIDs){
+	//Check that neuron is connected from or to at least one other member of the subset
+	bool neuronConnected = false;
+	foreach(unsigned int tstNeurID, neuronIDs){
+	    if(tstNeurID != neuronID){//Being connected to itself does not count
+		if(fromConnectionMap[neuronID].contains(tstNeurID) || toConnectionMap[neuronID].contains(tstNeurID)){
+		    neuronConnected = true;
+		    break;
+		}
+	    }
+	}
+	//No connection exists from or to this neuron with other neurons in the subset
+	if(!neuronConnected)
+	    return false;
+    }
+    return true;
 }
 
 
@@ -205,7 +233,7 @@ void SubsetManager::addSubset(bool subsetSelectionArray[], int arrayLength){
     }
 
     if(analysisInfo.getParameter("ignore_disconnected_subsets")){
-	qDebug()<<"USING IGNORE DISCONNECTED SUBSETS PARAMETER";
+	++totalSubsetCount;
 	if( subsetConnected(tmpSubset->getNeuronIDs()) ){
 	    //Store subset in class
 	    subsetList.append(tmpSubset);
@@ -223,6 +251,7 @@ void SubsetManager::deleteSubsets(){
     for(int i=0; i<subsetList.size(); ++i)
 	delete subsetList[i];
     subsetList.clear();
+    totalSubsetCount = 0;
 }
 
 
@@ -258,21 +287,11 @@ void SubsetManager::printSubsets(){
 }
 
 
-/*! Returns true if all of the neurons have at least one connection to the other neurons in the subset */
-bool SubsetManager::subsetConnected(QList<unsigned int> neuronIDs){
-    foreach(unsigned int neuronID, neuronIDs){
-	if(fromConnectionMap[neuronID].isEmpty() && toConnectionMap[neuronID].isEmpty())
-	    return false;
-    }
-    return true;
-}
-
-
 /*! Informs other classes about progess with the calculation */
 void SubsetManager::updateProgress(const QString& msg){
     ++progressCounter;
     if(progressCounter > numberOfProgressSteps)
-	throw SpikeStreamAnalysisException("Progress counter out of range.");
+	throw SpikeStreamAnalysisException("Progress counter out of range. progressCounter=" + QString::number(progressCounter) + "; numberOfProgressSteps=" + QString::number(numberOfProgressSteps));
 
     emit progress(msg, timeStep, progressCounter, numberOfProgressSteps);
 }
