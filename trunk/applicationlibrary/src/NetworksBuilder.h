@@ -16,6 +16,7 @@ namespace spikestream {
 	protected:
 	    //=====================  METHODS  ===========================
 	    void addTraining(unsigned int neuronID, QString trainingStr, bool output);
+	    void addConnectionGroup(unsigned int networkID, ConnectionGroup& connGrp);
 	    void runThread(NetworkDaoThread& thread);
     };
 
