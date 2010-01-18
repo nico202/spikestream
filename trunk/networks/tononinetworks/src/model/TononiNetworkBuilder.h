@@ -18,10 +18,12 @@ namespace spikestream {
 	    void addBalduzziTononiFigure5(const QString& networkName, const QString& networkDescription);
 	    void addBalduzziTononiFigure6(const QString& networkName, const QString& networkDescription);
 	    void addBalduzziTononiFigure12(const QString& networkName, const QString& networkDescription);
+	    void addBalduzziTononiFigure13(const QString& networkName, const QString& networkDescription);
 
 	private:
 	    //===================  METHODS  ======================
 	    void addParityGateTraining(unsigned int neuronID, int numberOfConnections);
+	    void addTwoOrMoreTraining(unsigned int neuronID, int numberOfConnections);
     };
 
 }

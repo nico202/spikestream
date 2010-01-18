@@ -432,6 +432,207 @@ void TononiNetworkBuilder::addBalduzziTononiFigure12(const QString& networkName,
 }
 
 
+/*! Adds Balduzzi and Tononi (2008), Figure 13.
+    Numbering of neurons is clockwise within each group, working through each group clockwise
+    So neuron at top left has number 1; neuron at bottom right has number 8.
+    The connections are as follows:
+	1->2	1->3
+	2->1	2->3
+	3->1	3->2	3->6	3->7
+	4->5	4->6
+	5->4	5->6
+	6->3	6->4	6->5	6->10
+	7->3	7->8	7->9	7->10
+	8->7	8->9
+	9->7	9->8
+	10->6	10->7	10->11	10->12
+	11->10	11->12
+	12->10	12->11
+*/
+void TononiNetworkBuilder::addBalduzziTononiFigure13(const QString& networkName, const QString& networkDescription){
+    //Easy reference to NetworkDao
+    NetworkDao* networkDao = Globals::getNetworkDao();
+
+    //Add a network
+    NetworkInfo netInfo(0, networkName, networkDescription);
+    Globals::getNetworkDao()->addNetwork(netInfo);
+
+    //Build neuron group - keep references to neurons
+    QHash<QString, double> paramMap;
+    NeuronGroup neurGrp(NeuronGroupInfo(0, "Neuron group 1", "Main neuron group", paramMap, 2));
+    Neuron* neur1 = neurGrp.addNeuron(1, 4, 1);
+    Neuron* neur2 = neurGrp.addNeuron(3, 4, 1);
+    Neuron* neur3 = neurGrp.addNeuron(2, 3, 1);
+    Neuron* neur4 = neurGrp.addNeuron(5, 4, 1);
+    Neuron* neur5 = neurGrp.addNeuron(7, 4, 1);
+    Neuron* neur6 = neurGrp.addNeuron(6, 3, 1);
+    Neuron* neur7 = neurGrp.addNeuron(6, 2, 1);
+    Neuron* neur8 = neurGrp.addNeuron(7, 1, 1);
+    Neuron* neur9 = neurGrp.addNeuron(5, 1, 1);
+    Neuron* neur10 = neurGrp.addNeuron(2, 2, 1);
+    Neuron* neur11 = neurGrp.addNeuron(3, 1, 1);
+    Neuron* neur12 = neurGrp.addNeuron(1, 1, 1);
+
+    //Add the neuron group
+    DBInfo netDBInfo = networkDao->getDBInfo();
+    NetworkDaoThread netDaoThread(netDBInfo);
+    netDaoThread.prepareAddNeuronGroup(netInfo.getID(), &neurGrp);
+    runThread(netDaoThread);
+
+    //Build the connection group that is to be added
+    ConnectionGroupInfo connGrpInfo(0, "Connection Group", neurGrp.getID(), neurGrp.getID(),  paramMap, 2);
+    ConnectionGroup connGrp(connGrpInfo);
+
+    //1->2	1->3
+    Connection* con12 = connGrp.addConnection(new Connection(neur1->getID(), neur2->getID(),  0,  0,  0));
+    Connection* con13 = connGrp.addConnection(new Connection(neur1->getID(), neur3->getID(),  0,  0,  0));
+
+    //2->1	2->3
+    Connection* con21 = connGrp.addConnection(new Connection(neur2->getID(), neur1->getID(),  0,  0,  0));
+    Connection* con23 = connGrp.addConnection(new Connection(neur2->getID(), neur3->getID(),  0,  0,  0));
+
+    //3->1	3->2	3->6	3->7
+    Connection* con31 = connGrp.addConnection(new Connection(neur3->getID(), neur1->getID(),  0,  0,  0));
+    Connection* con32 = connGrp.addConnection(new Connection(neur3->getID(), neur2->getID(),  0,  0,  0));
+    Connection* con36 = connGrp.addConnection(new Connection(neur3->getID(), neur6->getID(),  0,  0,  0));
+    Connection* con37 = connGrp.addConnection(new Connection(neur3->getID(), neur7->getID(),  0,  0,  0));
+
+    //4->5	4->6
+    Connection* con45 = connGrp.addConnection(new Connection(neur4->getID(), neur5->getID(),  0,  0,  0));
+    Connection* con46 = connGrp.addConnection(new Connection(neur4->getID(), neur6->getID(),  0,  0,  0));
+
+    //5->4	5->6
+    Connection* con54 = connGrp.addConnection(new Connection(neur5->getID(), neur4->getID(),  0,  0,  0));
+    Connection* con56 = connGrp.addConnection(new Connection(neur5->getID(), neur6->getID(),  0,  0,  0));
+
+    //6->3	6->4	6->5	6->10
+    Connection* con63 = connGrp.addConnection(new Connection(neur6->getID(), neur3->getID(),  0,  0,  0));
+    Connection* con64 = connGrp.addConnection(new Connection(neur6->getID(), neur4->getID(),  0,  0,  0));
+    Connection* con65 = connGrp.addConnection(new Connection(neur6->getID(), neur5->getID(),  0,  0,  0));
+    Connection* con610 = connGrp.addConnection(new Connection(neur6->getID(), neur10->getID(),  0,  0,  0));
+
+    //7->3	7->8	7->9	7->10
+    Connection* con73 = connGrp.addConnection(new Connection(neur7->getID(), neur3->getID(),  0,  0,  0));
+    Connection* con78 = connGrp.addConnection(new Connection(neur7->getID(), neur8->getID(),  0,  0,  0));
+    Connection* con79 = connGrp.addConnection(new Connection(neur7->getID(), neur9->getID(),  0,  0,  0));
+    Connection* con710 = connGrp.addConnection(new Connection(neur7->getID(), neur10->getID(),  0,  0,  0));
+
+    //8->7	8->9
+    Connection* con87 = connGrp.addConnection(new Connection(neur8->getID(), neur7->getID(),  0,  0,  0));
+    Connection* con89 = connGrp.addConnection(new Connection(neur8->getID(), neur9->getID(),  0,  0,  0));
+
+    //9->7	9->8
+    Connection* con97 = connGrp.addConnection(new Connection(neur9->getID(), neur7->getID(),  0,  0,  0));
+    Connection* con98 = connGrp.addConnection(new Connection(neur9->getID(), neur8->getID(),  0,  0,  0));
+
+    //10->6	10->7	10->11	10->12
+    Connection* con106 = connGrp.addConnection(new Connection(neur10->getID(), neur6->getID(),  0,  0,  0));
+    Connection* con107 = connGrp.addConnection(new Connection(neur10->getID(), neur7->getID(),  0,  0,  0));
+    Connection* con1011 = connGrp.addConnection(new Connection(neur10->getID(), neur11->getID(),  0,  0,  0));
+    Connection* con1012 = connGrp.addConnection(new Connection(neur10->getID(), neur12->getID(),  0,  0,  0));
+
+    //11->10	11->12
+    Connection* con1110 = connGrp.addConnection(new Connection(neur11->getID(), neur10->getID(),  0,  0,  0));
+    Connection* con1112 = connGrp.addConnection(new Connection(neur11->getID(), neur12->getID(),  0,  0,  0));
+
+    //12->10	12->11
+    Connection* con1210 = connGrp.addConnection(new Connection(neur12->getID(), neur10->getID(),  0,  0,  0));
+    Connection* con1211 = connGrp.addConnection(new Connection(neur12->getID(), neur11->getID(),  0,  0,  0));
+
+    netDaoThread.prepareAddConnectionGroup(netInfo.getID(), &connGrp);
+    runThread(netDaoThread);
+
+
+    //Add weightless connections
+    //2 connections to 1
+    networkDao->addWeightlessConnection(con21->getID(), 0);
+    networkDao->addWeightlessConnection(con31->getID(), 1);
+
+    //2 connections to 2
+    networkDao->addWeightlessConnection(con12->getID(), 0);
+    networkDao->addWeightlessConnection(con32->getID(), 1);
+
+    //4 connections to 3
+    networkDao->addWeightlessConnection(con13->getID(), 0);
+    networkDao->addWeightlessConnection(con23->getID(), 1);
+    networkDao->addWeightlessConnection(con63->getID(), 2);
+    networkDao->addWeightlessConnection(con73->getID(), 3);
+
+    //2 connections to 4
+    networkDao->addWeightlessConnection(con54->getID(), 0);
+    networkDao->addWeightlessConnection(con64->getID(), 1);
+
+    //2 connections to 5
+    networkDao->addWeightlessConnection(con45->getID(), 0);
+    networkDao->addWeightlessConnection(con65->getID(), 1);
+
+    //4 connections to 6
+    networkDao->addWeightlessConnection(con36->getID(), 0);
+    networkDao->addWeightlessConnection(con46->getID(), 1);
+    networkDao->addWeightlessConnection(con56->getID(), 2);
+    networkDao->addWeightlessConnection(con106->getID(), 3);
+
+    //4 connections to 7
+    networkDao->addWeightlessConnection(con37->getID(), 0);
+    networkDao->addWeightlessConnection(con87->getID(), 1);
+    networkDao->addWeightlessConnection(con97->getID(), 2);
+    networkDao->addWeightlessConnection(con107->getID(), 3);
+
+    //2 connections to 8
+    networkDao->addWeightlessConnection(con78->getID(), 0);
+    networkDao->addWeightlessConnection(con98->getID(), 1);
+
+    //2 connections to 9
+    networkDao->addWeightlessConnection(con79->getID(), 0);
+    networkDao->addWeightlessConnection(con89->getID(), 1);
+
+    //4 connections to 10
+    networkDao->addWeightlessConnection(con610->getID(), 0);
+    networkDao->addWeightlessConnection(con710->getID(), 1);
+    networkDao->addWeightlessConnection(con1110->getID(), 2);
+    networkDao->addWeightlessConnection(con1210->getID(), 3);
+
+    //2 connections to 11
+    networkDao->addWeightlessConnection(con1011->getID(), 0);
+    networkDao->addWeightlessConnection(con1211->getID(), 1);
+
+    //2 connections to 12
+    networkDao->addWeightlessConnection(con1012->getID(), 0);
+    networkDao->addWeightlessConnection(con1112->getID(), 1);
+
+    //Add training - Elements fire when they receive two or more spikes
+    addTwoOrMoreTraining(neur1->getID(), 2);
+    addTwoOrMoreTraining(neur2->getID(), 2);
+    addTwoOrMoreTraining(neur3->getID(), 4);
+    addTwoOrMoreTraining(neur4->getID(), 2);
+    addTwoOrMoreTraining(neur5->getID(), 2);
+    addTwoOrMoreTraining(neur6->getID(), 4);
+    addTwoOrMoreTraining(neur7->getID(), 4);
+    addTwoOrMoreTraining(neur8->getID(), 2);
+    addTwoOrMoreTraining(neur9->getID(), 2);
+    addTwoOrMoreTraining(neur10->getID(), 4);
+    addTwoOrMoreTraining(neur11->getID(), 2);
+    addTwoOrMoreTraining(neur12->getID(), 2);
+
+    //Add Archive to hold firing patterns
+    ArchiveInfo archiveInfo(0, netInfo.getID(), QDateTime::currentDateTime().toTime_t(), "Single firing pattern present in Balduzzi and Tononi (2008), Figure 5");
+    Globals::getArchiveDao()->addArchive(archiveInfo);
+
+    //Add archive data
+    Globals::getArchiveDao()->addArchiveData(
+	    archiveInfo.getID(),
+	    1,//Time step 1
+	    "" //00000000000
+    );
+}
+
+
+/*----------------------------------------------------------*/
+/*-----                PRIVATE METHODS                 -----*/
+/*----------------------------------------------------------*/
+
+/*! Adds parity gate training to the neuron.
+    A parity gate fires if it receives an odd number of spikes. */
 void TononiNetworkBuilder::addParityGateTraining(unsigned int neuronID, int numberOfConnections){
     //Create array to select subsets
     bool truthTableArray[numberOfConnections];
@@ -458,6 +659,39 @@ void TononiNetworkBuilder::addParityGateTraining(unsigned int neuronID, int numb
 		addTraining(neuronID, trainingStr, 0);
 	    else
 		addTraining(neuronID, trainingStr, 1);
+
+	    //Get the next permutation with this number of ones
+    	    permutationsComplete = !next_permutation(&truthTableArray[0], &truthTableArray[numberOfConnections]);
+	}
+    }
+}
+
+void TononiNetworkBuilder::addTwoOrMoreTraining(unsigned int neuronID, int numberOfConnections){
+    //Create array to select subsets
+    bool truthTableArray[numberOfConnections];
+
+    for(int numOnes = 0; numOnes <= numberOfConnections; ++ numOnes){
+	//Fill permutation array with initial selection
+	Util::fillSelectionArray(truthTableArray, numberOfConnections, numOnes);
+
+	//Work through all permutations at this subset size
+	bool permutationsComplete = false;
+	while(!permutationsComplete){
+
+	    //Build training string from subset selection array
+	    QString trainingStr = "";
+	    for(int i=0; i<numberOfConnections; ++i){
+		if(truthTableArray[i])
+		    trainingStr += "1";
+		else
+		    trainingStr += "0";
+	    }
+
+	    //Add the training
+	    if(numOnes >= 2)
+		addTraining(neuronID, trainingStr, 1);
+	    else
+		addTraining(neuronID, trainingStr, 0);
 
 	    //Get the next permutation with this number of ones
     	    permutationsComplete = !next_permutation(&truthTableArray[0], &truthTableArray[numberOfConnections]);
