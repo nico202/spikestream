@@ -54,6 +54,9 @@ TononiNetworksWidget::TononiNetworksWidget(){
     newButton = addNetworkButton(gridLayout, "Balduzzi and Tononi (2008), Figure 12");
     connect (newButton, SIGNAL(clicked()), this, SLOT(addNetwork()));
 
+    newButton = addNetworkButton(gridLayout, "Balduzzi and Tononi (2008), Figure 13");
+    connect (newButton, SIGNAL(clicked()), this, SLOT(addNetwork()));
+
     mainVBox->addLayout(gridLayout);
     mainVBox->addStretch(5);
 
@@ -81,6 +84,9 @@ void TononiNetworksWidget::addNetwork(){
 
 	else if(netDesc == "Balduzzi and Tononi (2008), Figure 12")
 	    networkBuilder->addBalduzziTononiFigure12(getNetworkName(), netDesc);
+
+	else if(netDesc == "Balduzzi and Tononi (2008), Figure 13")
+	    networkBuilder->addBalduzziTononiFigure13(getNetworkName(), netDesc);
 
 	else
 	    throw SpikeStreamException("Network descrption not recognized: " + netDesc);

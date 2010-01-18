@@ -233,6 +233,12 @@ void StateBasedPhiWidget::startAnalysis(){
 	return;
     }
 
+    //Double check that the neuron type is supported
+//    if(!Globals::getNetworkDao()->isWeightlessNetwork(Globals->getNetwork()->getID())){
+//	qCritical()<<"Network contains neuron types that are not currently supported.";
+//	return;
+//    }
+
     //Get time steps to be analyzed
     int firstTimeStep = Util::getInt(fromTimeStepCombo->currentText());
     int lastTimeStep = Util::getInt(toTimeStepCombo->currentText());
