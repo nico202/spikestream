@@ -527,12 +527,6 @@ void AleksanderNetworksBuilder::reset(){
 /*-------             PRIVATE METHODS              -------*/
 /*--------------------------------------------------------*/
 
-void AleksanderNetworksBuilder::addConnectionGroup(unsigned int networkID, ConnectionGroup& connGrp){
-    DBInfo netDBInfo = Globals::getNetworkDao()->getDBInfo();
-    NetworkDaoThread netDaoThread(netDBInfo);
-    netDaoThread.prepareAddConnectionGroup(networkID, &connGrp);
-    runThread(netDaoThread);
-}
 
 
 /*! Adds a series of progressively interconnected 4 neuron networks with associated archives */

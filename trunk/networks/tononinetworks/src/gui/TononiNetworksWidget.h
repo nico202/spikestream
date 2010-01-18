@@ -6,8 +6,10 @@
 using namespace spikestream;
 
 //Qt includes
-#include <QWidget>
+#include <QLayout>
 #include <QLineEdit>
+#include <QPushButton>
+#include <QWidget>
 
 namespace spikestream {
 
@@ -19,7 +21,7 @@ namespace spikestream {
 	    ~TononiNetworksWidget();
 
 	private slots:
-	    void addBalduzziTononiFigure6();
+	    void addNetwork();
 
 	private:
 	    //======================  VARIABLES  =======================
@@ -30,6 +32,8 @@ namespace spikestream {
 	    QLineEdit* networkName;
 
 	    //======================  METHODS  =========================
+	    QPushButton* addNetworkButton(QGridLayout* gridLayout, const QString& description);
+	    QString getNetworkName();
     };
 
 }

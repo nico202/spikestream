@@ -40,6 +40,15 @@ void NetworksBuilder::addTraining(unsigned int neuronID, QString trainingStr, bo
 }
 
 
+/*! Adds the connection group to the database */
+void NetworksBuilder::addConnectionGroup(unsigned int networkID, ConnectionGroup& connGrp){
+    DBInfo netDBInfo = Globals::getNetworkDao()->getDBInfo();
+    NetworkDaoThread netDaoThread(netDBInfo);
+    netDaoThread.prepareAddConnectionGroup(networkID, &connGrp);
+    runThread(netDaoThread);
+}
+
+
 /*! Runs the supplied thread and checks for errors */
 void NetworksBuilder::runThread(NetworkDaoThread& thread){
     thread.start();
