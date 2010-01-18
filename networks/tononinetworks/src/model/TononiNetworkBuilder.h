@@ -15,11 +15,13 @@ namespace spikestream {
 	public:
 	    TononiNetworkBuilder();
 	    ~TononiNetworkBuilder();
-	    void addBalduzziTononiFigure6(const QString& networkName);
+	    void addBalduzziTononiFigure5(const QString& networkName, const QString& networkDescription);
+	    void addBalduzziTononiFigure6(const QString& networkName, const QString& networkDescription);
+	    void addBalduzziTononiFigure12(const QString& networkName, const QString& networkDescription);
 
 	private:
 	    //===================  METHODS  ======================
-
+	    void addParityGateTraining(unsigned int neuronID, int numberOfConnections);
     };
 
 }
