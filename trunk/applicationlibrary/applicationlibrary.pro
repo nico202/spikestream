@@ -94,8 +94,10 @@ SOURCES += src/nrm/NRMNetwork.cpp \
 #----------------------------------------------#
 #---             analysis folder            ---#
 #----------------------------------------------#
-HEADERS += src/analysis/AnalysisLoaderWidget.h
-SOURCES += src/analysis/AnalysisLoaderWidget.cpp
+HEADERS += src/analysis/AnalysisLoaderWidget.h \
+			src/analysis/AbstractAnalysisWidget.h
+SOURCES += src/analysis/AnalysisLoaderWidget.cpp \
+			src/analysis/AbstractAnalysisWidget.cpp
 
 #----------------------------------------------#
 #---              dialogs folder            ---#
