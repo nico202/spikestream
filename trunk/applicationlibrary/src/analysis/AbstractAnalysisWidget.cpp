@@ -1,10 +1,15 @@
 //SpikeStream includes
 #include "AbstractAnalysisWidget.h"
+#include "AnalysisParameterDialog.h"
 #include "Globals.h"
 #include "LoadAnalysisDialog.h"
 #include "SpikeStreamAnalysisException.h"
 #include "Util.h"
 using namespace spikestream;
+
+//Qt includes
+#include <QAction>
+
 
 /*! Constructor */
 AbstractAnalysisWidget::AbstractAnalysisWidget(QWidget* parent) : QWidget(parent){
@@ -18,8 +23,6 @@ AbstractAnalysisWidget::AbstractAnalysisWidget(QWidget* parent) : QWidget(parent
 	);
 	connect(analysisRunner, SIGNAL(finished()), this, SLOT(threadFinished()));
 	connect(analysisRunner, SIGNAL(finished()), Globals::getEventRouter(), SLOT(analysisStopped()));
-	connect(analysisRunner, SIGNAL(progress(const QString&, unsigned int, unsigned int, unsigned int)), progressWidget, SLOT(updateProgress(const QString&, unsigned int, unsigned int, unsigned int)), Qt::QueuedConnection);
-	connect(analysisRunner, SIGNAL(timeStepComplete(unsigned int)), progressWidget, SLOT(timeStepComplete(unsigned int)), Qt::QueuedConnection);
 	connect(analysisRunner, SIGNAL(newResultsFound()), this , SLOT(updateResults()), Qt::QueuedConnection);
 
 
@@ -113,6 +116,24 @@ void AbstractAnalysisWidget::networkChanged(){
 }
 
 
+/*! Selects the parameters to be used for the analysis, including the description.
+	These cannot be edited once the analysis has been started - otherwise would have to associate
+	a set of parameters with each time step */
+void AbstractAnalysisWidget::selectParameters(){
+	//Record the current description
+	QString oldDescription = analysisInfo.getDescription();
+
+	AnalysisParameterDialog dialog(this, analysisInfo);
+	if(dialog.exec() == QDialog::Accepted ) {
+		//Copy the new information that has been set
+		analysisInfo = dialog.getInfo();
+
+		//Update the description if it has changed
+		if(analysisInfo.getDescription() != oldDescription && analysisInfo.getDescription() != "")
+			Globals::getAnalysisDao()->updateDescription(analysisInfo.getID(), analysisInfo.getDescription());
+	}
+}
+
 
 /*! Stops the analysis of the network. */
 void AbstractAnalysisWidget::stopAnalysis(){
@@ -164,7 +185,7 @@ QStringList AbstractAnalysisWidget::getTimeStepList(unsigned int min, unsigned i
 
 
 /*! Builds the toolbar that goes at the top of the page. */
-QToolBar* AbstractAnalysisWidget::getToolBar(){
+QToolBar* AbstractAnalysisWidget::getDefaultToolBar(){
 	QToolBar* tmpToolBar = new QToolBar(this);
 
 	QAction* tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/open.png"), "Open", this);

@@ -24,6 +24,7 @@ INCLUDEPATH += src \
 		src/views \
 		$(SPIKESTREAM_ROOT)/library/include \
 		$(SPIKESTREAM_ROOT)/applicationlibrary/src \
+		$(SPIKESTREAM_ROOT)/applicationlibrary/src/analysis \
 		$(SPIKESTREAM_ROOT)/applicationlibrary/src/widgets \
 		$(SPIKESTREAM_ROOT)/applicationlibrary/src/dialogs \
 		$(SPIKESTREAM_ROOT)/applicationlibrary/src/models \
@@ -36,32 +37,38 @@ win32 {
 #---               LIBRARIES                ---#
 #----------------------------------------------#
 unix {
-    LIBS += -lgmpxx -L$(SPIKESTREAM_ROOT)/lib -lspikestream -lspikestreamapplication
+	LIBS += -lgmpxx -L$(SPIKESTREAM_ROOT)/lib -lspikestream -lspikestreamapplication
 }
 win32 {
 	LIBS += -lgmp -L$(SPIKESTREAM_ROOT)/extlib/gmp/lib
 }
 
+
+#=================  ANALYSIS  ===================
+HEADERS = src/analysis/Cluster.h \
+			src/analysis/LivelinessTimeStepThread.h \
+			src/analysis/WeightlessLivelinessAnalyzer.h
+SOURCES = src/analysis/Cluster.cpp \
+			src/analysis/LivelinessTimeStepThread.cpp \
+			src/analysis/WeightlessLivelinessAnalyzer.cpp
+
 #====================  GUI  =====================
-HEADERS = src/gui/LivelinessWidget.h
-SOURCES = src/gui/LivelinessWidget.cpp
-
-#==================  ANALYSIS  ===================
-#HEADERS +=
-#SOURCES += src/analysis/AnalysisRunner.cpp \
-
+HEADERS += src/gui/LivelinessWidget.h \
+			src/gui/LivelinessExportDialog.h
+SOURCES += src/gui/LivelinessWidget.cpp \
+			src/gui/LivelinessExportDialog.cpp
 
 #==================  DATABASE  ===================
-#HEADERS += src/database/StateBasedPhiAnalysisDao.h
-#SOURCES += src/database/StateBasedPhiAnalysisDao.cpp
+HEADERS += src/database/LivelinessDao.h
+SOURCES += src/database/LivelinessDao.cpp
 
 #==================  MODELS  =====================
-#HEADERS +=
-#SOURCES +=
+HEADERS += src/models/LivelinessFullResultsModel.h
+SOURCES += src/models/LivelinessFullResultsModel.cpp
 
 #==================  VIEWS  =====================
-#HEADERS += src/views/FullResultsTableView.h
-#SOURCES += src/views/FullResultsTableView.cpp
+HEADERS += src/views/LivelinessFullResultsTableView.h
+SOURCES += src/views/LivelinessFullResultsTableView.cpp
 
 
 

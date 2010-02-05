@@ -3,10 +3,10 @@
 
 //SpikeStream includes
 #include "AbstractAnalysisWidget.h"
-#include "FullResultsModel.h"
-#include "FullResultsTableView.h"
+#include "LivelinessFullResultsModel.h"
+#include "LivelinessFullResultsTableView.h"
 #include "ProgressWidget.h"
-#include "LivelinessAnalysisDao.h"
+#include "LivelinessDao.h"
 using namespace spikestream;
 
 //Qt includes
@@ -15,16 +15,20 @@ using namespace spikestream;
 namespace spikestream {
 
 	class LivelinessWidget : public AbstractAnalysisWidget {
-	    Q_OBJECT
+		Q_OBJECT
 
 		public:
 			LivelinessWidget(QWidget* parent = 0);
 			~LivelinessWidget();
+			void exportAnalysis();
+			void newAnalysis();
+			void startAnalysis();
+			void updateResults();
 
 		private:
 			//=====================  VARIABLES  =======================
 			/*! Wraps analysis database with methods specialized for a state based phi analysis */
-			LivelinessAnalysisDao* livelinessDao;
+			LivelinessDao* livelinessDao;
 
 			/*! Shows a model derived from the liveliness data table */
 			QTableView* analysisDataTableView;
@@ -33,10 +37,12 @@ namespace spikestream {
 			ProgressWidget* progressWidget;
 
 			/*! Model for displaying table of results */
-			FullResultsModel* fullResultsModel;
+			LivelinessFullResultsModel* fullResultsModel;
 
 
 			//=====================  METHODS  =======================
+			void initializeAnalysisInfo();
+			bool timeStepsAlreadyAnalyzed(int firstTimeStep, int lastTimeStep);
    };
 
 }
