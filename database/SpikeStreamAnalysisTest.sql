@@ -47,6 +47,37 @@ CREATE TABLE StateBasedPhiData (
 )
 ENGINE=InnoDB;
 
+
+/* A cluster of neurons connected by lively connections.
+	The Liveliness value should measure the total information integration of the cluster. */
+CREATE TABLE ClusterLiveliness (
+	ClusterID MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
+	AnalysisID SMALLINT UNSIGNED NOT NULL,
+	TimeStep INT UNSIGNED NOT NULL, /* The time step of the firing pattern. */
+	Liveliness DOUBLE NOT NULL,
+	Neurons LONGTEXT NOT NULL,
+
+	PRIMARY KEY (ClusterID),
+	INDEX AnalysisIDIndex(AnalysisID),
+	FOREIGN KEY AnalysisID_FK(AnalysisID) REFERENCES Analyses(AnalysisID) ON DELETE CASCADE
+)
+ENGINE=InnoDB;
+
+
+/* The liveliness of each neuron. */
+CREATE TABLE NeuronLiveliness (
+	NeuronID MEDIUMINT UNSIGNED NOT NULL,
+	AnalysisID SMALLINT UNSIGNED NOT NULL,
+	TimeStep INT UNSIGNED NOT NULL, /* The time step of the firing pattern. */
+	Liveliness DOUBLE NOT NULL,
+
+	PRIMARY KEY (NeuronID, AnalysisID, TimeStep),
+	INDEX AnalysisIDIndex(AnalysisID),
+	FOREIGN KEY AnalysisID_FK(AnalysisID) REFERENCES Analyses(AnalysisID) ON DELETE CASCADE,
+	FOREIGN KEY NeuronID_FK(NeuronID) REFERENCES SpikeStreamNetworkTest.Neurons(NeuronID) ON DELETE CASCADE
+)
+ENGINE=InnoDB;
+
 /* Disable foreign key checks whilst creating tables etc. */
 SET foreign_key_checks = 1;
 

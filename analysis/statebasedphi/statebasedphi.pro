@@ -24,6 +24,7 @@ INCLUDEPATH += src \
 		src/views \
 		$(SPIKESTREAM_ROOT)/library/include \
 		$(SPIKESTREAM_ROOT)/applicationlibrary/src \
+		$(SPIKESTREAM_ROOT)/applicationlibrary/src/analysis \
 		$(SPIKESTREAM_ROOT)/applicationlibrary/src/widgets \
 		$(SPIKESTREAM_ROOT)/applicationlibrary/src/dialogs \
 		$(SPIKESTREAM_ROOT)/applicationlibrary/src/models \
@@ -36,7 +37,7 @@ win32 {
 #---               LIBRARIES                ---#
 #----------------------------------------------#
 unix {
-    LIBS += -lgmpxx -L$(SPIKESTREAM_ROOT)/lib -lspikestream -lspikestreamapplication
+	LIBS += -lgmpxx -L$(SPIKESTREAM_ROOT)/lib -lspikestream -lspikestreamapplication
 }
 win32 {
 	LIBS += -lgmp -L$(SPIKESTREAM_ROOT)/extlib/gmp/lib
@@ -44,27 +45,27 @@ win32 {
 
 #====================  GUI  =====================
 HEADERS = src/gui/StateBasedPhiWidget.h \
-	    src/gui/StateBasedPhiParameterDialog.h \
-	    src/gui/ProgressWidget.h \
-	    src/gui/ExportAnalysisDialog.h
+		src/gui/StateBasedPhiParameterDialog.h \
+		src/gui/ProgressWidget.h \
+		src/gui/StateBasedPhiExportDialog.h
 SOURCES = src/gui/StateBasedPhiWidget.cpp \
-	    src/gui/StateBasedPhiParameterDialog.cpp \
-	    src/gui/ProgressWidget.cpp \
-	    src/gui/ExportAnalysisDialog.cpp
+		src/gui/StateBasedPhiParameterDialog.cpp \
+		src/gui/ProgressWidget.cpp \
+		src/gui/StateBasedPhiExportDialog.cpp
 
 #==================  ANALYSIS  ===================
 HEADERS += src/analysis/AnalysisRunner.h \
-	    src/analysis/AnalysisTimeStepThread.h \
-	    src/analysis/PhiCalculator.h \
-	    src/analysis/SubsetManager.h \
-	    src/analysis/Subset.h \
-	    src/analysis/ProbabilityTable.h
+		src/analysis/PhiAnalysisTimeStepThread.h \
+		src/analysis/PhiCalculator.h \
+		src/analysis/SubsetManager.h \
+		src/analysis/Subset.h \
+		src/analysis/ProbabilityTable.h
 SOURCES += src/analysis/AnalysisRunner.cpp \
-	    src/analysis/AnalysisTimeStepThread.cpp \
-	    src/analysis/PhiCalculator.cpp \
-	    src/analysis/SubsetManager.cpp \
-	    src/analysis/Subset.cpp \
-	    src/analysis/ProbabilityTable.cpp
+		src/analysis/PhiAnalysisTimeStepThread.cpp \
+		src/analysis/PhiCalculator.cpp \
+		src/analysis/SubsetManager.cpp \
+		src/analysis/Subset.cpp \
+		src/analysis/ProbabilityTable.cpp
 
 #==================  DATABASE  ===================
 HEADERS += src/database/StateBasedPhiAnalysisDao.h
@@ -72,9 +73,9 @@ SOURCES += src/database/StateBasedPhiAnalysisDao.cpp
 
 #==================  MODELS  =====================
 HEADERS += src/models/FullResultsModel.h \
-	    src/models/Complex.h
+		src/models/Complex.h
 SOURCES += src/models/FullResultsModel.cpp \
-	    src/models/Complex.cpp
+		src/models/Complex.cpp
 
 #==================  VIEWS  =====================
 HEADERS += src/views/FullResultsTableView.h

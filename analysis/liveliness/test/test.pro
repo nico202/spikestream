@@ -1,4 +1,4 @@
-TARGET = teststatebasedphi
+TARGET = testliveliness
 
 VERSION = 0.2
 
@@ -11,13 +11,12 @@ MOC_DIR = build/moc
 INCLUDEPATH += src \
 		$(SPIKESTREAM_ROOT)/library/include \
 		$(SPIKESTREAM_ROOT)/testlibrary/include \
-		$(SPIKESTREAM_ROOT)/analysis/statebasedphi/src/database \
-		$(SPIKESTREAM_ROOT)/analysis/statebasedphi/src/analysis \
-		$(SPIKESTREAM_ROOT)/analysis/statebasedphi/src/models
+		$(SPIKESTREAM_ROOT)/analysis/liveliness/src/database \
+		$(SPIKESTREAM_ROOT)/analysis/liveliness/src/analysis
 
-LIBS += -lstatebasedphi -L$(SPIKESTREAM_ROOT)/plugins/analysis -lspikestreamtest -L$(SPIKESTREAM_ROOT)/lib
+LIBS += -lliveliness -L$(SPIKESTREAM_ROOT)/plugins/analysis -lspikestreamtest -L$(SPIKESTREAM_ROOT)/lib
 
-QT += xml opengl qt3support sql
+QT += sql
 
 CONFIG += qtestlib
 
@@ -25,22 +24,10 @@ CONFIG += qtestlib
 #---            Test Files                  ---#
 #----------------------------------------------#
 HEADERS += src/TestRunner.h \
-	    src/TestStateBasedPhiAnalysisDao.h \
-	    src/TestProbabilityTable.h \
-	    src/TestSubset.h \
-	    src/TestPhiCalculator.h \
-	    src/PhiUtil.h \
-	    src/TestSubsetManager.h \
-	    src/StateBasedPhiAnalysisDaoDuck.h
+		src/TestLivelinessDao.h
 
 SOURCES += src/Main.cpp \
-	    src/TestRunner.cpp \
-	    src/TestStateBasedPhiAnalysisDao.cpp \
-	    src/TestProbabilityTable.cpp \
-	    src/TestSubset.cpp \
-	    src/TestPhiCalculator.cpp \
-	    src/PhiUtil.cpp \
-	    src/TestSubsetManager.cpp \
-	    src/StateBasedPhiAnalysisDaoDuck.cpp
+		src/TestRunner.cpp \
+		src/TestLivelinessDao.cpp
 
 

@@ -18,14 +18,14 @@ namespace spikestream {
 		Q_OBJECT
 
 		public:
-			AnalysisWidget(QWidget* parent);
+			AbstractAnalysisWidget(QWidget* parent);
 			virtual ~AbstractAnalysisWidget();
 
 		protected slots:
 			virtual void archiveChanged();
 			void checkToolBarEnabled();
 			void fixTimeStepSelection(int);
-			virtual void exportAnalysis();
+			virtual void exportAnalysis() = 0;
 			virtual void loadAnalysis();
 			void loadArchiveTimeStepsIntoCombos();
 			virtual void networkChanged();
@@ -64,7 +64,6 @@ namespace spikestream {
 			static const int ANALYSIS_TASK = 1;
 
 			//==========================  METHODS  ========================
-			void connectAnalysisRunner();
 			QToolBar* getDefaultToolBar();
 			int getFirstTimeStep();
 			int getLastTimeStep();

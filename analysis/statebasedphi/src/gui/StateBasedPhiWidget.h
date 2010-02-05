@@ -19,74 +19,65 @@ using namespace spikestream;
 
 namespace spikestream {
 
-    class StateBasedPhiWidget : public QWidget {
-	    Q_OBJECT
+	class StateBasedPhiWidget : public AbstractAnalysisWidget {
+		Q_OBJECT
 
-	    public:
-		StateBasedPhiWidget(QWidget* parent = 0);
-		~StateBasedPhiWidget();
+		public:
+			StateBasedPhiWidget(QWidget* parent = 0);
+			~StateBasedPhiWidget();
 
-	    private slots:
-		void archiveChanged();
-		void checkToolBarEnabled();
-		void fixTimeStepSelection(int);
-		void exportAnalysis();
-		void loadAnalysis();
-		void loadArchiveTimeStepsIntoCombos();
-		void networkChanged();
-		void newAnalysis();
-		void selectParameters();
-		void startAnalysis();
-		void stopAnalysis();
-		void threadFinished();
-		void updateResults();
+		private slots:
+			void exportAnalysis();
+			void newAnalysis();
+			void startAnalysis();
+			void updateResults();
 
-	    private:
-		//=====================  VARIABLES  =======================
-		/*! Wraps analysis database with methods specialized for a state based phi analysis */
-		StateBasedPhiAnalysisDao* stateDao;
+		private:
+			//=====================  VARIABLES  =======================
+			/*! Wraps analysis database with methods specialized for a state based phi analysis */
+			StateBasedPhiAnalysisDao* stateDao;
 
-		/*! Shows a model derived from the state based phi data table */
-		QTableView* analysisDataTableView;
+			/*! Shows a model derived from the state based phi data table */
+			QTableView* analysisDataTableView;
 
-		/*! Toolbar with controls for the widget */
-		QToolBar* toolBar;
+			/*! Toolbar with controls for the widget */
+			QToolBar* toolBar;
 
-		/*! Allows user to select first time step to be analyzed */
-		QComboBox* fromTimeStepCombo;
+			/*! Allows user to select first time step to be analyzed */
+			QComboBox* fromTimeStepCombo;
 
-		/*! Allows user to select last time step to be analyzed */
-		QComboBox* toTimeStepCombo;
+			/*! Allows user to select last time step to be analyzed */
+			QComboBox* toTimeStepCombo;
 
-		/*! Class responsible for running the analysis */
-		AnalysisRunner* analysisRunner;
+			/*! Class responsible for running the analysis */
+			AnalysisRunner* analysisRunner;
 
-		/*! Information about the analysis */
-		AnalysisInfo analysisInfo;
+			/*! Information about the analysis */
+			AnalysisInfo analysisInfo;
 
-		/*! The task that is currently being undertaken */
-		int currentTask;
+			/*! The task that is currently being undertaken */
+			int currentTask;
 
-		/*! Task not defined */
-		static const int UNDEFINED_TASK = 0;
+			/*! Task not defined */
+			static const int UNDEFINED_TASK = 0;
 
-		/*! Task of State based phi analysis */
-		static const int ANALYSIS_TASK = 1;
+			/*! Task of State based phi analysis */
+			static const int ANALYSIS_TASK = 1;
 
-		/*! Displays progress bars for each of the threads analyzing time steps */
-		ProgressWidget* progressWidget;
+			/*! Displays progress bars for each of the threads analyzing time steps */
+			ProgressWidget* progressWidget;
 
-		/*! Model for displaying table of results */
-		FullResultsModel* fullResultsModel;
+			/*! Model for displaying table of results */
+			FullResultsModel* fullResultsModel;
 
 
-		//=====================  METHODS  =======================
-		QStringList getTimeStepList(unsigned int min, unsigned int max);
-		QToolBar* getToolBar();
-		void initializeAnalysisInfo();
-		void loadAnalysisResults();
-		bool timeStepsAlreadyAnalyzed(int firstTimeStep, int lastTimeStep);
-    };
+			//=====================  METHODS  =======================
+			QStringList getTimeStepList(unsigned int min, unsigned int max);
+			QToolBar* getToolBar();
+			void initializeAnalysisInfo();
+			void loadAnalysisResults();
+			bool timeStepsAlreadyAnalyzed(int firstTimeStep, int lastTimeStep);
+	};
 
 }
 

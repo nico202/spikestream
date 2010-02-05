@@ -17,40 +17,41 @@ using namespace spikestream;
 
 namespace spikestream{
 
-    /*! Abstraction layer on top of the SpikeStreamNetwork database.
+	/*! Abstraction layer on top of the SpikeStreamNetwork database.
 	Used for light operations taking place in the same thread as the calling
 	function. Operations that are more database intensive can be found in
 	the NetworkDaoThread class. */
-    class NetworkDao : public AbstractDao {
+	class NetworkDao : public AbstractDao {
 	public:
-	    NetworkDao(const DBInfo& dbInfo);
-	    virtual ~NetworkDao();
+		NetworkDao(const DBInfo& dbInfo);
+		virtual ~NetworkDao();
 
-	    void addNetwork(NetworkInfo& netInfo);
-	    void addWeightlessConnection(unsigned int connectionID, unsigned int patternIndex);
-	    unsigned int addWeightlessNeuronTrainingPattern(unsigned int neuronID, const unsigned char* patternArray, bool output, unsigned int patternArraySize);
-	    void deleteNetwork(unsigned int networkID);
-	    void getAllFromConnections(unsigned int networkID, QHash<unsigned int, QHash<unsigned int, bool> >& connMap);
-	    void getAllToConnections(unsigned int networkID, QHash<unsigned int, QHash<unsigned int, bool> >& connMap);
-	    QList<unsigned int> getFromConnections(unsigned int fromNeuronID);
-	    QList<unsigned int> getToConnections(unsigned int toNeuronID);
-	    QList<Connection> getConnections(unsigned int fromNeuronID, unsigned int toNeuronID);
-	    unsigned int getConnectionGroupSize(unsigned int connGrpID);
-	    QList<ConnectionGroupInfo> getConnectionGroupsInfo(unsigned int networkID);
-	    QList<Connection*> getConnections(unsigned int connectionMode, unsigned int singleNeuronID, unsigned int toNeuronID);
-	    QList<NetworkInfo> getNetworksInfo();
-	    Box getNeuronGroupBoundingBox(unsigned int neurGrpID);
-	    unsigned int getNeuronGroupID(unsigned int neuronID);
-	    QList<NeuronGroupInfo> getNeuronGroupsInfo(unsigned int networkID);
-	    QList<unsigned int> getNeuronIDs(unsigned int networkID);
-	    WeightlessNeuron* getWeightlessNeuron(unsigned int neuronID);
-	    bool isWeightlessNeuron(unsigned int neuronID);
+		void addNetwork(NetworkInfo& netInfo);
+		void addWeightlessConnection(unsigned int connectionID, unsigned int patternIndex);
+		unsigned int addWeightlessNeuronTrainingPattern(unsigned int neuronID, const unsigned char* patternArray, bool output, unsigned int patternArraySize);
+		void deleteNetwork(unsigned int networkID);
+		void getAllFromConnections(unsigned int networkID, QHash<unsigned int, QHash<unsigned int, bool> >& connMap);
+		void getAllToConnections(unsigned int networkID, QHash<unsigned int, QHash<unsigned int, bool> >& connMap);
+		QList<unsigned int> getFromConnections(unsigned int fromNeuronID);
+		QList<unsigned int> getToConnections(unsigned int toNeuronID);
+		QList<Connection> getConnections(unsigned int fromNeuronID, unsigned int toNeuronID);
+		unsigned int getConnectionGroupSize(unsigned int connGrpID);
+		QList<ConnectionGroupInfo> getConnectionGroupsInfo(unsigned int networkID);
+		QList<Connection*> getConnections(unsigned int connectionMode, unsigned int singleNeuronID, unsigned int toNeuronID);
+		QList<NetworkInfo> getNetworksInfo();
+		Box getNeuronGroupBoundingBox(unsigned int neurGrpID);
+		unsigned int getNeuronGroupID(unsigned int neuronID);
+		QList<NeuronGroupInfo> getNeuronGroupsInfo(unsigned int networkID);
+		QList<unsigned int> getNeuronIDs(unsigned int networkID);
+		WeightlessNeuron* getWeightlessNeuron(unsigned int neuronID);
+		bool isWeightlessNetwork(unsigned int networkID);
+		bool isWeightlessNeuron(unsigned int neuronID);
 
 	private:
-	    //==========================  VARIABLES  ==========================
+		//==========================  VARIABLES  ==========================
 
 
-    };
+	};
 
 }
 
