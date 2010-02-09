@@ -28,12 +28,12 @@ using namespace std;
 extern "C" {
 	/*! Creates a StateBasedPhiWidget class when library is dynamically loaded. */
 	StateBasedPhiWidget* getClass(){
-	return new StateBasedPhiWidget();
+		return new StateBasedPhiWidget();
 	}
 
 	/*! Returns a sensible name for this widget */
 	QString getName(){
-	return QString("State-based Phi Analysis");
+		return QString("State-based Phi Analysis");
 	}
 }
 
@@ -80,10 +80,10 @@ StateBasedPhiWidget::StateBasedPhiWidget(QWidget *parent) : QWidget(parent){
 
 	//Set up class to run analysis
 	analysisRunner = new AnalysisRunner(
-		Globals::getNetworkDao()->getDBInfo(),
-		Globals::getArchiveDao()->getDBInfo(),
-		Globals::getAnalysisDao()->getDBInfo()
-	);
+			Globals::getNetworkDao()->getDBInfo(),
+			Globals::getArchiveDao()->getDBInfo(),
+			Globals::getAnalysisDao()->getDBInfo()
+			);
 	connect(analysisRunner, SIGNAL(finished()), this, SLOT(threadFinished()));
 	connect(analysisRunner, SIGNAL(finished()), Globals::getEventRouter(), SLOT(analysisStopped()));
 	connect(analysisRunner, SIGNAL(progress(const QString&, unsigned int, unsigned int, unsigned int)), progressWidget, SLOT(updateProgress(const QString&, unsigned int, unsigned int, unsigned int)), Qt::QueuedConnection);
@@ -129,9 +129,9 @@ void StateBasedPhiWidget::networkChanged(){
 /*! Checks to see if network or archive have been loaded */
 void StateBasedPhiWidget::checkToolBarEnabled(){
 	if(Globals::networkLoaded() && Globals::archiveLoaded())
-	toolBar->setEnabled(true);
+		toolBar->setEnabled(true);
 	else
-	toolBar->setEnabled(false);
+		toolBar->setEnabled(false);
 }
 
 
@@ -139,15 +139,15 @@ void StateBasedPhiWidget::checkToolBarEnabled(){
 void StateBasedPhiWidget::fixTimeStepSelection(int selectedIndex){
 	//Check that from time step has not been set to greater than the to
 	if(sender() == fromTimeStepCombo){//FROM time step combo generated the signal
-	if(selectedIndex > toTimeStepCombo->currentIndex()){
-		toTimeStepCombo->setCurrentIndex(selectedIndex);
-	}
+		if(selectedIndex > toTimeStepCombo->currentIndex()){
+			toTimeStepCombo->setCurrentIndex(selectedIndex);
+		}
 	}
 	//Check to time step is not less than from
 	else{//TO time step combo generated the signal
-	if(selectedIndex < fromTimeStepCombo->currentIndex()){
-		fromTimeStepCombo->setCurrentIndex(selectedIndex);
-	}
+		if(selectedIndex < fromTimeStepCombo->currentIndex()){
+			fromTimeStepCombo->setCurrentIndex(selectedIndex);
+		}
 	}
 }
 
@@ -155,7 +155,7 @@ void StateBasedPhiWidget::fixTimeStepSelection(int selectedIndex){
 /*! Loads up the minimum and maximum time step for the archive */
 void StateBasedPhiWidget::loadArchiveTimeStepsIntoCombos(){
 	if(!Globals::archiveLoaded())
-	return;
+		return;
 
 	unsigned int minTimeStep = Globals::getArchiveDao()->getMinTimeStep(Globals::getArchive()->getID());
 	unsigned int maxTimeStep = Globals::getArchiveDao()->getMaxTimeStep(Globals::getArchive()->getID());
@@ -165,25 +165,25 @@ void StateBasedPhiWidget::loadArchiveTimeStepsIntoCombos(){
 	toTimeStepCombo->clear();
 	toTimeStepCombo->addItems(timeStepList);
 	if(fromTimeStepCombo->count() > 0)
-	fromTimeStepCombo->setCurrentIndex(0);
+		fromTimeStepCombo->setCurrentIndex(0);
 }
 
 
 /*! Displays the load analysis dialog box so the user can select which analysis to load */
 void StateBasedPhiWidget::loadAnalysis(){
 	try{
-	//Show dialog to select the analysis the user wants to load
-	LoadAnalysisDialog loadAnalysisDialog(this);
-	if(loadAnalysisDialog.exec() == QDialog::Accepted ) {//Load the archive
-		analysisInfo = loadAnalysisDialog.getAnalysisInfo();
-		loadAnalysisResults();
-		Globals::setAnalysisID(analysisInfo.getID());
-	}
+		//Show dialog to select the analysis the user wants to load
+		LoadAnalysisDialog loadAnalysisDialog(this);
+		if(loadAnalysisDialog.exec() == QDialog::Accepted ) {//Load the archive
+			analysisInfo = loadAnalysisDialog.getAnalysisInfo();
+			loadAnalysisResults();
+			Globals::setAnalysisID(analysisInfo.getID());
+		}
 	}
 	catch (SpikeStreamException& ex){
-	qCritical()<<ex.getMessage();
-	Globals::setAnalysisID(0);//Clear analysis status in globals
-	return;
+		qCritical()<<ex.getMessage();
+		Globals::setAnalysisID(0);//Clear analysis status in globals
+		return;
 	}
 }
 
@@ -211,15 +211,15 @@ void StateBasedPhiWidget::newAnalysis(){
 void StateBasedPhiWidget::startAnalysis(){
 	//Double check that both a network and an analysis are loaded
 	if(!Globals::networkLoaded() || !Globals::archiveLoaded()){
-	qCritical()<<"Network and/or archive not loaded - cannot start analysis.";
-	return;
+		qCritical()<<"Network and/or archive not loaded - cannot start analysis.";
+		return;
 	}
 
 	//Double check that the neuron type is supported
-//    if(!Globals::getNetworkDao()->isWeightlessNetwork(Globals->getNetwork()->getID())){
-//	qCritical()<<"Network contains neuron types that are not currently supported.";
-//	return;
-//    }
+	//    if(!Globals::getNetworkDao()->isWeightlessNetwork(Globals->getNetwork()->getID())){
+	//	qCritical()<<"Network contains neuron types that are not currently supported.";
+	//	return;
+	//    }
 
 	//Get time steps to be analyzed
 	int firstTimeStep = Util::getInt(fromTimeStepCombo->currentText());
@@ -227,46 +227,46 @@ void StateBasedPhiWidget::startAnalysis(){
 
 	//Create a new analysis in the database if one is not loaded
 	try {
-	if(!Globals::analysisLoaded()){
-		Globals::getAnalysisDao()->addAnalysis(analysisInfo);
+		if(!Globals::analysisLoaded()){
+			Globals::getAnalysisDao()->addAnalysis(analysisInfo);
 
-		//Analysis id in analysisInfo should now be set
-		if(analysisInfo.getID() == 0){
-		qCritical()<<"Analysis has not been added correctly";
-		return;
+			//Analysis id in analysisInfo should now be set
+			if(analysisInfo.getID() == 0){
+				qCritical()<<"Analysis has not been added correctly";
+				return;
+			}
+
+			//Store analysis ID in Globals to indicate that it is now loaded
+			Globals::setAnalysisID(analysisInfo.getID());
 		}
 
-		//Store analysis ID in Globals to indicate that it is now loaded
-		Globals::setAnalysisID(analysisInfo.getID());
-	}
+		//Check for a time step conflict
+		if(timeStepsAlreadyAnalyzed(firstTimeStep, lastTimeStep)){
+			//Check to see if user wants to overwrite time steps fully or partly analyzed
+			QString confirmMsg = "Some or all of the time steps from " + QString::number(firstTimeStep);
+			confirmMsg += " to " + QString::number(lastTimeStep) + " have already been fully or partly analyzed.\n";
+			confirmMsg += "Do you want to overwrite the current results for these time steps in the database?";
+			QMessageBox::StandardButton response = QMessageBox::warning(this, "Time step conflict", confirmMsg, QMessageBox::Ok | QMessageBox::Cancel);
+			if(response != QMessageBox::Ok)
+				return;
 
-	//Check for a time step conflict
-	if(timeStepsAlreadyAnalyzed(firstTimeStep, lastTimeStep)){
-		//Check to see if user wants to overwrite time steps fully or partly analyzed
-		QString confirmMsg = "Some or all of the time steps from " + QString::number(firstTimeStep);
-		confirmMsg += " to " + QString::number(lastTimeStep) + " have already been fully or partly analyzed.\n";
-		confirmMsg += "Do you want to overwrite the current results for these time steps in the database?";
-		QMessageBox::StandardButton response = QMessageBox::warning(this, "Time step conflict", confirmMsg, QMessageBox::Ok | QMessageBox::Cancel);
-		if(response != QMessageBox::Ok)
-		return;
+			//Delete time steps from the database and refresh the list of complexes
+			stateDao->deleteTimeSteps(firstTimeStep, lastTimeStep);
+			loadAnalysisResults();
+		}
 
-		//Delete time steps from the database and refresh the list of complexes
-		stateDao->deleteTimeSteps(firstTimeStep, lastTimeStep);
-		loadAnalysisResults();
-	}
-
-	//Initialize classes to run analysis
-	progressWidget->reset();
-	analysisRunner->prepareAnalysisTask(analysisInfo, firstTimeStep, lastTimeStep);
-	currentTask = ANALYSIS_TASK;
-	analysisRunner->start();
-	Globals::getEventRouter()->analysisStarted();
+		//Initialize classes to run analysis
+		progressWidget->reset();
+		analysisRunner->prepareAnalysisTask(analysisInfo, firstTimeStep, lastTimeStep);
+		currentTask = ANALYSIS_TASK;
+		analysisRunner->start();
+		Globals::getEventRouter()->analysisStarted();
 	}
 	catch(SpikeStreamException& ex){
-	qCritical()<<ex.getMessage();
+		qCritical()<<ex.getMessage();
 
-	//We don't know if analysis runner has started or not, so set error just in case
-	analysisRunner->setError("Exception thrown starting task or adding analysis to database.");
+		//We don't know if analysis runner has started or not, so set error just in case
+		analysisRunner->setError("Exception thrown starting task or adding analysis to database.");
 	}
 }
 
@@ -281,16 +281,16 @@ void StateBasedPhiWidget::stopAnalysis(){
 void StateBasedPhiWidget::threadFinished(){
 	//Check for errors
 	if(analysisRunner->isError()){
-	qCritical()<<analysisRunner->getErrorMessage();
-	currentTask = UNDEFINED_TASK;
-	return;
+		qCritical()<<analysisRunner->getErrorMessage();
+		currentTask = UNDEFINED_TASK;
+		return;
 	}
 
 	switch(currentTask){
-	case ANALYSIS_TASK:
+ case ANALYSIS_TASK:
 		Globals::getEventRouter()->analysisStopped();
-	break;
-	default:
+		break;
+ default:
 		qCritical()<<"Current task not recognized: "<<currentTask;
 	}
 
@@ -312,7 +312,7 @@ void StateBasedPhiWidget::updateResults(){
 QStringList StateBasedPhiWidget::getTimeStepList(unsigned int min, unsigned int max){
 	QStringList tmpStrList;
 	for(unsigned int i=min; i<=max; ++i)
-	tmpStrList.append(QString::number(i));
+		tmpStrList.append(QString::number(i));
 	return tmpStrList;
 }
 
@@ -366,15 +366,15 @@ void StateBasedPhiWidget::initializeAnalysisInfo(){
 
 	//Set the network id
 	if(Globals::networkLoaded())
-	analysisInfo.setNetworkID(Globals::getNetwork()->getID());
+		analysisInfo.setNetworkID(Globals::getNetwork()->getID());
 	else
-	analysisInfo.setNetworkID(0);
+		analysisInfo.setNetworkID(0);
 
 	//Set archive id
 	if(Globals::archiveLoaded())
-	analysisInfo.setArchiveID(Globals::getArchive()->getID());
+		analysisInfo.setArchiveID(Globals::getArchive()->getID());
 	else
-	analysisInfo.setArchiveID(0);
+		analysisInfo.setArchiveID(0);
 
 	//Set the type of analysis, 1 corresponds to a state based phi analysis
 	analysisInfo.setAnalysisType(1);
@@ -394,12 +394,12 @@ void StateBasedPhiWidget::loadAnalysisResults(){
 /*! Checks to see if any of the specified range of time steps already exist in the database */
 bool StateBasedPhiWidget::timeStepsAlreadyAnalyzed(int firstTimeStep, int lastTimeStep){
 	if(!Globals::analysisLoaded()){
-	return false;
+		return false;
 	}
 
 	int complexCount = stateDao->getComplexCount(analysisInfo.getID(), firstTimeStep, lastTimeStep);
 	if(complexCount > 0)
-	return true;
+		return true;
 	return false;
 }
 

@@ -24,10 +24,14 @@ CONFIG += qtestlib
 #---            Test Files                  ---#
 #----------------------------------------------#
 HEADERS += src/TestRunner.h \
-		src/TestLivelinessDao.h
+			src/TestLivelinessDao.h \
+			src/TestWeightlessLivelinessAnalyzer.h \
+			src/LivelinessDaoDuck.h
 
 SOURCES += src/Main.cpp \
-		src/TestRunner.cpp \
-		src/TestLivelinessDao.cpp
+			src/TestRunner.cpp \
+			src/TestLivelinessDao.cpp \
+			src/TestWeightlessLivelinessAnalyzer.cpp \
+			src/LivelinessDaoDuck.cpp
 
 

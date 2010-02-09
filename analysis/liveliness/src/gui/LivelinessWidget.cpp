@@ -24,7 +24,7 @@ using namespace std;
 //Functions for dynamic library loading
 extern "C" {
 	/*! Creates a LivelinessWidget class when library is dynamically loaded. */
-	LivelinessWidget* getClass(){
+	QWidget* getClass(){
 		return new LivelinessWidget();
 	}
 
@@ -64,7 +64,7 @@ LivelinessWidget::LivelinessWidget(QWidget *parent) : AbstractAnalysisWidget(par
 
 	//Add the model and view displaying the current analysis
 	fullResultsModel = new LivelinessFullResultsModel(&analysisInfo, livelinessDao);
-	QTableView* fullResultsTableView = new LivelinessFullResultsTableView(fullResultsModel);
+	QTableView* fullResultsTableView = new LivelinessFullResultsTableView(this, fullResultsModel);
 	fullResultsTableView->setMinimumSize(500, 500);
 	tabWidget->addTab(fullResultsTableView, "Results");
 
@@ -215,6 +215,7 @@ void LivelinessWidget::initializeAnalysisInfo(){
 
 	//Set parameters
 	analysisInfo.getParameterMap()["generalization"] = 1.0;
+	analysisInfo.getParameterMap()["store_connection_liveliness_as_temporary_weights"] = 1.0;
 }
 
 

@@ -8,17 +8,17 @@ using namespace spikestream;
 
 namespace spikestream {
 
-    class NetworksBuilder {
-	public:
-	    NetworksBuilder();
-	    virtual ~NetworksBuilder();
+	class NetworksBuilder {
+		public:
+			NetworksBuilder();
+			virtual ~NetworksBuilder();
 
-	protected:
-	    //=====================  METHODS  ===========================
-	    void addTraining(unsigned int neuronID, QString trainingStr, bool output);
-	    void addConnectionGroup(unsigned int networkID, ConnectionGroup& connGrp);
-	    void runThread(NetworkDaoThread& thread);
-    };
+		protected:
+			//=====================  METHODS  ===========================
+			virtual void addTraining(unsigned int neuronID, QString trainingStr, bool output);
+			virtual void addConnectionGroup(unsigned int networkID, ConnectionGroup& connGrp);
+			virtual void runThread(NetworkDaoThread& thread);
+		};
 
 }
 

@@ -6,18 +6,18 @@
 
 namespace spikestream {
 
-    class NeuronGroupWidget : public QWidget {
-	Q_OBJECT
+	class NeuronGroupWidget : public QWidget {
+		Q_OBJECT
 
-	public:
-	    NeuronGroupWidget(QWidget* parent);
-	    ~NeuronGroupWidget();
+		public:
+			NeuronGroupWidget(QWidget* parent = 0);
+			~NeuronGroupWidget();
 
 
-	private slots:
-	    void addNeurons();
+		private slots:
+			void addNeurons();
 
-    };
+	};
 
 }
 

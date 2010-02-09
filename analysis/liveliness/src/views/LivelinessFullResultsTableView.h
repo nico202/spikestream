@@ -11,7 +11,7 @@ namespace spikestream {
 	Q_OBJECT
 
 	public:
-		LivelinessFullResultsTableView(QAbstractTableModel* model);
+		LivelinessFullResultsTableView(QWidget* parent, QAbstractTableModel* model);
 		~LivelinessFullResultsTableView();
 		void resizeHeaders();
 

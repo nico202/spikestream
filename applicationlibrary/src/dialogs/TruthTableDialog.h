@@ -10,26 +10,26 @@ using namespace spikestream;
 
 namespace spikestream {
 
-    class TruthTableDialog : public QDialog {
-	Q_OBJECT
+	class TruthTableDialog : public QDialog {
+		Q_OBJECT
 
-	public:
-	    TruthTableDialog(QWidget* parent=0);
-	    ~TruthTableDialog();
-	    void show(unsigned int neuronID);
-
-
-	private slots:
-	    void cancelButtonPressed();
-	    void okButtonPressed();
+		public:
+			TruthTableDialog(QWidget* parent=0);
+			~TruthTableDialog();
+			void show(unsigned int neuronID);
 
 
-	private:
-	    //========================  VARIABLES  ========================
-	    TruthTableModel* truthTableModel;
+		private slots:
+			void cancelButtonPressed();
+			void okButtonPressed();
 
 
-    };
+		private:
+			//========================  VARIABLES  ========================
+			TruthTableModel* truthTableModel;
+
+
+	};
 
 }
 

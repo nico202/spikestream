@@ -16,86 +16,87 @@ using namespace spikestream;
 
 /*! Constructor */
 NetworkViewerProperties_V2::NetworkViewerProperties_V2(QWidget* parent) : QWidget(parent){
-    //Main vertical layout
-    QVBoxLayout* mainVerticalBox = new QVBoxLayout(this);
+	//Main vertical layout
+	QVBoxLayout* mainVerticalBox = new QVBoxLayout(this);
 
-    //Button group to set connection mode
-    QButtonGroup* conButGroup = new QButtonGroup();
+	//Button group to set connection mode
+	QButtonGroup* conButGroup = new QButtonGroup();
 
-    //All connection widgets
-    allConsButt = new QRadioButton("All selected connections");
-    conButGroup->addButton(allConsButt);
-    mainVerticalBox->addWidget(allConsButt);
+	//All connection widgets
+	allConsButt = new QRadioButton("All selected connections");
+	conButGroup->addButton(allConsButt);
+	mainVerticalBox->addWidget(allConsButt);
 
-    //Single neuron widgets
-    conSingleNeurButt = new QRadioButton("Connections to neuron");
-    conButGroup->addButton(conSingleNeurButt);
-    singleNeuronIDLabel = new QLabel("");
-    QHBoxLayout* singleNeuronBox = new QHBoxLayout();
-    singleNeuronBox->addWidget(conSingleNeurButt);
-    singleNeuronBox->addWidget(singleNeuronIDLabel);
-    singleNeuronBox->addStretch(5);
-    mainVerticalBox->addLayout(singleNeuronBox);
+	//Single neuron widgets
+	conSingleNeurButt = new QRadioButton("Connections to neuron");
+	conButGroup->addButton(conSingleNeurButt);
+	singleNeuronIDLabel = new QLabel("");
+	QHBoxLayout* singleNeuronBox = new QHBoxLayout();
+	singleNeuronBox->addWidget(conSingleNeurButt);
+	singleNeuronBox->addWidget(singleNeuronIDLabel);
+	singleNeuronBox->addStretch(5);
+	mainVerticalBox->addLayout(singleNeuronBox);
 
-    fromToCombo = new QComboBox();
-    fromToCombo->insertItem("From and To");
-    fromToCombo->insertItem("From");
-    fromToCombo->insertItem("To");
-    connect(fromToCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(fromToSelectionChanged(int)));
-    QHBoxLayout* fromToSingleBox = new QHBoxLayout();
-    fromToSingleBox->addSpacing(20);
-    fromToSingleBox->addWidget(fromToCombo);
-    truthTableButton = new QPushButton("Truth Table");
-    truthTableButton->setVisible(false);
-    connect(truthTableButton, SIGNAL(clicked()), this, SLOT(showTruthTable()));
-    fromToSingleBox->addWidget(truthTableButton);
-    fromToSingleBox->addStretch(5);
-    mainVerticalBox->addLayout(fromToSingleBox);
+	fromToCombo = new QComboBox();
+	fromToCombo->insertItem("From and To");
+	fromToCombo->insertItem("From");
+	fromToCombo->insertItem("To");
+	connect(fromToCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(fromToSelectionChanged(int)));
+	QHBoxLayout* fromToSingleBox = new QHBoxLayout();
+	fromToSingleBox->addSpacing(20);
+	fromToSingleBox->addWidget(fromToCombo);
+	truthTableButton = new QPushButton("Truth Table");
+	truthTableButton->setVisible(false);
+	connect(truthTableButton, SIGNAL(clicked()), this, SLOT(showTruthTable()));
+	fromToSingleBox->addWidget(truthTableButton);
+	fromToSingleBox->addStretch(5);
+	mainVerticalBox->addLayout(fromToSingleBox);
 
-    //Between neuron widgets
-    conBetweenNeurButt = new QRadioButton("Connection ");
-    conButGroup->addButton(conBetweenNeurButt);
-    QHBoxLayout* betweenBox = new QHBoxLayout();
-    betweenBox->addWidget(conBetweenNeurButt);
-    fromLabel = new QLabel("From: ");
-    betweenBox->addWidget(fromLabel);
-    fromNeuronIDLabel = new QLabel("");
-    betweenBox->addWidget(fromNeuronIDLabel);
-    toLabel = new QLabel("to: ");
-    betweenBox->addWidget(toLabel);
-    toNeuronIDLabel = new QLabel("");
-    betweenBox->addWidget(toNeuronIDLabel);
-    betweenBox->addStretch(5);
-    mainVerticalBox->addLayout(betweenBox);
+	//Between neuron widgets
+	conBetweenNeurButt = new QRadioButton("Connection ");
+	conButGroup->addButton(conBetweenNeurButt);
+	QHBoxLayout* betweenBox = new QHBoxLayout();
+	betweenBox->addWidget(conBetweenNeurButt);
+	fromLabel = new QLabel("From: ");
+	betweenBox->addWidget(fromLabel);
+	fromNeuronIDLabel = new QLabel("");
+	betweenBox->addWidget(fromNeuronIDLabel);
+	toLabel = new QLabel("to: ");
+	betweenBox->addWidget(toLabel);
+	toNeuronIDLabel = new QLabel("");
+	betweenBox->addWidget(toNeuronIDLabel);
+	betweenBox->addStretch(5);
+	mainVerticalBox->addLayout(betweenBox);
 
-    //Positive and negative filtering
-    QHBoxLayout* posNegBox = new QHBoxLayout();
-    posNegBox->addWidget(new QLabel("Filter by connection weight: "));
-    posNegCombo = new QComboBox();
-    posNegCombo->insertItem("All connections");
-    posNegCombo->insertItem("Positive connections");
-    posNegCombo->insertItem("Negative connections");
-    connect(posNegCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(posNegSelectionChanged(int)));
-    posNegBox->addWidget(posNegCombo);
-    posNegBox->addStretch(5);
-    mainVerticalBox->addLayout(posNegBox);
+	//Positive and negative filtering
+	QHBoxLayout* posNegBox = new QHBoxLayout();
+	posNegBox->addWidget(new QLabel("Filter by connection weight: "));
+	posNegCombo = new QComboBox();
+	posNegCombo->insertItem("All connections");
+	posNegCombo->insertItem("Positive connections");
+	posNegCombo->insertItem("Negative connections");
+	connect(posNegCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(posNegSelectionChanged(int)));
+	posNegBox->addWidget(posNegCombo);
+	posNegBox->addStretch(5);
+	mainVerticalBox->addLayout(posNegBox);
 
-    //Add table view and model
-    QAbstractTableModel* connectionsModel = new ConnectionsModel();
-    QTableView* connectionsView = new ConnectionsTableView(connectionsModel);
-    connectionsView->setMinimumWidth(500);
-    connectionsView->setMinimumHeight(500);
-    mainVerticalBox->addWidget(connectionsView);
-    mainVerticalBox->addStretch(5);
+	//Add table view and model
+	QAbstractTableModel* connectionsModel = new ConnectionsModel();
+	QTableView* connectionsView = new ConnectionsTableView(this, connectionsModel);
+	connectionsView->setMinimumWidth(500);
+	connectionsView->setMinimumHeight(500);
+	mainVerticalBox->addWidget(connectionsView);
+	mainVerticalBox->addStretch(5);
 
-    //Listen for changes in the network display
-    connect(Globals::getEventRouter(), SIGNAL(networkDisplayChangedSignal()), this, SLOT(networkDisplayChanged()));
+	//Listen for changes in the network display
+	connect(Globals::getEventRouter(), SIGNAL(networkDisplayChangedSignal()), this, SLOT(networkDisplayChanged()));
 
-    //Construct truth table dialog
-    truthTableDialog = new TruthTableDialog(this);
+	/* Initialize truth table dialog to NULL
+		Otherwise it appears as an annoying flash up during boot up of SpikeStream */
+	truthTableDialog = NULL;
 
-    //Initial state is to show all connections
-    showAllConnections();
+	//Initial state is to show all connections
+	showAllConnections();
 }
 
 
@@ -108,54 +109,54 @@ NetworkViewerProperties_V2::~NetworkViewerProperties_V2(){
 /*-----                PRIVATE SLOTS                   -----*/
 /*----------------------------------------------------------*/
 void NetworkViewerProperties_V2::fromToSelectionChanged(int index){
-    if(index == 0){
-	Globals::getNetworkDisplay()->clearDirectionFiltering();
-    }
-    else if (index == 1){
-	Globals::getNetworkDisplay()->showFromConnections();
-    }
-    else if (index == 2){
-	Globals::getNetworkDisplay()->showToConnections();
-    }
+	if(index == 0){
+		Globals::getNetworkDisplay()->clearDirectionFiltering();
+	}
+	else if (index == 1){
+		Globals::getNetworkDisplay()->showFromConnections();
+	}
+	else if (index == 2){
+		Globals::getNetworkDisplay()->showToConnections();
+	}
 }
 
 
 void NetworkViewerProperties_V2::networkDisplayChanged(){
-    unsigned int connectionMode = Globals::getNetworkDisplay()->getConnectionMode();
-    if(connectionMode & CONNECTION_MODE_ENABLED){
-	if(connectionMode & SHOW_BETWEEN_CONNECTIONS)
-	    showBetweenConnections();
-	else
-	    showSingleConnections();
-    }
-    else{
-	showAllConnections();
-    }
+	unsigned int connectionMode = Globals::getNetworkDisplay()->getConnectionMode();
+	if(connectionMode & CONNECTION_MODE_ENABLED){
+		if(connectionMode & SHOW_BETWEEN_CONNECTIONS)
+			showBetweenConnections();
+		else
+			showSingleConnections();
+	}
+	else{
+		showAllConnections();
+	}
 }
 
 
 void NetworkViewerProperties_V2::posNegSelectionChanged(int index){
-    if(index == 0){
-	Globals::getNetworkDisplay()->clearWeightFiltering();
-    }
-    else if (index == 1){
-	Globals::getNetworkDisplay()->showPositiveConnections();
-    }
-    else if (index == 2){
-	Globals::getNetworkDisplay()->showNegativeConnections();
-    }
+	if(index == 0){
+		Globals::getNetworkDisplay()->clearWeightFiltering();
+	}
+	else if (index == 1){
+		Globals::getNetworkDisplay()->showPositiveConnections();
+	}
+	else if (index == 2){
+		Globals::getNetworkDisplay()->showNegativeConnections();
+	}
 }
 
 
 /*! Shows a dialog with the truth table for the selected neuron */
 void NetworkViewerProperties_V2::showTruthTable(){
-    //Get neuron id.
-    unsigned int tmpNeurID = Globals::getNetworkDisplay()->getSingleNeuronID();
-    if(tmpNeurID == 0)
-	throw SpikeStreamException("Truth table cannot be displayed for an invalid neuron ID");
+	//Get neuron id.
+	unsigned int tmpNeurID = Globals::getNetworkDisplay()->getSingleNeuronID();
+	if(tmpNeurID == 0)
+		throw SpikeStreamException("Truth table cannot be displayed for an invalid neuron ID");
 
-    //Show non modal dialog
-    truthTableDialog->show(tmpNeurID);
+	//Show non modal dialog
+	showTruthTableDialog(tmpNeurID);
 }
 
 
@@ -164,84 +165,94 @@ void NetworkViewerProperties_V2::showTruthTable(){
 /*----------------------------------------------------------*/
 
 void NetworkViewerProperties_V2::showAllConnections(){
-    allConsButt->setChecked(true);
-    allConsButt->setEnabled(true);
-    conBetweenNeurButt->setEnabled(false);
-    conSingleNeurButt->setEnabled(false);
-    singleNeuronIDLabel->setEnabled(false);
-    singleNeuronIDLabel->setText("");
-    fromToCombo->setEnabled(false);
-    fromNeuronIDLabel->setEnabled(false);
-    fromNeuronIDLabel->setText("");
-    toNeuronIDLabel->setEnabled(false);
-    toNeuronIDLabel->setText("");
-    fromLabel->setEnabled(false);
-    toLabel->setEnabled(false);
-    truthTableButton->setVisible(false);
-    truthTableDialog->hide();
+	allConsButt->setChecked(true);
+	allConsButt->setEnabled(true);
+	conBetweenNeurButt->setEnabled(false);
+	conSingleNeurButt->setEnabled(false);
+	singleNeuronIDLabel->setEnabled(false);
+	singleNeuronIDLabel->setText("");
+	fromToCombo->setEnabled(false);
+	fromNeuronIDLabel->setEnabled(false);
+	fromNeuronIDLabel->setText("");
+	toNeuronIDLabel->setEnabled(false);
+	toNeuronIDLabel->setText("");
+	fromLabel->setEnabled(false);
+	toLabel->setEnabled(false);
+	truthTableButton->setVisible(false);
+	hideTruthTableDialog();
 }
 
 
 void NetworkViewerProperties_V2::showBetweenConnections(){
-    conBetweenNeurButt->setChecked(true);
-    conBetweenNeurButt->setEnabled(true);
-    fromNeuronIDLabel->setEnabled(true);
-    fromNeuronIDLabel->setText(QString::number(Globals::getNetworkDisplay()->getSingleNeuronID()));
-    toNeuronIDLabel->setEnabled(true);
-    toNeuronIDLabel->setText(QString::number(Globals::getNetworkDisplay()->getToNeuronID()));
-    fromToCombo->setEnabled(false);
-    allConsButt->setEnabled(false);
-    conSingleNeurButt->setEnabled(false);
-    singleNeuronIDLabel->setEnabled(false);
-    singleNeuronIDLabel->setText("");
-    fromLabel->setEnabled(true);
-    toLabel->setEnabled(true);
-    truthTableButton->setVisible(false);
-    truthTableDialog->hide();
+	conBetweenNeurButt->setChecked(true);
+	conBetweenNeurButt->setEnabled(true);
+	fromNeuronIDLabel->setEnabled(true);
+	fromNeuronIDLabel->setText(QString::number(Globals::getNetworkDisplay()->getSingleNeuronID()));
+	toNeuronIDLabel->setEnabled(true);
+	toNeuronIDLabel->setText(QString::number(Globals::getNetworkDisplay()->getToNeuronID()));
+	fromToCombo->setEnabled(false);
+	allConsButt->setEnabled(false);
+	conSingleNeurButt->setEnabled(false);
+	singleNeuronIDLabel->setEnabled(false);
+	singleNeuronIDLabel->setText("");
+	fromLabel->setEnabled(true);
+	toLabel->setEnabled(true);
+	truthTableButton->setVisible(false);
+	hideTruthTableDialog();
 }
 
 
 void NetworkViewerProperties_V2::showSingleConnections(){
-    //Id of the single neuron
-    unsigned int singleNeuronID = Globals::getNetworkDisplay()->getSingleNeuronID();
+	//Id of the single neuron
+	unsigned int singleNeuronID = Globals::getNetworkDisplay()->getSingleNeuronID();
 
-    //Set up graphical components appropriately
-    conSingleNeurButt->setChecked(true);
-    conSingleNeurButt->setEnabled(true);
-    singleNeuronIDLabel->setEnabled(true);
-    singleNeuronIDLabel->setText(QString::number(singleNeuronID));
-    fromToCombo->setEnabled(true);
-    fromNeuronIDLabel->setEnabled(false);
-    fromNeuronIDLabel->setText("");
-    toNeuronIDLabel->setEnabled(false);
-    toNeuronIDLabel->setText("");
-    allConsButt->setEnabled(false);
-    conBetweenNeurButt->setEnabled(false);
-    fromLabel->setEnabled(false);
-    toLabel->setEnabled(false);
+	//Set up graphical components appropriately
+	conSingleNeurButt->setChecked(true);
+	conSingleNeurButt->setEnabled(true);
+	singleNeuronIDLabel->setEnabled(true);
+	singleNeuronIDLabel->setText(QString::number(singleNeuronID));
+	fromToCombo->setEnabled(true);
+	fromNeuronIDLabel->setEnabled(false);
+	fromNeuronIDLabel->setText("");
+	toNeuronIDLabel->setEnabled(false);
+	toNeuronIDLabel->setText("");
+	allConsButt->setEnabled(false);
+	conBetweenNeurButt->setEnabled(false);
+	fromLabel->setEnabled(false);
+	toLabel->setEnabled(false);
 
-    //Show button to launch truth table dialog if to neuron connections are shown and it is a weightless neuron
-    if(Globals::getNetworkDao()->isWeightlessNeuron(singleNeuronID)){
-	//Update neuron in truth table dialog if it is visible
-	if(truthTableDialog->isVisible())
-	    truthTableDialog->show(singleNeuronID);
+	//Show button to launch truth table dialog if to neuron connections are shown and it is a weightless neuron
+	if(Globals::getNetworkDao()->isWeightlessNeuron(singleNeuronID)){
+		//Update neuron in truth table dialog if it is visible
+		if(truthTableDialog != NULL && truthTableDialog->isVisible())
+			showTruthTableDialog(singleNeuronID);
 
-	//Show button to display dialog if it is not already visible
-	if(fromToCombo->currentText() == "To"){
-	    truthTableButton->setVisible(true);
+		//Show button to display dialog if it is not already visible
+		if(fromToCombo->currentText() == "To"){
+			truthTableButton->setVisible(true);
+		}
+		else{
+			truthTableButton->setVisible(false);
+			hideTruthTableDialog();
+		}
 	}
 	else{
-	    truthTableButton->setVisible(false);
-	    truthTableDialog->hide();
+		truthTableButton->setVisible(false);
+		hideTruthTableDialog();
 	}
-    }
-    else{
-	truthTableButton->setVisible(false);
-	truthTableDialog->hide();
-    }
+}
+
+/*! Shows the dialog with the specified neuron's truth table */
+void NetworkViewerProperties_V2::showTruthTableDialog(unsigned int neuronID){
+	if(truthTableDialog == NULL)
+		truthTableDialog = new TruthTableDialog();
+	truthTableDialog->show(neuronID);
 }
 
 
-
-
+/*! Hides the dialog with the neuron's truth table */
+void NetworkViewerProperties_V2::hideTruthTableDialog(){
+	if(truthTableDialog != NULL)
+		truthTableDialog->hide();
+}
 

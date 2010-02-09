@@ -78,3 +78,14 @@ QString Cluster::getNeuronIDString() const{
 	tmpStr.truncate(tmpStr.size() - 1);
 	return tmpStr;
 }
+
+
+/*! Sets the neuron ids in the cluster and overwrites the liveliness values. */
+void Cluster::setNeuronIDs(QList<unsigned int>& neuronIDList){
+	neuronLivelinessMap.clear();
+	foreach(unsigned int neurID, neuronIDList){
+		neuronLivelinessMap[neurID] = 0.0;
+	}
+}
+
+

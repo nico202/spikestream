@@ -3,6 +3,7 @@
 #include "SpikeStreamException.h"
 #include "TestNetworkDao.h"
 #include "NetworkDao.h"
+#include "Util.h"
 using namespace spikestream;
 
 //Qt includes
@@ -596,6 +597,27 @@ void TestNetworkDao::testIsWeightlessNeuron(){
 	//Neuron in group 1 should be weightless
 	QVERIFY(networkDao.isWeightlessNeuron(testNeurIDList[0]));
 	QVERIFY(!networkDao.isWeightlessNeuron(testNeurIDList2[0]));
+}
+
+void TestNetworkDao::testSetTempWeight(){
+	//Add test network
+	addTestNetwork1();
+
+	//Check the temp weight of a neuron
+	QSqlQuery query = getQuery("SELECT TempWeight FROM Connections WHERE FromNeuronID = " + QString::number(testNeurIDList[4]) + " AND ToNeuronID=" + QString::number(testNeurIDList[3]));
+	executeQuery(query);
+	query.next();
+	QCOMPARE(Util::getDouble(query.value(0).toString()), 0.0);
+
+	//Execute test method
+	NetworkDao networkDao(dbInfo);
+	networkDao.setTempWeight(testNeurIDList[4],testNeurIDList[3], 2.132);
+
+	//Check weight has been updated
+	query = getQuery("SELECT TempWeight FROM Connections WHERE FromNeuronID = " + QString::number(testNeurIDList[4]) + " AND ToNeuronID=" + QString::number(testNeurIDList[3]));
+	executeQuery(query);
+	query.next();
+	QCOMPARE(Util::getDouble(query.value(0).toString()), 2.132);
 }
 
 

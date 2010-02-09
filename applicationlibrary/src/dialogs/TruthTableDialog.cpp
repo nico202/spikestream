@@ -10,24 +10,24 @@ using namespace spikestream;
 
 /*! Constructor */
 TruthTableDialog::TruthTableDialog(QWidget* parent) : QDialog(parent) {
-    QVBoxLayout *mainVBox = new QVBoxLayout(this);
+	QVBoxLayout *mainVBox = new QVBoxLayout(this);
 
-    //Create model and add view
-    truthTableModel = new TruthTableModel();
-    QTableView* truthTableView = new TruthTableView(truthTableModel);
-    truthTableView->setMinimumSize(600, 300);
-    mainVBox->addWidget(truthTableView);
+	//Create model and add view
+	truthTableModel = new TruthTableModel();
+	QTableView* truthTableView = new TruthTableView(truthTableModel);
+	truthTableView->setMinimumSize(600, 300);
+	mainVBox->addWidget(truthTableView);
 
-    //Add buttons
-    QHBoxLayout* buttonBox = new QHBoxLayout();
-    QPushButton* okPushButton = new QPushButton("Ok");
-    buttonBox->addWidget(okPushButton);
-    QPushButton* cancelPushButton = new QPushButton("Cancel");
-    buttonBox->addWidget(cancelPushButton);
-    mainVBox->addLayout(buttonBox);
+	//Add buttons
+	QHBoxLayout* buttonBox = new QHBoxLayout();
+	QPushButton* okPushButton = new QPushButton("Ok");
+	buttonBox->addWidget(okPushButton);
+	QPushButton* cancelPushButton = new QPushButton("Cancel");
+	buttonBox->addWidget(cancelPushButton);
+	mainVBox->addLayout(buttonBox);
 
-    connect (okPushButton, SIGNAL(clicked()), this, SLOT(okButtonPressed()));
-    connect (cancelPushButton, SIGNAL(clicked()), this, SLOT(cancelButtonPressed()));
+	connect (okPushButton, SIGNAL(clicked()), this, SLOT(okButtonPressed()));
+	connect (cancelPushButton, SIGNAL(clicked()), this, SLOT(cancelButtonPressed()));
 }
 
 
@@ -42,9 +42,9 @@ TruthTableDialog::~TruthTableDialog(){
 
 /*! Shows the dialog with the truth table for the specified neuron id */
 void TruthTableDialog::show(unsigned int neuronID){
-    this->setWindowTitle("Truth Table for Neuron " + QString::number(neuronID));
-    truthTableModel->setNeuronID(neuronID);
-    this->setVisible(true);
+	this->setWindowTitle("Truth Table for Neuron " + QString::number(neuronID));
+	truthTableModel->setNeuronID(neuronID);
+	this->setVisible(true);
 }
 
 
@@ -54,12 +54,12 @@ void TruthTableDialog::show(unsigned int neuronID){
 
 
 void TruthTableDialog::cancelButtonPressed(){
-    this->hide();
+	this->hide();
 }
 
 
 void TruthTableDialog::okButtonPressed(){
-    this->hide();
+	this->hide();
 }
 
 

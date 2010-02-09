@@ -405,6 +405,13 @@ bool NetworkDao::isWeightlessNetwork(unsigned int networkID){
 }
 
 
+/*! Sets the temporary weight between two neurons. In the event of multiple connections between two neurons
+	all of the temporary weights will be updated */
+void NetworkDao::setTempWeight(unsigned int fromNeurID, unsigned int toNeurID, double tempWeight){
+	QSqlQuery query = getQuery("UPDATE Connections SET TempWeight=" + QString::number(tempWeight) + " WHERE FromNeuronID=" + QString::number(fromNeurID) + " AND ToNeuronID=" + QString::number(toNeurID));
+	executeQuery(query);
+}
+
 
 
 

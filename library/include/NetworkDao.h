@@ -46,6 +46,7 @@ namespace spikestream{
 		WeightlessNeuron* getWeightlessNeuron(unsigned int neuronID);
 		bool isWeightlessNetwork(unsigned int networkID);
 		bool isWeightlessNeuron(unsigned int neuronID);
+		void setTempWeight(unsigned int fromNeurID, unsigned int toNeurID, double tempWeight);
 
 	private:
 		//==========================  VARIABLES  ==========================

@@ -33,7 +33,7 @@ namespace spikestream {
 			QList<Cluster> clusterList;
 
 			/*! The index in the clusterList of which cluster is visible.
-			Set to -1 if no clusters are visible */
+				Set to -1 if no clusters are visible */
 			int clusterDisplayIndex;
 
 			/*! Details about the analysis.
