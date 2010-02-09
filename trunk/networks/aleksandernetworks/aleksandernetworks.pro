@@ -14,6 +14,7 @@ CONFIG += debug \
 	  warn_on \
 	  qt \
 	  thread \
+	  opengl \
 	  exceptions \
 	  stl
 
@@ -30,8 +31,8 @@ LIBS += -L$(SPIKESTREAM_ROOT)/lib -lspikestream -lspikestreamapplication
 
 
 HEADERS = src/gui/AleksanderNetworksWidget.h \
-	    src/model/AleksanderNetworksBuilder.h
+		src/model/AleksanderNetworksBuilder.h
 
 SOURCES = src/gui/AleksanderNetworksWidget.cpp \
-	    src/model/AleksanderNetworksBuilder.cpp
+		src/model/AleksanderNetworksBuilder.cpp
 

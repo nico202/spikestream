@@ -10,7 +10,6 @@ OBJECTS_DIR = build/objects
 
 MOC_DIR = build/moc
 
-
 CONFIG += debug \
 	  warn_on \
 	  qt \
@@ -32,10 +31,10 @@ LIBS += -L$(SPIKESTREAM_ROOT)/lib -lspikestream -lspikestreamapplication
 
 
 HEADERS = src/gui/TononiNetworksWidget.h \
-	    src/model/TononiNetworkBuilder.h
+		src/model/TononiNetworkBuilder.h
 
 SOURCES = src/gui/TononiNetworksWidget.cpp \
-	    src/model/TononiNetworkBuilder.cpp
+		src/model/TononiNetworkBuilder.cpp
 
 
 

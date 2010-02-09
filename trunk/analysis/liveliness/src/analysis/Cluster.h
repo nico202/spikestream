@@ -21,6 +21,8 @@ namespace spikestream {
 			QList<unsigned int> getNeuronIDs() const;
 			QHash<unsigned int, double>& getNeuronLivelinessMap() { return neuronLivelinessMap; }
 			QString getNeuronIDString() const;
+			void setLiveliness(double liveliness) { this->liveliness = liveliness; }
+			void setNeuronIDs(QList<unsigned int>& neuronIDList);
 
 
 		private:
@@ -34,8 +36,7 @@ namespace spikestream {
 			/*! The total liveliness associated with the cluster */
 			double liveliness;
 
-			/*! Map linking neuron IDs in the cluster with the colour with which
-				they are to be displayed. */
+			/*! Map linking neuron IDs in the cluster with their liveliness. */
 			QHash<unsigned int, double> neuronLivelinessMap;
 
 	};

@@ -63,8 +63,7 @@ WeightlessNeuron::WeightlessNeuron(QHash<unsigned int, QList<unsigned int> >& co
 /*! Destructor */
 WeightlessNeuron::~WeightlessNeuron(){
 	//Delete the training data
-	foreach(byte* array, trainingData)
-		delete array;
+	resetTraining();
 }
 
 
@@ -227,6 +226,14 @@ double WeightlessNeuron::getTransitionProbability(const QList<unsigned int>& neu
 	   So probability of the firing state is the sum of the prob(state occurring) * prob(firing state for that string) */
 	tmpProbOut /= randomStringCount;
 	return tmpProbOut;
+}
+
+
+/*! Clears the training of the neuron */
+void WeightlessNeuron::resetTraining(){
+	foreach(byte* array, trainingData)
+		delete array;
+	trainingData.clear();
 }
 
 

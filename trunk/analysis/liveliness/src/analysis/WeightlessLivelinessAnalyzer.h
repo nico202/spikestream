@@ -13,16 +13,30 @@
 
 namespace spikestream {
 
+	typedef unsigned char byte;
+
 	/*! Analyzes weightless neurons for state-based liveliness.
 		Identifies the liveliness of connections for a particular state as well as the liveliness
 		of neurons and clusters of connected lively neurons. */
-	class WeightlessLivelinessAnalyzer {
+	class WeightlessLivelinessAnalyzer : public QObject {
 		Q_OBJECT
 
 		public:
 			WeightlessLivelinessAnalyzer(const DBInfo& netDBInfo, const DBInfo& archDBInfo, const DBInfo& anaDBInfo, const AnalysisInfo& anaInfo, unsigned int timeStep);
+			WeightlessLivelinessAnalyzer();
 			~WeightlessLivelinessAnalyzer();
+			void calculateConnectionLiveliness();
+			void fillInputArray(WeightlessNeuron* weiNeuron, byte*& inPatArr, int& inPatArrLen);
+			void flipBits(byte inPatArr[], int inPatArrLen, QList<unsigned int>& indexList);
+			QHash<unsigned int, QHash<unsigned int, double> > getConnectionLivelinessMap() { return connectionLivelinessMap; }
+			QHash<unsigned int, double> getNeuronLivelinessMap() { return neuronLivelinessMap; }
+			void identifyClusters();
 			void runCalculation(const bool * const stop);
+			void setAnalysisInfo(const AnalysisInfo& anaInfo) { this->analysisInfo = anaInfo; }
+			void setConnectionLivelinessMap(QHash<unsigned int, QHash<unsigned int, double> > conLivMap) { this->connectionLivelinessMap = conLivMap; }
+			void setFiringNeuronMap(QHash<unsigned int, bool> firingNeuronMap) { this->firingNeuronMap = firingNeuronMap; }
+			void setLivelinessDao(LivelinessDao* livelinessDao) { this->livelinessDao = livelinessDao; }
+			void setWeightlessNeuronMap(QHash<unsigned int, WeightlessNeuron*> weiNeurMap) { this->weightlessNeuronMap = weiNeurMap; }
 
 		signals:
 			 void newResultsFound();
@@ -48,24 +62,32 @@ namespace spikestream {
 			/*! Pointer to the stop variable in the controlling thread. */
 			const bool* stop;
 
-			/*! Nested  maps containing each neuron's to connections.*/
-			QHash<unsigned int, QHash<unsigned int, bool> > toConnectionMap;
-
 			/*! Map containing all of the weightless neurons in the network */
 			QHash<unsigned int, WeightlessNeuron*> weightlessNeuronMap;
+
+			/*! Map containing the liveliness of each connection */
+			QHash<unsigned int, QHash<unsigned int, double> > connectionLivelinessMap;
+
+			/*! Map containing the liveliness of each neuron */
+			QHash<unsigned int, double>  neuronLivelinessMap;
 
 			/*! Map of the neurons firing at this time step */
 			QHash<unsigned int, bool> firingNeuronMap;
 
+			/*! Number of steps in the calculation */
+			unsigned int numberOfProgressSteps;
+
+			/*! Step we are at in the calculation */
+			unsigned int progressCounter;
+
 
 			//=======================  METHODS  ==========================
-			void calculateConnectionLiveliness();
-			void calculateNeuronLiveliness();
-			void identifyClusters();
 			void deleteWeightlessNeurons();
 			void loadFiringNeurons();
 			void loadWeightlessNeurons();
-
+			void setConnectionLiveliness(unsigned int fromNeurID, unsigned int toNeurID, double liveliness);
+			void saveNeuronLiveliness();
+			void updateProgress(const QString& msg);
 	};
 
 }

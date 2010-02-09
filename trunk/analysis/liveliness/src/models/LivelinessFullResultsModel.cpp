@@ -136,7 +136,16 @@ void LivelinessFullResultsModel::reload(){
 	}
 
 	//Get the current list of clusters
-	QList<Cluster> newClusterList = livelinessDao->getClusters(analysisInfo->getID());
+	QList<Cluster> newClusterList;
+	try{
+		newClusterList = livelinessDao->getClusters(analysisInfo->getID());
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<ex.getMessage();
+		clearClusters();
+		reset();
+		return;
+	}
 
 	//Get Id of currently displayed cluster
 	if(clusterDisplayIndex > 0){

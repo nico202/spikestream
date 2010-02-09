@@ -30,7 +30,7 @@ namespace spikestream {
 		void newResultsFound();
 		void progress(const QString& msg, unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps);
 
-	private slots:
+	protected slots:
 		void updateResults();
 		void updateProgress(const QString& msg, unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps);
 

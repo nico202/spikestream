@@ -10,8 +10,6 @@ using namespace spikestream;
 #include <QtTest>
 #include <QString>
 
-typedef unsigned char byte;
-
 class TestNetworkDao : public TestDao {
 	Q_OBJECT
 
@@ -36,6 +34,7 @@ class TestNetworkDao : public TestDao {
 		void testGetWeightlessNeuron();
 		void testIsWeightlessNetwork();
 		void testIsWeightlessNeuron();
+		void testSetTempWeight();
 
 	private:
 		bool bitsEqual(byte* byteArr, const QString pattern, int output);

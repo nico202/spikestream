@@ -31,8 +31,8 @@ void LivelinessTimeStepThread::run(){
 
 	try{
 		//Check that network is all weightless neurons
-		NetworkDao netDao(netDBInfo);
-		if(netDao->isWeightlessNetwork(analysisInfo.getNetworkID())){
+		NetworkDao netDao(networkDBInfo);
+		if(netDao.isWeightlessNetwork(analysisInfo.getNetworkID())){
 			WeightlessLivelinessAnalyzer* weiLivAna = new WeightlessLivelinessAnalyzer(networkDBInfo, archiveDBInfo, analysisDBInfo, analysisInfo, timeStep);
 			connect(weiLivAna, SIGNAL(newResultsFound()), this, SLOT(updateResults()), Qt::DirectConnection);
 			connect(weiLivAna, SIGNAL(progress(const QString&, unsigned int, unsigned int, unsigned int)), this, SLOT(updateProgress(const QString&, unsigned int, unsigned int, unsigned int)), Qt::DirectConnection);

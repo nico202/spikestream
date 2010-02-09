@@ -41,16 +41,16 @@ ConfigLoader::ConfigLoader(string configPath){
 	char row[200];
 	while(!configReader.eof()){
 		configReader.getline(row, 200);
-		
+
 		//Extracts key and value pairs
-		if (!(row[0] == '#' | row[0] == ' ' | row[0] == 13 | row[0] == 0)){
+		if ( !( (row[0] == '#') | (row[0] == ' ') | (row[0] == 13) | (row[0] == 0) ) ){
 			string key = "";
 			int j=0;
 			while((row[j] != ' ') && (row[j]!= '=') && j<200){
 				key += row[j];
 				j++;
 			}
-			while(row[j] == ' ' | row [j] == '=')
+			while( (row[j] == ' ') | (row [j] == '=') )
 				j++;
 			string value = "";
 			while(row[j] != 0 && row [j] != ' ' && row[j] != 13 && row[j] != 0){
@@ -109,10 +109,10 @@ void ConfigLoader::printConfig(){
 	cout<<"Configuration for Neuron Application"<<endl;
 	cout<<"---------------------------------------"<<endl;
 	map<string, string>::iterator iter;
-    for (iter = configMap.begin(); iter != configMap.end(); ++iter) {
-        cout << "Key: " << iter->first << "; "
-             << "Value: " << iter->second << endl;
-    }
+	for (iter = configMap.begin(); iter != configMap.end(); ++iter) {
+		cout << "Key: " << iter->first << "; "
+			 << "Value: " << iter->second << endl;
+	}
 }
 
 

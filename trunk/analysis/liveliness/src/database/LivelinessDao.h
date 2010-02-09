@@ -14,7 +14,7 @@ namespace spikestream {
 			LivelinessDao(const DBInfo& dbInfo);
 			LivelinessDao();
 			virtual ~LivelinessDao();
-			void addCluster(unsigned int analysisID, int timeStep, QList<unsigned int>& neuronIDList, double liveliness);
+			virtual void addCluster(unsigned int analysisID, int timeStep, QList<unsigned int>& neuronIDList, double liveliness);
 			bool containsAnalysisData(unsigned int analysisID, unsigned int firstTimeStep, unsigned int lastTimeStep);
 			void deleteTimeSteps(unsigned int analysisID, unsigned int firstTimeStep, unsigned int lastTimeStep);
 			QList<Cluster> getClusters(unsigned int analysisID);

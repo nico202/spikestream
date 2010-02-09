@@ -6,7 +6,7 @@ using namespace spikestream;
 #include <QHeaderView>
 
 /*! Constructor */
-LivelinessFullResultsTableView::LivelinessFullResultsTableView(QAbstractTableModel* model) : QTableView() {
+LivelinessFullResultsTableView::LivelinessFullResultsTableView(QWidget* parent, QAbstractTableModel* model) : QTableView(parent) {
 	//Set up the view
 	setShowGrid(false);
 	setSelectionMode(QAbstractItemView::NoSelection);

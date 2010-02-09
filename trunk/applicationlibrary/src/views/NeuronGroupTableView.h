@@ -7,18 +7,18 @@
 
 namespace spikestream {
 
-    class NeuronGroupTableView : public QTableView {
-	Q_OBJECT
+	class NeuronGroupTableView : public QTableView {
+		Q_OBJECT
 
-	public:
-	    NeuronGroupTableView(QAbstractTableModel* model);
-	    ~NeuronGroupTableView();
-	    void resizeHeaders();
+		public:
+			NeuronGroupTableView(QWidget* parent, QAbstractTableModel* model);
+			~NeuronGroupTableView();
+			void resizeHeaders();
 
-	private slots:
-	    void tableClicked(QModelIndex index);
+		private slots:
+			void tableClicked(QModelIndex index);
 
-    };
+	};
 
 }
 

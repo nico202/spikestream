@@ -6,18 +6,18 @@
 
 namespace spikestream {
 
-    class ConnectionWidget_V2 : public QWidget {
+	class ConnectionWidget_V2 : public QWidget {
 	Q_OBJECT
 
 	public:
-	    ConnectionWidget_V2(QWidget* parent);
-	    ~ConnectionWidget_V2();
+		ConnectionWidget_V2(QWidget* parent = 0);
+		~ConnectionWidget_V2();
 
 
 	private slots:
-	    void addConnections();
+		void addConnections();
 
-    };
+	};
 
 }
 

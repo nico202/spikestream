@@ -12,19 +12,19 @@ using namespace spikestream;
 
 /*! Constructor */
 ConnectionWidget_V2::ConnectionWidget_V2(QWidget* parent)  : QWidget(parent) {
-    //Vertical box to organize layout
-    QVBoxLayout* verticalBox = new QVBoxLayout(this, 2, 2);
+	//Vertical box to organize layout
+	QVBoxLayout* verticalBox = new QVBoxLayout(this, 2, 2);
 
-    //Add button to launch add neurons dialog
-    QPushButton* addConnectionsButton = new QPushButton("Add Connections");
-    addConnectionsButton->setMaximumSize(150, 30);
-    connect (addConnectionsButton, SIGNAL(clicked()), this, SLOT(addConnections()));
-    verticalBox->addWidget(addConnectionsButton);
+	//Add button to launch add neurons dialog
+	QPushButton* addConnectionsButton = new QPushButton("Add Connections");
+	addConnectionsButton->setMaximumSize(150, 30);
+	connect (addConnectionsButton, SIGNAL(clicked()), this, SLOT(addConnections()));
+	verticalBox->addWidget(addConnectionsButton);
 
-    //Construct table view and model
-    QAbstractTableModel* connGroupModel = new ConnectionGroupModel();
-    QTableView* connGroupView = new ConnectionGroupTableView(connGroupModel);
-    verticalBox->addWidget(connGroupView);
+	//Construct table view and model
+	QAbstractTableModel* connGroupModel = new ConnectionGroupModel();
+	QTableView* connGroupView = new ConnectionGroupTableView(this, connGroupModel);
+	verticalBox->addWidget(connGroupView);
 }
 
 
@@ -39,9 +39,9 @@ ConnectionWidget_V2::~ConnectionWidget_V2(){
 
 /*! Shows plugins dialog configured to load up available plugins for adding neurons */
 void ConnectionWidget_V2::addConnections(){
-    PluginsDialog* pluginsDialog = new PluginsDialog(this, "/plugins/neurons", "Add Neurons");
-    pluginsDialog->exec();
-    delete pluginsDialog;
+	PluginsDialog* pluginsDialog = new PluginsDialog(this, "/plugins/neurons", "Add Neurons");
+	pluginsDialog->exec();
+	delete pluginsDialog;
 }
 
 
