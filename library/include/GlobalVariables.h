@@ -140,7 +140,20 @@
 /*! Show all connections to a single neuron */
 #define SHOW_TO_CONNECTIONS 64
 
+/*! Heat map colours */
+#define HEAT_COLOR_0 0, 0, 0
+#define HEAT_COLOR_1 0, 0, 1.0
+#define HEAT_COLOR_2 0.125, 0, 0.875
+#define HEAT_COLOR_3 0.251, 0, 0.749
+#define HEAT_COLOR_4 0.376, 0, 0.624
+#define HEAT_COLOR_5 0.502, 0, 0.498
+#define HEAT_COLOR_6 0.624, 0, 0.376
+#define HEAT_COLOR_7 0.749, 0, 0.251
+#define HEAT_COLOR_8 0.875, 0, 0.125
+#define HEAT_COLOR_9 1.0, 0, 0
+#define HEAT_COLOR_10 1.0, 1.0, 0
 
+#define DEFAULT_MAX_HEAT_COLOR_VALUE 10.0;
 
 /*! Commenting or uncommenting this define determines whether
 	statistics are recorded for the simulation.*/
@@ -152,7 +165,7 @@
 /*! Function for comparing two char keys in a hash map.*/
 struct charKeyCompare{
   bool operator()(const char* key1, const char* key2) const{
-    return strcmp(key1, key2) < 0;
+	return strcmp(key1, key2) < 0;
   }
 };
 

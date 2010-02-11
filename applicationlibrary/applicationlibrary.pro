@@ -100,14 +100,16 @@ HEADERS += src/analysis/AnalysisLoaderWidget.h \
 			src/analysis/AnalysisParameterDialog.h \
 			src/analysis/AbstractExportAnalysisDialog.h \
 			src/analysis/AbstractAnalysisTimeStepThread.h \
-			src/analysis/ProgressWidget.h
+			src/analysis/ProgressWidget.h \
+			src/analysis/HeatColorBar.h
 SOURCES += src/analysis/AnalysisLoaderWidget.cpp \
 			src/analysis/AbstractAnalysisWidget.cpp \
 			src/analysis/AnalysisRunner.cpp \
 			src/analysis/AnalysisParameterDialog.cpp \
 			src/analysis/AbstractExportAnalysisDialog.cpp \
 			src/analysis/AbstractAnalysisTimeStepThread.cpp \
-			src/analysis/ProgressWidget.cpp
+			src/analysis/ProgressWidget.cpp \
+			src/analysis/HeatColorBar.cpp
 
 #----------------------------------------------#
 #---              dialogs folder            ---#

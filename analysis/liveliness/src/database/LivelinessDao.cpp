@@ -122,6 +122,15 @@ double LivelinessDao::getNeuronLiveliness(unsigned int analysisID, unsigned int 
 }
 
 
+/*! Returns the maximum neuron liveliness in the analysis */
+double LivelinessDao::getMaxNeuronLiveliness(unsigned int analysisID){
+	QSqlQuery query = getQuery("SELECT MAX(Liveliness) FROM NeuronLiveliness WHERE AnalysisID=" + QString::number(analysisID));
+	executeQuery(query);
+	query.next();
+	return Util::getDouble(query.value(0).toString());
+}
+
+
 /*! Sets the neuron's liveliness for a given time step and analysis.
 	If the neuron's liveliness has already been set, it is updated. */
 void LivelinessDao::setNeuronLiveliness(unsigned int analysisID, int timeStep, unsigned int neuronID, double liveliness){

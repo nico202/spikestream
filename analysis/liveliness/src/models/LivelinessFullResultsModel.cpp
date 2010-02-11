@@ -1,6 +1,8 @@
 //SpikeStream includes
 #include "LivelinessFullResultsModel.h"
 #include "Globals.h"
+#include "GlobalVariables.h"
+#include "RGBColor.h"
 #include "SpikeStreamException.h"
 using namespace spikestream;
 
@@ -16,6 +18,7 @@ LivelinessFullResultsModel::LivelinessFullResultsModel(const AnalysisInfo* analy
 
 	//initialise variables
 	clusterDisplayIndex = -1;
+	maxHeatColorValue = DEFAULT_MAX_HEAT_COLOR_VALUE;
 }
 
 
@@ -73,6 +76,12 @@ QVariant LivelinessFullResultsModel::data(const QModelIndex & index, int role) c
 
 	//If we have reached this point ignore request
 	return QVariant();
+}
+
+
+/*! Returns the maximum neuron liveliness or the default if there are no results */
+double LivelinessFullResultsModel::getMaxHeatColorValue(){
+	return  maxHeatColorValue;
 }
 
 
@@ -135,10 +144,11 @@ void LivelinessFullResultsModel::reload(){
 		return;
 	}
 
-	//Get the current list of clusters
+	//Get the current list of clusters and the maximum neuron liveliness
 	QList<Cluster> newClusterList;
 	try{
 		newClusterList = livelinessDao->getClusters(analysisInfo->getID());
+		maxHeatColorValue = livelinessDao->getMaxNeuronLiveliness(analysisInfo->getID());
 	}
 	catch(SpikeStreamException& ex){
 		qCritical()<<ex.getMessage();
@@ -175,6 +185,18 @@ void LivelinessFullResultsModel::reload(){
 }
 
 
+/*! Sets the maximum heat value and adjusts the color index appropriately */
+void LivelinessFullResultsModel::setMaxHeatColorValue(double maxHeatColorValue){
+	this->maxHeatColorValue = maxHeatColorValue;
+
+	//Re-show the cluster to set the heat map correctly
+	if(clusterDisplayIndex >= 0){
+		setVisibility(clusterList[clusterDisplayIndex], false);
+		setVisibility(clusterList[clusterDisplayIndex], true);
+	}
+}
+
+
 /*----------------------------------------------------------*/
 /*-------             PRIVATE METHODS                -------*/
 /*----------------------------------------------------------*/
@@ -188,9 +210,11 @@ void LivelinessFullResultsModel::clearClusters(){
 	//Clean up the data structures
 	clusterList.clear();
 	clusterDisplayIndex = -1;
+	maxHeatColorValue = DEFAULT_MAX_HEAT_COLOR_VALUE;
 }
 
 
+/*! Makes a new cluster visible or hides the present cluster */
 void LivelinessFullResultsModel::setVisibleCluster(int index){
 	if(index >= clusterList.size())
 		throw SpikeStreamException("Cluster display index is out of range.");
@@ -224,7 +248,34 @@ void LivelinessFullResultsModel::setVisibility(Cluster& cluster, bool makeVisibl
 	}
 	//Show cluster
 	else {
-		//Globals::getNetworkDisplay()->addHighlightNeurons(cluster.getNeuronColorMap());
+		//Build a new neuron colour map
+		QHash<unsigned int, RGBColor*> newColorMap;
+		QHash<unsigned int, double> neuronLivelinessMap = cluster.getNeuronLivelinessMap();
+		for(QHash<unsigned int, double>::iterator mapIter = neuronLivelinessMap.begin(); mapIter != neuronLivelinessMap.end(); ++mapIter){
+			if( mapIter.value() < maxHeatColorValue/10 )
+				newColorMap[mapIter.key()] = new RGBColor(HEAT_COLOR_0);
+			else if( mapIter.value() < 2.0 * (maxHeatColorValue/10.0) )
+				newColorMap[mapIter.key()] = new RGBColor(HEAT_COLOR_1);
+			else if( mapIter.value() < 3.0 * (maxHeatColorValue/10.0) )
+				newColorMap[mapIter.key()] = new RGBColor(HEAT_COLOR_2);
+			else if( mapIter.value() < 4.0 * (maxHeatColorValue/10.0) )
+				newColorMap[mapIter.key()] = new RGBColor(HEAT_COLOR_3);
+			else if( mapIter.value() < 5.0 * (maxHeatColorValue/10.0) )
+				newColorMap[mapIter.key()] = new RGBColor(HEAT_COLOR_4);
+			else if( mapIter.value() < 6.0 * (maxHeatColorValue/10.0) )
+				newColorMap[mapIter.key()] = new RGBColor(HEAT_COLOR_5);
+			else if( mapIter.value() < 7.0 * (maxHeatColorValue/10.0) )
+				newColorMap[mapIter.key()] = new RGBColor(HEAT_COLOR_6);
+			else if( mapIter.value() < 8.0 * (maxHeatColorValue/10.0) )
+				newColorMap[mapIter.key()] = new RGBColor(HEAT_COLOR_7);
+			else if( mapIter.value() < 9.0 * (maxHeatColorValue/10.0) )
+				newColorMap[mapIter.key()] = new RGBColor(HEAT_COLOR_8);
+			else if( mapIter.value() < 10.0 * (maxHeatColorValue/10.0) )
+				newColorMap[mapIter.key()] = new RGBColor(HEAT_COLOR_9);
+			else
+				newColorMap[mapIter.key()] = new RGBColor(HEAT_COLOR_10);
+		}
+		Globals::getNetworkDisplay()->addHighlightNeurons(newColorMap);
 	}
 }
 

@@ -2,6 +2,7 @@
 #include "LivelinessExportDialog.h"
 #include "LivelinessFullResultsTableView.h"
 #include "Globals.h"
+#include  "GlobalVariables.h"
 #include "SpikeStreamException.h"
 #include "LivelinessWidget.h"
 #include "LivelinessTimeStepThread.h"
@@ -78,6 +79,24 @@ LivelinessWidget::LivelinessWidget(QWidget *parent) : AbstractAnalysisWidget(par
 	tabWidget->addTab(progressScrollArea, "Progress");
 	mainVerticalBox->addWidget(tabWidget);
 
+	//Add heat color bar and controls for setting the range
+	QHBoxLayout* heatLayout = new QHBoxLayout();
+	heatColorBar = new HeatColorBar(this);
+	heatLayout->addWidget(heatColorBar);
+	QValidator *validator = new QIntValidator(1, 100000, this);
+	heatRangeEdit = new QLineEdit(QString::number(heatColorBar->getMaxValue()));
+	heatRangeEdit->setValidator(validator);
+	heatLayout->addWidget(heatRangeEdit);
+	QPushButton* setMaxButton = new QPushButton("Set Max");
+	connect(setMaxButton, SIGNAL(clicked()), this, SLOT(setHeatColorRangeMax()));
+	heatLayout->addWidget(setMaxButton);
+	QPushButton* resetButton = new QPushButton("Reset");
+	connect(resetButton, SIGNAL(clicked()), this, SLOT(resetHeatColorRange()));
+	heatLayout->addWidget(resetButton);
+	mainVerticalBox->addLayout(heatLayout);
+
+	mainVerticalBox->addStretch(5);
+
 }
 
 
@@ -119,6 +138,47 @@ void LivelinessWidget::newAnalysis(){
 }
 
 
+/*! Resets the colour range to the value stored in the full results model.
+	This is either the default, or the maximum neuron liveliness */
+void LivelinessWidget::resetHeatColorRange(){
+	if(!Globals::analysisLoaded() ){
+		heatColorBar->setMaxValue(DEFAULT_MAX_HEAT_COLOR_VALUE);
+		fullResultsModel->setMaxHeatColorValue(DEFAULT_MAX_HEAT_COLOR_VALUE);
+		heatRangeEdit->setText(QString::number(DEFAULT_MAX_HEAT_COLOR_VALUE));
+		return;
+	}
+
+	//Load maximum value from the database
+	double newMaxHeatColorValue = DEFAULT_MAX_HEAT_COLOR_VALUE;
+	try{
+		newMaxHeatColorValue = livelinessDao->getMaxNeuronLiveliness(analysisInfo->getID());
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<ex.getMessage();
+	}
+
+	//Set the new value
+	heatColorBar->setMaxValue(newMaxHeatColorValue);
+	fullResultsModel->setMaxHeatColorValue(newMaxHeatColorValue);
+	heatRangeEdit->setText(QString::number(newMaxHeatColorValue));
+}
+
+
+void LivelinessWidget::setHeatColorRangeMax(){
+	if(heatRangeEdit->text().isEmpty()){
+		QMessageBox::warning(
+				this,
+				"SpikeStream Analysis", "No maximum range value has been specified.\nPleas enter a value.",
+				QMessageBox::Ok
+		);
+		return;
+	}
+	double tmpMaxVal =Util::getDouble(heatRangeEdit->text());
+	heatColorBar->setMaxValue(tmpMaxVal);
+	fullResultsModel->setMaxHeatColorValue(tmpMaxVal);
+}
+
+
 /*! Starts the analysis of the network for state-based phi */
 void LivelinessWidget::startAnalysis(){
 	//Double check that both a network and an analysis are loaded
@@ -126,12 +186,6 @@ void LivelinessWidget::startAnalysis(){
 		qCritical()<<"Network and/or archive not loaded - cannot start analysis.";
 		return;
 	}
-
-	//Double check that the neuron type is supported
-	//    if(!Globals::getNetworkDao()->isWeightlessNetwork(Globals->getNetwork()->getID())){
-	//	qCritical()<<"Network contains neuron types that are not currently supported.";
-	//	return;
-	//    }
 
 	//Get time steps to be analyzed
 	int firstTimeStep = getFirstTimeStep();
@@ -186,6 +240,7 @@ void LivelinessWidget::startAnalysis(){
 /*! Updates results table by reloading it from the database */
 void LivelinessWidget::updateResults(){
 	fullResultsModel->reload();
+	resetHeatColorRange();
 }
 
 

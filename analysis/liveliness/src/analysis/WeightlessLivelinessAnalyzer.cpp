@@ -82,7 +82,8 @@ void WeightlessLivelinessAnalyzer::runCalculation(const bool * const stop){
 	weight field of the network database */
 void WeightlessLivelinessAnalyzer::calculateConnectionLiveliness(){
 	//Reset previous results
-	connectionLivelinessMap.clear();
+	fromConnectionLivelinessMap.clear();
+	toConnectionLivelinessMap.clear();
 	neuronLivelinessMap.clear();
 
 	//Work through each weightless neuron
@@ -198,9 +199,27 @@ void WeightlessLivelinessAnalyzer::identifyClusters(){
 			//Record the fact that we are expanding this neuron
 			expansionMap[expNeurID] = true;
 
-			//Add connected neurons that are not in the current cluster
-			if(connectionLivelinessMap.contains(expNeurID)){
-				for(QHash<unsigned int, double>::iterator conIter = connectionLivelinessMap[expNeurID].begin(); conIter != connectionLivelinessMap[expNeurID].end(); ++conIter){
+			//Add neurons that are connected FROM this neuron that are not in the current cluster
+			if(fromConnectionLivelinessMap.contains(expNeurID)){
+				for(QHash<unsigned int, double>::iterator conIter = fromConnectionLivelinessMap[expNeurID].begin(); conIter != fromConnectionLivelinessMap[expNeurID].end(); ++conIter){
+
+					//Abandon expansion if neuron is in a cluster we already have
+					if(addedNeuronsMap.contains(conIter.key())){
+						expansionList.clear();
+						break;
+					}
+
+					//Add neuron to the list of neurons to be expanded in the current cluster
+					if(conIter.value() > 0){
+						if(!expansionMap.contains(conIter.key()))
+							expansionList.append(conIter.key());
+					}
+				}
+			}
+
+			//Add neurons that connect TO this neuron that are not in the current cluster
+			if(toConnectionLivelinessMap.contains(expNeurID) && !expansionList.isEmpty()){
+				for(QHash<unsigned int, double>::iterator conIter = toConnectionLivelinessMap[expNeurID].begin(); conIter != toConnectionLivelinessMap[expNeurID].end(); ++conIter){
 
 					//Abandon expansion if neuron is in a cluster we already have
 					if(addedNeuronsMap.contains(conIter.key())){
@@ -245,7 +264,8 @@ void WeightlessLivelinessAnalyzer::deleteWeightlessNeurons(){
 		delete iter.value();
 	}
 	weightlessNeuronMap.clear();
-	connectionLivelinessMap.clear();
+	fromConnectionLivelinessMap.clear();
+	toConnectionLivelinessMap.clear();
 	neuronLivelinessMap.clear();
 }
 
@@ -293,8 +313,9 @@ void WeightlessLivelinessAnalyzer::setConnectionLiveliness(unsigned int fromNeur
 		networkDao->setTempWeight(fromNeurID, toNeurID, liveliness);
 	}
 
-	//Store in map for analysis of clusters and neurons
-	connectionLivelinessMap[fromNeurID][toNeurID] = liveliness;
+	//Store in maps for analysis of clusters and neurons
+	fromConnectionLivelinessMap[fromNeurID][toNeurID] = liveliness;
+	toConnectionLivelinessMap[toNeurID][fromNeurID] = liveliness;
 	neuronLivelinessMap[toNeurID] += liveliness;
 }
 

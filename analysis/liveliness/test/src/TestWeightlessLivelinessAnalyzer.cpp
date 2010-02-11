@@ -34,7 +34,7 @@ void TestWeightlessLivelinessAnalyzer::testCalculateConnectionLiveliness(){
 		weiLivAna.setAnalysisInfo(getAnalysisInfo());
 		weiLivAna.setWeightlessNeuronMap(weightlessNeuronMap);
 		weiLivAna.calculateConnectionLiveliness();
-		QHash<unsigned int, QHash<unsigned int, double> > conLiveMap = weiLivAna.getConnectionLivelinessMap();
+		QHash<unsigned int, QHash<unsigned int, double> > conLiveMap = weiLivAna.getFromConnectionLivelinessMap();
 		QHash<unsigned int, double> neurLiveMap = weiLivAna.getNeuronLivelinessMap();
 		QVERIFY(conLiveMap.contains(1) && conLiveMap[1].contains(4));
 		QVERIFY(conLiveMap.contains(2) && conLiveMap[2].contains(4));
@@ -42,7 +42,7 @@ void TestWeightlessLivelinessAnalyzer::testCalculateConnectionLiveliness(){
 		QCOMPARE(conLiveMap[1][4], 0.0);
 		QCOMPARE(conLiveMap[2][4], 0.0);
 		QCOMPARE(conLiveMap[3][4], 0.0);
-		QCOMPARE(neurLiveMap.size(), (int)1);
+		QCOMPARE(neurLiveMap.size(), (int)4);
 		QVERIFY(neurLiveMap.contains(4));
 		QCOMPARE(neurLiveMap[4], 0.0);
 
@@ -53,7 +53,7 @@ void TestWeightlessLivelinessAnalyzer::testCalculateConnectionLiveliness(){
 		firingNeuronMap[3] = true;
 		weiLivAna.setFiringNeuronMap(firingNeuronMap);
 		weiLivAna.calculateConnectionLiveliness();
-		conLiveMap = weiLivAna.getConnectionLivelinessMap();
+		conLiveMap = weiLivAna.getFromConnectionLivelinessMap();
 		neurLiveMap = weiLivAna.getNeuronLivelinessMap();
 		QVERIFY(conLiveMap.contains(1) && conLiveMap[1].contains(4));
 		QVERIFY(conLiveMap.contains(2) && conLiveMap[2].contains(4));
@@ -61,7 +61,7 @@ void TestWeightlessLivelinessAnalyzer::testCalculateConnectionLiveliness(){
 		QCOMPARE(conLiveMap[1][4], 1.0);
 		QCOMPARE(conLiveMap[2][4], 1.0);
 		QCOMPARE(conLiveMap[3][4], 1.0);
-		QCOMPARE(neurLiveMap.size(), (int)1);
+		QCOMPARE(neurLiveMap.size(), (int)4);
 		QVERIFY(neurLiveMap.contains(4));
 		QCOMPARE(neurLiveMap[4], 3.0);
 
@@ -71,7 +71,7 @@ void TestWeightlessLivelinessAnalyzer::testCalculateConnectionLiveliness(){
 		firingNeuronMap[2] = true;
 		weiLivAna.setFiringNeuronMap(firingNeuronMap);
 		weiLivAna.calculateConnectionLiveliness();
-		conLiveMap = weiLivAna.getConnectionLivelinessMap();
+		conLiveMap = weiLivAna.getFromConnectionLivelinessMap();
 		neurLiveMap = weiLivAna.getNeuronLivelinessMap();
 		QVERIFY(conLiveMap.contains(1) && conLiveMap[1].contains(4));
 		QVERIFY(conLiveMap.contains(2) && conLiveMap[2].contains(4));
@@ -79,7 +79,7 @@ void TestWeightlessLivelinessAnalyzer::testCalculateConnectionLiveliness(){
 		QCOMPARE(conLiveMap[1][4], 0.0);
 		QCOMPARE(conLiveMap[2][4], 0.0);
 		QCOMPARE(conLiveMap[3][4], 1.0);
-		QCOMPARE(neurLiveMap.size(), (int)1);
+		QCOMPARE(neurLiveMap.size(), (int)4);
 		QVERIFY(neurLiveMap.contains(4));
 		QCOMPARE(neurLiveMap[4], 1.0);
 
@@ -98,7 +98,7 @@ void TestWeightlessLivelinessAnalyzer::testCalculateConnectionLiveliness(){
 		firingNeuronMap.clear();;
 		weiLivAna.setFiringNeuronMap(firingNeuronMap);
 		weiLivAna.calculateConnectionLiveliness();
-		conLiveMap = weiLivAna.getConnectionLivelinessMap();
+		conLiveMap = weiLivAna.getFromConnectionLivelinessMap();
 		neurLiveMap = weiLivAna.getNeuronLivelinessMap();
 		QVERIFY(conLiveMap.contains(1) && conLiveMap[1].contains(4));
 		QVERIFY(conLiveMap.contains(2) && conLiveMap[2].contains(4));
@@ -106,7 +106,7 @@ void TestWeightlessLivelinessAnalyzer::testCalculateConnectionLiveliness(){
 		QCOMPARE(conLiveMap[1][4], 1.0);
 		QCOMPARE(conLiveMap[2][4], 1.0);
 		QCOMPARE(conLiveMap[3][4], 1.0);
-		QCOMPARE(neurLiveMap.size(), (int)1);
+		QCOMPARE(neurLiveMap.size(), (int)4);
 		QVERIFY(neurLiveMap.contains(4));
 		QCOMPARE(neurLiveMap[4], 3.0);
 	}
@@ -200,27 +200,34 @@ void TestWeightlessLivelinessAnalyzer::testIdentifyClusters(){
 
 	try{
 		// Build lively connections 1->2, 3->4, 4->5
-		QHash<unsigned int, QHash<unsigned int, double> > conLivMap;
-		conLivMap[1][2] = 1.0;
-		conLivMap[3][4] = 1.0;
-		conLivMap[4][5] = 1.0;
-		weiLivAna.setConnectionLivelinessMap(conLivMap);
+		QHash<unsigned int, QHash<unsigned int, double> > fromConLivMap;
+		QHash<unsigned int, QHash<unsigned int, double> > toConLivMap;
+		fromConLivMap[1][2] = 1.0;
+		fromConLivMap[3][4] = 1.0;
+		fromConLivMap[4][5] = 1.0;
+		toConLivMap[1][2] = 1.0;
+		toConLivMap[3][4] = 1.0;
+		toConLivMap[4][5] = 1.0;
+		weiLivAna.setFromConnectionLivelinessMap(fromConLivMap);
+		weiLivAna.setToConnectionLivelinessMap(toConLivMap);
 
 		//Run analysis and check results
 		weiLivAna.identifyClusters();
 		checkClusters(daoDuck->getClusterList(), "1,2;3,4,5");
 
-		// Build lively connections 1<->2, 2<->3, 3<->1, 4<->5
-		conLivMap.clear();
-		conLivMap[1][2] = 1.0;
-		conLivMap[2][1] = 1.0;
-		conLivMap[2][3] = 1.0;
-		conLivMap[3][2] = 1.0;
-		conLivMap[1][3] = 1.0;
-		conLivMap[3][1] = 1.0;
-		conLivMap[4][5] = 1.0;
-		conLivMap[5][4] = 1.0;
-		weiLivAna.setConnectionLivelinessMap(conLivMap);
+		/* Build lively connections 1<->2, 2<->3, 3<->1, 4<->5
+			Connections are symmetrical so only need to use one map */
+		fromConLivMap.clear();
+		fromConLivMap[1][2] = 1.0;
+		fromConLivMap[2][1] = 1.0;
+		fromConLivMap[2][3] = 1.0;
+		fromConLivMap[3][2] = 1.0;
+		fromConLivMap[1][3] = 1.0;
+		fromConLivMap[3][1] = 1.0;
+		fromConLivMap[4][5] = 1.0;
+		fromConLivMap[5][4] = 1.0;
+		weiLivAna.setFromConnectionLivelinessMap(fromConLivMap);
+		weiLivAna.setToConnectionLivelinessMap(fromConLivMap);
 
 		//Run analysis and check results
 		daoDuck->reset();
@@ -228,15 +235,34 @@ void TestWeightlessLivelinessAnalyzer::testIdentifyClusters(){
 		checkClusters(daoDuck->getClusterList(), "1,2,3;4,5");
 
 		// Build lively connections 1->2, 3->4
-		conLivMap.clear();
-		conLivMap[1][2] = 1.0;
-		conLivMap[3][4] = 1.0;
-		weiLivAna.setConnectionLivelinessMap(conLivMap);
+		fromConLivMap.clear();
+		toConLivMap.clear();
+		fromConLivMap[1][2] = 1.0;
+		fromConLivMap[3][4] = 1.0;
+		toConLivMap[2][1] = 1.0;
+		toConLivMap[4][3] = 1.0;
+		weiLivAna.setFromConnectionLivelinessMap(fromConLivMap);
+		weiLivAna.setToConnectionLivelinessMap(toConLivMap);
 
 		//Run analysis and check results
 		daoDuck->reset();
 		weiLivAna.identifyClusters();
 		checkClusters(daoDuck->getClusterList(), "1,2;3,4;5");
+
+		// Build lively connections 2->1, 2->3
+		fromConLivMap.clear();
+		toConLivMap.clear();
+		fromConLivMap[2][1] = 1.0;
+		fromConLivMap[2][3] = 1.0;
+		toConLivMap[1][2] = 1.0;
+		toConLivMap[3][2] = 1.0;
+		weiLivAna.setFromConnectionLivelinessMap(fromConLivMap);
+		weiLivAna.setToConnectionLivelinessMap(toConLivMap);
+
+		//Run analysis and check results
+		daoDuck->reset();
+		weiLivAna.identifyClusters();
+		checkClusters(daoDuck->getClusterList(), "1,2,3;4;5");
 
 	}
 	catch(SpikeStreamException& ex){
