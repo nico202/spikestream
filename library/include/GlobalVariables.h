@@ -153,7 +153,7 @@
 #define HEAT_COLOR_9 1.0, 0, 0
 #define HEAT_COLOR_10 1.0, 1.0, 0
 
-#define DEFAULT_MAX_HEAT_COLOR_VALUE 10.0;
+#define DEFAULT_MAX_HEAT_COLOR_VALUE 10.0
 
 /*! Commenting or uncommenting this define determines whether
 	statistics are recorded for the simulation.*/
