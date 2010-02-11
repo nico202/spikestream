@@ -142,7 +142,7 @@ void LivelinessWidget::newAnalysis(){
 	This is either the default, or the maximum neuron liveliness */
 void LivelinessWidget::resetHeatColorRange(){
 	if(!Globals::analysisLoaded() ){
-		heatColorBar->setMaxValue(DEFAULT_MAX_HEAT_COLOR_VALUE);
+		heatColorBar->setMaxValue( DEFAULT_MAX_HEAT_COLOR_VALUE );
 		fullResultsModel->setMaxHeatColorValue(DEFAULT_MAX_HEAT_COLOR_VALUE);
 		heatRangeEdit->setText(QString::number(DEFAULT_MAX_HEAT_COLOR_VALUE));
 		return;
@@ -151,7 +151,7 @@ void LivelinessWidget::resetHeatColorRange(){
 	//Load maximum value from the database
 	double newMaxHeatColorValue = DEFAULT_MAX_HEAT_COLOR_VALUE;
 	try{
-		newMaxHeatColorValue = livelinessDao->getMaxNeuronLiveliness(analysisInfo->getID());
+		newMaxHeatColorValue = livelinessDao->getMaxNeuronLiveliness(analysisInfo.getID());
 	}
 	catch(SpikeStreamException& ex){
 		qCritical()<<ex.getMessage();
