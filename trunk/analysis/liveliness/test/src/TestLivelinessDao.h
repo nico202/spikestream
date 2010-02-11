@@ -17,6 +17,7 @@ class TestLivelinessDao : public TestDao {
 		void testDeleteTimeSteps();
 		void testGetClusters();
 		void testGetNeuronLiveliness();
+		void testGetMaxNeuronLiveliness();
 		void testSetNeuronLiveliness();
 
 	private:

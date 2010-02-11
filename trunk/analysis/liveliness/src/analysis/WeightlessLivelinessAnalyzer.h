@@ -28,12 +28,13 @@ namespace spikestream {
 			void calculateConnectionLiveliness();
 			void fillInputArray(WeightlessNeuron* weiNeuron, byte*& inPatArr, int& inPatArrLen);
 			void flipBits(byte inPatArr[], int inPatArrLen, QList<unsigned int>& indexList);
-			QHash<unsigned int, QHash<unsigned int, double> > getConnectionLivelinessMap() { return connectionLivelinessMap; }
+			QHash<unsigned int, QHash<unsigned int, double> > getFromConnectionLivelinessMap() { return fromConnectionLivelinessMap; }
 			QHash<unsigned int, double> getNeuronLivelinessMap() { return neuronLivelinessMap; }
 			void identifyClusters();
 			void runCalculation(const bool * const stop);
 			void setAnalysisInfo(const AnalysisInfo& anaInfo) { this->analysisInfo = anaInfo; }
-			void setConnectionLivelinessMap(QHash<unsigned int, QHash<unsigned int, double> > conLivMap) { this->connectionLivelinessMap = conLivMap; }
+			void setFromConnectionLivelinessMap(QHash<unsigned int, QHash<unsigned int, double> > conLivMap) { this->fromConnectionLivelinessMap = conLivMap; }
+			void setToConnectionLivelinessMap(QHash<unsigned int, QHash<unsigned int, double> > conLivMap) { this->toConnectionLivelinessMap = conLivMap; }
 			void setFiringNeuronMap(QHash<unsigned int, bool> firingNeuronMap) { this->firingNeuronMap = firingNeuronMap; }
 			void setLivelinessDao(LivelinessDao* livelinessDao) { this->livelinessDao = livelinessDao; }
 			void setWeightlessNeuronMap(QHash<unsigned int, WeightlessNeuron*> weiNeurMap) { this->weightlessNeuronMap = weiNeurMap; }
@@ -65,8 +66,11 @@ namespace spikestream {
 			/*! Map containing all of the weightless neurons in the network */
 			QHash<unsigned int, WeightlessNeuron*> weightlessNeuronMap;
 
-			/*! Map containing the liveliness of each connection */
-			QHash<unsigned int, QHash<unsigned int, double> > connectionLivelinessMap;
+			/*! Map containing the liveliness of each connection FROM the neuron which is the key. */
+			QHash<unsigned int, QHash<unsigned int, double> > fromConnectionLivelinessMap;
+
+			/*! Map containing the liveliness of each connection TO the neuron which is the key. */
+			QHash<unsigned int, QHash<unsigned int, double> > toConnectionLivelinessMap;
 
 			/*! Map containing the liveliness of each neuron */
 			QHash<unsigned int, double>  neuronLivelinessMap;

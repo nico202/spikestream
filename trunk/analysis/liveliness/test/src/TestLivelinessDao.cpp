@@ -121,6 +121,17 @@ void TestLivelinessDao::testGetNeuronLiveliness(){
 }
 
 
+void TestLivelinessDao::testGetMaxNeuronLiveliness(){
+	//Add test analysis and data
+	addTestAnalysis1();
+	addTestAnalysis1Data();
+
+	//Invoke test method
+	LivelinessDao livelinessDao(analysisDBInfo);
+	QCOMPARE(livelinessDao.getMaxNeuronLiveliness(testAnalysis1ID), 1.8);
+}
+
+
 void TestLivelinessDao::testSetNeuronLiveliness(){
 	//Add test analysis and data
 	addTestAnalysis1();

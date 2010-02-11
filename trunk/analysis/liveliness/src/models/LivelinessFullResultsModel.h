@@ -22,10 +22,12 @@ namespace spikestream {
 			~LivelinessFullResultsModel();
 			int columnCount(const QModelIndex& parent = QModelIndex()) const;
 			QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
+			double getMaxHeatColorValue();
 			QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 			void reload();
 			int rowCount(const QModelIndex& parent = QModelIndex()) const;
 			bool setData(const QModelIndex& index, const QVariant&, int);
+			void setMaxHeatColorValue(double maxHeatColorValue);
 
 		private:
 			//====================  VARIABLES  ====================
@@ -42,6 +44,9 @@ namespace spikestream {
 
 			/*! Pointer to the database dao */
 			LivelinessDao* livelinessDao;
+
+			/*! Max value of the colour map */
+			double maxHeatColorValue;
 
 			static const int numCols = 5;
 			static const int idCol = 0;

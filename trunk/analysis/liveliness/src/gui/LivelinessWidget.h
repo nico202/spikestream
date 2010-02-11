@@ -3,6 +3,7 @@
 
 //SpikeStream includes
 #include "AbstractAnalysisWidget.h"
+#include "HeatColorBar.h"
 #include "LivelinessFullResultsModel.h"
 #include "LivelinessFullResultsTableView.h"
 #include "ProgressWidget.h"
@@ -25,6 +26,10 @@ namespace spikestream {
 			void startAnalysis();
 			void updateResults();
 
+		private slots:
+			void resetHeatColorRange();
+			void setHeatColorRangeMax();
+
 		private:
 			//=====================  VARIABLES  =======================
 			/*! Wraps analysis database with methods specialized for a state based phi analysis */
@@ -39,6 +44,11 @@ namespace spikestream {
 			/*! Model for displaying table of results */
 			LivelinessFullResultsModel* fullResultsModel;
 
+			/*! Shows the approximate value associated with each color */
+			HeatColorBar* heatColorBar;
+
+			/*! Used to edit the maximum range of the heat colour bar */
+			QLineEdit* heatRangeEdit;
 
 			//=====================  METHODS  =======================
 			void initializeAnalysisInfo();
