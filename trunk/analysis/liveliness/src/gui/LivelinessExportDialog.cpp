@@ -40,19 +40,6 @@ void LivelinessExportDialog::exportCommaSeparated(const QString& filePath){
 		outStream<<tmpCluster.getNeuronIDString()<<"\n";
 	}
 
-	//FIXME
-//	//Write headers for neuron liveliness information
-//	outStream<<"Neuron ID\tTime Step\tLiveliness\n";
-//
-//	//Write complexes
-//	foreach(Cluster tmpCluster, clusterList){
-//		outStream<<tmpCluster.getID()<<"\t";
-//		outStream<<tmpCluster.getTimeStep()<<"\t";
-//		outStream<<tmpCluster.getLiveliness()<<"\t";
-//		outStream<<tmpCluster.getNeuronIDString()<<"\n";
-//	}
-
-
 	//Close the file
 	outFile.close();
 }

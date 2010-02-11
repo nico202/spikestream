@@ -74,6 +74,12 @@ unsigned int NetworkDao::addWeightlessNeuronTrainingPattern(unsigned int neuronI
 }
 
 
+/*! Deletes all networks and associated data from the database. */
+void NetworkDao::deleteAllNetworks(){
+	executeQuery("DELETE FROM Networks");
+}
+
+
 /*! Returns all of the connections from the specified neuron to the specified neuron. */
 QList<Connection> NetworkDao::getConnections(unsigned int fromNeuronID, unsigned int toNeuronID){
 	QSqlQuery query = getQuery("SELECT ConnectionID, ConnectionGroupID, Delay, Weight, TempWeight FROM Connections WHERE FromNeuronID=" + QString::number(fromNeuronID) + " AND ToNeuronID="+ QString::number(toNeuronID));

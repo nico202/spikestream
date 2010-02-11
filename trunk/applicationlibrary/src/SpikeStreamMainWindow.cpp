@@ -1,7 +1,6 @@
 //SpikeStream includes
 #include "AnalysisLoaderWidget.h"
 #include "SpikeStreamMainWindow.h"
-#include "Utilities.h"
 #include "GlobalVariables.h"
 #include "ConfigLoader.h"
 #include "Globals.h"
@@ -13,6 +12,7 @@
 #include "ConnectionWidget_V2.h"
 #include "NetworkViewer_V2.h"
 #include "NetworkViewerProperties_V2.h"
+#include "Util.h"
 using namespace spikestream;
 
 //Qt includes
@@ -182,10 +182,10 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow( 0, "SpikeStream - 
 	Q3PopupMenu * fileMenu = new Q3PopupMenu(this);
 	menuBar()->insertItem("File", fileMenu);
 	fileMenu->insertItem("Clear databases", this, SLOT(clearDatabases()));
-	fileMenu->insertItem("Load databases", this, SLOT(loadDatabases()), Qt::CTRL+Qt::Key_L);
-	fileMenu->insertItem("Save databases", this, SLOT(saveDatabases()), Qt::CTRL+Qt::Key_S);
+	//fileMenu->insertItem("Load databases", this, SLOT(loadDatabases()), Qt::CTRL+Qt::Key_L);
+	//fileMenu->insertItem("Save databases", this, SLOT(saveDatabases()), Qt::CTRL+Qt::Key_S);
 	fileMenu->insertSeparator();
-	fileMenu->insertItem("Import connection matrix", this, SLOT(importConnectionMatrix()), Qt::CTRL+Qt::Key_I);
+	//fileMenu->insertItem("Import connection matrix", this, SLOT(importConnectionMatrix()), Qt::CTRL+Qt::Key_I);
 	fileMenu->insertItem("Import NRM network", this, SLOT(importNRMNetwork()), Qt::CTRL+Qt::Key_M);
 	fileMenu->insertSeparator();
 	fileMenu->insertItem("Quit", qApp, SLOT(closeAllWindows()), Qt::CTRL+Qt::Key_Q);
@@ -226,7 +226,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow( 0, "SpikeStream - 
 	//Create network viewer for right half of screen
 	unsigned int maxAutoLoadConnGrpSize = 1000000;
 	try{
-		maxAutoLoadConnGrpSize = Utilities::getUInt(configLoader->getStringData("max_autoload_conngrp_size"));
+		maxAutoLoadConnGrpSize = Util::getUInt(configLoader->getStringData("max_autoload_conngrp_size"));
 	}
 	catch(std::exception& er){// Catch-all for std exceptions
 		cerr<<"SpikeStreamMainWindow: STD EXCEPTION \""<<er.what()<<"\""<<endl;
@@ -338,7 +338,22 @@ void SpikeStreamMainWindow::showNetworkWidget(){
 	an error has led to out of date information in one of the tables. However all
 	data will be lost if this method is called. */
 void SpikeStreamMainWindow::clearDatabases(){
-	qWarning()<<"Clear databases method not implemented";
+	//Confirm that user wants to take this action.
+	QMessageBox msgBox;
+	msgBox.setText("Deleting Network");
+	msgBox.setInformativeText("Are you sure that you want to clear the database completely?\nAll data will be lost and this step cannot be undone.");
+	msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+	msgBox.setDefaultButton(QMessageBox::Cancel);
+	int ret = msgBox.exec();
+	if(ret != QMessageBox::Ok)
+		return;
+
+	//Delete all networks
+	Globals::getNetworkDao()->deleteAllNetworks();
+
+	//Inform other classes about the change
+	Globals::setNetwork(NULL);
+	Globals::getEventRouter()->networkChangedSlot();
 }
 
 

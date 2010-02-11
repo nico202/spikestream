@@ -203,16 +203,19 @@ void WeightlessLivelinessAnalyzer::identifyClusters(){
 			if(fromConnectionLivelinessMap.contains(expNeurID)){
 				for(QHash<unsigned int, double>::iterator conIter = fromConnectionLivelinessMap[expNeurID].begin(); conIter != fromConnectionLivelinessMap[expNeurID].end(); ++conIter){
 
-					//Abandon expansion if neuron is in a cluster we already have
-					if(addedNeuronsMap.contains(conIter.key())){
-						expansionList.clear();
-						break;
-					}
-
-					//Add neuron to the list of neurons to be expanded in the current cluster
+					//Positive liveliness between this neuron and the other neuron
 					if(conIter.value() > 0){
-						if(!expansionMap.contains(conIter.key()))
+
+						//Abandon expansion if neuron is in a cluster we already have
+						if(addedNeuronsMap.contains(conIter.key())){
+							expansionList.clear();
+							break;
+						}
+
+						//Add neuron to expansion list
+						else if(!expansionMap.contains(conIter.key())){
 							expansionList.append(conIter.key());
+						}
 					}
 				}
 			}
@@ -221,16 +224,19 @@ void WeightlessLivelinessAnalyzer::identifyClusters(){
 			if(toConnectionLivelinessMap.contains(expNeurID) && !expansionList.isEmpty()){
 				for(QHash<unsigned int, double>::iterator conIter = toConnectionLivelinessMap[expNeurID].begin(); conIter != toConnectionLivelinessMap[expNeurID].end(); ++conIter){
 
-					//Abandon expansion if neuron is in a cluster we already have
-					if(addedNeuronsMap.contains(conIter.key())){
-						expansionList.clear();
-						break;
-					}
-
-					//Add neuron to the list of neurons to be expanded in the current cluster
+					//Positive liveliness between this neuron and the other neuron
 					if(conIter.value() > 0){
-						if(!expansionMap.contains(conIter.key()))
+
+						//Abandon expansion if neuron is in a cluster we already have
+						if(addedNeuronsMap.contains(conIter.key())){
+							expansionList.clear();
+							break;
+						}
+
+						//Add neuron to expansion list
+						else if(!expansionMap.contains(conIter.key())){
 							expansionList.append(conIter.key());
+						}
 					}
 				}
 			}

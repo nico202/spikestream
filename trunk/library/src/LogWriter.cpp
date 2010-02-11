@@ -22,7 +22,8 @@
 
 //SpikeStream includes
 #include "LogWriter.h"
-#include "Utilities.h"
+#include "Util.h"
+using namespace spikestream;
 
 //Other includes
 #include <ctime>
@@ -42,7 +43,7 @@ char LogWriter::logPath[255];
 /*! Add log to the log file. */
 void LogWriter::addLog(char * data){
 	if(logLevel != 0){
- 		ofstream logOut(logPath, ios::app);
+		ofstream logOut(logPath, ios::app);
 		logOut<<data<<endl<<endl;
 		logOut.close();
 	}
@@ -52,7 +53,7 @@ void LogWriter::addLog(char * data){
 /*! Add log to the log file. */
 void LogWriter::addLog(char*  data1, char* data2){
 	if(logLevel != 0){
-  		ofstream logOut(logPath, ios::app);
+		ofstream logOut(logPath, ios::app);
 		logOut<<data1<<" "<<data2<<endl<<endl;
 		logOut.close();
 	}
@@ -62,7 +63,7 @@ void LogWriter::addLog(char*  data1, char* data2){
 /*! Add log to the log file. */
 void LogWriter::addLog(const char*  data1, const char* data2){
 	if(logLevel != 0){
-  		ofstream logOut(logPath, ios::app);
+		ofstream logOut(logPath, ios::app);
 		logOut<<data1<<" "<<data2<<endl<<endl;
 		logOut.close();
 	}
@@ -82,7 +83,7 @@ void LogWriter::addLog(string data){
 /*! Add log to the log file. */
 void LogWriter::addLog(string data1, string data2){
 	if(logLevel != 0){
-  		ofstream logOut(logPath, ios::app);
+		ofstream logOut(logPath, ios::app);
 		logOut<<data1<<" "<<data2<<endl<<endl;
 		logOut.close();
 	}
@@ -117,7 +118,7 @@ void LogWriter::setLogLevel(int logLev){
 
 /*! Sets the location of the log path. */
 void LogWriter::setLogPath(const char* lp){
-	Utilities::safeCStringCopy(logPath, lp, 100);
+	Util::safeCStringCopy(logPath, lp, 100);
 }
 
 
@@ -125,11 +126,11 @@ void LogWriter::setLogPath(const char* lp){
 void LogWriter::writeDate(){
 	if(logLevel != 0)//Check to see if logging is enabled
 		return;
-		
+
 	//Get the time and date
 	time_t timeNow = time(NULL);
 	struct tm *locTm = localtime(&timeNow);
-	
+
 	//Write the time and date
 	ofstream logOut(logPath, ios::app);//Should create a new file if one does not exist already
 	if(!logOut){//No point in throwing an exception since this is a non critical function

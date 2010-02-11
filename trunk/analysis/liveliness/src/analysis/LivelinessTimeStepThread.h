@@ -7,14 +7,14 @@
 namespace spikestream {
 
 	class LivelinessTimeStepThread : public AbstractAnalysisTimeStepThread {
-	Q_OBJECT
+		Q_OBJECT
 
-	public:
-		LivelinessTimeStepThread(const DBInfo& netDBInfo, const DBInfo& archDBInfo, const DBInfo& anaDBInfo);
-		~LivelinessTimeStepThread();
-		void run();
+		public:
+			LivelinessTimeStepThread(const DBInfo& netDBInfo, const DBInfo& archDBInfo, const DBInfo& anaDBInfo);
+			~LivelinessTimeStepThread();
+			void run();
 
-	};
+		};
 
 }
 

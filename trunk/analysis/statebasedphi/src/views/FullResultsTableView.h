@@ -7,23 +7,23 @@
 
 namespace spikestream {
 
-    class FullResultsTableView : public QTableView {
+	class FullResultsTableView : public QTableView {
 	Q_OBJECT
 
 	public:
-	    FullResultsTableView(QAbstractTableModel* model);
-	    ~FullResultsTableView();
-	    void resizeHeaders();
+		FullResultsTableView(QWidget* parent, QAbstractTableModel* model);
+		~FullResultsTableView();
+		void resizeHeaders();
 
 	private slots:
-	    void tableClicked(QModelIndex index);
+		void tableClicked(QModelIndex index);
 
 	private:
-	    //=====================  VARIABLES  ==========================
-	    static const int viewCol = 4;//FIXME: BETTER TO GET THIS FROM MODEL
+		//=====================  VARIABLES  ==========================
+		static const int viewCol = 4;//FIXME: BETTER TO GET THIS FROM MODEL
 
 
-    };
+	};
 
 }
 

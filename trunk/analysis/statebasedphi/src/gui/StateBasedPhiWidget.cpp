@@ -3,6 +3,7 @@
 #include "FullResultsTableView.h"
 #include "Globals.h"
 #include "LoadAnalysisDialog.h"
+#include "PhiAnalysisTimeStepThread.h"
 #include "SpikeStreamException.h"
 #include "StateBasedPhiWidget.h"
 #include "AnalysisParameterDialog.h"
@@ -38,8 +39,14 @@ extern "C" {
 }
 
 
+/*! Returns a class that is used by the analysis runner for the analysis */
+AbstractAnalysisTimeStepThread* createAnalysisTimeStepThread(const DBInfo& netDBInfo, const DBInfo& archDBInfo, const DBInfo& anaDBInfo){
+	return new PhiAnalysisTimeStepThread(netDBInfo, archDBInfo, anaDBInfo);
+}
+
+
 /*! Constructor */
-StateBasedPhiWidget::StateBasedPhiWidget(QWidget *parent) : QWidget(parent){
+StateBasedPhiWidget::StateBasedPhiWidget(QWidget *parent) : AbstractAnalysisWidget(parent){
 	QVBoxLayout *mainVerticalBox = new QVBoxLayout(this);
 
 	//Create a state based phi analysis dao to be used by this class
@@ -47,10 +54,12 @@ StateBasedPhiWidget::StateBasedPhiWidget(QWidget *parent) : QWidget(parent){
 
 	//Initialize analysis parameters and other variables
 	initializeAnalysisInfo();
-	currentTask = UNDEFINED_TASK;
+
+	//Set up analysis runner with function to create threads to analyze for state-based phi
+	analysisRunner->setTimeStepThreadCreationFunction(&createAnalysisTimeStepThread);
 
 	//Add tool bar to top of widget
-	toolBar = getToolBar();
+	toolBar = getDefaultToolBar();
 	checkToolBarEnabled();//Can only carry out analysis if a network and archive are loaded
 	mainVerticalBox->addWidget(toolBar);
 
@@ -59,7 +68,7 @@ StateBasedPhiWidget::StateBasedPhiWidget(QWidget *parent) : QWidget(parent){
 
 	//Add the model and view displaying the current analysis
 	fullResultsModel = new FullResultsModel(&analysisInfo, stateDao);
-	QTableView* fullResultsTableView = new FullResultsTableView(fullResultsModel);
+	QTableView* fullResultsTableView = new FullResultsTableView(this, fullResultsModel);
 	fullResultsTableView->setMinimumSize(500, 500);
 	tabWidget->addTab(fullResultsTableView, "Results");
 
@@ -73,22 +82,7 @@ StateBasedPhiWidget::StateBasedPhiWidget(QWidget *parent) : QWidget(parent){
 	tabWidget->addTab(progressScrollArea, "Progress");
 	mainVerticalBox->addWidget(tabWidget);
 
-	//Listen for events that affect whether the tool bar should be enabled or not.
-	connect(Globals::getEventRouter(), SIGNAL(archiveChangedSignal()), this, SLOT(archiveChanged()));
-	connect(Globals::getEventRouter(), SIGNAL(archiveChangedSignal()), this, SLOT(loadArchiveTimeStepsIntoCombos()));
-	connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(networkChanged()));
-
-	//Set up class to run analysis
-	analysisRunner = new AnalysisRunner(
-			Globals::getNetworkDao()->getDBInfo(),
-			Globals::getArchiveDao()->getDBInfo(),
-			Globals::getAnalysisDao()->getDBInfo()
-			);
-	connect(analysisRunner, SIGNAL(finished()), this, SLOT(threadFinished()));
-	connect(analysisRunner, SIGNAL(finished()), Globals::getEventRouter(), SLOT(analysisStopped()));
-	connect(analysisRunner, SIGNAL(progress(const QString&, unsigned int, unsigned int, unsigned int)), progressWidget, SLOT(updateProgress(const QString&, unsigned int, unsigned int, unsigned int)), Qt::QueuedConnection);
-	connect(analysisRunner, SIGNAL(timeStepComplete(unsigned int)), progressWidget, SLOT(timeStepComplete(unsigned int)), Qt::QueuedConnection);
-	connect(analysisRunner, SIGNAL(complexFound()), this , SLOT(updateResults()), Qt::QueuedConnection);
+	mainVerticalBox->addStretch(5);
 }
 
 
@@ -104,87 +98,11 @@ StateBasedPhiWidget::~StateBasedPhiWidget(){
 /*------                PRIVATE SLOTS                 ------*/
 /*----------------------------------------------------------*/
 
-/*! Called when the archive changes and sets archive ID appropriately */
-void StateBasedPhiWidget::archiveChanged(){
-	//The analyses are archive specific, so create a new analysis
-	newAnalysis();
-}
-
-
 /*! Exports data from the analysis */
 void StateBasedPhiWidget::exportAnalysis(){
 	//Show dialog to select the analysis the user wants to load
 	StateBasedPhiExportDialog exportAnalysisDialog(this);
 	exportAnalysisDialog.exec();
-}
-
-
-/*! Called when the network changes and sets network ID appropriately */
-void StateBasedPhiWidget::networkChanged(){
-	//The analyses are archive specific, so create a new analysis
-	newAnalysis();
-}
-
-
-/*! Checks to see if network or archive have been loaded */
-void StateBasedPhiWidget::checkToolBarEnabled(){
-	if(Globals::networkLoaded() && Globals::archiveLoaded())
-		toolBar->setEnabled(true);
-	else
-		toolBar->setEnabled(false);
-}
-
-
-/*! Corrects the time step selection combos so that the from is never greater than the to */
-void StateBasedPhiWidget::fixTimeStepSelection(int selectedIndex){
-	//Check that from time step has not been set to greater than the to
-	if(sender() == fromTimeStepCombo){//FROM time step combo generated the signal
-		if(selectedIndex > toTimeStepCombo->currentIndex()){
-			toTimeStepCombo->setCurrentIndex(selectedIndex);
-		}
-	}
-	//Check to time step is not less than from
-	else{//TO time step combo generated the signal
-		if(selectedIndex < fromTimeStepCombo->currentIndex()){
-			fromTimeStepCombo->setCurrentIndex(selectedIndex);
-		}
-	}
-}
-
-
-/*! Loads up the minimum and maximum time step for the archive */
-void StateBasedPhiWidget::loadArchiveTimeStepsIntoCombos(){
-	if(!Globals::archiveLoaded())
-		return;
-
-	unsigned int minTimeStep = Globals::getArchiveDao()->getMinTimeStep(Globals::getArchive()->getID());
-	unsigned int maxTimeStep = Globals::getArchiveDao()->getMaxTimeStep(Globals::getArchive()->getID());
-	QStringList timeStepList = getTimeStepList(minTimeStep, maxTimeStep);
-	fromTimeStepCombo->clear();
-	fromTimeStepCombo->addItems(timeStepList);
-	toTimeStepCombo->clear();
-	toTimeStepCombo->addItems(timeStepList);
-	if(fromTimeStepCombo->count() > 0)
-		fromTimeStepCombo->setCurrentIndex(0);
-}
-
-
-/*! Displays the load analysis dialog box so the user can select which analysis to load */
-void StateBasedPhiWidget::loadAnalysis(){
-	try{
-		//Show dialog to select the analysis the user wants to load
-		LoadAnalysisDialog loadAnalysisDialog(this);
-		if(loadAnalysisDialog.exec() == QDialog::Accepted ) {//Load the archive
-			analysisInfo = loadAnalysisDialog.getAnalysisInfo();
-			loadAnalysisResults();
-			Globals::setAnalysisID(analysisInfo.getID());
-		}
-	}
-	catch (SpikeStreamException& ex){
-		qCritical()<<ex.getMessage();
-		Globals::setAnalysisID(0);//Clear analysis status in globals
-		return;
-	}
 }
 
 
@@ -214,12 +132,6 @@ void StateBasedPhiWidget::startAnalysis(){
 		qCritical()<<"Network and/or archive not loaded - cannot start analysis.";
 		return;
 	}
-
-	//Double check that the neuron type is supported
-	//    if(!Globals::getNetworkDao()->isWeightlessNetwork(Globals->getNetwork()->getID())){
-	//	qCritical()<<"Network contains neuron types that are not currently supported.";
-	//	return;
-	//    }
 
 	//Get time steps to be analyzed
 	int firstTimeStep = Util::getInt(fromTimeStepCombo->currentText());
@@ -251,8 +163,8 @@ void StateBasedPhiWidget::startAnalysis(){
 				return;
 
 			//Delete time steps from the database and refresh the list of complexes
-			stateDao->deleteTimeSteps(firstTimeStep, lastTimeStep);
-			loadAnalysisResults();
+			stateDao->deleteTimeSteps(analysisInfo.getID(), firstTimeStep, lastTimeStep);
+			updateResults();
 		}
 
 		//Initialize classes to run analysis
@@ -271,92 +183,15 @@ void StateBasedPhiWidget::startAnalysis(){
 }
 
 
-/*! Stops the analysis of the network. */
-void StateBasedPhiWidget::stopAnalysis(){
-	analysisRunner->stop();
-}
-
-
-/*! Called when the thread running the analysis finishes. */
-void StateBasedPhiWidget::threadFinished(){
-	//Check for errors
-	if(analysisRunner->isError()){
-		qCritical()<<analysisRunner->getErrorMessage();
-		currentTask = UNDEFINED_TASK;
-		return;
-	}
-
-	switch(currentTask){
- case ANALYSIS_TASK:
-		Globals::getEventRouter()->analysisStopped();
-		break;
- default:
-		qCritical()<<"Current task not recognized: "<<currentTask;
-	}
-
-	currentTask = UNDEFINED_TASK;
-}
-
-
 /*! Updates results table by reloading it from the database */
 void StateBasedPhiWidget::updateResults(){
-	loadAnalysisResults();
+	fullResultsModel->reload();
 }
 
 
 /*-------------------------------------------------------------*/
 /*-------                PRIVATE METHODS                 ------*/
 /*-------------------------------------------------------------*/
-
-/*! Builds a list of time steps covering the specified range. */
-QStringList StateBasedPhiWidget::getTimeStepList(unsigned int min, unsigned int max){
-	QStringList tmpStrList;
-	for(unsigned int i=min; i<=max; ++i)
-		tmpStrList.append(QString::number(i));
-	return tmpStrList;
-}
-
-
-/*! Builds the toolbar that goes at the top of the page. */
-QToolBar* StateBasedPhiWidget::getToolBar(){
-	QToolBar* tmpToolBar = new QToolBar(this);
-
-	QAction* tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/open.png"), "Open", this);
-	connect(tmpAction, SIGNAL(triggered()), this, SLOT(loadAnalysis()));
-	tmpToolBar->addAction (tmpAction);
-
-	tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/new.png"), "New", this);
-	connect(tmpAction, SIGNAL(triggered()), this, SLOT(newAnalysis()));
-	tmpToolBar->addAction (tmpAction);
-
-	tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/save.png"), "Export analysis", this);
-	connect(tmpAction, SIGNAL(triggered()), this, SLOT(exportAnalysis()));
-	connect(Globals::getEventRouter(), SIGNAL(analysisNotRunningSignal(bool)), tmpAction, SLOT(setEnabled(bool)));
-	tmpToolBar->addAction (tmpAction);
-
-	tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/play.png"), "Start analysis", this);
-	connect(tmpAction, SIGNAL(triggered()), this, SLOT(startAnalysis()));
-	connect(Globals::getEventRouter(), SIGNAL(analysisNotRunningSignal(bool)), tmpAction, SLOT(setEnabled(bool)));
-	tmpToolBar->addAction (tmpAction);
-
-	tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/stop.png"), "Stop analysis", this);
-	connect(tmpAction, SIGNAL(triggered()), this, SLOT(stopAnalysis()));
-	tmpToolBar->addAction (tmpAction);
-
-	fromTimeStepCombo = new QComboBox(this);
-	tmpToolBar->addWidget(fromTimeStepCombo);
-	connect(fromTimeStepCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(fixTimeStepSelection(int)));
-
-	toTimeStepCombo = new QComboBox(this);
-	tmpToolBar->addWidget(toTimeStepCombo);
-	connect(toTimeStepCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(fixTimeStepSelection(int)));
-
-	tmpAction = new QAction(QIcon(), "Parameters", this);
-	connect(tmpAction, SIGNAL(triggered()), this, SLOT(selectParameters()));
-	tmpToolBar->addAction (tmpAction);
-
-	return tmpToolBar;
-}
 
 
 /*! Sets initial state of parameters for a state based phi analysis */
@@ -382,12 +217,6 @@ void StateBasedPhiWidget::initializeAnalysisInfo(){
 	//Set parameters
 	analysisInfo.getParameterMap()["generalization"] = 1.0;
 	analysisInfo.getParameterMap()["ignore_disconnected_subsets"] = 1.0;
-}
-
-
-/*! Instructs the model to reload the results from the database */
-void StateBasedPhiWidget::loadAnalysisResults(){
-	fullResultsModel->reload();
 }
 
 

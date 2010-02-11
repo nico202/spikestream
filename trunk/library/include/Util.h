@@ -34,6 +34,7 @@ namespace spikestream {
 			static void printBoolArray(bool arr[], int arrLen);
 			static double rDouble(double num, int numPlaces);
 			static unsigned int rUInt(double num);
+			static void safeCStringCopy(char target[], const char source[], int targetSize);
 			static void seedRandom(int seed = 0);
 			static void setGeneralization(QHash<unsigned int, WeightlessNeuron*>& weiNeurMap, double gen);
 
