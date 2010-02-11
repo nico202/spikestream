@@ -29,11 +29,11 @@ void Util::fillSelectionArray(bool* selectionArray, int arraySize, int selection
 
 	//Add zeros at start of array up to the non-selection size
 	for(int i=0; i<nonSelectionSize; ++i)
-	selectionArray[i] = false;
+		selectionArray[i] = false;
 
 	//Add 1s to the rest of the array
 	for(int i=nonSelectionSize; i<arraySize; ++i)
-	selectionArray[i] = true;
+		selectionArray[i] = true;
 }
 
 
@@ -43,7 +43,7 @@ int Util::getInt(const QString& str){
 	bool ok = true;
 	int newInt = str.toInt(&ok);
 	if(!ok)
-	throw NumberConversionException("Error converting " + str + " to integer.");
+		throw NumberConversionException("Error converting " + str + " to integer.");
 	return newInt;
 }
 
@@ -54,7 +54,7 @@ unsigned int Util::getUInt(const QString& str){
 	bool ok = true;
 	unsigned int newInt = str.toUInt(&ok);
 	if(!ok)
-	throw NumberConversionException("Error converting " + str + " to unsigned integer.");
+		throw NumberConversionException("Error converting " + str + " to unsigned integer.");
 	return newInt;
 }
 
@@ -64,7 +64,7 @@ QList<unsigned int> Util::getUIntList(const QString& str){
 	QStringList strList = str.split(",", QString::SkipEmptyParts);
 	QList<unsigned int> uIntList;
 	foreach(QString tmpStr, strList)
-	uIntList.append(Util::getUInt(tmpStr.trimmed()));
+		uIntList.append(Util::getUInt(tmpStr.trimmed()));
 	return uIntList;
 }
 
@@ -75,7 +75,7 @@ double Util::getDouble(const QString& str){
 	bool ok = true;
 	double newDouble = str.toDouble(&ok);
 	if(!ok)
-	throw NumberConversionException("Error converting " + str + " to double.");
+		throw NumberConversionException("Error converting " + str + " to double.");
 	return newDouble;
 }
 
@@ -83,7 +83,7 @@ double Util::getDouble(const QString& str){
 /*! Returns a random number in the range specified */
 int Util::getRandom(int min, int max){
 	if(max <= min)
-	throw SpikeStreamException("Incorrect range for random number: maximum <= minimum.");
+		throw SpikeStreamException("Incorrect range for random number: maximum <= minimum.");
 
 	int randomNum = min;
 	randomNum += qrand() % (max - min);
@@ -95,10 +95,10 @@ int Util::getRandom(int min, int max){
 void Util::printBoolArray(bool arr[], int arrLen){
 	cout<<"Bool Array: ";
 	for(int i=0; i< arrLen; ++i){
-	if(arr[i])
-		cout<<"1";
-	else
-		cout<<"0";
+		if(arr[i])
+			cout<<"1";
+		else
+			cout<<"0";
 	}
 	cout<<endl;
 }
@@ -108,10 +108,10 @@ void Util::printBoolArray(bool arr[], int arrLen){
 void Util::printByteArray(byte* byteArr, int arrLen){
 	cout<<"Byte array: ";
 	for(int i=0; i< arrLen*8; ++i){
-	if(byteArr[i/8] & 1<<(i%8))
-		cout<<"1";
-	else
-		cout<<"0";
+		if(byteArr[i/8] & 1<<(i%8))
+			cout<<"1";
+		else
+			cout<<"0";
 	}
 	cout<<endl;
 }
@@ -121,13 +121,13 @@ void Util::printByteArray(byte* byteArr, int arrLen){
 void Util::printByteArray(const QByteArray& byteArr){
 	cout<<"QByteArray: ";
 	for(int i=0; i< byteArr.size(); ++i){
-	byte tmpByte = (unsigned char) byteArr.at(i);
-	for(int j=0; j<8; ++j){
-		if(tmpByte & 1<<j)
-		cout<<"1";
-		else
-		cout<<"0";
-	}
+		byte tmpByte = (unsigned char) byteArr.at(i);
+		for(int j=0; j<8; ++j){
+			if(tmpByte & 1<<j)
+				cout<<"1";
+			else
+				cout<<"0";
+		}
 	}
 	cout<<endl;
 }
@@ -149,15 +149,29 @@ unsigned int Util::rUInt(double num){
 }
 
 
+/*! Carries out a safe copy of source cstring to target cstring that is no larger than targetSize. */
+void Util::safeCStringCopy(char target[], const char source[], int targetSize){
+	int newLength = strlen(source);
+	if(newLength > targetSize){
+		throw SpikeStreamException("Source cstring too large for destination cstring.");
+	}
+	int i;
+	for(i=0; i< newLength; ++i) //Copy everything up to newLength-1
+		target[i] = source[i];
+	target[i] = '\0';//Finish string with null character
+}
+
+
+
 /*! Seeds the random number generator.
 	If the seed is not specified or zero, number of seconds to midnight is used as the seed.*/
 void Util::seedRandom(int seed){
 	if(seed == 0){
-	QTime midnight(0, 0, 0);
-	qsrand(midnight.secsTo(QTime::currentTime()));
+		QTime midnight(0, 0, 0);
+		qsrand(midnight.secsTo(QTime::currentTime()));
 	}
 	else
-	qsrand(seed);
+		qsrand(seed);
 }
 
 

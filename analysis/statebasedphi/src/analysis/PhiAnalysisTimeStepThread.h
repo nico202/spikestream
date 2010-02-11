@@ -8,14 +8,14 @@
 namespace spikestream {
 
 	class PhiAnalysisTimeStepThread : public AbstractAnalysisTimeStepThread {
-	Q_OBJECT
+		Q_OBJECT
 
-	public:
-		PhiAnalysisTimeStepThread(const DBInfo& netDBInfo, const DBInfo& archDBInfo, const DBInfo& anaDBInfo);
-		~PhiAnalysisTimeStepThread();
-		void run();
+		public:
+			PhiAnalysisTimeStepThread(const DBInfo& netDBInfo, const DBInfo& archDBInfo, const DBInfo& anaDBInfo);
+			~PhiAnalysisTimeStepThread();
+			void run();
 
-	};
+		};
 
 }
 

@@ -45,23 +45,17 @@ win32 {
 
 #====================  GUI  =====================
 HEADERS = src/gui/StateBasedPhiWidget.h \
-		src/gui/StateBasedPhiParameterDialog.h \
-		src/gui/ProgressWidget.h \
 		src/gui/StateBasedPhiExportDialog.h
 SOURCES = src/gui/StateBasedPhiWidget.cpp \
-		src/gui/StateBasedPhiParameterDialog.cpp \
-		src/gui/ProgressWidget.cpp \
 		src/gui/StateBasedPhiExportDialog.cpp
 
 #==================  ANALYSIS  ===================
-HEADERS += src/analysis/AnalysisRunner.h \
-		src/analysis/PhiAnalysisTimeStepThread.h \
+HEADERS += src/analysis/PhiAnalysisTimeStepThread.h \
 		src/analysis/PhiCalculator.h \
 		src/analysis/SubsetManager.h \
 		src/analysis/Subset.h \
 		src/analysis/ProbabilityTable.h
-SOURCES += src/analysis/AnalysisRunner.cpp \
-		src/analysis/PhiAnalysisTimeStepThread.cpp \
+SOURCES += src/analysis/PhiAnalysisTimeStepThread.cpp \
 		src/analysis/PhiCalculator.cpp \
 		src/analysis/SubsetManager.cpp \
 		src/analysis/Subset.cpp \

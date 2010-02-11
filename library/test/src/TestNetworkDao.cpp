@@ -108,6 +108,60 @@ void TestNetworkDao::testAddWeightlessNeuronTrainingPattern(){
 }
 
 
+void TestNetworkDao::testDeleteAllNetworks(){
+	//Add test network
+	addTestNetwork1();
+	addTestNetwork2();
+	addTestAnalysis1();
+	addTestArchive1();
+	addTestArchive2();
+
+	//Check networks are there
+	QSqlQuery query = getQuery("SELECT * FROM Networks");
+	executeQuery(query);
+	QVERIFY(query.size() > 0);
+
+	//Check neurons are there
+	query = getQuery("SELECT * FROM Neurons");
+	executeQuery(query);
+	QVERIFY(query.size() > 0);
+
+	//Check archives are there
+	query = getArchiveQuery("SELECT * FROM Archives");
+	executeQuery(query);
+	QVERIFY(query.size() > 0);
+
+	//Check analyses are there
+	query = getAnalysisQuery("SELECT * FROM Analyses");
+	executeQuery(query);
+	QVERIFY(query.size() > 0);
+
+	//Invoke test method
+	NetworkDao networkDao(dbInfo);
+	networkDao.deleteAllNetworks();
+
+	//Check networks have gone
+	query = getQuery("SELECT * FROM Networks");
+	executeQuery(query);
+	QCOMPARE(query.size(), (int)0);
+
+	//Check neurons have gone
+	query = getQuery("SELECT * FROM Neurons");
+	executeQuery(query);
+	QCOMPARE(query.size(), (int)0);
+
+	//Check archive has gone
+	query = getArchiveQuery("SELECT * FROM Archives");
+	executeQuery(query);
+	QCOMPARE(query.size(), (int)0);
+
+	//Check analysis has gone
+	query = getAnalysisQuery("SELECT * FROM Analyses");
+	executeQuery(query);
+	QCOMPARE(query.size(), (int)0);
+}
+
+
 void TestNetworkDao::testDeleteNetwork(){
 	//Add test network
 	addTestNetwork1();
