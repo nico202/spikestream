@@ -23,7 +23,7 @@ class NRMNeuralLayer : public NRMLayer {
 		void createNeurons();
 		QList<NRMConnection*> getConnections();
 		NRMConnection* getConnectionById(int id);
-		NRMNeuron* getNeuron(unsigned int neurNum);
+		NRMNeuron* getNeuron(int neurNum);
 		unsigned int getNumberOfConnections();
 		unsigned int getNumConnsPerNeuron();
 		unsigned int getPatternArraySize();

@@ -26,9 +26,9 @@ void NRMTrainingLoader::loadTraining(const char* filePath){
 	//Open the file
 	FILE* file = fopen(filePath, "rb");
 	if ( !file ) {
-	    ostringstream errMsg;
-	    errMsg<<"Unable to open training file '"<<filePath<<"'";
-	    throw NRMException(errMsg.str());
+		ostringstream errMsg;
+		errMsg<<"Unable to open training file '"<<filePath<<"'";
+		throw NRMException(errMsg.str());
 	}
 
 	//Reset count of bytes we have read
@@ -226,7 +226,7 @@ void NRMTrainingLoader::loadLayerTraining(int layerId, FILE* file){
 	//Check that number of connections in the parameters is correct */
 	for (int n = 0; n < layerConns.size(); n++ ) {
 		fReadFile(&val, 2, 1, file);
-		if ( val != layerConns[n]->conParams.numCons ) {
+		if ( val != (int)layerConns[n]->conParams.numCons ) {
 			fclose(file);
 			ostringstream errMsg;
 			errMsg<<"Layer "<<layerId<<" Connection path "<<n<<". Training data in file is for "<<val<<" connections per neuron";

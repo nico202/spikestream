@@ -189,8 +189,10 @@ void TestWeightlessLivelinessAnalyzer::testIdentifyClusters(){
 		Connections within weightless neurons don't matter for this part of the analysis.  */
 	QHash<unsigned int, QList<unsigned int> > conMap;
 	QHash<unsigned int, WeightlessNeuron*> weiNeurMap;
-	for(int i=0; i<5; ++i)
+	QHash<unsigned int, double> neurLivMap;
+	for(int i=0; i<5; ++i){
 		weiNeurMap[i+1] = new WeightlessNeuron(conMap, i+1);
+	}
 	WeightlessLivelinessAnalyzer weiLivAna;
 	weiLivAna.setWeightlessNeuronMap(weiNeurMap);
 
@@ -208,16 +210,23 @@ void TestWeightlessLivelinessAnalyzer::testIdentifyClusters(){
 		toConLivMap[1][2] = 1.0;
 		toConLivMap[3][4] = 1.0;
 		toConLivMap[4][5] = 1.0;
+		neurLivMap[1] = 0.0;
+		neurLivMap[2] = 1.0;
+		neurLivMap[3] = 0.0;
+		neurLivMap[4] = 1.0;
+		neurLivMap[5] = 1.0;
 		weiLivAna.setFromConnectionLivelinessMap(fromConLivMap);
 		weiLivAna.setToConnectionLivelinessMap(toConLivMap);
+		weiLivAna.setNeuronLivelinessMap(neurLivMap);
 
 		//Run analysis and check results
 		weiLivAna.identifyClusters();
-		checkClusters(daoDuck->getClusterList(), "1,2;3,4,5");
+		checkClusters(daoDuck->getClusterList(), "1,2;3,4,5", "0.25;0.444");
 
 		/* Build lively connections 1<->2, 2<->3, 3<->1, 4<->5
 			Connections are symmetrical so only need to use one map */
 		fromConLivMap.clear();
+		neurLivMap.clear();
 		fromConLivMap[1][2] = 1.0;
 		fromConLivMap[2][1] = 1.0;
 		fromConLivMap[2][3] = 1.0;
@@ -226,43 +235,63 @@ void TestWeightlessLivelinessAnalyzer::testIdentifyClusters(){
 		fromConLivMap[3][1] = 1.0;
 		fromConLivMap[4][5] = 1.0;
 		fromConLivMap[5][4] = 1.0;
+		neurLivMap[1] = 2.0;
+		neurLivMap[2] = 2.0;
+		neurLivMap[3] = 2.0;
+		neurLivMap[4] = 1.0;
+		neurLivMap[5] = 1.0;
 		weiLivAna.setFromConnectionLivelinessMap(fromConLivMap);
 		weiLivAna.setToConnectionLivelinessMap(fromConLivMap);
+		weiLivAna.setNeuronLivelinessMap(neurLivMap);
 
 		//Run analysis and check results
 		daoDuck->reset();
 		weiLivAna.identifyClusters();
-		checkClusters(daoDuck->getClusterList(), "1,2,3;4,5");
+		checkClusters(daoDuck->getClusterList(), "1,2,3;4,5", "4.0;1.0");
 
 		// Build lively connections 1->2, 3->4
 		fromConLivMap.clear();
 		toConLivMap.clear();
+		neurLivMap.clear();
 		fromConLivMap[1][2] = 1.0;
 		fromConLivMap[3][4] = 1.0;
 		toConLivMap[2][1] = 1.0;
 		toConLivMap[4][3] = 1.0;
+		neurLivMap[1] = 0.0;
+		neurLivMap[2] = 1.0;
+		neurLivMap[3] = 0.0;
+		neurLivMap[4] = 1.0;
+		neurLivMap[5] = 0.0;
 		weiLivAna.setFromConnectionLivelinessMap(fromConLivMap);
 		weiLivAna.setToConnectionLivelinessMap(toConLivMap);
+		weiLivAna.setNeuronLivelinessMap(neurLivMap);
 
 		//Run analysis and check results
 		daoDuck->reset();
 		weiLivAna.identifyClusters();
-		checkClusters(daoDuck->getClusterList(), "1,2;3,4;5");
+		checkClusters(daoDuck->getClusterList(), "1,2;3,4;5", "0.25;0.25;0.0");
 
 		// Build lively connections 2->1, 2->3
 		fromConLivMap.clear();
 		toConLivMap.clear();
+		neurLivMap.clear();
 		fromConLivMap[2][1] = 1.0;
 		fromConLivMap[2][3] = 1.0;
 		toConLivMap[1][2] = 1.0;
 		toConLivMap[3][2] = 1.0;
+		neurLivMap[1] = 1.0;
+		neurLivMap[2] = 0.0;
+		neurLivMap[3] = 1.0;
+		neurLivMap[4] = 0.0;
+		neurLivMap[5] = 0.0;
 		weiLivAna.setFromConnectionLivelinessMap(fromConLivMap);
 		weiLivAna.setToConnectionLivelinessMap(toConLivMap);
+		weiLivAna.setNeuronLivelinessMap(neurLivMap);
 
 		//Run analysis and check results
 		daoDuck->reset();
 		weiLivAna.identifyClusters();
-		checkClusters(daoDuck->getClusterList(), "1,2,3;4;5");
+		checkClusters(daoDuck->getClusterList(), "1,2,3;4;5", "0.444;0;0");
 
 	}
 	catch(SpikeStreamException& ex){
@@ -281,22 +310,27 @@ void TestWeightlessLivelinessAnalyzer::testIdentifyClusters(){
 
 /*! Checks that the clusters in the string match the clusters in the list.
 	Neuron ids are separated by commas; clusters are separated by semi colons */
-void TestWeightlessLivelinessAnalyzer::checkClusters(QList<Cluster>& clusterList, QString clusterStr){
+void TestWeightlessLivelinessAnalyzer::checkClusters(QList<Cluster>& clusterList, QString clusterStr, QString clusterLivelinessStr){
 	QStringList clusterStrList = clusterStr.split(";", QString::SkipEmptyParts);
+	QStringList clusterLivelinessStrList = clusterLivelinessStr.split(";", QString::SkipEmptyParts);
+
 	//Check lists are the same size
-	if(clusterList.size() != clusterStrList.size()){
+	if(clusterList.size() != clusterStrList.size() || clusterList.size() != clusterLivelinessStrList.size()){
 		QFAIL("Expected cluster list size does not match actual cluster list size");
 		return;
 	}
 
 	//Check that each cluster specified in the string can be found in the list
-	foreach(QString clstrStr, clusterStrList){
+	for(int i=0; i<clusterStrList.size(); ++i){
+		QString clstrStr = clusterStrList.at(i);
+		double clstrLiveliness = Util::getDouble(clusterLivelinessStrList.at(i));
 
 		//Look for a cluster that has this neuron id string
 		bool clusterFound = false;
 		foreach(Cluster clstr, clusterList){
 			//qDebug()<<"COMPARING "<<clstrStr<<" WITH "<<clstr.getNeuronIDString();
 			if(clstr.getNeuronIDString() == clstrStr){
+				QCOMPARE( Util::rDouble(clstr.getLiveliness(), 3), clstrLiveliness );
 				clusterFound = true;
 				break;
 			}

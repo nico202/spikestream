@@ -120,8 +120,6 @@ void NRMRandom::multiply64Bit(unsigned int& multiplicand, unsigned int multiplie
 	mpz_fdiv_q_ui(tmpNum, tmpNum, 4294967295);
 	overflow = mpz_get_ui (tmpNum);
 
-	//cout<<"OVERFLOW: "<<overflow<<endl;
-
 	//Clean up
 	mpz_clear(tmpNum);
 }

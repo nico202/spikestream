@@ -177,27 +177,26 @@ void WeightlessLivelinessAnalyzer::identifyClusters(){
 	//Map containing all neurons that have been added to a cluster
 	QHash<unsigned int, bool> addedNeuronsMap;
 
-	//Map of neurons whose connections have been expanded
-	QHash<unsigned int, bool> expansionMap;
-
 	//List of neurons to expand in the current cluster
 	QList<unsigned int> expansionList;
 
+	//Map to filter duplicates in the expansion list
+	QHash<unsigned int, bool> expansionListMap;
+
 	//Work through each weightless neuron
 	for(QHash<unsigned int, WeightlessNeuron*>::iterator weiNeurIter = weightlessNeuronMap.begin(); !*stop && weiNeurIter != weightlessNeuronMap.end(); ++weiNeurIter){
-		expansionMap.clear();
+		expansionListMap.clear();
 		expansionList.clear();
 
 		//Add seed neuron to list of neurons that are to be expanded
-		if( !addedNeuronsMap.contains( weiNeurIter.key() ) )
+		if( !addedNeuronsMap.contains( weiNeurIter.key() ) ){
 			expansionList.append(weiNeurIter.key());
+			expansionListMap[weiNeurIter.key()] = true;
+		}
 
 		//Expand the connections to all the neurons in current cluster
 		for(int clstrIndx=0; clstrIndx<expansionList.size(); ++clstrIndx){
 			unsigned int expNeurID = expansionList.at(clstrIndx);
-
-			//Record the fact that we are expanding this neuron
-			expansionMap[expNeurID] = true;
 
 			//Add neurons that are connected FROM this neuron that are not in the current cluster
 			if(fromConnectionLivelinessMap.contains(expNeurID)){
@@ -212,9 +211,10 @@ void WeightlessLivelinessAnalyzer::identifyClusters(){
 							break;
 						}
 
-						//Add neuron to expansion list
-						else if(!expansionMap.contains(conIter.key())){
+						//Add neuron to expansion list if it is not already in it
+						else if(!expansionListMap.contains(conIter.key())){
 							expansionList.append(conIter.key());
+							expansionListMap[conIter.key()] = true;
 						}
 					}
 				}
@@ -233,9 +233,10 @@ void WeightlessLivelinessAnalyzer::identifyClusters(){
 							break;
 						}
 
-						//Add neuron to expansion list
-						else if(!expansionMap.contains(conIter.key())){
+						//Add neuron to expansion list if it is not already in it
+						else if(!expansionListMap.contains(conIter.key())){
 							expansionList.append(conIter.key());
+							expansionListMap[conIter.key()] = true;
 						}
 					}
 				}
@@ -244,7 +245,7 @@ void WeightlessLivelinessAnalyzer::identifyClusters(){
 
 		//Store cluster if it is not empty
 		if(!expansionList.isEmpty()){
-			livelinessDao->addCluster(analysisInfo.getID(), timeStep, expansionList, 0.0);
+			livelinessDao->addCluster(analysisInfo.getID(), timeStep, expansionList, getClusterLiveliness(expansionList));
 
 			//Add neurons to map of all expanded neurons
 			foreach(unsigned int neurID, expansionList)
@@ -273,6 +274,25 @@ void WeightlessLivelinessAnalyzer::deleteWeightlessNeurons(){
 	fromConnectionLivelinessMap.clear();
 	toConnectionLivelinessMap.clear();
 	neuronLivelinessMap.clear();
+}
+
+
+/*! Returns the liveliness of a cluster.
+	This is the sum of the liveliness of each neuron in the cluster multiplied by
+	this same sum divided by the maximum possible liveliness */
+double WeightlessLivelinessAnalyzer::getClusterLiveliness(QList<unsigned int>& neuronIDs){
+	//Work out the sum of the liveliness
+	double totLiveliness = 0.0;
+	foreach(unsigned int neurID, neuronIDs){
+		if(!neuronLivelinessMap.contains(neurID))
+			throw SpikeStreamAnalysisException("Neuron ID is missing from neuron liveliness map.");
+		totLiveliness += neuronLivelinessMap[neurID];
+	}
+
+	//Return the sum weighted by the extent to which this is the maximum liveliness
+	if( neuronIDs.size() > sqrt(0xffffffff) )
+		throw SpikeStreamAnalysisException("Neuron list size will cause overflow of 32 bit calculation.");
+	return totLiveliness * ( totLiveliness /  (double)( neuronIDs.size() * neuronIDs.size() ) );
 }
 
 

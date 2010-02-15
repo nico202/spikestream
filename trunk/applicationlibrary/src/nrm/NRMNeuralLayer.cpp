@@ -66,7 +66,7 @@ QList<NRMConnection*> NRMNeuralLayer::getConnections(){
 
 
 /*! Returns the neuron */
-NRMNeuron* NRMNeuralLayer::getNeuron(unsigned int neurNum){
+NRMNeuron* NRMNeuralLayer::getNeuron(int neurNum){
 	if(neurNum >= getSize())
 		throw NRMException("Training neuron number is out of range: ", neurNum);
 	return neuronArray[neurNum];
@@ -139,7 +139,7 @@ void NRMNeuralLayer::printNeuronConnections(unsigned int neurNum){
 
 /*! Prints out the training of the layer */
 void NRMNeuralLayer::printTraining(){
-	for(unsigned int i=0; i<this->getSize(); ++i){
+	for(int i=0; i<this->getSize(); ++i){
 		neuronArray[i]->printTraining();
 	}
 }
