@@ -37,6 +37,7 @@ namespace spikestream {
 			void setToConnectionLivelinessMap(QHash<unsigned int, QHash<unsigned int, double> > conLivMap) { this->toConnectionLivelinessMap = conLivMap; }
 			void setFiringNeuronMap(QHash<unsigned int, bool> firingNeuronMap) { this->firingNeuronMap = firingNeuronMap; }
 			void setLivelinessDao(LivelinessDao* livelinessDao) { this->livelinessDao = livelinessDao; }
+			void setNeuronLivelinessMap(QHash<unsigned int, double>& neurLivMap) { this->neuronLivelinessMap = neurLivMap; }
 			void setWeightlessNeuronMap(QHash<unsigned int, WeightlessNeuron*> weiNeurMap) { this->weightlessNeuronMap = weiNeurMap; }
 
 		signals:
@@ -87,6 +88,7 @@ namespace spikestream {
 
 			//=======================  METHODS  ==========================
 			void deleteWeightlessNeurons();
+			double getClusterLiveliness(QList<unsigned int>& neuronIDs);
 			void loadFiringNeurons();
 			void loadWeightlessNeurons();
 			void setConnectionLiveliness(unsigned int fromNeurID, unsigned int toNeurID, double liveliness);

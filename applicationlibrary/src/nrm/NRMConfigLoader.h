@@ -36,14 +36,11 @@ class NRMConfigLoader{
 		NRMNetwork* network;
 
 		//==========================  METHODS  ===============================
-		void getInputLayerSize(int inputLayerNum, int& ctWidth, int& ctHeight, int& ctColPlanes, int& ctType);
-		void getNeuralLayerSize(int neuralLayerNum, int& ctWidth, int& ctHeight, int& ctColPlanes);
 		void loadConfigVersion(FILE* file);
 		void loadConnectionParameters(conType& conParams, FILE* file);
 		void loadConnections(FILE* file);
 		void loadInputs(FILE* file);
 		void loadNeuralLayers(FILE* file);
-		void SetConParams(cons*, int, int, int, int, int, int, int, int );
 
 };
 

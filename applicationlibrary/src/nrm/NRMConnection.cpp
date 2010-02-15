@@ -98,7 +98,7 @@ void NRMConnection::createConnections(){
 			if ( conParams.spatialAlignment ) { //Setup full Spatially aligned connections
 				off = conParams.sTop * destLayer->width + conParams.sLeft;
 				count = 0;
-				for (unsigned int nn = 0; nn <curLayer->getSize(); nn++ ) {  // for all neurons
+				for (int nn = 0; nn <curLayer->getSize(); nn++ ) {  // for all neurons
 					fullCount = 0;
 					for (unsigned int c = 0; c < conParams.numCons; c++ ) {
 						if ( destLayer->colPlanes == 1 )
@@ -148,7 +148,7 @@ void NRMConnection::createConnections(){
 		count = 0;
 		fullCount = 0;
 		// no wrapping
-		for (unsigned int nn = 0; nn <curLayer->getSize(); nn++ ) {  // for all neurons
+		for (int nn = 0; nn <curLayer->getSize(); nn++ ) {  // for all neurons
 			if ( conParams.spatialAlignment ) { // do spatial aligned iconic
 				off = conParams.sTop * destLayer->width + conParams.sLeft;
 				for (unsigned int c = 0; c < conParams.numCons; c++ ) {
@@ -264,7 +264,7 @@ void NRMConnection::createConnections(){
 		}
 		else if ( ((NRMNeuralLayer*)curLayer)->altParam2 < 1 ) {
 			count = 0; fullCount = 0;
-			for (unsigned int nn = 0; nn <curLayer->getSize(); nn++ ) {  // for all neurons
+			for (int nn = 0; nn <curLayer->getSize(); nn++ ) {  // for all neurons
 				for (unsigned int c = 0; c < conParams.numCons; c++ ) {
 					p = fullCount % destLayer->width +
 						( (fullCount / curLayer->height) % destLayer->height ) * destLayer->width;
@@ -286,7 +286,7 @@ void NRMConnection::createConnections(){
 		fullCount = 0;
 		count = 0;
 		if ( conParams.randomCon ) {
-			for (unsigned int nn = 0; nn <curLayer->getSize(); nn++ ) {  // for all neurons
+			for (int nn = 0; nn <curLayer->getSize(); nn++ ) {  // for all neurons
 				for (unsigned int c = 0; c < conParams.numCons; c++ ) {
 					// find the top left corner of each tiled mapping on the destination object
 					yOff = yTileSize * ( fullCount / curLayer->width );
@@ -301,7 +301,7 @@ void NRMConnection::createConnections(){
 			int xPos, yPos, pos;
 			int xTileSize = destLayer->width /curLayer->width;
 			int yTileSize = destLayer->height / curLayer->height;
-			for (unsigned int nn = 0; nn <curLayer->getSize(); nn++ ) {  // for all neurons
+			for (int nn = 0; nn <curLayer->getSize(); nn++ ) {  // for all neurons
 				pos = 0;
 				for (unsigned int c = 0; c < conParams.numCons; c++ ) {
 					// find the top left corner of each tiled mapping on the destination object
@@ -345,7 +345,7 @@ void NRMConnection::createConnections(){
 					for (unsigned int segX = 0; segX < segNumH; segX++ ) {
 						xLeft = (segNumH - segX - 1) * stepH + nX - adj;
 						p = yTop + xLeft;
-						if ( p < 0 || p > (destLayer->width * destLayer->height - 1) )
+						if ( p < 0 || p > (int)(destLayer->width * destLayer->height - 1) )
 							p = 0;
 						for (unsigned int c = 0; c < conParams.numCons; c++ ) {
 							wRandCons[count++] = p;
@@ -362,7 +362,7 @@ void NRMConnection::createConnections(){
 QList<unsigned int> NRMConnection::getNeuronConnections(unsigned int neurNum){
 	//Check neuron number is in the source layer
 	NRMLayer* curLayer = ((NRMNetwork*)parentNetwork)->getLayerById(srcLayerId, srcObjectType);
-	if(neurNum >= curLayer->getSize())
+	if(neurNum >= (unsigned int)curLayer->getSize())
 		throw NRMException ("Requested neuron number is out of range: ", neurNum);
 
 	//Add the connections for this neuron to a list

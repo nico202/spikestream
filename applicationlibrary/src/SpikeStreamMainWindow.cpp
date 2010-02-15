@@ -226,7 +226,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow( 0, "SpikeStream - 
 	//Create network viewer for right half of screen
 	unsigned int maxAutoLoadConnGrpSize = 1000000;
 	try{
-		maxAutoLoadConnGrpSize = Util::getUInt(configLoader->getStringData("max_autoload_conngrp_size"));
+		maxAutoLoadConnGrpSize = Util::getUInt(configLoader->getStringData("max_autoload_conngrp_size").data());
 	}
 	catch(std::exception& er){// Catch-all for std exceptions
 		cerr<<"SpikeStreamMainWindow: STD EXCEPTION \""<<er.what()<<"\""<<endl;

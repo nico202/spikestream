@@ -22,7 +22,7 @@ class TestWeightlessLivelinessAnalyzer : public TestDao {
 		void testIdentifyClusters();
 
 	private:
-		void checkClusters(QList<Cluster>& clusterList, QString clusterStr);
+		void checkClusters(QList<Cluster>& clusterList, QString clusterStr, QString clusterLivelinessStr);
 		AnalysisInfo getAnalysisInfo();
 };
 
