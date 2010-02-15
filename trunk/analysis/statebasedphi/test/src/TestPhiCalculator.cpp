@@ -105,7 +105,7 @@ void TestPhiCalculator::testGetCausalProbability(){
 	try{
 		//Test with n1=0, n2=0, n3=1 and generalization = 1.0
 		QString x0Pattern = "100";
-		PhiUtil::setGeneralization(weightlessNeuronMap, 1.0);
+		Util::setGeneralization(weightlessNeuronMap, 1.0);
 		QCOMPARE(phiCalc.getCausalProbability(neurIDList, x0Pattern), 0.0);
 
 		//Test with n1=1, n2=1, n3=1 and generlization = 1.0
@@ -114,7 +114,7 @@ void TestPhiCalculator::testGetCausalProbability(){
 
 		//Test with n1=1, n2=0, n3=0 and generalization = 0.5
 		x0Pattern = "010";
-		PhiUtil::setGeneralization(weightlessNeuronMap, 0.5);
+		Util::setGeneralization(weightlessNeuronMap, 0.5);
 		QCOMPARE(phiCalc.getCausalProbability(neurIDList, x0Pattern), 0.125);
 
 	}
