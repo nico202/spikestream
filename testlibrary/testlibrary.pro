@@ -14,7 +14,6 @@ CONFIG += qtestlib
 
 QT += sql
 
-
 INCLUDEPATH += include 	$(SPIKESTREAM_ROOT)/library/include
 
 HEADERS = include/TestDao.h

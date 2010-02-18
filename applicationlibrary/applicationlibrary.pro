@@ -4,7 +4,7 @@ TARGET = spikestreamapplication
 
 VERSION = 0.2
 
-DESTDIR = $(SPIKESTREAM_ROOT)/lib
+DESTDIR = ../lib
 
 OBJECTS_DIR = build/objects
 
@@ -48,13 +48,7 @@ win32 {
 }
 
 
-CONFIG += debug \
-	  warn_on \
-	  qt \
-	  opengl \
-	  thread \
-	  exceptions \
-	  stl
+CONFIG += release thread exceptions
 
 QT += xml opengl qt3support sql
 

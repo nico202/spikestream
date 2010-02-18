@@ -88,7 +88,6 @@ StateBasedPhiWidget::StateBasedPhiWidget(QWidget *parent) : AbstractAnalysisWidg
 
 /*! Destructor */
 StateBasedPhiWidget::~StateBasedPhiWidget(){
-	delete analysisRunner;
 	delete stateDao;
 	delete fullResultsModel;
 }

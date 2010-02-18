@@ -10,13 +10,7 @@ OBJECTS_DIR = build/objects
 
 MOC_DIR = build/moc
 
-CONFIG += debug \
-	  warn_on \
-	  qt \
-	  thread \
-	  opengl \
-	  exceptions \
-	  stl
+CONFIG += release thread exceptions
 
 QT += xml opengl qt3support sql
 
@@ -27,8 +21,12 @@ INCLUDEPATH += src \
 		$(SPIKESTREAM_ROOT)/applicationlibrary/src/widgets \
 		$(SPIKESTREAM_ROOT)/applicationlibrary/src/dialogs
 
-LIBS += -L$(SPIKESTREAM_ROOT)/lib -lspikestream -lspikestreamapplication
-
+unix{
+	LIBS += -L$(SPIKESTREAM_ROOT)/lib  -lspikestreamapplication -lspikestream
+}
+win32{
+	LIBS += -L$(SPIKESTREAM_ROOT)/lib  -lspikestreamapplication0 -lspikestream0
+}
 
 HEADERS = src/gui/AleksanderNetworksWidget.h \
 		src/model/AleksanderNetworksBuilder.h

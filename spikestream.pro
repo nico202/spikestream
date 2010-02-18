@@ -1,5 +1,7 @@
 TEMPLATE = subdirs
 
+CONFIG += release warn_off
+
 #===========  CORE SPIKESTREAM COMPONENTS  ===========
 SUBDIRS =   library \
 			applicationlibrary \

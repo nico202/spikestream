@@ -4,13 +4,13 @@ TARGET = spikestream
 
 VERSION = 0.2
 
-DESTDIR = $(SPIKESTREAM_ROOT)/lib
+DESTDIR = ../lib
 
 OBJECTS_DIR = build/objects
 
 MOC_DIR = build/moc
 
-CONFIG += debug warn_on thread exceptions
+CONFIG += release thread exceptions
 
 QT += sql xml
 

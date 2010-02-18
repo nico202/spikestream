@@ -6,8 +6,6 @@
 
 namespace spikestream {
 
-	typedef unsigned char byte;
-
 	class WeightlessNeuron {
 		 public:
 				WeightlessNeuron(QHash<unsigned int, QList<unsigned int> >& connectionMap, unsigned int id);

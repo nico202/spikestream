@@ -10,7 +10,7 @@ OBJECTS_DIR = build/objects
 
 MOC_DIR = build/moc
 
-CONFIG += debug warn_on qt opengl thread exceptions stl
+CONFIG += release thread exceptions
 
 QT += xml opengl qt3support sql
 
@@ -40,7 +40,7 @@ unix {
 	LIBS += -lgmpxx -L$(SPIKESTREAM_ROOT)/lib -lspikestream -lspikestreamapplication
 }
 win32 {
-	LIBS += -lgmp -L$(SPIKESTREAM_ROOT)/extlib/gmp/lib
+	LIBS += -L$(SPIKESTREAM_ROOT)/lib -lspikestreamapplication0 -lspikestream0 -lgmp -L$(SPIKESTREAM_ROOT)/extlib/gmp/lib
 }
 
 
