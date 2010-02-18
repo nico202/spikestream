@@ -14,8 +14,9 @@ unix{
     LIBS += -lspikestream -lspikestreamapplication -L$(SPIKESTREAM_ROOT)/lib
 }
 win32{
-    LIBS += -lspikestream0 -lspikestreamapplication0 -L$(SPIKESTREAM_ROOT)/lib
+	LIBS += -L$(SPIKESTREAM_ROOT)/lib -lspikestreamapplication0 -lspikestream0 -lgmp -L$(SPIKESTREAM_ROOT)/extlib/gmp/lib
 }
+
 
 INCLUDEPATH += src \
 		$(SPIKESTREAM_ROOT)/applicationlibrary/src \
@@ -26,14 +27,7 @@ INCLUDEPATH += src \
 		$(SPIKESTREAM_ROOT)/applicationlibrary/src/widgets \
 		$(SPIKESTREAM_ROOT)/library/include
 
-CONFIG += debug \
-	  warn_on \
-	  qt \
-	  opengl \
-	  thread \
-	  exceptions \
-	  stl \
-	  console
+CONFIG += release thread exceptions
 
 QT += xml opengl qt3support sql
 

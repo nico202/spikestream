@@ -51,9 +51,18 @@ QWidget* PluginManager_V2::getPlugin(QString pluginName) throw(SpikeStreamExcept
 void PluginManager_V2::loadPlugins(){
 	//Get a list of files in the plugins directory
 	QDir pluginDirectory(this->pluginFolder);
+
+	//Filter plugin appropriately depending on the operating system
 	QStringList filters;
-	filters << "*.so";
+	#ifdef LINUX32_SPIKESTREAM
+		filters << "*.so";
+	#endif
+	#ifdef WIN32_SPIKESTREAM
+		filters << "*.dll";
+	#endif
 	pluginDirectory.setNameFilters(filters);
+
+	//Get list of plugin files
 	QStringList fileList = pluginDirectory.entryList();
 	qDebug()<<"Path: "<<pluginFolder<<". Available plugins: "<<fileList;
 
