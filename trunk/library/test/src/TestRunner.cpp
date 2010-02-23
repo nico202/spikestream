@@ -2,6 +2,7 @@
 //SpikeStream includes
 #include "TestAnalysisDao.h"
 #include "TestArchiveDao.h"
+#include "TestDatabaseDao.h"
 #include "TestRunner.h"
 #include "TestNetwork.h"
 #include "TestNeuronGroup.h"
@@ -17,7 +18,10 @@ using namespace std;
 
 /*! Runs all of the tests */
 void TestRunner::runTests(){
-    TestNetworkDao testNetworkDao;
+	TestDatabaseDao testDatabaseDao;
+	QTest::qExec(&testDatabaseDao);
+
+ /*   TestNetworkDao testNetworkDao;
     QTest::qExec(&testNetworkDao);
 
     TestNetworkDaoThread testNetworkDaoThread;
@@ -42,7 +46,7 @@ void TestRunner::runTests(){
     QTest::qExec(&testUtil);
 
     TestWeightlessNeuron testWeightlessNeuron;
-    QTest::qExec(&testWeightlessNeuron);
+	QTest::qExec(&testWeightlessNeuron);*/
 }
 
 

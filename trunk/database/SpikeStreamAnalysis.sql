@@ -2,8 +2,15 @@
 /* Disable foreign key checks whilst creating tables etc. */
 SET foreign_key_checks = 0;
 
-/* PhiAnalysisDescriptions
-	Holds information about each phi analysis saved in the database. */
+
+/* Create and use the database */
+DROP DATABASE IF EXISTS SpikeStreamAnalysis;
+CREATE DATABASE SpikeStreamAnalysis;
+USE SpikeStreamAnalysis;
+
+
+/* AnalysisDescriptions
+	Holds information about each analysis saved in the database. */
 CREATE TABLE Analyses (
 	AnalysisID SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	NetworkID SMALLINT NOT NULL,/* The ID of the network that is being analyzed */
@@ -19,6 +26,7 @@ CREATE TABLE Analyses (
 	FOREIGN KEY AnalysisTypeID_FK(AnalysisTypeID) REFERENCES AnalysisTypes(AnalysisTypeID) ON DELETE NO ACTION
 )
 ENGINE=InnoDB;
+
 
 /* The different types of analysis */
 CREATE TABLE AnalysisTypes (

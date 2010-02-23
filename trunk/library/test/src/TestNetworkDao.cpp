@@ -679,7 +679,7 @@ void TestNetworkDao::testSetTempWeight(){
 /*-----              PRIVATE METHODS                   -----*/
 /*----------------------------------------------------------*/
 
-bool TestNetworkDao::bitsEqual(byte* byteArr, const QString bitPattStr, int output){
+bool TestNetworkDao::bitsEqual(const unsigned char* byteArr, const QString bitPattStr, int output){
 	if(byteArr[0] != output)
 	return false;
 

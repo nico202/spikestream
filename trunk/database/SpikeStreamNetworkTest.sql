@@ -1,19 +1,20 @@
-/*------------------------  SpikeStreamNetwork ----------------------*/
+/*------------------------  SpikeStreamNetworkTest ----------------------*/
 /* Holds the neurons and connections. All of the databases are created using
 	InnoDB so that we can use foreign keys. Performance looks roughly the same
 	or better than MyISAM. 
 	
 	IMPORTANT NOTE: COMMENTS WITH SEMI-COLONS BREAK THE DATABASE CONFIGURATION TOOL!
-*/             
+*/              
 /*-------------------------------------------------------------------------*/
  
 /* Disable foreign key checks whilst creating tables etc. */
 SET foreign_key_checks = 0;
 
-/* Create and use SpikeStreamNetwork database */
-DROP DATABASE IF EXISTS SpikeStreamNetwork;
-CREATE DATABASE SpikeStreamNetwork;
-USE SpikeStreamNetwork;
+/* Create and use SpikeStreamNetworkTest database */
+DROP DATABASE IF EXISTS SpikeStreamNetworkTest;
+CREATE DATABASE SpikeStreamNetworkTest;
+USE SpikeStreamNetworkTest;
+
 
 /* NeuralNetwork
 	Allows a number of different networks to be held in the same database, 
@@ -27,6 +28,7 @@ CREATE TABLE Networks (
     INDEX NetworkIDIndex(NetworkID)
 )
 ENGINE=InnoDB;
+
 
 /* NeuronGroups
     Neurons are gathered together into neuron groups that have common parameters and types

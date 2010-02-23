@@ -1,14 +1,22 @@
-/*------------------ SpikeStreamArchive -----------------------*/
-/*        Stores information about recorded simulation runs    */
+/*------------------ SpikeStreamArchiveTest -----------------------*/
+/*  Stores information about recorded simulation runs   	
+	
+	IMPORTANT NOTE: COMMENTS WITH SEMI-COLONS BREAK THE DATABASE CONFIGURATION TOOL!
+*/ 
 /*-------------------------------------------------------------*/
 
 /* Disable foreign key checks whilst creating tables etc. */
 SET foreign_key_checks = 0;
 
-/* SimulationRun
-    Holds general information about each simulation run.
-    Entries will be automatically deleted if there is no associated simulation data.
-*/
+
+/* Create and use the database */
+DROP DATABASE IF EXISTS SpikeStreamArchiveTest;
+CREATE DATABASE SpikeStreamArchiveTest;
+USE SpikeStreamArchiveTest;
+
+
+/* Archives
+    Holds general information about each archive */
 CREATE TABLE Archives (
 	ArchiveID MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	StartTime BIGINT NOT NULL, /*When the simulation was initialized */
@@ -21,10 +29,8 @@ CREATE TABLE Archives (
 ENGINE=InnoDB;
 
 
-/* SimulationData
-	The data for a particular simulation run. An entry for each recorded time
-	step containing the firing pattern for that point in the simulation. 
-*/
+/* ArchiveData
+	Holds the firing neurons at each time step */
 CREATE TABLE ArchiveData (
 	ArchiveID MEDIUMINT UNSIGNED NOT NULL, /* References the meta data about the simulation run in the SimulationRun table. */
 	TimeStep INT UNSIGNED NOT NULL, /* The time step of the firing pattern. */

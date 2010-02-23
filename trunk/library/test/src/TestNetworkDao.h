@@ -38,7 +38,7 @@ class TestNetworkDao : public TestDao {
 		void testSetTempWeight();
 
 	private:
-		bool bitsEqual(byte* byteArr, const QString pattern, int output);
+		bool bitsEqual(const unsigned char* byteArr, const QString pattern, int output);
 };
 
 #endif//TESTNETWORKDAO_H

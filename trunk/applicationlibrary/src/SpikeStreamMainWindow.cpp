@@ -38,31 +38,21 @@ using namespace std;
 
 /*! Constructor. */
 SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow( 0, "SpikeStream - Analysis", Qt::WDestructiveClose ){
-	//Get the working directory, which should be defined by the SPIKESTREAM_ROOT variable
-	QString workingDirectory = getenv("SPIKESTREAM_ROOT");
-
-	//Working directory is essential, so exit if it is not defined.
-	if( workingDirectory == ""){
-		qCritical()<<"SPIKESTREAM_ROOT variable is not defined.\nApplication will now exit.";
-		exit(1);
-	}
-	else if( !QFile::exists(workingDirectory) ){
-		qCritical()<< "SPIKESTREAM_ROOT variable does not point to a valid directory.\nApplication will now exit.";
-		exit(1);
-	}
-	//Store root directory in global scope
-	Globals::setSpikeStreamRoot(workingDirectory);
+	//Get the working directory and store in global scope
+	QString rootDir = QCoreApplication::applicationDirPath();
+	rootDir.truncate(rootDir.size() - 4);//Trim the "/bin" off the end
+	Globals::setSpikeStreamRoot(rootDir);
 
 	//Set up splash screen to give feedback whilst application is loading
 	QSplashScreen *splashScreen = 0;
-	QPixmap splashPixmap(workingDirectory + "/images/spikestream_splash.png" );
+	QPixmap splashPixmap(Globals::getSpikeStreamRoot() + "/images/spikestream_splash.png" );
 	splashScreen = new QSplashScreen( splashPixmap );
 	splashScreen->show();
 
 	//Set up config
 	ConfigLoader* configLoader;
-	if(QFile::exists(workingDirectory +  "/spikestream.config")){
-		configLoader = new ConfigLoader(workingDirectory.toStdString() + "/spikestream.config");
+	if(QFile::exists(Globals::getSpikeStreamRoot() +  "/spikestream.config")){
+		configLoader = new ConfigLoader(Globals::getSpikeStreamRoot().toStdString() + "/spikestream.config");
 	}
 	else{
 		qCritical()<<"Cannot find configuration file\nApplication will now exit.";
@@ -74,8 +64,8 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow( 0, "SpikeStream - 
 			configLoader->getCharData("spikeStreamNetworkHost"),
 			configLoader->getCharData("spikeStreamNetworkUser"),
 			configLoader->getCharData("spikeStreamNetworkPassword"),
-			configLoader->getCharData("spikeStreamNetworkDatabase")
-			);
+			"SpikeStreamNetwork"
+	);
 	try{
 		NetworkDao* networkDao = new NetworkDao(netDBInfo);
 		Globals::setNetworkDao(networkDao);
@@ -90,8 +80,8 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow( 0, "SpikeStream - 
 			configLoader->getCharData("spikeStreamArchiveHost"),
 			configLoader->getCharData("spikeStreamArchiveUser"),
 			configLoader->getCharData("spikeStreamArchivePassword"),
-			configLoader->getCharData("spikeStreamArchiveDatabase")
-			);
+			"SpikeStreamArchive"
+	);
 	try{
 		ArchiveDao* archiveDao = new ArchiveDao(archiveDBInfo);
 		Globals::setArchiveDao(archiveDao);
@@ -106,8 +96,8 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow( 0, "SpikeStream - 
 			configLoader->getCharData("spikeStreamAnalysisHost"),
 			configLoader->getCharData("spikeStreamAnalysisUser"),
 			configLoader->getCharData("spikeStreamAnalysisPassword"),
-			configLoader->getCharData("spikeStreamAnalysisDatabase")
-			);
+			"SpikeStreamAnalysis"
+	);
 	try{
 		AnalysisDao* analysisDao = new AnalysisDao(analysisDBInfo);
 		Globals::setAnalysisDao(analysisDao);
@@ -277,7 +267,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow( 0, "SpikeStream - 
 	this->addAction(showAnalysisWidgetAction);
 
 	//Finish off
-	QPixmap iconPixmap(workingDirectory + "/images/spikestream_icon_64.png" );
+	QPixmap iconPixmap(Globals::getSpikeStreamRoot() + "/images/spikestream_icon_64.png" );
 	setIcon(iconPixmap);
 	setCentralWidget( mainSplitterWidget );
 	//setWindowState(Qt::WindowMaximized);

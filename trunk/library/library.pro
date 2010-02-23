@@ -1,10 +1,12 @@
+SPIKESTREAM_ROOT_DIR = ..
+
 TEMPLATE = lib
 
 TARGET = spikestream
 
 VERSION = 0.2
 
-DESTDIR = ../lib
+DESTDIR = $${SPIKESTREAM_ROOT_DIR}/lib
 
 OBJECTS_DIR = build/objects
 
@@ -20,7 +22,7 @@ QT += sql xml
 #----------------------------------------------#
 LIBS += -lgmpxx
 win32 {
-	LIBS += -lgmp -L$(SPIKESTREAM_ROOT)/extlib/gmp/lib
+	LIBS += -lgmp -L$${SPIKESTREAM_ROOT_DIR}/extlib/gmp/lib
 }
 
 
@@ -29,25 +31,21 @@ win32 {
 #----------------------------------------------#
 INCLUDEPATH += include
 win32 {
-	INCLUDEPATH += $(SPIKESTREAM_ROOT)/extlib/gmp/include
+	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/gmp/include
 }
 
 
 #----------------------------------------------#
 #---                  src                   ---#
 #----------------------------------------------#
-HEADERS = include/ConfigLoader.h \
-			include/GlobalVariables.h \
-			include/LogWriter.h \
+HEADERS = include/GlobalVariables.h \
 			include/PerformanceTimer.h \
 			include/RGBColor.h \
 			include/SimulationTypes.h \
 			include/Box.h \
 			include/Util.h
 
-SOURCES = src/ConfigLoader.cpp \
-			src/LogWriter.cpp \
-			src/PerformanceTimer.cpp \
+SOURCES = src/PerformanceTimer.cpp \
 			src/Box.cpp \
 			src/RGBColor.cpp \
 			src/Util.cpp
@@ -56,12 +54,14 @@ SOURCES = src/ConfigLoader.cpp \
 #---               database                 ---#
 #----------------------------------------------#
 HEADERS += include/AbstractDao.h \
+			include/DatabaseDao.h \
 			include/DBInfo.h \
 			include/NetworkDao.h \
 			include/NetworkDaoThread.h \
 			include/ArchiveDao.h \
 			include/AnalysisDao.h
 SOURCES += src/database/DBInfo.cpp \
+			src/database/DatabaseDao.cpp \
 			src/database/AbstractDao.cpp \
 			src/database/NetworkDao.cpp \
 			src/database/NetworkDaoThread.cpp \
@@ -72,11 +72,13 @@ SOURCES += src/database/DBInfo.cpp \
 #---             exceptions                 ---#
 #----------------------------------------------#
 HEADERS += include/SpikeStreamDBException.h \
+			include/SpikeStreamIOException.h \
 			include/SpikeStreamException.h \
 			include/SpikeStreamXMLException.h \
 			include/NumberConversionException.h \
 			include/SpikeStreamAnalysisException.h
 SOURCES += src/exceptions/SpikeStreamDBException.cpp \
+			src/exceptions/SpikeStreamIOException.cpp \
 			src/exceptions/SpikeStreamException.cpp \
 			src/exceptions/SpikeStreamXMLException.cpp \
 			src/exceptions/NumberConversionException.cpp \
@@ -119,5 +121,13 @@ HEADERS += include/XMLParameterParser.h
 SOURCES += src/xml/XMLParameterParser.cpp
 
 
+#----------------------------------------------#
+#---                 file                   ---#
+#----------------------------------------------#
 
-
+HEADERS += include/ConfigLoader.h \
+			include/ConfigEditor.h \
+			include/LogWriter.h
+SOURCES += src/file/ConfigLoader.cpp \
+			src/file/ConfigEditor.cpp \
+			src/file/LogWriter.cpp

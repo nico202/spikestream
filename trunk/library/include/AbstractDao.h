@@ -9,45 +9,49 @@ using namespace spikestream;
 #include <QThread>
 #include <QtSql>
 
+namespace spikestream {
 
-class AbstractDao {
-    public:
-	AbstractDao(const DBInfo& dbInfo);
-	AbstractDao();
-	virtual ~AbstractDao();
-	DBInfo getDBInfo();
+	/*! Wraps the functionality used for connecting to databases and running queries. */
+	class AbstractDao {
+		public:
+			AbstractDao(const DBInfo& dbInfo);
+			AbstractDao();
+			virtual ~AbstractDao();
+			DBInfo getDBInfo();
 
-    protected:
-	void checkDatabase();
-	void closeDatabaseConnection();
-	void connectToDatabase();
-	bool isConnected();
-	void executeQuery(QSqlQuery& query);
-	void executeQuery(const QString& queryStr);
-	QSqlQuery getQuery();
-	QSqlQuery getQuery(const QString& queryStr);
+		protected:
+			void checkDatabase();
+			void closeDatabaseConnection();
+			void connectToDatabase();
+			bool isConnected();
+			void executeQuery(QSqlQuery& query);
+			void executeQuery(const QString& queryStr);
+			QSqlQuery getQuery();
+			QSqlQuery getQuery(const QString& queryStr);
+			void setDBInfo(const DBInfo& dbInfo) { this->dbInfo = dbInfo; }
 
-    private:
-	//=========================  VARIABLES  ============================
-	/*! In QSql library can only use connections within the thread that created them.
-	    So record id of thread and throw exception if different id calls functions. */
-	QThread* dbThread;
+		private:
+			//=========================  VARIABLES  ============================
+			/*! In QSql library can only use connections within the thread that created them.
+				So record id of thread and throw exception if different id calls functions. */
+			QThread* dbThread;
 
-	/*! Parameters of the database connection */
-	DBInfo dbInfo;
+			/*! Parameters of the database connection */
+			DBInfo dbInfo;
 
-	/*! Unique name of the database */
-	QString dbName;
+			/*! Unique name of the database */
+			QString dbName;
 
-	/*! Static counter that is used to assign a unique id to each QSql database */
-	static unsigned int dbCounter;
+			/*! Static counter that is used to assign a unique id to each QSql database */
+			static unsigned int dbCounter;
 
 
-	//=========================  METHODS  ===============================
-	static QString getUniqueDBName();
+			//=========================  METHODS  ===============================
+			static QString getUniqueDBName();
 
-};
+	};
 
+}
 
 #endif//ABSTRACTDAO_H
 

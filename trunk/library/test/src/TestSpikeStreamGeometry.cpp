@@ -17,7 +17,8 @@ void TestNRMConfigLoader::cleanup(){
 }
 
 void TestNRMConfigLoader::init(){
-    workingDirectory = getenv("SPIKESTREAM_ROOT");
+	workingDirectory = QCoreApplication::applicationDirPath();
+	workingDirectory.truncate(workingDirectory.size() - 4);//Trim the "/bin" off the end
 }
 
 

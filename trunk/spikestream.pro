@@ -1,7 +1,5 @@
 TEMPLATE = subdirs
 
-CONFIG += release warn_off
-
 #===========  CORE SPIKESTREAM COMPONENTS  ===========
 SUBDIRS =   library \
 			applicationlibrary \
@@ -16,6 +14,10 @@ SUBDIRS += analysis/statebasedphi \
 #================  NETWORKS PLUGINS  =================
 SUBDIRS += networks/tononinetworks \
 			networks/aleksandernetworks
+	
+	
+#================  INSTALLATION  =====================
+SUBDIRS += installation/dbconfigtool
 
 
 #=================  TESTS  ===================
