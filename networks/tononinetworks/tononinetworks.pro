@@ -1,10 +1,12 @@
+SPIKESTREAM_ROOT_DIR = ../..
+
 TEMPLATE = lib
 
 TARGET = tononinetworks
 
 VERSION = 0.2
 
-DESTDIR = $(SPIKESTREAM_ROOT)/plugins/networks
+DESTDIR = $${SPIKESTREAM_ROOT_DIR}/plugins/networks
 
 OBJECTS_DIR = build/objects
 
@@ -16,17 +18,17 @@ QT += xml opengl qt3support sql
 
 INCLUDEPATH += src \
 				src/model \
-				$(SPIKESTREAM_ROOT)/library/include \
-				$(SPIKESTREAM_ROOT)/applicationlibrary/src \
-				$(SPIKESTREAM_ROOT)/applicationlibrary/src/widgets \
-				$(SPIKESTREAM_ROOT)/applicationlibrary/src/dialogs
+				$${SPIKESTREAM_ROOT_DIR}/library/include \
+				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src \
+				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src/widgets \
+				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src/dialogs
 
 unix{
-	LIBS += -L$(SPIKESTREAM_ROOT)/lib  -lspikestreamapplication -lspikestream
+	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/lib  -lspikestreamapplication -lspikestream
 }
 win32{
-	LIBS += -L$(SPIKESTREAM_ROOT)/lib  -lspikestreamapplication0 -lspikestream0
-	INCLUDEPATH += $(SPIKESTREAM_ROOT)/extlib/gmp/include
+	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/lib  -lspikestreamapplication0 -lspikestream0
+	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/gmp/include
 }
 
 HEADERS = src/gui/TononiNetworksWidget.h \

@@ -1,27 +1,25 @@
-#!/bin/sh
+REM SpikeStream script that removes makefiles and any build files, objects and libraries
 
-#Removes makefiles and any built objects and libraries
-
-#Run make clean at root - if SpikeStream has been built from here, this should clean everything
+REM Run make clean at root - if SpikeStream has been built from here, this should clean everything
 cd ..
 mingw32-make distclean
 
-#Clean up files at root
+REM Clean up files at root
 rm Makefile
 
-#Clean up liveliness files
+REM Clean up liveliness files
 cd analysis/liveliness
 mingw32-make distclean
 rm liveliness.pro.user
 rm liveliness_resource.rc
 
-#Clean up state based phi files
+REM Clean up state based phi files
 cd ../statebasedphi
 mingw32-make distclean
 rm statebasedphi.pro.user
 rm statebasedphi_resource.rc
 
-#Clean up application files
+REM Clean up application files
 cd ../../application
 mingw32-make distclean
 rm application.pro.user
@@ -29,7 +27,7 @@ rm spikestream_resource.rc
 rm -R debug
 rm -R release
 
-#Clean up application library
+REM Clean up application library
 
 
  

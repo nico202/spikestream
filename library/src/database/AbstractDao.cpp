@@ -1,5 +1,6 @@
 #include "AbstractDao.h"
 #include "SpikeStreamDBException.h"
+using namespace spikestream;
 
 //Qt includes
 #include <QDebug>
@@ -21,8 +22,10 @@ AbstractDao::AbstractDao(const DBInfo& dbInfo){
 }
 
 
-/*! Empty constructor for unit testing */
+/*! Empty constructor. */
 AbstractDao::AbstractDao(){
+	//Default name of database  - this changes when it is connected.
+	dbName = "";
 }
 
 
@@ -51,12 +54,12 @@ DBInfo AbstractDao::getDBInfo(){
     Thread checks have to be done at runtime. */
 void AbstractDao::checkDatabase(){
     if(!isConnected())
-	connectToDatabase();
+		connectToDatabase();
 
     /* Check that we are accessing datbase connection from the thread it was created on.
        The Qt database class only works within a single thread.*/
     if(QThread::currentThread() != dbThread){
-	throw SpikeStreamDBException("Attempting to access database from different thread. This is not supported in Qt4");
+		throw SpikeStreamDBException("Attempting to access database from different thread. This is not supported in Qt4");
     }
 }
 
@@ -65,8 +68,8 @@ void AbstractDao::checkDatabase(){
 bool AbstractDao::isConnected(){
     QSqlDatabase db = QSqlDatabase::database(dbName);
     if(db.isValid())
-	if(db.isOpen())
-	    return true;
+		if(db.isOpen())
+			return true;
     return false;
 }
 
@@ -77,7 +80,7 @@ void AbstractDao::closeDatabaseConnection(){
 
 
 void AbstractDao::connectToDatabase(){
-   //Record the thread that this database was created in - this class cannot be used across multiple threads
+	//Record the thread that this database was created in - this class cannot be used across multiple threads
     dbThread = QThread::currentThread();
 
     //Get a unique name that can be used to access the database
@@ -91,13 +94,13 @@ void AbstractDao::connectToDatabase(){
     database.setPassword(this->dbInfo.getPassword());
 
     //Set connection options to prevent it from timing out
-   database.setConnectOptions("MYSQL_OPT_RECONNECT=1");
+	database.setConnectOptions("MYSQL_OPT_RECONNECT=1");
     //database.setConnectOptions("CLIENT_SSL=1;CLIENT_IGNORE_SPACE=1");
 
     //Open database connection
     bool ok = database.open();
     if(!ok)
-	throw SpikeStreamDBException( QString("Cannot connect to database ") + this->dbInfo.toString() + ". Error: " + database.lastError().text() );
+		throw SpikeStreamDBException( QString("Cannot connect to database ") + this->dbInfo.toString() + ". Error: " + database.lastError().text() );
 }
 
 
@@ -105,7 +108,7 @@ void AbstractDao::connectToDatabase(){
 void AbstractDao::executeQuery(QSqlQuery& query){
     bool result = query.exec();
     if(!result){
-	throw SpikeStreamDBException(QString("Error executing query: '") + query.lastQuery() + "'; Error='" + query.lastError().text() + "'.");
+		throw SpikeStreamDBException(QString("Error executing query: '") + query.lastQuery() + "'; Error='" + query.lastError().text() + "'.");
     }
 }
 

@@ -1,6 +1,10 @@
 #include "DBInfo.h"
 using namespace spikestream;
 
+//Initialize static varaibles
+QString DBInfo::UNDEFINED = "undefined";
+
+
 /*! Normal constructor */
 DBInfo::DBInfo(QString host, QString user, QString password, QString database){
     this->host = host;
@@ -12,10 +16,10 @@ DBInfo::DBInfo(QString host, QString user, QString password, QString database){
 
 /*! Empty constructor */
 DBInfo::DBInfo(){
-    host = "undefined";
-    database = "undefined";
-    password = "undefined";
-    user = "undefined";
+	host = DBInfo::UNDEFINED;
+	database = DBInfo::UNDEFINED;
+	password = DBInfo::UNDEFINED;
+	user = DBInfo::UNDEFINED;
 }
 
 
@@ -49,7 +53,7 @@ DBInfo& DBInfo::operator=(const DBInfo &rhs) {
 
 
 /*! Returns a string representation of the database information */
-QString DBInfo::toString(){
+QString DBInfo::toString() const{
     QString tmpStr;
     tmpStr += "host=" + host + "; ";
     tmpStr += "user=" + user + "; ";

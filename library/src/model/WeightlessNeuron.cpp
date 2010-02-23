@@ -102,7 +102,7 @@ double WeightlessNeuron::getFiringStateProbability(byte inPatArr[], int inPatArr
 	//Work through all of the training patterns
 	bool firstTime = true;
 	byte currentResponse;
-	unsigned int minDist;
+	unsigned int minDist = hammingThreshold + 1;//Initialise to take account of case where there is no training data
 	byte* trainingPattern;
 	QHash<int, byte> minDistIndxMap;
 	for(int listIndx=0; listIndx<trainingData.size(); ++listIndx){

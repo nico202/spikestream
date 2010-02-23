@@ -70,10 +70,3 @@ CREATE TABLE WeightlessSynapseParameters (
 ENGINE=InnoDB;
 
 
-/* Syntax for adding parameters if you need to.
-  ALTER TABLE STDP1SynapseParameters ADD DriftThreshold_val DOUBLE DEFAULT 0.5;
-  ALTER TABLE STDP1SynapseParameters ADD DriftThreshold_desc CHAR(100) DEFAULT "Drift threshold";
-*/
-
-
-

@@ -36,7 +36,12 @@ void TestDao::init(){
 
 /*! Called before all the tests */
 void TestDao::initTestCase(){
-    connectToDatabases("SpikeStreamNetworkTest", "SpikeStreamArchiveTest", "SpikeStreamAnalysisTest");
+	try{
+		connectToDatabases("SpikeStreamNetworkTest", "SpikeStreamArchiveTest", "SpikeStreamAnalysisTest");
+	}
+	catch(SpikeStreamException& ex){
+		QFAIL(ex.getMessage().toAscii());
+	}
 }
 
 

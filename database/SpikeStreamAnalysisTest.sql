@@ -1,6 +1,16 @@
+/*
+	IMPORTANT NOTE: COMMENTS WITH SEMI-COLONS BREAK THE DATABASE CONFIGURATION TOOL!
+*/ 
  
 /* Disable foreign key checks whilst creating tables etc. */
 SET foreign_key_checks = 0;
+
+
+/* Create and use the database */
+DROP DATABASE IF EXISTS SpikeStreamAnalysisTest;
+CREATE DATABASE SpikeStreamAnalysisTest;
+USE SpikeStreamAnalysisTest;
+
 
 /* PhiAnalysisDescriptions
 	Holds information about each phi analysis saved in the database. */

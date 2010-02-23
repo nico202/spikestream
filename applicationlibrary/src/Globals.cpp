@@ -114,8 +114,7 @@ NetworkDisplay* Globals::getNetworkDisplay(){
 }
 
 
-/*! Returns the root directory, which should correspond to the SPIKESTREAM_ROOT
-	 environment variable.*/
+/*! Returns the root directory where SpikeStream is installed.*/
 QString Globals::getSpikeStreamRoot(){
 	return spikeStreamRoot;
 }

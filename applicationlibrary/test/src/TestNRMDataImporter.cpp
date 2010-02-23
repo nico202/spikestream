@@ -7,7 +7,8 @@ void TestNRMDataImporter::cleanup(){
 
 
 void TestNRMDataImporter::init(){
-    workingDirectory = getenv("SPIKESTREAM_ROOT");
+	workingDirectory = QCoreApplication::applicationDirPath();
+	workingDirectory.truncate(workingDirectory.size() - 4);//Trim the "/bin" off the end
 }
 
 

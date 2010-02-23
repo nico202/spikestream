@@ -1,8 +1,6 @@
 
 /*---------------------------- Add Neuron Types ---------------------------- */
-/*	SQL to add the current neuron types to the Neural Network Database.
-	If you create a new neuron class you will need to add an entry to the
-	NeuronTypes table and a new table to hold its parameters. */
+/*	SQL to add the current neuron types to the Network Database.*/
 /*-----------------------------------------------------------------------------*/
 
 /* Add an entry for the STDP1 Neuron to the NeuronTypes table */
@@ -41,6 +39,7 @@ ENGINE=InnoDB;
 /* Add an entry for the STDP1 Neuron to the NeuronTypes table */
 INSERT INTO NeuronTypes(NeuronTypeID, Description, ParameterTableName, ClassLibrary) VALUES (2, "Weightless Neuron", "WeigthlessNeuronParameters", "undefined.so");
 
+
 /* Add table for STDP1 Neuron parameters
 	Table containing the parameters for the Spike time dependent plasticity Neuron type 1
 	Each neuron group created with this type will have an entry in this table.*/
@@ -55,8 +54,3 @@ CREATE TABLE WeightlessNeuronParameters (
 ENGINE=InnoDB;
 
 
-
-/* Syntax for adding parameters if you need to.
-	ALTER TABLE STDP1NeuronParameters ADD MinPostsynapticPotential_val DOUBLE DEFAULT -5.0;
-	ALTER TABLE STDP1NeuronParameters ADD MinPostsynapticPotential_desc CHAR(100) DEFAULT "Min postsynaptic potential";
-*/
