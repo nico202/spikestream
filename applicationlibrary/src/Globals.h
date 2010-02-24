@@ -21,11 +21,10 @@ using namespace spikestream;
 namespace spikestream {
     class Globals {
 		public:
-			static bool analysisLoaded();
 			static bool archiveLoaded();
 			static void cleanUp();
+			static unsigned int getAnalysisID(const QString& analysisName);
 			static AnalysisDao* getAnalysisDao();
-			static unsigned int getAnalysisID();
 			static Archive* getArchive();
 			static ArchiveDao* getArchiveDao();
 			static EventRouter* getEventRouter() {return eventRouter; }
@@ -35,9 +34,10 @@ namespace spikestream {
 			static QString getSpikeStreamRoot();
 			static QString getWorkingDirectory();
 			static bool isArchivePlaying();
+			static bool isAnalysisLoaded(const QString& analysisName);
 			static bool isRendering();
 			static bool networkLoaded();
-			static void setAnalysisID(unsigned int id);
+			static void setAnalysisID(const QString& analysisName, unsigned int id);
 			static void setArchivePlaying(bool archivePlaying);
 			static void startTimer();
 			static unsigned int timeElapsed();
@@ -73,8 +73,9 @@ namespace spikestream {
 			/*! The current loaded archive */
 			static Archive* archive;
 
-			/*! The id of the current analysis */
-			static unsigned int analysisID;
+			/*! Stores the id for each analysis type.
+				An ID of 0 indicates that no analysis is loaded for that type. */
+			static QHash<QString, unsigned int> analysisMap;
 
 			/*! Class controlling how the current network is displayed */
 			static NetworkDisplay* networkDisplay;

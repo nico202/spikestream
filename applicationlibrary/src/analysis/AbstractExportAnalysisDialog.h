@@ -13,7 +13,7 @@ namespace spikestream {
 		Q_OBJECT
 
 		public:
-			AbstractExportAnalysisDialog(QWidget* parent);
+			AbstractExportAnalysisDialog(const QString& analysisName, QWidget* parent);
 			virtual ~AbstractExportAnalysisDialog();
 
 
@@ -23,9 +23,13 @@ namespace spikestream {
 
 		protected:
 			virtual void exportCommaSeparated(const QString& filePath) = 0;
+			QString getAnalysisName() { return analysisName; }
 
 		private:
 			//======================  VARIABLES  =====================
+			/*! The type of analysis being exported */
+			QString analysisName;
+
 			/*! Holds the file information */
 			QLineEdit* fileLineEdit;
 

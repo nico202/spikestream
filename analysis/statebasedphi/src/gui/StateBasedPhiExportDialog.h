@@ -11,12 +11,15 @@ namespace spikestream {
 		Q_OBJECT
 
 		public:
-			StateBasedPhiExportDialog(QWidget* parent = 0);
+			StateBasedPhiExportDialog(const QString& analysisName, QWidget* parent = 0);
 			virtual ~StateBasedPhiExportDialog();
 
 
 		protected:
 			void exportCommaSeparated(const QString& filePath);
+
+		private:
+
 	};
 
 }

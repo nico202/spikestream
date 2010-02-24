@@ -75,7 +75,7 @@ double PhiCalculator::getSubsetPhi(QList<unsigned int>& subsetNeurIDs){
 	QList<unsigned int> aPartition, bPartition;
 
 	//Variables used during calculation
-	double newPhi, minimumPhi, tmpNormFact, normalizationFactor;
+	double newPhi, minimumPhi=0, tmpNormFact, normalizationFactor=1;
 	bool firstTime = true;
 
 	//Work through the bipartitions of the subset

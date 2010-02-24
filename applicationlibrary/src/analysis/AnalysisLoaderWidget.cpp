@@ -1,6 +1,7 @@
 
 //SpikeStream includes
 #include "AnalysisLoaderWidget.h"
+#include "AbstractAnalysisWidget.h"
 #include "Globals.h"
 #include "PluginManager_V2.h"
 using namespace spikestream;
@@ -8,7 +9,6 @@ using namespace spikestream;
 //Qt includes
 #include <QLabel>
 #include <QDebug>
-#include <QStackedWidget>
 
 
 /*! Constructor */
@@ -34,7 +34,7 @@ AnalysisLoaderWidget::AnalysisLoaderWidget(QWidget* parent) : QWidget(parent) {
 		mainVerticalBox->addLayout(comboBox);
 
 		//Add the widgets to a stacked widget
-		QStackedWidget* stackedWidget = new QStackedWidget();
+		stackedWidget = new QStackedWidget();
 		for(QList<QString>::iterator iter = pluginList.begin(); iter != pluginList.end(); ++iter){
 			pluginWidgetMap[*iter] = stackedWidget->addWidget(pluginManager->getPlugin(*iter));
 		}
@@ -43,14 +43,7 @@ AnalysisLoaderWidget::AnalysisLoaderWidget(QWidget* parent) : QWidget(parent) {
 		mainVerticalBox->addWidget(stackedWidget);
 
 		//Connect combo changed signal to slot loading appropriate analysis widget
-		connect(pluginsCombo, SIGNAL(currentIndexChanged(int)), stackedWidget, SLOT(setCurrentIndex(int)) );
-
-		//Add the currently selected widget to the layout
-		/*        if(!pluginList.isEmpty()){
-		currentAnalysisWidget = pluginWidgetMap[pluginsCombo->currentText()];
-		currentAnalysisWidget->setVisible(true);
-		mainVerticalBox->addWidget(currentAnalysisWidget);
-	}*/
+		connect(pluginsCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(showAnalysisWidget(int)) );
 	}
 	catch(SpikeStreamException* ex){
 		qCritical()<<ex->getMessage();
@@ -68,16 +61,13 @@ AnalysisLoaderWidget::~AnalysisLoaderWidget(){
 /*----------                   PRIVATE SLOTS                          -------------*/
 /*---------------------------------------------------------------------------------*/
 
-/*! Sets the current analysis widget */
-void AnalysisLoaderWidget::showAnalysisWidget(){
-	//Hide current widget and remove from layout
-	//    currentAnalysisWidget->setVisible(false);
-	//    mainVerticalBox->removeWidget(currentAnalysisWidget);
-	//
-	//    //Load new widget
-	//    currentAnalysisWidget = pluginWidgetMap[pluginsCombo->currentText()];
-	//    currentAnalysisWidget->setVisible(true);
-	//    mainVerticalBox->addWidget(currentAnalysisWidget);
+/*! Requests current widget to hide its results - particularly in the network viewer.
+	Sets the current analysis widget */
+void AnalysisLoaderWidget::showAnalysisWidget(int layerID){
+	if(layerID != stackedWidget->currentIndex()){
+		((AbstractAnalysisWidget*)stackedWidget->currentWidget())->hideAnalysisResults();
+		stackedWidget->setCurrentIndex(layerID);
+	}
 }
 
 

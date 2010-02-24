@@ -157,6 +157,15 @@
 	Heat colour 0 is always associated with 0. */
 #define DEFAULT_MAX_HEAT_COLOR_VALUE 10.0
 
+
+/*! A state based phi analysis */
+#define STATE_BASED_PHI_ANALYSIS "statebasedphianalysis"
+
+
+/*! A liveliness analysis */
+#define LIVELINESS_ANALYSIS "livelinessanalysis"
+
+
 /*! Commenting or uncommenting this define determines whether
 	statistics are recorded for the simulation.*/
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

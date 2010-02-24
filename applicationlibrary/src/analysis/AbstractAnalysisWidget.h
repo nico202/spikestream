@@ -20,12 +20,14 @@ namespace spikestream {
 		public:
 			AbstractAnalysisWidget(QWidget* parent);
 			virtual ~AbstractAnalysisWidget();
+			virtual void hideAnalysisResults() = 0;
 
 		protected slots:
 			virtual void archiveChanged();
 			void checkToolBarEnabled();
 			void fixTimeStepSelection(int);
 			virtual void exportAnalysis() = 0;
+			virtual QString getAnalysisName() = 0;
 			virtual void loadAnalysis();
 			void loadArchiveTimeStepsIntoCombos();
 			virtual void networkChanged();
@@ -62,6 +64,7 @@ namespace spikestream {
 
 			/*! Task of Liveliness analysis */
 			static const int ANALYSIS_TASK = 1;
+
 
 			//==========================  METHODS  ========================
 			QToolBar* getDefaultToolBar();

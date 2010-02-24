@@ -78,12 +78,12 @@ void AbstractAnalysisWidget::loadAnalysis(){
 		if(loadAnalysisDialog.exec() == QDialog::Accepted ) {//Load the archive
 			analysisInfo = loadAnalysisDialog.getAnalysisInfo();
 			updateResults();
-			Globals::setAnalysisID(analysisInfo.getID());
+			Globals::setAnalysisID(getAnalysisName(), analysisInfo.getID());
 		}
 	}
 	catch (SpikeStreamException& ex){
 		qCritical()<<ex.getMessage();
-		Globals::setAnalysisID(0);//Clear analysis status in globals
+		Globals::setAnalysisID(getAnalysisName(), 0);
 		return;
 	}
 }

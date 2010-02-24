@@ -7,6 +7,7 @@
 #include "AnalysisRunner.h"
 #include "FullResultsModel.h"
 #include "FullResultsTableView.h"
+#include "GlobalVariables.h"
 #include "ProgressWidget.h"
 #include "StateBasedPhiAnalysisDao.h"
 using namespace spikestream;
@@ -26,9 +27,11 @@ namespace spikestream {
 		public:
 			StateBasedPhiWidget(QWidget* parent = 0);
 			~StateBasedPhiWidget();
+			void hideAnalysisResults();
 
 		private slots:
 			void exportAnalysis();
+			QString getAnalysisName() { return STATE_BASED_PHI_ANALYSIS; }
 			void newAnalysis();
 			void startAnalysis();
 			void updateResults();

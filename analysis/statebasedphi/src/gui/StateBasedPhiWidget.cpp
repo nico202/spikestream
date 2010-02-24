@@ -93,6 +93,16 @@ StateBasedPhiWidget::~StateBasedPhiWidget(){
 }
 
 
+/*-----------------------------------------------------------*/
+/*-------               PUBLIC METHODS                 ------*/
+/*-----------------------------------------------------------*/
+
+/*! Hides the analysis results - particularly the neurons highlighted in the network viewer */
+void StateBasedPhiWidget::hideAnalysisResults(){
+	fullResultsModel->hideAnalysisResults();
+}
+
+
 /*----------------------------------------------------------*/
 /*------                PRIVATE SLOTS                 ------*/
 /*----------------------------------------------------------*/
@@ -100,7 +110,7 @@ StateBasedPhiWidget::~StateBasedPhiWidget(){
 /*! Exports data from the analysis */
 void StateBasedPhiWidget::exportAnalysis(){
 	//Show dialog to select the analysis the user wants to load
-	StateBasedPhiExportDialog exportAnalysisDialog(this);
+	StateBasedPhiExportDialog exportAnalysisDialog(getAnalysisName(), this);
 	exportAnalysisDialog.exec();
 }
 
@@ -114,7 +124,7 @@ void StateBasedPhiWidget::newAnalysis(){
 	initializeAnalysisInfo();
 
 	//Clear analysis id
-	Globals::setAnalysisID(0);
+	Globals::setAnalysisID(getAnalysisName(), 0);
 
 	//Reload model
 	fullResultsModel->reload();
@@ -138,7 +148,7 @@ void StateBasedPhiWidget::startAnalysis(){
 
 	//Create a new analysis in the database if one is not loaded
 	try {
-		if(!Globals::analysisLoaded()){
+		if(!Globals::isAnalysisLoaded(getAnalysisName())){
 			Globals::getAnalysisDao()->addAnalysis(analysisInfo);
 
 			//Analysis id in analysisInfo should now be set
@@ -148,7 +158,7 @@ void StateBasedPhiWidget::startAnalysis(){
 			}
 
 			//Store analysis ID in Globals to indicate that it is now loaded
-			Globals::setAnalysisID(analysisInfo.getID());
+			Globals::setAnalysisID(getAnalysisName(), analysisInfo.getID());
 		}
 
 		//Check for a time step conflict
@@ -192,7 +202,6 @@ void StateBasedPhiWidget::updateResults(){
 /*-------                PRIVATE METHODS                 ------*/
 /*-------------------------------------------------------------*/
 
-
 /*! Sets initial state of parameters for a state based phi analysis */
 void StateBasedPhiWidget::initializeAnalysisInfo(){
 	//Initialize all values in the analysis info to default values
@@ -221,7 +230,7 @@ void StateBasedPhiWidget::initializeAnalysisInfo(){
 
 /*! Checks to see if any of the specified range of time steps already exist in the database */
 bool StateBasedPhiWidget::timeStepsAlreadyAnalyzed(int firstTimeStep, int lastTimeStep){
-	if(!Globals::analysisLoaded()){
+	if( !Globals::isAnalysisLoaded( getAnalysisName() ) ){
 		return false;
 	}
 

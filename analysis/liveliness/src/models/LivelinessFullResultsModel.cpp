@@ -104,7 +104,16 @@ QVariant LivelinessFullResultsModel::headerData(int section, Qt::Orientation ori
 	}
 
 	return QVariant();
+}
 
+
+/*! Hides all visible clusters */
+void LivelinessFullResultsModel::hideClusters(){
+	//Hide visible cluster
+	setVisibleCluster(-1);
+
+	//Inform view associated with this model.
+	reset();
 }
 
 
@@ -116,7 +125,7 @@ int LivelinessFullResultsModel::rowCount(const QModelIndex&) const{
 
 /*! Sets data in the model */
 bool LivelinessFullResultsModel::setData(const QModelIndex& index, const QVariant&, int) {
-	if (!index.isValid() || !Globals::analysisLoaded() )
+	if (!index.isValid() || !Globals::isAnalysisLoaded(LIVELINESS_ANALYSIS) )
 		return false;
 	if (index.row() < 0 || index.row() >= rowCount())
 		return false;
@@ -218,6 +227,10 @@ void LivelinessFullResultsModel::clearClusters(){
 void LivelinessFullResultsModel::setVisibleCluster(int index){
 	if(index >= clusterList.size())
 		throw SpikeStreamException("Cluster display index is out of range.");
+
+	//No clusters visible and index does not indicate one to display
+	if(index < 0 && clusterDisplayIndex < 0)
+		return;
 
 	//Hide cluster if it is already visible
 	if(index == clusterDisplayIndex){

@@ -1,12 +1,13 @@
 //SpikeStream includes
 #include "Globals.h"
+#include "GlobalVariables.h"
 #include "LivelinessExportDialog.h"
 #include "LivelinessDao.h"
 using namespace spikestream;
 
 
 /*! Constructor */
-LivelinessExportDialog::LivelinessExportDialog(QWidget* parent) : AbstractExportAnalysisDialog(parent){
+LivelinessExportDialog::LivelinessExportDialog(QWidget* parent) : AbstractExportAnalysisDialog(LIVELINESS_ANALYSIS, parent){
 }
 
 
@@ -19,7 +20,7 @@ LivelinessExportDialog::~LivelinessExportDialog(){
 void LivelinessExportDialog::exportCommaSeparated(const QString& filePath){
 	//Get the data to be exported
 	LivelinessDao livelinessDao(Globals::getAnalysisDao()->getDBInfo());
-	QList<Cluster> clusterList = livelinessDao.getClusters(Globals::getAnalysisID());
+	QList<Cluster> clusterList = livelinessDao.getClusters(Globals::getAnalysisID(getAnalysisName()));
 
 	//Open the file
 	QFile outFile(filePath);

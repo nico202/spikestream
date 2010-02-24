@@ -14,7 +14,10 @@ using namespace spikestream;
 #include <QTextStream>
 
 /*! Constructor */
-AbstractExportAnalysisDialog::AbstractExportAnalysisDialog(QWidget* parent) : QDialog(parent){
+AbstractExportAnalysisDialog::AbstractExportAnalysisDialog(const QString& analysisName, QWidget* parent) : QDialog(parent){
+	//Store name
+	this->analysisName = analysisName;
+
 	//Create layouts
 	QVBoxLayout* mainVerticalBox = new QVBoxLayout(this);
 	QGridLayout* gridLayout = new QGridLayout();
@@ -67,7 +70,7 @@ void AbstractExportAnalysisDialog::okButtonClicked(){
 		return;
 	}
 
-	if(!Globals::analysisLoaded()){
+	if(!Globals::isAnalysisLoaded(analysisName)){
 		qCritical()<<"No analysis loaded; nothing to export.";
 		return;
 	}
