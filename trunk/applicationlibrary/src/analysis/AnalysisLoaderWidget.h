@@ -6,29 +6,37 @@
 #include <QHash>
 #include <QLayout>
 #include <QComboBox>
+#include <QStackedWidget>
 
-class AnalysisLoaderWidget : public QWidget {
-  Q_OBJECT
+namespace spikestream {
 
-    public:
-	AnalysisLoaderWidget(QWidget* parent=0);
-	~AnalysisLoaderWidget();
+	/*! Holds the different types of analysis widget and allows
+		selection using a combo box.  */
+	class AnalysisLoaderWidget : public QWidget {
+	  Q_OBJECT
 
-    private slots:
-	void showAnalysisWidget();
+		public:
+			AnalysisLoaderWidget(QWidget* parent=0);
+			~AnalysisLoaderWidget();
 
-    private:
-	//=========================  VARIABLES  =============================
-	/*! Combo box to select plugin */
-	QComboBox* pluginsCombo;
+		private slots:
+			void showAnalysisWidget(int layerID);
 
-	/*! Stores the position in the stacked widget where the analysis plugins are stored. */
-	QHash<QString, int> pluginWidgetMap;
+		private:
+			//=========================  VARIABLES  =============================
+			/*! Combo box to select plugin */
+			QComboBox* pluginsCombo;
 
-	/*! Vertical box organizing layout */
-	QVBoxLayout *mainVerticalBox;
-};
+			/*! Stores the position in the stacked widget where the analysis plugins are stored. */
+			QHash<QString, int> pluginWidgetMap;
 
+			/*! Vertical box organizing layout */
+			QVBoxLayout *mainVerticalBox;
 
+			/*! Widget with layers holding the different analysis plugins */
+			QStackedWidget* stackedWidget;
+	};
+
+}
 
 #endif // ANALYSISLOADERWIDGET_CPP

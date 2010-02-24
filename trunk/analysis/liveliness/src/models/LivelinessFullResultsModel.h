@@ -24,6 +24,7 @@ namespace spikestream {
 			QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
 			double getMaxHeatColorValue();
 			QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+			void hideClusters();
 			void reload();
 			int rowCount(const QModelIndex& parent = QModelIndex()) const;
 			bool setData(const QModelIndex& index, const QVariant&, int);

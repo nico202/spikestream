@@ -1,11 +1,12 @@
 //SpikeStream includes
+#include "Complex.h"
 #include "Globals.h"
 #include "StateBasedPhiExportDialog.h"
 #include "StateBasedPhiAnalysisDao.h"
 using namespace spikestream;
 
 /*! Constructor */
-StateBasedPhiExportDialog::StateBasedPhiExportDialog(QWidget* parent) : AbstractExportAnalysisDialog(parent){
+StateBasedPhiExportDialog::StateBasedPhiExportDialog(const QString& analysisName, QWidget* parent) : AbstractExportAnalysisDialog(analysisName, parent){
 }
 
 
@@ -18,7 +19,7 @@ StateBasedPhiExportDialog::~StateBasedPhiExportDialog(){
 void StateBasedPhiExportDialog::exportCommaSeparated(const QString& filePath){
 	//Get the data to be exported
 	StateBasedPhiAnalysisDao stateDao(Globals::getAnalysisDao()->getDBInfo());
-	QList<Complex> complexList = stateDao.getComplexes(Globals::getAnalysisID());
+	QList<Complex> complexList = stateDao.getComplexes(Globals::getAnalysisID(getAnalysisName()));
 
 	//Open the file
 	QFile outFile(filePath);

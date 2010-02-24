@@ -1,6 +1,7 @@
 //SpikeStream includes
 #include "Globals.h"
 #include "SpikeStreamException.h"
+#include "SpikeStreamAnalysisException.h"
 using namespace spikestream;
 
 //Qt includes
@@ -8,7 +9,7 @@ using namespace spikestream;
 
 
 //Declare static variables
-unsigned int Globals::analysisID = 0;
+QHash<QString, unsigned int> Globals::analysisMap;
 AnalysisDao* Globals::analysisDao = NULL;
 Archive* Globals::archive = NULL;
 ArchiveDao* Globals::archiveDao = NULL;
@@ -28,10 +29,26 @@ unsigned int Globals::timerStart_sec = 0;
 /*---------------------------------------------------------------------------------*/
 
 /*! Returns true if an analysis is loaded */
-bool Globals::analysisLoaded(){
-	if(analysisID == 0)
-		return false;
-	return true;
+bool Globals::isAnalysisLoaded(const QString& analysisName){
+	//Map has an entry for this analysis - return false if ID is zero
+	if(analysisMap.contains(analysisName)){
+		if(analysisMap[analysisName] == 0)
+			return false;
+		return true;
+	}
+
+	//No entry in map so no analysis loaded
+	return false;
+}
+
+
+/*! Returns the analysis id if it has been set, otherwise return zero */
+unsigned int Globals::getAnalysisID(const QString& analysisName){
+	if(!analysisMap.contains(analysisName))
+		return analysisMap[analysisName];
+
+	//No analysis ID has been set for this name, so return zero
+	return 0;
 }
 
 
@@ -70,12 +87,6 @@ void Globals::cleanUp(){
 /*! Returns the analysis Dao that wraps the SpikeStreamAnalysis database. */
 AnalysisDao* Globals::getAnalysisDao(){
 	return analysisDao;
-}
-
-
-/*! Returns the ID of the currently loaded analysis or zero if no analysis is loaded */
-unsigned int Globals::getAnalysisID(){
-	return analysisID;
 }
 
 
@@ -147,8 +158,8 @@ bool Globals::isArchivePlaying() {
 
 
 /*! Sets the analysis id. An id of 0 indicates that no analysis is loaded. */
-void Globals::setAnalysisID(unsigned int id){
-	Globals::analysisID = id;
+void Globals::setAnalysisID(const QString& analysisName, unsigned int id){
+	analysisMap[analysisName] = id;
 }
 
 
@@ -163,6 +174,7 @@ unsigned int Globals::timeElapsed(){
 	unsigned int currTime_sec = QDateTime::currentDateTime().toTime_t();
 	return currTime_sec - timerStart_sec;
 }
+
 
 
 /*---------------------------------------------------------------------------------*/

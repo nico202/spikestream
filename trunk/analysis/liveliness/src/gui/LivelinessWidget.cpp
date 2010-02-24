@@ -119,6 +119,12 @@ void LivelinessWidget::exportAnalysis(){
 }
 
 
+/*! Hides analysis results - typically called when switching analysis widget */
+void LivelinessWidget::hideAnalysisResults(){
+	fullResultsModel->hideClusters();
+}
+
+
 /*! Resets everything ready for a new analysis */
 void LivelinessWidget::newAnalysis(){
 	//Set enabled status of toolbar
@@ -128,7 +134,7 @@ void LivelinessWidget::newAnalysis(){
 	initializeAnalysisInfo();
 
 	//Clear analysis id
-	Globals::setAnalysisID(0);
+	Globals::setAnalysisID(getAnalysisName(), 0);
 
 	//Reload model
 	fullResultsModel->reload();
@@ -141,7 +147,7 @@ void LivelinessWidget::newAnalysis(){
 /*! Resets the colour range to the value stored in the full results model.
 	This is either the default, or the maximum neuron liveliness */
 void LivelinessWidget::resetHeatColorRange(){
-	if(!Globals::analysisLoaded() ){
+	if( !Globals::isAnalysisLoaded(getAnalysisName()) ){
 		heatColorBar->setMaxValue( DEFAULT_MAX_HEAT_COLOR_VALUE );
 		fullResultsModel->setMaxHeatColorValue(DEFAULT_MAX_HEAT_COLOR_VALUE);
 		heatRangeEdit->setText(QString::number(DEFAULT_MAX_HEAT_COLOR_VALUE));
@@ -193,7 +199,7 @@ void LivelinessWidget::startAnalysis(){
 
 	//Create a new analysis in the database if one is not loaded
 	try {
-		if(!Globals::analysisLoaded()){
+		if(!Globals::isAnalysisLoaded(getAnalysisName())){
 			Globals::getAnalysisDao()->addAnalysis(analysisInfo);
 
 			//Analysis id in analysisInfo should now be set
@@ -203,7 +209,7 @@ void LivelinessWidget::startAnalysis(){
 			}
 
 			//Store analysis ID in Globals to indicate that it is now loaded
-			Globals::setAnalysisID(analysisInfo.getID());
+			Globals::setAnalysisID(getAnalysisName(), analysisInfo.getID());
 		}
 
 		//Check for a time step conflict
@@ -276,7 +282,7 @@ void LivelinessWidget::initializeAnalysisInfo(){
 
 /*! Checks to see if any of the specified range of time steps already exist in the database */
 bool LivelinessWidget::timeStepsAlreadyAnalyzed(int firstTimeStep, int lastTimeStep){
-	if(!Globals::analysisLoaded()){
+	if(!Globals::isAnalysisLoaded(getAnalysisName())){
 		return false;
 	}
 	return livelinessDao->containsAnalysisData(analysisInfo.getID(), firstTimeStep, lastTimeStep);

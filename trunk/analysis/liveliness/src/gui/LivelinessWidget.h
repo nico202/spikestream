@@ -3,6 +3,7 @@
 
 //SpikeStream includes
 #include "AbstractAnalysisWidget.h"
+#include "GlobalVariables.h"
 #include "HeatColorBar.h"
 #include "LivelinessFullResultsModel.h"
 #include "LivelinessFullResultsTableView.h"
@@ -22,6 +23,8 @@ namespace spikestream {
 			LivelinessWidget(QWidget* parent = 0);
 			~LivelinessWidget();
 			void exportAnalysis();
+			QString getAnalysisName() { return LIVELINESS_ANALYSIS; }
+			void hideAnalysisResults();
 			void newAnalysis();
 			void startAnalysis();
 			void updateResults();
