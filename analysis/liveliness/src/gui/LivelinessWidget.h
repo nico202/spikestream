@@ -29,6 +29,9 @@ namespace spikestream {
 			void startAnalysis();
 			void updateResults();
 
+		protected:
+			void initializeAnalysisInfo();
+
 		private slots:
 			void resetHeatColorRange();
 			void setHeatColorRangeMax();
@@ -54,7 +57,6 @@ namespace spikestream {
 			QLineEdit* heatRangeEdit;
 
 			//=====================  METHODS  =======================
-			void initializeAnalysisInfo();
 			bool timeStepsAlreadyAnalyzed(int firstTimeStep, int lastTimeStep);
    };
 

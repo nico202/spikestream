@@ -56,9 +56,9 @@ AnalysisParameterDialog::AnalysisParameterDialog(QWidget* parent, const Analysis
 
 	//Add Ok and Cancel buttons
 	QHBoxLayout *okCanButtonBox = new QHBoxLayout();
-	QPushButton *okPushButton = new QPushButton("Ok", this, "okButton");
+	QPushButton *okPushButton = new QPushButton("Ok");
 	connect(okPushButton, SIGNAL(clicked()), this, SLOT(okButtonClicked()));
-	QPushButton *cancelPushButton = new QPushButton("Cancel", this, "cancelButton");
+	QPushButton *cancelPushButton = new QPushButton("Cancel");
 	connect(cancelPushButton, SIGNAL(clicked()), this, SLOT(reject()));
 	okCanButtonBox->addWidget(okPushButton);
 	okCanButtonBox->addWidget(cancelPushButton);

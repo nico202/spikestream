@@ -16,7 +16,7 @@ unix{
 	LIBS += -lspikestream -L$${SPIKESTREAM_ROOT_DIR}/lib
 }
 win32{
-	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/bin -lspikestream0
+	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/lib -lspikestream0
 }
 
 

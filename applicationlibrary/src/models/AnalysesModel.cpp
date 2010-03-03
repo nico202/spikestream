@@ -10,8 +10,9 @@ using namespace spikestream;
 #include <QIcon>
 
 /*! Constructor */
-AnalysesModel::AnalysesModel() : QAbstractTableModel(){
-    reload();
+AnalysesModel::AnalysesModel(unsigned int analysisType) : QAbstractTableModel(){
+	this->analysisType = analysisType;
+	reload();
 }
 
 
@@ -138,7 +139,7 @@ void AnalysesModel::reload(){
     if(!Globals::networkLoaded() || !Globals::archiveLoaded())
 	throw SpikeStreamException("This dialog should not be invokable when network or archive is not loaded.");
 
-    analysisInfoList = Globals::getAnalysisDao()->getAnalysesInfo(Globals::getNetwork()->getID(), Globals::getArchive()->getID());
+	analysisInfoList = Globals::getAnalysisDao()->getAnalysesInfo(Globals::getNetwork()->getID(), Globals::getArchive()->getID(), analysisType);
     selectionMap.clear();
 }
 

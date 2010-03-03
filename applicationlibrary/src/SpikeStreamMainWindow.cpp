@@ -23,13 +23,9 @@ using namespace spikestream;
 #include <qmessagebox.h>
 #include <qapplication.h>
 #include <qfile.h>
-//Added by qt3to4:
 #include <QCloseEvent>
-#include <Q3PopupMenu>
 #include <QDebug>
 #include <QScrollArea>
-#include <Q3ScrollView>
-#include <Q3VBox>
 
 //Other includes
 #include <string>
@@ -37,7 +33,9 @@ using namespace std;
 
 
 /*! Constructor. */
-SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow( 0, "SpikeStream - Analysis", Qt::WDestructiveClose ){
+SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow(){
+	setWindowTitle("SpikeStream - Analysis");
+
 	//Get the working directory and store in global scope
 	QString rootDir = QCoreApplication::applicationDirPath();
 	rootDir.truncate(rootDir.size() - 4);//Trim the "/bin" off the end
@@ -51,19 +49,19 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow( 0, "SpikeStream - 
 
 	//Set up config
 	ConfigLoader* configLoader;
-	if(QFile::exists(Globals::getSpikeStreamRoot() +  "/spikestream.config")){
-		configLoader = new ConfigLoader(Globals::getSpikeStreamRoot().toStdString() + "/spikestream.config");
+	try{
+		configLoader = new ConfigLoader(Globals::getSpikeStreamRoot() + "/spikestream.config");
 	}
-	else{
-		qCritical()<<"Cannot find configuration file\nApplication will now exit.";
+	catch(SpikeStreamException& ex){
+		qCritical()<<"Error loading configuration: "<<ex.getMessage()<<".\nApplication will now exit.";
 		exit(1);
 	}
 
 	//Set up the data access objects wrapping the network database
 	DBInfo netDBInfo(
-			configLoader->getCharData("spikeStreamNetworkHost"),
-			configLoader->getCharData("spikeStreamNetworkUser"),
-			configLoader->getCharData("spikeStreamNetworkPassword"),
+			configLoader->getParameter("spikeStreamNetworkHost"),
+			configLoader->getParameter("spikeStreamNetworkUser"),
+			configLoader->getParameter("spikeStreamNetworkPassword"),
 			"SpikeStreamNetwork"
 	);
 	try{
@@ -77,9 +75,9 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow( 0, "SpikeStream - 
 
 	//Set up the data access objects wrapping the archive database.
 	DBInfo archiveDBInfo(
-			configLoader->getCharData("spikeStreamArchiveHost"),
-			configLoader->getCharData("spikeStreamArchiveUser"),
-			configLoader->getCharData("spikeStreamArchivePassword"),
+			configLoader->getParameter("spikeStreamArchiveHost"),
+			configLoader->getParameter("spikeStreamArchiveUser"),
+			configLoader->getParameter("spikeStreamArchivePassword"),
 			"SpikeStreamArchive"
 	);
 	try{
@@ -93,9 +91,9 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow( 0, "SpikeStream - 
 
 	//Set up the data access object wrapping the analysis database.
 	DBInfo analysisDBInfo(
-			configLoader->getCharData("spikeStreamAnalysisHost"),
-			configLoader->getCharData("spikeStreamAnalysisUser"),
-			configLoader->getCharData("spikeStreamAnalysisPassword"),
+			configLoader->getParameter("spikeStreamAnalysisHost"),
+			configLoader->getParameter("spikeStreamAnalysisUser"),
+			configLoader->getParameter("spikeStreamAnalysisPassword"),
 			"SpikeStreamAnalysis"
 	);
 	try{
@@ -108,7 +106,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow( 0, "SpikeStream - 
 	}
 
 	//Get the default location for saving and loading databases
-	Globals::setWorkingDirectory(configLoader->getCharData("default_file_location"));
+	Globals::setWorkingDirectory(configLoader->getParameter("default_file_location"));
 
 	//Actions
 	//Add OpenGL actions
@@ -169,28 +167,25 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow( 0, "SpikeStream - 
 
 	//Set up menus.
 	//Add file menu.
-	Q3PopupMenu * fileMenu = new Q3PopupMenu(this);
-	menuBar()->insertItem("File", fileMenu);
-	fileMenu->insertItem("Clear databases", this, SLOT(clearDatabases()));
-	//fileMenu->insertItem("Load databases", this, SLOT(loadDatabases()), Qt::CTRL+Qt::Key_L);
-	//fileMenu->insertItem("Save databases", this, SLOT(saveDatabases()), Qt::CTRL+Qt::Key_S);
-	fileMenu->insertSeparator();
-	//fileMenu->insertItem("Import connection matrix", this, SLOT(importConnectionMatrix()), Qt::CTRL+Qt::Key_I);
-	fileMenu->insertItem("Import NRM network", this, SLOT(importNRMNetwork()), Qt::CTRL+Qt::Key_M);
-	fileMenu->insertSeparator();
-	fileMenu->insertItem("Quit", qApp, SLOT(closeAllWindows()), Qt::CTRL+Qt::Key_Q);
+	QMenu * fileMenu = new QMenu("File", this);
+	menuBar()->addMenu(fileMenu);
+	fileMenu->addAction("Clear databases", this, SLOT(clearDatabases()));
+	fileMenu->addSeparator();
+	fileMenu->addAction("Import NRM network", this, SLOT(importNRMNetwork()), Qt::CTRL+Qt::Key_M);
+	fileMenu->addSeparator();
+	fileMenu->addAction("Quit", qApp, SLOT(closeAllWindows()), Qt::CTRL+Qt::Key_Q);
 
 	//Add refresh menu for when changes have been made in the database independently of the application
-	Q3PopupMenu *viewMenu = new Q3PopupMenu(this);
-	menuBar()->insertItem("View", viewMenu);
+	QMenu *viewMenu = new QMenu("View", this);
+	menuBar()->addMenu(viewMenu);
 
 	//Reload everything is broadcast to all classes connected to the event router
-	viewMenu->insertItem("Reload everything", Globals::getEventRouter(), SLOT(reloadSlot()), Qt::SHIFT+Qt::Key_F5);
+	viewMenu->addAction("Reload everything", Globals::getEventRouter(), SLOT(reloadSlot()), Qt::SHIFT+Qt::Key_F5);
 
 	//Add help menu
-	Q3PopupMenu *helpMenu = new Q3PopupMenu(this);
-	menuBar()->insertItem("Help", helpMenu);
-	helpMenu->insertItem("About", this , SLOT(about()), Qt::Key_F12);
+	QMenu *helpMenu = new QMenu("Help", this);
+	menuBar()->addMenu(helpMenu);
+	helpMenu->addAction("About", this , SLOT(about()), Qt::Key_F12);
 
 	//Set up panes
 	//Set up main splitter, which will divide graphical view from editor/viewer/simulator windows
@@ -214,17 +209,6 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow( 0, "SpikeStream - 
 
 
 	//Create network viewer for right half of screen
-	unsigned int maxAutoLoadConnGrpSize = 1000000;
-	try{
-		maxAutoLoadConnGrpSize = Util::getUInt(configLoader->getStringData("max_autoload_conngrp_size").data());
-	}
-	catch(std::exception& er){// Catch-all for std exceptions
-		cerr<<"SpikeStreamMainWindow: STD EXCEPTION \""<<er.what()<<"\""<<endl;
-		QString errorString = "Exception thrown getting maxAutoLoadConnGrpSize: \"";
-		errorString += er.what();
-		errorString += "\"";
-		QMessageBox::critical( 0, "Config Error", errorString);
-	}
 	new NetworkViewer_V2(mainSplitterWidget);
 
 	//Set up viewer tab
@@ -268,7 +252,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow( 0, "SpikeStream - 
 
 	//Finish off
 	QPixmap iconPixmap(Globals::getSpikeStreamRoot() + "/images/spikestream_icon_64.png" );
-	setIcon(iconPixmap);
+	setWindowIcon(iconPixmap);
 	setCentralWidget( mainSplitterWidget );
 	//setWindowState(Qt::WindowMaximized);
 
@@ -302,25 +286,25 @@ void SpikeStreamMainWindow::about(){
 
 /*! Displays the analysis widget */
 void SpikeStreamMainWindow::showAnalysisWidget(){
-	tabWidget->setCurrentPage(3);
+	tabWidget->setCurrentIndex(3);
 }
 
 
 /*! Displays the archive widget */
 void SpikeStreamMainWindow::showArchiveWidget(){
-	tabWidget->setCurrentPage(2);
+	tabWidget->setCurrentIndex(2);
 }
 
 
 /*! Displays the editor widget */
 void SpikeStreamMainWindow::showEditorWidget(){
-	tabWidget->setCurrentPage(1);
+	tabWidget->setCurrentIndex(1);
 }
 
 
 /*! Displays the networks widget */
 void SpikeStreamMainWindow::showNetworkWidget(){
-	tabWidget->setCurrentPage(0);
+	tabWidget->setCurrentIndex(0);
 }
 
 

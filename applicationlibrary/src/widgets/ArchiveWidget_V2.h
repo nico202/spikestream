@@ -13,6 +13,8 @@ using namespace spikestream;
 #include <QHash>
 #include <QPushButton>
 #include <QLabel>
+#include <QComboBox>
+
 
 namespace spikestream{
 

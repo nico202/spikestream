@@ -29,6 +29,9 @@ namespace spikestream {
 			~StateBasedPhiWidget();
 			void hideAnalysisResults();
 
+		protected:
+			void initializeAnalysisInfo();
+
 		private slots:
 			void exportAnalysis();
 			QString getAnalysisName() { return STATE_BASED_PHI_ANALYSIS; }
@@ -52,7 +55,6 @@ namespace spikestream {
 
 
 			//=====================  METHODS  =======================
-			void initializeAnalysisInfo();
 			bool timeStepsAlreadyAnalyzed(int firstTimeStep, int lastTimeStep);
 	};
 

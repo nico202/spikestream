@@ -4,6 +4,12 @@ TEMPLATE = lib
 
 TARGET = spikestreamapplication
 
+win32 {
+	# Add a copy of the libary to the bin directory
+	target.path = $${SPIKESTREAM_ROOT_DIR}/bin
+	INSTALLS += target
+}
+
 VERSION = 0.2
 
 DESTDIR = $${SPIKESTREAM_ROOT_DIR}/lib
@@ -52,7 +58,7 @@ win32 {
 
 CONFIG += release thread exceptions
 
-QT += xml opengl qt3support sql
+QT += xml opengl sql
 
 
 #----------------------------------------------#
@@ -172,7 +178,6 @@ SOURCES += src/widgets/NetworksWidget.cpp \
 #----------------------------------------------#
 HEADERS += src/SpikeStreamApplication.h \
 		   src/SpikeStreamMainWindow.h \
-		   src/HighlightDialog.h \
 		   src/PluginManager_V2.h \
 		   src/Globals.h \
 		   src/EventRouter.h \
@@ -183,7 +188,6 @@ HEADERS += src/SpikeStreamApplication.h \
 
 SOURCES += src/SpikeStreamApplication.cpp \
 		   src/SpikeStreamMainWindow.cpp \
-		   src/HighlightDialog.cpp \
 		   src/PluginManager_V2.cpp \
 		   src/Globals.cpp \
 		   src/EventRouter.cpp \

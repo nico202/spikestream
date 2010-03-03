@@ -11,7 +11,7 @@ using namespace spikestream;
 
 //Other includes
 #include <algorithm>
-
+using namespace std;
 
 /*! Constructor */
 TononiNetworkBuilder::TononiNetworkBuilder(){

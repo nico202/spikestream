@@ -13,18 +13,21 @@ using namespace spikestream;
 
 
 /*! Constructor */
-LoadAnalysisDialog::LoadAnalysisDialog(QWidget* parent) : QDialog(parent) {
+LoadAnalysisDialog::LoadAnalysisDialog(QWidget* parent, unsigned int analysisType) : QDialog(parent) {
+	//Store analysis type to filter results
+	this->analysisType = analysisType;
+
     //Check that both a network and an archive have been loaded
     if(!Globals::networkLoaded() || !Globals::archiveLoaded()){
-	qCritical()<<"Analyses are linked to a particular network and archive, which must be loaded first.";
-	return;
+		qCritical()<<"Analyses are linked to a particular network and archive, which must be loaded first.";
+		return;
     }
 
     QVBoxLayout *mainVerticalBox = new QVBoxLayout(this);
 
     //Create model and add view
-    analysesModel = new AnalysesModel();
-    QTableView* analysesTableView = new AnalysesTableView(analysesModel);
+	analysesModel = new AnalysesModel(analysisType);
+	QTableView* analysesTableView = new AnalysesTableView(this, analysesModel);
     analysesTableView->setMinimumSize(600, 300);
     mainVerticalBox->addWidget(analysesTableView);
 
@@ -60,7 +63,7 @@ LoadAnalysisDialog::~LoadAnalysisDialog(){
     user has cancelled the operation. */
 const AnalysisInfo& LoadAnalysisDialog::getAnalysisInfo(){
     if(analysisInfo.getID() == 0)
-	throw SpikeStreamException("Analysis info ID is 0. This method should not be called if the user has cancelled selection of analysis.");
+		throw SpikeStreamException("Analysis info ID is 0. This method should not be called if the user has cancelled selection of analysis.");
     return analysisInfo;
 }
 
@@ -76,8 +79,8 @@ void LoadAnalysisDialog::okButtonPressed(){
 
     //Check that there is exactly one selection
     if(selectedAnalysisList.size() != 1){
-	qCritical()<<"A single analysis must be selected for loading.";
-	return;
+		qCritical()<<"A single analysis must be selected for loading.";
+		return;
     }
 
     //Store the selected analysis and accept dialog
@@ -92,7 +95,7 @@ void LoadAnalysisDialog::deleteButtonPressed(){
 
     //Check that there is at least one selection
     if(selectedAnalysisList.size() == 0){
-	return;
+		return;
     }
 
     //Confirm that user wants to delete the analyses
@@ -103,11 +106,11 @@ void LoadAnalysisDialog::deleteButtonPressed(){
     msgBox.setDefaultButton(QMessageBox::Cancel);
     int ret = msgBox.exec();
     if(ret != QMessageBox::Ok)
-	return;
+		return;
 
     //Delete the analyses
     foreach(AnalysisInfo anaInfo, selectedAnalysisList){
-	Globals::getAnalysisDao()->deleteAnalysis(anaInfo.getID());
+		Globals::getAnalysisDao()->deleteAnalysis(anaInfo.getID());
     }
 
     //Reload the model

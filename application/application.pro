@@ -6,6 +6,8 @@ TARGET = spikestream
 
 VERSION = 0.2
 
+RC_FILE = spikestream.rc
+
 DESTDIR = $${SPIKESTREAM_ROOT_DIR}/bin
 
 OBJECTS_DIR = build/objects
@@ -29,6 +31,6 @@ INCLUDEPATH += src \
 
 CONFIG += release thread exceptions
 
-QT += xml opengl qt3support sql
+QT += xml opengl sql
 
 SOURCES += src/Main.cpp

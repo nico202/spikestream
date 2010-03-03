@@ -12,7 +12,7 @@ using namespace spikestream;
 /*! Constructor */
 PluginsDialog::PluginsDialog(QWidget* parent, const QString pluginFolder, const QString title) : QDialog(parent){
 	//Set caption
-	this->setCaption(title);
+	this->setWindowTitle(title);
 
 	//Create vertical box to organize layout
 	QVBoxLayout* mainVerticalBox = new QVBoxLayout(this);

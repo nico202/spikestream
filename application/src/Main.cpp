@@ -48,7 +48,6 @@ int main( int argc, char ** argv ) {
 
 	//Start up main window of application
 	SpikeStreamMainWindow *spikeStrMainWin = new SpikeStreamMainWindow();
-	spikeStrMainWin->setCaption( "SpikeStream - Analysis" );
 	spikeStrMainWin->show();
 
 	//Listen for window closing events

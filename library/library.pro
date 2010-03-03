@@ -4,6 +4,12 @@ TEMPLATE = lib
 
 TARGET = spikestream
 
+win32 {
+	# Add a copy of the libary to the bin directory
+	target.path = $${SPIKESTREAM_ROOT_DIR}/bin
+	INSTALLS += target
+}
+
 VERSION = 0.2
 
 DESTDIR = $${SPIKESTREAM_ROOT_DIR}/lib

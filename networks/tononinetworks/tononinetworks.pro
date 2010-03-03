@@ -14,7 +14,7 @@ MOC_DIR = build/moc
 
 CONFIG += release thread exceptions
 
-QT += xml opengl qt3support sql
+QT += xml opengl sql
 
 INCLUDEPATH += src \
 				src/model \
