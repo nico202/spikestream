@@ -38,9 +38,9 @@ NetworkViewerProperties_V2::NetworkViewerProperties_V2(QWidget* parent) : QWidge
 	mainVerticalBox->addLayout(singleNeuronBox);
 
 	fromToCombo = new QComboBox();
-	fromToCombo->insertItem("From and To");
-	fromToCombo->insertItem("From");
-	fromToCombo->insertItem("To");
+	fromToCombo->addItem("From and To");
+	fromToCombo->addItem("From");
+	fromToCombo->addItem("To");
 	connect(fromToCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(fromToSelectionChanged(int)));
 	QHBoxLayout* fromToSingleBox = new QHBoxLayout();
 	fromToSingleBox->addSpacing(20);
@@ -72,9 +72,9 @@ NetworkViewerProperties_V2::NetworkViewerProperties_V2(QWidget* parent) : QWidge
 	QHBoxLayout* posNegBox = new QHBoxLayout();
 	posNegBox->addWidget(new QLabel("Filter by connection weight: "));
 	posNegCombo = new QComboBox();
-	posNegCombo->insertItem("All connections");
-	posNegCombo->insertItem("Positive connections");
-	posNegCombo->insertItem("Negative connections");
+	posNegCombo->addItem("All connections");
+	posNegCombo->addItem("Positive connections");
+	posNegCombo->addItem("Negative connections");
 	connect(posNegCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(posNegSelectionChanged(int)));
 	posNegBox->addWidget(posNegCombo);
 	posNegBox->addStretch(5);

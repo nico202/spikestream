@@ -16,7 +16,7 @@ namespace spikestream {
 	Q_OBJECT
 
 	public:
-	    AnalysesModel();
+		AnalysesModel(unsigned int analysisType);
 	    ~AnalysesModel();
 	    int columnCount(const QModelIndex& parent = QModelIndex()) const;
 	    QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
@@ -35,6 +35,9 @@ namespace spikestream {
 	    /*! Map of the analyses that are currently selected.
 		The key is the index in the analysis info list; the value is a bool. */
 	    QHash<int, bool> selectionMap;
+
+		/*! The type of anlysis being displayed by the dialog */
+		unsigned int analysisType;
 
 	    static const int numCols = 8;
 	    static const int selectCol = 0;

@@ -19,7 +19,7 @@ namespace spikestream {
 	Q_OBJECT
 
 	public:
-	    LoadAnalysisDialog(QWidget* parent);
+		LoadAnalysisDialog(QWidget* parent, unsigned int analysisType);
 	    ~LoadAnalysisDialog();
 	   const AnalysisInfo& getAnalysisInfo();
 
@@ -30,8 +30,11 @@ namespace spikestream {
 	private:
 	    //====================  VARIABLES  =======================
 	     /*! Holds information about the currently selected analysis if there is one.
-		If dialog is accepted the calling class should request this with getAnalysisInfo(). */
+			If dialog is accepted the calling class should request this with getAnalysisInfo(). */
 	     AnalysisInfo analysisInfo;
+
+		 /*! Type of analysis being displayed by the dialog */
+		 unsigned int analysisType;
 
 	     /*! Model */
 	     AnalysesModel* analysesModel;

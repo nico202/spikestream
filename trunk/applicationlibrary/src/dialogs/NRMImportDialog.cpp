@@ -20,10 +20,10 @@ using namespace spikestream;
 using namespace std;
 
 /*! Constructor */
-NRMImportDialog::NRMImportDialog(QWidget* parent) : QDialog(parent, "NoiseParamDlg", false){
+NRMImportDialog::NRMImportDialog(QWidget* parent) : QDialog(parent){
 
     //Set caption
-    this->setCaption("Import NRM Network");
+	this->setWindowTitle("Import NRM Network");
 
     //Build the fixed pages of the widget and make sure page2 is null
     buildPage1();
@@ -66,9 +66,9 @@ void NRMImportDialog::addNetwork(){
 
     //Make sure network name and description have text
     if(networkName->text() == "")
-	networkName->setText("Unnamed");
+		networkName->setText("Unnamed");
     if(networkDescription->text() == "")
-	networkDescription->setText("Undescribed");
+		networkDescription->setText("Undescribed");
 
     //Lists of the input and neural layers in the NRM network
     QList<NRMInputLayer*> inputList = fileLoader->getNetwork()->getAllInputs();
@@ -81,85 +81,85 @@ void NRMImportDialog::addNetwork(){
 	page in addLayersToPage2() method */
     int rowCount = 0;
     for(int i=0; i<inputList.size(); ++i){
-	int neurGrpXPos, neurGrpYPos, neurGrpZPos;
+		int neurGrpXPos, neurGrpYPos, neurGrpZPos;
 
-	//Extract position information
-	try{
-	    QWidget* lineEdit = layerLocationGrid->itemAtPosition(rowCount, page2XCol)->widget();
-	    neurGrpXPos = Util::getInt(((QLineEdit*)lineEdit)->text());
-	    lineEdit = layerLocationGrid->itemAtPosition(rowCount, page2YCol)->widget();
-	    neurGrpYPos = Util::getInt(((QLineEdit*)lineEdit)->text());
-	    lineEdit = layerLocationGrid->itemAtPosition(rowCount, page2ZCol)->widget();
-	    neurGrpZPos = Util::getInt(((QLineEdit*)lineEdit)->text());
-	}
-	catch (NumberConversionException& ex){
-	    qCritical()<<"Error in neuron group position: "<<ex.getMessage();
-	    return;
-	}
+		//Extract position information
+		try{
+			QWidget* lineEdit = layerLocationGrid->itemAtPosition(rowCount, page2XCol)->widget();
+			neurGrpXPos = Util::getInt(((QLineEdit*)lineEdit)->text());
+			lineEdit = layerLocationGrid->itemAtPosition(rowCount, page2YCol)->widget();
+			neurGrpYPos = Util::getInt(((QLineEdit*)lineEdit)->text());
+			lineEdit = layerLocationGrid->itemAtPosition(rowCount, page2ZCol)->widget();
+			neurGrpZPos = Util::getInt(((QLineEdit*)lineEdit)->text());
+		}
+		catch (NumberConversionException& ex){
+			qCritical()<<"Error in neuron group position: "<<ex.getMessage();
+			return;
+		}
 
-	//Create a neuron info describing group and use it to create a new group
-	NeuronGroupInfo tmpGrpInfo(0, inputList[i]->frameName.data(), inputList[i]->frameName.data(), QHash<QString, double>(), 2);
-	NeuronGroup* tmpNeurGrp = new NeuronGroup(tmpGrpInfo);
+		//Create a neuron info describing group and use it to create a new group
+		NeuronGroupInfo tmpGrpInfo(0, inputList[i]->frameName.data(), inputList[i]->frameName.data(), QHash<QString, double>(), 2);
+		NeuronGroup* tmpNeurGrp = new NeuronGroup(tmpGrpInfo);
 
-	//Add layer with width, height and position to group
-	tmpNeurGrp->addLayer(inputList[i]->width, inputList[i]->height, neurGrpXPos, neurGrpYPos, neurGrpZPos);
-	newNeuronGroupList.append(tmpNeurGrp);
+		//Add layer with width, height and position to group
+		tmpNeurGrp->addLayer(inputList[i]->width, inputList[i]->height, neurGrpXPos, neurGrpYPos, neurGrpZPos);
+		newNeuronGroupList.append(tmpNeurGrp);
 
-	++rowCount;
+		++rowCount;
     }
 
     /* Work through neural layers in the same way as was done when adding them to the
 	page in addLayersToPage2() method */
     for(int i=0; i< neuralList.size(); ++i){
-	int neurGrpXPos, neurGrpYPos, neurGrpZPos;
+		int neurGrpXPos, neurGrpYPos, neurGrpZPos;
 
-	//Extract position information
-	try{
-	    QWidget* lineEdit = layerLocationGrid->itemAtPosition(rowCount, page2XCol)->widget();
-	    neurGrpXPos = Util::getInt(((QLineEdit*)lineEdit)->text());
-	    lineEdit = layerLocationGrid->itemAtPosition(rowCount, page2YCol)->widget();
-	    neurGrpYPos = Util::getInt(((QLineEdit*)lineEdit)->text());
-	    lineEdit = layerLocationGrid->itemAtPosition(rowCount, page2ZCol)->widget();
-	    neurGrpZPos = Util::getInt(((QLineEdit*)lineEdit)->text());
-	}
-	catch (NumberConversionException& ex){
-	    qCritical()<<"Error in neuron group position: "<<ex.getMessage();
-	    return;
-	}
+		//Extract position information
+		try{
+			QWidget* lineEdit = layerLocationGrid->itemAtPosition(rowCount, page2XCol)->widget();
+			neurGrpXPos = Util::getInt(((QLineEdit*)lineEdit)->text());
+			lineEdit = layerLocationGrid->itemAtPosition(rowCount, page2YCol)->widget();
+			neurGrpYPos = Util::getInt(((QLineEdit*)lineEdit)->text());
+			lineEdit = layerLocationGrid->itemAtPosition(rowCount, page2ZCol)->widget();
+			neurGrpZPos = Util::getInt(((QLineEdit*)lineEdit)->text());
+		}
+		catch (NumberConversionException& ex){
+			qCritical()<<"Error in neuron group position: "<<ex.getMessage();
+			return;
+		}
 
-	//Create a neuron info describing group and use it to create a new group
-	NeuronGroupInfo tmpGrpInfo(0, neuralList[i]->frameName.data(), neuralList[i]->frameName.data(), QHash<QString, double>(), 2);
-	NeuronGroup* tmpNeurGrp = new NeuronGroup(tmpGrpInfo);
+		//Create a neuron info describing group and use it to create a new group
+		NeuronGroupInfo tmpGrpInfo(0, neuralList[i]->frameName.data(), neuralList[i]->frameName.data(), QHash<QString, double>(), 2);
+		NeuronGroup* tmpNeurGrp = new NeuronGroup(tmpGrpInfo);
 
-	//Add layer with width, height and position to group
-	tmpNeurGrp->addLayer(neuralList[i]->width, neuralList[i]->height, neurGrpXPos, neurGrpYPos, neurGrpZPos);
-	newNeuronGroupList.append(tmpNeurGrp);
+		//Add layer with width, height and position to group
+		tmpNeurGrp->addLayer(neuralList[i]->width, neuralList[i]->height, neurGrpXPos, neurGrpYPos, neurGrpZPos);
+		newNeuronGroupList.append(tmpNeurGrp);
 
-	++rowCount;
+		++rowCount;
     }
 
     //Add neuron groups and connection groups to database
     newNetwork = NULL;
     try{
-	//Create network
-	newNetwork = new Network(Globals::getNetworkDao(), Globals::getArchiveDao(), networkName->text(), networkDescription->text());
-	connect(newNetwork, SIGNAL(taskFinished()), this, SLOT(threadFinished()));
-	showBusyPage("Adding neurons to database...");
+		//Create network
+		newNetwork = new Network(Globals::getNetworkDao(), Globals::getArchiveDao(), networkName->text(), networkDescription->text());
+		connect(newNetwork, SIGNAL(taskFinished()), this, SLOT(threadFinished()));
+		showBusyPage("Adding neurons to database...");
 
-	/* Add all of the neuron groups to the network
+		/* Add all of the neuron groups to the network
 	   This network starts a thread. Need to show busy dialog and periodically check to see if thread has
 	   finished using a timer. */
-	newNetwork->addNeuronGroups(newNeuronGroupList);
+		newNetwork->addNeuronGroups(newNeuronGroupList);
 
-	//Show busy page and wait for thread to finish
-	currentTask = ADD_NEURON_GROUPS_TASK;
+		//Show busy page and wait for thread to finish
+		currentTask = ADD_NEURON_GROUPS_TASK;
     }
     catch (SpikeStreamException& ex){
-	qCritical()<<"Error occurred adding neuron groups to network: "<<ex.getMessage();
+		qCritical()<<"Error occurred adding neuron groups to network: "<<ex.getMessage();
 
-	//Delete network from database
-	if(newNetwork != NULL)
-	    Globals::getNetworkDao()->deleteNetwork(newNetwork->getID());
+		//Delete network from database
+		if(newNetwork != NULL)
+			Globals::getNetworkDao()->deleteNetwork(newNetwork->getID());
     }
 }
 
@@ -171,13 +171,13 @@ void NRMImportDialog::cancel(){
     switch (currentTask){
 	case FILE_LOADING_TASK:
 	    fileLoader->stop();
-	break;
+		break;
 	case ADD_NEURON_GROUPS_TASK:
 	    newNetwork->cancel();
-	break;
+		break;
 	case ADD_CONNECTION_GROUPS_TASK:
 	    dataImporter->stop();
-	break;
+		break;
 	default:
 	    qCritical()<<"Current task with id " + QString::number(currentTask) + " is not recognized.";
     }
@@ -189,19 +189,19 @@ void NRMImportDialog::cancel(){
 void NRMImportDialog::threadFinished(){
     //Operation has been cancelled by user interaction with buttons in this widget
     if(operationCancelled){
-	switch (currentTask){
-	    case FILE_LOADING_TASK:
-		showPage1();
-	    break;
-	    case ADD_NEURON_GROUPS_TASK: case ADD_CONNECTION_GROUPS_TASK: case ADD_TRAINING_TASK:
-		showPage2();
-	    break;
-	    default:
-		qCritical()<<"Current task with id " + QString::number(currentTask) + " is not recognized.";
-	}
-	currentTask = -1;
-	operationCancelled = false;
-	return;
+		switch (currentTask){
+  case FILE_LOADING_TASK:
+			showPage1();
+			break;
+  case ADD_NEURON_GROUPS_TASK: case ADD_CONNECTION_GROUPS_TASK: case ADD_TRAINING_TASK:
+			  showPage2();
+	  break;
+  default:
+	  qCritical()<<"Current task with id " + QString::number(currentTask) + " is not recognized.";
+  }
+		currentTask = -1;
+		operationCancelled = false;
+		return;
     }
 
     //Check for errors
@@ -209,30 +209,30 @@ void NRMImportDialog::threadFinished(){
     switch (currentTask){
 	case FILE_LOADING_TASK:
 	    if(fileLoader->isError()){
-		qCritical()<<fileLoader->getErrorMessage();
-		threadError = true;
+			qCritical()<<fileLoader->getErrorMessage();
+			threadError = true;
 	    }
-	break;
+		break;
 	case ADD_NEURON_GROUPS_TASK:
 	    if(newNetwork->isError()){
-		qCritical()<<newNetwork->getErrorMessage();
-		Globals::getNetworkDao()->deleteNetwork(newNetwork->getID());
-		threadError = true;
+			qCritical()<<newNetwork->getErrorMessage();
+			Globals::getNetworkDao()->deleteNetwork(newNetwork->getID());
+			threadError = true;
 	    }
-	break;
+		break;
 	case ADD_CONNECTION_GROUPS_TASK: case ADD_ARCHIVES_TASK: case ADD_TRAINING_TASK:
-	    if(dataImporter->isError()){
-		qCritical()<<dataImporter->getErrorMessage();
-		threadError = true;
+				if(dataImporter->isError()){
+			qCritical()<<dataImporter->getErrorMessage();
+			threadError = true;
 	    }
-	break;
+		break;
 	default:
 	    qCritical()<<"Current task with id " + QString::number(currentTask) + " is not recognized.";
     }
     if(threadError){
-	showPage1();
-	currentTask = -1;
-	return;
+		showPage1();
+		currentTask = -1;
+		return;
     }
 
     /* Operation has not been cancelled and thread has terminated normally and without errors
@@ -241,22 +241,22 @@ void NRMImportDialog::threadFinished(){
 	case FILE_LOADING_TASK:
 	    addLayersToPage2();
 	    showPage2();
-	break;
+		break;
 	case ADD_NEURON_GROUPS_TASK:
 	    //Store the new neuron group IDs in the NRM network
 	    addNeuronGroupIDsToNRMNetwork();
 
 	    //Start the add connection groups to network task
 	    addConnectionGroups();
-	break;
+		break;
 	case ADD_CONNECTION_GROUPS_TASK:
 	    //Add the archives to the database
 	    addArchives();
-	break;
+		break;
 	case ADD_ARCHIVES_TASK:
 	    //Add training to the database
 	    addTraining();
-	break;
+		break;
 	case ADD_TRAINING_TASK:
 	    /* Inform other classes that the list of networks has changed
 	       No need to inform about archive changes because the new network is not loaded. */
@@ -267,8 +267,8 @@ void NRMImportDialog::threadFinished(){
 
 	    //Clean up network from memory - this does not affect the network stored in the database
 	    if(newNetwork != NULL)
-		delete newNetwork;
-	break;
+			delete newNetwork;
+		break;
 	default:
 	    qCritical()<<"Current task with id " + QString::number(currentTask) + " is not recognized.";
     }
@@ -351,54 +351,54 @@ void NRMImportDialog::loadNetworkFromFiles(){
 
     //Check that file paths are valid
     if(!QFile::exists(configFilePath->text())){
-	if(configFilePath->text() == "")
-	    configFilePath->setText("Please enter a valid file path");
-	configFilePath->setStyleSheet("* { color: red; }");
-	configFilePath->setSelection(0, 0);
-	fileError = true;
+		if(configFilePath->text() == "")
+			configFilePath->setText("Please enter a valid file path");
+		configFilePath->setStyleSheet("* { color: red; }");
+		configFilePath->setSelection(0, 0);
+		fileError = true;
     }
     else{
-	configFilePath->setStyleSheet("* { color: black; }");
+		configFilePath->setStyleSheet("* { color: black; }");
     }
     if(!QFile::exists(datasetFilePath->text())){
-	if(datasetFilePath->text() == "")
-	    datasetFilePath->setText("Please enter a valid file path");
-	datasetFilePath->setStyleSheet("* { color: red; }");
-	datasetFilePath->setSelection(0, 0);
-	fileError = true;
+		if(datasetFilePath->text() == "")
+			datasetFilePath->setText("Please enter a valid file path");
+		datasetFilePath->setStyleSheet("* { color: red; }");
+		datasetFilePath->setSelection(0, 0);
+		fileError = true;
     }
     else{
-	datasetFilePath->setStyleSheet("* { color: black; }");
+		datasetFilePath->setStyleSheet("* { color: black; }");
     }
     if(!QFile::exists(trainingFilePath->text())){
-	if(trainingFilePath->text() == "")
-	    trainingFilePath->setText("Please enter a valid file path");
-	trainingFilePath->setStyleSheet("* { color: red; }");
-	trainingFilePath->setSelection(0, 0);
-	fileError = true;
+		if(trainingFilePath->text() == "")
+			trainingFilePath->setText("Please enter a valid file path");
+		trainingFilePath->setStyleSheet("* { color: red; }");
+		trainingFilePath->setSelection(0, 0);
+		fileError = true;
     }
     else{
-	trainingFilePath->setStyleSheet("* { color: black; }");
+		trainingFilePath->setStyleSheet("* { color: black; }");
     }
     if(fileError)
-	return;
+		return;
 
     //Load up configuration file
     showBusyPage(QString ("Loading configuration and training files"));
     try{
-	currentTask = FILE_LOADING_TASK;
-	fileLoader->setConfigFilePath(configFilePath->text());
-	fileLoader->setDatasetFilePath(datasetFilePath->text());
-	fileLoader->setTrainingFilePath(trainingFilePath->text());
-	fileLoader->start();
+		currentTask = FILE_LOADING_TASK;
+		fileLoader->setConfigFilePath(configFilePath->text());
+		fileLoader->setDatasetFilePath(datasetFilePath->text());
+		fileLoader->setTrainingFilePath(trainingFilePath->text());
+		fileLoader->start();
     }
     catch(NRMException& ex){
-	qCritical()<<ex.getMessage();
-	showPage1();
+		qCritical()<<ex.getMessage();
+		showPage1();
     }
     catch(...){
-	qCritical()<<"An unknown exception occurred whilst loading NRM files";
-	showPage1();
+		qCritical()<<"An unknown exception occurred whilst loading NRM files";
+		showPage1();
     }
 }
 
@@ -410,20 +410,20 @@ void NRMImportDialog::loadNetworkFromFiles(){
 void NRMImportDialog::addArchives(){
     //Do nothing if there is no data
     if(fileLoader->getDataSet()->size() == 0)
-	return;
+		return;
 
     //Reset variables
     operationCancelled = false;
     currentTask = ADD_ARCHIVES_TASK;
     showBusyPage("Adding archives to database...");
     try{
-	dataImporter->prepareAddArchives(fileLoader->getNetwork(), newNetwork, fileLoader->getDataSet());
-	dataImporter->start();
+		dataImporter->prepareAddArchives(fileLoader->getNetwork(), newNetwork, fileLoader->getDataSet());
+		dataImporter->start();
     }
     catch(SpikeStreamException& ex){
-	qCritical()<<ex.getMessage();
-	showPage1();
-	currentTask = -1;
+		qCritical()<<ex.getMessage();
+		showPage1();
+		currentTask = -1;
     }
 }
 
@@ -445,15 +445,15 @@ void NRMImportDialog::addConnectionGroups(){
 void NRMImportDialog::addLayersToPage2(){
     //Check network has been loaded
     if(fileLoader->getNetwork() == NULL){
-	qCritical()<<"Network has not been loaded. Cannot add network layers to dialog.";
-	return;
+		qCritical()<<"Network has not been loaded. Cannot add network layers to dialog.";
+		return;
     }
 
     //Clear grid layout
     for(int x=0; x<layerLocationGrid->rowCount(); ++x){
-	for(int y=0; y<layerLocationGrid->columnCount(); ++y){
-	    layerLocationGrid->removeItem(layerLocationGrid->itemAtPosition(x, y));
-	}
+		for(int y=0; y<layerLocationGrid->columnCount(); ++y){
+			layerLocationGrid->removeItem(layerLocationGrid->itemAtPosition(x, y));
+		}
     }
 
     //Get the input and neural layers
@@ -465,40 +465,40 @@ void NRMImportDialog::addLayersToPage2(){
 
     //Add input layers to grid layout.
     for(int i=0; i<inputList.size(); ++i){
-	//Add widgets to grid
-	layerLocationGrid->addWidget(new QLabel( QString::number(inputList[i]->frameNum) ), rowCount, 0);
-	layerLocationGrid->addWidget(new QLabel( inputList[i]->frameName.data() ), rowCount, 1);
-	QString sizeStr = "(" + QString::number(inputList[i]->width) + "x" + QString::number(inputList[i]->height) + "):";
-	layerLocationGrid->addWidget(new QLabel(sizeStr), rowCount, 2);//size
-	layerLocationGrid->addWidget(new QLabel(" x="), rowCount, 3);//size
-	layerLocationGrid->addWidget(new QLineEdit( QString::number(tmpXPos) ), rowCount, page2XCol);//x location
-	layerLocationGrid->addWidget(new QLabel(" y="), rowCount, 5);//size
-	layerLocationGrid->addWidget(new QLineEdit( QString::number(tmpYPos) ), rowCount, page2YCol);//y location
-	layerLocationGrid->addWidget(new QLabel(" z="), rowCount, 7);//size
-	layerLocationGrid->addWidget(new QLineEdit( QString::number(tmpZPos) ), rowCount, page2ZCol);//z location
-	++rowCount;
+		//Add widgets to grid
+		layerLocationGrid->addWidget(new QLabel( QString::number(inputList[i]->frameNum) ), rowCount, 0);
+		layerLocationGrid->addWidget(new QLabel( inputList[i]->frameName.data() ), rowCount, 1);
+		QString sizeStr = "(" + QString::number(inputList[i]->width) + "x" + QString::number(inputList[i]->height) + "):";
+		layerLocationGrid->addWidget(new QLabel(sizeStr), rowCount, 2);//size
+		layerLocationGrid->addWidget(new QLabel(" x="), rowCount, 3);//size
+		layerLocationGrid->addWidget(new QLineEdit( QString::number(tmpXPos) ), rowCount, page2XCol);//x location
+		layerLocationGrid->addWidget(new QLabel(" y="), rowCount, 5);//size
+		layerLocationGrid->addWidget(new QLineEdit( QString::number(tmpYPos) ), rowCount, page2YCol);//y location
+		layerLocationGrid->addWidget(new QLabel(" z="), rowCount, 7);//size
+		layerLocationGrid->addWidget(new QLineEdit( QString::number(tmpZPos) ), rowCount, page2ZCol);//z location
+		++rowCount;
 
-	//Calculate next proposed insertion position
-	tmpXPos += inputList[i]->width + 2;
+		//Calculate next proposed insertion position
+		tmpXPos += inputList[i]->width + 2;
     }
 
     //Add neural layers to grid layout.
     for(int i=0; i<neuralList.size(); ++i){
-	//Add widgets to grid
-	layerLocationGrid->addWidget(new QLabel( QString::number(neuralList[i]->frameNum) ), rowCount, 0);
-	layerLocationGrid->addWidget(new QLabel( neuralList[i]->frameName.data() ), rowCount, 1);
-	QString sizeStr = "(" + QString::number(neuralList[i]->width) + "x" + QString::number(neuralList[i]->height) + "):";
-	layerLocationGrid->addWidget(new QLabel(sizeStr), rowCount, 2);//size
-	layerLocationGrid->addWidget(new QLabel(" x="), rowCount, 3);//size
-	layerLocationGrid->addWidget(new QLineEdit( QString::number(tmpXPos) ), rowCount, 4);//x location
-	layerLocationGrid->addWidget(new QLabel(" y="), rowCount, 5);//size
-	layerLocationGrid->addWidget(new QLineEdit( QString::number(tmpYPos) ), rowCount, 6);//y location
-	layerLocationGrid->addWidget(new QLabel(" z="), rowCount, 7);//size
-	layerLocationGrid->addWidget(new QLineEdit( QString::number(tmpZPos) ), rowCount, 8);//z location
-	++rowCount;
+		//Add widgets to grid
+		layerLocationGrid->addWidget(new QLabel( QString::number(neuralList[i]->frameNum) ), rowCount, 0);
+		layerLocationGrid->addWidget(new QLabel( neuralList[i]->frameName.data() ), rowCount, 1);
+		QString sizeStr = "(" + QString::number(neuralList[i]->width) + "x" + QString::number(neuralList[i]->height) + "):";
+		layerLocationGrid->addWidget(new QLabel(sizeStr), rowCount, 2);//size
+		layerLocationGrid->addWidget(new QLabel(" x="), rowCount, 3);//size
+		layerLocationGrid->addWidget(new QLineEdit( QString::number(tmpXPos) ), rowCount, 4);//x location
+		layerLocationGrid->addWidget(new QLabel(" y="), rowCount, 5);//size
+		layerLocationGrid->addWidget(new QLineEdit( QString::number(tmpYPos) ), rowCount, 6);//y location
+		layerLocationGrid->addWidget(new QLabel(" z="), rowCount, 7);//size
+		layerLocationGrid->addWidget(new QLineEdit( QString::number(tmpZPos) ), rowCount, 8);//z location
+		++rowCount;
 
-	//Calculate next proposed insertion position
-	tmpXPos += neuralList[i]->width + 2;
+		//Calculate next proposed insertion position
+		tmpXPos += neuralList[i]->width + 2;
     }
 }
 
@@ -512,19 +512,19 @@ void NRMImportDialog::addNeuronGroupIDsToNRMNetwork(){
 
     //Check that the lists are likely to be in synchrony
     if( (inputList.size() + neuralList.size()) != newNeuronGroupList.size()){
-	qCritical()<<"NRM layers and new neuron groups do not match.";
-	return;
+		qCritical()<<"NRM layers and new neuron groups do not match.";
+		return;
     }
 
     //Work through list in same order as was used to generate the list
     int index = 0;
     for(int i=0; i<inputList.size(); ++i){
-	inputList[i]->spikeStreamID = newNeuronGroupList[index]->getID();
-	++index;
+		inputList[i]->spikeStreamID = newNeuronGroupList[index]->getID();
+		++index;
     }
     for(int i=0; i<neuralList.size(); ++i){
-	neuralList[i]->spikeStreamID = newNeuronGroupList[index]->getID();
-	++index;
+		neuralList[i]->spikeStreamID = newNeuronGroupList[index]->getID();
+		++index;
     }
 }
 
@@ -534,13 +534,13 @@ void NRMImportDialog::addTraining(){
     currentTask = ADD_TRAINING_TASK;
     showBusyPage("Adding training to database...");
     try{
-	dataImporter->prepareAddTraining(fileLoader->getNetwork(), newNetwork);
-	dataImporter->start();
+		dataImporter->prepareAddTraining(fileLoader->getNetwork(), newNetwork);
+		dataImporter->start();
     }
     catch(SpikeStreamException& ex){
-	qCritical()<<ex.getMessage();
-	showPage1();
-	currentTask = -1;
+		qCritical()<<ex.getMessage();
+		showPage1();
+		currentTask = -1;
     }
 }
 
@@ -548,7 +548,7 @@ void NRMImportDialog::addTraining(){
 /*! Builds page to display when an operation is taking place */
 void NRMImportDialog::buildBusyPage(){
     busyWidget = new QWidget(this);
-    QVBoxLayout *verticalBox = new QVBoxLayout(busyWidget, 2, 2);
+	QVBoxLayout *verticalBox = new QVBoxLayout(busyWidget);
     verticalBox->setMargin(10);
 
     QHBoxLayout *hBox = new QHBoxLayout();
@@ -577,7 +577,7 @@ void NRMImportDialog::buildPage1(){
     page1Widget = new QWidget(this);
 
     //Create box to organise dialog
-    QVBoxLayout *verticalBox = new QVBoxLayout(page1Widget, 2, 2);
+	QVBoxLayout *verticalBox = new QVBoxLayout(page1Widget);
     verticalBox->setMargin(10);
 
     //Layout path gathering information using grid layout
@@ -632,7 +632,7 @@ void NRMImportDialog::buildPage2(){
     page2Widget = new QWidget(this);
 
     //Create box to organise dialog
-    QVBoxLayout *verticalBox = new QVBoxLayout(page2Widget, 2, 2);
+	QVBoxLayout *verticalBox = new QVBoxLayout(page2Widget);
     verticalBox->setMargin(20);
 
     layerLocationGrid = new QGridLayout();
@@ -679,7 +679,7 @@ void NRMImportDialog::buildPage2(){
 /*! Constructs the final page informing user that loading is complete */
 void NRMImportDialog::buildSuccessPage(){
     successWidget = new QWidget(this);
-    QVBoxLayout *verticalBox = new QVBoxLayout(successWidget, 2, 2);
+	QVBoxLayout *verticalBox = new QVBoxLayout(successWidget);
     verticalBox->setMargin(10);
     verticalBox->addWidget(new QLabel("NRM loading complete"));
     QHBoxLayout *buttonBox = new QHBoxLayout();
@@ -700,11 +700,11 @@ QString NRMImportDialog::getFilePath(QString fileFilter){
     dialog.setViewMode(QFileDialog::Detail);
     QStringList fileNames;
     if (dialog.exec())
-	fileNames = dialog.selectedFiles();
+		fileNames = dialog.selectedFiles();
     if(fileNames.size() > 0)
-	return fileNames[0];
+		return fileNames[0];
     else
-	return QString("");
+		return QString("");
 }
 
 

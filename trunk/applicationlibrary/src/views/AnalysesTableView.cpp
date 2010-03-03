@@ -6,7 +6,7 @@ using namespace spikestream;
 #include <QHeaderView>
 
 /*! Constructor */
-AnalysesTableView::AnalysesTableView(QAbstractTableModel* model) : QTableView() {
+AnalysesTableView::AnalysesTableView(QWidget* parent, QAbstractTableModel* model) : QTableView(parent) {
     //Set up the view
     setShowGrid(false);
     setSelectionMode(QAbstractItemView::NoSelection);

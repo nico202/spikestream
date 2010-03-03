@@ -53,8 +53,12 @@ void AnalysisDao::deleteAnalysis(unsigned int analysisID){
 
 
 /*! Returns a list of information about analyses matching the network and archive ID */
-QList<AnalysisInfo> AnalysisDao::getAnalysesInfo(unsigned int networkID, unsigned int archiveID){
-    QSqlQuery query = getQuery("SELECT AnalysisID, StartTime, Description, Parameters, AnalysisTypeID FROM Analyses WHERE NetworkID=" + QString::number(networkID) + " AND ArchiveID=" + QString::number(archiveID));
+QList<AnalysisInfo> AnalysisDao::getAnalysesInfo(unsigned int networkID, unsigned int archiveID, unsigned int analysisType){
+	QString queryStr = "SELECT AnalysisID, StartTime, Description, Parameters, AnalysisTypeID FROM Analyses ";
+	queryStr += "WHERE NetworkID=" + QString::number(networkID) + " AND ArchiveID=" + QString::number(archiveID);
+	queryStr += " AND AnalysisTypeID=" + QString::number(analysisType);
+
+	QSqlQuery query = getQuery(queryStr);
     executeQuery(query);
     QList<AnalysisInfo> tmpList;
     for(int i=0; i<query.size(); ++i){

@@ -20,7 +20,7 @@ using namespace std;
 NetworksWidget::NetworksWidget(QWidget* parent) : QWidget(parent){
 	//this->setStyleSheet("* { background-color: white; }");
 
-	QVBoxLayout* verticalBox = new QVBoxLayout(this, 2, 2);
+	QVBoxLayout* verticalBox = new QVBoxLayout(this);
 
 	//Add button to launch networks dialog
 	QPushButton* addNetworksButton = new QPushButton("Add Networks");

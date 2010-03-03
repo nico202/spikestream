@@ -71,6 +71,7 @@ namespace spikestream {
 			int getFirstTimeStep();
 			int getLastTimeStep();
 			QStringList getTimeStepList(unsigned int min, unsigned int max);
+			virtual void initializeAnalysisInfo() = 0;
 	};
 
 }

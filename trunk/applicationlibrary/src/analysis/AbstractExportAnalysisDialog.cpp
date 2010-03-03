@@ -35,7 +35,7 @@ AbstractExportAnalysisDialog::AbstractExportAnalysisDialog(const QString& analys
 	//Add the export type selection combo
 	gridLayout->addWidget(new QLabel("Export type: "), 1, 0);
 	exportTypeCombo = new QComboBox();
-	exportTypeCombo->insertItem("Tab separated fields");
+	exportTypeCombo->addItem("Tab separated fields");
 	gridLayout->addWidget(exportTypeCombo, 1, 1);
 
 	//Add the grid layout to the dialog
@@ -43,9 +43,9 @@ AbstractExportAnalysisDialog::AbstractExportAnalysisDialog(const QString& analys
 
 	//Add Ok and Cancel buttons
 	QHBoxLayout *okCanButtonBox = new QHBoxLayout();
-	QPushButton *okPushButton = new QPushButton("Ok", this, "okButton");
+	QPushButton *okPushButton = new QPushButton("Ok");
 	connect(okPushButton, SIGNAL(clicked()), this, SLOT(okButtonClicked()));
-	QPushButton *cancelPushButton = new QPushButton("Cancel", this, "cancelButton");
+	QPushButton *cancelPushButton = new QPushButton("Cancel");
 	connect(cancelPushButton, SIGNAL(clicked()), this, SLOT(reject()));
 	okCanButtonBox->addWidget(okPushButton);
 	okCanButtonBox->addWidget(cancelPushButton);

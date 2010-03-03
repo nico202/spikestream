@@ -44,7 +44,7 @@ bool Globals::isAnalysisLoaded(const QString& analysisName){
 
 /*! Returns the analysis id if it has been set, otherwise return zero */
 unsigned int Globals::getAnalysisID(const QString& analysisName){
-	if(!analysisMap.contains(analysisName))
+	if(analysisMap.contains(analysisName))
 		return analysisMap[analysisName];
 
 	//No analysis ID has been set for this name, so return zero

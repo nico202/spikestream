@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://web.resource.org/cc/"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="744.09448819"
+   height="1052.3622047"
+   id="svg2"
+   sodipodi:version="0.32"
+   inkscape:version="0.44.1"
+   sodipodi:docbase="/home/davidg/spikestream/images"
+   sodipodi:docname="spikestream_icon_version1.svg"
+   inkscape:export-filename="/home/davidg/spikestream/website/WorkingDocs/SpikeStream_Logo.png"
+   inkscape:export-xdpi="300.00000"
+   inkscape:export-ydpi="300.00000">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.4"
+     inkscape:cx="289.41043"
+     inkscape:cy="552.39676"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     gridspacingx="10.000000px"
+     gridspacingy="10.000000px"
+     inkscape:window-width="1280"
+     inkscape:window-height="962"
+     inkscape:window-x="0"
+     inkscape:window-y="0" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Background"
+     style="display:inline" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     style="display:inline">
+    <path
+       inkscape:export-ydpi="300"
+       inkscape:export-xdpi="300"
+       inkscape:export-filename="/home/davidg/spikestream/images/spikestream_icon_version1.png"
+       sodipodi:type="arc"
+       style="opacity:1;fill:black;fill-opacity:1;stroke:#969696;stroke-width:2.77669153;stroke-linejoin:miter;stroke-miterlimit:0;stroke-dasharray:none;stroke-opacity:1"
+       id="path1378"
+       sodipodi:cx="279.28571"
+       sodipodi:cy="387.36218"
+       sodipodi:rx="37.857143"
+       sodipodi:ry="37.857143"
+       d="M 317.14285 387.36218 A 37.857143 37.857143 0 1 1  241.42856,387.36218 A 37.857143 37.857143 0 1 1  317.14285 387.36218 z"
+       transform="matrix(2.160845,0,0,2.160845,-454.2074,-417.0884)" />
+    <text
+       inkscape:export-ydpi="300"
+       inkscape:export-xdpi="300"
+       inkscape:export-filename="/home/davidg/spikestream/images/spikestream_icon_version1.png"
+       transform="scale(1.070723,0.933948)"
+       sodipodi:linespacing="125%"
+       id="text1380"
+       y="502.54175"
+       x="93.926643"
+       style="font-size:12.84865284px;font-style:normal;font-weight:normal;line-height:125%;fill:black;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       xml:space="preserve"><tspan
+         style="font-size:154.18386841px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:white;fill-opacity:1;font-family:SUSE Sans Mono"
+         y="502.54175"
+         x="93.926643"
+         id="tspan1382"
+         sodipodi:role="line">S</tspan></text>
+    <path
+       inkscape:export-ydpi="300"
+       inkscape:export-xdpi="300"
+       inkscape:export-filename="/home/davidg/spikestream/images/spikestream_icon_version1.png"
+       sodipodi:type="arc"
+       style="opacity:1;fill:#323232;fill-opacity:1;stroke:#969696;stroke-width:12.16607857;stroke-linejoin:miter;stroke-miterlimit:0;stroke-dasharray:none;stroke-opacity:1"
+       id="path1386"
+       sodipodi:cx="279.28571"
+       sodipodi:cy="387.36218"
+       sodipodi:rx="37.857143"
+       sodipodi:ry="37.857143"
+       d="M 317.14285 387.36218 A 37.857143 37.857143 0 1 1  241.42856,387.36218 A 37.857143 37.857143 0 1 1  317.14285 387.36218 z"
+       transform="matrix(0.328783,0,0,0.328783,116.8912,348.4407)" />
+    <path
+       inkscape:export-ydpi="300"
+       inkscape:export-xdpi="300"
+       inkscape:export-filename="/home/davidg/spikestream/images/spikestream_icon_version1.png"
+       sodipodi:nodetypes="cc"
+       id="path1394"
+       d="M 220.20921,353.22609 L 233.06636,342.51181"
+       style="fill:none;fill-opacity:0.75;fill-rule:evenodd;stroke:#969696;stroke-width:6;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:3.9000001;stroke-dasharray:none;stroke-opacity:1" />
+    <path
+       inkscape:export-ydpi="300"
+       inkscape:export-xdpi="300"
+       inkscape:export-filename="/home/davidg/spikestream/images/spikestream_icon_version1.png"
+       sodipodi:nodetypes="cc"
+       id="path1396"
+       d="M 150.33595,323.72177 L 150.40658,306.98568"
+       style="fill:none;fill-opacity:0.75;fill-rule:evenodd;stroke:#969696;stroke-width:6;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:3.9000001;stroke-dasharray:none;stroke-opacity:1" />
+    <path
+       inkscape:export-ydpi="300"
+       inkscape:export-xdpi="300"
+       inkscape:export-filename="/home/davidg/spikestream/images/spikestream_icon_version1.png"
+       sodipodi:nodetypes="cc"
+       id="path1398"
+       d="M 81.71428,351.84865 L 71,338.9915"
+       style="fill:none;fill-opacity:0.75;fill-rule:evenodd;stroke:#969696;stroke-width:6;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:3.9000001;stroke-dasharray:none;stroke-opacity:1" />
+    <path
+       inkscape:export-ydpi="300"
+       inkscape:export-xdpi="300"
+       inkscape:export-filename="/home/davidg/spikestream/images/spikestream_icon_version1.png"
+       style="fill:none;fill-opacity:0.75;fill-rule:evenodd;stroke:#969696;stroke-width:6;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:3.9000001;stroke-dasharray:none;stroke-opacity:1"
+       d="M 66.14285,495.94037 L 79,485.22609"
+       id="path1400"
+       sodipodi:nodetypes="cc" />
+    <path
+       inkscape:export-ydpi="300"
+       inkscape:export-xdpi="300"
+       inkscape:export-filename="/home/davidg/spikestream/images/spikestream_icon_version1.png"
+       style="fill:none;fill-opacity:0.75;fill-rule:evenodd;stroke:#969696;stroke-width:6;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:3.9000001;stroke-dasharray:none;stroke-opacity:1"
+       d="M 53.40754,417.14937 L 36.67145,417.07874"
+       id="path1402"
+       sodipodi:nodetypes="cc" />
+    <path
+       inkscape:export-ydpi="300"
+       inkscape:export-xdpi="300"
+       inkscape:export-filename="/home/davidg/spikestream/images/spikestream_icon_version1.png"
+       transform="matrix(0.328783,0,0,0.328783,117.3963,234.7985)"
+       d="M 317.14285 387.36218 A 37.857143 37.857143 0 1 1  241.42856,387.36218 A 37.857143 37.857143 0 1 1  317.14285 387.36218 z"
+       sodipodi:ry="37.857143"
+       sodipodi:rx="37.857143"
+       sodipodi:cy="387.36218"
+       sodipodi:cx="279.28571"
+       id="path1406"
+       style="opacity:1;fill:#323232;fill-opacity:1;stroke:#969696;stroke-width:12.16607857;stroke-linejoin:miter;stroke-miterlimit:0;stroke-dasharray:none;stroke-opacity:1"
+       sodipodi:type="arc" />
+    <path
+       inkscape:export-ydpi="300"
+       inkscape:export-xdpi="300"
+       inkscape:export-filename="/home/davidg/spikestream/images/spikestream_icon_version1.png"
+       sodipodi:type="arc"
+       style="opacity:1;fill:#323232;fill-opacity:1;stroke:#969696;stroke-width:12.16607857;stroke-linejoin:miter;stroke-miterlimit:0;stroke-dasharray:none;stroke-opacity:1"
+       id="path1408"
+       sodipodi:cx="279.28571"
+       sodipodi:cy="387.36218"
+       sodipodi:rx="37.857143"
+       sodipodi:ry="37.857143"
+       d="M 317.14285 387.36218 A 37.857143 37.857143 0 1 1  241.42856,387.36218 A 37.857143 37.857143 0 1 1  317.14285 387.36218 z"
+       transform="matrix(0.328783,0,0,0.328783,58.30238,210.0498)" />
+    <path
+       inkscape:export-ydpi="300"
+       inkscape:export-xdpi="300"
+       inkscape:export-filename="/home/davidg/spikestream/images/spikestream_icon_version1.png"
+       transform="matrix(0.328783,0,0,0.328783,-0.286523,235.3036)"
+       d="M 317.14285 387.36218 A 37.857143 37.857143 0 1 1  241.42856,387.36218 A 37.857143 37.857143 0 1 1  317.14285 387.36218 z"
+       sodipodi:ry="37.857143"
+       sodipodi:rx="37.857143"
+       sodipodi:cy="387.36218"
+       sodipodi:cx="279.28571"
+       id="path1410"
+       style="opacity:1;fill:#323232;fill-opacity:1;stroke:#969696;stroke-width:12.16607857;stroke-linejoin:miter;stroke-miterlimit:0;stroke-dasharray:none;stroke-opacity:1"
+       sodipodi:type="arc" />
+    <path
+       inkscape:export-ydpi="300"
+       inkscape:export-xdpi="300"
+       inkscape:export-filename="/home/davidg/spikestream/images/spikestream_icon_version1.png"
+       sodipodi:type="arc"
+       style="opacity:1;fill:#323232;fill-opacity:1;stroke:#969696;stroke-width:12.16607857;stroke-linejoin:miter;stroke-miterlimit:0;stroke-dasharray:none;stroke-opacity:1"
+       id="path1412"
+       sodipodi:cx="279.28571"
+       sodipodi:cy="387.36218"
+       sodipodi:rx="37.857143"
+       sodipodi:ry="37.857143"
+       d="M 317.14285 387.36218 A 37.857143 37.857143 0 1 1  241.42856,387.36218 A 37.857143 37.857143 0 1 1  317.14285 387.36218 z"
+       transform="matrix(0.328783,0,0,0.328783,-24.02512,291.3671)" />
+    <path
+       inkscape:export-ydpi="300"
+       inkscape:export-xdpi="300"
+       inkscape:export-filename="/home/davidg/spikestream/images/spikestream_icon_version1.png"
+       transform="matrix(0.328783,0,0,0.328783,-2.306823,349.4509)"
+       d="M 317.14285 387.36218 A 37.857143 37.857143 0 1 1  241.42856,387.36218 A 37.857143 37.857143 0 1 1  317.14285 387.36218 z"
+       sodipodi:ry="37.857143"
+       sodipodi:rx="37.857143"
+       sodipodi:cy="387.36218"
+       sodipodi:cx="279.28571"
+       id="path1414"
+       style="opacity:1;fill:#323232;fill-opacity:1;stroke:#969696;stroke-width:12.16607857;stroke-linejoin:miter;stroke-miterlimit:0;stroke-dasharray:none;stroke-opacity:1"
+       sodipodi:type="arc" />
+    <path
+       inkscape:export-ydpi="300"
+       inkscape:export-xdpi="300"
+       inkscape:export-filename="/home/davidg/spikestream/images/spikestream_icon_version1.png"
+       sodipodi:type="arc"
+       style="opacity:1;fill:white;fill-opacity:1;stroke:#969696;stroke-width:12.16607857;stroke-linejoin:miter;stroke-miterlimit:0;stroke-dasharray:none;stroke-opacity:1"
+       id="path1416"
+       sodipodi:cx="279.28571"
+       sodipodi:cy="387.36218"
+       sodipodi:rx="37.857143"
+       sodipodi:ry="37.857143"
+       d="M 317.14285 387.36218 A 37.857143 37.857143 0 1 1  241.42856,387.36218 A 37.857143 37.857143 0 1 1  317.14285 387.36218 z"
+       transform="matrix(0.328783,0,0,0.328783,58.30238,375.4623)" />
+    <path
+       inkscape:export-ydpi="300"
+       inkscape:export-xdpi="300"
+       style="fill:none;fill-opacity:0.75;fill-rule:evenodd;stroke:#969696;stroke-width:6;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:3.9000001;stroke-dasharray:none;stroke-opacity:1"
+       d="M 229,498.82585 L 218.28572,485.9687"
+       id="path1418"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/home/davidg/spikestream/images/spikestream_icon_version1.png" />
+    <path
+       transform="matrix(0.328783,0,0,0.328783,58.30238,375.4623)"
+       d="M 317.14285 387.36218 A 37.857143 37.857143 0 1 1  241.42856,387.36218 A 37.857143 37.857143 0 1 1  317.14285 387.36218 z"
+       sodipodi:ry="37.857143"
+       sodipodi:rx="37.857143"
+       sodipodi:cy="387.36218"
+       sodipodi:cx="279.28571"
+       id="path1420"
+       style="opacity:1;fill:#323232;fill-opacity:1;stroke:#969696;stroke-width:12.16607857;stroke-linejoin:miter;stroke-miterlimit:0;stroke-dasharray:none;stroke-opacity:1"
+       sodipodi:type="arc"
+       inkscape:export-filename="/home/davidg/spikestream/images/spikestream_icon_version1.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <path
+       sodipodi:nodetypes="cc"
+       id="path2054"
+       d="M 242.58465,419.82485 L 255.68184,419.1074"
+       style="fill:none;fill-opacity:0.75;fill-rule:evenodd;stroke:#969696;stroke-width:6;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:3.9000001;stroke-dasharray:none;stroke-opacity:1"
+       inkscape:export-filename="/home/davidg/spikestream/images/spikestream_icon_version1.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <path
+       transform="matrix(-0.328783,0,0,0.328783,321.2284,292.0814)"
+       d="M 317.14285 387.36218 A 37.857143 37.857143 0 1 1  241.42856,387.36218 A 37.857143 37.857143 0 1 1  317.14285 387.36218 z"
+       sodipodi:ry="37.857143"
+       sodipodi:rx="37.857143"
+       sodipodi:cy="387.36218"
+       sodipodi:cx="279.28571"
+       id="path2056"
+       style="opacity:1;fill:#323232;fill-opacity:1;stroke:#969696;stroke-width:12.16607857;stroke-linejoin:miter;stroke-miterlimit:0;stroke-dasharray:none;stroke-opacity:1"
+       sodipodi:type="arc"
+       inkscape:export-filename="/home/davidg/spikestream/images/spikestream_icon_version1.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <path
+       inkscape:export-ydpi="300"
+       inkscape:export-xdpi="300"
+       inkscape:export-filename="/home/davidg/spikestream/images/spikestream_icon_version1.png"
+       sodipodi:nodetypes="cc"
+       id="path2943"
+       d="M 149.57143,533.58737 L 149.64206,516.85128"
+       style="fill:none;fill-opacity:0.75;fill-rule:evenodd;stroke:#969696;stroke-width:6;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:3.9000001;stroke-dasharray:none;stroke-opacity:1;display:inline" />
+  </g>
+</svg>

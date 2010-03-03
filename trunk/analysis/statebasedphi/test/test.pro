@@ -25,7 +25,7 @@ win32 {
 	LIBS += -lstatebasedphi0 -L$${SPIKESTREAM_ROOT_DIR}/plugins/analysis -lspikestreamtest0 -lspikestream0 -L$${SPIKESTREAM_ROOT_DIR}/lib
 }
 
-QT += xml opengl qt3support sql
+QT += xml opengl sql
 
 CONFIG += release qtestlib console
 

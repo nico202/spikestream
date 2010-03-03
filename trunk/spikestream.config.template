@@ -20,30 +20,6 @@ spikeStreamAnalysisUser = SpikeStream
 spikeStreamAnalysisPassword = password
 spikeStreamAnalysisDatabase = SpikeStreamAnalysis
 
-#LOGGING PARAMETERS
-#Log file parameters
-Max_log_size = 5000000
-
-#Log level parameters: O disables logging; 1 enables medium logging; 2 enables full logging, which may incur performance penalties
-log_level = 0
-#log_level = 1
-#log_level = 2
-
 #FILE PARAMETERS
 default_file_location = /home/terry/spikestream
-
-#NETWORK VIEWER PARAMETERS
-#Controls the maximum size of connection group that will be automatically loaded.
-max_autoload_conngrp_size = 1000000
-
-#SIMULATION PARAMETERS
-#How long the simulation waits for tasks to load their neuron data. You may need to increse this value for large networks. Value is in seconds.
-max_neuron_data_load_time = 1000
-
-#NUMBER OF DELAY VALUES
-#Controls how many buffers are in the simulation and thus how many delay values are possible
-#Each delay value is a single time step and so the amount of delay varies with the time step size in milliseconds
-#FIXME: NOT IMPLEMENTED - THINK ABOUT WHETHER TO IMPLEMENT THIS OR NOT
-number_of_delay_values = 250
-
 

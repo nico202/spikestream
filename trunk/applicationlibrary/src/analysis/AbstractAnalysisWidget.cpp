@@ -20,7 +20,7 @@ AbstractAnalysisWidget::AbstractAnalysisWidget(QWidget* parent) : QWidget(parent
 			Globals::getNetworkDao()->getDBInfo(),
 			Globals::getArchiveDao()->getDBInfo(),
 			Globals::getAnalysisDao()->getDBInfo()
-	);
+			);
 	connect(analysisRunner, SIGNAL(finished()), this, SLOT(threadFinished()));
 	connect(analysisRunner, SIGNAL(finished()), Globals::getEventRouter(), SLOT(analysisStopped()));
 	connect(analysisRunner, SIGNAL(newResultsFound()), this , SLOT(updateResults()), Qt::QueuedConnection);
@@ -74,7 +74,7 @@ void AbstractAnalysisWidget::fixTimeStepSelection(int selectedIndex){
 void AbstractAnalysisWidget::loadAnalysis(){
 	try{
 		//Show dialog to select the analysis the user wants to load
-		LoadAnalysisDialog loadAnalysisDialog(this);
+		LoadAnalysisDialog loadAnalysisDialog(this, analysisInfo.getAnalyisType());
 		if(loadAnalysisDialog.exec() == QDialog::Accepted ) {//Load the archive
 			analysisInfo = loadAnalysisDialog.getAnalysisInfo();
 			updateResults();
@@ -151,13 +151,12 @@ void AbstractAnalysisWidget::threadFinished(){
 	}
 
 	switch(currentTask){
-	case ANALYSIS_TASK:
-		Globals::getEventRouter()->analysisStopped();
-		break;
-	default:
-		qCritical()<<"Current task not recognized: "<<currentTask;
+		case ANALYSIS_TASK:
+			Globals::getEventRouter()->analysisStopped();
+				break;
+		default:
+				qCritical()<<"Current task not recognized: "<<currentTask;
 	}
-
 	currentTask = UNDEFINED_TASK;
 }
 

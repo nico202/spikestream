@@ -101,11 +101,11 @@ QVariant FullResultsModel::headerData(int section, Qt::Orientation orientation, 
 
 /*! Hides the results of the analysis */
 void FullResultsModel::hideAnalysisResults(){
-	//Hide visible complex
-	setVisibleComplex(-1);
-
-	//Inform view associated with this model.
-	reset();
+//	//Hide visible complex
+//	setVisibleComplex(-1);
+//
+//	//Inform view associated with this model.
+//	reset();
 }
 
 

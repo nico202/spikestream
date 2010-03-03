@@ -14,7 +14,7 @@ using namespace spikestream;
 /*! Constructor */
 NeuronGroupWidget::NeuronGroupWidget(QWidget* parent)  : QWidget(parent) {
 	//Vertical box to organize layout
-	QVBoxLayout* verticalBox = new QVBoxLayout(this, 2, 2);
+	QVBoxLayout* verticalBox = new QVBoxLayout(this);
 
 	//Add button to launch add neurons dialog
 	QPushButton* addNeuronsButton = new QPushButton("Add Neurons");

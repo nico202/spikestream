@@ -8,10 +8,10 @@
 namespace spikestream {
 
     class AnalysesTableView : public QTableView {
-	Q_OBJECT
+		Q_OBJECT
 
 	public:
-	    AnalysesTableView(QAbstractTableModel* model);
+		AnalysesTableView(QWidget* parent, QAbstractTableModel* model);
 	    ~AnalysesTableView();
 	    void resizeHeaders();
 

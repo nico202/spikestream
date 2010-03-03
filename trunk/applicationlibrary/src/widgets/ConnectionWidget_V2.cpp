@@ -13,7 +13,7 @@ using namespace spikestream;
 /*! Constructor */
 ConnectionWidget_V2::ConnectionWidget_V2(QWidget* parent)  : QWidget(parent) {
 	//Vertical box to organize layout
-	QVBoxLayout* verticalBox = new QVBoxLayout(this, 2, 2);
+	QVBoxLayout* verticalBox = new QVBoxLayout(this);
 
 	//Add button to launch add neurons dialog
 	QPushButton* addConnectionsButton = new QPushButton("Add Connections");

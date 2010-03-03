@@ -271,8 +271,9 @@ void LivelinessWidget::initializeAnalysisInfo(){
 	else
 		analysisInfo.setArchiveID(0);
 
-	//Set the type of analysis, 1 corresponds to a state based phi analysis
-	analysisInfo.setAnalysisType(1);
+	//Set the type of analysis, 2 corresponds to a liveliness analysis
+	//FIXME: ACCESS THIS USING A STRING NOT A DATABASE ID
+	analysisInfo.setAnalysisType(2);
 
 	//Set parameters
 	analysisInfo.getParameterMap()["generalization"] = 1.0;

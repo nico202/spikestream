@@ -109,11 +109,11 @@ QVariant LivelinessFullResultsModel::headerData(int section, Qt::Orientation ori
 
 /*! Hides all visible clusters */
 void LivelinessFullResultsModel::hideClusters(){
-	//Hide visible cluster
-	setVisibleCluster(-1);
-
-	//Inform view associated with this model.
-	reset();
+//	//Hide visible cluster
+//	setVisibleCluster(-1);
+//
+//	//Inform view associated with this model.
+//	reset();
 }
 
 

@@ -7,11 +7,6 @@
 //Qt includes
 #include <qgl.h>
 
-//FIXME: DELETE THESE INCLUDES WHEN THIS CLASS IS TIDIED UP!
-#include "RGBColor.h"
-#include <q3progressbar.h>
-#include <vector>
-using namespace std;
 
 namespace spikestream {
 
@@ -23,38 +18,11 @@ namespace spikestream {
 			NetworkViewer_V2(QWidget* parent);
 			~NetworkViewer_V2();
 
-			//FIXME: TEMPORARILY PUBLIC
-			void loadDefaultClippingVolume();
-
-
-			//FIXME: EMPTY METHODS DECLARED FOR BACKWARDS COMPATIBILITY WITH OLD NETWORK VIEWER REMOVE ASAP
-			void addHighlight(unsigned int, RGBColor*) {}
-			void cancelRenderProgress(){}
-			void clearHighlights(){}
-			void deleteConnectionGroup(unsigned int){}
-			void deleteNeuronGroup(unsigned int){}
-			vector<unsigned int>* getConnectionViewVector(){ return &TEMP_VECTOR;}
-			void loadConnectionGroup(unsigned int, bool){}
-			void loadNeuronGroup(unsigned int, bool){}
-			void reloadEverything(){}
-			void setConnectionView(vector<unsigned int>){}
-			void setFullRenderMode(bool){}
-			void setLayerView(vector<unsigned int>){}
-			void setMaxAutoLoadConnGrpSize(unsigned int){}
-			void setNetworkViewerProperties(QWidget*){}
-			void setNeuronConnectionMode(bool, unsigned int, bool, unsigned int){}
-			void setNeuronFilterMode(bool, char, char, bool, bool, bool){}
-			void setRenderDelay(double){}
-			void setRenderProgressBar(Q3ProgressBar*){}
-			void showConnections(bool){}
-			void zoomAboveLayer(unsigned int){}
-			void zoomToLayer(unsigned int){}
-
-			vector<unsigned int> TEMP_VECTOR;
 
 		public slots:
 			void refresh();
 			void reset();
+
 
 		protected:
 			//Methods inherited from QGLWidget
@@ -64,6 +32,7 @@ namespace spikestream {
 
 			//Methods inherited from QWidget
 			void mouseDoubleClickEvent (QMouseEvent * event );
+
 
 		private slots:
 			void moveBackward();
@@ -77,9 +46,9 @@ namespace spikestream {
 			void rotateDown();
 			void rotateLeft();
 			void rotateRight();
-
 			void viewClippingVolume_Horizontal(Box& clipVolume);
 			void viewClippingVolume_Vertical(Box& clipVolume);
+
 
 		private:
 			//=======================  VARIABLES  ========================
@@ -146,6 +115,7 @@ namespace spikestream {
 			void fillRotationMatrix(float angle, float x, float y, float z);
 			unsigned int getSelectedNeuron(GLuint selectBuffer[], int hitCount, int bufferSize);
 			void initialiseCameraParameters();
+			void loadDefaultClippingVolume();
 			void positionCamera();
 			void rotateVector(GLfloat x, GLfloat y, GLfloat z, GLfloat result[]);
 			void rotateXAxis(float angle);
