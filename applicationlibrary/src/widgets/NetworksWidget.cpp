@@ -12,6 +12,7 @@ using namespace spikestream;
 #include <QLabel>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QTimer>
 
 #include <iostream>
 using namespace std;
@@ -50,7 +51,7 @@ NetworksWidget::NetworksWidget(QWidget* parent) : QWidget(parent){
 
 	//Connect to global reload signal
 	connect(Globals::getEventRouter(), SIGNAL(reloadSignal()), this, SLOT(loadNetworkList()), Qt::QueuedConnection);
-	connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(loadNetworkList()), Qt::QueuedConnection);
+	//connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(loadNetworkList()), Qt::QueuedConnection);
 	connect(Globals::getEventRouter(), SIGNAL(networkListChangedSignal()), this, SLOT(loadNetworkList()), Qt::QueuedConnection);
 	connect(this, SIGNAL(networkChanged()), Globals::getEventRouter(), SLOT(networkChangedSlot()), Qt::QueuedConnection);
 }
@@ -110,11 +111,13 @@ void NetworksWidget::deleteNetwork(){
 	if(Globals::networkLoaded() && Globals::getNetwork()->getID() == networkID){
 		Globals::setNetwork(NULL);
 		emit networkChanged();
+		QTimer::singleShot(500, this, SLOT(loadNetworkList()));
 	}
 
 	//Otherwise, just reload the network list
+	//NOTE: USE TIMER TO AVOID DELETING DELETE BUTTON DURING ITS EVENT LOOP.
 	else{
-		loadNetworkList();
+		QTimer::singleShot(500, this, SLOT(loadNetworkList()));
 	}
 }
 

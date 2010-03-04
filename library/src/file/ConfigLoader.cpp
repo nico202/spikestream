@@ -30,8 +30,6 @@ ConfigLoader::ConfigLoader(const QString& fileLocation){
 		setParameter(line);
 	}
 	configFile.close();
-
-	printConfig();
 }
 
 

@@ -22,6 +22,7 @@ bool Globals::rendering = false;
 QString Globals::spikeStreamRoot = "";
 QString Globals::workingDirectory = "";
 unsigned int Globals::timerStart_sec = 0;
+float Globals::vertexSize = 7.5f;
 
 
 /*---------------------------------------------------------------------------------*/
@@ -131,6 +132,13 @@ QString Globals::getSpikeStreamRoot(){
 }
 
 
+/*! Returns the size of vertexes in the 3D Network Viewer.
+	This is a configuration setting. */
+float Globals::getVertexSize(){
+	return vertexSize;
+}
+
+
 /*! Returns the working directory which is opened when loading projects, import files etc. */
 QString Globals::getWorkingDirectory(){
 	return workingDirectory;
@@ -160,6 +168,12 @@ bool Globals::isArchivePlaying() {
 /*! Sets the analysis id. An id of 0 indicates that no analysis is loaded. */
 void Globals::setAnalysisID(const QString& analysisName, unsigned int id){
 	analysisMap[analysisName] = id;
+}
+
+
+/*! Sets the size of vertices in the 3D Network Viewer */
+void Globals::setVertexSize(float vertexSize){
+	Globals::vertexSize = vertexSize;
 }
 
 
