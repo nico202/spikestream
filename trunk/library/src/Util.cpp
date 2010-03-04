@@ -37,6 +37,17 @@ void Util::fillSelectionArray(bool* selectionArray, int arraySize, int selection
 }
 
 
+/*! Converts the QString to a float.
+	Throws a number conversion exception if the conversion fails. */
+float Util::getFloat(const QString& str){
+	bool ok = true;
+	float newFloat = str.toFloat(&ok);
+	if(!ok)
+		throw NumberConversionException("Error converting " + str + " to float.");
+	return newFloat;
+}
+
+
 /*! Converts the QString to an integer.
 	Throws a number conversion exception if the conversion fails. */
 int Util::getInt(const QString& str){

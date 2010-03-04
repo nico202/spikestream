@@ -33,12 +33,14 @@ namespace spikestream {
 			static NetworkDisplay* getNetworkDisplay();
 			static QString getSpikeStreamRoot();
 			static QString getWorkingDirectory();
+			static float getVertexSize();
 			static bool isArchivePlaying();
 			static bool isAnalysisLoaded(const QString& analysisName);
 			static bool isRendering();
 			static bool networkLoaded();
 			static void setAnalysisID(const QString& analysisName, unsigned int id);
 			static void setArchivePlaying(bool archivePlaying);
+			static void setVertexSize(float vertexSize);
 			static void startTimer();
 			static unsigned int timeElapsed();
 
@@ -91,6 +93,9 @@ namespace spikestream {
 
 			/*! Is archive playback in progress */
 			static bool archivePlaying;
+
+			/*! Size of vertices in the 3D Network Viewer */
+			static float vertexSize;
 
 			//======================  METHODS  ============================
 			static void setAnalysisDao(AnalysisDao* analysisDao);

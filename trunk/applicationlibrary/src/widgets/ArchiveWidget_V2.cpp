@@ -42,7 +42,7 @@ ArchiveWidget_V2::ArchiveWidget_V2(QWidget* parent) : QWidget(parent){
     verticalBox->addStretch(1);
 
     //Listen for changes in the network and archive
-    connect(Globals::getEventRouter(), SIGNAL(archiveChangedSignal()), this, SLOT(loadArchiveList()));
+	//connect(Globals::getEventRouter(), SIGNAL(archiveChangedSignal()), this, SLOT(loadArchiveList()));
     connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(loadArchiveList()));
 
     //Inform other classes when a different archive is loaded
@@ -111,9 +111,10 @@ void ArchiveWidget_V2::deleteArchive(){
     if(Globals::archiveLoaded() && Globals::getArchive()->getID() == archiveID){
 		Globals::setArchive(NULL);
 		emit archiveChanged();
+		QTimer::singleShot(500, this, SLOT(loadArchiveList()));
     }
     else{//Otherwise, just reload the archive list
-		loadArchiveList();
+		QTimer::singleShot(500, this, SLOT(loadArchiveList()));
     }
 }
 
@@ -183,12 +184,14 @@ void ArchiveWidget_V2::loadArchiveList(){
 
 		//Create the load button and name it with the object id so we can tell which button was invoked
 		QPushButton* loadButton = new QPushButton("Load");
+		loadButton->setMinimumHeight(25);
 		loadButton->setObjectName(QString::number(archInfo.getID()));
 		connect ( loadButton, SIGNAL(clicked()), this, SLOT( loadArchive() ) );
 
 		//Create the delete button and name it with the object id so we can tell which button was invoked
 		QPushButton* deleteButton = new QPushButton("Delete");
 		deleteButton->setObjectName(QString::number(archInfo.getID()));
+		deleteButton->setMinimumHeight(25);
 		connect ( deleteButton, SIGNAL(clicked()), this, SLOT( deleteArchive() ) );
 
 		//Set labels and buttons depending on whether it is the current archive
@@ -213,7 +216,7 @@ void ArchiveWidget_V2::loadArchiveList(){
 		gridLayout->addWidget(descriptionLabel, i, descCol);
 		gridLayout->addWidget(loadButton, i, loadButCol);
 		gridLayout->addWidget(deleteButton, i, delButCol);
-		gridLayout->setRowMinimumHeight(i, 20);
+		//gridLayout->setRowMinimumHeight(i, 20);
     }
 
 
@@ -417,7 +420,7 @@ void ArchiveWidget_V2::loadArchive(ArchiveInfo& archiveInfo){
     Globals::setArchive(newArchive);
 
 
-    //Inform classes about the change - this should trigger reloading of archive list via event router
+	//Inform classes about the change
     emit archiveChanged();
 
     //Set the time step labels
@@ -429,6 +432,9 @@ void ArchiveWidget_V2::loadArchive(ArchiveInfo& archiveInfo){
 
     //Nothing has yet been displayed of the archive firing patterns
     archiveOpen = false;
+
+	//Schedule reloading of archive after event loop has completed
+	QTimer::singleShot(500, this, SLOT(loadArchiveList()));
 }
 
 
@@ -474,7 +480,8 @@ void ArchiveWidget_V2::reset(){
     archiveInfoMap.clear();
 
     //Disable the transport controls
-    toolBar->setEnabled(false);
+	if(!Globals::archiveLoaded())
+		toolBar->setEnabled(false);
 }
 
 

@@ -105,6 +105,15 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow(){
 		exit(1);
 	}
 
+	//Store configuration settings in Globals
+	try{
+		Globals::setVertexSize( Util::getFloat( configLoader->getParameter("vertex_size") ) );
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<ex.getMessage();
+		exit(1);
+	}
+
 	//Get the default location for saving and loading databases
 	Globals::setWorkingDirectory(configLoader->getParameter("default_file_location"));
 
@@ -254,7 +263,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow(){
 	QPixmap iconPixmap(Globals::getSpikeStreamRoot() + "/images/spikestream_icon_64.png" );
 	setWindowIcon(iconPixmap);
 	setCentralWidget( mainSplitterWidget );
-	//setWindowState(Qt::WindowMaximized);
+	setWindowState(Qt::WindowMaximized);
 
 	//Get rid of splash screen if it is showing
 	if(splashScreen){
@@ -327,7 +336,7 @@ void SpikeStreamMainWindow::clearDatabases(){
 
 	//Inform other classes about the change
 	Globals::setNetwork(NULL);
-	Globals::getEventRouter()->networkChangedSlot();
+	Globals::getEventRouter()->reloadSlot();
 }
 
 

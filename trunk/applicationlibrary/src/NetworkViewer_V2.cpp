@@ -577,7 +577,7 @@ void NetworkViewer_V2::drawNeurons(){
     QHash<unsigned int, RGBColor*> neuronColorMap = netDisplay->getNeuronColorMap();
 
     //Set the size of points in OpenGL
-    glPointSize(7.5f);
+	glPointSize(Globals::getVertexSize());
 
 	glInitNames();
 
