@@ -525,8 +525,6 @@ void AleksanderNetworksBuilder::reset(){
 /*-------             PRIVATE METHODS              -------*/
 /*--------------------------------------------------------*/
 
-
-
 /*! Adds a series of progressively interconnected 4 neuron networks with associated archives */
 void AleksanderNetworksBuilder::add4NeuronBasicNetwork(const QString& networkName, const QString& networkDescription){
 	//Reset class before adding network

@@ -105,6 +105,10 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow(){
 		exit(1);
 	}
 
+	//Create Database manager
+	databaseManager = new DatabaseManager(Globals::getNetworkDao()->getDBInfo(), Globals::getArchiveDao()->getDBInfo(), Globals::getAnalysisDao()->getDBInfo());
+	progressDialog = NULL;
+
 	//Store configuration settings in Globals
 	try{
 		Globals::setVertexSize( Util::getFloat( configLoader->getParameter("vertex_size") ) );
@@ -263,7 +267,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow(){
 	QPixmap iconPixmap(Globals::getSpikeStreamRoot() + "/images/spikestream_icon_64.png" );
 	setWindowIcon(iconPixmap);
 	setCentralWidget( mainSplitterWidget );
-	setWindowState(Qt::WindowMaximized);
+	//setWindowState(Qt::WindowMaximized);
 
 	//Get rid of splash screen if it is showing
 	if(splashScreen){
@@ -280,6 +284,8 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow(){
 SpikeStreamMainWindow::~SpikeStreamMainWindow(){
 	//Clean up globals - everything stored in globals is cleaned up by globals
 	Globals::cleanUp();
+
+	delete databaseManager;
 }
 
 
@@ -290,6 +296,18 @@ SpikeStreamMainWindow::~SpikeStreamMainWindow(){
 /*! Displays brief information about the application. */
 void SpikeStreamMainWindow::about(){
 	QMessageBox::about( this, "About", "SpikeStream\nVersion 0.1 beta\nCreated by David Gamez: david@davidgamez.eu");
+}
+
+
+/*! Called when the database manager has finished its task */
+void SpikeStreamMainWindow::databaseManagerFinished(){
+	if(databaseManager->getTaskID() == DatabaseManager::CLEAR_DATABASES_TASK){
+		//Inform other classes about the change
+		Globals::setNetwork(NULL);
+		Globals::getEventRouter()->reloadSlot();
+		progressDialog->hide();
+		delete progressDialog;
+	}
 }
 
 
@@ -331,12 +349,12 @@ void SpikeStreamMainWindow::clearDatabases(){
 	if(ret != QMessageBox::Ok)
 		return;
 
-	//Delete all networks
-	Globals::getNetworkDao()->deleteAllNetworks();
-
-	//Inform other classes about the change
-	Globals::setNetwork(NULL);
-	Globals::getEventRouter()->reloadSlot();
+	//Instruct database manager to delete all networks
+	progressDialog = new QProgressDialog("Clearing databases, please wait", "", 0, 0, this);
+	progressDialog->setMinimumDuration(1000);
+	databaseManager->prepareClearDatabases();
+	connect(databaseManager, SIGNAL(finished()), this, SLOT(databaseManagerFinished()));
+	databaseManager->start();
 }
 
 
@@ -345,6 +363,11 @@ void SpikeStreamMainWindow::clearDatabases(){
 	Could run a check on whether the user really wants to quit.
 	However, this is not needed at present since everthing is stored in the database. */
 void SpikeStreamMainWindow::closeEvent( QCloseEvent* ce ){
+	if(databaseManager->isRunning()){
+		qCritical()<<"Database manager is still running, it is recommended that you wait for it to complete";
+		return;
+	}
+
 	ce->accept();
 }
 

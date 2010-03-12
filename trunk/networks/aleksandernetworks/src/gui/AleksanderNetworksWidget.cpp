@@ -84,40 +84,40 @@ AleksanderNetworksWidget::~AleksanderNetworksWidget(){
 void AleksanderNetworksWidget::addNetwork(){
 	QString netDesc = sender()->objectName();
 	try{
-	if(netDesc == "4 neurons. A<->B; C<->D. AND")
-		networkBuilder->add4NeuronNetwork1(getNetworkName(), netDesc);
+		if(netDesc == "4 neurons. A<->B; C<->D. AND")
+			networkBuilder->add4NeuronNetwork1(getNetworkName(), netDesc);
 
-	else if(netDesc == "4 neurons. A<->B; A->C; C<->D. AND")
-		networkBuilder->add4NeuronNetwork2_AND(getNetworkName(), netDesc);
+		else if(netDesc == "4 neurons. A<->B; A->C; C<->D. AND")
+			networkBuilder->add4NeuronNetwork2_AND(getNetworkName(), netDesc);
 
-	else if(netDesc == "4 neurons. A<->B; A->C; C<->D. XOR")
-		networkBuilder->add4NeuronNetwork2_XOR(getNetworkName(), netDesc);
+		else if(netDesc == "4 neurons. A<->B; A->C; C<->D. XOR")
+			networkBuilder->add4NeuronNetwork2_XOR(getNetworkName(), netDesc);
 
-	else if(netDesc == "4 neurons. A<->B; A<->C; C<->D. AND")
-		networkBuilder->add4NeuronNetwork3_AND(getNetworkName(), netDesc);
+		else if(netDesc == "4 neurons. A<->B; A<->C; C<->D. AND")
+			networkBuilder->add4NeuronNetwork3_AND(getNetworkName(), netDesc);
 
-	else if(netDesc == "4 neurons. A<->B; A<->C; C<->D. XOR")
-		networkBuilder->add4NeuronNetwork3_XOR(getNetworkName(), netDesc);
+		else if(netDesc == "4 neurons. A<->B; A<->C; C<->D. XOR")
+			networkBuilder->add4NeuronNetwork3_XOR(getNetworkName(), netDesc);
 
-	else if(netDesc == "4 neurons. A<->B; A<->C; B<->D; C<->D. AND")
-		networkBuilder->add4NeuronNetwork4_AND(getNetworkName(), netDesc);
+		else if(netDesc == "4 neurons. A<->B; A<->C; B<->D; C<->D. AND")
+			networkBuilder->add4NeuronNetwork4_AND(getNetworkName(), netDesc);
 
-	else if(netDesc == "4 neurons. A<->B; A<->C; B<->D; C<->D. XOR")
-		networkBuilder->add4NeuronNetwork4_XOR(getNetworkName(), netDesc);
+		else if(netDesc == "4 neurons. A<->B; A<->C; B<->D; C<->D. XOR")
+			networkBuilder->add4NeuronNetwork4_XOR(getNetworkName(), netDesc);
 
-	else if(netDesc == "4 neurons. A<->B; A<->C; A<->D; B<->C; B<->D; C<->D. AND")
-		networkBuilder->add4NeuronNetwork5_AND(getNetworkName(), netDesc);
+		else if(netDesc == "4 neurons. A<->B; A<->C; A<->D; B<->C; B<->D; C<->D. AND")
+			networkBuilder->add4NeuronNetwork5_AND(getNetworkName(), netDesc);
 
-	else if(netDesc == "4 neurons. A<->B; A<->C; A<->D; B<->C; B<->D; C<->D. XOR")
-		networkBuilder->add4NeuronNetwork5_XOR(getNetworkName(), netDesc);
+		else if(netDesc == "4 neurons. A<->B; A<->C; A<->D; B<->C; B<->D; C<->D. XOR")
+			networkBuilder->add4NeuronNetwork5_XOR(getNetworkName(), netDesc);
 
-	else
-		throw SpikeStreamException("Network descrption not recognized: " + netDesc);
+		else
+			throw SpikeStreamException("Network descrption not recognized: " + netDesc);
 
-	Globals::getEventRouter()->reloadSlot();
+		Globals::getEventRouter()->reloadSlot();
 	}
 	catch(SpikeStreamException& ex){
-	qCritical()<<ex.getMessage();
+		qCritical()<<ex.getMessage();
 	}
 }
 
@@ -125,7 +125,7 @@ void AleksanderNetworksWidget::addNetwork(){
 
 QString AleksanderNetworksWidget::getNetworkName(){
 	if(networkName->text() == "")
-	return QString("Unnamed");
+		return QString("Unnamed");
 	return networkName->text();
 }
 
