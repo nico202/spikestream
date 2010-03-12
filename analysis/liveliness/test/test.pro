@@ -26,7 +26,7 @@ win32 {
 
 QT += sql
 
-CONFIG += release console qtestlib
+CONFIG += debug console qtestlib
 
 #----------------------------------------------#
 #---            Test Files                  ---#

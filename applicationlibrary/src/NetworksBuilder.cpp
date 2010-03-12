@@ -7,6 +7,8 @@ using namespace spikestream;
 
 /*! Constructor */
 NetworksBuilder::NetworksBuilder(){
+	networkDao = NULL;
+	archiveDao = NULL;
 }
 
 
@@ -20,23 +22,23 @@ void NetworksBuilder::addTraining(unsigned int neuronID, QString trainingStr, bo
 	//Create arry of appropriate length
 	int arrLen;
 	if(trainingStr.length() % 8 == 0)
-	arrLen = trainingStr.length() / 8;
+		arrLen = trainingStr.length() / 8;
 	else
-	arrLen = trainingStr.length() / 8 + 1;
+		arrLen = trainingStr.length() / 8 + 1;
 	unsigned char byteArr[arrLen];
 
 	//Initialize array
 	for(int i=0; i<arrLen; ++i)
-	byteArr[i] = 0;
+		byteArr[i] = 0;
 
 	//Set bits corresponding to 1's in byte string
 	for(int i=0; i<trainingStr.length(); ++i){
-	if(trainingStr[i] == '1')
-		byteArr[i/8] |= 1<<(i % 8);
+		if(trainingStr[i] == '1')
+			byteArr[i/8] |= 1<<(i % 8);
 	}
 
 	//Add training to database
-	Globals::getNetworkDao()->addWeightlessNeuronTrainingPattern(neuronID, byteArr, output, arrLen);
+	networkDao->addWeightlessNeuronTrainingPattern(neuronID, byteArr, output, arrLen);
 }
 
 
@@ -54,10 +56,23 @@ void NetworksBuilder::runThread(NetworkDaoThread& thread){
 	thread.start();
 	thread.wait();
 	if(thread.isError()){
-	throw SpikeStreamException(thread.getErrorMessage());
+		throw SpikeStreamException(thread.getErrorMessage());
 	}
 }
 
+
+/*! Clears the error state of the class. */
+void NetworksBuilder::clearError(){
+	error = false;
+	errorMessage = "";
+}
+
+
+/*! Sets the class in an error state. Used when running as a thread. */
+void NetworksBuilder::setError(const QString &errMsg){
+	errorMessage = errMsg;
+	error = true;
+}
 
 
 

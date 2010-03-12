@@ -13,7 +13,8 @@ SUBDIRS += analysis/statebasedphi \
 
 #================  NETWORKS PLUGINS  =================
 SUBDIRS += networks/tononinetworks \
-			networks/aleksandernetworks
+			networks/aleksandernetworks \
+			networks/alekgameznets2
 	
 	
 #================  INSTALLATION  =====================

@@ -23,13 +23,14 @@ win32{
 INCLUDEPATH += src \
 				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src \
 				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src/analysis \
+				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src/database \
 				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src/exceptions \
 				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src/nrm \
 				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src/dialogs \
 				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src/widgets \
 				$${SPIKESTREAM_ROOT_DIR}/library/include
 
-CONFIG += release thread exceptions
+CONFIG += console debug thread exceptions
 
 QT += xml opengl sql
 

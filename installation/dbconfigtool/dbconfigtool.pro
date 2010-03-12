@@ -23,7 +23,7 @@ win32{
 INCLUDEPATH += src  \
 				$${SPIKESTREAM_ROOT_DIR}/library/include
 
-CONFIG += release exceptions
+CONFIG += debug exceptions
 
 QT += sql xml
 

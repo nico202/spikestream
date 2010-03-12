@@ -43,9 +43,9 @@ win32 {
 #----------------------------------------------#
 INCLUDEPATH += src \
 				src/analysis \
+				src/database \
 				src/exceptions \
 				src/nrm \
-				src/delegates \
 				src/dialogs \
 				src/models \
 				src/views \
@@ -56,9 +56,16 @@ win32 {
 }
 
 
-CONFIG += release thread exceptions
+CONFIG += debug thread exceptions
 
 QT += xml opengl sql
+
+
+#----------------------------------------------#
+#---          database folder               ---#
+#----------------------------------------------#
+HEADERS += src/database/DatabaseManager.h
+SOURCES += src/database/DatabaseManager.cpp
 
 
 #----------------------------------------------#
