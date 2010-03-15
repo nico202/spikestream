@@ -39,6 +39,9 @@ void PartitionedNetworksBuilder::prepareAddNetworks(const QString& networkName, 
 void PartitionedNetworksBuilder::run(){
 	clearError();
 
+	//Seed the random number generator
+	srand(123456789);
+
 	// Set up the network and archive daos within the new thread
 	networkDao = new NetworkDao(Globals::getNetworkDao()->getDBInfo());
 	archiveDao = new ArchiveDao(Globals::getArchiveDao()->getDBInfo());
@@ -256,9 +259,6 @@ void PartitionedNetworksBuilder::addTraining(unsigned int percentInputs){
 
 /*! Returns a string with the specified percentage of firing neurons selected at random */
 QString PartitionedNetworksBuilder::getFiringNeuronStr(unsigned int percentNeurons){
-	//Seed the random number generator
-	srand(123456789);
-
 	//Fill map with indexes of selected neurons
 	int numNeurs = (int) rint( 12.0 * ((double)percentNeurons / 100.0 ) );
 	QHash<unsigned int, bool> selectionMap;
@@ -280,10 +280,7 @@ QList<unsigned int> PartitionedNetworksBuilder::getRandomFromNeuronIDs(unsigned 
 	if(numFromCons > neuronMap.size())
 		throw SpikeStreamException("Trying to connect to more unique neurons than exist in network.");
 
-	//Seed the random number generator
-	srand(123456789);
 	QHash<unsigned int, bool> selectionMap;
-
 	while (selectionMap.size() < numFromCons){
 		//Fill map with indexes of selected neurons. Connect 1st 6 neurons together and second 6 neurons together
 		unsigned int tmpNeurID;

@@ -35,9 +35,13 @@ win32{
 
 HEADERS = src/gui/AlekGam2NetworksWidget.h \
 			src/model/FullyConnectedNetworksBuilder.h \
-			src/model/PartitionedNetworksBuilder.h
+			src/model/PartitionedNetworksBuilder.h \
+			src/model/ModularNetworksBuilder.h \
+			src/model/SensoryNetworksBuilder.h
 
 SOURCES = src/gui/AlekGam2NetworksWidget.cpp \
 			src/model/FullyConnectedNetworksBuilder.cpp \
-			src/model/PartitionedNetworksBuilder.cpp
+			src/model/PartitionedNetworksBuilder.cpp \
+			src/model/ModularNetworksBuilder.cpp \
+			src/model/SensoryNetworksBuilder.cpp
 
