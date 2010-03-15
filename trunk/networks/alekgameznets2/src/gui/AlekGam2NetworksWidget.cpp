@@ -2,6 +2,8 @@
 #include "AlekGam2NetworksWidget.h"
 #include "FullyConnectedNetworksBuilder.h"
 #include "PartitionedNetworksBuilder.h"
+#include "ModularNetworksBuilder.h"
+#include "SensoryNetworksBuilder.h"
 #include "Globals.h"
 #include "SpikeStreamException.h"
 using namespace spikestream;
@@ -43,12 +45,14 @@ AlekGam2NetworksWidget::AlekGam2NetworksWidget(){
 
 	newButton = addNetworkButton(gridLayout, "Set of 4 partitioned 12 neuron networks with different training");
 	connect (newButton, SIGNAL(clicked()), this, SLOT(addNetwork()));
+
+	newButton = addNetworkButton(gridLayout, "Set of 4 modular 12 neuron networks with different training");
+	connect (newButton, SIGNAL(clicked()), this, SLOT(addNetwork()));
 }
 
 
 /*! Destructor */
 AlekGam2NetworksWidget::~AlekGam2NetworksWidget(){
-
 }
 
 
@@ -80,6 +84,30 @@ void AlekGam2NetworksWidget::addNetwork(){
 			stop = false;
 			partitionedNetBuilder->prepareAddNetworks(networkName->text(), netDesc, &stop);
 			partitionedNetBuilder->start();
+		}
+		else if(netDesc == "Set of 4 modular 12 neuron networks with different training"){
+			ModularNetworksBuilder* modularNetBuilder = new ModularNetworksBuilder();
+			networksBuilder = modularNetBuilder;
+			progressDialog = new QProgressDialog("Building modular network", "Cancel", 0, 100, this);
+			progressDialog->setWindowModality(Qt::WindowModal);
+			progressDialog->setMinimumDuration(2000);
+			connect(modularNetBuilder, SIGNAL( progress(int, int) ), this, SLOT( updateProgress(int, int) ) );
+			connect(modularNetBuilder, SIGNAL( finished() ), this, SLOT( threadFinished() ) );
+			stop = false;
+			modularNetBuilder->prepareAddNetworks(networkName->text(), netDesc, &stop);
+			modularNetBuilder->start();
+		}
+		else if(netDesc == "Set of 4 sensory 12 neuron networks with different training"){
+			SensoryNetworksBuilder* sensoryNetBuilder = new SensoryNetworksBuilder();
+			networksBuilder = sensoryNetBuilder;
+			progressDialog = new QProgressDialog("Building sensory network", "Cancel", 0, 100, this);
+			progressDialog->setWindowModality(Qt::WindowModal);
+			progressDialog->setMinimumDuration(2000);
+			connect(sensoryNetBuilder, SIGNAL( progress(int, int) ), this, SLOT( updateProgress(int, int) ) );
+			connect(sensoryNetBuilder, SIGNAL( finished() ), this, SLOT( threadFinished() ) );
+			stop = false;
+			sensoryNetBuilder->prepareAddNetworks(networkName->text(), netDesc, &stop);
+			sensoryNetBuilder->start();
 		}
 		else {
 			throw SpikeStreamException("Network descrption not recognized: " + netDesc);
