@@ -1,5 +1,5 @@
 //SpikeStream includes
-#include "ModularNetworksBuilder.h"
+#include "SensoryNetworksBuilder.h"
 #include "Globals.h"
 #include "SpikeStreamException.h"
 #include "Util.h"
@@ -15,7 +15,7 @@ using namespace std;
 
 
 /*! Constructor  */
-ModularNetworksBuilder::ModularNetworksBuilder() : NetworksBuilder(){
+SensoryNetworksBuilder::SensoryNetworksBuilder() : NetworksBuilder(){
 
 	//Create array to store connections for each neuron to add weightless indexes later when we have the connection id
 	conListArray = new QList<Connection*>[12];
@@ -23,7 +23,7 @@ ModularNetworksBuilder::ModularNetworksBuilder() : NetworksBuilder(){
 
 
 /*! Destructor */
-ModularNetworksBuilder::~ModularNetworksBuilder(){
+SensoryNetworksBuilder::~SensoryNetworksBuilder(){
 	delete [] conListArray;
 }
 
@@ -33,7 +33,7 @@ ModularNetworksBuilder::~ModularNetworksBuilder(){
 /*--------------------------------------------------------*/
 
 /*! Adds all of the fully connected networks */
-void ModularNetworksBuilder::prepareAddNetworks(const QString& networkName, const QString& networkDescription, const bool* stop){
+void SensoryNetworksBuilder::prepareAddNetworks(const QString& networkName, const QString& networkDescription, const bool* stop){
 	this->networkName = networkName;
 	this->networkDescription = networkDescription;
 	this->stop = stop;
@@ -41,7 +41,7 @@ void ModularNetworksBuilder::prepareAddNetworks(const QString& networkName, cons
 
 
 /*! Run method inherited from QThread */
-void ModularNetworksBuilder::run(){
+void SensoryNetworksBuilder::run(){
 	clearError();
 
 	//Seed the random number generator
@@ -101,7 +101,7 @@ void ModularNetworksBuilder::run(){
 /*--------------------------------------------------------*/
 
 /*! Resets the class and adds the basic 12 neuron network along with the firing patterns */
-void ModularNetworksBuilder::addBasicNetwork(const QString& networkName, const QString& networkDescription){
+void SensoryNetworksBuilder::addBasicNetwork(const QString& networkName, const QString& networkDescription){
 	//Reset this class
 	reset();
 
@@ -114,18 +114,18 @@ void ModularNetworksBuilder::addBasicNetwork(const QString& networkName, const Q
 	QHash<QString, double> paramMap;
 	NeuronGroup neuronGroup(NeuronGroupInfo(0, "Neuron group 1", "Main neuron group", paramMap, 2));
 	QList<Neuron*> neuronList;
-	neuronList.append(neuronGroup.addNeuron(1, 5, 1));
+	neuronList.append(neuronGroup.addNeuron(3, 1, 1));
+	neuronList.append(neuronGroup.addNeuron(5, 2, 1));
+	neuronList.append(neuronGroup.addNeuron(5, 7, 1));
+	neuronList.append(neuronGroup.addNeuron(3, 8, 1));
+	neuronList.append(neuronGroup.addNeuron(1, 7, 1));
+	neuronList.append(neuronGroup.addNeuron(1, 2, 1));
+	neuronList.append(neuronGroup.addNeuron(3, 3, 1));
+	neuronList.append(neuronGroup.addNeuron(4, 4, 1));
+	neuronList.append(neuronGroup.addNeuron(4, 5, 1));
+	neuronList.append(neuronGroup.addNeuron(3, 6, 1));
 	neuronList.append(neuronGroup.addNeuron(2, 5, 1));
-	neuronList.append(neuronGroup.addNeuron(2, 6, 1));
-	neuronList.append(neuronGroup.addNeuron(1, 6, 1));
-	neuronList.append(neuronGroup.addNeuron(5, 1, 1));
-	neuronList.append(neuronGroup.addNeuron(6, 2, 1));
-	neuronList.append(neuronGroup.addNeuron(5, 3, 1));
-	neuronList.append(neuronGroup.addNeuron(4, 2, 1));
-	neuronList.append(neuronGroup.addNeuron(8, 5, 1));
-	neuronList.append(neuronGroup.addNeuron(9, 5, 1));
-	neuronList.append(neuronGroup.addNeuron(9, 6, 1));
-	neuronList.append(neuronGroup.addNeuron(8, 6, 1));
+	neuronList.append(neuronGroup.addNeuron(2, 4, 1));
 
 	//Add the neuron group
 	DBInfo netDBInfo = networkDao->getDBInfo();
@@ -145,44 +145,30 @@ void ModularNetworksBuilder::addBasicNetwork(const QString& networkName, const Q
 
 
 /*! Adds the connections */
-void ModularNetworksBuilder::addConnections(){
+void SensoryNetworksBuilder::addConnections(){
 	//Build the connection group that is to be added
 	QHash<QString, double> paramMap;
 	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neuronGroupID, neuronGroupID,  paramMap, 2);
 	ConnectionGroup connGrp(connGrpInfo);
 
 	/* Add connections
-		Each neuron receives connections from all neurons within the same cluster */
+		Center cluster is fully connected together; Each neuron at the periphery has a single connection
+		to a neuron in the center cluster. */
 
-	//FIRST MODULE
-	//Add connections within the module
-	for(unsigned int toNeurIndx = 1; toNeurIndx <=4; ++ toNeurIndx){
-		for(unsigned int fromNeurIndx = 1; fromNeurIndx <=4; ++fromNeurIndx)
+	//Add connections within the center cluster
+	for(unsigned int toNeurIndx = 7; toNeurIndx <=12; ++ toNeurIndx){
+		for(unsigned int fromNeurIndx = 7; fromNeurIndx <=12; ++fromNeurIndx)
 			if(fromNeurIndx != toNeurIndx)
 				conListArray[toNeurIndx-1].append( connGrp.addConnection( new Connection(neuronMap[fromNeurIndx], neuronMap[toNeurIndx],  0,  0,  0) ) );
 	}
-	//Add single connection from other module
-	conListArray[3-1].append( connGrp.addConnection( new Connection(neuronMap[12], neuronMap[3],  0,  0,  0) ) );
 
-	//SECOND MODULE
-	//Add connections within the module
-	for(unsigned int toNeurIndx = 5; toNeurIndx <=8; ++ toNeurIndx){
-		for(unsigned int fromNeurIndx = 5; fromNeurIndx <=8; ++fromNeurIndx)
-			if(fromNeurIndx != toNeurIndx)
-				conListArray[toNeurIndx-1].append( connGrp.addConnection( new Connection(neuronMap[fromNeurIndx], neuronMap[toNeurIndx],  0,  0,  0) ) );
-	}
-	//Add single connection from other module
-	conListArray[8-1].append( connGrp.addConnection( new Connection(neuronMap[1], neuronMap[8],  0,  0,  0) ) );
-
-	//THIRD MODULE
-	//Add connections within the module
-	for(unsigned int toNeurIndx = 9; toNeurIndx <=12; ++ toNeurIndx){
-		for(unsigned int fromNeurIndx = 9; fromNeurIndx <=12; ++fromNeurIndx)
-			if(fromNeurIndx != toNeurIndx)
-				conListArray[toNeurIndx-1].append( connGrp.addConnection( new Connection(neuronMap[fromNeurIndx], neuronMap[toNeurIndx],  0,  0,  0) ) );
-	}
-	//Add single connection from other module
-	conListArray[10-1].append( connGrp.addConnection( new Connection(neuronMap[6], neuronMap[10],  0,  0,  0) ) );
+	//Add connections from periphery to center
+	conListArray[7-1].append( connGrp.addConnection( new Connection(neuronMap[1], neuronMap[7],  0,  0,  0) ) );
+	conListArray[8-1].append( connGrp.addConnection( new Connection(neuronMap[2], neuronMap[8],  0,  0,  0) ) );
+	conListArray[9-1].append( connGrp.addConnection( new Connection(neuronMap[3], neuronMap[9],  0,  0,  0) ) );
+	conListArray[10-1].append( connGrp.addConnection( new Connection(neuronMap[4], neuronMap[10],  0,  0,  0) ) );
+	conListArray[11-1].append( connGrp.addConnection( new Connection(neuronMap[5], neuronMap[11],  0,  0,  0) ) );
+	conListArray[12-1].append( connGrp.addConnection( new Connection(neuronMap[6], neuronMap[12],  0,  0,  0) ) );
 
 	//Add connection group to the database
 	addConnectionGroup(networkID, connGrp);
@@ -197,49 +183,65 @@ void ModularNetworksBuilder::addConnections(){
 
 
 /*! Adds the firing patterns for the network */
-void ModularNetworksBuilder::addFiringPatterns(){
+void SensoryNetworksBuilder::addFiringPatterns(){
 	//Create archive
-	ArchiveInfo archiveInfo(0, networkID, QDateTime::currentDateTime().toTime_t(), "0,1,2,3 or 4 randomly selected neurons firing per module");
+	ArchiveInfo archiveInfo(0, networkID, QDateTime::currentDateTime().toTime_t(), "Combinations of center and perhiphery neurons firing.");
 	archiveDao->addArchive(archiveInfo);
 
 	//First firing pattern has 0 neurons firing
-	archiveDao->addArchiveData(archiveInfo.getID(), 1, "");//0%
+	archiveDao->addArchiveData(archiveInfo.getID(), 1, "");
 
-	//Second firing pattern has 1 randomly selected neuron firing in each module
+	//Second firing pattern has 50% of center neurons firing
 	QString firingStr = "";
-	firingStr += QString::number(neuronMap[rand() % 4 + 1]) + ",";
-	firingStr += QString::number(neuronMap[rand() % 4 + 5]) + ",";
-	firingStr += QString::number(neuronMap[rand() % 4 + 9]);
+	QHash<unsigned int, bool> selectionMap;
+	while(selectionMap.size() < 3){
+		selectionMap[ neuronMap[rand() % 6 + 7] ] = true;
+	}
+	for(QHash<unsigned int, bool>::iterator iter = selectionMap.begin(); iter != selectionMap.end(); ++iter)
+		firingStr += QString::number(iter.key()) + ",";
+	firingStr.truncate(firingStr.length() - 1);
 	archiveDao->addArchiveData(archiveInfo.getID(), 2, firingStr);
 
-	//Third firing pattern has 2 randomly selected neurons firing in each module
-	firingStr = QString::number(neuronMap[rand() % 2 + 1]) + "," + QString::number(neuronMap[rand() % 2 + 3]) + ",";
-	firingStr += QString::number(neuronMap[rand() % 2 + 5]) + "," + QString::number(neuronMap[rand() % 2 + 7]) + ",";
-	firingStr += QString::number(neuronMap[rand() % 2 + 9]) + "," + QString::number(neuronMap[rand() % 2 + 11]);
+	//Third firing pattern has 50% of peripheral neurons firing
+	firingStr = "";
+	selectionMap.clear();
+	while(selectionMap.size() < 3){
+		selectionMap[ neuronMap[rand() % 6 + 1] ] = true;
+	}
+	for(QHash<unsigned int, bool>::iterator iter = selectionMap.begin(); iter != selectionMap.end(); ++iter)
+		firingStr += QString::number(iter.key()) + ",";
+	firingStr.truncate(firingStr.length() - 1);
 	archiveDao->addArchiveData(archiveInfo.getID(), 3, firingStr);
 
-	//Fourth firing pattern has 1 randomly selected neuron that does NOT fire in each module
-	unsigned int notFire1 = rand() % 4 + 1, notFire2 =  rand() % 4 + 5, notFire3 =  rand() % 4 + 11;
+	//Fourth firing pattern has all center neurons firing and periphery quiescent.
 	firingStr = "";
-	for(unsigned int neurIndx = 1; neurIndx <= 12; ++neurIndx){
-		if(neurIndx != notFire1 && neurIndx != notFire2 && neurIndx != notFire3)
-			firingStr += QString::number(neuronMap[neurIndx]) + ",";
-	}
-	firingStr.truncate(firingStr.length() - 1);
+	for(unsigned int neurIndx = 7; neurIndx <=11; ++neurIndx)
+		firingStr += QString::number(neuronMap[neurIndx]) + ",";
+	firingStr += QString::number(neuronMap[12]);
 	archiveDao->addArchiveData(archiveInfo.getID(), 4, firingStr);
 
-	//Fifth firing pattern has all neurons firing
+	//Fifth firing pattern has all perphery neurons firing and center quiescent.
 	firingStr = "";
-	for(unsigned int neurIndx = 1; neurIndx <= 12; ++neurIndx){
+	for(unsigned int neurIndx = 1; neurIndx <=5; ++neurIndx)
 		firingStr += QString::number(neuronMap[neurIndx]) + ",";
-	}
-	firingStr.truncate(firingStr.length() - 1);
+	firingStr += QString::number(neuronMap[6]);
 	archiveDao->addArchiveData(archiveInfo.getID(), 5, firingStr);
+
+	//Sixth firing pattern has 50% neurons firing at random
+	firingStr = "";
+	selectionMap.clear();
+	while(selectionMap.size() < 6){
+		selectionMap[ neuronMap[rand() % 12 + 1] ] = true;
+	}
+	for(QHash<unsigned int, bool>::iterator iter = selectionMap.begin(); iter != selectionMap.end(); ++iter)
+		firingStr += QString::number(iter.key()) + ",";
+	firingStr.truncate(firingStr.length() - 1);
+	archiveDao->addArchiveData(archiveInfo.getID(), 6, firingStr);
 }
 
 
 /*! Adds training to the network. */
-void ModularNetworksBuilder::addTraining(unsigned int percentInputs){
+void SensoryNetworksBuilder::addTraining(unsigned int percentInputs){
 
 	//Neurons have different numbers of connections so work through them in turn
 	for(unsigned int toNeurIndx = 1; toNeurIndx <=12; ++toNeurIndx){
@@ -291,7 +293,7 @@ void ModularNetworksBuilder::addTraining(unsigned int percentInputs){
 
 
 /*! Resets this class, except for the firing patterns */
-void ModularNetworksBuilder::reset(){
+void SensoryNetworksBuilder::reset(){
 	networkID = 0;
 	neuronGroupID = 0;
 	neuronMap.clear();

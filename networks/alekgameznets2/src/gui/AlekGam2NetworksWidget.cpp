@@ -48,6 +48,9 @@ AlekGam2NetworksWidget::AlekGam2NetworksWidget(){
 
 	newButton = addNetworkButton(gridLayout, "Set of 4 modular 12 neuron networks with different training");
 	connect (newButton, SIGNAL(clicked()), this, SLOT(addNetwork()));
+
+	newButton = addNetworkButton(gridLayout, "Set of 4 sensory 12 neuron networks with different training");
+	connect (newButton, SIGNAL(clicked()), this, SLOT(addNetwork()));
 }
 
 

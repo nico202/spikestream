@@ -1,5 +1,5 @@
-#ifndef MODULARNETWORKSBUILDER_H
-#define MODULARNETWORKSBUILDER_H
+#ifndef SENSORYNETWORKSBUILDER_H
+#define SENSORYNETWORKSBUILDER_H
 
 //SpikeStream includes
 #include "NetworksBuilder.h"
@@ -12,12 +12,12 @@
 
 namespace spikestream {
 
-	class ModularNetworksBuilder : public QThread, public NetworksBuilder {
+	class SensoryNetworksBuilder : public QThread, public NetworksBuilder {
 		Q_OBJECT
 
 		public:
-			ModularNetworksBuilder();
-			~ModularNetworksBuilder();
+			SensoryNetworksBuilder();
+			~SensoryNetworksBuilder();
 
 			void prepareAddNetworks(const QString& networkName, const QString& networkDescription, const bool* stop);
 			void run();
@@ -58,4 +58,4 @@ namespace spikestream {
 	};
 }
 
-#endif//PARTITIONEDNETWORKSBUILDER_H
+#endif//SENSORYNETWORKSBUILDER_H
