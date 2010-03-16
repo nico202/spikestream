@@ -160,7 +160,6 @@ void AnalysisRunner::threadFinished(){
 	subThreadMap.remove(tmpTimeStep);
 
 	//Inform listening classes that the analysis of this time step is now complete.
-	emit progress("Task complete", tmpTimeStep, 100, 100);
 	emit timeStepComplete(tmpTimeStep);
 
 	//Determine if any time steps need to be analyzed

@@ -243,8 +243,8 @@ void WeightlessLivelinessAnalyzer::identifyClusters(){
 			}
 		}
 
-		//Store cluster if it is not empty
-		if(!expansionList.isEmpty()){
+		//Store cluster if there is more than one neuron in it
+		if(expansionList.size() > 1){
 			livelinessDao->addCluster(analysisInfo.getID(), timeStep, expansionList, getClusterLiveliness(expansionList));
 
 			//Add neurons to map of all expanded neurons
