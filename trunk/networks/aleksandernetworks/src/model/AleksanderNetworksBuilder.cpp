@@ -11,12 +11,21 @@ using namespace spikestream;
 /*! Constructor */
 AleksanderNetworksBuilder::AleksanderNetworksBuilder(){
 	neuronGroup = NULL;
+
+	/*Set up the network and archive dao.
+		These can be created in the constructor because this builder does not run as a separate thread. */
+	networkDao = new NetworkDao(Globals::getNetworkDao()->getDBInfo());
+	archiveDao = new ArchiveDao(Globals::getArchiveDao()->getDBInfo());
 }
 
 
 /*! Destructor */
 AleksanderNetworksBuilder::~AleksanderNetworksBuilder(){
 	reset();
+
+	//Clean up database interfaces
+	delete networkDao;
+	delete archiveDao;
 }
 
 
@@ -41,7 +50,6 @@ void AleksanderNetworksBuilder::add4NeuronNetwork1(const QString& networkName, c
 	addConnectionGroup(networkID, connGrp);
 
 	//Add weightless connections. Only 1 connection per neuron, so pattern index is zero in all cases
-	NetworkDao* networkDao = Globals::getNetworkDao();
 	networkDao->addWeightlessConnection(baCon->getID(), 0);
 	networkDao->addWeightlessConnection(abCon->getID(), 0);
 	networkDao->addWeightlessConnection(dcCon->getID(), 0);
@@ -79,7 +87,6 @@ void AleksanderNetworksBuilder::add4NeuronNetwork2_AND(const QString& networkNam
 	addConnectionGroup(networkID, connGrp);
 
 	//Add weightless connections.1 connection to A, B and D
-	NetworkDao* networkDao = Globals::getNetworkDao();
 	networkDao->addWeightlessConnection(baCon->getID(), 0);
 	networkDao->addWeightlessConnection(abCon->getID(), 0);
 	networkDao->addWeightlessConnection(cdCon->getID(), 0);
@@ -122,7 +129,6 @@ void AleksanderNetworksBuilder::add4NeuronNetwork2_XOR(const QString& networkNam
 	addConnectionGroup(networkID, connGrp);
 
 	//Add weightless connections.1 connection to A, B and D
-	NetworkDao* networkDao = Globals::getNetworkDao();
 	networkDao->addWeightlessConnection(baCon->getID(), 0);
 	networkDao->addWeightlessConnection(abCon->getID(), 0);
 	networkDao->addWeightlessConnection(cdCon->getID(), 0);
@@ -166,7 +172,6 @@ void AleksanderNetworksBuilder::add4NeuronNetwork3_AND(const QString& networkNam
 	addConnectionGroup(networkID, connGrp);
 
 	//Add weightless connections.1 connection to B and D
-	NetworkDao* networkDao = Globals::getNetworkDao();
 	networkDao->addWeightlessConnection(abCon->getID(), 0);
 	networkDao->addWeightlessConnection(cdCon->getID(), 0);
 
@@ -213,7 +218,6 @@ void AleksanderNetworksBuilder::add4NeuronNetwork3_XOR(const QString& networkNam
 	addConnectionGroup(networkID, connGrp);
 
 	//Add weightless connections.1 connection to B and D
-	NetworkDao* networkDao = Globals::getNetworkDao();
 	networkDao->addWeightlessConnection(abCon->getID(), 0);
 	networkDao->addWeightlessConnection(cdCon->getID(), 0);
 
@@ -263,7 +267,6 @@ void AleksanderNetworksBuilder::add4NeuronNetwork4_AND(const QString& networkNam
 	addConnectionGroup(networkID, connGrp);
 
 	//Add weightless connections. All neurons have two connections
-	NetworkDao* networkDao = Globals::getNetworkDao();
 	networkDao->addWeightlessConnection(baCon->getID(), 0);
 	networkDao->addWeightlessConnection(caCon->getID(), 1);
 	networkDao->addWeightlessConnection(abCon->getID(), 0);
@@ -316,7 +319,6 @@ void AleksanderNetworksBuilder::add4NeuronNetwork4_XOR(const QString& networkNam
 	addConnectionGroup(networkID, connGrp);
 
 	//Add weightless connections. All neurons have two connections
-	NetworkDao* networkDao = Globals::getNetworkDao();
 	networkDao->addWeightlessConnection(baCon->getID(), 0);
 	networkDao->addWeightlessConnection(caCon->getID(), 1);
 	networkDao->addWeightlessConnection(abCon->getID(), 0);
@@ -373,7 +375,6 @@ void AleksanderNetworksBuilder::add4NeuronNetwork5_AND(const QString& networkNam
 	addConnectionGroup(networkID, connGrp);
 
 	//Add weightless connections. All neurons have three connections
-	NetworkDao* networkDao = Globals::getNetworkDao();
 	networkDao->addWeightlessConnection(baCon->getID(), 0);
 	networkDao->addWeightlessConnection(caCon->getID(), 1);
 	networkDao->addWeightlessConnection(daCon->getID(), 2);
@@ -453,7 +454,6 @@ void AleksanderNetworksBuilder::add4NeuronNetwork5_XOR(const QString& networkNam
 	addConnectionGroup(networkID, connGrp);
 
 	//Add weightless connections. All neurons have three connections
-	NetworkDao* networkDao = Globals::getNetworkDao();
 	networkDao->addWeightlessConnection(baCon->getID(), 0);
 	networkDao->addWeightlessConnection(caCon->getID(), 1);
 	networkDao->addWeightlessConnection(daCon->getID(), 2);
@@ -530,9 +530,6 @@ void AleksanderNetworksBuilder::add4NeuronBasicNetwork(const QString& networkNam
 	//Reset class before adding network
 	reset();
 
-	//Local reference to network dao
-	NetworkDao* networkDao = Globals::getNetworkDao();
-
 	//Add first network
 	NetworkInfo netInfo(0, networkName, networkDescription);
 	networkDao->addNetwork(netInfo);
@@ -547,7 +544,7 @@ void AleksanderNetworksBuilder::add4NeuronBasicNetwork(const QString& networkNam
 	neuronMap[4] = neuronGroup->addNeuron(2, 1, 1);//D
 
 	//Add the neuron group
-	DBInfo netDBInfo = Globals::getNetworkDao()->getDBInfo();
+	DBInfo netDBInfo = networkDao->getDBInfo();
 	NetworkDaoThread netDaoThread(netDBInfo);
 	netDaoThread.prepareAddNeuronGroup(netInfo.getID(), neuronGroup);
 	runThread(netDaoThread);
@@ -558,9 +555,6 @@ void AleksanderNetworksBuilder::add4NeuronBasicNetwork(const QString& networkNam
 
 
 void AleksanderNetworksBuilder::add4NeuronFiringPatterns(unsigned int networkID, NeuronMap& neuronMap){
-	//Local reference to archive dao
-	ArchiveDao* archiveDao = Globals::getArchiveDao();
-
 	//Easy to use neuron ids
 	QString neurID1 = QString::number(neuronMap[1]->getID()), neurID2 = QString::number(neuronMap[2]->getID());
 	QString neurID3 = QString::number(neuronMap[3]->getID()), neurID4 = QString::number(neuronMap[4]->getID());

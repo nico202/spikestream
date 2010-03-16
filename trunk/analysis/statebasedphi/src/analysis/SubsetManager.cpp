@@ -182,7 +182,8 @@ void SubsetManager::runCalculation(const bool * const stop){
 	//Fix the number of progress steps if we are ignoring disconnected subsets
 	if(analysisInfo.getParameter("ignore_disconnected_subsets")){
 		qDebug()<<"IGNORE DISCONNECTED SUBSETS PARAMETER. Number of possible subsets: "<<totalSubsetCount<<". Current subset list size: "<<subsetList.size();
-		numberOfProgressSteps -= totalSubsetCount - subsetList.size();
+		//numberOfProgressSteps -= totalSubsetCount - subsetList.size();
+		numberOfProgressSteps = 2*subsetList.size() + neuronIDList.size() - 1;
 	}
 
 	//Calculate the phi of each of these subsets

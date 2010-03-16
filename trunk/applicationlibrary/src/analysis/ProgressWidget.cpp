@@ -69,8 +69,8 @@ void ProgressWidget::updateProgress(const QString& msg, unsigned int timeStep, u
 
 	//Check to see if we have a progress bar for this time step
 	if(progressBarMap.contains(timeStep)){
-		progressBarMap[timeStep]->setValue(stepsCompleted);
 		progressBarMap[timeStep]->setMaximum(totalSteps);
+		progressBarMap[timeStep]->setValue(stepsCompleted);
 		progressDetailsMap[timeStep]->setText(msg);
 	}
 	//Add new progress bar
@@ -84,7 +84,7 @@ void ProgressWidget::updateProgress(const QString& msg, unsigned int timeStep, u
 /*-------                PRIVATE METHODS                 ------*/
 /*-------------------------------------------------------------*/
 /*! Adds a progress bar to the bottom of the layout */
-void ProgressWidget::addProgressBar(unsigned int timeStep, unsigned int min, unsigned int max){
+void ProgressWidget::addProgressBar(unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps){
 	if(progressBarMap.contains(timeStep)){
 		qCritical()<<"Attempting to add a progress bar for time step "<<timeStep<<" that already exists.";
 		return;
@@ -94,8 +94,8 @@ void ProgressWidget::addProgressBar(unsigned int timeStep, unsigned int min, uns
 	QProgressBar* progBar = new QProgressBar();
 	progBar->setMinimumSize(100, 15);
 	progBar->setBaseSize(100, 15);
-	progBar->setRange(0, max);
-	progBar->setValue(min);
+	progBar->setRange(0, totalSteps);
+	progBar->setValue(stepsCompleted);
 	gridLayout->addWidget(new QLabel("Time step " + QString::number(timeStep) + ": "), progressBarMap.size(), 0);
 	gridLayout->addWidget(progBar, progressBarMap.size(), 1);
 	progressBarMap[timeStep] = progBar;

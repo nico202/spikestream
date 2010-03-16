@@ -41,7 +41,7 @@ namespace spikestream {
 
 
 	    //====================  METHODS  =======================
-	    void addProgressBar(unsigned int timeStep, unsigned int min, unsigned int max);
+		void addProgressBar(unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps);
     };
 
 }

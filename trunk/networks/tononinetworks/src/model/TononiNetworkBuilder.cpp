@@ -15,11 +15,18 @@ using namespace std;
 
 /*! Constructor */
 TononiNetworkBuilder::TononiNetworkBuilder(){
+	/*Set up the network and archive dao.
+		These can be created in the constructor because this builder does not run as a separate thread. */
+	networkDao = new NetworkDao(Globals::getNetworkDao()->getDBInfo());
+	archiveDao = new ArchiveDao(Globals::getArchiveDao()->getDBInfo());
 }
 
 
 /*! Destructor */
 TononiNetworkBuilder::~TononiNetworkBuilder(){
+	//Clean up database interfaces
+	delete networkDao;
+	delete archiveDao;
 }
 
 
@@ -41,12 +48,9 @@ TononiNetworkBuilder::~TononiNetworkBuilder(){
 	9->7	11->9
 */
 void TononiNetworkBuilder::addBalduzziTononiFigure5(const QString& networkName, const QString& networkDescription){
-    //Easy reference to NetworkDao
-    NetworkDao* networkDao = Globals::getNetworkDao();
-
     //Add a network
     NetworkInfo netInfo(0, networkName, networkDescription);
-    Globals::getNetworkDao()->addNetwork(netInfo);
+	networkDao->addNetwork(netInfo);
 
     //Build neuron group - keep references to neurons
     QHash<QString, double> paramMap;
@@ -188,10 +192,10 @@ void TononiNetworkBuilder::addBalduzziTononiFigure5(const QString& networkName, 
 
     //Add Archive to hold firing patterns
     ArchiveInfo archiveInfo(0, netInfo.getID(), QDateTime::currentDateTime().toTime_t(), "Single firing pattern present in Balduzzi and Tononi (2008), Figure 5");
-    Globals::getArchiveDao()->addArchive(archiveInfo);
+	archiveDao->addArchive(archiveInfo);
 
     //Add archive data
-    Globals::getArchiveDao()->addArchiveData(
+	archiveDao->addArchiveData(
 	    archiveInfo.getID(),
 	    1,//Time step 1
 	    "" //00000000000
@@ -201,12 +205,9 @@ void TononiNetworkBuilder::addBalduzziTononiFigure5(const QString& networkName, 
 
 /*! Adds Balduzzi and Tononi (2008), Figure 6 */
 void TononiNetworkBuilder::addBalduzziTononiFigure6(const QString& networkName, const QString& networkDescription){
-    //Easy reference to NetworkDao
-    NetworkDao* networkDao = Globals::getNetworkDao();
-
     //Add a network
     NetworkInfo netInfo(0, networkName, networkDescription);
-    Globals::getNetworkDao()->addNetwork(netInfo);
+	networkDao->addNetwork(netInfo);
 
     //Build neuron group - store neurons in order in a list
     QHash<QString, double> paramMap;
@@ -220,7 +221,7 @@ void TononiNetworkBuilder::addBalduzziTononiFigure6(const QString& networkName, 
     neuronMap[6] = neurGrp.addNeuron(4, 1, 1);
 
     //Add the neuron group
-    DBInfo netDBInfo = Globals::getNetworkDao()->getDBInfo();
+	DBInfo netDBInfo = networkDao->getDBInfo();
     NetworkDaoThread netDaoThread(netDBInfo);
     netDaoThread.prepareAddNeuronGroup(netInfo.getID(), &neurGrp);
     runThread(netDaoThread);
@@ -292,10 +293,10 @@ void TononiNetworkBuilder::addBalduzziTononiFigure6(const QString& networkName, 
 
     //Add Archive to hold firing patterns
     ArchiveInfo archiveInfo(0, netInfo.getID(), QDateTime::currentDateTime().toTime_t(), "Single firing pattern present in Balduzzi and Tononi (2008), Figure 6");
-    Globals::getArchiveDao()->addArchive(archiveInfo);
+	archiveDao->addArchive(archiveInfo);
 
     //Add archive data
-    Globals::getArchiveDao()->addArchiveData(
+	archiveDao->addArchiveData(
 	    archiveInfo.getID(),
 	    1,//Time step 1
 	    QString::number(neuronMap[3]->getID()) + "," + QString::number(neuronMap[4]->getID()) + "," + QString::number(neuronMap[5]->getID()) //001110
@@ -311,12 +312,9 @@ void TononiNetworkBuilder::addBalduzziTononiFigure6(const QString& networkName, 
 	6->5	7->8	8->1	8->5
 */
 void TononiNetworkBuilder::addBalduzziTononiFigure12(const QString& networkName, const QString& networkDescription){
-    //Easy reference to NetworkDao
-    NetworkDao* networkDao = Globals::getNetworkDao();
-
     //Add a network
     NetworkInfo netInfo(0, networkName, networkDescription);
-    Globals::getNetworkDao()->addNetwork(netInfo);
+	networkDao->addNetwork(netInfo);
 
     //Build neuron group - keep references to neurons
     QHash<QString, double> paramMap;
@@ -421,10 +419,10 @@ void TononiNetworkBuilder::addBalduzziTononiFigure12(const QString& networkName,
 
     //Add Archive to hold firing patterns
     ArchiveInfo archiveInfo(0, netInfo.getID(), QDateTime::currentDateTime().toTime_t(), "Single firing pattern present in Balduzzi and Tononi (2008), Figure 12");
-    Globals::getArchiveDao()->addArchive(archiveInfo);
+	archiveDao->addArchive(archiveInfo);
 
     //Add archive data
-    Globals::getArchiveDao()->addArchiveData(
+	archiveDao->addArchiveData(
 	    archiveInfo.getID(),
 	    1,//Time step 1
 	    QString::number(neur4->getID()) + "," + QString::number(neur5->getID()) //000110000
@@ -450,12 +448,9 @@ void TononiNetworkBuilder::addBalduzziTononiFigure12(const QString& networkName,
 	12->10	12->11
 */
 void TononiNetworkBuilder::addBalduzziTononiFigure13(const QString& networkName, const QString& networkDescription){
-    //Easy reference to NetworkDao
-    NetworkDao* networkDao = Globals::getNetworkDao();
-
     //Add a network
     NetworkInfo netInfo(0, networkName, networkDescription);
-    Globals::getNetworkDao()->addNetwork(netInfo);
+	networkDao->addNetwork(netInfo);
 
     //Build neuron group - keep references to neurons
     QHash<QString, double> paramMap;
@@ -616,10 +611,10 @@ void TononiNetworkBuilder::addBalduzziTononiFigure13(const QString& networkName,
 
     //Add Archive to hold firing patterns
     ArchiveInfo archiveInfo(0, netInfo.getID(), QDateTime::currentDateTime().toTime_t(), "Single firing pattern present in Balduzzi and Tononi (2008), Figure 5");
-    Globals::getArchiveDao()->addArchive(archiveInfo);
+	archiveDao->addArchive(archiveInfo);
 
     //Add archive data
-    Globals::getArchiveDao()->addArchiveData(
+	archiveDao->addArchiveData(
 	    archiveInfo.getID(),
 	    1,//Time step 1
 	    "" //00000000000
