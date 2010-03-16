@@ -4,6 +4,7 @@
 #include "PartitionedNetworksBuilder.h"
 #include "ModularNetworksBuilder.h"
 #include "SensoryNetworksBuilder.h"
+#include "MotorNetworksBuilder.h"
 #include "Globals.h"
 #include "SpikeStreamException.h"
 using namespace spikestream;
@@ -50,6 +51,9 @@ AlekGam2NetworksWidget::AlekGam2NetworksWidget(){
 	connect (newButton, SIGNAL(clicked()), this, SLOT(addNetwork()));
 
 	newButton = addNetworkButton(gridLayout, "Set of 4 sensory 12 neuron networks with different training");
+	connect (newButton, SIGNAL(clicked()), this, SLOT(addNetwork()));
+
+	newButton = addNetworkButton(gridLayout, "Set of 4 motor 12 neuron networks with different training");
 	connect (newButton, SIGNAL(clicked()), this, SLOT(addNetwork()));
 }
 
@@ -111,6 +115,18 @@ void AlekGam2NetworksWidget::addNetwork(){
 			stop = false;
 			sensoryNetBuilder->prepareAddNetworks(networkName->text(), netDesc, &stop);
 			sensoryNetBuilder->start();
+		}
+		else if(netDesc == "Set of 4 motor 12 neuron networks with different training"){
+			MotorNetworksBuilder* motorNetBuilder = new MotorNetworksBuilder();
+			networksBuilder = motorNetBuilder;
+			progressDialog = new QProgressDialog("Building motor network", "Cancel", 0, 100, this);
+			progressDialog->setWindowModality(Qt::WindowModal);
+			progressDialog->setMinimumDuration(2000);
+			connect(motorNetBuilder, SIGNAL( progress(int, int) ), this, SLOT( updateProgress(int, int) ) );
+			connect(motorNetBuilder, SIGNAL( finished() ), this, SLOT( threadFinished() ) );
+			stop = false;
+			motorNetBuilder->prepareAddNetworks(networkName->text(), netDesc, &stop);
+			motorNetBuilder->start();
 		}
 		else {
 			throw SpikeStreamException("Network descrption not recognized: " + netDesc);
