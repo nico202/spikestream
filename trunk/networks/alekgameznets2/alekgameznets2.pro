@@ -12,7 +12,7 @@ OBJECTS_DIR = build/objects
 
 MOC_DIR = build/moc
 
-CONFIG += console debug thread exceptions
+CONFIG += release thread exceptions
 
 QT += xml opengl sql
 
@@ -38,12 +38,13 @@ HEADERS = src/gui/AlekGam2NetworksWidget.h \
 			src/model/PartitionedNetworksBuilder.h \
 			src/model/ModularNetworksBuilder.h \
 			src/model/SensoryNetworksBuilder.h \
-			src/model/MotorNetworksBuilder.h
+			src/model/MotorNetworksBuilder.h \
+			src/model/TestPartitionedNetworksBuilder.h
 
 SOURCES = src/gui/AlekGam2NetworksWidget.cpp \
 			src/model/FullyConnectedNetworksBuilder.cpp \
 			src/model/PartitionedNetworksBuilder.cpp \
 			src/model/ModularNetworksBuilder.cpp \
 			src/model/SensoryNetworksBuilder.cpp \
-			src/model/MotorNetworksBuilder.cpp
-
+			src/model/MotorNetworksBuilder.cpp \
+			src/model/TestPartitionedNetworksBuilder.cpp

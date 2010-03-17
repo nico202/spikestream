@@ -33,7 +33,7 @@ void TruthTableView::resizeHeaders(){
     //Resize columns
     if(truthTableModel->columnCount() > 0){
 	for(int i=0; i<truthTableModel->columnCount()-1; ++i)
-	    hHeader->resizeSection(hHeader->logicalIndex(i), 20);//Neuron ID column
+		hHeader->resizeSection(hHeader->logicalIndex(i), 40);//Neuron ID column
 	hHeader->resizeSection(hHeader->logicalIndex(truthTableModel->columnCount()-1), 50);//Output column
     }
 

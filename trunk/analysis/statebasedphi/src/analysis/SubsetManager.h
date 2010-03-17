@@ -73,9 +73,6 @@ namespace spikestream {
 		Used for filtering out subsets with a disconnected neuron, which have zero phi */
 	    QHash<unsigned int, QHash<unsigned int, bool> > toConnectionMap;
 
-	    /*! Records the total number of subsets without filtering the disconnected ones for debugging */
-	    unsigned int totalSubsetCount;
-
 	    /*! Complete list of possible subsets */
 	    QList<Subset*> subsetList;
 

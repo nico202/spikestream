@@ -21,7 +21,7 @@ win32 {
 	LIBS += -lspikestreamapplication0 -L$${SPIKESTREAM_ROOT_DIR}/lib
 }
 
-CONFIG += debug console qtestlib
+CONFIG += release console qtestlib
 
 #----------------------------------------------#
 #---            Test Files                  ---#
