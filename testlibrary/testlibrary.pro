@@ -12,7 +12,7 @@ OBJECTS_DIR = build/objects
 
 MOC_DIR = build/moc
 
-CONFIG += debug qtestlib
+CONFIG += release qtestlib console
 
 QT += sql
 

@@ -62,8 +62,7 @@ PhiCalculator::~PhiCalculator(){
 /*-------------------------------------------------------------*/
 
 /*! Calculates and returns the phi of the specified subset.
-	FIXME: NEED TO HANDLE THE NORMALIZATION FOR THE TOTAL PARTITION AND
-	POSSIBILITY THAT MULTIPLE PARTITIONS HAVE THE SAME MINIMUM NORMALIZED PHI. */
+	FIXME: NEED TO HANDLE THE POSSIBILITY THAT MULTIPLE PARTITIONS HAVE THE SAME MINIMUM NORMALIZED PHI. */
 double PhiCalculator::getSubsetPhi(QList<unsigned int>& subsetNeurIDs){
 	//Convenience variable storing subset size
 	int subsetSize = subsetNeurIDs.size();
@@ -101,9 +100,9 @@ double PhiCalculator::getSubsetPhi(QList<unsigned int>& subsetNeurIDs){
 			}
 
 			/* Normalize the new phi
-		   If calculation is being run on the entire subset (aPartition.size() ==0), then
-		   For a partition into two parts the normalization is the size of the smaller a priori
-		   repertoire, which has 2^n entries */
+				If calculation is being run on the entire subset (aPartition.size() ==0), then
+				For a partition into two parts the normalization is the size of the smaller a priori
+				 repertoire, which has 2^n entries */
 			if(aPartition.size() == 0)//Entire subset
 				tmpNormFact = (double)bPartition.size();
 			else if(aPartition.size() <= bPartition.size())//A is the smaller partition
@@ -138,7 +137,7 @@ double PhiCalculator::getSubsetPhi(QList<unsigned int>& subsetNeurIDs){
 	delete [] partitionArray;
 
 	//Return the non-normalized phi
-	return minimumPhi *= normalizationFactor;
+	return minimumPhi * normalizationFactor;
 }
 
 
@@ -291,19 +290,21 @@ double PhiCalculator::getPartitionPhi(QList<unsigned int>& aPartition, QList<uns
 	double result = 0.0, subsetProb;
 	//Work through the A partition
 	for(QHash<QString, double>::iterator aIter = aProbTable.begin(); aIter != aProbTable.end() && !*stop; ++aIter){
+
 		//Work through the B partition
 		for(QHash<QString, double>::iterator bIter =bProbTable.begin(); bIter != bProbTable.end() && !*stop; ++bIter){
 			/* Calculation is
-		SUM[ p(i)log2( p(i) / (pA(i) * pB(i)))
-		*/
+				SUM[ p(i)log2( p(i) / (pA(i) * pB(i)))
+			*/
 			subsetProb = subProbTable.get(aIter.key() + bIter.key());//Combine the A and B keys to get the p(s0->s1) for whole subset
-			if(subsetProb != 0.0)//Avoid log of zero multiplied by zero, which is not a number
+			if(subsetProb != 0.0){//Avoid log of zero multiplied by zero, which is not a number
 				result += subsetProb * log2( subsetProb / (aIter.value() * bIter.value()));
+			}
 		}
 	}
 
-	//Return the result
-	return result;
+	//Return the result rounded to 4 decimal places
+	return Util::rDouble(result, 4);
 }
 
 
@@ -388,3 +389,6 @@ void PhiCalculator::setWeightlessNeuronMap(QHash<unsigned int, WeightlessNeuron*
 void PhiCalculator::setFiringNeuronMap(QHash<unsigned int, bool> newMap){
 	firingNeuronMap = newMap;
 }
+
+
+

@@ -119,10 +119,17 @@ void SubsetManager::identifyComplexes(){
 	//Check each subset to see if it contained within another subset of higher phi
 	for(int tstIndx=0; tstIndx<subsetList.size() && !*stop; ++tstIndx){
 
+		QList<unsigned int> subsetNeurIDs = subsetList[tstIndx]->getNeuronIDs();
+		bool runChecks = false;
+		if(subsetNeurIDs.size() ==4 && subsetNeurIDs.at(0) == 1761 && subsetNeurIDs.at(1) == 1762 && subsetNeurIDs.at(2) == 1765 && subsetNeurIDs.at(3) == 1766){
+			runChecks = true;
+		}
+
+
 		//Complexes must have phi greater than zero
 		if(subsetList[tstIndx]->getPhi() > 0.0){
 			/* Work through all of the other subsets to see if the subset is contained within it and has
-		   higher phi. If it cannot find an enclosing subset with higher phi, then it is a complex. */
+				higher phi. If it cannot find an enclosing subset with higher phi, then it is a complex. */
 			bool isComplex = true;
 			for(int containsIndx=0; containsIndx<subsetList.size() && !*stop; ++containsIndx){
 
@@ -138,7 +145,7 @@ void SubsetManager::identifyComplexes(){
 			}
 
 			/* All the other subsets have been checked. If no enclosing subset has been found with higher
-		   phi, then the current subset is a complex */
+				phi, then the current subset is a complex */
 			if(isComplex){
 				//Store complex in database
 				QList<unsigned int> subNeurIDs = subsetList[tstIndx]->getNeuronIDs();
@@ -146,8 +153,6 @@ void SubsetManager::identifyComplexes(){
 
 				//Inform other classes that a complex has been found
 				emit complexFound();
-
-				//qDebug()<<"COMPLEX FOUND: NeuronIDs="<<subNeurIDs<<"; phi="<<subsetList[tstIndx]->getPhi();
 			}
 		}
 
@@ -181,8 +186,6 @@ void SubsetManager::runCalculation(const bool * const stop){
 
 	//Fix the number of progress steps if we are ignoring disconnected subsets
 	if(analysisInfo.getParameter("ignore_disconnected_subsets")){
-		qDebug()<<"IGNORE DISCONNECTED SUBSETS PARAMETER. Number of possible subsets: "<<totalSubsetCount<<". Current subset list size: "<<subsetList.size();
-		//numberOfProgressSteps -= totalSubsetCount - subsetList.size();
 		numberOfProgressSteps = 2*subsetList.size() + neuronIDList.size() - 1;
 	}
 
@@ -195,7 +198,8 @@ void SubsetManager::runCalculation(const bool * const stop){
 }
 
 
-/*! Returns true if all of the neurons have at least one connection to the other neurons in the subset */
+/*! Returns true if all of the neurons have at least one connection to the other neurons in the subset.
+	FIXME: THIS ONLY IDENTIFIES INDIVIDUAL ISOLATED NEURONS, NOT TWO CLUSTERS SEPARATE FROM EACH OTHER. */
 bool SubsetManager::subsetConnected(QList<unsigned int> neuronIDs){
 	//Work through each neuron id
 	foreach(unsigned int neuronID, neuronIDs){
@@ -234,7 +238,6 @@ void SubsetManager::addSubset(bool subsetSelectionArray[], int arrayLength){
 	}
 
 	if(analysisInfo.getParameter("ignore_disconnected_subsets")){
-		++totalSubsetCount;
 		if( subsetConnected(tmpSubset->getNeuronIDs()) ){
 			//Store subset in class
 			subsetList.append(tmpSubset);
@@ -252,7 +255,6 @@ void SubsetManager::deleteSubsets(){
 	for(int i=0; i<subsetList.size(); ++i)
 		delete subsetList[i];
 	subsetList.clear();
-	totalSubsetCount = 0;
 }
 
 
