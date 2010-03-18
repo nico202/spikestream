@@ -116,6 +116,9 @@ void SubsetManager::calculateSubsetsPhi(){
 	of higher phi. The subset is a complex if no enclosing higher phi subset
 	can be found */
 void SubsetManager::identifyComplexes(){
+	//Get a local copy of the minimum value of phi
+	double minComplexPhi = analysisInfo.getParameter("minimum_complex_phi");
+
 	//Check each subset to see if it contained within another subset of higher phi
 	for(int tstIndx=0; tstIndx<subsetList.size() && !*stop; ++tstIndx){
 
@@ -125,9 +128,8 @@ void SubsetManager::identifyComplexes(){
 			runChecks = true;
 		}
 
-
-		//Complexes must have phi greater than zero
-		if(subsetList[tstIndx]->getPhi() > 0.0){
+		//Complexes must have phi greater than the threshold
+		if(subsetList[tstIndx]->getPhi() >= minComplexPhi){
 			/* Work through all of the other subsets to see if the subset is contained within it and has
 				higher phi. If it cannot find an enclosing subset with higher phi, then it is a complex. */
 			bool isComplex = true;

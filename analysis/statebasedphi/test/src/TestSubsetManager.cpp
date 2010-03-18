@@ -192,6 +192,7 @@ AnalysisInfo TestSubsetManager::getAnalysisInfo(){
     //Set parameters
     info.getParameterMap()["generalization"] = 1.0;
     info.getParameterMap()["ignore_disconnected_subsets"] = 0.0;
+	info.getParameterMap()["minimum_complex_phi"] = 0.000001;
 
     //Return
     return info;
