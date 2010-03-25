@@ -44,9 +44,6 @@ void SensoryNetworksBuilder::prepareAddNetworks(const QString& networkName, cons
 void SensoryNetworksBuilder::run(){
 	clearError();
 
-	//Seed the random number generator
-	srand(123456789);
-
 	// Set up the network and archive daos within the new thread
 	networkDao = new NetworkDao(Globals::getNetworkDao()->getDBInfo());
 	archiveDao = new ArchiveDao(Globals::getArchiveDao()->getDBInfo());
@@ -55,6 +52,7 @@ void SensoryNetworksBuilder::run(){
 		emit progress(0, 4);
 
 		//Add nework with training so each neuron fires when 100% of its input neurons are firing
+		srand(123456789);//Seed the random number generator
 		addBasicNetwork(networkName, networkDescription + " \n100% training");
 		addTraining(100);
 
@@ -63,6 +61,7 @@ void SensoryNetworksBuilder::run(){
 			return;
 
 		//Add nework with training so each neuron fires when 75% of its input neurons are firing
+		srand(123456789);//Seed the random number generator
 		addBasicNetwork(networkName, networkDescription + " \n75% training");
 		addTraining(75);
 
@@ -71,6 +70,7 @@ void SensoryNetworksBuilder::run(){
 			return;
 
 		//Add nework with training so each neuron fires when 50% of its input neurons are firing
+		srand(123456789);//Seed the random number generator
 		addBasicNetwork(networkName, networkDescription + " \n50% training");
 		addTraining(50);
 
@@ -79,6 +79,7 @@ void SensoryNetworksBuilder::run(){
 			return;
 
 		//Add nework with training so each neuron fires when 25% of its input neurons are firing
+		srand(123456789);//Seed the random number generator
 		addBasicNetwork(networkName, networkDescription + " \n25% training");
 		addTraining(25);
 		emit progress(4, 4);

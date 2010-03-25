@@ -39,9 +39,6 @@ void TestPartitionedNetworksBuilder::prepareAddNetworks(const QString& networkNa
 void TestPartitionedNetworksBuilder::run(){
 	clearError();
 
-	//Seed the random number generator
-	srand(123456789);
-
 	// Set up the network and archive daos within the new thread
 	networkDao = new NetworkDao(Globals::getNetworkDao()->getDBInfo());
 	archiveDao = new ArchiveDao(Globals::getArchiveDao()->getDBInfo());
@@ -50,6 +47,7 @@ void TestPartitionedNetworksBuilder::run(){
 		emit progress(0, 4);
 
 		//Add nework with training so each neuron fires when 100% of its input neurons are firing
+		srand(123456789);//Seed the random number generator
 		addBasicNetwork(networkName, networkDescription + " \n100% training");
 		addTraining(100);
 
