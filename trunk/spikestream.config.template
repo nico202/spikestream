@@ -25,4 +25,5 @@ default_file_location = /home/terry/spikestream
 
 # VIEWING PARAMETERS
 vertex_size = 7.5
+draw_axes = true
 

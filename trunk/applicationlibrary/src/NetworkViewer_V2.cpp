@@ -390,6 +390,10 @@ void NetworkViewer_V2::checkOpenGLErrors(){
 /*! Draw X, Y and Z axes
 	These are drawn so that they cover the clipping volume plus a bit of extra length. */
 void NetworkViewer_V2::drawAxes(void){
+	//Do nothing if drawAxes is set to false
+	if(!Globals::isDrawAxes())
+		return;
+
 	//Set the drawing colour to red
 	glColor3f(1.0f, 0.0f, 0.0f);
 

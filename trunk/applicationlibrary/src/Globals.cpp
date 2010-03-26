@@ -22,6 +22,7 @@ bool Globals::rendering = false;
 QString Globals::spikeStreamRoot = "";
 QString Globals::workingDirectory = "";
 unsigned int Globals::timerStart_sec = 0;
+bool Globals::drawAxes = true;
 float Globals::vertexSize = 7.5f;
 
 
@@ -153,6 +154,12 @@ bool Globals::networkLoaded(){
 }
 
 
+/*! Returns true if draw axes mode is set */
+bool Globals::isDrawAxes(){
+	return drawAxes;
+}
+
+
 /*! Returns true if OpenGL rendering is in progress */
 bool Globals::isRendering() {
 	return rendering;
@@ -168,6 +175,12 @@ bool Globals::isArchivePlaying() {
 /*! Sets the analysis id. An id of 0 indicates that no analysis is loaded. */
 void Globals::setAnalysisID(const QString& analysisName, unsigned int id){
 	analysisMap[analysisName] = id;
+}
+
+
+/*! Sets parameter controlling whether axes are displayed in the 3D viewer */
+void Globals::setDrawAxes(bool drawAxes){
+	Globals::drawAxes = drawAxes;
 }
 
 

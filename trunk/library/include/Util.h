@@ -23,6 +23,7 @@ namespace spikestream {
 			bool bitsEqual(unsigned char* byteArr, QString bitPattStr, int output);
 			static void fillByteArray(unsigned char*& byteArr, int& arrLen, QString byteStr);
 			static void fillSelectionArray(bool* array, int arraySize, int selectionSize);
+			static bool getBool(const QString& str);
 			static float getFloat(const QString& str);
 			static int getInt(const QString& str);
 			static unsigned int getUInt(const QString& str);
