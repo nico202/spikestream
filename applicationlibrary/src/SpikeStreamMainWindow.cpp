@@ -112,6 +112,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow(){
 	//Store configuration settings in Globals
 	try{
 		Globals::setVertexSize( Util::getFloat( configLoader->getParameter("vertex_size") ) );
+		Globals::setDrawAxes( Util::getBool( configLoader->getParameter("draw_axes") ) );
 	}
 	catch(SpikeStreamException& ex){
 		qCritical()<<ex.getMessage();
@@ -267,7 +268,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow(){
 	QPixmap iconPixmap(Globals::getSpikeStreamRoot() + "/images/spikestream_icon_64.png" );
 	setWindowIcon(iconPixmap);
 	setCentralWidget( mainSplitterWidget );
-	//setWindowState(Qt::WindowMaximized);
+	setWindowState(Qt::WindowMaximized);
 
 	//Get rid of splash screen if it is showing
 	if(splashScreen){

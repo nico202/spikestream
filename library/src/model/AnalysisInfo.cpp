@@ -2,6 +2,10 @@
 #include "SpikeStreamAnalysisException.h"
 using namespace spikestream;
 
+/*! Default number of threads */
+#define DEFAULT_NUMBER_OF_THREADS 5
+
+
 /*! Empty constructor */
 AnalysisInfo::AnalysisInfo(){
 	reset();
@@ -16,6 +20,7 @@ AnalysisInfo::AnalysisInfo(unsigned int analysisID, unsigned int networkID, unsi
 	this->parameterMap = parameterMap;
 	this->description = description;
 	this->analysisType = analysisType;
+	this->numberOfThreads = DEFAULT_NUMBER_OF_THREADS;
 }
 
 
@@ -28,6 +33,7 @@ AnalysisInfo::AnalysisInfo(const AnalysisInfo& analysisInfo){
 	this->parameterMap = analysisInfo.parameterMap;
 	this->description = analysisInfo.description;
 	this->analysisType = analysisInfo.analysisType;
+	this->numberOfThreads = analysisInfo.numberOfThreads;
 }
 
 
@@ -44,6 +50,7 @@ AnalysisInfo& AnalysisInfo::operator=(const AnalysisInfo& rhs){
 	this->parameterMap = rhs.parameterMap;
 	this->description = rhs.description;
 	this->analysisType = rhs.analysisType;
+	this->numberOfThreads = rhs.numberOfThreads;
 
 	return *this;
 }
@@ -81,5 +88,5 @@ void AnalysisInfo::reset(){
 	this->description = "Untitled";
 	this->analysisType = 0;
 	this->parameterMap.clear();
-	this->numberOfThreads = 5;
+	this->numberOfThreads = DEFAULT_NUMBER_OF_THREADS;
 }
