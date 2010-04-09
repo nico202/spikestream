@@ -2,6 +2,7 @@
 #include "StateBasedPhiExportDialog.h"
 #include "FullResultsTableView.h"
 #include "Globals.h"
+#include "StateBasedPhiGraphDialog.h"
 #include "LoadAnalysisDialog.h"
 #include "PhiAnalysisTimeStepThread.h"
 #include "SpikeStreamException.h"
@@ -131,6 +132,12 @@ void StateBasedPhiWidget::newAnalysis(){
 
 	//Reset progress widget
 	progressWidget->reset();
+}
+
+/*! Shows dialog that plots graphs of the results - at the moment these are integration heat maps */
+void StateBasedPhiWidget::plotGraphs(){
+	StateBasedPhiGraphDialog dialog(this, analysisInfo);
+	dialog.exec();
 }
 
 

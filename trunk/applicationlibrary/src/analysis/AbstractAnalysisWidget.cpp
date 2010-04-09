@@ -221,6 +221,10 @@ QToolBar* AbstractAnalysisWidget::getDefaultToolBar(){
 	connect(tmpAction, SIGNAL(triggered()), this, SLOT(selectParameters()));
 	tmpToolBar->addAction (tmpAction);
 
+	tmpAction = new QAction(QIcon(), "Plot", this);
+	connect(tmpAction, SIGNAL(triggered()), this, SLOT(plotGraphs()));
+	tmpToolBar->addAction (tmpAction);
+
 	return tmpToolBar;
 }
 

@@ -32,6 +32,7 @@ namespace spikestream {
 			void loadArchiveTimeStepsIntoCombos();
 			virtual void networkChanged();
 			virtual void newAnalysis() = 0;
+			virtual void plotGraphs() = 0;
 			virtual void selectParameters();
 			virtual void startAnalysis() = 0;
 			virtual void stopAnalysis();

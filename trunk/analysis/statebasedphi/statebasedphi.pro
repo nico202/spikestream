@@ -12,7 +12,7 @@ OBJECTS_DIR = build/objects
 
 MOC_DIR = build/moc
 
-CONFIG += dll release thread exceptions
+CONFIG += console dll release thread exceptions
 
 QT += xml opengl sql
 
@@ -33,7 +33,7 @@ INCLUDEPATH += src \
 				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src/models \
 				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src/views
 win32 {
-	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/gmp/include
+	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/gmp/include $${SPIKESTREAM_ROOT_DIR}/extlib/qwt/include
 }
 
 #----------------------------------------------#
@@ -43,14 +43,19 @@ unix {
 	LIBS += -lgmpxx -L$${SPIKESTREAM_ROOT_DIR}/lib -lspikestream -lspikestreamapplication
 }
 win32 {
-	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/lib -lspikestreamapplication0 -lspikestream0 -lgmpxx -lgmp -L$${SPIKESTREAM_ROOT_DIR}/extlib/gmp/lib
+	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/lib -lspikestreamapplication0 -lspikestream0
+	LIBS += -lgmpxx -lgmp -L$${SPIKESTREAM_ROOT_DIR}/extlib/gmp/lib
+	LIBS += -lqwt5 -L$${SPIKESTREAM_ROOT_DIR}/extlib/qwt/lib
 }
 
 #====================  GUI  =====================
 HEADERS = src/gui/StateBasedPhiWidget.h \
-			src/gui/StateBasedPhiExportDialog.h
+			src/gui/StateBasedPhiExportDialog.h \
+			src/gui/StateBasedPhiGraphDialog.h
 SOURCES = src/gui/StateBasedPhiWidget.cpp \
-			src/gui/StateBasedPhiExportDialog.cpp
+			src/gui/StateBasedPhiExportDialog.cpp \
+			src/gui/StateBasedPhiGraphDialog.cpp
+
 
 #==================  ANALYSIS  ===================
 HEADERS += src/analysis/PhiAnalysisTimeStepThread.h \
@@ -70,9 +75,11 @@ SOURCES += src/database/StateBasedPhiAnalysisDao.cpp
 
 #==================  MODELS  =====================
 HEADERS += src/models/FullResultsModel.h \
-			src/models/Complex.h
+			src/models/Complex.h \
+			src/models/StateBasedPhiSpectrogramData.h
 SOURCES += src/models/FullResultsModel.cpp \
-			src/models/Complex.cpp
+			src/models/Complex.cpp \
+			src/models/StateBasedPhiSpectrogramData.cpp
 
 #==================  VIEWS  =====================
 HEADERS += src/views/FullResultsTableView.h
