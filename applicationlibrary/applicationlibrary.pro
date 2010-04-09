@@ -35,7 +35,9 @@ unix {
 	LIBS += -lspikestream -L$${SPIKESTREAM_ROOT_DIR}/lib -lgmp
 }
 win32 {
-	LIBS += -lspikestream0 -L$${SPIKESTREAM_ROOT_DIR}/lib -lgmp -L$${SPIKESTREAM_ROOT_DIR}/extlib/gmp/lib
+	LIBS += -lspikestream0 -L$${SPIKESTREAM_ROOT_DIR}/lib
+	LIBS += -lgmp -L$${SPIKESTREAM_ROOT_DIR}/extlib/gmp/lib
+	LIBS += -lqwt5 -L$${SPIKESTREAM_ROOT_DIR}/extlib/qwt/lib
 }
 
 #----------------------------------------------#
@@ -52,11 +54,11 @@ INCLUDEPATH += src \
 				src/widgets \
 				$${SPIKESTREAM_ROOT_DIR}/library/include
 win32 {
-	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/gmp/include
+	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/gmp/include  $${SPIKESTREAM_ROOT_DIR}/extlib/qwt/include
 }
 
 
-CONFIG += release thread exceptions
+CONFIG += console release thread exceptions
 
 QT += xml opengl sql
 
@@ -110,7 +112,10 @@ HEADERS += src/analysis/AnalysisLoaderWidget.h \
 			src/analysis/AbstractExportAnalysisDialog.h \
 			src/analysis/AbstractAnalysisTimeStepThread.h \
 			src/analysis/ProgressWidget.h \
-			src/analysis/HeatColorBar.h
+			src/analysis/HeatColorBar.h \
+			src/analysis/AbstractGraphDialog.h \
+			src/analysis/AbstractSpectrogramData.h \
+			src/analysis/AnalysisSpectrogram.h
 SOURCES += src/analysis/AnalysisLoaderWidget.cpp \
 			src/analysis/AbstractAnalysisWidget.cpp \
 			src/analysis/AnalysisRunner.cpp \
@@ -118,7 +123,10 @@ SOURCES += src/analysis/AnalysisLoaderWidget.cpp \
 			src/analysis/AbstractExportAnalysisDialog.cpp \
 			src/analysis/AbstractAnalysisTimeStepThread.cpp \
 			src/analysis/ProgressWidget.cpp \
-			src/analysis/HeatColorBar.cpp
+			src/analysis/HeatColorBar.cpp \
+			src/analysis/AbstractGraphDialog.cpp \
+			src/analysis/AbstractSpectrogramData.cpp \
+			src/analysis/AnalysisSpectrogram.cpp
 
 #----------------------------------------------#
 #---              dialogs folder            ---#

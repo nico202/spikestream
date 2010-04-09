@@ -36,6 +36,7 @@ namespace spikestream {
 			void exportAnalysis();
 			QString getAnalysisName() { return STATE_BASED_PHI_ANALYSIS; }
 			void newAnalysis();
+			void plotGraphs();
 			void startAnalysis();
 			void updateResults();
 
