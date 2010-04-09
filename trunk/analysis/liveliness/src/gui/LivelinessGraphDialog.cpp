@@ -1,9 +1,9 @@
 //SpikeStream includes
 #include "Globals.h"
 #include "SpikeStreamException.h"
-#include "StateBasedPhiGraphDialog.h"
-#include "StateBasedPhiAnalysisDao.h"
-#include "StateBasedPhiSpectrogramData.h"
+#include "LivelinessGraphDialog.h"
+#include "LivelinessDao.h"
+#include "LivelinessSpectrogramData.h"
 using namespace spikestream;
 
 //Qt includes
@@ -11,9 +11,9 @@ using namespace spikestream;
 
 
 /*! Constructor */
-StateBasedPhiGraphDialog::StateBasedPhiGraphDialog(QWidget* parent, const AnalysisInfo& info) : AbstractGraphDialog(parent, info){
+LivelinessGraphDialog::LivelinessGraphDialog(QWidget* parent, const AnalysisInfo& info) : AbstractGraphDialog(parent, info){
 	//Create data
-	spectrogramData = new StateBasedPhiSpectrogramData(analysisInfo);
+	spectrogramData = new LivelinessSpectrogramData(analysisInfo);
 
 	//Add spectrogram
 	QVBoxLayout* mainVBox = new QVBoxLayout(this);
@@ -40,35 +40,34 @@ StateBasedPhiGraphDialog::StateBasedPhiGraphDialog(QWidget* parent, const Analys
 	controlsLayout->addWidget(neurIDChkBox);
 	controlsLayout->addStretch(5);
 	mainVBox->addLayout(controlsLayout);
-
 }
 
 
 /*! Destructor */
-StateBasedPhiGraphDialog::~StateBasedPhiGraphDialog(){
+LivelinessGraphDialog::~LivelinessGraphDialog(){
 	//FIXME: COPY FUNCTION IN DATA IS NOT A PROPER COPY, SO DATA IS DELETED AUTOMATICALLY BY THE GRAPH
 }
 
 
 /*! Adds available time steps to the time step combo */
-void StateBasedPhiGraphDialog::addTimeSteps(QComboBox* combo){
-	StateBasedPhiAnalysisDao stateDao(Globals::getAnalysisDao()->getDBInfo());
-	QList<Complex> complexList = stateDao.getComplexes(analysisInfo.getID());
+void LivelinessGraphDialog::addTimeSteps(QComboBox* combo){
+	LivelinessDao livelinessDao(Globals::getAnalysisDao()->getDBInfo());
+	QList<Cluster> clusterList = livelinessDao.getClusters(analysisInfo.getID());
 
 	//Add the "all" entry
 	combo->addItem("All");
 
 	bool firstTime = true;
 	unsigned int oldTimeStep = 0;
-	foreach(Complex cmplx, complexList){
+	foreach(Cluster clstr, clusterList){
 		if(firstTime){
-			combo->addItem( QString::number(cmplx.getTimeStep()) );
-			oldTimeStep = cmplx.getTimeStep();
+			combo->addItem( QString::number(clstr.getTimeStep()) );
+			oldTimeStep = clstr.getTimeStep();
 			firstTime = false;
 		}
-		else if(oldTimeStep != cmplx.getTimeStep()){
-			combo->addItem( QString::number(cmplx.getTimeStep()) );
-			oldTimeStep = cmplx.getTimeStep();
+		else if(oldTimeStep != clstr.getTimeStep()){
+			combo->addItem( QString::number(clstr.getTimeStep()) );
+			oldTimeStep = clstr.getTimeStep();
 		}
 	}
 }

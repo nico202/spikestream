@@ -26,7 +26,6 @@ AnalysisSpectrogram::AnalysisSpectrogram (QWidget* parent, QwtRasterData* data) 
 
 	// A color bar on the right axis
 	QwtScaleWidget *rightAxis = axisWidget(QwtPlot::yRight);
-	rightAxis->setTitle("Information Integration");
 	rightAxis->setColorBarEnabled(true);
 	rightAxis->setColorMap(d_spectrogram->data().range(), d_spectrogram->colorMap());
 
@@ -37,6 +36,18 @@ AnalysisSpectrogram::AnalysisSpectrogram (QWidget* parent, QwtRasterData* data) 
 	setAxisMaxMinor( QwtPlot::yLeft, 0);
 	setAxisMaxMinor( QwtPlot::xBottom, 0);
 	rescale();
+
+	//Change canvas background
+	setCanvasBackground(Qt::white);
+
+	//Set titles
+	//setAxisTitle(QwtPlot::yRight, "Information Integration");
+
+	//Change fonts
+	QFont axisFont("Arial", 12, QFont::Normal);
+	setAxisFont(QwtPlot::yLeft, axisFont);
+	setAxisFont(QwtPlot::yRight, axisFont);
+	setAxisFont(QwtPlot::xBottom, axisFont);
 
 	plotLayout()->setAlignCanvasToScales(true);
 	replot();

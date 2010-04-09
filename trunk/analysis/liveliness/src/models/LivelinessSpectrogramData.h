@@ -1,5 +1,5 @@
-#ifndef STATEBASEDPHISPECTROGRAMDATA_H
-#define STATEBASEDPHISPECTROGRAMDATA_H
+#ifndef LIVELINESSSPECTROGRAMDATA_H
+#define LIVELINESSSPECTROGRAMDATA_H
 
 //SpikeStream includes
 #include "AbstractSpectrogramData.h"
@@ -7,10 +7,10 @@ using namespace spikestream;
 
 namespace spikestream {
 
-	class StateBasedPhiSpectrogramData: public AbstractSpectrogramData {
+	class LivelinessSpectrogramData: public AbstractSpectrogramData {
 		public:
-			StateBasedPhiSpectrogramData(const AnalysisInfo& analysisInfo);
-			~StateBasedPhiSpectrogramData();
+			LivelinessSpectrogramData(const AnalysisInfo& analysisInfo);
+			~LivelinessSpectrogramData();
 			virtual QwtRasterData *copy() const;
 
 		protected:
@@ -22,5 +22,5 @@ namespace spikestream {
 }
 
 
-#endif//STATEBASEDPHISPECTROGRAMDATA_H
+#endif//LIVELINESSSPECTROGRAMDATA_H
 

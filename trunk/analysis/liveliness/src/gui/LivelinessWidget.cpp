@@ -2,10 +2,11 @@
 #include "LivelinessExportDialog.h"
 #include "LivelinessFullResultsTableView.h"
 #include "Globals.h"
-#include  "GlobalVariables.h"
+#include "GlobalVariables.h"
 #include "SpikeStreamException.h"
 #include "LivelinessWidget.h"
 #include "LivelinessTimeStepThread.h"
+#include "LivelinessGraphDialog.h"
 #include "Util.h"
 using namespace spikestream;
 
@@ -144,6 +145,11 @@ void LivelinessWidget::newAnalysis(){
 }
 
 
+void LivelinessWidget::plotGraphs(){
+	LivelinessGraphDialog dialog(this, analysisInfo);
+	dialog.exec();
+}
+
 /*! Resets the colour range to the value stored in the full results model.
 	This is either the default, or the maximum neuron liveliness */
 void LivelinessWidget::resetHeatColorRange(){
@@ -278,6 +284,7 @@ void LivelinessWidget::initializeAnalysisInfo(){
 	//Set parameters
 	analysisInfo.getParameterMap()["generalization"] = 1.0;
 	analysisInfo.getParameterMap()["store_connection_liveliness_as_temporary_weights"] = 1.0;
+	analysisInfo.getParameterMap()["minimum_cluster_liveliness"] = 1.0;
 }
 
 

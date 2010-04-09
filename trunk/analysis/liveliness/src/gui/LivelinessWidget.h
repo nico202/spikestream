@@ -26,7 +26,7 @@ namespace spikestream {
 			QString getAnalysisName() { return LIVELINESS_ANALYSIS; }
 			void hideAnalysisResults();
 			void newAnalysis();
-			void plotGraphs(){}
+			void plotGraphs();
 			void startAnalysis();
 			void updateResults();
 

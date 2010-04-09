@@ -174,6 +174,9 @@ void WeightlessLivelinessAnalyzer::flipBits(byte inPatArr [], int inPatArrLen, Q
 
 
 void WeightlessLivelinessAnalyzer::identifyClusters(){
+	//Get a local copy of the minimum value of liveliness
+	double minClusterLiveliness = analysisInfo.getParameter("minimum_cluster_liveliness");
+
 	//Map containing all neurons that have been added to a cluster
 	QHash<unsigned int, bool> addedNeuronsMap;
 
@@ -243,9 +246,12 @@ void WeightlessLivelinessAnalyzer::identifyClusters(){
 			}
 		}
 
-		//Store cluster if there is more than one neuron in it
+		//Store cluster if there is more than one neuron in it and if the liveliness is greater than the threshold
 		if(expansionList.size() > 1){
-			livelinessDao->addCluster(analysisInfo.getID(), timeStep, expansionList, getClusterLiveliness(expansionList));
+			double clstrLiveliness = getClusterLiveliness(expansionList);
+			if(clstrLiveliness >= minClusterLiveliness){
+				livelinessDao->addCluster(analysisInfo.getID(), timeStep, expansionList, clstrLiveliness);
+			}
 
 			//Add neurons to map of all expanded neurons
 			foreach(unsigned int neurID, expansionList)

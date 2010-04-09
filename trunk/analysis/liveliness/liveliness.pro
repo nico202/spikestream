@@ -33,7 +33,7 @@ INCLUDEPATH += src \
 				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src/models \
 				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src/views
 win32 {
-	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/gmp/include
+	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/gmp/include $${SPIKESTREAM_ROOT_DIR}/extlib/qwt/include
 }
 
 #----------------------------------------------#
@@ -43,7 +43,9 @@ unix {
 	LIBS += -lgmpxx -L$${SPIKESTREAM_ROOT_DIR}/lib -lspikestream -lspikestreamapplication
 }
 win32 {
-	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/lib -lspikestreamapplication0 -lspikestream0 -lgmp -L$${SPIKESTREAM_ROOT_DIR}/extlib/gmp/lib
+	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/lib -lspikestreamapplication0 -lspikestream0
+	LIBS += -lgmpxx -lgmp -L$${SPIKESTREAM_ROOT_DIR}/extlib/gmp/lib
+	LIBS += -lqwt5 -L$${SPIKESTREAM_ROOT_DIR}/extlib/qwt/lib
 }
 
 
@@ -57,17 +59,21 @@ SOURCES = src/analysis/Cluster.cpp \
 
 #====================  GUI  =====================
 HEADERS += src/gui/LivelinessWidget.h \
-			src/gui/LivelinessExportDialog.h
+			src/gui/LivelinessExportDialog.h \
+			src/gui/LivelinessGraphDialog.h
 SOURCES += src/gui/LivelinessWidget.cpp \
-			src/gui/LivelinessExportDialog.cpp
+			src/gui/LivelinessExportDialog.cpp \
+			src/gui/LivelinessGraphDialog.cpp
 
 #==================  DATABASE  ===================
 HEADERS += src/database/LivelinessDao.h
 SOURCES += src/database/LivelinessDao.cpp
 
 #==================  MODELS  =====================
-HEADERS += src/models/LivelinessFullResultsModel.h
-SOURCES += src/models/LivelinessFullResultsModel.cpp
+HEADERS += src/models/LivelinessFullResultsModel.h \
+			src/models/LivelinessSpectrogramData.h
+SOURCES += src/models/LivelinessFullResultsModel.cpp \
+			src/models/LivelinessSpectrogramData.cpp
 
 #==================  VIEWS  =====================
 HEADERS += src/views/LivelinessFullResultsTableView.h
