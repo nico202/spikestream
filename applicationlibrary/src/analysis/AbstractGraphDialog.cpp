@@ -14,6 +14,8 @@ using namespace spikestream;
 AbstractGraphDialog::AbstractGraphDialog(QWidget* parent, const AnalysisInfo& anaInfo) : QDialog(parent){
 	//Store references
 	this->analysisInfo = anaInfo;
+
+	this->setStyleSheet("QWidget { background-color: white; font-family: Arial; font-size: 25px; } ");
 }
 
 
