@@ -4,8 +4,9 @@
 #include "SpikeStreamAnalysisException.h"
 using namespace spikestream;
 
-//Qt includes
-#include <QDateTime>
+//Other includes
+#include <iostream>
+using namespace std;
 
 
 //Declare static variables
@@ -21,7 +22,6 @@ NetworkDisplay* Globals::networkDisplay = new NetworkDisplay();
 bool Globals::rendering = false;
 QString Globals::spikeStreamRoot = "";
 QString Globals::workingDirectory = "";
-unsigned int Globals::timerStart_sec = 0;
 bool Globals::drawAxes = true;
 float Globals::vertexSize = 7.5f;
 
@@ -187,19 +187,6 @@ void Globals::setDrawAxes(bool drawAxes){
 /*! Sets the size of vertices in the 3D Network Viewer */
 void Globals::setVertexSize(float vertexSize){
 	Globals::vertexSize = vertexSize;
-}
-
-
-/*! Stores the current time in seconds */
-void Globals::startTimer(){
-	timerStart_sec = QDateTime::currentDateTime().toTime_t();
-}
-
-
-/*! Returns the number of seconds that have elapsed since the timer started */
-unsigned int Globals::timeElapsed(){
-	unsigned int currTime_sec = QDateTime::currentDateTime().toTime_t();
-	return currTime_sec - timerStart_sec;
 }
 
 

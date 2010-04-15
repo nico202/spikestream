@@ -63,9 +63,6 @@ void AnalysisRunner::run(){
 	stopThread = false;
 	qDebug()<<"Analysis Runner thread started";
 
-	//Initialize the timer with the current time
-	Globals::startTimer();
-
 	//Launch the first batch of threads
 	unsigned int threadCount = 0;
 	while(threadCount < analysisInfo.getNumberOfThreads()){
@@ -90,9 +87,6 @@ void AnalysisRunner::run(){
 	while(!stopThread){
 		usleep(500000);//Sleep for half a second
 	}
-
-	//Output the number of seconds that the analysis toook
-	qDebug()<<"Analysis took "<<Globals::timeElapsed()<<" seconds.";
 
 	qDebug()<<"Analysis runner thread stopped.";
 }

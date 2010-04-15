@@ -91,11 +91,29 @@ void StateBasedPhiSpectrogramData::loadData(){
 	foreach(Complex cmplx, newComplexList){
 		unsigned int timeStep = cmplx.getTimeStep();
 
+		/* Get neurons in the complex
+			NOTE: Neuron ids are in an arbitrary order and this is unlikely to be the
+			same order as the list of neuron ids from the database */
 		QList<unsigned int> tmpNeurIDs = cmplx.getNeuronIDs();
+
+		//Work through all possible combinations of the neurons. Current measure is symmetrical
 		for(int i=0; i<tmpNeurIDs.size(); ++i){
 			for(int j=i; j<tmpNeurIDs.size(); ++j){
-				if(cmplx.getPhi() > timeStepDataMap[timeStep][tmpNeurIDs.at(i)][tmpNeurIDs.at(j)])
-					timeStepDataMap[timeStep][tmpNeurIDs.at(i)][tmpNeurIDs.at(j)] = cmplx.getPhi();
+				unsigned int tmpNeur1 = tmpNeurIDs.at(i);
+				unsigned int tmpNeur2 = tmpNeurIDs.at(j);
+
+				if(tmpNeur1 <= tmpNeur2){
+					if(!timeStepDataMap[timeStep].contains(tmpNeur1) || !timeStepDataMap[timeStep][tmpNeur1].contains(tmpNeur2))
+						qCritical()<<"Neuron ID Key error";
+					if(cmplx.getPhi() > timeStepDataMap[timeStep][tmpNeur1][tmpNeur2])
+						timeStepDataMap[timeStep][tmpNeur1][tmpNeur2] = cmplx.getPhi();
+				}
+				else{
+					if(!timeStepDataMap[timeStep].contains(tmpNeur2) || !timeStepDataMap[timeStep][tmpNeur2].contains(tmpNeur1))
+						qCritical()<<"Neuron ID Key error";
+					if(cmplx.getPhi() > timeStepDataMap[timeStep][tmpNeur2][tmpNeur1])
+						timeStepDataMap[timeStep][tmpNeur2][tmpNeur1] = cmplx.getPhi();
+				}
 			}
 		}
 	}

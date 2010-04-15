@@ -1,5 +1,7 @@
 //SpikeStream includes
+#include "Globals.h"
 #include "LivelinessTimeStepThread.h"
+#include "PerformanceTimer.h"
 #include "SpikeStreamException.h"
 #include "WeightlessLivelinessAnalyzer.h"
 using namespace spikestream;
@@ -26,6 +28,9 @@ void LivelinessTimeStepThread::run(){
 	stop = false;
 	qDebug()<<"LivelinessTimeStepThread started for time step "<<timeStep<<".";
 
+	//Start timer
+	PerformanceTimer timer;
+
 	//Reset error state
 	clearError();
 
@@ -46,6 +51,9 @@ void LivelinessTimeStepThread::run(){
 	catch(SpikeStreamException& ex){
 		setError(ex.getMessage());
 	}
+
+	//Show time taken for the analysis
+	timer.printTime("Liveliness Analysis time step " + QString::number(timeStep));
 
 	qDebug()<<"LivelinessTimeStepThread stopped for time step "<<timeStep<<".";
 	stop = true;

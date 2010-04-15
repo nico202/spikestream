@@ -17,6 +17,7 @@ using namespace spikestream;
 
 //Qt includes
 #include <QString>
+#include <QDateTime>
 
 namespace spikestream {
     class Globals {
@@ -43,8 +44,6 @@ namespace spikestream {
 			static void setArchivePlaying(bool archivePlaying);
 			static void setDrawAxes(bool drawAxes);
 			static void setVertexSize(float vertexSize);
-			static void startTimer();
-			static unsigned int timeElapsed();
 
 			/* Friend classes that are allowed to change the state of Globals
 				by accessing private setter methods*/
@@ -89,9 +88,6 @@ namespace spikestream {
 
 			/*! Records when rendering is in progress */
 			static bool rendering;
-
-			/*! The time at which the timer starts */
-			static unsigned int timerStart_sec;
 
 			/*! Is archive playback in progress */
 			static bool archivePlaying;
