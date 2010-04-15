@@ -112,9 +112,14 @@ void AbstractSpectrogramData::addTimeStep(unsigned int timeStep, const QList<uns
 	if(timeStepDataMap.contains(timeStep))
 		throw SpikeStreamAnalysisException("Time step already exists in time step data map.");
 
+	//Add each combination of neuron IDs only once
 	for(int i=0; i<neurIDList.size(); ++i){
 		for(int j=i; j<neurIDList.size(); ++j){
-			timeStepDataMap[timeStep][neurIDList.at(i)][neurIDList.at(j)] = 0.0;
+			//Make sure that map always stores lower number in the first key
+			if(neurIDList.at(i) <= neurIDList.at(j))
+				timeStepDataMap[timeStep][neurIDList.at(i)][neurIDList.at(j)] = 0.0;
+			else
+				timeStepDataMap[timeStep][neurIDList.at(j)][neurIDList.at(i)] = 0.0;
 		}
 	}
 }

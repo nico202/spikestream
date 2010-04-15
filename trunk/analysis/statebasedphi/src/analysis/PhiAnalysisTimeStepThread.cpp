@@ -1,4 +1,5 @@
 //SpikeStream includes
+#include "PerformanceTimer.h"
 #include "PhiAnalysisTimeStepThread.h"
 #include "SpikeStreamException.h"
 #include "SubsetManager.h"
@@ -31,6 +32,9 @@ void PhiAnalysisTimeStepThread::run(){
 	stop = false;
 	clearError();
 
+	//Start timer
+	PerformanceTimer timer;
+
 	try{
 		//Check that network is all weightless neurons
 		NetworkDao netDao(networkDBInfo);
@@ -49,6 +53,9 @@ void PhiAnalysisTimeStepThread::run(){
 	catch(SpikeStreamException& ex){
 		setError(ex.getMessage());
 	}
+
+	//Show time taken for the analysis
+	timer.printTime("State-based phi time step " + QString::number(timeStep));
 
 	stop = true;
 }

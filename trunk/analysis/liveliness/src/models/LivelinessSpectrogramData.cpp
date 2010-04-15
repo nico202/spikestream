@@ -91,11 +91,29 @@ void LivelinessSpectrogramData::loadData(){
 	foreach(Cluster clstr, newClusterList){
 		unsigned int timeStep = clstr.getTimeStep();
 
+		/* Get neurons in the cluster
+			NOTE: Neuron ids are in an arbitrary order and this is unlikely to be the
+			same order as the list of neuron ids from the database */
 		QList<unsigned int> tmpNeurIDs = clstr.getNeuronIDs();
+
+		//Work through all possible combinations of the neurons. Current measure is symmetrical
 		for(int i=0; i<tmpNeurIDs.size(); ++i){
 			for(int j=i; j<tmpNeurIDs.size(); ++j){
-				if(clstr.getLiveliness() > timeStepDataMap[timeStep][tmpNeurIDs.at(i)][tmpNeurIDs.at(j)])
-					timeStepDataMap[timeStep][tmpNeurIDs.at(i)][tmpNeurIDs.at(j)] = clstr.getLiveliness();
+				unsigned int tmpNeur1 = tmpNeurIDs.at(i);
+				unsigned int tmpNeur2 = tmpNeurIDs.at(j);
+
+				if(tmpNeur1 <= tmpNeur2){
+					if(!timeStepDataMap[timeStep].contains(tmpNeur1) || !timeStepDataMap[timeStep][tmpNeur1].contains(tmpNeur2))
+						qCritical()<<"Neuron ID Key error";
+					if(clstr.getLiveliness() > timeStepDataMap[timeStep][tmpNeur1][tmpNeur2])
+						timeStepDataMap[timeStep][tmpNeur1][tmpNeur2] = clstr.getLiveliness();
+				}
+				else{
+					if(!timeStepDataMap[timeStep].contains(tmpNeur2) || !timeStepDataMap[timeStep][tmpNeur2].contains(tmpNeur1))
+						qCritical()<<"Neuron ID Key error";
+					if(clstr.getLiveliness() > timeStepDataMap[timeStep][tmpNeur2][tmpNeur1])
+						timeStepDataMap[timeStep][tmpNeur2][tmpNeur1] = clstr.getLiveliness();
+				}
 			}
 		}
 	}

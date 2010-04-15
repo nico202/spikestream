@@ -1,27 +1,6 @@
-/***************************************************************************
- *   SpikeStream Library                                                   *
- *   Copyright (C) 2007 by David Gamez                                     *
- *   david@davidgamez.eu                                                   *
- *   Version 0.1                                                           *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
-
 //SpikeStream includes
 #include "PerformanceTimer.h"
+using namespace spikestream;
 
 //Other includes
 #include <iostream>
@@ -30,61 +9,46 @@ using namespace std;
 
 /*! Constructor */
 PerformanceTimer::PerformanceTimer(){
-	//Timer has not been started yet
-	timerStopped = true;
-
-	//Initialise the time values to zero
-	startTime.tv_sec = 0;
-	startTime.tv_usec = 0;
-	endTime.tv_sec = 0;
-	endTime.tv_usec = 0;
+	timerStart = QDateTime::currentDateTime();
 }
 
 
 /*! Destructor. */
 PerformanceTimer::~PerformanceTimer(){
-	#ifdef MEMORY_DEBUG
-		cout<<"DESTROYING PERFORMANCE TIMER"<<endl;
-	#endif//MEMORY_DEBUG
+}
+
+/*----------------------------------------------------------*/
+/*------                PUBLIC METHODS                ------*/
+/*----------------------------------------------------------*/
+
+/*! Stores the current date time in seconds */
+void PerformanceTimer::start(){
+	timerStart = QDateTime::currentDateTime();
 }
 
 
-//------------------------------------------------------------------------
-//------------------------ PUBLIC METHODS --------------------------------
-//------------------------------------------------------------------------
+/*! Returns the number of seconds that have elapsed since the timer started */
+void PerformanceTimer::printTime(const QString& taskName){
+	QDateTime currDateTime = QDateTime::currentDateTime();
 
-/*! Returns how long since the timer was started in microseconds. */
-unsigned int PerformanceTimer::getTime_usec(){
-	//Update the current time if the timer is still running
-	if(!timerStopped)
-		gettimeofday(&endTime, NULL);
-	unsigned int timerTime_us = 1000000 * (endTime.tv_sec - startTime.tv_sec) + endTime.tv_usec - startTime.tv_usec;
-	return timerTime_us;
+	//Later in the same day, can just subtract the milliseconds
+	if(timerStart.daysTo(currDateTime) == 0){
+		cout<<taskName.toStdString()<<" took "<<( timerStart.time().msecsTo(currDateTime.time()) )<<" ms."<<endl;
+	}
+	//1 day difference - still output result in milliseconds in case timing takes place over midnight
+	else if (timerStart.daysTo(currDateTime) == 1){
+		//Calculate the time left in day1
+		unsigned int msecDay1 = timerStart.time().hour()*3600000 + timerStart.time().minute()*60000 + timerStart.time().second()*1000 + timerStart.time().msec();
+		msecDay1 -= 86400000;
+
+		//Calculate msec elapsed in day2
+		unsigned int msecDay2 = currDateTime.time().hour()*3600000 + currDateTime.time().minute()*60000 + currDateTime.time().second()*1000 + currDateTime.time().msec();
+		cout<<taskName.toStdString()<<" took "<<(msecDay1 + msecDay2)<<" ms."<<endl;
+	}
+	//More than 1 day difference - output result in seconds
+	else{
+		cout<<taskName.toStdString()<<" took "<<( currDateTime.toTime_t() - timerStart.toTime_t() )<<" seconds."<<endl;
+	}
 }
 
-
-/*! Prints out the time since it started. */
-void PerformanceTimer::printTime(){
-	//Update the current time if the timer is still running
-	if(!timerStopped)
-		gettimeofday(&endTime, NULL);
-	unsigned int timerTime_us = 1000000 * (endTime.tv_sec - startTime.tv_sec) + endTime.tv_usec - startTime.tv_usec;
-	cout<<processName<<" took "<<timerTime_us<<" microseconds"<<endl;
-}
-
-
-/*! Starts the timer by recording the current time. */
-void PerformanceTimer::start(string procName){
-	processName = procName;
-	gettimeofday(&startTime, NULL);
-	gettimeofday(&endTime, NULL);//Also initialise the end time
-	timerStopped = false;
-}
-
-
-/*! Stops the timer. */
-void PerformanceTimer::stop(){
-	gettimeofday(&endTime, NULL);
-	timerStopped = true;
-}
 
