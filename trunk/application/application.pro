@@ -30,7 +30,7 @@ INCLUDEPATH += src \
 				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src/widgets \
 				$${SPIKESTREAM_ROOT_DIR}/library/include
 
-CONFIG += console release thread exceptions
+CONFIG += console debug thread exceptions
 
 QT += xml opengl sql
 

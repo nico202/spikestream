@@ -1,6 +1,7 @@
 //SpikeStream includes
 #include "Globals.h"
 #include "NetworkDao.h"
+#include "NewNetworkDialog.h"
 #include "NetworksWidget.h"
 #include "PluginsDialog.h"
 #include "SpikeStreamException.h"
@@ -23,11 +24,20 @@ NetworksWidget::NetworksWidget(QWidget* parent) : QWidget(parent){
 
 	QVBoxLayout* verticalBox = new QVBoxLayout(this);
 
+	//Add button to add a new empty network to the database
+	QHBoxLayout* buttonBox = new QHBoxLayout();
+	QPushButton* newNetworkButton = new QPushButton("New Network");
+	newNetworkButton->setMaximumSize(120, 30);
+	connect (newNetworkButton, SIGNAL(clicked()), this, SLOT(addNewNetwork()));
+	buttonBox->addWidget(newNetworkButton);
+
 	//Add button to launch networks dialog
 	QPushButton* addNetworksButton = new QPushButton("Add Networks");
 	addNetworksButton->setMaximumSize(120, 30);
 	connect (addNetworksButton, SIGNAL(clicked()), this, SLOT(addNetworks()));
-	verticalBox->addWidget(addNetworksButton);
+	buttonBox->addWidget(addNetworksButton);
+	buttonBox->addStretch(10);
+	verticalBox->addLayout(buttonBox);
 
 	//Add grid holding networks
 	gridLayout = new QGridLayout();
@@ -111,14 +121,10 @@ void NetworksWidget::deleteNetwork(){
 	if(Globals::networkLoaded() && Globals::getNetwork()->getID() == networkID){
 		Globals::setNetwork(NULL);
 		emit networkChanged();
-		QTimer::singleShot(500, this, SLOT(loadNetworkList()));
 	}
 
-	//Otherwise, just reload the network list
-	//NOTE: USE TIMER TO AVOID DELETING DELETE BUTTON DURING ITS EVENT LOOP.
-	else{
-		QTimer::singleShot(500, this, SLOT(loadNetworkList()));
-	}
+	//Reload the network list
+	loadNetworkList();
 }
 
 
@@ -213,6 +219,19 @@ void NetworksWidget::loadNetworkList(){
 }
 
 
+/*! Shows a plugins dialog to enable the user to add a network */
+void NetworksWidget::addNewNetwork(){
+	try{
+		NewNetworkDialog* newNetworkDialog = new NewNetworkDialog(this);
+		newNetworkDialog->exec();
+		delete newNetworkDialog;
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<ex.getMessage();
+	}
+}
+
+
 /*----------------------------------------------------------*/
 /*-----                PRIVATE METHODS                 -----*/
 /*----------------------------------------------------------*/
@@ -301,16 +320,20 @@ void NetworksWidget::checkLoadingProgress(){
 	emit networkChanged();
 
 	/* Reload network list to reflect color changes and buttons enabled
-	Should not lead to an infinite loop because network in Globals
-	should match one in the list returned from the database */
+		Should not lead to an infinite loop because network in Globals
+		should match one in the list returned from the database */
 	loadNetworkList();
-
 }
 
 
 /*! Resets the state of the widget.
 	Deleting the widget automatically removes it from the layout. */
 void NetworksWidget::reset(){
+	//Clean up widgets that were scheduled to be deleted during the previous event cycle
+	foreach(QWidget* widget , cleanUpList)
+		widget->deleteLater();
+	cleanUpList.clear();
+
 	//Remove no networks label if it exists
 	if(networkInfoMap.size() == 0){
 		QLayoutItem* item = gridLayout->itemAtPosition(0, 0);
@@ -321,27 +344,41 @@ void NetworksWidget::reset(){
 	}
 
 	//Remove list of networks
-	//FIXME: GENERATES WARNING DO NOT DELETE OBJECT '8' DURING ITS EVENT HANDLER
 	for(int i=0; i<networkInfoMap.size(); ++i){
 		QLayoutItem* item = gridLayout->itemAtPosition(i, 0);
 		if(item != 0){
-			item->widget()->deleteLater();
+			QWidget* tmpWidget = item->widget();
+			gridLayout->removeWidget(tmpWidget);
+			tmpWidget->setVisible(false);
+			cleanUpList.append(tmpWidget);
 		}
 		item = gridLayout->itemAtPosition(i, 1);
 		if(item != 0){
-			item->widget()->deleteLater();
+			QWidget* tmpWidget = item->widget();
+			gridLayout->removeWidget(tmpWidget);
+			tmpWidget->setVisible(false);
+			cleanUpList.append(tmpWidget);
 		}
 		item = gridLayout->itemAtPosition(i, 3);
 		if(item != 0){
-			item->widget()->deleteLater();
+			QWidget* tmpWidget = item->widget();
+			gridLayout->removeWidget(tmpWidget);
+			tmpWidget->setVisible(false);
+			cleanUpList.append(tmpWidget);
 		}
 		item = gridLayout->itemAtPosition(i, 4);
 		if(item != 0){
-			item->widget()->deleteLater();
+			QWidget* tmpWidget = item->widget();
+			gridLayout->removeWidget(tmpWidget);
+			tmpWidget->setVisible(false);
+			cleanUpList.append(tmpWidget);
 		}
 		item = gridLayout->itemAtPosition(i, 5);
 		if(item != 0){
-			item->widget()->deleteLater();
+			QWidget* tmpWidget = item->widget();
+			gridLayout->removeWidget(tmpWidget);
+			tmpWidget->setVisible(false);
+			cleanUpList.append(tmpWidget);
 		}
 	}
 	networkInfoMap.clear();

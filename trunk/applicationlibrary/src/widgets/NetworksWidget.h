@@ -26,6 +26,7 @@ namespace spikestream {
 
 	private slots:
 	    void addNetworks();
+		void addNewNetwork();
 	    void checkLoadingProgress();
 	    void deleteNetwork();
 	    void loadNetwork();
@@ -48,6 +49,9 @@ namespace spikestream {
 
 	    /*! The network that is being loaded */
 	    Network* newNetwork;
+
+		/** Holds widgets that were set to be deleted during earlier event cycle */
+		QList<QWidget*> cleanUpList;
 
 	    //=======================  METHODS  ======================
 	    void loadNetwork(NetworkInfo& netInfo);

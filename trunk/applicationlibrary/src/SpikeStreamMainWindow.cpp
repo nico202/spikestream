@@ -12,6 +12,7 @@
 #include "ConnectionWidget_V2.h"
 #include "NetworkViewer_V2.h"
 #include "NetworkViewerProperties_V2.h"
+#include "SimulationLoaderWidget.h"
 #include "Util.h"
 using namespace spikestream;
 
@@ -194,7 +195,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow(){
 	menuBar()->addMenu(viewMenu);
 
 	//Reload everything is broadcast to all classes connected to the event router
-	viewMenu->addAction("Reload everything", Globals::getEventRouter(), SLOT(reloadSlot()), Qt::SHIFT+Qt::Key_F5);
+	viewMenu->addAction("Reload everything", Globals::getEventRouter(), SLOT(reloadSlot()), Qt::CTRL + Qt::Key_F5);
 
 	//Add help menu
 	QMenu *helpMenu = new QMenu("Help", this);
@@ -231,6 +232,12 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow(){
 	networkViewPropsScrollArea->setWidget(networkViewerProperties_V2);
 	tabWidget->addTab(networkViewPropsScrollArea, "Viewer");
 
+	//Set up simulation tab
+	QScrollArea* simulationScrollArea = new QScrollArea(tabWidget);
+	SimulationLoaderWidget* simulationWidget = new SimulationLoaderWidget();
+	simulationScrollArea->setWidget(simulationWidget);
+	tabWidget->addTab(simulationScrollArea, "Simulation");
+
 	//Set up archive tab
 	QScrollArea* archiveScrollArea = new QScrollArea(tabWidget);
 	ArchiveWidget_V2* archiveWidget = new ArchiveWidget_V2();
@@ -254,13 +261,23 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow(){
 	connect(showEditorWidgetAction, SIGNAL(triggered()), this, SLOT(showEditorWidget()));
 	this->addAction(showEditorWidgetAction);
 
+	QAction* showViewerWidgetAction = new QAction(this);
+	showViewerWidgetAction->setShortcut(QKeySequence(Qt::Key_F3));
+	connect(showViewerWidgetAction, SIGNAL(triggered()), this, SLOT(showViewerWidget()));
+	this->addAction(showViewerWidgetAction);
+
+	QAction* showSimulationWidgetAction = new QAction(this);
+	showSimulationWidgetAction->setShortcut(QKeySequence(Qt::Key_F4));
+	connect(showSimulationWidgetAction, SIGNAL(triggered()), this, SLOT(showSimulationWidget()));
+	this->addAction(showSimulationWidgetAction);
+
 	QAction* showArchiveWidgetAction = new QAction(this);
-	showArchiveWidgetAction->setShortcut(QKeySequence(Qt::Key_F3));
+	showArchiveWidgetAction->setShortcut(QKeySequence(Qt::Key_F5));
 	connect(showArchiveWidgetAction, SIGNAL(triggered()), this, SLOT(showArchiveWidget()));
 	this->addAction(showArchiveWidgetAction);
 
 	QAction* showAnalysisWidgetAction = new QAction(this);
-	showAnalysisWidgetAction->setShortcut(QKeySequence(Qt::Key_F4));
+	showAnalysisWidgetAction->setShortcut(QKeySequence(Qt::Key_F6));
 	connect(showAnalysisWidgetAction, SIGNAL(triggered()), this, SLOT(showAnalysisWidget()));
 	this->addAction(showAnalysisWidgetAction);
 
@@ -268,7 +285,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow(){
 	QPixmap iconPixmap(Globals::getSpikeStreamRoot() + "/images/spikestream_icon_64.png" );
 	setWindowIcon(iconPixmap);
 	setCentralWidget( mainSplitterWidget );
-	setWindowState(Qt::WindowMaximized);
+	//setWindowState(Qt::WindowMaximized);
 
 	//Get rid of splash screen if it is showing
 	if(splashScreen){
@@ -314,13 +331,13 @@ void SpikeStreamMainWindow::databaseManagerFinished(){
 
 /*! Displays the analysis widget */
 void SpikeStreamMainWindow::showAnalysisWidget(){
-	tabWidget->setCurrentIndex(3);
+	tabWidget->setCurrentIndex(5);
 }
 
 
 /*! Displays the archive widget */
 void SpikeStreamMainWindow::showArchiveWidget(){
-	tabWidget->setCurrentIndex(2);
+	tabWidget->setCurrentIndex(4);
 }
 
 
@@ -333,6 +350,18 @@ void SpikeStreamMainWindow::showEditorWidget(){
 /*! Displays the networks widget */
 void SpikeStreamMainWindow::showNetworkWidget(){
 	tabWidget->setCurrentIndex(0);
+}
+
+
+/*! Displays the simulation widget */
+void SpikeStreamMainWindow::showSimulationWidget(){
+	tabWidget->setCurrentIndex(3);
+}
+
+
+/*! Displays the viewer widget */
+void SpikeStreamMainWindow::showViewerWidget(){
+	tabWidget->setCurrentIndex(2);
 }
 
 
