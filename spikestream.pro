@@ -1,31 +1,22 @@
 TEMPLATE = subdirs
 
 #===========  CORE SPIKESTREAM COMPONENTS  ===========
-SUBDIRS =   library \
-			applicationlibrary \
-			application
+SUBDIRS =   library applicationlibrary application
 
 
 #================  ANALYSIS PLUGINS  =================
-SUBDIRS += analysis/statebasedphi \
-			analysis/liveliness
+#SUBDIRS += analysis/statebasedphi analysis/liveliness
 
 
 #================  NETWORKS PLUGINS  =================
-SUBDIRS += networks/tononinetworks \
-			networks/aleksandernetworks \
-			networks/alekgameznets2
+#SUBDIRS += networks/tononinetworks networks/aleksandernetworks networks/alekgameznets2
 	
 	
 #================  INSTALLATION  =====================
-SUBDIRS += installation/dbconfigtool
+#SUBDIRS += installation/dbconfigtool
 
 
 #=================  TESTS  ===================
-SUBDIRS += testlibrary \
-			library/test \
-			applicationlibrary/test \
-			analysis/statebasedphi/test \
-			analysis/liveliness/test
+#SUBDIRS += testlibrary library/test applicationlibrary/test analysis/statebasedphi/test analysis/liveliness/test
 
 

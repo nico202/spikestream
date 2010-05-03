@@ -35,6 +35,8 @@ namespace spikestream {
 			void showArchiveWidget();
 			void showEditorWidget();
 			void showNetworkWidget();
+			void showSimulationWidget();
+			void showViewerWidget();
 			void databaseManagerFinished();
 
 

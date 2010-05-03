@@ -58,7 +58,7 @@ win32 {
 }
 
 
-CONFIG += console release thread exceptions
+CONFIG += debug console thread exceptions
 
 QT += xml opengl sql
 
@@ -128,23 +128,28 @@ SOURCES += src/analysis/AnalysisLoaderWidget.cpp \
 			src/analysis/AbstractSpectrogramData.cpp \
 			src/analysis/AnalysisSpectrogram.cpp
 
+
 #----------------------------------------------#
 #---              dialogs folder            ---#
 #----------------------------------------------#
 HEADERS += src/dialogs/NRMImportDialog.h \
 			src/dialogs/LoadAnalysisDialog.h \
 			src/dialogs/PluginsDialog.h \
-			src/dialogs/TruthTableDialog.h
+			src/dialogs/TruthTableDialog.h \
+			src/dialogs/NewNetworkDialog.h
 SOURCES += src/dialogs/NRMImportDialog.cpp \
 			src/dialogs/LoadAnalysisDialog.cpp \
 			src/dialogs/PluginsDialog.cpp \
-			src/dialogs/TruthTableDialog.cpp
+			src/dialogs/TruthTableDialog.cpp \
+			src/dialogs/NewNetworkDialog.cpp
+
 
 #----------------------------------------------#
 #---            exceptions folder           ---#
 #----------------------------------------------#
 HEADERS += src/exceptions/NRMException.h
 SOURCES += src/exceptions/NRMException.cpp
+
 
 #----------------------------------------------#
 #---              models folder             ---#
@@ -160,6 +165,7 @@ SOURCES += src/models/NeuronGroupModel.cpp \
 			src/models/AnalysesModel.cpp \
 			src/models/TruthTableModel.cpp
 
+
 #----------------------------------------------#
 #---              views folder             ---#
 #----------------------------------------------#
@@ -174,6 +180,7 @@ SOURCES += src/views/NeuronGroupTableView.cpp \
 			src/views/AnalysesTableView.cpp \
 			src/views/TruthTableView.cpp
 
+
 #----------------------------------------------#
 #---              widgets folder            ---#
 #----------------------------------------------#
@@ -181,12 +188,15 @@ HEADERS += src/widgets/NetworksWidget.h \
 			src/widgets/ArchiveWidget_V2.h \
 			src/widgets/NeuronGroupWidget.h \
 			src/widgets/ConnectionWidget_V2.h \
-			src/widgets/NetworkViewerProperties_V2.h
+			src/widgets/NetworkViewerProperties_V2.h \
+			src/widgets/SimulationLoaderWidget.h
 SOURCES += src/widgets/NetworksWidget.cpp \
 			src/widgets/ArchiveWidget_V2.cpp \
 			src/widgets/NeuronGroupWidget.cpp \
 			src/widgets/ConnectionWidget_V2.cpp \
-			src/widgets/NetworkViewerProperties_V2.cpp
+			src/widgets/NetworkViewerProperties_V2.cpp \
+			src/widgets/SimulationLoaderWidget.cpp
+
 
 #----------------------------------------------#
 #---               src folder               ---#
