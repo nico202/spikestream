@@ -20,10 +20,7 @@ INCLUDEPATH += src \
 				src/gui \
 				src/model \
 				$${SPIKESTREAM_ROOT_DIR}/library/include \
-				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src \
-				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src/database \
-				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src/widgets \
-				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src/dialogs
+				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/include
 
 unix{
 	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/lib  -lspikestreamapplication -lspikestream

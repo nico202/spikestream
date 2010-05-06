@@ -4,6 +4,12 @@ TEMPLATE = lib
 
 TARGET = spikestreamtest
 
+win32 {
+	# Add a copy of the libary to the bin directory
+	target.path = $${SPIKESTREAM_ROOT_DIR}/bin
+	INSTALLS += target
+}
+
 VERSION = 0.2
 
 DESTDIR = $${SPIKESTREAM_ROOT_DIR}/lib
@@ -12,7 +18,7 @@ OBJECTS_DIR = build/objects
 
 MOC_DIR = build/moc
 
-CONFIG += release qtestlib console
+CONFIG += debug qtestlib console
 
 QT += sql
 

@@ -41,7 +41,7 @@ Network::Network(const NetworkInfo& networkInfo, NetworkDao* networkDao, Archive
 
     //Check that network ID is valid
     if(info.getID() == INVALID_NETWORK_ID){
-	throw SpikeStreamException ("Attempting to load an invalid network");
+		throw SpikeStreamException ("Attempting to load an invalid network");
     }
 
     //Create network dao threads for heavy operations
@@ -64,14 +64,14 @@ Network::Network(const NetworkInfo& networkInfo, NetworkDao* networkDao, Archive
 /*! Destructor */
 Network::~Network(){
     if(neuronNetworkDaoThread != NULL){
-	neuronNetworkDaoThread->stop();
-	neuronNetworkDaoThread->wait();
-	delete neuronNetworkDaoThread;
+		neuronNetworkDaoThread->stop();
+		neuronNetworkDaoThread->wait();
+		delete neuronNetworkDaoThread;
     }
     if(connectionNetworkDaoThread != NULL){
-	connectionNetworkDaoThread->stop();
-	connectionNetworkDaoThread->wait();
-	delete connectionNetworkDaoThread;
+		connectionNetworkDaoThread->stop();
+		connectionNetworkDaoThread->wait();
+		delete connectionNetworkDaoThread;
     }
 
     //Empties all data stored in the class
@@ -89,13 +89,13 @@ Network::~Network(){
     #FIXME#: MAKE THIS WORK IN THE SAME WAY AS A NEURON GROUP. WILL HAVE TO CHANGE NRM IMPORTER WHEN THIS IS DONE. */
 void Network::addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList, bool checkNetworkLocked){
     if(checkNetworkLocked && isLocked())//Check if network is editable or not
-	throw SpikeStreamException("Cannot add connection groups to a locked network.");
+		throw SpikeStreamException("Cannot add connection groups to a locked network.");
 
     for(QList<ConnectionGroup*>::iterator iter = connectionGroupList.begin(); iter != connectionGroupList.end(); ++iter){
-	if(connGrpMap.contains((*iter)->getID()))
-	    throw SpikeStreamException("Connection group with ID " + QString::number((*iter)->getID()) + " is already present in the network.");
+		if(connGrpMap.contains((*iter)->getID()))
+			throw SpikeStreamException("Connection group with ID " + QString::number((*iter)->getID()) + " is already present in the network.");
 
-	connGrpMap[(*iter)->getID()] = *iter;
+		connGrpMap[(*iter)->getID()] = *iter;
     }
 }
 
@@ -103,7 +103,7 @@ void Network::addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList, 
 /*! Adds neuron groups to the network */
 void Network::addNeuronGroups(QList<NeuronGroup*>& neuronGroupList){
     if(isLocked())//Check if network is editable or not
-	throw SpikeStreamException("Cannot add neuron groups to a locked network.");
+		throw SpikeStreamException("Cannot add neuron groups to a locked network.");
 
     //Store the list of neuron groups to be added later when the thread has finished and we have the correct ID
     newNeuronGroups = neuronGroupList;
@@ -128,9 +128,9 @@ void Network::cancel(){
 bool Network::containsNeuron(unsigned int neurID){
     //Need to check each neuron group to see if it contains the neuron.
     for(QHash<unsigned int, NeuronGroup*>::iterator iter = neurGrpMap.begin(); iter != neurGrpMap.end(); ++iter){
-	if(iter.value()->contains(neurID)){
-	    return true;
-	}
+		if(iter.value()->contains(neurID)){
+			return true;
+		}
     }
     return false;
 }
@@ -140,7 +140,7 @@ bool Network::containsNeuron(unsigned int neurID){
 QList<ConnectionGroupInfo> Network::getConnectionGroupsInfo(){
     QList<ConnectionGroupInfo> tmpList;
     for(QHash<unsigned int, ConnectionGroup*>::iterator iter = connGrpMap.begin(); iter != connGrpMap.end(); ++iter)
-	tmpList.append(iter.value()->getInfo());
+		tmpList.append(iter.value()->getInfo());
     return tmpList;
 }
 
@@ -149,7 +149,7 @@ QList<ConnectionGroupInfo> Network::getConnectionGroupsInfo(){
 QList<NeuronGroupInfo> Network::getNeuronGroupsInfo(){
     QList<NeuronGroupInfo> tmpList;
     for(QHash<unsigned int, NeuronGroup*>::iterator iter = neurGrpMap.begin(); iter != neurGrpMap.end(); ++iter)
-	tmpList.append(iter.value()->getInfo());
+		tmpList.append(iter.value()->getInfo());
     return tmpList;
 }
 
@@ -158,13 +158,13 @@ QList<NeuronGroupInfo> Network::getNeuronGroupsInfo(){
 int Network::getNumberOfToConnections(unsigned int neuronID){
     //Check neuron id is in the network
     if(!containsNeuron(neuronID))
-	throw SpikeStreamException("Request for number of connections to a neuron that is not in the network.");
+		throw SpikeStreamException("Request for number of connections to a neuron that is not in the network.");
 
     //Count up the number of connections to this neuron in each connection group
     int toConCount = 0;
     for(QHash<unsigned int, ConnectionGroup*>::iterator iter = connGrpMap.begin(); iter != connGrpMap.end(); ++iter){
-	//Get the number of connections to the neuron in this connection group
-	toConCount += iter.value()->getToConnections(neuronID).size();
+		//Get the number of connections to the neuron in this connection group
+		toConCount += iter.value()->getToConnections(neuronID).size();
     }
 
     //Return final count
@@ -175,7 +175,7 @@ int Network::getNumberOfToConnections(unsigned int neuronID){
 /*! Returns true if heavy thread-based operations are in progress */
 bool Network::isBusy() {
     if(neuronNetworkDaoThread->isRunning() || connectionNetworkDaoThread->isRunning())
-	return true;
+		return true;
     return false;
 }
 
@@ -200,26 +200,26 @@ Box Network::getBoundingBox(){
     bool firstTime = true;
     QList<NeuronGroup*> tmpNeurGrpList = neurGrpMap.values();
     for(QList<NeuronGroup*>::iterator iter = tmpNeurGrpList.begin(); iter != tmpNeurGrpList.end(); ++iter){
-	if(firstTime){//Take box enclosing first neuron group as a starting point
-	    networkBox = networkDao->getNeuronGroupBoundingBox((*iter)->getID());
-	    firstTime = false;
-	}
-	else{//Expand box to include subsequent neuron groups
-	    Box neurGrpBox = networkDao->getNeuronGroupBoundingBox((*iter)->getID());
-	    if(neurGrpBox.x1 < networkBox.x1)
-		networkBox.x1 = neurGrpBox.x1;
-	    if(neurGrpBox.y1 < networkBox.y1)
-		networkBox.y1 = neurGrpBox.y1;
-	    if(neurGrpBox.z1 < networkBox.z1)
-		networkBox.z1 = neurGrpBox.z1;
+		if(firstTime){//Take box enclosing first neuron group as a starting point
+			networkBox = networkDao->getNeuronGroupBoundingBox((*iter)->getID());
+			firstTime = false;
+		}
+		else{//Expand box to include subsequent neuron groups
+			Box neurGrpBox = networkDao->getNeuronGroupBoundingBox((*iter)->getID());
+			if(neurGrpBox.x1 < networkBox.x1)
+				networkBox.x1 = neurGrpBox.x1;
+			if(neurGrpBox.y1 < networkBox.y1)
+				networkBox.y1 = neurGrpBox.y1;
+			if(neurGrpBox.z1 < networkBox.z1)
+				networkBox.z1 = neurGrpBox.z1;
 
-	    if(neurGrpBox.x2 > networkBox.x2)
-		networkBox.x2 = neurGrpBox.x2;
-	    if(neurGrpBox.y2 > networkBox.y2)
-		networkBox.y2 = neurGrpBox.y2;
-	    if(neurGrpBox.z2 > networkBox.z2)
-		networkBox.z2 = neurGrpBox.z2;
-	}
+			if(neurGrpBox.x2 > networkBox.x2)
+				networkBox.x2 = neurGrpBox.x2;
+			if(neurGrpBox.y2 > networkBox.y2)
+				networkBox.y2 = neurGrpBox.y2;
+			if(neurGrpBox.z2 > networkBox.z2)
+				networkBox.z2 = neurGrpBox.z2;
+		}
     }
     return networkBox;
 }
@@ -299,9 +299,9 @@ void Network::load(){
     QList<ConnectionGroup*> loadList;
     QList<ConnectionGroup*> connGrpMapList = connGrpMap.values();
     for(QList<ConnectionGroup*>::iterator iter = connGrpMapList.begin(); iter != connGrpMapList.end(); ++iter){
-	unsigned int connGrpSize = networkDao->getConnectionGroupSize((*iter)->getID());
-	if(connGrpSize <= LAZY_LOADING_THRESHOLD)
-	    loadList.append(*iter);
+		unsigned int connGrpSize = networkDao->getConnectionGroupSize((*iter)->getID());
+		if(connGrpSize <= LAZY_LOADING_THRESHOLD)
+			loadList.append(*iter);
     }
     connectionNetworkDaoThread->prepareLoadConnections(loadList);
     currentConnectionTask = LOAD_CONNECTIONS_TASK;
@@ -324,15 +324,15 @@ void Network::load(){
 /*! Slot called when thread processing connections has finished running. */
 void Network::connectionThreadFinished(){
     if(connectionNetworkDaoThread->isError()){
-	errorMessage += "Connection Loading Error: '" + connectionNetworkDaoThread->getErrorMessage() + "'. ";
-	error = true;
+		errorMessage += "Connection Loading Error: '" + connectionNetworkDaoThread->getErrorMessage() + "'. ";
+		error = true;
     }
 
     //Reset task
     currentConnectionTask = -1;
 
     if(!isBusy())
-	emit taskFinished();
+		emit taskFinished();
 }
 
 
@@ -340,46 +340,46 @@ void Network::connectionThreadFinished(){
 void Network::neuronThreadFinished(){
     //Check for errors
     if(neuronNetworkDaoThread->isError()){
-	errorMessage += "Neuron Loading Error: '" + neuronNetworkDaoThread->getErrorMessage() + "'. ";
-	error = true;
+		errorMessage += "Neuron Loading Error: '" + neuronNetworkDaoThread->getErrorMessage() + "'. ";
+		error = true;
     }
 
     //Handle any task-specific stuff
     if(!error){
-	try{
-	    switch(currentNeuronTask){
-		case ADD_NEURONS_TASK:
-		    //Add neuron groups to the network now that they have the correct ID
-		    for(QList<NeuronGroup*>::iterator iter = newNeuronGroups.begin(); iter != newNeuronGroups.end(); ++iter){
-			//Check to see if ID already exists - error in this case
-			if( neurGrpMap.contains( (*iter)->getID() ) ){
-			    cout<<"NEUR GRP MAP SIZE: "<<neurGrpMap.size()<<" incorrect id: "<<(*iter)->getID()<<endl;
-			    throw SpikeStreamException("Adding neurons task - trying to add a neuron group with ID " + QString::number((*iter)->getID()) + " that already exists in the network.");
+		try{
+			switch(currentNeuronTask){
+				case ADD_NEURONS_TASK:
+					//Add neuron groups to the network now that they have the correct ID
+					for(QList<NeuronGroup*>::iterator iter = newNeuronGroups.begin(); iter != newNeuronGroups.end(); ++iter){
+						//Check to see if ID already exists - error in this case
+						if( neurGrpMap.contains( (*iter)->getID() ) ){
+							cout<<"NEUR GRP MAP SIZE: "<<neurGrpMap.size()<<" incorrect id: "<<(*iter)->getID()<<endl;
+							throw SpikeStreamException("Adding neurons task - trying to add a neuron group with ID " + QString::number((*iter)->getID()) + " that already exists in the network.");
+						}
+
+						//Store neuron group
+						neurGrpMap[ (*iter)->getID() ] = *iter;
+					}
+				break;
+				case LOAD_NEURONS_TASK:
+					;//Nothing to do at present
+				break;
+				default:
+					throw SpikeStreamException("The current task ID has not been recognized.");
 			}
-
-			//Store neuron group
-			neurGrpMap[ (*iter)->getID() ] = *iter;
-		    }
-		break;
-		case LOAD_NEURONS_TASK:
-		    ;//Nothing to do at present
-		break;
-		default:
-		    throw SpikeStreamException("The current task ID has not been recognized.");
-	    }
-	}
-	catch(SpikeStreamException& ex){
-	    errorMessage = ex.getMessage();
-	    error = true;
-	}
+		}
+		catch(SpikeStreamException& ex){
+			errorMessage = ex.getMessage();
+			error = true;
+		}
     }
-
+	qDebug()<<"NETWORK: "<<neurGrpMap.size();
     //Reset task
     currentNeuronTask = -1;
 
     //Emit signal that task has finished if no other threads are carrying out operations
     if(!isBusy())
-	emit taskFinished();
+		emit taskFinished();
 }
 
 /*! Returns the size of the network.
@@ -388,7 +388,7 @@ void Network::neuronThreadFinished(){
 int Network::size(){
     int neuronCount = 0;
     for(QHash<unsigned int, NeuronGroup*>::iterator iter = neurGrpMap.begin(); iter != neurGrpMap.end(); ++iter){
-	neuronCount += iter.value()->size();
+		neuronCount += iter.value()->size();
     }
     return neuronCount;
 }
@@ -402,7 +402,7 @@ int Network::size(){
     and throws an exception if not. */
 void Network::checkConnectionGroupID(unsigned int id){
     if(!connGrpMap.contains(id))
-	throw SpikeStreamException(QString("Connection group with id ") + QString::number(id) + " is not in network with id " + QString::number(getID()));
+		throw SpikeStreamException(QString("Connection group with id ") + QString::number(id) + " is not in network with id " + QString::number(getID()));
 }
 
 
@@ -410,7 +410,7 @@ void Network::checkConnectionGroupID(unsigned int id){
     and throws an exception if not. */
 void Network::checkNeuronGroupID(unsigned int id){
     if(!neurGrpMap.contains(id))
-	throw SpikeStreamException(QString("Neuron group with id ") + QString::number(id) + " is not in network with id " + QString::number(getID()));
+		throw SpikeStreamException(QString("Neuron group with id ") + QString::number(id) + " is not in network with id " + QString::number(getID()));
 }
 
 
@@ -425,7 +425,7 @@ void Network::loadConnectionGroupsInfo(){
 
     //Copy list into hash map for faster access
     for(int i=0; i<connGrpInfoList.size(); ++i)
-	connGrpMap[ connGrpInfoList[i].getID() ] = new ConnectionGroup(connGrpInfoList[i]);
+		connGrpMap[ connGrpInfoList[i].getID() ] = new ConnectionGroup(connGrpInfoList[i]);
 }
 
 
@@ -440,7 +440,7 @@ void Network::loadNeuronGroupsInfo(){
 
     //Copy list into hash map for faster access
     for(int i=0; i<neurGrpInfoList.size(); ++i)
-	neurGrpMap[ neurGrpInfoList[i].getID() ] = new NeuronGroup(neurGrpInfoList[i]);
+		neurGrpMap[ neurGrpInfoList[i].getID() ] = new NeuronGroup(neurGrpInfoList[i]);
 }
 
 
@@ -448,7 +448,7 @@ void Network::loadNeuronGroupsInfo(){
 void Network::deleteConnectionGroups(){
     //Delete all connection groups
     for(QHash<unsigned int, ConnectionGroup*>::iterator iter = connGrpMap.begin(); iter != connGrpMap.end(); ++iter)
-	delete iter.value();
+		delete iter.value();
     connGrpMap.clear();
 }
 
@@ -456,6 +456,6 @@ void Network::deleteConnectionGroups(){
 void Network::deleteNeuronGroups(){
     //Delete all neuron groups
     for(QHash<unsigned int, NeuronGroup*>::iterator iter = neurGrpMap.begin(); iter != neurGrpMap.end(); ++iter)
-	delete iter.value();
+		delete iter.value();
     neurGrpMap.clear();
 }

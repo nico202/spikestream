@@ -257,6 +257,24 @@ QList<Connection*> NetworkDao::getConnections(unsigned int connectionMode, unsig
 }
 
 
+/*! Returns the number of neurons within the specified box.
+	Useful for determining overlap when adding neuron groups to networks */
+unsigned int NetworkDao::getNeuronCount(unsigned int networkID, const Box& box){
+	//Build query
+	QString queryStr = "SELECT COUNT(*) FROM Neurons ";
+	queryStr += " WHERE NeuronGroupID IN (SELECT NeuronGroupID FROM NeuronGroups WHERE NetworkID=" + QString::number(networkID) + ") AND ";
+	queryStr += " X >= " + QString::number(box.x1) + " AND X <= " + QString::number(box.x2) + " AND ";
+	queryStr += " Y >= " + QString::number(box.y1) + " AND Y <= " + QString::number(box.y2) + " AND ";
+	queryStr += " Z >= " + QString::number(box.z1) + " AND Z <= " + QString::number(box.z2);
+
+	//Execute query and return result
+	QSqlQuery query = getQuery(queryStr);
+	executeQuery(query);
+	query.next();
+	return(Util::getUInt(query.value(0).toString()));
+}
+
+
 /*! Returns a box enclosing a particular neuron group */
 Box NetworkDao::getNeuronGroupBoundingBox(unsigned int neurGrpID){
 	QSqlQuery query = getQuery("SELECT MIN(X), MIN(Y), MIN(Z), MAX(X), MAX(Y), MAX(Z) FROM Neurons WHERE NeuronGroupID = " + QString::number(neurGrpID));

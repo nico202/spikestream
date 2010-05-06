@@ -460,6 +460,23 @@ void TestNetworkDao::testGetConnectionGroupsInfo(){
 }
 
 
+void TestNetworkDao::testGetNeuronCount(){
+	//Adds test network with known properties
+	addTestNetwork1();
+
+	//Create test class
+	NetworkDao networkDao(dbInfo);
+
+	//Box that should intersect with test network 1
+	Box intersectBox1(-1,-5,-6,0,0,0);
+	Box intersectBox2(0,-1,0,2,2,2);
+	Box intersectBox3(1,1,1,2,2,2);
+
+	QVERIFY(networkDao.getNeuronCount(testNetID, intersectBox1) > 0);
+	QVERIFY(networkDao.getNeuronCount(testNetID, intersectBox2) > 0);
+	QVERIFY(networkDao.getNeuronCount(testNetID, intersectBox3) == 0);
+}
+
 
 void TestNetworkDao::testGetNeuronGroupBoundingBox(){
 	//Adds test network with known properties

@@ -141,33 +141,33 @@ void NetworkDaoThread::run(){
     numberOfCompletedSteps = 0;
     try{
     	//Connect to the database now that we are in a separate thread
-	connectToDatabase();
+		connectToDatabase();
 
-	switch(currentTask){
-	    case ADD_NEURON_GROUPS_TASK:
-		addNeuronGroups();
-	    break;
-	    case ADD_CONNECTION_GROUPS_TASK:
-		addConnectionGroups();
-	    break;
-	    case LOAD_CONNECTIONS_TASK:
-		loadConnections();
-	    break;
-	    case LOAD_NEURONS_TASK:
-		loadNeurons();
-	    break;
-	    default:
-		setError("NetworkDaoThread started without defined task.");
-	}
+		switch(currentTask){
+			case ADD_NEURON_GROUPS_TASK:
+						addNeuronGroups();
+						break;
+			case ADD_CONNECTION_GROUPS_TASK:
+						addConnectionGroups();
+						break;
+			case LOAD_CONNECTIONS_TASK:
+						loadConnections();
+						break;
+			case LOAD_NEURONS_TASK:
+						loadNeurons();
+						break;
+			default:
+				setError("NetworkDaoThread started without defined task.");
+		}
 
-	//Database connection can be closed
-	closeDatabaseConnection();
+		//Database connection can be closed
+		closeDatabaseConnection();
     }
     catch(SpikeStreamException& ex){
-	setError("NetworkDaoThread: SpikeStreamException thrown carrying out current task: " + ex.getMessage());
+		setError("NetworkDaoThread: SpikeStreamException thrown carrying out current task: " + ex.getMessage());
     }
     catch(...){
-	setError("Unrecognized exception thrown carrying out current task.");
+		setError("Unrecognized exception thrown carrying out current task.");
     }
 
     //Current task is complete
@@ -192,66 +192,66 @@ void NetworkDaoThread::stop(){
 void NetworkDaoThread::addConnectionGroups(){
     //Work through the list of connection groups
     for(QList<ConnectionGroup*>::iterator iter = connectionGroupList.begin(); iter != connectionGroupList.end(); ++iter){
-	//Get a pointer to the connection group
-	ConnectionGroup* connectionGroup = *iter;
+		//Get a pointer to the connection group
+		ConnectionGroup* connectionGroup = *iter;
 
-	//Get a copy of the information about the connection group
-	ConnectionGroupInfo connGrpInfo = connectionGroup->getInfo();
+		//Get a copy of the information about the connection group
+		ConnectionGroupInfo connGrpInfo = connectionGroup->getInfo();
 
-	//Build query string
-	QString queryStr = "INSERT INTO ConnectionGroups (NetworkID, Description, FromNeuronGroupID, ToNeuronGroupID, Parameters, SynapseTypeID ) VALUES (";
-	queryStr += QString::number(networkID) + ", ";
-	queryStr += "'" + connGrpInfo.getDescription() + "', ";
-	queryStr += QString::number(connGrpInfo.getFromNeuronGroupID()) + ", ";
-	queryStr += QString::number(connGrpInfo.getToNeuronGroupID()) + ", ";
-	queryStr += "'" + connGrpInfo.getParameterXML() + "', ";
-	queryStr += QString::number(connGrpInfo.getSynapseType()) + ")";
-	QSqlQuery query = getQuery(queryStr);
-	executeQuery(query);
+		//Build query string
+		QString queryStr = "INSERT INTO ConnectionGroups (NetworkID, Description, FromNeuronGroupID, ToNeuronGroupID, Parameters, SynapseTypeID ) VALUES (";
+		queryStr += QString::number(networkID) + ", ";
+		queryStr += "'" + connGrpInfo.getDescription() + "', ";
+		queryStr += QString::number(connGrpInfo.getFromNeuronGroupID()) + ", ";
+		queryStr += QString::number(connGrpInfo.getToNeuronGroupID()) + ", ";
+		queryStr += "'" + connGrpInfo.getParameterXML() + "', ";
+		queryStr += QString::number(connGrpInfo.getSynapseType()) + ")";
+		QSqlQuery query = getQuery(queryStr);
+		executeQuery(query);
 
-	//Check id is correct and add to connection group info if it is
-	int lastInsertID = query.lastInsertId().toInt();
-	if(lastInsertID >= START_CONNECTIONGROUP_ID)
-	    connectionGroup->setID(lastInsertID);
-	else{
-	    setError("Insert ID for ConnectionGroup is invalid.");
-	    return;
-	}
+		//Check id is correct and add to connection group info if it is
+		int lastInsertID = query.lastInsertId().toInt();
+		if(lastInsertID >= START_CONNECTIONGROUP_ID)
+			connectionGroup->setID(lastInsertID);
+		else{
+			setError("Insert ID for ConnectionGroup is invalid.");
+			return;
+		}
 
-	//Check for cancellation of task
-	if(stopThread)
-	    return;
+		//Check for cancellation of task
+		if(stopThread)
+			return;
 
-	//Add connections to database
-	ConnectionList::const_iterator endConGrp = connectionGroup->end();
-	for(ConnectionList::const_iterator iter = connectionGroup->begin(); iter != endConGrp; ++iter){
-	    //Build query string
-	    queryStr = "INSERT INTO Connections ( ConnectionGroupID, FromNeuronID, ToNeuronID, Delay, Weight) VALUES (";
-	    queryStr += QString::number(connectionGroup->getID()) + ", ";
-	    queryStr += QString::number((*iter)->fromNeuronID) + ", ";
-	    queryStr += QString::number((*iter)->toNeuronID) + ", ";
-	    queryStr += QString::number((*iter)->delay) + ", ";
-	    queryStr += QString::number((*iter)->weight) + ")";
+		//Add connections to database
+		ConnectionList::const_iterator endConGrp = connectionGroup->end();
+		for(ConnectionList::const_iterator iter = connectionGroup->begin(); iter != endConGrp; ++iter){
+			//Build query string
+			queryStr = "INSERT INTO Connections ( ConnectionGroupID, FromNeuronID, ToNeuronID, Delay, Weight) VALUES (";
+			queryStr += QString::number(connectionGroup->getID()) + ", ";
+			queryStr += QString::number((*iter)->fromNeuronID) + ", ";
+			queryStr += QString::number((*iter)->toNeuronID) + ", ";
+			queryStr += QString::number((*iter)->delay) + ", ";
+			queryStr += QString::number((*iter)->weight) + ")";
 
-	    //Execute query
-	    query = getQuery(queryStr);
-	    executeQuery(query);
+			//Execute query
+			query = getQuery(queryStr);
+			executeQuery(query);
 
-	    //Add connection id to connection
-	    int lastInsertID = query.lastInsertId().toInt();
-	    if(lastInsertID < START_CONNECTION_ID){
-		setError("Insert ID for Connection is invalid.");
-		return;
-	    }
+			//Add connection id to connection
+			int lastInsertID = query.lastInsertId().toInt();
+			if(lastInsertID < START_CONNECTION_ID){
+				setError("Insert ID for Connection is invalid.");
+				return;
+			}
 
-	    (*iter)->setID(lastInsertID);
+			(*iter)->setID(lastInsertID);
 
-	    if(stopThread)
-		return;
-	}
+			if(stopThread)
+				return;
+		}
 
-	//ConnectionGroup should now match information in database
-	connectionGroup->setLoaded(true);
+		//ConnectionGroup should now match information in database
+		connectionGroup->setLoaded(true);
     }
 }
 
@@ -261,84 +261,86 @@ void NetworkDaoThread::addConnectionGroups(){
 void NetworkDaoThread::addNeuronGroups(){
     //Check that parameters have been set correctly
     if(networkID == 0){
-	setError("Network ID has not been set.");
-	return;
+		setError("Network ID has not been set.");
+		return;
     }
 
     //Work through the list of neuron groups
     for(QList<NeuronGroup*>::iterator iter = neuronGroupList.begin(); iter != neuronGroupList.end(); ++iter){
-	//User friendly pointer to group
-	NeuronGroup* neuronGroup = *iter;
+		//User friendly pointer to group
+		NeuronGroup* neuronGroup = *iter;
 
-	//Get information about the neuron group
-	NeuronGroupInfo neurGrpInfo = neuronGroup->getInfo();
+		//Get information about the neuron group
+		NeuronGroupInfo neurGrpInfo = neuronGroup->getInfo();
 
-	//Add the neuron group first
-	QString queryStr = "INSERT INTO NeuronGroups (NetworkID, Name, Description, Parameters, NeuronTypeID ) VALUES (";
-	queryStr += QString::number(networkID) + ", ";
-	queryStr += "'" + neurGrpInfo.getName() + "', '" + neurGrpInfo.getDescription() + "', '" + neurGrpInfo.getParameterXML() + "', ";
-	queryStr += QString::number(neurGrpInfo.getNeuronType()) + ")";
-	QSqlQuery query = getQuery(queryStr);
-	executeQuery(query);
+		//Add the neuron group first
+		QString queryStr = "INSERT INTO NeuronGroups (NetworkID, Name, Description, Parameters, NeuronTypeID ) VALUES (";
+		queryStr += QString::number(networkID) + ", ";
+		queryStr += "'" + neurGrpInfo.getName() + "', '" + neurGrpInfo.getDescription() + "', '" + neurGrpInfo.getParameterXML() + "', ";
+		queryStr += QString::number(neurGrpInfo.getNeuronType()) + ")";
+		QSqlQuery query = getQuery(queryStr);
+		executeQuery(query);
 
-	//Check id is correct and add to neuron group info if it is
-	int lastInsertID = query.lastInsertId().toInt();
-	if(lastInsertID >= START_NEURONGROUP_ID)
-	    neuronGroup->setID(lastInsertID);//Set this on neuron group, not on the copied info
-	else{
-	    setError("Insert ID for NeuronGroup is invalid.");
-	    return;
-	}
+		//Check id is correct and add to neuron group info if it is
+		int lastInsertID = query.lastInsertId().toInt();
+		if(lastInsertID >= START_NEURONGROUP_ID)
+			neuronGroup->setID(lastInsertID);//Set this on neuron group, not on the copied info
+		else{
+			setError("Insert ID for NeuronGroup is invalid.");
+			return;
+		}
 
-	//Check for cancellation of task
-	if(stopThread)
-	    return;
+		//Check for cancellation of task
+		if(stopThread)
+			return;
 
-	//Add neurons
-	bool firstTime = true;
-	NeuronMap* neurMap = neuronGroup->getNeuronMap();
-	NeuronMap* newNeurMap = new NeuronMap();
-	NeuronMap::iterator mapEnd = neurMap->end();//Saves accessing this function multiple times
-	for(NeuronMap::iterator iter=neurMap->begin(); iter != mapEnd; ++iter){
-	    QString queryStr("INSERT INTO Neurons (NeuronGroupID, X, Y, Z) VALUES (");
-	    queryStr += QString::number(neuronGroup->getID()) + ", ";
-	    queryStr += QString::number(iter.value()->getXPos()) + ", ";
-	    queryStr += QString::number(iter.value()->getYPos()) + ", ";
-	    queryStr += QString::number(iter.value()->getZPos()) + ")";
-	    query = getQuery(queryStr);
-	    executeQuery(query);
+		//Add neurons
+		bool firstTime = true;
+		NeuronMap* neurMap = neuronGroup->getNeuronMap();
+		NeuronMap* newNeurMap = new NeuronMap();
+		NeuronMap::iterator mapEnd = neurMap->end();//Saves accessing this function multiple times
+		for(NeuronMap::iterator iter=neurMap->begin(); iter != mapEnd; ++iter){
+			QString queryStr("INSERT INTO Neurons (NeuronGroupID, X, Y, Z) VALUES (");
+			queryStr += QString::number(neuronGroup->getID()) + ", ";
+			queryStr += QString::number(iter.value()->getXPos()) + ", ";
+			queryStr += QString::number(iter.value()->getYPos()) + ", ";
+			queryStr += QString::number(iter.value()->getZPos()) + ")";
+			qDebug()<<queryStr;
+			query = getQuery(queryStr);
+			executeQuery(query);
+			qDebug()<<"EXECUTED: "<<queryStr;
 
-	    //Add neuron with correct id to the new map
-	    int lastInsertID = query.lastInsertId().toInt();
-	    if(lastInsertID < START_NEURON_ID){
-		setError("Insert ID for Neuron is invalid.");
-		return;
-	    }
-	    (*newNeurMap)[lastInsertID] = iter.value();
+			//Add neuron with correct id to the new map
+			int lastInsertID = query.lastInsertId().toInt();
+			if(lastInsertID < START_NEURON_ID){
+				setError("Insert ID for Neuron is invalid.");
+				return;
+			}
+			(*newNeurMap)[lastInsertID] = iter.value();
 
-	    //Store the id in the neuron
-	    iter.value()->setID(lastInsertID);
+			//Store the id in the neuron
+			iter.value()->setID(lastInsertID);
 
-	    /* Store the first neuron id in the group.
+			/* Store the first neuron id in the group.
 		NOTE: Most neuron groups are stored with continuously increasing IDs, but
 		there may be exceptions, so take care! */
-	    if(firstTime){
-		neuronGroup->setStartNeuronID(lastInsertID);
-		firstTime = false;
-	    }
+			if(firstTime){
+				neuronGroup->setStartNeuronID(lastInsertID);
+				firstTime = false;
+			}
 
-	    if(stopThread)
-		return;
-	}
-	//Add the correct map to the neuron group. This should also clean up the old map
-	neuronGroup->setNeuronMap(newNeurMap);
+			if(stopThread)
+				return;
+		}
+		//Add the correct map to the neuron group. This should also clean up the old map
+		neuronGroup->setNeuronMap(newNeurMap);
 
-	/* Clean up the dynamically allocated neuron map, but keep the dynamically allocated
+		/* Clean up the dynamically allocated neuron map, but keep the dynamically allocated
 	    Point3Ds, which are used in the new map */
-	delete neurMap;
+		delete neurMap;
 
-	//Neuron group now reflects state of table in database, so set loaded to true
-	neuronGroup->setLoaded(true);
+		//Neuron group now reflects state of table in database, so set loaded to true
+		neuronGroup->setLoaded(true);
     }
 }
 
@@ -347,32 +349,32 @@ void NetworkDaoThread::loadConnections(){
     //Work through all the connections to be loaded
     for(QList<ConnectionGroup*>::iterator iter = connectionGroupList.begin(); iter != connectionGroupList.end(); ++iter){
 
-	//Empty current connections in group
-	(*iter)->clearConnections();
+		//Empty current connections in group
+		(*iter)->clearConnections();
 
-	//Load connections into group
-	unsigned int tmpConGrpID = (*iter)->getID();
-	QSqlQuery query = getQuery("SELECT ConnectionID, FromNeuronID, ToNeuronID, Delay, Weight, TempWeight FROM Connections WHERE ConnectionGroupID = " + QString::number(tmpConGrpID));
-	executeQuery(query);
-	while ( query.next() ) {
-	    Connection* tmpConn = new Connection(
-			query.value(0).toUInt(),//ConnectionID
-			tmpConGrpID,//Connection Group ID
-			query.value(1).toUInt(),//FromNeuronID
-			query.value(2).toUInt(),//ToNeuronID
-			query.value(3).toString().toFloat(),//Delay
-			query.value(4).toString().toFloat(),//Weight
-			query.value(5).toString().toFloat()//tempWeight
-	    );
-	    (*iter)->addConnection(tmpConn);
+		//Load connections into group
+		unsigned int tmpConGrpID = (*iter)->getID();
+		QSqlQuery query = getQuery("SELECT ConnectionID, FromNeuronID, ToNeuronID, Delay, Weight, TempWeight FROM Connections WHERE ConnectionGroupID = " + QString::number(tmpConGrpID));
+		executeQuery(query);
+		while ( query.next() ) {
+			Connection* tmpConn = new Connection(
+					query.value(0).toUInt(),//ConnectionID
+					tmpConGrpID,//Connection Group ID
+					query.value(1).toUInt(),//FromNeuronID
+					query.value(2).toUInt(),//ToNeuronID
+					query.value(3).toString().toFloat(),//Delay
+					query.value(4).toString().toFloat(),//Weight
+					query.value(5).toString().toFloat()//tempWeight
+					);
+			(*iter)->addConnection(tmpConn);
 
-	    //Quit if user cancels
-	    if(stopThread)
-		return;
-	}
+			//Quit if user cancels
+			if(stopThread)
+				return;
+		}
 
-	//Connection group now matches the database
-	(*iter)->setLoaded(true);
+		//Connection group now matches the database
+		(*iter)->setLoaded(true);
     }
 }
 
@@ -381,38 +383,38 @@ void NetworkDaoThread::loadNeurons(){
     //Work through all the neurons to be loaded
     for(QList<NeuronGroup*>::iterator iter = neuronGroupList.begin(); iter != neuronGroupList.end(); ++iter){
 
-	//Empty current connections in group
-	(*iter)->clearNeurons();
+		//Empty current connections in group
+		(*iter)->clearNeurons();
 
-	//Get pointer to neuron map
-	NeuronMap* tmpNeurMap = (*iter)->getNeuronMap();
+		//Get pointer to neuron map
+		NeuronMap* tmpNeurMap = (*iter)->getNeuronMap();
 
-	//Load neurons into group
-	bool firstTime = true;
-	QSqlQuery query = getQuery("SELECT NeuronID, X, Y, Z FROM Neurons WHERE NeuronGroupID = " + QString::number((*iter)->getID()) + " ORDER BY NeuronID");
-	executeQuery(query);
-	while ( query.next() ) {
-	    Neuron* tmpNeuron = new Neuron(
-			query.value(0).toUInt(),//ID
-			query.value(1).toString().toFloat(),//X
-			query.value(2).toString().toFloat(),//Y
-			query.value(3).toString().toFloat()//Z
-	    );
-	    (*tmpNeurMap)[query.value(0).toUInt()] = tmpNeuron;
+		//Load neurons into group
+		bool firstTime = true;
+		QSqlQuery query = getQuery("SELECT NeuronID, X, Y, Z FROM Neurons WHERE NeuronGroupID = " + QString::number((*iter)->getID()) + " ORDER BY NeuronID");
+		executeQuery(query);
+		while ( query.next() ) {
+			Neuron* tmpNeuron = new Neuron(
+					query.value(0).toUInt(),//ID
+					query.value(1).toString().toFloat(),//X
+					query.value(2).toString().toFloat(),//Y
+					query.value(3).toString().toFloat()//Z
+					);
+			(*tmpNeurMap)[query.value(0).toUInt()] = tmpNeuron;
 
-	    //Store the start neuron id - useful when neurons are stored continuously, which is usually but not always the case
-	    if(firstTime){
-		(*iter)->setStartNeuronID(query.value(0).toUInt());
-		firstTime = false;
-	    }
+			//Store the start neuron id - useful when neurons are stored continuously, which is usually but not always the case
+			if(firstTime){
+				(*iter)->setStartNeuronID(query.value(0).toUInt());
+				firstTime = false;
+			}
 
-	    //Quit if user cancels
-	    if(stopThread)
-		return;
-	}
+			//Quit if user cancels
+			if(stopThread)
+				return;
+		}
 
-	//Neuron group now matches the database
-	(*iter)->setLoaded(true);
+		//Neuron group now matches the database
+		(*iter)->setLoaded(true);
     }
 }
 
