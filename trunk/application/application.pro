@@ -20,15 +20,7 @@ win32{
 }
 
 
-INCLUDEPATH += src \
-				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src \
-				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src/analysis \
-				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src/database \
-				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src/exceptions \
-				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src/nrm \
-				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src/dialogs \
-				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src/widgets \
-				$${SPIKESTREAM_ROOT_DIR}/library/include
+INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/applicationlibrary/include $${SPIKESTREAM_ROOT_DIR}/library/include
 
 CONFIG += console debug thread exceptions
 

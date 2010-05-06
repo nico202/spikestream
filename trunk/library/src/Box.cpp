@@ -1,6 +1,8 @@
+//SpikeStream includes
 #include "Box.h"
 #include "SpikeStreamException.h"
 using namespace spikestream;
+
 
 /*! Default constructor */
 Box::Box(){
@@ -35,25 +37,30 @@ Box::Box(const Box& box){
 }
 
 
-/*! Assignment operator */
-Box& Box::operator=(const Box& rhs){
-    if(this == &rhs)
-	return *this;
-
-    this->x1 = rhs.x1;
-    this->y1 = rhs.y1;
-    this->z1 = rhs.z1;
-    this->x2 = rhs.x2;
-    this->y2 = rhs.y2;
-    this->z2 = rhs.z2;
-
-    return *this;
-
-}
-
 /*! Destructor */
 Box::~Box(){
 }
+
+
+/*----------------------------------------------------------*/
+/*-----                 PUBLIC METHODS                 -----*/
+/*----------------------------------------------------------*/
+/*! Assignment operator */
+Box& Box::operator=(const Box& rhs){
+	if(this == &rhs)
+		return *this;
+
+	this->x1 = rhs.x1;
+	this->y1 = rhs.y1;
+	this->z1 = rhs.z1;
+	this->x2 = rhs.x2;
+	this->y2 = rhs.y2;
+	this->z2 = rhs.z2;
+
+	return *this;
+
+}
+
 
 /*! Expands the box by the specified percentage */
 void Box::expand_percent(float percent){

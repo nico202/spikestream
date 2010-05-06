@@ -28,7 +28,7 @@ QHash<QString, double> XMLParameterParser::getParameterMap(const QString& xmlStr
 
     //Return empty map if paramter string is empty
     if(xmlString == "")
-	return parameterMap;
+		return parameterMap;
 
     //Parse the XML
     QXmlSimpleReader xmlReader;
@@ -49,21 +49,21 @@ QHash<QString, double> XMLParameterParser::getParameterMap(const QString& xmlStr
 /*! Called when parser encounters characters. */
 bool XMLParameterParser::characters(const QString& chars){
     if(loadingParameter){
-	if(currentElement == "name"){
-	    currentParamName = chars;
-	}
-	else if(currentElement == "value"){
-	    bool ok;
-	    currentParamValue = chars.toDouble(&ok);
-	    if(!ok)
-		throw SpikeStreamXMLException("Error converting parameter value to double: " + chars);
-	}
-	else{
-	    throw SpikeStreamXMLException("Unrecognized element: " + currentElement);
-	}
+		if(currentElement == "name"){
+			currentParamName = chars;
+		}
+		else if(currentElement == "value"){
+			bool ok;
+			currentParamValue = chars.toDouble(&ok);
+			if(!ok)
+				throw SpikeStreamXMLException("Error converting parameter value to double: " + chars);
+		}
+		else{
+			throw SpikeStreamXMLException("Unrecognized element: " + currentElement);
+		}
     }
     else
-	throw SpikeStreamXMLException("Unexpected characters encountered: '" + chars + "'");
+		throw SpikeStreamXMLException("Unexpected characters encountered: '" + chars + "'");
     return true;
 }
 
@@ -71,15 +71,15 @@ bool XMLParameterParser::characters(const QString& chars){
 /*! Called when the parser encounters the end of an element. */
 bool XMLParameterParser::endElement( const QString&, const QString&, const QString& elemName){
     if(loadingParameter && elemName == "parameter"){
-	//Check that parameter name has been set
-	if(currentParamName == "")
-	    throw SpikeStreamXMLException("Parameter is missing description");
+		//Check that parameter name has been set
+		if(currentParamName == "")
+			throw SpikeStreamXMLException("Parameter is missing description");
 
-	//Store parameter in map
-	parameterMap[currentParamName] = currentParamValue;
+		//Store parameter in map
+		parameterMap[currentParamName] = currentParamValue;
 
-	//Have finished loading the parameter
-	loadingParameter = false;
+		//Have finished loading the parameter
+		loadingParameter = false;
     }
     return true;
 }
@@ -117,10 +117,10 @@ bool XMLParameterParser::startDocument(){
 bool XMLParameterParser::startElement(const QString&, const QString&, const QString& qName, const QXmlAttributes&){
     currentElement = qName;
     if(currentElement == "parameter"){
-	//Reset information associated with a parameter
-	currentParamName = "";
-	currentParamValue = 0.0;
-	loadingParameter = true;
+		//Reset information associated with a parameter
+		currentParamName = "";
+		currentParamValue = 0.0;
+		loadingParameter = true;
     }
     return true;
 }

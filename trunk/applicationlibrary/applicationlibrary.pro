@@ -43,16 +43,7 @@ win32 {
 #----------------------------------------------#
 #---                INCLUDE                 ---#
 #----------------------------------------------#
-INCLUDEPATH += src \
-				src/analysis \
-				src/database \
-				src/exceptions \
-				src/nrm \
-				src/dialogs \
-				src/models \
-				src/views \
-				src/widgets \
-				$${SPIKESTREAM_ROOT_DIR}/library/include
+INCLUDEPATH += include $${SPIKESTREAM_ROOT_DIR}/library/include
 win32 {
 	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/gmp/include  $${SPIKESTREAM_ROOT_DIR}/extlib/qwt/include
 }
@@ -66,27 +57,27 @@ QT += xml opengl sql
 #----------------------------------------------#
 #---          database folder               ---#
 #----------------------------------------------#
-HEADERS += src/database/DatabaseManager.h
+HEADERS += include/DatabaseManager.h
 SOURCES += src/database/DatabaseManager.cpp
 
 
 #----------------------------------------------#
 #---            nrm folder                  ---#
 #----------------------------------------------#
-HEADERS += src/nrm/NRMNetwork.h \
-			src/nrm/NRMConfigLoader.h \
-			src/nrm/NRMTrainingLoader.h \
-			src/nrm/NRMConstants.h \
-			src/nrm/NRMLayer.h \
-			src/nrm/NRMNeuralLayer.h \
-			src/nrm/NRMInputLayer.h \
-			src/nrm/NRMConnection.h \
-			src/nrm/NRMNeuron.h \
-			src/nrm/NRMRandom.h \
-			src/nrm/NRMFileLoader.h \
-			src/nrm/NRMDataImporter.h \
-			src/nrm/NRMDataSetImporter.h \
-			src/nrm/NRMDataSet.h
+HEADERS += include/NRMNetwork.h \
+			include/NRMConfigLoader.h \
+			include/NRMTrainingLoader.h \
+			include/NRMConstants.h \
+			include/NRMLayer.h \
+			include/NRMNeuralLayer.h \
+			include/NRMInputLayer.h \
+			include/NRMConnection.h \
+			include/NRMNeuron.h \
+			include/NRMRandom.h \
+			include/NRMFileLoader.h \
+			include/NRMDataImporter.h \
+			include/NRMDataSetImporter.h \
+			include/NRMDataSet.h
 SOURCES += src/nrm/NRMNetwork.cpp \
 			src/nrm/NRMConfigLoader.cpp \
 			src/nrm/NRMTrainingLoader.cpp \
@@ -105,17 +96,17 @@ SOURCES += src/nrm/NRMNetwork.cpp \
 #----------------------------------------------#
 #---             analysis folder            ---#
 #----------------------------------------------#
-HEADERS += src/analysis/AnalysisLoaderWidget.h \
-			src/analysis/AbstractAnalysisWidget.h \
-			src/analysis/AnalysisRunner.h \
-			src/analysis/AnalysisParameterDialog.h \
-			src/analysis/AbstractExportAnalysisDialog.h \
-			src/analysis/AbstractAnalysisTimeStepThread.h \
-			src/analysis/ProgressWidget.h \
-			src/analysis/HeatColorBar.h \
-			src/analysis/AbstractGraphDialog.h \
-			src/analysis/AbstractSpectrogramData.h \
-			src/analysis/AnalysisSpectrogram.h
+HEADERS += include/AnalysisLoaderWidget.h \
+			include/AbstractAnalysisWidget.h \
+			include/AnalysisRunner.h \
+			include/AnalysisParameterDialog.h \
+			include/AbstractExportAnalysisDialog.h \
+			include/AbstractAnalysisTimeStepThread.h \
+			include/ProgressWidget.h \
+			include/HeatColorBar.h \
+			include/AbstractGraphDialog.h \
+			include/AbstractSpectrogramData.h \
+			include/AnalysisSpectrogram.h
 SOURCES += src/analysis/AnalysisLoaderWidget.cpp \
 			src/analysis/AbstractAnalysisWidget.cpp \
 			src/analysis/AnalysisRunner.cpp \
@@ -130,13 +121,13 @@ SOURCES += src/analysis/AnalysisLoaderWidget.cpp \
 
 
 #----------------------------------------------#
-#---              dialogs folder            ---#
+#---                Dialogs                 ---#
 #----------------------------------------------#
-HEADERS += src/dialogs/NRMImportDialog.h \
-			src/dialogs/LoadAnalysisDialog.h \
-			src/dialogs/PluginsDialog.h \
-			src/dialogs/TruthTableDialog.h \
-			src/dialogs/NewNetworkDialog.h
+HEADERS += include/NRMImportDialog.h \
+			include/LoadAnalysisDialog.h \
+			include/PluginsDialog.h \
+			include/TruthTableDialog.h \
+			include/NewNetworkDialog.h
 SOURCES += src/dialogs/NRMImportDialog.cpp \
 			src/dialogs/LoadAnalysisDialog.cpp \
 			src/dialogs/PluginsDialog.cpp \
@@ -145,20 +136,20 @@ SOURCES += src/dialogs/NRMImportDialog.cpp \
 
 
 #----------------------------------------------#
-#---            exceptions folder           ---#
+#---               Exceptions               ---#
 #----------------------------------------------#
-HEADERS += src/exceptions/NRMException.h
+HEADERS += include/NRMException.h
 SOURCES += src/exceptions/NRMException.cpp
 
 
 #----------------------------------------------#
-#---              models folder             ---#
+#---                Models                  ---#
 #----------------------------------------------#
-HEADERS += src/models/NeuronGroupModel.h \
-			src/models/ConnectionGroupModel.h \
-			src/models/ConnectionsModel.h \
-			src/models/AnalysesModel.h \
-			src/models/TruthTableModel.h
+HEADERS += include/NeuronGroupModel.h \
+			include/ConnectionGroupModel.h \
+			include/ConnectionsModel.h \
+			include/AnalysesModel.h \
+			include/TruthTableModel.h
 SOURCES += src/models/NeuronGroupModel.cpp \
 			src/models/ConnectionGroupModel.cpp \
 			src/models/ConnectionsModel.cpp \
@@ -167,13 +158,13 @@ SOURCES += src/models/NeuronGroupModel.cpp \
 
 
 #----------------------------------------------#
-#---              views folder             ---#
+#---                   Views                ---#
 #----------------------------------------------#
-HEADERS += src/views/NeuronGroupTableView.h \
-			src/views/ConnectionGroupTableView.h \
-			src/views/ConnectionsTableView.h \
-			src/views/AnalysesTableView.h \
-			src/views/TruthTableView.h
+HEADERS += include/NeuronGroupTableView.h \
+			include/ConnectionGroupTableView.h \
+			include/ConnectionsTableView.h \
+			include/AnalysesTableView.h \
+			include/TruthTableView.h
 SOURCES += src/views/NeuronGroupTableView.cpp \
 			src/views/ConnectionGroupTableView.cpp \
 			src/views/ConnectionsTableView.cpp \
@@ -182,14 +173,14 @@ SOURCES += src/views/NeuronGroupTableView.cpp \
 
 
 #----------------------------------------------#
-#---              widgets folder            ---#
+#---                 Widgets                ---#
 #----------------------------------------------#
-HEADERS += src/widgets/NetworksWidget.h \
-			src/widgets/ArchiveWidget_V2.h \
-			src/widgets/NeuronGroupWidget.h \
-			src/widgets/ConnectionWidget_V2.h \
-			src/widgets/NetworkViewerProperties_V2.h \
-			src/widgets/SimulationLoaderWidget.h
+HEADERS += include/NetworksWidget.h \
+			include/ArchiveWidget_V2.h \
+			include/NeuronGroupWidget.h \
+			include/ConnectionWidget_V2.h \
+			include/NetworkViewerProperties_V2.h \
+			include/SimulationLoaderWidget.h
 SOURCES += src/widgets/NetworksWidget.cpp \
 			src/widgets/ArchiveWidget_V2.cpp \
 			src/widgets/NeuronGroupWidget.cpp \
@@ -199,18 +190,17 @@ SOURCES += src/widgets/NetworksWidget.cpp \
 
 
 #----------------------------------------------#
-#---               src folder               ---#
+#---             Miscellaneous              ---#
 #----------------------------------------------#
-HEADERS += src/SpikeStreamApplication.h \
-		   src/SpikeStreamMainWindow.h \
-		   src/PluginManager_V2.h \
-		   src/Globals.h \
-		   src/EventRouter.h \
-		   src/NetworkViewer_V2.h \
-		   src/NetworkDisplay.h \
-		   src/ArchivePlayerThread.h \
-		   src/NetworksBuilder.h
-
+HEADERS += include/SpikeStreamApplication.h \
+		   include/SpikeStreamMainWindow.h \
+		   include/PluginManager_V2.h \
+		   include/Globals.h \
+		   include/EventRouter.h \
+		   include/NetworkViewer_V2.h \
+		   include/NetworkDisplay.h \
+		   include/ArchivePlayerThread.h \
+		   include/NetworksBuilder.h
 SOURCES += src/SpikeStreamApplication.cpp \
 		   src/SpikeStreamMainWindow.cpp \
 		   src/PluginManager_V2.cpp \

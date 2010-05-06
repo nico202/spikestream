@@ -88,8 +88,8 @@ void NetworkViewer_V2::initializeGL(){
 void NetworkViewer_V2::paintGL(){
     //If we are already painting, skip further calls to this method triggered by accelerator keys
     if(Globals::isRendering()){
-	paintGLSkipped = true;
-	return;
+		paintGLSkipped = true;
+		return;
     }
 
     paintGLSkipped = false;
@@ -114,18 +114,18 @@ void NetworkViewer_V2::paintGL(){
 	Only use display lists when not in full render mode. They speed up
 	the graphics considerably, but crash when they are too big. */
     if(useDisplayList){
-	//Call the display list
-	glCallList(mainDisplayList);
+		//Call the display list
+		glCallList(mainDisplayList);
     }
 
     //Record a new display list
     else{
-	//Lock network display whilst rendering is taking place
-	//FIXME: MIGHT WANT TO LOCK NETWORK AS WELL
-	Globals::getNetworkDisplay()->lockMutex();
+		//Lock network display whilst rendering is taking place
+		//FIXME: MIGHT WANT TO LOCK NETWORK AS WELL
+		Globals::getNetworkDisplay()->lockMutex();
 
-	//Start recording new display list
-	glNewList(mainDisplayList, GL_COMPILE_AND_EXECUTE);
+		//Start recording new display list
+		glNewList(mainDisplayList, GL_COMPILE_AND_EXECUTE);
 
 	    //Draw the axes
 	    drawAxes();
@@ -139,14 +139,14 @@ void NetworkViewer_V2::paintGL(){
 	    //Restore the original state of the matrix
 	    glPopMatrix();
 
-	//Finished recording display list
-	glEndList();
+		//Finished recording display list
+		glEndList();
 
-	//Have now created the display list so record this fact for next render
-	//useDisplayList = true;
+		//Have now created the display list so record this fact for next render
+		//useDisplayList = true;
 
-	//Unlock network display
-	Globals::getNetworkDisplay()->unlockMutex();
+		//Unlock network display
+		Globals::getNetworkDisplay()->unlockMutex();
     }
 
     //Check for OpenGL errors
@@ -158,11 +158,11 @@ void NetworkViewer_V2::paintGL(){
     /* If during the render, start render or resize were called and
 		filtered out, need to re-render. */
     if(resizeGLSkipped){
-	resizeGL(newTempScreenWidth, newTempScreenHeight);
-	paintGLSkipped = true;
+		resizeGL(newTempScreenWidth, newTempScreenHeight);
+		paintGLSkipped = true;
     }
     if(paintGLSkipped){
-	paintGL();
+		paintGL();
     }
 }
 
@@ -170,12 +170,12 @@ void NetworkViewer_V2::paintGL(){
 /*! Inherited from QGLWidget */
 void NetworkViewer_V2::resizeGL(int screenWidth, int screenHeight){
     if(Globals::isRendering()){
-	resizeGLSkipped = true;
+		resizeGLSkipped = true;
 
-	//Store new screen width and height
-	newTempScreenWidth = screenWidth;
-	newTempScreenHeight = screenHeight;
-	return;
+		//Store new screen width and height
+		newTempScreenWidth = screenWidth;
+		newTempScreenHeight = screenHeight;
+		return;
     }
 
     //Reset resizeSkipped
@@ -183,7 +183,7 @@ void NetworkViewer_V2::resizeGL(int screenWidth, int screenHeight){
 
     // Prevent a divide by zero, when window is too short (you cant make a window of zero width).
     if(screenHeight == 0)
-	screenHeight = 1;
+		screenHeight = 1;
 
     glViewport(0, 0, screenWidth, screenHeight);
 
@@ -211,7 +211,7 @@ void NetworkViewer_V2::mouseDoubleClickEvent (QMouseEvent* event){
     //Determine if control button is down
     bool ctrlBtnDown = false;
     if(event->modifiers() & Qt::ControlModifier){
-	ctrlBtnDown = true;
+		ctrlBtnDown = true;
     }
 
     //Create the select buffer
@@ -254,11 +254,11 @@ void NetworkViewer_V2::mouseDoubleClickEvent (QMouseEvent* event){
     int hitCount = glRenderMode(GL_RENDER);
 
     if(hitCount != 0){//Neuron selected
-	unsigned int selectedNeuronID = getSelectedNeuron(selectBuffer, hitCount, SELECT_BUFFER_SIZE);
-	Globals::getNetworkDisplay()->setSelectedNeuronID(selectedNeuronID, ctrlBtnDown);
+		unsigned int selectedNeuronID = getSelectedNeuron(selectBuffer, hitCount, SELECT_BUFFER_SIZE);
+		Globals::getNetworkDisplay()->setSelectedNeuronID(selectedNeuronID, ctrlBtnDown);
     }
     else{
-	Globals::getNetworkDisplay()->setSelectedNeuronID(0);
+		Globals::getNetworkDisplay()->setSelectedNeuronID(0);
     }
 
     //Restore render mode and the original projection matrix
@@ -374,15 +374,15 @@ void NetworkViewer_V2::checkOpenGLErrors(){
     //Check to see if error has occurred
     GLenum err = glGetError();
     if(err != GL_NO_ERROR){
-	//May be more than one error message, so add them all to the error string if there is an error
-	QString errMsg = "OpenGL ERROR(S): ";
-	while(err != GL_NO_ERROR){
-	    errMsg += QString("'") + (const char *)gluErrorString(err) + "'; ";
-	    err = glGetError();
-	}
+		//May be more than one error message, so add them all to the error string if there is an error
+		QString errMsg = "OpenGL ERROR(S): ";
+		while(err != GL_NO_ERROR){
+			errMsg += QString("'") + (const char *)gluErrorString(err) + "'; ";
+			err = glGetError();
+		}
 
-	//Flag error to user
-	qCritical()<<errMsg;
+		//Flag error to user
+		qCritical()<<errMsg;
     }
 }
 
@@ -408,15 +408,15 @@ void NetworkViewer_V2::drawAxes(void){
 
 	//Draw the main axes
 	glBegin(GL_LINES);
-	    //X Axis
-	    glVertex3f(defaultClippingVol.x1 - extraLength, 0.0f, 0.0f);
-	    glVertex3f(defaultClippingVol.x2 + extraLength, 0.0f, 0.0f);
-	    //Y Axis
-	    glVertex3f(0.0f, defaultClippingVol.y1 - extraLength, 0.0f);
-	    glVertex3f(0.0f, defaultClippingVol.y2 + extraLength, 0.0f);
-	    //Z Axis
-	    glVertex3f(0.0f, 0.0f, defaultClippingVol.z1 - extraLength);
-	    glVertex3f(0.0f, 0.0f, defaultClippingVol.z2 + extraLength);
+	//X Axis
+	glVertex3f(defaultClippingVol.x1 - extraLength, 0.0f, 0.0f);
+	glVertex3f(defaultClippingVol.x2 + extraLength, 0.0f, 0.0f);
+	//Y Axis
+	glVertex3f(0.0f, defaultClippingVol.y1 - extraLength, 0.0f);
+	glVertex3f(0.0f, defaultClippingVol.y2 + extraLength, 0.0f);
+	//Z Axis
+	glVertex3f(0.0f, 0.0f, defaultClippingVol.z1 - extraLength);
+	glVertex3f(0.0f, 0.0f, defaultClippingVol.z2 + extraLength);
 	glEnd();
 
 	//Work along axes, marking every point with a point
@@ -456,7 +456,7 @@ void NetworkViewer_V2::drawAxes(void){
 void NetworkViewer_V2::drawConnections(){
     //Nothing to do if no network is loaded
     if(!Globals::networkLoaded())
-	return;
+		return;
 
     //Local variables declared once here to save processing. These point to the points stored in the neurons
     Point3D* fromNeuronPoint;
@@ -474,9 +474,9 @@ void NetworkViewer_V2::drawConnections(){
     unsigned int singleNeuronID=0, toNeuronID=0;
     unsigned int connectionMode = netDisplay->getConnectionMode();
     if(connectionMode & CONNECTION_MODE_ENABLED){
-	singleNeuronID = netDisplay->getSingleNeuronID();
-	if(connectionMode & SHOW_BETWEEN_CONNECTIONS)
-	    toNeuronID = netDisplay->getToNeuronID();
+		singleNeuronID = netDisplay->getSingleNeuronID();
+		if(connectionMode & SHOW_BETWEEN_CONNECTIONS)
+			toNeuronID = netDisplay->getToNeuronID();
     }
     bool drawConnection;
 
@@ -498,57 +498,57 @@ void NetworkViewer_V2::drawConnections(){
 	    QList<Connection*>::const_iterator endConGrp = conGrp->end();
 	    for(QList<Connection*>::const_iterator conIter = conGrp->begin(); conIter != endConGrp; ++ conIter){
 
-		//Decide if connection should be drawn, depending on the connection mode and neuron id
-		drawConnection = true;
-		if(connectionMode & CONNECTION_MODE_ENABLED){
-		    //Single neuron mode
-		    if( !(connectionMode & SHOW_BETWEEN_CONNECTIONS) ){
-			//Show only connections from a single neuron
-			if(connectionMode & SHOW_FROM_CONNECTIONS){
-			    if( (*conIter)->fromNeuronID != singleNeuronID)
-				drawConnection = false;
+			//Decide if connection should be drawn, depending on the connection mode and neuron id
+			drawConnection = true;
+			if(connectionMode & CONNECTION_MODE_ENABLED){
+				//Single neuron mode
+				if( !(connectionMode & SHOW_BETWEEN_CONNECTIONS) ){
+					//Show only connections from a single neuron
+					if(connectionMode & SHOW_FROM_CONNECTIONS){
+						if( (*conIter)->fromNeuronID != singleNeuronID)
+							drawConnection = false;
+					}
+					//Show only connections to a single neuron
+					else if(connectionMode & SHOW_TO_CONNECTIONS){
+						if( (*conIter)->toNeuronID != singleNeuronID)
+							drawConnection = false;
+					}
+					//Show from and to connections to a single neuron
+					else if( ((*conIter)->fromNeuronID != singleNeuronID) && ((*conIter)->toNeuronID != singleNeuronID) ){
+						drawConnection = false;
+					}
+				}
+				//Between neuron mode
+				else{
+					//Only show connections from first neuron to second
+					if( (*conIter)->fromNeuronID != singleNeuronID || (*conIter)->toNeuronID != toNeuronID)
+						drawConnection = false;
+				}
+
+				//Decide whether to draw connection based on its weight
+				if( (*conIter)->weight < 0 && (connectionMode & SHOW_POSITIVE_CONNECTIONS) )
+					drawConnection = false;
+				if( (*conIter)->weight >= 0 && (connectionMode & SHOW_NEGATIVE_CONNECTIONS))
+					drawConnection = false;
 			}
-			//Show only connections to a single neuron
-			else if(connectionMode & SHOW_TO_CONNECTIONS){
-			    if( (*conIter)->toNeuronID != singleNeuronID)
-				drawConnection = false;
+
+			//Draw the connection
+			if(drawConnection){
+				//Get the position of the from and to neurons
+				//FIXME: THIS COULD BE SPEEDED UP BY STORING THE POSITION IN Connection AT THE COST OF SOME LOADING COMPLEXITY
+				fromNeuronPoint = &fromNeuronGroup->getNeuronLocation((*conIter)->fromNeuronID);
+				toNeuronPoint = &toNeuronGroup->getNeuronLocation((*conIter)->toNeuronID);
+
+				//Set the colour
+				if((*conIter)->weight >= 0)
+					glColor3f(positiveConnectionColor.red, positiveConnectionColor.green, positiveConnectionColor.blue);
+				if((*conIter)->weight < 0)
+					glColor3f(negativeConnectionColor.red, negativeConnectionColor.green, negativeConnectionColor.blue);
+
+				//Draw the connection
+				glVertex3f(fromNeuronPoint->getXPos(), fromNeuronPoint->getYPos(), fromNeuronPoint->getZPos());
+				glVertex3f(toNeuronPoint->getXPos(), toNeuronPoint->getYPos(), toNeuronPoint->getZPos());
 			}
-			//Show from and to connections to a single neuron
-			else if( ((*conIter)->fromNeuronID != singleNeuronID) && ((*conIter)->toNeuronID != singleNeuronID) ){
-			    drawConnection = false;
-			}
-		    }
-		    //Between neuron mode
-		    else{
-			//Only show connections from first neuron to second
-			if( (*conIter)->fromNeuronID != singleNeuronID || (*conIter)->toNeuronID != toNeuronID)
-			    drawConnection = false;
-		    }
-
-		    //Decide whether to draw connection based on its weight
-		    if( (*conIter)->weight < 0 && (connectionMode & SHOW_POSITIVE_CONNECTIONS) )
-			drawConnection = false;
-		    if( (*conIter)->weight >= 0 && (connectionMode & SHOW_NEGATIVE_CONNECTIONS))
-			drawConnection = false;
-		}
-
-		//Draw the connection
-		if(drawConnection){
-		    //Get the position of the from and to neurons
-		    //FIXME: THIS COULD BE SPEEDED UP BY STORING THE POSITION IN Connection AT THE COST OF SOME LOADING COMPLEXITY
-		    fromNeuronPoint = &fromNeuronGroup->getNeuronLocation((*conIter)->fromNeuronID);
-		    toNeuronPoint = &toNeuronGroup->getNeuronLocation((*conIter)->toNeuronID);
-
-		    //Set the colour
-		    if((*conIter)->weight >= 0)
-			glColor3f(positiveConnectionColor.red, positiveConnectionColor.green, positiveConnectionColor.blue);
-		    if((*conIter)->weight < 0)
-			glColor3f(negativeConnectionColor.red, negativeConnectionColor.green, negativeConnectionColor.blue);
-
-		    //Draw the connection
-		    glVertex3f(fromNeuronPoint->getXPos(), fromNeuronPoint->getYPos(), fromNeuronPoint->getZPos());
-		    glVertex3f(toNeuronPoint->getXPos(), toNeuronPoint->getYPos(), toNeuronPoint->getZPos());
-		}
 	    }
 	}
 
@@ -562,7 +562,7 @@ void NetworkViewer_V2::drawConnections(){
 void NetworkViewer_V2::drawNeurons(){
     //Nothing to do if no network is loaded
     if(!Globals::networkLoaded())
-	return;
+		return;
 
     //Local variables
     RGBColor *tmpColor, tmpColor2;
@@ -588,42 +588,43 @@ void NetworkViewer_V2::drawNeurons(){
 
 	//Work through the neuron groups listed in the view vector
 	QList<unsigned int> neuronGrpIDs = Globals::getNetworkDisplay()->getVisibleNeuronGroupIDs();
+	qDebug()<<"neur grp ids size: "<<neuronGrpIDs.size();
 	for(QList<unsigned int>::iterator neurGrpIter = neuronGrpIDs.begin(); neurGrpIter != neuronGrpIDs.end(); ++neurGrpIter){
 	    //Get the map of neurons associated with this group
 	    NeuronMap* neuronMap = network->getNeuronGroup(*neurGrpIter)->getNeuronMap();
-
+		qDebug()<<"Neuron map size: "<<neuronMap->size();
 	    //Draw the neurons in the map
 	    NeuronMap::iterator neurMapEnd = neuronMap->end();
 	    for(NeuronMap::iterator neurIter = neuronMap->begin(); neurIter != neurMapEnd; ++neurIter){
 
-		//Set the color of the neuron
-		if(connectionMode & CONNECTION_MODE_ENABLED){
-		    if(netDisplay->getSingleNeuronID() == (*neurIter)->getID() ){
-			tmpColor2 = netDisplay->getSingleNeuronColor();
-			glColor3f(tmpColor2.red, tmpColor2.green, tmpColor2.blue);
-		    }
-		    else if(netDisplay->getToNeuronID() == (*neurIter)->getID() ){
-			tmpColor2 = netDisplay->getToNeuronColor();
-			glColor3f(tmpColor2.red, tmpColor2.green, tmpColor2.blue);
-		    }
-		    else{
-			glColor3f(defaultNeuronColor.red, defaultNeuronColor.green, defaultNeuronColor.blue);
-		    }
-		}
-		else if(neuronColorMap.contains(neurIter.key())){
-		    tmpColor = neuronColorMap[neurIter.key()];
-		    glColor3f(tmpColor->red, tmpColor->green, tmpColor->blue);
-		}
-		else{
-		    glColor3f(defaultNeuronColor.red, defaultNeuronColor.green, defaultNeuronColor.blue);
-		}
+			//Set the color of the neuron
+			if(connectionMode & CONNECTION_MODE_ENABLED){
+				if(netDisplay->getSingleNeuronID() == (*neurIter)->getID() ){
+					tmpColor2 = netDisplay->getSingleNeuronColor();
+					glColor3f(tmpColor2.red, tmpColor2.green, tmpColor2.blue);
+				}
+				else if(netDisplay->getToNeuronID() == (*neurIter)->getID() ){
+					tmpColor2 = netDisplay->getToNeuronColor();
+					glColor3f(tmpColor2.red, tmpColor2.green, tmpColor2.blue);
+				}
+				else{
+					glColor3f(defaultNeuronColor.red, defaultNeuronColor.green, defaultNeuronColor.blue);
+				}
+			}
+			else if(neuronColorMap.contains(neurIter.key())){
+				tmpColor = neuronColorMap[neurIter.key()];
+				glColor3f(tmpColor->red, tmpColor->green, tmpColor->blue);
+			}
+			else{
+				glColor3f(defaultNeuronColor.red, defaultNeuronColor.green, defaultNeuronColor.blue);
+			}
 
-		//Draw the neuron
-		glPushName((*neurIter)->getID());
-		glBegin(GL_POINTS);
+			//Draw the neuron
+			glPushName((*neurIter)->getID());
+			glBegin(GL_POINTS);
 		    glVertex3f(neurIter.value()->getXPos(), neurIter.value()->getYPos(), neurIter.value()->getZPos());
-		glEnd();
-		glPopName();
+			glEnd();
+			glPopName();
 	    }
 	}
 }
@@ -633,13 +634,13 @@ void NetworkViewer_V2::drawNeurons(){
 /*! Point camera towards position specified in struct for camera and rotate scene appropriately */
 void NetworkViewer_V2::positionCamera(){    //
     gluLookAt(
-	    //Location defined by fourth column of camera matrix
-	    cameraMatrix[12], cameraMatrix[13], cameraMatrix[14],
-	    //Forward is the Y axis so add this to position
-	    (cameraMatrix[12] + cameraMatrix[4]), (cameraMatrix[13] + cameraMatrix[5]), (cameraMatrix[14] + cameraMatrix[6]),
-	    //Up is the Z axis
-	    cameraMatrix[8], cameraMatrix[9], cameraMatrix[10]
-    );
+			//Location defined by fourth column of camera matrix
+			cameraMatrix[12], cameraMatrix[13], cameraMatrix[14],
+			//Forward is the Y axis so add this to position
+			(cameraMatrix[12] + cameraMatrix[4]), (cameraMatrix[13] + cameraMatrix[5]), (cameraMatrix[14] + cameraMatrix[6]),
+			//Up is the Z axis
+			cameraMatrix[8], cameraMatrix[9], cameraMatrix[10]
+			);
 
     //Rotate scene
     glRotatef(sceneRotateX, 1.0f, 0.0f, 0.0f);
@@ -656,8 +657,8 @@ void NetworkViewer_V2::fillRotationMatrix(float angle, float x, float y, float z
 
     // If NULL vector passed in, this will blow up...
     if(x == 0.0f && y == 0.0f && z == 0.0f){
-	qCritical()<<"NetworkViewer: NULL MATRIX PASSED TO fillRotationMatrix.";
-	return;
+		qCritical()<<"NetworkViewer: NULL MATRIX PASSED TO fillRotationMatrix.";
+		return;
     }
 
     // Scale vector
@@ -708,38 +709,38 @@ void NetworkViewer_V2::fillRotationMatrix(float angle, float x, float y, float z
     Returns an invalid neuron ID if no hits are present */
 unsigned int NetworkViewer_V2::getSelectedNeuron(GLuint selectBuffer[], int hitCount, int bufferSize){
     if(hitCount == 0)
-	return 0;
+		return 0;
     if(hitCount * 4 > bufferSize)
-	throw SpikeStreamException("Hit data overflows buffer");
+		throw SpikeStreamException("Hit data overflows buffer");
 
 
     GLuint nameCount, *ptr, minZ, minZName=0, currentMinZ, name;
     ptr = selectBuffer;
     minZ = 0xffffffff;
     for(int i=0; i<hitCount; ++i){
-	//First field is the number of names
-	nameCount = *ptr;
-	if(nameCount != 1)
-	    throw SpikeStreamException("Unnamed object selected or multiple names associated with the same object.");
+		//First field is the number of names
+		nameCount = *ptr;
+		if(nameCount != 1)
+			throw SpikeStreamException("Unnamed object selected or multiple names associated with the same object.");
 
-	//Second field is minimum depth for this record
-	++ptr;
-	currentMinZ = *ptr;
+		//Second field is minimum depth for this record
+		++ptr;
+		currentMinZ = *ptr;
 
-	//Third field is the maximum depth for this record
-	++ptr;
+		//Third field is the maximum depth for this record
+		++ptr;
 
-	//Remaining field for this record is the name - should only be 1 name if we have got this far
-	++ptr;
-	name = *ptr;
+		//Remaining field for this record is the name - should only be 1 name if we have got this far
+		++ptr;
+		name = *ptr;
 
-	if(currentMinZ < minZ){
-	    minZ = currentMinZ;
-	    minZName = name;
-	}
+		if(currentMinZ < minZ){
+			minZ = currentMinZ;
+			minZName = name;
+		}
 
-	//Increase pointer to the next hit if it exists
-	++ptr;
+		//Increase pointer to the next hit if it exists
+		++ptr;
     }
 
     //Return the name with the minimum z
@@ -785,13 +786,13 @@ void NetworkViewer_V2::loadDefaultClippingVolume(){
     /*If the network is empty or contains no neurons.
 	set up default clipping volume around origin */
     if(!Globals::networkLoaded() || Globals::getNetwork()->size() == 0){
-	defaultClippingVol.x1 = -100;
-	defaultClippingVol.x2 = 100;
-	defaultClippingVol.y1 = -100;
-	defaultClippingVol.y2 = 100;
-	defaultClippingVol.z1 = -100;
-	defaultClippingVol.z2 = 100;
-	return;
+		defaultClippingVol.x1 = -100;
+		defaultClippingVol.x2 = 100;
+		defaultClippingVol.y1 = -100;
+		defaultClippingVol.y2 = 100;
+		defaultClippingVol.z1 = -100;
+		defaultClippingVol.z2 = 100;
+		return;
     }
 
     //Get box enclosing network
@@ -799,17 +800,17 @@ void NetworkViewer_V2::loadDefaultClippingVolume(){
 
     //Want to include the origin in the starting clip volume
     if(defaultClippingVol.x1 > 0)
-	defaultClippingVol.x1 = 0;
+		defaultClippingVol.x1 = 0;
     if(defaultClippingVol.x2 < 0)
-	defaultClippingVol.x2 =0;
+		defaultClippingVol.x2 =0;
     if(defaultClippingVol.y1 > 0)
-	defaultClippingVol.y1 = 0;
+		defaultClippingVol.y1 = 0;
     if(defaultClippingVol.y2 < 0)
-	defaultClippingVol.y2 = 0;
+		defaultClippingVol.y2 = 0;
     if(defaultClippingVol.z1 > 0)
-	defaultClippingVol.z1 = 0;
+		defaultClippingVol.z1 = 0;
     if(defaultClippingVol.z2 < 0)
-	defaultClippingVol.z2 = 0;
+		defaultClippingVol.z2 = 0;
 
     //Expand box by 20% to give a nice view
     defaultClippingVol.expand_percent(20);
@@ -891,10 +892,10 @@ void NetworkViewer_V2::viewClippingVolume_Horizontal(Box& clipVolume){
     //First find whether z or x direction is longest
     GLfloat backwardsDistance;
     if((clipVolume.x2 - clipVolume.x1) > (clipVolume.z2 - clipVolume.z1)){//X direction is longest
-	backwardsDistance = ((clipVolume.x2 - clipVolume.x1)/2.0f)/tan(gltDegToRad(perspective_angle)/2.0f);
+		backwardsDistance = ((clipVolume.x2 - clipVolume.x1)/2.0f)/tan(gltDegToRad(perspective_angle)/2.0f);
     }
     else{//Z direction is longest
-	backwardsDistance = ((clipVolume.z2 - clipVolume.z1)/2.0f)/tan(gltDegToRad(perspective_angle)/2.0f);
+		backwardsDistance = ((clipVolume.z2 - clipVolume.z1)/2.0f)/tan(gltDegToRad(perspective_angle)/2.0f);
     }
     //Now move camera back so that it can see everything in both directions
     //In this case this moves camera back along the negative y direction
@@ -919,10 +920,10 @@ void NetworkViewer_V2::viewClippingVolume_Vertical(Box& clipVolume){
     //First find whether y or x direction is longest
     GLfloat backwardsDistance;
     if((clipVolume.x2 - clipVolume.x1) > (clipVolume.y2 - clipVolume.y1)){//X direction is longest
-	backwardsDistance = ((clipVolume.x2 - clipVolume.x1)/2.0f)/tan(gltDegToRad(perspective_angle)/2.0f);
+		backwardsDistance = ((clipVolume.x2 - clipVolume.x1)/2.0f)/tan(gltDegToRad(perspective_angle)/2.0f);
     }
     else{//Y direction is longest
-	backwardsDistance = ((clipVolume.y2 - clipVolume.y1)/2.0f)/tan(gltDegToRad(perspective_angle)/2.0f);
+		backwardsDistance = ((clipVolume.y2 - clipVolume.y1)/2.0f)/tan(gltDegToRad(perspective_angle)/2.0f);
     }
 
     //Now move camera back so that it can see everything in both directions
@@ -947,15 +948,15 @@ void NetworkViewer_V2::viewClippingVolume_Vertical(Box& clipVolume){
 
 void NetworkViewer_V2::setZoomLevel(){
     if(Globals::getNetworkDisplay()->isZoomEnabled()){
-	unsigned int tmpZoomNeurGrpID = Globals::getNetworkDisplay()->getZoomNeuronGroupID();
-	if(tmpZoomNeurGrpID == 0)
-	    zoomDefaultView();
-	else{
-	    if(Globals::getNetworkDisplay()->getZoomStatus() == NetworkDisplay::ZOOM_SIDE)
-		zoomToNeuronGroup(tmpZoomNeurGrpID);
-	    else if (Globals::getNetworkDisplay()->getZoomStatus() == NetworkDisplay::ZOOM_ABOVE)
-		zoomAboveNeuronGroup(tmpZoomNeurGrpID);
-	}
+		unsigned int tmpZoomNeurGrpID = Globals::getNetworkDisplay()->getZoomNeuronGroupID();
+		if(tmpZoomNeurGrpID == 0)
+			zoomDefaultView();
+		else{
+			if(Globals::getNetworkDisplay()->getZoomStatus() == NetworkDisplay::ZOOM_SIDE)
+				zoomToNeuronGroup(tmpZoomNeurGrpID);
+			else if (Globals::getNetworkDisplay()->getZoomStatus() == NetworkDisplay::ZOOM_ABOVE)
+				zoomAboveNeuronGroup(tmpZoomNeurGrpID);
+		}
     }
 }
 
@@ -972,7 +973,7 @@ void NetworkViewer_V2::zoomDefaultView(){
 	outside of the main list. */
 void NetworkViewer_V2::zoomAboveNeuronGroup(unsigned int neuronGroupID){
     if(!Globals::networkLoaded())
-	return;
+		return;
     Box neurGrpBox = Globals::getNetwork()->getNeuronGroupBoundingBox(neuronGroupID);
     viewClippingVolume_Vertical(neurGrpBox);
 }
@@ -983,7 +984,7 @@ void NetworkViewer_V2::zoomAboveNeuronGroup(unsigned int neuronGroupID){
 	outside of the main list. */
 void NetworkViewer_V2::zoomToNeuronGroup(unsigned int neuronGroupID){
     if(!Globals::networkLoaded())
-	return;
+		return;
     Box neurGrpBox = Globals::getNetwork()->getNeuronGroupBoundingBox(neuronGroupID);
     viewClippingVolume_Horizontal(neurGrpBox);
 }

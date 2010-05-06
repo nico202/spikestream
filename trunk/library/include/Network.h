@@ -58,6 +58,7 @@ namespace spikestream {
 	    bool isLocked();
 	    void load();
 	    bool neuronGroupIsLoaded(unsigned int neurGrpID);
+		void setArchiveDao(ArchiveDao* archDao) { this->archiveDao = archDao; }
 	    void setNetworkDao(NetworkDao* netDao) { this->networkDao = netDao; }
 	    int size();
 

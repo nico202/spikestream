@@ -27,6 +27,7 @@ class TestNetworkDao : public TestDao {
 		void testGetToConnections();
 		void testGetConnectionGroupsInfo();
 		void testGetConnectionGroupSize();
+		void testGetNeuronCount();
 		void testGetNeuronGroupBoundingBox();
 		void testGetNetworksInfo();
 		void testGetNeuronGroupsInfo();

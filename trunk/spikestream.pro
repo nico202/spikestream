@@ -10,6 +10,10 @@ SUBDIRS =   library applicationlibrary application
 
 #================  NETWORKS PLUGINS  =================
 #SUBDIRS += networks/tononinetworks networks/aleksandernetworks networks/alekgameznets2
+
+
+#================  NEURON GROUP PLUGINS  =================
+SUBDIRS += neurongroups/cuboid
 	
 	
 #================  INSTALLATION  =====================
