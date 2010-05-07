@@ -136,6 +136,54 @@ bool Network::containsNeuron(unsigned int neurID){
 }
 
 
+/*! Removes the specified connection groups from the network and database.
+	Throws an exception if the connection groups cannot be found */
+void Network::deleteConnectionGroups(QList<unsigned int>& conGrpIDList){
+	//Check if network is editable or not
+	if(isLocked())
+		throw SpikeStreamException("Cannot delete connection groups from a locked network.");
+
+	//Check that connection group ids exist in network
+	foreach(unsigned int conGrpID, conGrpIDList){
+		if(!connGrpMap.contains(conGrpID))
+			throw SpikeStreamException("Connection group ID " + QString::number(conGrpID) + " cannot be found in the current network.");
+	}
+
+	//Store the list of neuron groups to be added later when the thread has finished and we have the correct ID
+	deleteConnectionGroupIDs = conGrpIDList;
+
+	//Start thread that adds neuron groups to database
+	clearError();
+	connectionNetworkDaoThread->prepareDeleteConnectionGroups(getID(), conGrpIDList);
+	currentConnectionTask = DELETE_NEURONS_TASK;
+	connectionNetworkDaoThread->start();
+}
+
+
+/*! Removes the specified neuron groups from the network and database.
+	Throws an exception if the neuron groups cannot be found */
+void Network::deleteNeuronGroups(QList<unsigned int>& neurGrpIDList){
+	//Check if network is editable or not
+	if(isLocked())
+		throw SpikeStreamException("Cannot delete neuron groups from a locked network.");
+
+	//Check that neuron group ids exist in network
+	foreach(unsigned int neurGrpID, neurGrpIDList){
+		if(!neurGrpMap.contains(neurGrpID))
+			throw SpikeStreamException("Neuron group ID " + QString::number(neurGrpID) + " cannot be found in the current network.");
+	}
+
+	//Store the list of neuron groups to be added later when the thread has finished and we have the correct ID
+	deleteNeuronGroupIDs = neurGrpIDList;
+
+	//Start thread that adds neuron groups to database
+	clearError();
+	neuronNetworkDaoThread->prepareDeleteNeuronGroups(getID(), neurGrpIDList);
+	currentNeuronTask = DELETE_NEURONS_TASK;
+	neuronNetworkDaoThread->start();
+}
+
+
 /*! Returns a complete list of connection group infos */
 QList<ConnectionGroupInfo> Network::getConnectionGroupsInfo(){
     QList<ConnectionGroupInfo> tmpList;
@@ -327,6 +375,33 @@ void Network::connectionThreadFinished(){
 		errorMessage += "Connection Loading Error: '" + connectionNetworkDaoThread->getErrorMessage() + "'. ";
 		error = true;
     }
+	if(!error){
+		try{
+			switch(currentConnectionTask){
+				case DELETE_CONNECTIONS_TASK:
+					//Remove deleted connection groups from memory
+					foreach(unsigned int conGrpID,  deleteConnectionGroupIDs){
+						if(!connGrpMap.contains(conGrpID))
+							throw SpikeStreamException("Connection group ID " + QString::number(conGrpID) + " cannot be found in network.");
+						delete connGrpMap[conGrpID];
+						connGrpMap.remove(conGrpID);
+					}
+				break;
+				case ADD_CONNECTIONS_TASK:
+					;//Nothing to do at present
+				break;
+				case LOAD_CONNECTIONS_TASK:
+					;//Nothing to do at present
+				break;
+				default:
+					throw SpikeStreamException("The current task ID has not been recognized.");
+			}
+		}
+		catch(SpikeStreamException& ex){
+			errorMessage = ex.getMessage();
+			error = true;
+		}
+	}
 
     //Reset task
     currentConnectionTask = -1;
@@ -353,12 +428,20 @@ void Network::neuronThreadFinished(){
 					for(QList<NeuronGroup*>::iterator iter = newNeuronGroups.begin(); iter != newNeuronGroups.end(); ++iter){
 						//Check to see if ID already exists - error in this case
 						if( neurGrpMap.contains( (*iter)->getID() ) ){
-							cout<<"NEUR GRP MAP SIZE: "<<neurGrpMap.size()<<" incorrect id: "<<(*iter)->getID()<<endl;
 							throw SpikeStreamException("Adding neurons task - trying to add a neuron group with ID " + QString::number((*iter)->getID()) + " that already exists in the network.");
 						}
 
 						//Store neuron group
 						neurGrpMap[ (*iter)->getID() ] = *iter;
+					}
+				break;
+				case DELETE_NEURONS_TASK:
+					//Remove deleted neuron groups from memory
+					foreach(unsigned int neurGrpID,  deleteNeuronGroupIDs){
+						if(!neurGrpMap.contains(neurGrpID))
+							throw SpikeStreamException("Neuron group ID " + QString::number(neurGrpID) + " cannot be found in network.");
+						delete neurGrpMap[neurGrpID];
+						neurGrpMap.remove(neurGrpID);
 					}
 				break;
 				case LOAD_NEURONS_TASK:
@@ -373,7 +456,7 @@ void Network::neuronThreadFinished(){
 			error = true;
 		}
     }
-	qDebug()<<"NETWORK: "<<neurGrpMap.size();
+
     //Reset task
     currentNeuronTask = -1;
 
@@ -381,6 +464,7 @@ void Network::neuronThreadFinished(){
     if(!isBusy())
 		emit taskFinished();
 }
+
 
 /*! Returns the size of the network.
     An exception is thrown if not all neuron groups have been loaded.

@@ -17,6 +17,10 @@ ConnectionGroup::~ConnectionGroup(){
 }
 
 
+/*--------------------------------------------------------*/
+/*-------             PUBLIC METHODS               -------*/
+/*--------------------------------------------------------*/
+
 /*! Adds a connection to the group */
 Connection* ConnectionGroup::addConnection(Connection* newConn){
     connectionList.append(newConn);
@@ -30,22 +34,23 @@ Connection* ConnectionGroup::addConnection(Connection* newConn){
 }
 
 
+/*! Returns iterator pointing to beginning of connection group */
 ConnectionList::const_iterator ConnectionGroup::begin(){
     return connectionList.begin();
 }
 
 
+/*! Returns iterator pointing to end of connection group */
 ConnectionList::const_iterator ConnectionGroup::end(){
     return connectionList.end();
 }
-
 
 
 /*! Removes all connections from this group */
 void ConnectionGroup::clearConnections(){
     ConnectionList::iterator endConnList = connectionList.end();
     for(ConnectionList::iterator iter = connectionList.begin(); iter != endConnList; ++iter){
-	delete *iter;
+		delete *iter;
     }
     connectionList.clear();
     fromConnectionMap.clear();
@@ -58,7 +63,7 @@ void ConnectionGroup::clearConnections(){
     Empty list is returned if neuron id cannot be found. */
 const ConnectionList ConnectionGroup::getFromConnections(unsigned int neurID){
     if(!fromConnectionMap.contains(neurID))
-	return ConnectionList();//Returns an empty connection list without filling map with invalid from and to neurons
+		return ConnectionList();//Returns an empty connection list without filling map with invalid from and to neurons
     return fromConnectionMap[neurID];
 }
 
@@ -66,9 +71,9 @@ const ConnectionList ConnectionGroup::getFromConnections(unsigned int neurID){
 /*! Returns a list of connections to the neuron with the specified id.
     Exception is thrown if the neuron cannot be found. */
 const ConnectionList ConnectionGroup::getToConnections(unsigned int neurID){
-   if(!toConnectionMap.contains(neurID))
-       return ConnectionList();//Returns an empty connection list without filling map with invalid from and to neurons
-   return toConnectionMap[neurID];
+	if(!toConnectionMap.contains(neurID))
+		return ConnectionList();//Returns an empty connection list without filling map with invalid from and to neurons
+	return toConnectionMap[neurID];
 }
 
 

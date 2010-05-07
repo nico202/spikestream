@@ -94,7 +94,7 @@ SOURCES += src/nrm/NRMNetwork.cpp \
 
 
 #----------------------------------------------#
-#---             analysis folder            ---#
+#---                 Analysis               ---#
 #----------------------------------------------#
 HEADERS += include/AnalysisLoaderWidget.h \
 			include/AbstractAnalysisWidget.h \
@@ -178,13 +178,13 @@ SOURCES += src/views/NeuronGroupTableView.cpp \
 HEADERS += include/NetworksWidget.h \
 			include/ArchiveWidget_V2.h \
 			include/NeuronGroupWidget.h \
-			include/ConnectionWidget_V2.h \
+			include/ConnectionWidget.h \
 			include/NetworkViewerProperties_V2.h \
 			include/SimulationLoaderWidget.h
 SOURCES += src/widgets/NetworksWidget.cpp \
 			src/widgets/ArchiveWidget_V2.cpp \
 			src/widgets/NeuronGroupWidget.cpp \
-			src/widgets/ConnectionWidget_V2.cpp \
+			src/widgets/ConnectionWidget.cpp \
 			src/widgets/NetworkViewerProperties_V2.cpp \
 			src/widgets/SimulationLoaderWidget.cpp
 

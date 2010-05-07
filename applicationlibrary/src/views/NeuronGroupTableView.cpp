@@ -41,7 +41,7 @@ void NeuronGroupTableView::resizeHeaders(){
 
 /*! Called when the table is clicked and passes this information on to model. */
 void NeuronGroupTableView::tableClicked(QModelIndex index){
-	if(index.column() == 0 || index.column() == 1)
-	model()->setData(index, 0);
+	if(index.column() == 0 || index.column() == 1 || index.column() == 6)
+		model()->setData(index, 0);
 }
 

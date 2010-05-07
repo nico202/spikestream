@@ -3,6 +3,7 @@
 #include "Globals.h"
 #include "NeuronGroup.h"
 #include "NeuronGroupInfo.h"
+#include "SpikeStreamException.h"
 #include "Util.h"
 using namespace spikestream;
 
@@ -159,14 +160,20 @@ void CuboidWidget::addButtonClicked(){
 		descriptionEdit->setText("Undescribed");
 
 	//Check inputs are not empty
-	checkInput(xPosEdit, "X position has not been set.");
-	checkInput(yPosEdit, "Y position has not been set.");
-	checkInput(zPosEdit, "Z position has not been set.");
-	checkInput(widthEdit, "Width has not been set.");
-	checkInput(lengthEdit, "Length has not been set.");
-	checkInput(heightEdit, "Height has not been set.");
-	checkInput(spacingEdit, "Spacing has not been set.");
-	checkInput(densityEdit, "Density has not been set.");
+	try{
+		checkInput(xPosEdit, "X position has not been set.");
+		checkInput(yPosEdit, "Y position has not been set.");
+		checkInput(zPosEdit, "Z position has not been set.");
+		checkInput(widthEdit, "Width has not been set.");
+		checkInput(lengthEdit, "Length has not been set.");
+		checkInput(heightEdit, "Height has not been set.");
+		checkInput(spacingEdit, "Spacing has not been set.");
+		checkInput(densityEdit, "Density has not been set.");
+	}
+	catch(SpikeStreamException& ex){
+		QMessageBox::warning(this, "Cuboid Neuron Group Builder", ex.getMessage(), QMessageBox::Ok);
+		return;
+	}
 
 	//Extract variables
 	int xPos = Util::getInt(xPosEdit->text());
@@ -213,9 +220,14 @@ void CuboidWidget::builderThreadFinished(){
 	if(builderThread->isError())
 		qCritical()<<builderThread->getErrorMessage();
 
+
+	//Prevent this method being called when network finishes other tasks
+	this->disconnect(Globals::getNetwork(), SIGNAL(taskFinished()));
+
 	//Reset network and archive daos in network
 	Globals::getNetwork()->setNetworkDao(Globals::getNetworkDao());
 	Globals::getNetwork()->setArchiveDao(Globals::getArchiveDao());
+	Globals::getEventRouter()->networkChangedSlot();
 }
 
 
@@ -227,11 +239,12 @@ void CuboidWidget::updateProgress(int stepsCompleted, int totalSteps){
 	}
 	else{
 		progressDialog->close();
-		Globals::getEventRouter()->networkChangedSlot();
+		delete progressDialog;
 	}
 
-	if(progressDialog->wasCanceled())
+	if(progressDialog->wasCanceled()){
 		builderThread->stop();
+	}
 }
 
 
@@ -241,7 +254,7 @@ void CuboidWidget::updateProgress(int stepsCompleted, int totalSteps){
 
 void CuboidWidget::checkInput(QLineEdit* inputEdit, const QString& errMsg){
 	if(inputEdit->text().isEmpty()){
-		QMessageBox::warning(this, "Cuboid Neuron Group Builder", errMsg, QMessageBox::Ok);
+		throw SpikeStreamException(errMsg);
 	}
 }
 

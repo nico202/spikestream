@@ -30,6 +30,8 @@ namespace spikestream {
 	    void prepareAddConnectionGroups(unsigned int networkID, QList<ConnectionGroup*>& connGrpList);
 	    void prepareAddNeuronGroup(unsigned int networkID, NeuronGroup* neurGrp);
 	    void prepareAddNeuronGroups(unsigned int networkID, QList<NeuronGroup*>& neurGrpList);
+		void prepareDeleteConnectionGroups(unsigned int networkID, QList<unsigned int>& conGrpList);
+		void prepareDeleteNeuronGroups(unsigned int networkID, QList<unsigned int>& neurGrpList);
 	    void prepareLoadConnections(QList<ConnectionGroup*>& connGrpList);
 	    void prepareLoadConnections(ConnectionGroup* connGrp);
 	    void prepareLoadNeurons(const QList<NeuronGroup*>& neurGrpList);
@@ -44,8 +46,14 @@ namespace spikestream {
 		adding connection groups to the database. */
 	    QList<ConnectionGroup*> connectionGroupList;
 
+		/*! List of connection group ids used for deleting connection groups */
+		QList<unsigned int> connectionGroupIDList;
+
 	    /*! List of neuron groups to load neurons into or for adding to database */
 	    QList<NeuronGroup*> neuronGroupList;
+
+		/*! List of neuron group ids used for deleting neuron groups */
+		QList<unsigned int> neuronGroupIDList;
 
 	    /*! Id of network to which neuron or connection group are added */
 	    unsigned int networkID;
@@ -73,12 +81,16 @@ namespace spikestream {
 	    const static unsigned int NO_TASK_DEFINED = 1;
 	    const static unsigned int ADD_CONNECTION_GROUPS_TASK = 2;
 	    const static unsigned int ADD_NEURON_GROUPS_TASK = 3;
-	    const static unsigned int LOAD_NEURONS_TASK = 4;
-	    const static unsigned int LOAD_CONNECTIONS_TASK = 5;
+		const static unsigned int DELETE_CONNECTION_GROUPS_TASK = 4;
+		const static unsigned int DELETE_NEURON_GROUPS_TASK = 5;
+		const static unsigned int LOAD_NEURONS_TASK = 6;
+		const static unsigned int LOAD_CONNECTIONS_TASK = 7;
 
 	    //========================  METHODS  ===========================
 	    void addNeuronGroups();
 	    void addConnectionGroups();
+		void deleteConnectionGroups();
+		void deleteNeuronGroups();
 	    void loadConnections();
 	    void loadNeurons();
 	    void setError(const QString& msg);

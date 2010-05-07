@@ -9,7 +9,7 @@
 #include "NetworksWidget.h"
 #include "ArchiveWidget_V2.h"
 #include "NeuronGroupWidget.h"
-#include "ConnectionWidget_V2.h"
+#include "ConnectionWidget.h"
 #include "NetworkViewer_V2.h"
 #include "NetworkViewerProperties_V2.h"
 #include "SimulationLoaderWidget.h"
@@ -216,7 +216,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow(){
 	//Set up editor window
 	QSplitter *layerSplitterWidget = new QSplitter(tabWidget);
 	NeuronGroupWidget* neuronGrpWidget = new NeuronGroupWidget();
-	ConnectionWidget_V2* conWidget = new ConnectionWidget_V2(this);
+	ConnectionWidget* conWidget = new ConnectionWidget(this);
 	layerSplitterWidget->addWidget(neuronGrpWidget);
 	layerSplitterWidget->addWidget(conWidget);
 	layerSplitterWidget->setOrientation(Qt::Vertical);

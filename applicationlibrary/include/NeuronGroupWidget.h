@@ -1,7 +1,12 @@
 #ifndef NEURONGROUPWIDGET_H
 #define NEURONGROUPWIDGET_H
 
+//SpikeStream includes
+#include "NeuronGroupModel.h"
+
 //Qt includes
+#include <QProgressDialog>
+#include <QPushButton>
 #include <QWidget>
 
 namespace spikestream {
@@ -16,7 +21,23 @@ namespace spikestream {
 
 		private slots:
 			void addNeurons();
+			void deleteSelectedNeurons();
+			void networkChanged();
+			void networkTaskFinished();
 
+		private:
+			//========================  VARIABLES  ========================
+			/*! Model for display of list of neuron groups */
+			NeuronGroupModel* neuronGroupModel;
+
+			/*! Button for adding neurons */
+			QPushButton* addNeuronsButton;
+
+			/*! Button for deleting neurons */
+			QPushButton* deleteButton;
+
+			/*! Provides feedback with progress deleting neurons */
+			QProgressDialog* progressDialog;
 	};
 
 }
