@@ -43,16 +43,37 @@ void CuboidBuilderThread::run(){
 	clearError();
 	stopThread = false;
 	newNeuronGroup = NULL;
+	networkFinished = false;
 	try{
 		//Seed the random number generator
 		srand(12345678);
 
 		//Add the neuron group
 		addNeuronGroup();
+
+		//Wait for network to finish
+		while(!networkFinished)
+			msleep(250);
 	}
 	catch (SpikeStreamException& ex){
 		setError(ex.getMessage());
 	}
+	qDebug()<<"CUBOID BUILDER COMPLETE";
+}
+
+
+
+/*----------------------------------------------------------*/
+/*-----                PRIVATE METHODS                 -----*/
+/*----------------------------------------------------------*/
+
+/*! Called when network has finished adding the neuron groups */
+void CuboidBuilderThread::networkTaskFinished(){
+	//Inform other classes that loading has completed
+	emit progress(width+1, width+1);
+
+	//Record that network has finished
+	networkFinished = true;
 }
 
 
@@ -74,13 +95,8 @@ void CuboidBuilderThread::addNeuronGroup(){
 	buildNeuronGroup();
 	QList<NeuronGroup*> neurGrpList;
 	neurGrpList.append(newNeuronGroup);
+	connect(currentNetwork, SIGNAL(taskFinished()), this, SLOT(networkTaskFinished()),  Qt::UniqueConnection);
 	currentNetwork->addNeuronGroups(neurGrpList);
-
-	//Wait for network to finish
-	while(currentNetwork->isBusy())
-		this->msleep(500);
-
-	emit progress(width+2, width+2);
 }
 
 
@@ -97,9 +113,9 @@ void CuboidBuilderThread::buildNeuronGroup(){
 	newNeuronGroup = new NeuronGroup(neuronGroupInfo);
 
 	//Add the neurons to the neuron group
-	for(int xPos = xStart; xPos <= xStart+width && !stopThread; xPos += spacing){
-		for(int yPos = yStart; yPos <= yStart+length && !stopThread; yPos += spacing){
-			for(int zPos = zStart; zPos <= zStart+height && !stopThread; zPos += spacing){
+	for(int xPos = xStart; xPos < xStart+width && !stopThread; xPos += spacing){
+		for(int yPos = yStart; yPos < yStart+length && !stopThread; yPos += spacing){
+			for(int zPos = zStart; zPos < zStart+height && !stopThread; zPos += spacing){
 				double ranNum = (double)rand() / (double)RAND_MAX;
 				if(ranNum <= density)
 					newNeuronGroup->addNeuron(xPos, yPos, zPos);
@@ -107,7 +123,7 @@ void CuboidBuilderThread::buildNeuronGroup(){
 		}
 
 		//Give some idea about progress
-		emit progress(xPos, width+2);
+		emit progress(xPos, width+1);
 	}
 }
 

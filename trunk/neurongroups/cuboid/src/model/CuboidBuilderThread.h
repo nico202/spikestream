@@ -28,6 +28,9 @@ namespace spikestream {
 		signals:
 			void progress(int stepsCompleted, int totalSteps);
 
+		private slots:
+			void networkTaskFinished();
+
 		private:
 			//=======================  VARIABLES  ========================
 			/*! Holds information about the neuron group that is being added */
@@ -35,6 +38,9 @@ namespace spikestream {
 
 			/*! Neuron group being added */
 			NeuronGroup* newNeuronGroup;
+
+			/*! Set to true when network has finished adding the neuron groups */
+			bool networkFinished;
 
 			/*! Used to cancel the operation */
 			bool stopThread;

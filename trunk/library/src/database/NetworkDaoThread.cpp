@@ -72,6 +72,34 @@ void NetworkDaoThread::prepareAddNeuronGroups(unsigned int networkID, QList<Neur
 }
 
 
+/*! Prepares to delete connection groups with the specified ids */
+void NetworkDaoThread::prepareDeleteConnectionGroups(unsigned int networkID, QList<unsigned int>& conGrpList){
+	//Store necessary variables
+	this->networkID = networkID;
+	this->connectionGroupIDList = conGrpList;
+
+	//Set the task that will run when the thread starts
+	currentTask = DELETE_CONNECTION_GROUPS_TASK;
+
+	//Record the total number of steps that the task involves
+	totalNumberOfSteps = 1;
+}
+
+
+/*! Prepares to delete neuron groups with the specified ids */
+void NetworkDaoThread::prepareDeleteNeuronGroups(unsigned int networkID, QList<unsigned int>& neurGrpList){
+	//Store necessary variables
+	this->networkID = networkID;
+	this->neuronGroupIDList = neurGrpList;
+
+	//Set the task that will run when the thread starts
+	currentTask = DELETE_NEURON_GROUPS_TASK;
+
+	//Record the total number of steps that the task involves
+	totalNumberOfSteps = 1;
+}
+
+
 /*! Prepares to load connections for a list of connection groups. This task is executed when the thread runs.  */
 void NetworkDaoThread::prepareLoadConnections(QList<ConnectionGroup*>& connGrpList){
     //Store necessary variables
@@ -145,17 +173,23 @@ void NetworkDaoThread::run(){
 
 		switch(currentTask){
 			case ADD_NEURON_GROUPS_TASK:
-						addNeuronGroups();
-						break;
+				addNeuronGroups();
+			break;
 			case ADD_CONNECTION_GROUPS_TASK:
-						addConnectionGroups();
-						break;
+				addConnectionGroups();
+			break;
+			case DELETE_CONNECTION_GROUPS_TASK:
+				deleteConnectionGroups();
+			break;
+			case DELETE_NEURON_GROUPS_TASK:
+				deleteNeuronGroups();
+			break;
 			case LOAD_CONNECTIONS_TASK:
-						loadConnections();
-						break;
+				loadConnections();
+			break;
 			case LOAD_NEURONS_TASK:
-						loadNeurons();
-						break;
+				loadNeurons();
+			break;
 			default:
 				setError("NetworkDaoThread started without defined task.");
 		}
@@ -305,10 +339,8 @@ void NetworkDaoThread::addNeuronGroups(){
 			queryStr += QString::number(iter.value()->getXPos()) + ", ";
 			queryStr += QString::number(iter.value()->getYPos()) + ", ";
 			queryStr += QString::number(iter.value()->getZPos()) + ")";
-			qDebug()<<queryStr;
 			query = getQuery(queryStr);
 			executeQuery(query);
-			qDebug()<<"EXECUTED: "<<queryStr;
 
 			//Add neuron with correct id to the new map
 			int lastInsertID = query.lastInsertId().toInt();
@@ -336,12 +368,48 @@ void NetworkDaoThread::addNeuronGroups(){
 		neuronGroup->setNeuronMap(newNeurMap);
 
 		/* Clean up the dynamically allocated neuron map, but keep the dynamically allocated
-	    Point3Ds, which are used in the new map */
+			neurons, which are used in the new map */
 		delete neurMap;
 
 		//Neuron group now reflects state of table in database, so set loaded to true
 		neuronGroup->setLoaded(true);
     }
+}
+
+
+/*! Deletes connection groups from the SpikeStreamNetwork database. */
+void NetworkDaoThread::deleteConnectionGroups(){
+	//Check that parameters have been set correctly
+	if(networkID == 0){
+		setError("Network ID has not been set.");
+		return;
+	}
+
+	//Work through the list of neuron groups
+	foreach(unsigned int conGroupID, connectionGroupIDList){
+		executeQuery("DELETE FROM ConnectionGroups WHERE NetworkID="+ QString::number(networkID) + " AND ConnectionGroupID=" + QString::number(conGroupID) );
+	}
+
+	//Reset list
+	connectionGroupIDList.clear();
+}
+
+
+/*! Deletes neuron groups from the SpikeStreamNetwork database. */
+void NetworkDaoThread::deleteNeuronGroups(){
+	//Check that parameters have been set correctly
+	if(networkID == 0){
+		setError("Network ID has not been set.");
+		return;
+	}
+
+	//Work through the list of neuron groups
+	foreach(unsigned int neuronGroupID, neuronGroupIDList){
+		executeQuery("DELETE FROM NeuronGroups WHERE NetworkID="+ QString::number(networkID) + " AND NeuronGroupID=" + QString::number(neuronGroupID) );
+	}
+
+	//Reset list
+	neuronGroupIDList.clear();
 }
 
 

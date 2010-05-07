@@ -18,10 +18,16 @@ using namespace std;
 
 /*! Runs all of the tests */
 void TestRunner::runTests(){
+
+	//Create core application object so that drivers load in Windows
+	int argsSize = 0;
+	char* argsChar[0];
+	QCoreApplication coreApplication(argsSize, argsChar);
+
 	TestDatabaseDao testDatabaseDao;
 	QTest::qExec(&testDatabaseDao);
 
- /*   TestNetworkDao testNetworkDao;
+	TestNetworkDao testNetworkDao;
     QTest::qExec(&testNetworkDao);
 
     TestNetworkDaoThread testNetworkDaoThread;
@@ -46,7 +52,7 @@ void TestRunner::runTests(){
     QTest::qExec(&testUtil);
 
     TestWeightlessNeuron testWeightlessNeuron;
-	QTest::qExec(&testWeightlessNeuron);*/
+	QTest::qExec(&testWeightlessNeuron);
 }
 
 

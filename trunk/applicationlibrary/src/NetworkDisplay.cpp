@@ -66,7 +66,6 @@ void NetworkDisplay::networkChanged(){
 	//Make the neuron groups visible by default
 	if(Globals::networkLoaded()){
 		setVisibleNeuronGroupIDs(Globals::getNetwork()->getNeuronGroupIDs());
-		qDebug()<<" neuron group ids size: "<<Globals::getNetwork()->getNeuronGroupIDs().size();
 		setVisibleConnectionGroupIDs(Globals::getNetwork()->getConnectionGroupIDs());
 	}
 }
@@ -237,7 +236,6 @@ void NetworkDisplay::setNeuronGroupVisibility(unsigned int neurGrpID, bool visib
 	else{
 		neurGrpDisplayMap.remove(neurGrpID);
 	}
-	qDebug()<<"num vis neur grps: "<<neurGrpDisplayMap.size();
 	//Inform other classes that the display has changed
 	emit networkDisplayChanged();
 }

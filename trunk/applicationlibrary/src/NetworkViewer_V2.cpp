@@ -588,11 +588,10 @@ void NetworkViewer_V2::drawNeurons(){
 
 	//Work through the neuron groups listed in the view vector
 	QList<unsigned int> neuronGrpIDs = Globals::getNetworkDisplay()->getVisibleNeuronGroupIDs();
-	qDebug()<<"neur grp ids size: "<<neuronGrpIDs.size();
 	for(QList<unsigned int>::iterator neurGrpIter = neuronGrpIDs.begin(); neurGrpIter != neuronGrpIDs.end(); ++neurGrpIter){
 	    //Get the map of neurons associated with this group
 	    NeuronMap* neuronMap = network->getNeuronGroup(*neurGrpIter)->getNeuronMap();
-		qDebug()<<"Neuron map size: "<<neuronMap->size();
+
 	    //Draw the neurons in the map
 	    NeuronMap::iterator neurMapEnd = neuronMap->end();
 	    for(NeuronMap::iterator neurIter = neuronMap->begin(); neurIter != neurMapEnd; ++neurIter){

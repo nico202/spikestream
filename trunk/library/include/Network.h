@@ -36,6 +36,8 @@ namespace spikestream {
 	    void clearError() { error = false; errorMessage = ""; }
 	    bool connectionGroupIsLoaded(unsigned int connGrpID);
 	    bool containsNeuron(unsigned int neurID);
+		void deleteConnectionGroups(QList<unsigned int>& conGrpIDList);
+		void deleteNeuronGroups(QList<unsigned int>& neurGrpIDList);
 	    Box getBoundingBox();
 	    unsigned int getID() { return info.getID(); }
 	    QString getErrorMessage() { return  errorMessage; }
@@ -115,6 +117,12 @@ namespace spikestream {
 	    /*! List of neuron groups that are being added to the network */
 	    QList<NeuronGroup*> newNeuronGroups;
 
+		/*! List of ids of neuron groups to delete */
+		QList<unsigned int> deleteNeuronGroupIDs;
+
+		/*! List of ids of connection groups to delete */
+		QList<unsigned int> deleteConnectionGroupIDs;
+
 	    /*! Current task being undertaken by the neuron thread.*/
 	    int currentNeuronTask;
 
@@ -122,9 +130,11 @@ namespace spikestream {
 	    int currentConnectionTask;
 
 	    static const int ADD_NEURONS_TASK = 1;
-	    static const int LOAD_NEURONS_TASK = 2;
-	    static const int ADD_CONNECTIONS_TASK = 3;
-	    static const int LOAD_CONNECTIONS_TASK = 4;
+		static const int DELETE_CONNECTIONS_TASK = 2;
+		static const int DELETE_NEURONS_TASK = 3;
+		static const int LOAD_NEURONS_TASK = 4;
+		static const int ADD_CONNECTIONS_TASK = 5;
+		static const int LOAD_CONNECTIONS_TASK = 6;
 
 
 
