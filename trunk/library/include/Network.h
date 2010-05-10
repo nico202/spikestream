@@ -17,11 +17,9 @@ using namespace spikestream;
 namespace spikestream {
 
     /*! Class holding information about a neural network in the database.
-	This class is linked to the database to enable lazy loading of connections and neurons.
-	This is a read only class. All adding to the database should be done through the networkDao
-	and then this class should be reloaded.
-	NOTE: This class is not thread safe because of its database dependency.
-	The network dao needs to be set appropriately if using it from a different thread */
+		This class is linked to the database to enable lazy loading of connections and neurons.
+		NOTE: This class is not thread safe because of its database dependency.
+		The network dao needs to be set appropriately if using it from a different thread */
     class Network : public QObject {
 	Q_OBJECT
 

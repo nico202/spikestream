@@ -371,7 +371,7 @@ void SpikeStreamMainWindow::showViewerWidget(){
 void SpikeStreamMainWindow::clearDatabases(){
 	//Confirm that user wants to take this action.
 	QMessageBox msgBox;
-	msgBox.setText("Deleting Network");
+	msgBox.setText("Clearing Database");
 	msgBox.setInformativeText("Are you sure that you want to clear the database completely?\nAll data will be lost and this step cannot be undone.");
 	msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
 	msgBox.setDefaultButton(QMessageBox::Cancel);

@@ -25,6 +25,12 @@ NeuronGroupModel::~NeuronGroupModel(){
 /*-------             PUBLIC METHODS               -------*/
 /*--------------------------------------------------------*/
 
+/*! Clears the list of selected neuron groups */
+void NeuronGroupModel::clearSelection(){
+	selectionMap.clear();
+}
+
+
 /*! Inherited from QAbstractTableModel. Returns the number of columns in the model */
 int NeuronGroupModel::columnCount(const QModelIndex&) const{
     return numCols;
