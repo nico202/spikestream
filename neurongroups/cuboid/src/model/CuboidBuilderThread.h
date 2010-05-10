@@ -2,6 +2,8 @@
 #define CUBOIDBUILDERTHREAD_H
 
 //SpikeStream includes
+#include "ArchiveDao.h"
+#include "NetworkDao.h"
 #include "NeuronGroup.h"
 #include "NeuronGroupInfo.h"
 
@@ -23,7 +25,7 @@ namespace spikestream {
 			bool isError() { return error; }
 			void prepareAddNeuronGroup(const NeuronGroupInfo& neurGrpInfo);
 			void run();
-			void stop() { stopThread = true; }
+			void stop();
 
 		signals:
 			void progress(int stepsCompleted, int totalSteps);
@@ -38,6 +40,12 @@ namespace spikestream {
 
 			/*! Neuron group being added */
 			NeuronGroup* newNeuronGroup;
+
+			/*! Network Dao used by Network when in thread */
+			NetworkDao* threadNetworkDao;
+
+			/*! Archive Dao used by Network when in thread */
+			ArchiveDao* threadArchiveDao;
 
 			/*! Set to true when network has finished adding the neuron groups */
 			bool networkFinished;

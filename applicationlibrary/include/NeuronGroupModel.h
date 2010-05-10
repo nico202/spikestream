@@ -17,6 +17,7 @@ namespace spikestream {
 	public:
 	    NeuronGroupModel();
 	    ~NeuronGroupModel();
+		void clearSelection();
 	    int columnCount(const QModelIndex& parent = QModelIndex()) const;
 	    QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
 		QList<unsigned int> getSelectedNeuronGroupIDs();

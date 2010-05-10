@@ -32,7 +32,7 @@ NeuronGroup::~NeuronGroup(){
 	by the actual ID when the group is added to the network and database. */
 Neuron* NeuronGroup::addNeuron(float xPos, float yPos, float zPos){
 	Neuron* tmpNeuron = new Neuron(xPos, yPos, zPos);
-	if(neuronMap->contains(neuronMap->size()))
+	if(neuronMap->contains((unsigned int)neuronMap->size()))
 		throw SpikeStreamException("Temporary neuron ID conflicts with neuron ID already in group.");
 	(*neuronMap)[(unsigned int) neuronMap->size()] = tmpNeuron;
 	return tmpNeuron;
@@ -97,11 +97,8 @@ Point3D& NeuronGroup::getNeuronLocation(unsigned int neuronID){
 }
 
 
-/*! Returns the number of neurons in the group.
-	A SpikeStreamException is thrown if the neuron group has not been loaded. */
+/*! Returns the number of neurons in the group. */
 int NeuronGroup::size(){
-	if(!isLoaded())
-		throw SpikeStreamException("size() cannot be called on a neuron group that has not been loaded!");
 	return neuronMap->size();
 }
 

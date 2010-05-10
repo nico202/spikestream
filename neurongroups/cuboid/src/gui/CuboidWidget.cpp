@@ -197,8 +197,9 @@ void CuboidWidget::addButtonClicked(){
 	paramMap["spacing"] = spacing;
 	paramMap["density"] = density;
 
-	//Check that there are no conflicts with existing neurons
-	Box neurGrpBox(xPos, yPos, zPos, xPos+width, yPos+length, zPos+height);
+	/* Check that there are no conflicts with existing neurons
+	   Neurons are added starting at (x,y,z) and finishing when x<x+width, y<y+length and z<z+height */
+	Box neurGrpBox(xPos, yPos, zPos, xPos+width-1, yPos+length-1, zPos+height-1);
 	unsigned int numOverlappingNeurons = Globals::getNetworkDao()->getNeuronCount(Globals::getNetwork()->getID(), neurGrpBox);
 	if(numOverlappingNeurons != 0){
 		QMessageBox::critical(this, "Cuboid Neuron Group Builder Error", "Proposed neuron group overlaps with a neuron group that is already in the database.\nPlease change the position and/or the width, length and height.", QMessageBox::Ok);
@@ -220,13 +221,7 @@ void CuboidWidget::builderThreadFinished(){
 	if(builderThread->isError())
 		qCritical()<<builderThread->getErrorMessage();
 
-
-	//Prevent this method being called when network finishes other tasks
-	this->disconnect(Globals::getNetwork(), SIGNAL(taskFinished()));
-
-	//Reset network and archive daos in network
-	Globals::getNetwork()->setNetworkDao(Globals::getNetworkDao());
-	Globals::getNetwork()->setArchiveDao(Globals::getArchiveDao());
+	//Inform other classes that network has changed
 	Globals::getEventRouter()->networkChangedSlot();
 }
 
@@ -234,16 +229,18 @@ void CuboidWidget::builderThreadFinished(){
 /*! Updates user with feedback about progress with the operation */
 void CuboidWidget::updateProgress(int stepsCompleted, int totalSteps){
 	if(stepsCompleted < totalSteps){
+		//Update progress
 		progressDialog->setValue(stepsCompleted);
 		progressDialog->setMaximum(totalSteps);
+
+		//Check for cancellation
+		if(progressDialog->wasCanceled()){
+			builderThread->stop();
+		}
 	}
 	else{
 		progressDialog->close();
-		delete progressDialog;
-	}
-
-	if(progressDialog->wasCanceled()){
-		builderThread->stop();
+		//delete progressDialog;
 	}
 }
 

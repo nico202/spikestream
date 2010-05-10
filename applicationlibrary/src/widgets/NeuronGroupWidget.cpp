@@ -72,7 +72,7 @@ void NeuronGroupWidget::deleteSelectedNeurons(){
 		return;
 
 	//Show warning
-	QMessageBox msgBox(QMessageBox::Warning, "Deleting Network", "Are you sure that you want to delete these neuron groups?\nThis step cannot be undone.", QMessageBox::Ok | QMessageBox::Cancel, this);
+	QMessageBox msgBox(QMessageBox::Warning, "Deleting Neuron Groups", "Are you sure that you want to delete these neuron groups?\nThis step cannot be undone.", QMessageBox::Ok | QMessageBox::Cancel, this);
 	if(msgBox.exec() != QMessageBox::Ok)
 		return;
 
@@ -108,7 +108,10 @@ void NeuronGroupWidget::networkChanged(){
 void NeuronGroupWidget::networkTaskFinished(){
 	progressDialog->setValue(100);
 	progressDialog->close();
-	delete progressDialog;
+	//delete progressDialog;
+
+	//Clear selection on neuron group model
+	neuronGroupModel->clearSelection();
 
 	//Prevent this method being called when network finishes other tasks
 	this->disconnect(Globals::getNetwork(), SIGNAL(taskFinished()));
