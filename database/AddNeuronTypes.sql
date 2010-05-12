@@ -4,7 +4,7 @@
 /*-----------------------------------------------------------------------------*/
 
 /* Add an entry for the STDP1 Neuron to the NeuronTypes table */
-INSERT INTO NeuronTypes(NeuronTypeID, Description, ParameterTableName, ClassLibrary) VALUES (1, "STDP1 Neuron", "STDP1NeuronParameters", "libstdp1neuron.so");
+INSERT INTO NeuronTypes(NeuronTypeID, Description, ParameterTableName, ClassLibrary) VALUES (1, "Izhikevich Neuron", "IzhikevichNeuronParameters", "");
 
 /* Add table for STDP1 Neuron parameters
 	Table containing the parameters for the Spike time dependent plasticity Neuron type 1
@@ -37,7 +37,7 @@ ENGINE=InnoDB;
 
 
 /* Add an entry for the STDP1 Neuron to the NeuronTypes table */
-INSERT INTO NeuronTypes(NeuronTypeID, Description, ParameterTableName, ClassLibrary) VALUES (2, "Weightless Neuron", "WeigthlessNeuronParameters", "undefined.so");
+INSERT INTO NeuronTypes(NeuronTypeID, Description, ParameterTableName, ClassLibrary) VALUES (2, "Weightless Neuron", "WeightlessNeuronParameters", "");
 
 
 /* Add table for STDP1 Neuron parameters

@@ -115,6 +115,9 @@ namespace spikestream {
 	    /*! List of neuron groups that are being added to the network */
 	    QList<NeuronGroup*> newNeuronGroups;
 
+		/*! List of connection groups that are being added to the network */
+		QList<ConnectionGroup*> newConnectionGroups;
+
 		/*! List of ids of neuron groups to delete */
 		QList<unsigned int> deleteNeuronGroupIDs;
 

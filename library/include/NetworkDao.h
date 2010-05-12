@@ -9,6 +9,8 @@
 #include "NetworkInfo.h"
 #include "NeuronGroup.h"
 #include "NeuronGroupInfo.h"
+#include "NeuronType.h"
+#include "SynapseType.h"
 #include "WeightlessNeuron.h"
 using namespace spikestream;
 
@@ -45,6 +47,8 @@ namespace spikestream{
 		unsigned int getNeuronGroupID(unsigned int neuronID);
 		QList<NeuronGroupInfo> getNeuronGroupsInfo(unsigned int networkID);
 		QList<unsigned int> getNeuronIDs(unsigned int networkID);
+		QList<NeuronType> getNeuronTypes();
+		QList<SynapseType> getSynapseTypes();
 		WeightlessNeuron* getWeightlessNeuron(unsigned int neuronID);
 		bool isWeightlessNetwork(unsigned int networkID);
 		bool isWeightlessNeuron(unsigned int neuronID);

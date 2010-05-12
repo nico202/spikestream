@@ -24,6 +24,12 @@ ConnectionGroupModel::~ConnectionGroupModel(){
 /*-------             PUBLIC METHODS               -------*/
 /*--------------------------------------------------------*/
 
+/*! Clears the list of selected neuron groups */
+void ConnectionGroupModel::clearSelection(){
+	selectionMap.clear();
+}
+
+
 /*! Inherited from QAbstractTableModel. Returns the number of columns in the model */
 int ConnectionGroupModel::columnCount(const QModelIndex&) const{
     return numCols;
@@ -120,6 +126,7 @@ bool ConnectionGroupModel::setData(const QModelIndex& index, const QVariant&, in
 
 	//Change selection status of connection group
 	if(index.column() == selectCol){
+		qDebug()<<"SELECTION CHANGE "<<selectionMap.size()<<" row: "<<index.row()<<" col: "<<index.column();
 		if(selectionMap.contains(index.row()))
 			selectionMap.remove(index.row());
 		else
