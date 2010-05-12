@@ -105,7 +105,9 @@ HEADERS += include/Network.h \
 			include/AnalysisInfo.h \
 			include/WeightlessNeuron.h \
 			include/Neuron.h \
-			include/Point3D.h
+			include/NeuronType.h \
+			include/Point3D.h \
+			include/SynapseType.h
 SOURCES += src/model/Network.cpp \
 			src/model/NetworkInfo.cpp \
 			src/model/NeuronGroup.cpp \
@@ -118,7 +120,9 @@ SOURCES += src/model/Network.cpp \
 			src/model/AnalysisInfo.cpp \
 			src/model/WeightlessNeuron.cpp \
 			src/model/Neuron.cpp \
-			src/model/Point3D.cpp
+			src/model/NeuronType.cpp \
+			src/model/Point3D.cpp \
+			src/model/SynapseType.cpp
 
 #----------------------------------------------#
 #---                  xml                   ---#

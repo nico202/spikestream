@@ -143,7 +143,7 @@ void NetworkViewer_V2::paintGL(){
 		glEndList();
 
 		//Have now created the display list so record this fact for next render
-		//useDisplayList = true;
+		useDisplayList = true;
 
 		//Unlock network display
 		Globals::getNetworkDisplay()->unlockMutex();

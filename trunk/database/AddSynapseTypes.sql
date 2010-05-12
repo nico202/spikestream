@@ -9,9 +9,9 @@
 ---------------------------------------------------------------------------*/
 
 /* Add entry to the SynapseTypes table */
-INSERT INTO SynapseTypes(SynapseTypeID, Description, ParameterTableName, ClassLibrary) VALUES (1, "STDP1 Synapse", "STDP1SynapseParameters", "libstdp1synapse.so");
+INSERT INTO SynapseTypes(SynapseTypeID, Description, ParameterTableName, ClassLibrary) VALUES (1, "Izhikevich Synapse 1", "IzhikevichSynapse1Parameters", "");
 
-INSERT INTO SynapseTypes(SynapseTypeID, Description, ParameterTableName, ClassLibrary) VALUES (2, "Weightless Synapse", "WeigthlessSynapseParameters", "undefined.so");
+INSERT INTO SynapseTypes(SynapseTypeID, Description, ParameterTableName, ClassLibrary) VALUES (2, "Weightless Synapse", "WeightlessSynapseParameters", "");
 
 
 /* Add table for STDP1Synapse parameters

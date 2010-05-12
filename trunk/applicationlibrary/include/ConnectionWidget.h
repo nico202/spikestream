@@ -23,6 +23,7 @@ namespace spikestream {
 			void addConnections();
 			void deleteSelectedConnections();
 			void networkChanged();
+			void networkTaskFinished();
 
 		private:
 			//======================  VARIABLES  =========================

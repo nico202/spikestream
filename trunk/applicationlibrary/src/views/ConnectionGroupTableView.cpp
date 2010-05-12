@@ -41,7 +41,6 @@ void ConnectionGroupTableView::resizeHeaders(){
 
 /*! Called when the table is clicked and passes this information on to model. */
 void ConnectionGroupTableView::tableClicked(QModelIndex index){
-	if(index.column() == 0)
 	model()->setData(index, 0);
 }
 

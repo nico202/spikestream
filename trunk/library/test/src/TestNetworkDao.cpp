@@ -26,20 +26,20 @@ void TestNetworkDao::testAddNetwork(){
 	//Information about the network to be added
 	NetworkInfo netInfo(0, "test1Name","test3Description");
 	try{
-	//Invoke method that is being tested
-	networkDao.addNetwork(netInfo);
+		//Invoke method that is being tested
+		networkDao.addNetwork(netInfo);
 
-	//Check that network has been added
-	QSqlQuery query = getQuery("SELECT Name FROM Networks");
-	executeQuery(query);
-	QCOMPARE(query.size(), 1);
-	query.next();
-	QCOMPARE(query.value(0).toString(), netInfo.getName());
-	QVERIFY( netInfo.getID() != 0);
+		//Check that network has been added
+		QSqlQuery query = getQuery("SELECT Name FROM Networks");
+		executeQuery(query);
+		QCOMPARE(query.size(), 1);
+		query.next();
+		QCOMPARE(query.value(0).toString(), netInfo.getName());
+		QVERIFY( netInfo.getID() != 0);
 
 	}
 	catch(SpikeStreamException& ex){
-	QFAIL(ex.getMessage().toAscii());
+		QFAIL(ex.getMessage().toAscii());
 	}
 }
 
@@ -53,10 +53,10 @@ void TestNetworkDao::testAddWeightlessConnection(){
 
 	//Add a pattern index to the database
 	try{
-	networkDao.addWeightlessConnection(testConnIDList[0], 2);
+		networkDao.addWeightlessConnection(testConnIDList[0], 2);
 	}
 	catch(SpikeStreamException& ex){
-	QFAIL(ex.getMessage().toAscii());
+		QFAIL(ex.getMessage().toAscii());
 	}
 
 	//Check pattern index has been added
@@ -435,10 +435,10 @@ void TestNetworkDao::testGetConnectionGroupsInfo(){
 	NetworkDao networkDao (dbInfo);
 	QList<ConnectionGroupInfo> connGrpInfoList;
 	try{
-	connGrpInfoList = networkDao.getConnectionGroupsInfo(networkID);
+		connGrpInfoList = networkDao.getConnectionGroupsInfo(networkID);
 	}
 	catch(SpikeStreamException& ex){
-	QFAIL(ex.getMessage().toAscii());
+		QFAIL(ex.getMessage().toAscii());
 	}
 
 	//Should be 2 entries
@@ -543,10 +543,10 @@ void TestNetworkDao::testGetNeuronGroupsInfo(){
 	NetworkDao networkDao (dbInfo);
 	QList<NeuronGroupInfo> neurGrpInfoList;
 	try{
-	neurGrpInfoList = networkDao.getNeuronGroupsInfo(networkID);
+		neurGrpInfoList = networkDao.getNeuronGroupsInfo(networkID);
 	}
 	catch(SpikeStreamException& ex){
-	QFAIL(ex.getMessage().toAscii());
+		QFAIL(ex.getMessage().toAscii());
 	}
 
 	//Should be three entries
@@ -584,12 +584,78 @@ void TestNetworkDao::testGetNeuronIDs(){
 	//Convert neurons in test network 2 into a map
 	QHash<unsigned int, bool> testNet2NeurMap;
 	foreach(unsigned int neurID, testNeurIDList2)
-	testNet2NeurMap[neurID] = true;
+		testNet2NeurMap[neurID] = true;
 
 	//Check that all neurons in list are in map
 	foreach(unsigned int neurID, neurIDList)
-	if(!testNet2NeurMap.contains(neurID))
-		QFAIL("Neuron ID list contains neuron that is not in the network.");
+		if(!testNet2NeurMap.contains(neurID))
+			QFAIL("Neuron ID list contains neuron that is not in the network.");
+}
+
+
+/*! Note this test will need to be updated if the default types change. */
+void TestNetworkDao::testGetNeuronTypes(){
+	//Invoke method being tested
+	NetworkDao networkDao(dbInfo);
+	try{
+		QList<NeuronType> neurTypesList = networkDao.getNeuronTypes();
+		QCOMPARE(neurTypesList.size(), (int)2);
+
+		//Check ids
+		QCOMPARE(neurTypesList.at(0).getID(), (unsigned int)1);
+		QCOMPARE(neurTypesList.at(1).getID(), (unsigned int)2);
+
+		//Check descriptions
+		QCOMPARE(neurTypesList.at(0).getDescription(), QString("Izhikevich Neuron"));
+		QCOMPARE(neurTypesList.at(1).getDescription(), QString("Weightless Neuron"));
+
+		//Check parameter table names
+		QCOMPARE(neurTypesList.at(0).getParameterTableName(), QString("IzhikevichNeuronParameters"));
+		QCOMPARE(neurTypesList.at(1).getParameterTableName(), QString("WeightlessNeuronParameters"));
+
+		//Check class names
+		QCOMPARE(neurTypesList.at(0).getClassLibaryName(), QString(""));
+		QCOMPARE(neurTypesList.at(1).getClassLibaryName(), QString(""));
+	}
+	catch(SpikeStreamException ex){
+		QFAIL(ex.getMessage().toAscii());
+	}
+	catch(...){
+		QFAIL("Unrecognized exception thrown.");
+	}
+}
+
+
+/*! Note this test will need to be updated if the default types change. */
+void TestNetworkDao::testGetSynapseTypes(){
+	//Invoke method being tested
+	NetworkDao networkDao(dbInfo);
+	try{
+		QList<SynapseType> synTypesList = networkDao.getSynapseTypes();
+		QCOMPARE(synTypesList.size(), (int)2);
+
+		//Check ids
+		QCOMPARE(synTypesList.at(0).getID(), (unsigned int)1);
+		QCOMPARE(synTypesList.at(1).getID(), (unsigned int)2);
+
+		//Check descriptions
+		QCOMPARE(synTypesList.at(0).getDescription(), QString("Izhikevich Synapse 1"));
+		QCOMPARE(synTypesList.at(1).getDescription(), QString("Weightless Synapse"));
+
+		//Check parameter table names
+		QCOMPARE(synTypesList.at(0).getParameterTableName(), QString("IzhikevichSynapse1Parameters"));
+		QCOMPARE(synTypesList.at(1).getParameterTableName(), QString("WeightlessSynapseParameters"));
+
+		//Check class names
+		QCOMPARE(synTypesList.at(0).getClassLibaryName(), QString(""));
+		QCOMPARE(synTypesList.at(1).getClassLibaryName(), QString(""));
+	}
+	catch(SpikeStreamException ex){
+		QFAIL(ex.getMessage().toAscii());
+	}
+	catch(...){
+		QFAIL("Unrecognized exception thrown.");
+	}
 }
 
 
@@ -600,34 +666,34 @@ void TestNetworkDao::testGetWeightlessNeuron(){
 	//Invoke method being tested
 	NetworkDao networkDao(dbInfo);
 	try{
-	WeightlessNeuron* neuron = networkDao.getWeightlessNeuron(testNeurIDList[1]);
-	QHash<unsigned int, QList<unsigned int> > conMap = neuron->getConnectionMap();
-	QCOMPARE(conMap.size(), (int)2);
-	QCOMPARE(conMap[testNeurIDList[0]][0], (unsigned int)0);
-	QCOMPARE(conMap[testNeurIDList[4]][0], (unsigned int)1);
-	QList<byte*> trainingDataList = neuron->getTrainingData();
-	QCOMPARE(trainingDataList.size(), (int)2);
-	QVERIFY( bitsEqual(trainingDataList[0], "10000000", 1) );
-	QVERIFY( bitsEqual(trainingDataList[1], "11000000", 1) );
-	delete neuron;
+		WeightlessNeuron* neuron = networkDao.getWeightlessNeuron(testNeurIDList[1]);
+		QHash<unsigned int, QList<unsigned int> > conMap = neuron->getConnectionMap();
+		QCOMPARE(conMap.size(), (int)2);
+		QCOMPARE(conMap[testNeurIDList[0]][0], (unsigned int)0);
+		QCOMPARE(conMap[testNeurIDList[4]][0], (unsigned int)1);
+		QList<byte*> trainingDataList = neuron->getTrainingData();
+		QCOMPARE(trainingDataList.size(), (int)2);
+		QVERIFY( bitsEqual(trainingDataList[0], "10000000", 1) );
+		QVERIFY( bitsEqual(trainingDataList[1], "11000000", 1) );
+		delete neuron;
 
-	//Check a second neuron
-	neuron = networkDao.getWeightlessNeuron(testNeurIDList[2]);
-	conMap = neuron->getConnectionMap();
-	QCOMPARE(conMap.size(), (int)2);
-	QCOMPARE(conMap[testNeurIDList[0]][0], (unsigned int)0);
-	QCOMPARE(conMap[testNeurIDList[3]][0], (unsigned int)1);
-	trainingDataList = neuron->getTrainingData();
-	QCOMPARE(trainingDataList.size(), (int)2);
-	QVERIFY( bitsEqual(trainingDataList[0], "00000000", 0) );
-	QVERIFY( bitsEqual(trainingDataList[1], "11000000", 0) );
-	delete neuron;
+		//Check a second neuron
+		neuron = networkDao.getWeightlessNeuron(testNeurIDList[2]);
+		conMap = neuron->getConnectionMap();
+		QCOMPARE(conMap.size(), (int)2);
+		QCOMPARE(conMap[testNeurIDList[0]][0], (unsigned int)0);
+		QCOMPARE(conMap[testNeurIDList[3]][0], (unsigned int)1);
+		trainingDataList = neuron->getTrainingData();
+		QCOMPARE(trainingDataList.size(), (int)2);
+		QVERIFY( bitsEqual(trainingDataList[0], "00000000", 0) );
+		QVERIFY( bitsEqual(trainingDataList[1], "11000000", 0) );
+		delete neuron;
 	}
 	catch(SpikeStreamException ex){
-	QFAIL(ex.getMessage().toAscii());
+		QFAIL(ex.getMessage().toAscii());
 	}
 	catch(...){
-	QFAIL("Unrecognized exception thrown.");
+		QFAIL("Unrecognized exception thrown.");
 	}
 }
 
@@ -698,15 +764,15 @@ void TestNetworkDao::testSetTempWeight(){
 
 bool TestNetworkDao::bitsEqual(const unsigned char* byteArr, const QString bitPattStr, int output){
 	if(byteArr[0] != output)
-	return false;
+		return false;
 
 	for(int i=0; i<bitPattStr.length(); ++i){
-	if(bitPattStr[i] == '1' && (byteArr[1 + i/8] & ( 1<<(i % 8) )))//1 is equal
-		;//do nothing
-	else if(bitPattStr[i] == '0' && !(byteArr[1 + i/8] & ( 1<<(i % 8) )))//0 is equal
-		;//Do nothing
-	else
-		return false;//String and byte array do not match
+		if(bitPattStr[i] == '1' && (byteArr[1 + i/8] & ( 1<<(i % 8) )))//1 is equal
+			;//do nothing
+		else if(bitPattStr[i] == '0' && !(byteArr[1 + i/8] & ( 1<<(i % 8) )))//0 is equal
+			;//Do nothing
+		else
+			return false;//String and byte array do not match
 	}
 	return true;
 }

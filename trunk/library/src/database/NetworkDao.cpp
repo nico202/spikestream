@@ -350,6 +350,47 @@ QList<unsigned int> NetworkDao::getNeuronIDs(unsigned int networkID){
 }
 
 
+/*! Returns the current list of available neuron types.
+	This information is stored in the NeuronTypes table. */
+QList<NeuronType> NetworkDao::getNeuronTypes(){
+	QList<NeuronType> neuronTypesList;
+	QSqlQuery query = getQuery("SELECT NeuronTypeID, Description, ParameterTableName, ClassLibrary FROM NeuronTypes ORDER BY NeuronTypeID");
+	executeQuery(query);
+	for(int i=0; i<query.size(); ++i){
+		query.next();
+		NeuronType tmpNeurType(
+			Util::getUInt(query.value(0).toString()),//ID
+			query.value(1).toString(),//Description
+			query.value(2).toString(),//ParameterTableName
+			query.value(3).toString()//ClassLibrary
+		);
+		neuronTypesList.append(tmpNeurType);
+	}
+	return neuronTypesList;
+}
+
+
+/*! Returns the current list of available synapse types.
+	This information is stored in the SynapseTypes table. */
+QList<SynapseType> NetworkDao::getSynapseTypes(){
+	QList<SynapseType> synapseTypesList;
+	QSqlQuery query = getQuery("SELECT SynapseTypeID, Description, ParameterTableName, ClassLibrary FROM SynapseTypes ORDER BY SynapseTypeID");
+	executeQuery(query);
+	for(int i=0; i<query.size(); ++i){
+		query.next();
+		SynapseType tmpSynType(
+			Util::getUInt(query.value(0).toString()),//ID
+			query.value(1).toString(),//Description
+			query.value(2).toString(),//ParameterTableName
+			query.value(3).toString()//ClassLibrary
+		);
+		synapseTypesList.append(tmpSynType);
+	}
+	return synapseTypesList;
+}
+
+
+/*! Returns the weightless neuron with the specified ID. */
 WeightlessNeuron* NetworkDao::getWeightlessNeuron(unsigned int neuronID){
 	//Query to select neurons connected to weightless neuron and the pattern index of each neuron
 	QSqlQuery query = getQuery("SELECT cons.FromNeuronID, weiCons.PatternIndex FROM Connections cons INNER JOIN WeightlessConnections weiCons ON cons.ConnectionID=weiCons.ConnectionID WHERE cons.ToNeuronID=" + QString::number(neuronID));

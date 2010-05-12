@@ -33,6 +33,8 @@ class TestNetworkDao : public TestDao {
 		void testGetNeuronGroupsInfo();
 		void testGetNeuronIDs();
 		void testGetNeuronGroupID();
+		void testGetNeuronTypes();
+		void testGetSynapseTypes();
 		void testGetWeightlessNeuron();
 		void testIsWeightlessNetwork();
 		void testIsWeightlessNeuron();

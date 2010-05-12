@@ -52,7 +52,7 @@ ConnectionWidget::~ConnectionWidget(){
 
 /*! Shows plugins dialog configured to load up available plugins for adding neurons */
 void ConnectionWidget::addConnections(){
-	PluginsDialog* pluginsDialog = new PluginsDialog(this, "/plugins/neurons", "Add Neurons");
+	PluginsDialog* pluginsDialog = new PluginsDialog(this, "/plugins/connections", "Add Connections");
 	pluginsDialog->exec();
 	delete pluginsDialog;
 }
@@ -91,7 +91,7 @@ void ConnectionWidget::deleteSelectedConnections(){
 
 /*! Enables or disables buttons depending on whether a network is loaded */
 void ConnectionWidget::networkChanged(){
-	if(Globals::networkLoaded()){
+	if(Globals::networkLoaded() && (Globals::getNetwork()->getNeuronGroupCount() > 0) ){
 		addConnectionsButton->setEnabled(true);
 		deleteButton->setEnabled(true);
 	}
@@ -100,6 +100,26 @@ void ConnectionWidget::networkChanged(){
 		deleteButton->setEnabled(false);
 	}
 }
+
+
+/*! Called when the network has finished deleting neurons.
+	Informs other classes that network has changed. */
+void ConnectionWidget::networkTaskFinished(){
+	progressDialog->setValue(100);
+	progressDialog->close();
+	//delete progressDialog;
+
+	//Clear selection on connection group model
+	connectionGroupModel->clearSelection();
+
+	//Prevent this method being called when network finishes other tasks
+	this->disconnect(Globals::getNetwork(), SIGNAL(taskFinished()));
+
+	//Inform other classes that network has changed
+	Globals::getEventRouter()->networkChangedSlot();
+}
+
+
 
 
 

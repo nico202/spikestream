@@ -103,8 +103,7 @@ CuboidWidget::CuboidWidget(QWidget* parent) : QWidget(parent) {
 	densityEdit->setMaximumSize(100, 30);
 	densityEdit->setValidator(doubleValidator);
 	neuronTypeCombo = new QComboBox();
-	neuronTypeCombo->addItem("Weighted");
-	neuronTypeCombo->addItem("Weightless");
+	addNeuronTypes(neuronTypeCombo);
 	QHBoxLayout* miscLayout = new QHBoxLayout();
 	miscLayout->addWidget(new QLabel("Spacing (neurons): "));
 	miscLayout->addWidget(spacingEdit);
@@ -184,7 +183,7 @@ void CuboidWidget::addButtonClicked(){
 	int height = Util::getInt(heightEdit->text());
 	int spacing = Util::getInt(spacingEdit->text());
 	double density = Util::getDouble(densityEdit->text());
-	int neuronType = neuronTypeCombo->currentIndex() + 1;//FIXME: CHECK THIS PROPERLY WITH DATABASE
+	int neuronType = getNeuronTypeID(neuronTypeCombo->currentText());
 
 	//Store parameters in parameter map
 	QHash<QString, double> paramMap;
@@ -249,6 +248,16 @@ void CuboidWidget::updateProgress(int stepsCompleted, int totalSteps){
 /*-----                 PRIVATE METHODS                -----*/
 /*----------------------------------------------------------*/
 
+/*! Adds neuron types to the specified combo */
+void CuboidWidget::addNeuronTypes(QComboBox* combo){
+	QList<NeuronType> neuronTypesList = Globals::getNetworkDao()->getNeuronTypes();
+	foreach(NeuronType neurType, neuronTypesList){
+		combo->addItem(neurType.getDescription() + "(" + QString::number(neurType.getID()) + ")");
+	}
+}
+
+
+/*! Checks that there is valid input in the specified combo box and throws an exception with the specified error if not. */
 void CuboidWidget::checkInput(QLineEdit* inputEdit, const QString& errMsg){
 	if(inputEdit->text().isEmpty()){
 		throw SpikeStreamException(errMsg);
@@ -256,5 +265,13 @@ void CuboidWidget::checkInput(QLineEdit* inputEdit, const QString& errMsg){
 }
 
 
+/*! Extracts the neuron group ID from the text of a combo box */
+unsigned int CuboidWidget::getNeuronTypeID(const QString& comboText){
+	if(comboText.isEmpty())
+		throw SpikeStreamException("Cannot extract a neuron type ID from empty text.");
 
+	QRegExp regExp("[()]");
+	qDebug()<<"TEST SECTION: "<<comboText.section(regExp, 1, 1);
+	return Util::getUInt(comboText.section(regExp, 1, 1));
+}
 
