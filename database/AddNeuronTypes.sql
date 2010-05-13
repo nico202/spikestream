@@ -9,26 +9,9 @@ INSERT INTO NeuronTypes(NeuronTypeID, Description, ParameterTableName, ClassLibr
 /* Add table for STDP1 Neuron parameters
 	Table containing the parameters for the Spike time dependent plasticity Neuron type 1
 	Each neuron group created with this type will have an entry in this table.*/
-CREATE TABLE STDP1NeuronParameters (
+CREATE TABLE IzhikevichNeuronParameters (
 	NeuronGroupID SMALLINT UNSIGNED NOT NULL,
-	CalciumIncreaseAmnt_val DOUBLE DEFAULT 1.0,
-	CalciumIncreaseAmnt_desc CHAR(100) DEFAULT "Calcium increase amount",
-	CalciumDecayRate_val DOUBLE DEFAULT 60.0,
-	CalciumDecayRate_desc CHAR(100) DEFAULT "Calcium decay rate",
-	RefractoryPeriod_val DOUBLE DEFAULT 1.0,
-	RefractoryPeriod_desc CHAR(100) DEFAULT "Refractory period (ms)",
-	MembraneTimeConstant_val DOUBLE DEFAULT 3.0,
-	MembraneTimeConstant_desc CHAR(100) DEFAULT "Membrane time constant (ms)",
-	RefractoryParamM_val DOUBLE DEFAULT 0.8,
-	RefractoryParamM_desc CHAR(100) DEFAULT "Refractory parameter M",
-	RefractoryParamN_val DOUBLE DEFAULT 3.0,
-	RefractoryParamN_desc CHAR(100) DEFAULT "Refractory parameter N",
-	Threshold_val DOUBLE DEFAULT 1.0,
-	Threshold_desc CHAR(100) DEFAULT "Threshold",
-	MinPostsynapticPotential_val DOUBLE DEFAULT -5.0,
-	MinPostsynapticPotential_desc CHAR(100) DEFAULT "Min postsynaptic potential",
-	Learning_val BOOLEAN DEFAULT 0,
-	Learning_desc CHAR(100) DEFAULT "Learning",
+	a DOUBLE DEFAULT 1.0 COMMENT 'Time scale of the recovery variable.',
 
 	PRIMARY KEY (NeuronGroupID),
 	FOREIGN KEY NeuronGroupID_FK(NeuronGroupID) REFERENCES NeuronGroups(NeuronGroupID) ON DELETE CASCADE
