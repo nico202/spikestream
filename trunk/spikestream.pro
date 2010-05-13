@@ -14,6 +14,10 @@ SUBDIRS =   library applicationlibrary application
 
 #================  NEURON GROUP PLUGINS  =================
 SUBDIRS += neurongroups/cuboid
+
+
+#================  SIMULATION PLUGINS  =================
+SUBDIRS += simulators/nemo
 	
 	
 #================  INSTALLATION  =====================
