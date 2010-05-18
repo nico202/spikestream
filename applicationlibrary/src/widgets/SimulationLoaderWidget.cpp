@@ -34,7 +34,8 @@ SimulationLoaderWidget::SimulationLoaderWidget(QWidget* parent) : QWidget(parent
 		//Add the widgets to a stacked widget
 		stackedWidget = new QStackedWidget();
 		for(QList<QString>::iterator iter = pluginList.begin(); iter != pluginList.end(); ++iter){
-			pluginWidgetMap[*iter] = stackedWidget->addWidget(pluginManager->getPlugin(*iter));
+			QWidget* tmpWidget = pluginManager->getPlugin(*iter);
+			pluginWidgetMap[*iter] = stackedWidget->addWidget(tmpWidget);
 		}
 
 		//Add stacked widget to layout
@@ -43,8 +44,11 @@ SimulationLoaderWidget::SimulationLoaderWidget(QWidget* parent) : QWidget(parent
 		//Connect combo changed signal to slot loading appropriate analysis widget
 		connect(pluginsCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(showSimulationWidget(int)) );
 	}
-	catch(SpikeStreamException* ex){
-		qCritical()<<ex->getMessage();
+	catch(SpikeStreamException& ex){
+		qCritical()<<ex.getMessage();
+	}
+	catch(...){
+		qCritical()<<"An unknown exception occurred.";
 	}
 }
 

@@ -59,7 +59,7 @@ QVariant NeuronGroupModel::data(const QModelIndex & index, int role) const{
 		if(index.column() == descCol)
 			return neurGrpInfoList[index.row()].getDescription();
 		if(index.column() == neurTypeCol)
-			return neurGrpInfoList[index.row()].getNeuronType();
+			return neurGrpInfoList[index.row()].getNeuronTypeID();
     }
 
 	//Icons

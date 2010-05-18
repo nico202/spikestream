@@ -275,6 +275,7 @@ void NetworksWidget::loadNetwork(NetworkInfo& netInfo){
 	//Set up progress dialog, this checks on the network every 200ms until loading is complete
 	progressDialog = new QProgressDialog("Loading network", "Abort load", 0, newNetwork->getTotalNumberOfSteps(), this);
 	progressDialog->setWindowModality(Qt::WindowModal);
+	progressDialog->setMinimumDuration(1000);
 	loadingTimer  = new QTimer(this);
 	connect(loadingTimer, SIGNAL(timeout()), this, SLOT(checkLoadingProgress()));
 	loadingTimer->start(200);

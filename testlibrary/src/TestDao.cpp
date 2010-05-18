@@ -99,6 +99,8 @@ void TestDao::cleanTestDatabases(){
     executeQuery("DELETE FROM Connections");
     executeQuery("DELETE FROM WeightlessConnections");
     executeQuery("DELETE FROM WeightlessNeuronTrainingPatterns");
+	executeQuery("DELETE FROM IzhikevichNeuronParameters");
+	executeQuery("DELETE FROM WeightlessNeuronParameters");
 
     //Clean up archive database
     executeArchiveQuery("DELETE FROM Archives");
@@ -245,18 +247,20 @@ void TestDao::addTestNetwork1(){
     executeQuery(query);
     testNetID = query.lastInsertId().toUInt();
 
-    //Add two neuron groups
+	//Add two neuron groups with neuron type 1
     QString queryStr = "INSERT INTO NeuronGroups (NetworkID, Name, Description, Parameters, NeuronTypeID ) VALUES (";
     queryStr += QString::number(testNetID) + ", " + "'name1', 'desc1', '" + getConnectionParameterXML() + "', 1)";
     query = getQuery(queryStr);
     executeQuery(query);
     neurGrp1ID = query.lastInsertId().toUInt();
+	executeQuery("INSERT INTO IzhikevichNeuronParameters (NeuronGroupID) VALUES (" + QString::number(neurGrp1ID) + ")");
 
     queryStr = "INSERT INTO NeuronGroups (NetworkID, Name, Description, Parameters, NeuronTypeID ) VALUES (";
     queryStr += QString::number(testNetID) + ", " + "'name2', 'desc2', '" + getNeuronParameterXML() + "', 1)";
     query = getQuery(queryStr);
     executeQuery(query);
     neurGrp2ID = query.lastInsertId().toUInt();
+	executeQuery("INSERT INTO IzhikevichNeuronParameters (NeuronGroupID) VALUES (" + QString::number(neurGrp2ID) + ")");
 
     //Create connection group between the two neuron groups
     queryStr = "INSERT INTO ConnectionGroups (NetworkID, Description, FromNeuronGroupID, ToNeuronGroupID, Parameters, SynapseTypeID ) VALUES (";

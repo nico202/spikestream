@@ -5,6 +5,10 @@
 #include "SpikeStreamException.h"
 using namespace spikestream;
 
+//Nemo includes
+//#include "nemo.hpp"
+//using namespace nemo;
+
 
 /*! Constructor */
 NemoWrapper::NemoWrapper(){
@@ -37,10 +41,10 @@ void NemoWrapper::prepareLoadSimulation(){
 
 
 /*! Prepares the wrapper for the playing task */
-void NemoWrapper::preparePlaySimulation(){
+void NemoWrapper::prepareRunSimulation(){
 	if(!simulationLoaded)
-		throw SpikeStreamException("Cannot play simulation - no simulation loaded.");
-	currentTaskID = PLAY_SIMULATION_TASK;
+		throw SpikeStreamException("Cannot run simulation - no simulation loaded.");
+	currentTaskID = RUN_SIMULATION_TASK;
 }
 
 
@@ -53,8 +57,8 @@ void NemoWrapper::run(){
 			case LOAD_SIMULATION_TASK:
 				loadSimulation();
 			break;
-			case PLAY_SIMULATION_TASK:
-				playSimulation();
+			case RUN_SIMULATION_TASK:
+				runSimulation();
 			break;
 			default:
 				throw SpikeStreamException("Task ID not recognized.");
@@ -73,6 +77,17 @@ void NemoWrapper::run(){
 /*! Stops the thread running */
 void NemoWrapper::stop(){
 	stopThread = true;
+}
+
+
+/*----------------------------------------------------------*/
+/*-----                  PRIVATE SLOTS                 -----*/
+/*----------------------------------------------------------*/
+
+/*! Called by other classes being executed by this class to inform this
+	class about progress with an operation */
+void NemoWrapper::updateProgress(int stepsComplete, int totalSteps){
+	emit progress(stepsComplete, totalSteps);
 }
 
 
@@ -101,7 +116,18 @@ void NemoWrapper::loadSimulation(){
 	//Load the simulation
 	NemoLoader* nemoLoader = new NemoLoader();
 	connect(nemoLoader, SIGNAL(progress(int, int)), this, SLOT(updateProgress(int, int)));
-	nemo::Simulation* = nemoLoader->loadSimulation(currentNetwork, &stopThread);
+	//nemo::Simulation* nemoSim = nemoLoader->loadSimulation(currentNetwork, &stopThread);
+
+	//Load the network into the simulator
+	int cntr = 0;
+	while(cntr < 20 && !stopThread){
+		qDebug()<<"LOADING SIMULATION. COUNTER="<<cntr;
+		sleep(1);
+		emit progress(cntr, 20);
+		++cntr;
+	}
+
+	simulationLoaded = true;
 
 	//Reset the daos in the network
 	currentNetwork->setNetworkDao(Globals::getNetworkDao());
@@ -116,11 +142,11 @@ void NemoWrapper::loadSimulation(){
 
 
 /*! Plays the current simulation */
-void NemoWrapper::playSimulation(){
+void NemoWrapper::runSimulation(){
 	//Check simulation is loaded
 
 	int cntr = 0;
-	while(!stop){
+	while(!stopThread){
 		//Advance simulation one step
 
 		qDebug()<<"Playing simulation. Counter="<<cntr;

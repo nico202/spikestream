@@ -4,9 +4,11 @@
 //SpikeStream includes
 #include "ArchiveDao.h"
 #include "NetworkDao.h"
+#include "Network.h"
+using namespace spikestream;
 
 //Nemo includes
-#include "nemo.hpp"
+//#include "nemo.hpp"
 
 //Qt includes
 #include <QObject>
@@ -18,11 +20,11 @@ namespace spikestream {
 		Q_OBJECT
 
 		public:
-			NemoLoader(const DBInfo& networkDBInfo, const DBInfo& archiveDBInfo);
+			NemoLoader();
 			~NemoLoader();
-			nemo::Simulation* loadSimulation(Network* network, const bool* stop);
+			void loadSimulation(Network* network, const bool* stop);
 
-		private slots:
+		signals:
 			void progress(int stepsCompleted, int totalSteps);
 
 		private:

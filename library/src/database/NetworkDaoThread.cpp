@@ -1,16 +1,16 @@
 //SpikeStream includes
 #include "GlobalVariables.h"
 #include "NetworkDaoThread.h"
+#include "Neuron.h"
 #include "SpikeStreamException.h"
 #include "SpikeStreamDBException.h"
-#include "Neuron.h"
 using namespace spikestream;
 
 #include <iostream>
 using namespace std;
 
 /*! Constructor  */
-NetworkDaoThread::NetworkDaoThread(const DBInfo& dbInfo) : AbstractDao(dbInfo) {
+NetworkDaoThread::NetworkDaoThread(const DBInfo& dbInfo) : NetworkDao(dbInfo) {
     currentTask = NO_TASK_DEFINED;
     clearError();
     stopThread = true;
@@ -311,7 +311,7 @@ void NetworkDaoThread::addNeuronGroups(){
 		QString queryStr = "INSERT INTO NeuronGroups (NetworkID, Name, Description, Parameters, NeuronTypeID ) VALUES (";
 		queryStr += QString::number(networkID) + ", ";
 		queryStr += "'" + neurGrpInfo.getName() + "', '" + neurGrpInfo.getDescription() + "', '" + neurGrpInfo.getParameterXML() + "', ";
-		queryStr += QString::number(neurGrpInfo.getNeuronType()) + ")";
+		queryStr += QString::number(neurGrpInfo.getNeuronTypeID()) + ")";
 		QSqlQuery query = getQuery(queryStr);
 		executeQuery(query);
 
@@ -323,6 +323,17 @@ void NetworkDaoThread::addNeuronGroups(){
 			setError("Insert ID for NeuronGroup is invalid.");
 			return;
 		}
+
+		//Add entry for neuron group parameters
+		//Get name of table
+		NeuronType neurType = getNeuronType(neurGrpInfo.getNeuronTypeID());
+
+		//Add parameter table entry for this neuron group
+		executeQuery( "INSERT INTO " + neurType.getParameterTableName() + "(NeuronGroupID) VALUES (" + QString::number(neuronGroup->getID()) + ")" );
+
+		//Set parameters in neuron group
+		QHash<QString, double> tmpParamMap = getNeuronParameters(neuronGroup->getInfo());
+		neuronGroup->setParameters(tmpParamMap);
 
 		//Check for cancellation of task
 		if(stopThread)
@@ -354,8 +365,8 @@ void NetworkDaoThread::addNeuronGroups(){
 			iter.value()->setID(lastInsertID);
 
 			/* Store the first neuron id in the group.
-		NOTE: Most neuron groups are stored with continuously increasing IDs, but
-		there may be exceptions, so take care! */
+				NOTE: Most neuron groups are stored with continuously increasing IDs, but
+				there may be exceptions, so take care! */
 			if(firstTime){
 				neuronGroup->setStartNeuronID(lastInsertID);
 				firstTime = false;
@@ -480,6 +491,10 @@ void NetworkDaoThread::loadNeurons(){
 			if(stopThread)
 				return;
 		}
+
+		//Load parameters in neuron group
+		QHash<QString, double> tmpParamMap = getNeuronParameters( (*iter)->getInfo());
+		(*iter)->setParameters(tmpParamMap);
 
 		//Neuron group now matches the database
 		(*iter)->setLoaded(true);

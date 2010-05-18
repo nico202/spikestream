@@ -1,18 +1,22 @@
 //SpikeStream includes
 #include "Globals.h"
+#include "NemoParametersDialog.h"
 #include "NemoWidget.h"
+#include "NeuronParametersDialog.h"
 #include "SpikeStreamException.h"
+#include "SynapseParametersDialog.h"
 using namespace spikestream;
 
 //Qt includes
 #include <QAction>
 #include <QDebug>
 #include <QLayout>
+#include <QMutexLocker>
 
 
 //Functions for dynamic library loading
 extern "C" {
-	/*! Creates a Random1Widget class when library is dynamically loaded. */
+	/*! Creates a NemoWidget class when library is dynamically loaded. */
 	QWidget* getClass(){
 		return new NemoWidget();
 	}
@@ -25,21 +29,28 @@ extern "C" {
 
 
 /*! Constructor */
-NemoWidget::NemoWidget(QWidget* parent) : QWidget() {
+NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	//Create layout for the widget
 	QVBoxLayout* mainVBox = new QVBoxLayout(this);
+	mainGroupBox = new QGroupBox("Nemo CUDA Simulator", this);
 
 	//Add load, unload and parameters buttons
 	loadButton = new QPushButton("Load");
 	connect(loadButton, SIGNAL(clicked()), this, SLOT(loadSimulation()));
 	unloadButton = new QPushButton("Unload");
 	connect(unloadButton, SIGNAL(clicked()), this, SLOT(unloadSimulation()));
-	parametersButton = new QPushButton("Parameters");
-	connect(parametersButton, SIGNAL(clicked()), this, SLOT(setParameters()));
+	neuronParametersButton = new QPushButton("Neuron Parameters");
+	connect(neuronParametersButton, SIGNAL(clicked()), this, SLOT(setNeuronParameters()));
+	synapseParametersButton = new QPushButton("Synapse Parameters");
+	connect(synapseParametersButton, SIGNAL(clicked()), this, SLOT(setSynapseParameters()));
+	nemoParametersButton = new QPushButton("Nemo Parameters");
+	connect(nemoParametersButton, SIGNAL(clicked()), this, SLOT(setNemoParameters()));
 	QHBoxLayout* loadLayout = new QHBoxLayout();
 	loadLayout->addWidget(loadButton);
 	loadLayout->addWidget(unloadButton);
-	loadLayout->addWidget(parametersButton);
+	loadLayout->addWidget(neuronParametersButton);
+	loadLayout->addWidget(synapseParametersButton);
+	loadLayout->addWidget(nemoParametersButton);
 	mainVBox->addLayout(loadLayout);
 
 	//Add the tool bar
@@ -63,9 +74,23 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget() {
 	archiveLayout->addWidget(setArchiveDescriptionButton);
 	mainVBox->addLayout(archiveLayout);
 
-	//Create wrapper for Nemo library
-	connect(nemoWrapper, SIGNAL(finished()), this, SLOT(nemoWrapperFinished()));
+	//Put layout into enclosing box
+	mainGroupBox->setLayout(mainVBox);
+	this->setMinimumSize(800, 700);
 
+	//Create wrapper for Nemo library
+	nemoWrapper = new NemoWrapper();
+	connect(nemoWrapper, SIGNAL(finished()), this, SLOT(nemoWrapperFinished()));
+	connect(nemoWrapper, SIGNAL(progress(int,int)), this, SLOT(updateProgress(int, int)), Qt::QueuedConnection);
+
+	//Listen for network changes
+	connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(networkChanged()));
+
+	//Set initial state of tool bar
+	checkWidgetEnabled();
+
+	//Initialise variables
+	progressDialog = NULL;
 }
 
 
@@ -79,6 +104,12 @@ NemoWidget::~NemoWidget(){
 /*------                PRIVATE SLOTS                 ------*/
 /*----------------------------------------------------------*/
 
+/*! Switches the archiving of the simulation on or off */
+void NemoWidget::archiveStateChanged(int state){
+
+}
+
+
 /*! Instructs the Nemo wrapper to load the network from the database into Nemo */
 void NemoWidget::loadSimulation(){
 	if(!Globals::networkLoaded()){
@@ -87,6 +118,9 @@ void NemoWidget::loadSimulation(){
 	}
 	try{
 		nemoWrapper->prepareLoadSimulation();
+		progressDialog = new QProgressDialog("Loading simulation", "Cancel", 0, 100, this);
+		progressDialog->setWindowModality(Qt::WindowModal);
+		progressDialog->setMinimumDuration(2000);
 		nemoWrapper->start();
 	}
 	catch(SpikeStreamException& ex){
@@ -95,25 +129,66 @@ void NemoWidget::loadSimulation(){
 }
 
 
+/*! Switches the monitoring of the simulation on or off */
+void NemoWidget::monitorStateChanged(int state){
+
+}
+
+
 /*! Called when the nemo wrapper finishes a task it is engaged in */
-void NemoWidget::nemoFinished(){
+void NemoWidget::nemoWrapperFinished(){
 	checkForErrors();
 
 	switch (nemoWrapper->getCurrentTask()){
 		case NemoWrapper::LOAD_SIMULATION_TASK :
 			qDebug()<<"NemoWidget: Load simulation finished";
 		break;
-		case NemoWrapper::PLAY_SIMULATION_TASK :
-			qDebug()<<"NemoWidget: Play simulation finished";
+		case NemoWrapper::RUN_SIMULATION_TASK :
+			qDebug()<<"NemoWidget: Simulation run finished";
 		break;
 		default :
 			qCritical()<<"Nemo has finished executing, but task is not defined";
 	}
 }
 
-/*! Sets the parameters of the simulation */
-void NemoWidget::setParameters(){
+/*! Called when the network is changed.
+	Shows an error if this simulation is running, otherwise enables or disables the toolbar. */
+void NemoWidget::networkChanged(){
+	if(nemoWrapper->isRunning())
+		qCritical()<<"Network should not be changed while simulation is running";
 
+	//Fix enabled status of toolbar
+	checkWidgetEnabled();
+}
+
+
+/*! Sets the archive description using the contents of the archiveDescriptionEdit text field */
+void NemoWidget::setArchiveDescription(){
+
+}
+
+
+/*! Sets the parameters of the neurons in the network */
+void  NemoWidget::setNeuronParameters(){
+	NeuronParametersDialog* dialog = new NeuronParametersDialog(this);
+	dialog->exec();
+	delete dialog;
+}
+
+
+/*! Sets the parameters of Nemo */
+void NemoWidget::setNemoParameters(){
+	NemoParametersDialog* dialog = new NemoParametersDialog(this);
+	dialog->exec();
+	delete dialog;
+}
+
+
+/*! Sets the parameters of the synapses in the network */
+void NemoWidget::setSynapseParameters(){
+	SynapseParametersDialog* dialog = new SynapseParametersDialog(this);
+	dialog->exec();
+	delete dialog;
 }
 
 
@@ -141,7 +216,7 @@ void NemoWidget::startSimulation(){
 		return;
 	}
 	try{
-		nemoWrapper->preparePlaySimulation();
+		nemoWrapper->prepareRunSimulation();
 		nemoWrapper->start();
 	}
 	catch(SpikeStreamException& ex){
@@ -169,6 +244,36 @@ void NemoWidget::unloadSimulation(){
 }
 
 
+/*! Updates progress with a long operation */
+void NemoWidget::updateProgress(int stepsCompleted, int totalSteps){
+	//Protect code against multiple access
+	QMutexLocker locker(&mutex);
+
+	if(progressDialog == NULL)
+		return;
+
+	if(stepsCompleted < totalSteps){
+		//Update progress
+		progressDialog->setValue(stepsCompleted);
+		progressDialog->setMaximum(totalSteps);
+
+		//Check for cancellation
+		if(progressDialog->wasCanceled()){
+			nemoWrapper->stop();
+		}
+	}
+	else if(stepsCompleted > totalSteps){
+		qCritical()<<"Progress update error: Number of steps completed is greater than the number of possible steps.";
+		return;
+	}
+	else{
+		progressDialog->close();
+		delete progressDialog;
+		progressDialog = NULL;
+	}
+}
+
+
 /*----------------------------------------------------------*/
 /*------               PRIVATE METHODS                ------*/
 /*----------------------------------------------------------*/
@@ -178,6 +283,15 @@ void NemoWidget::checkForErrors(){
 	if(nemoWrapper->isError()){
 		qCritical()<<"NemoWrapper error: '"<<nemoWrapper->getErrorMessage()<<"'.";
 	}
+}
+
+
+/*! Checks to see if network is been loaded and sets enabled status of toolbar appropriately */
+void NemoWidget::checkWidgetEnabled(){
+	if(Globals::networkLoaded())
+		mainGroupBox->setEnabled(true);
+	else
+		mainGroupBox->setEnabled(false);
 }
 
 

@@ -20,7 +20,7 @@ namespace spikestream {
 			bool isError() { return error; }
 			bool isSimulationLoaded() { return simulationLoaded; }
 			void prepareLoadSimulation();
-			void preparePlaySimulation();
+			void prepareRunSimulation();
 			void run();
 			void stop();
 			void updatePprogress(int stepsComplete, int totalSteps);
@@ -34,7 +34,8 @@ namespace spikestream {
 			static const int LOAD_SIMULATION_TASK = 1;
 
 			/*! Task of playing simulation */
-			static const int PLAY_SIMULATION_TASK = 2;
+			static const int RUN_SIMULATION_TASK = 2;
+
 
 		signals:
 			void progress(int stepsComplete, int totalSteps);
@@ -42,6 +43,7 @@ namespace spikestream {
 
 		private slots:
 			void updateProgress(int stepsComplete, int totalSteps);
+
 
 		private:
 			//======================  VARIABLES  ========================
@@ -63,9 +65,8 @@ namespace spikestream {
 			//======================  METHODS  ========================
 			void clearError();
 			void loadSimulation();
-			void playSimulation();
+			void runSimulation();
 			void setError(const QString& errorMessage);
-
 
 	};
 

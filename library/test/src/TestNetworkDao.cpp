@@ -556,7 +556,7 @@ void TestNetworkDao::testGetNeuronGroupsInfo(){
 	QCOMPARE(neurGrpInfoList[0].getID(), neurGrp1ID);
 	QCOMPARE(neurGrpInfoList[0].getName(), QString("name1"));
 	QCOMPARE(neurGrpInfoList[0].getDescription(), QString("desc1"));
-	QCOMPARE(neurGrpInfoList[0].getNeuronType(), (unsigned int)1);
+	QCOMPARE(neurGrpInfoList[0].getNeuronTypeID(), (unsigned int)1);
 	QCOMPARE(neurGrpInfoList[0].getParameterMap()["neurparam1"], 1.63);
 
 	QCOMPARE(neurGrpInfoList[1].getID(), neurGrp2ID);
@@ -593,6 +593,58 @@ void TestNetworkDao::testGetNeuronIDs(){
 }
 
 
+void TestNetworkDao::testGetNeuronParameters(){
+	//Add test network
+	addTestNetwork1();
+
+	try{
+		//Get the values of the parameters - this should be the default
+		NetworkDao networkDao(dbInfo);
+		NeuronGroupInfo neurGrpInfo (neurGrp1ID, "name", "description", QHash<QString, double>(), 1);
+		QHash<QString, double> neurParamMap = networkDao.getNeuronParameters(neurGrpInfo);
+
+		//Check parameters
+		QCOMPARE(neurParamMap.size(), (int)1);
+		QCOMPARE(neurParamMap["a"], 1.0);
+	}
+	catch(SpikeStreamException ex){
+		QFAIL(ex.getMessage().toAscii());
+	}
+	catch(...){
+		QFAIL("Unrecognized exception thrown.");
+	}
+}
+
+
+void TestNetworkDao::testGetNeuronType(){
+	try{
+		NetworkDao networkDao(dbInfo);
+
+		//Test type 1 neurons
+		NeuronType type = networkDao.getNeuronType(1);
+		QCOMPARE(type.getDescription(), QString("Izhikevich Neuron"));
+		QCOMPARE(type.getParameterTableName(), QString("IzhikevichNeuronParameters"));
+		QCOMPARE(type.getParameterInfoList().size(), (int)1);
+		QCOMPARE(type.getParameterInfoList().at(0).getName(), QString("a"));
+		QCOMPARE(type.getParameterInfoList().at(0).getDescription(), QString("Time scale of the recovery variable."));
+
+		//Test type 2 neurons
+		type = networkDao.getNeuronType(2);
+		QCOMPARE(type.getDescription(), QString("Weightless Neuron"));
+		QCOMPARE(type.getParameterTableName(), QString("WeightlessNeuronParameters"));
+		QCOMPARE(type.getParameterInfoList().size(), (int)1);
+		QCOMPARE(type.getParameterInfoList().at(0).getName(), QString("Generalization"));
+		QCOMPARE(type.getParameterInfoList().at(0).getDescription(), QString("Degree of match using hamming distance with incoming pattern"));
+	}
+	catch(SpikeStreamException ex){
+		QFAIL(ex.getMessage().toAscii());
+	}
+	catch(...){
+		QFAIL("Unrecognized exception thrown.");
+	}
+}
+
+
 /*! Note this test will need to be updated if the default types change. */
 void TestNetworkDao::testGetNeuronTypes(){
 	//Invoke method being tested
@@ -623,6 +675,16 @@ void TestNetworkDao::testGetNeuronTypes(){
 	catch(...){
 		QFAIL("Unrecognized exception thrown.");
 	}
+}
+
+
+void TestNetworkDao::testGetSynapseParameters(){
+
+}
+
+
+void TestNetworkDao::testGetSynapseType(){
+
 }
 
 
@@ -735,6 +797,17 @@ void TestNetworkDao::testIsWeightlessNeuron(){
 	QVERIFY(networkDao.isWeightlessNeuron(testNeurIDList[0]));
 	QVERIFY(!networkDao.isWeightlessNeuron(testNeurIDList2[0]));
 }
+
+
+void TestNetworkDao::testSetNeuronParameters(){
+
+}
+
+
+void TestNetworkDao::testSetSynapseParameters(){
+
+}
+
 
 void TestNetworkDao::testSetTempWeight(){
 	//Add test network

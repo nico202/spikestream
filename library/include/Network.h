@@ -75,13 +75,13 @@ namespace spikestream {
 	    NetworkInfo info;
 
 	    /*! Access to the database layer. Stored here to enable dynamic loading
-		of neurons and connections on request.
-		NOTE: This will have to be changed if the network is passed between threads. */
+			of neurons and connections on request.
+			NOTE: This will have to be changed if the network is passed between threads. */
 	    NetworkDao* networkDao;
 
 	    /*! Access to the database layer. Stored here to enable network to prevent modifications
-		if it is associated with archives.
-		NOTE: This will have to be changed if the network is passed between threads. */
+			if it is associated with archives.
+			NOTE: This will have to be changed if the network is passed between threads. */
 	    ArchiveDao* archiveDao;
 
 	    /*! Hash map of the neuron groups in the network */

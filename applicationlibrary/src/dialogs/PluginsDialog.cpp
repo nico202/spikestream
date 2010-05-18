@@ -57,8 +57,8 @@ PluginsDialog::PluginsDialog(QWidget* parent, const QString pluginFolder, const 
 		mainVerticalBox->addLayout(buttonBox);
 
 	}
-	catch(SpikeStreamException* ex){
-		qCritical()<<ex->getMessage();
+	catch(SpikeStreamException& ex){
+		qCritical()<<ex.getMessage();
 	}
 }
 
