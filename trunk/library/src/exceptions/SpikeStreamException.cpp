@@ -9,5 +9,5 @@ SpikeStreamException::~SpikeStreamException(){
 }
 
 QString SpikeStreamException::getMessage(){
-    return type + ": Details: \'" + details + " \'";
+	return type + ": \'" + details + " \'";
 }

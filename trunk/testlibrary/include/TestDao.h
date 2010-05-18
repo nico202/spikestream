@@ -3,7 +3,6 @@
 
 //SpikeStream includes
 #include "DBInfo.h"
-#include "NetworkDaoThread.h"
 using namespace spikestream;
 
 //Qt includes

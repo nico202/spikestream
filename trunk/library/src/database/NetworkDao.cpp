@@ -350,6 +350,58 @@ QList<unsigned int> NetworkDao::getNeuronIDs(unsigned int networkID){
 }
 
 
+/*! Returns a map containing the parameters for the specified neuron group */
+QHash<QString, double> NetworkDao::getNeuronParameters(const NeuronGroupInfo& neurGrpInfo){
+	/* Get class describing the type of neuron in this group - this contains the parameter
+		table name and info about the parameters */
+	NeuronType neuronType = getNeuronType(neurGrpInfo.getNeuronTypeID());
+
+	//Build query to extract values of parameters for this neuron group
+	QString queryStr = "SELECT ";
+	QList<ParameterInfo> parameterInfoList = neuronType.getParameterInfoList();
+	foreach(ParameterInfo paramInfo, parameterInfoList){
+		queryStr += paramInfo.getName() + ",";
+	}
+	queryStr.truncate(queryStr.length() - 1);
+	queryStr += " FROM " + neuronType.getParameterTableName() + " WHERE NeuronGroupID=" + QString::number(neurGrpInfo.getID());
+	QSqlQuery query = getQuery(queryStr);
+	executeQuery(query);
+
+	//Check only one row exists
+	if(query.size() != 1)
+		throw SpikeStreamException("Zero or multiple parameter entries for neuron group in table " + neuronType.getParameterTableName() + ": " + QString::number(query.size()));
+
+	//Extract parameters
+	query.next();
+	QHash<QString, double> paramMap;
+	int indx = 0;
+	foreach(ParameterInfo paramInfo, parameterInfoList){
+		if(paramMap.contains(paramInfo.getName()))
+			throw SpikeStreamException("Duplicate entries in parameter map!");
+
+		paramMap[paramInfo.getName()] = Util::getDouble(query.value(indx).toString());
+		++indx;
+	}
+
+	//Return the finished map
+	return paramMap;
+}
+
+
+
+/*! Returns the neuron type for a specific neuron group */
+NeuronType NetworkDao::getNeuronType(unsigned int neuronTypeID){
+	//Resuse other method - not efficient, but more likely to be reliable than duplicating code.
+	QList<NeuronType> neurTypesList = getNeuronTypes();
+	foreach(NeuronType neurType, neurTypesList){
+		if(neurType.getID() == neuronTypeID)
+			return neurType;
+	}
+	throw SpikeStreamException("Neuron type with ID " + QString::number(neuronTypeID) + " not found.");
+
+}
+
+
 /*! Returns the current list of available neuron types.
 	This information is stored in the NeuronTypes table. */
 QList<NeuronType> NetworkDao::getNeuronTypes(){
@@ -365,6 +417,12 @@ QList<NeuronType> NetworkDao::getNeuronTypes(){
 			query.value(3).toString()//ClassLibrary
 		);
 		neuronTypesList.append(tmpNeurType);
+	}
+
+	//Add the information about parameters for each neuron type
+	for(int i=0; i<neuronTypesList.size(); ++i){
+		QList<ParameterInfo> paramInfoList = getNeuronParameterInfo(neuronTypesList.at(i));
+		neuronTypesList[i].setParameterInfoList(paramInfoList);
 	}
 	return neuronTypesList;
 }
@@ -470,6 +528,12 @@ bool NetworkDao::isWeightlessNetwork(unsigned int networkID){
 }
 
 
+/*! Sets the neuron group's parameters */
+void NetworkDao::setNeuronParameters(QHash<QString, double>& paramMap){
+
+}
+
+
 /*! Sets the temporary weight between two neurons. In the event of multiple connections between two neurons
 	all of the temporary weights will be updated */
 void NetworkDao::setTempWeight(unsigned int fromNeurID, unsigned int toNeurID, double tempWeight){
@@ -478,6 +542,27 @@ void NetworkDao::setTempWeight(unsigned int fromNeurID, unsigned int toNeurID, d
 }
 
 
+/*----------------------------------------------------------*/
+/*-----                PRIVATE METHODS                 -----*/
+/*----------------------------------------------------------*/
 
+/*! Returns a list of ParameterInfos describing the parameters available for a
+	particular neuron type. The description of the parameters is stored as comments in the table. */
+QList<ParameterInfo> NetworkDao::getNeuronParameterInfo(const NeuronType& neuronType){
+	QList<ParameterInfo> paramInfoList;
+
+	//Extract variable names and descriptions (as comments) from parameter table
+	QSqlQuery query = getQuery("SHOW FULL COLUMNS FROM " + neuronType.getParameterTableName());
+	executeQuery(query);
+	int variableNameCol = query.record().indexOf("Field");
+	int commentCol = query.record().indexOf("Comment");
+	while(query.next()){
+		QString variableName = query.value(variableNameCol).toString();
+		if(variableName != "NeuronGroupID"){
+			paramInfoList.append(ParameterInfo(variableName, query.value(commentCol).toString()));
+		}
+	}
+	return paramInfoList;
+}
 
 

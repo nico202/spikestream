@@ -45,8 +45,8 @@ AnalysisLoaderWidget::AnalysisLoaderWidget(QWidget* parent) : QWidget(parent) {
 		//Connect combo changed signal to slot loading appropriate analysis widget
 		connect(pluginsCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(showAnalysisWidget(int)) );
 	}
-	catch(SpikeStreamException* ex){
-		qCritical()<<ex->getMessage();
+	catch(SpikeStreamException& ex){
+		qCritical()<<ex.getMessage();
 	}
 }
 

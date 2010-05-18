@@ -106,8 +106,8 @@ void TestNetworkDaoThread::testAddConnectionGroup(){
 void TestNetworkDaoThread::testAddNeuronGroup(){
     try{
 		/* Add network to get a valid id.
-	    Slightly sloppy to use the network dao method, but it has been tested elsewhere
-		and we need a network because of foreign key constraints */
+			Slightly sloppy to use the network dao method, but it has been tested elsewhere
+			and we need a network because of foreign key constraints */
 		NetworkInfo netInfo(0, "test2Name","test3Description");
 		NetworkDao networkDao(dbInfo);
 		networkDao.addNetwork(netInfo);
@@ -138,7 +138,7 @@ void TestNetworkDaoThread::testAddNeuronGroup(){
 		QCOMPARE(query.value(1).toString(), neurGrpInfo.getName());//Check name
 		QCOMPARE(query.value(2).toString(), neurGrpInfo.getDescription());//Check description
 		QCOMPARE(query.value(3).toString(), neurGrpInfo.getParameterXML());//Check parameters
-		QCOMPARE(query.value(4).toString(), QString::number(neurGrpInfo.getNeuronType()));//Check neuron type
+		QCOMPARE(query.value(4).toString(), QString::number(neurGrpInfo.getNeuronTypeID()));//Check neuron type
 		QVERIFY( neurGrpInfo.getID() != 0);
 
 		//Check that the neurons were added correctly

@@ -2,6 +2,7 @@
 #define TESTNETWORKDAOTHREAD_H
 
 //SpikeStream includes
+#include "NetworkDaoThread.h"
 #include "TestDao.h"
 
 //Qt includes

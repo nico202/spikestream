@@ -8,12 +8,12 @@ NeuronGroupInfo::NeuronGroupInfo(){
     this->id = 0;
     this->name = "undefined";
     this->description = "undefined";
-    this->neuronType = -1;
+	this->neuronTypeID = 0;
 }
 
 
 /*! Normal constructor */
-NeuronGroupInfo::NeuronGroupInfo(unsigned int id, const QString& name, const QString& desc, const QHash<QString, double>& paramMap, int neurType){
+NeuronGroupInfo::NeuronGroupInfo(unsigned int id, const QString& name, const QString& desc, const QHash<QString, double>& paramMap, unsigned int neurTypeID){
        //Check that name and description will fit in the database
     if(name.size() > MAX_DATABASE_NAME_LENGTH || desc.size() > MAX_DATABASE_DESCRIPTION_LENGTH)
 	throw SpikeStreamException("NeuronGroup: Name and/or description length exceeds maximum possible size in database.");
@@ -22,7 +22,7 @@ NeuronGroupInfo::NeuronGroupInfo(unsigned int id, const QString& name, const QSt
     this->name = name;
     this->description = desc;
     this->parameterMap = paramMap;
-    this->neuronType = neurType;
+	this->neuronTypeID = neurTypeID;
 }
 
 
@@ -32,7 +32,7 @@ NeuronGroupInfo::NeuronGroupInfo(const NeuronGroupInfo& neurGrpInfo){
     this->name = neurGrpInfo.name;
     this->description = neurGrpInfo.description;
     this->parameterMap = neurGrpInfo.parameterMap;
-    this->neuronType = neurGrpInfo.neuronType;
+	this->neuronTypeID = neurGrpInfo.neuronTypeID;
 }
 
 
@@ -55,7 +55,7 @@ NeuronGroupInfo& NeuronGroupInfo::operator=(const NeuronGroupInfo& rhs) {
     this->name = rhs.name;
     this->description = rhs.description;
     this->parameterMap = rhs.parameterMap;
-    this->neuronType = rhs.neuronType;
+	this->neuronTypeID = rhs.neuronTypeID;
 
     return *this;
 }
@@ -66,10 +66,10 @@ QString NeuronGroupInfo::getParameterXML(){
     QString tmpStr = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>";
     tmpStr += "<neuron_group_parameters>";
     for(QHash<QString, double>::iterator iter = parameterMap.begin(); iter != parameterMap.end(); ++iter){
-	tmpStr +="<parameter>";
-	tmpStr += "<name>" + iter.key() + "</name>";
-	tmpStr += "<value>" + QString::number(iter.value()) + "</value>";
-	tmpStr += "</parameter>";
+		tmpStr +="<parameter>";
+		tmpStr += "<name>" + iter.key() + "</name>";
+		tmpStr += "<value>" + QString::number(iter.value()) + "</value>";
+		tmpStr += "</parameter>";
     }
     tmpStr += "</neuron_group_parameters>";
     return tmpStr;

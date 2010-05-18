@@ -7,8 +7,11 @@
 //Qt includes
 #include <QCheckBox>
 #include <QComboBox>
+#include <QGroupBox>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMutex>
+#include <QProgressDialog>
 #include <QPushButton>
 #include <QToolBar>
 #include <QWidget>
@@ -24,19 +27,30 @@ namespace spikestream {
 			~NemoWidget();
 
 		private slots:
+			void archiveStateChanged(int state);
 			void loadSimulation();
-			void setParameters();
-			void simulationAdvanceOccurred();
+			void monitorStateChanged(int state);
+			void nemoWrapperFinished();
+			void networkChanged();
+			void setArchiveDescription();
+			void setNeuronParameters();
+			void setNemoParameters();
+			void setSynapseParameters();
+			void simulationAdvanceOccurred(unsigned int timeStep);
 			void simulationRateChanged(int comboIndex);
 			void startSimulation();
 			void stepSimulation();
 			void stopSimulation();
 			void unloadSimulation();
+			void updateProgress(int stepsCompleted, int totalSteps);
 
 		private:
 			//========================  VARIABLES  ========================
 			/*! Wrapper for Nemo library */
 			NemoWrapper* nemoWrapper;
+
+			/*! Box holding all widgets - makes it easy to enable and disable everything. */
+			QGroupBox* mainGroupBox;
 
 			/*! Button for loading simulation */
 			QPushButton* loadButton;
@@ -44,11 +58,17 @@ namespace spikestream {
 			/*! Button for unloading simulation */
 			QPushButton* unloadButton;
 
-			/*! Button that launches dialog to edit the parameters */
-			QPushButton* parametersButton;
+			/*! Button that launches dialog to edit the neuron parameters */
+			QPushButton* neuronParametersButton;
+
+			/*! Button that launches dialog to edit the synapse parameters */
+			QPushButton* synapseParametersButton;
+
+			/*! Button that launches dialog to edit the neuron parameters */
+			QPushButton* nemoParametersButton;
 
 			/*! Tool bar with transport controls for loading, playing, etc. */
-			QToolBar toolBar;
+			QToolBar* toolBar;
 
 			/*! For user to enter a description of the archive */
 			QLineEdit* archiveDescriptionEdit;
@@ -62,9 +82,16 @@ namespace spikestream {
 			/*! Time step of the simulation */
 			QLabel* timeStepLabel;
 
+			/*! Dialog for giving feedback about progress */
+			QProgressDialog* progressDialog;
+
+			/*! Mutex for preventing multiple access to functions */
+			QMutex mutex;
 
 			//=======================  METHODS  =========================
 			void checkForErrors();
+			void checkWidgetEnabled();
+			QToolBar* getToolBar();
 	};
 
 }

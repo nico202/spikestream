@@ -55,14 +55,14 @@ QT += xml opengl sql
 
 
 #----------------------------------------------#
-#---          database folder               ---#
+#---                Database                ---#
 #----------------------------------------------#
 HEADERS += include/DatabaseManager.h
 SOURCES += src/database/DatabaseManager.cpp
 
 
 #----------------------------------------------#
-#---            nrm folder                  ---#
+#---                 NRM                    ---#
 #----------------------------------------------#
 HEADERS += include/NRMNetwork.h \
 			include/NRMConfigLoader.h \
@@ -127,12 +127,16 @@ HEADERS += include/NRMImportDialog.h \
 			include/LoadAnalysisDialog.h \
 			include/PluginsDialog.h \
 			include/TruthTableDialog.h \
-			include/NewNetworkDialog.h
+			include/NewNetworkDialog.h \
+			include/NeuronParametersDialog.h \
+			include/SynapseParametersDialog.h
 SOURCES += src/dialogs/NRMImportDialog.cpp \
 			src/dialogs/LoadAnalysisDialog.cpp \
 			src/dialogs/PluginsDialog.cpp \
 			src/dialogs/TruthTableDialog.cpp \
-			src/dialogs/NewNetworkDialog.cpp
+			src/dialogs/NewNetworkDialog.cpp \
+			src/dialogs/NeuronParametersDialog.cpp \
+			src/dialogs/SynapseParametersDialog.cpp
 
 
 #----------------------------------------------#
@@ -149,12 +153,14 @@ HEADERS += include/NeuronGroupModel.h \
 			include/ConnectionGroupModel.h \
 			include/ConnectionsModel.h \
 			include/AnalysesModel.h \
-			include/TruthTableModel.h
+			include/TruthTableModel.h \
+			include/NeuronParametersModel.h
 SOURCES += src/models/NeuronGroupModel.cpp \
 			src/models/ConnectionGroupModel.cpp \
 			src/models/ConnectionsModel.cpp \
 			src/models/AnalysesModel.cpp \
-			src/models/TruthTableModel.cpp
+			src/models/TruthTableModel.cpp \
+			src/models/NeuronParametersModel.cpp
 
 
 #----------------------------------------------#
@@ -164,12 +170,14 @@ HEADERS += include/NeuronGroupTableView.h \
 			include/ConnectionGroupTableView.h \
 			include/ConnectionsTableView.h \
 			include/AnalysesTableView.h \
-			include/TruthTableView.h
+			include/TruthTableView.h \
+			include/NeuronParametersView.h
 SOURCES += src/views/NeuronGroupTableView.cpp \
 			src/views/ConnectionGroupTableView.cpp \
 			src/views/ConnectionsTableView.cpp \
 			src/views/AnalysesTableView.cpp \
-			src/views/TruthTableView.cpp
+			src/views/TruthTableView.cpp \
+			src/views/NeuronParametersView.cpp
 
 
 #----------------------------------------------#
