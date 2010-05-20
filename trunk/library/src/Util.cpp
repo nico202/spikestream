@@ -44,7 +44,7 @@ bool Util::getBool(const QString& str){
 		return true;
 	else if (str.toLower() == "false")
 		return false;
-	throw NumberConversionException("Error converting " + str + " to boolean.");
+	throw NumberConversionException("Error converting '" + str + "' to boolean.");
 }
 
 
@@ -54,7 +54,7 @@ float Util::getFloat(const QString& str){
 	bool ok = true;
 	float newFloat = str.toFloat(&ok);
 	if(!ok)
-		throw NumberConversionException("Error converting " + str + " to float.");
+		throw NumberConversionException("Error converting '" + str + "' to float.");
 	return newFloat;
 }
 
@@ -65,7 +65,7 @@ int Util::getInt(const QString& str){
 	bool ok = true;
 	int newInt = str.toInt(&ok);
 	if(!ok)
-		throw NumberConversionException("Error converting " + str + " to integer.");
+		throw NumberConversionException("Error converting '" + str + "' to integer.");
 	return newInt;
 }
 
@@ -76,7 +76,7 @@ unsigned int Util::getUInt(const QString& str){
 	bool ok = true;
 	unsigned int newInt = str.toUInt(&ok);
 	if(!ok)
-		throw NumberConversionException("Error converting " + str + " to unsigned integer.");
+		throw NumberConversionException("Error converting '" + str + "' to unsigned integer.");
 	return newInt;
 }
 
@@ -97,7 +97,7 @@ double Util::getDouble(const QString& str){
 	bool ok = true;
 	double newDouble = str.toDouble(&ok);
 	if(!ok)
-		throw NumberConversionException("Error converting " + str + " to double.");
+		throw NumberConversionException("Error converting '" + str + "' to double.");
 	return newDouble;
 }
 

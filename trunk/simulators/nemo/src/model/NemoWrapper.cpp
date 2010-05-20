@@ -80,6 +80,12 @@ void NemoWrapper::stop(){
 }
 
 
+/*! Unloads the current simulation */
+void NemoWrapper::unload(){
+
+}
+
+
 /*----------------------------------------------------------*/
 /*-----                  PRIVATE SLOTS                 -----*/
 /*----------------------------------------------------------*/
@@ -123,11 +129,11 @@ void NemoWrapper::loadSimulation(){
 	while(cntr < 20 && !stopThread){
 		qDebug()<<"LOADING SIMULATION. COUNTER="<<cntr;
 		sleep(1);
-		emit progress(cntr, 20);
 		++cntr;
+		emit progress(cntr, 20);
 	}
-
-	simulationLoaded = true;
+	if(!stopThread)
+		simulationLoaded = true;
 
 	//Reset the daos in the network
 	currentNetwork->setNetworkDao(Globals::getNetworkDao());
@@ -137,7 +143,6 @@ void NemoWrapper::loadSimulation(){
 	delete nemoLoader;
 	delete netDao;
 	delete archDao;
-	simulationLoaded = true;
 }
 
 

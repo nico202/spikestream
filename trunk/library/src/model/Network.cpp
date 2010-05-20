@@ -127,6 +127,13 @@ void Network::cancel(){
 }
 
 
+/*! Clears the error state */
+void Network::clearError(){
+	error = false;
+	errorMessage = "";
+}
+
+
 /*! Returns true if a neuron with the specified ID is in the network */
 bool Network::containsNeuron(unsigned int neurID){
     //Need to check each neuron group to see if it contains the neuron.
@@ -349,11 +356,32 @@ ConnectionGroupInfo Network::getConnectionGroupInfo(unsigned int id){
 }
 
 
-/*! Returns the number of steps that have been completed so far during a load operation. */
-int Network::getNumberOfCompletedSteps(){
-    return connectionNetworkDaoThread->getNumberOfCompletedSteps() + neuronNetworkDaoThread->getNumberOfCompletedSteps();
+/*! Returns the message associated with an error */
+QString Network::getErrorMessage(){
+	return errorMessage;
 }
 
+
+/*! Returns the number of steps that have been completed so far during a heavy operation. */
+int Network::getNumberOfCompletedSteps(){
+	int numSteps = 0;
+	if(neuronNetworkDaoThread->isRunning())
+		numSteps += neuronNetworkDaoThread->getNumberOfCompletedSteps();
+	if(connectionNetworkDaoThread->isRunning())
+		numSteps += connectionNetworkDaoThread->getNumberOfCompletedSteps();
+	return numSteps;
+}
+
+
+/*! Returns the number of steps involved in the current tasks */
+int Network::getTotalNumberOfSteps(){
+	int total = 0;
+	if(neuronNetworkDaoThread->isRunning())
+		total += neuronNetworkDaoThread->getTotalNumberOfSteps();
+	if(connectionNetworkDaoThread->isRunning())
+		total += connectionNetworkDaoThread->getTotalNumberOfSteps();
+	return total;
+}
 
 /*! Returns true if the network is not editable because it is associated with archives */
 bool Network::isLocked(){
@@ -381,13 +409,6 @@ void Network::load(){
     connectionNetworkDaoThread->prepareLoadConnections(loadList);
     currentConnectionTask = LOAD_CONNECTIONS_TASK;
     connectionNetworkDaoThread->start();
-
-    //Record the total number of steps and initialise the number of completed steps
-    totalNumberOfSteps = neuronNetworkDaoThread->getTotalNumberOfSteps() + neuronNetworkDaoThread->getTotalNumberOfSteps();
-
-    /* Both threads will now be running to load connections and neurons.
-       This class will return true to the isBusy() method until the threads finish.
-       When the threads finish they should call the appropriat slot in this class. */
 }
 
 
@@ -399,8 +420,7 @@ void Network::load(){
 /*! Slot called when thread processing connections has finished running. */
 void Network::connectionThreadFinished(){
     if(connectionNetworkDaoThread->isError()){
-		errorMessage += "Connection Loading Error: '" + connectionNetworkDaoThread->getErrorMessage() + "'. ";
-		error = true;
+		setError("Connection Loading Error: '" + connectionNetworkDaoThread->getErrorMessage() + "'. ");
     }
 	if(!error){
 		try{
@@ -431,8 +451,7 @@ void Network::connectionThreadFinished(){
 			}
 		}
 		catch(SpikeStreamException& ex){
-			errorMessage = ex.getMessage();
-			error = true;
+			setError(" End connection thread error " + ex.getMessage());
 		}
 	}
 
@@ -448,8 +467,7 @@ void Network::connectionThreadFinished(){
 void Network::neuronThreadFinished(){
     //Check for errors
     if(neuronNetworkDaoThread->isError()){
-		errorMessage += "Neuron Loading Error: '" + neuronNetworkDaoThread->getErrorMessage() + "'. ";
-		error = true;
+		setError("Neuron Loading Error: '" + neuronNetworkDaoThread->getErrorMessage() + "'. ");
     }
 
     //Handle any task-specific stuff
@@ -485,8 +503,7 @@ void Network::neuronThreadFinished(){
 			}
 		}
 		catch(SpikeStreamException& ex){
-			errorMessage = ex.getMessage();
-			error = true;
+			setError("End neuron thread error: " + ex.getMessage());
 		}
     }
 
@@ -500,14 +517,9 @@ void Network::neuronThreadFinished(){
 
 
 /*! Returns the size of the network.
-    An exception is thrown if not all neuron groups have been loaded.
-    FIXME: USE DATABASE LOOKUP IN THIS CASE INSTEAD. */
+	An exception is thrown if not all neuron groups have been loaded. */
 int Network::size(){
-    int neuronCount = 0;
-    for(QHash<unsigned int, NeuronGroup*>::iterator iter = neurGrpMap.begin(); iter != neurGrpMap.end(); ++iter){
-		neuronCount += iter.value()->size();
-    }
-    return neuronCount;
+	return networkDao->getNeuronCount(info.getID());
 }
 
 
@@ -575,4 +587,12 @@ void Network::deleteNeuronGroups(){
     for(QHash<unsigned int, NeuronGroup*>::iterator iter = neurGrpMap.begin(); iter != neurGrpMap.end(); ++iter)
 		delete iter.value();
     neurGrpMap.clear();
+}
+
+
+/*! Sets the class into error state and adds error message */
+void Network::setError(const QString& errorMsg){
+	this->errorMessage += " " + errorMsg;
+	qDebug()<<"NETWORK ERROR: "<<errorMessage;
+	error = true;
 }

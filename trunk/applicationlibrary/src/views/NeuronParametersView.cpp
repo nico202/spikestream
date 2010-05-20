@@ -1,3 +1,5 @@
+//SpikeStream includes
+#include "NeuronParametersEditDialog.h"
 #include "NeuronParametersView.h"
 using namespace spikestream;
 
@@ -6,7 +8,9 @@ using namespace spikestream;
 #include <QHeaderView>
 
 /*! Constructor */
-NeuronParametersView::NeuronParametersView(QWidget* parent, QAbstractTableModel* model) : QTableView(parent) {
+NeuronParametersView::NeuronParametersView(QWidget* parent, NeuronParametersModel* model) : QTableView(parent) {
+	this->model = model;
+
 	//Set up the view
 	setShowGrid(false);
 	setSelectionMode(QAbstractItemView::NoSelection);
@@ -16,6 +20,9 @@ NeuronParametersView::NeuronParametersView(QWidget* parent, QAbstractTableModel*
 	setModel(model);
 	show();
 	resizeHeaders();
+
+	//Listen for resize events
+	connect(model, SIGNAL(modelReset()), this, SLOT(resizeHeaders()));
 }
 
 
@@ -29,18 +36,28 @@ NeuronParametersView::~NeuronParametersView(){
 void NeuronParametersView::resizeHeaders(){
 	QHeaderView* hHeader = horizontalHeader();
 	hHeader->setMinimumSectionSize(10);
-//	hHeader->resizeSection(hHeader->logicalIndex(0), 20);//Visibility icon
-//	hHeader->resizeSection(hHeader->logicalIndex(1), 20);//Zoom icon
-//	hHeader->resizeSection(hHeader->logicalIndex(2), 50);//ID
-//	hHeader->resizeSection(hHeader->logicalIndex(3), 200);//Name
-//	hHeader->resizeSection(hHeader->logicalIndex(4), 300);//Description
-//	hHeader->resizeSection(hHeader->logicalIndex(5), 100);//Neuron type
+	hHeader->resizeSection(hHeader->logicalIndex(0), 100);//Description
+	QList<ParameterInfo> neuronParams = model->getParameterInfoList();
+	for(int i=0; i<neuronParams.size(); ++i){
+		int tmpParamLength = 10+neuronParams.at(i).getName().length() * 10;
+		if(tmpParamLength < 40)
+			tmpParamLength = 40;
+		hHeader->resizeSection(hHeader->logicalIndex(i+1), tmpParamLength);//Parameter name
+	}
+
+	//Icon
+	hHeader->resizeSection(hHeader->logicalIndex(neuronParams.size() + 1), 50);//Edit button
 	hHeader->setDefaultAlignment(Qt::AlignLeft);
 }
 
 
 /*! Called when the table is clicked and passes this information on to model. */
 void NeuronParametersView::tableClicked(QModelIndex index){
-	model()->setData(index, 0);
+	if(index.column() != model->getParameterInfoList().size() + 1)
+		return;
+
+	NeuronParametersEditDialog dialog(model->getNeuronGroupInfo(index.row()), model->getParameterInfoList(), model->getParameterValues(index.row()), this);
+	if(dialog.exec() == QDialog::Accepted)
+		model->reload();
 }
 

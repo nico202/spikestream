@@ -1,6 +1,9 @@
 #ifndef NEURONPARAMETERSVIEW_H
 #define NEURONPARAMETERSVIEW_H
 
+//SpikeStream includes
+#include "NeuronParametersModel.h"
+
 //Qt includes
 #include <QTableView>
 
@@ -12,13 +15,17 @@ namespace spikestream {
 		Q_OBJECT
 
 		public:
-			NeuronParametersView(QWidget* parent, QAbstractTableModel* model);
+			NeuronParametersView(QWidget* parent, NeuronParametersModel* model);
 			~NeuronParametersView();
-			void resizeHeaders();
 
 		private slots:
+			void resizeHeaders();
 			void tableClicked(QModelIndex index);
 
+		private:
+			//======================  VARIABLES  =====================
+			/*! The model associated with the view */
+			NeuronParametersModel* model;
 	};
 
 }

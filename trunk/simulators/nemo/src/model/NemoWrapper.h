@@ -23,6 +23,7 @@ namespace spikestream {
 			void prepareRunSimulation();
 			void run();
 			void stop();
+			void unload();
 			void updatePprogress(int stepsComplete, int totalSteps);
 
 

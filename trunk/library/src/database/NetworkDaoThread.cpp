@@ -108,8 +108,8 @@ void NetworkDaoThread::prepareLoadConnections(QList<ConnectionGroup*>& connGrpLi
     //Set the taks that will run when the thread starts
     currentTask = LOAD_CONNECTIONS_TASK;
 
-    //Record the total number of steps that the task involves
-    totalNumberOfSteps = connGrpList.size();
+	//Set total number of steps to a value greater than 1 - this will change when task starts
+	totalNumberOfSteps = 100;
 }
 
 
@@ -122,8 +122,8 @@ void NetworkDaoThread::prepareLoadConnections(ConnectionGroup* connGrp){
     //Set the task that will run when the thread starts
     currentTask = LOAD_CONNECTIONS_TASK;
 
-    //Record the total number of steps that the task involves
-    totalNumberOfSteps = 1;
+	//Set total number of steps to a value greater than 1 - this will change when task starts
+	totalNumberOfSteps = 100;
 }
 
 
@@ -135,8 +135,8 @@ void NetworkDaoThread::prepareLoadNeurons(const QList<NeuronGroup*>& neurGrpList
     //Set the task that will run when the thread starts
     currentTask = LOAD_NEURONS_TASK;
 
-    //Record the total number of steps that the task involves
-    totalNumberOfSteps = neurGrpList.size();
+	//Set total number of steps to a value greater than 1 - this will change when task starts
+	totalNumberOfSteps = 100;
 }
 
 
@@ -149,8 +149,8 @@ void NetworkDaoThread::prepareLoadNeurons(NeuronGroup* neurGrp){
     //Set the task that will run when the thread starts
     currentTask = LOAD_NEURONS_TASK;
 
-    //Record the total number of steps that the task involves
-    totalNumberOfSteps = 1;
+	//Set total number of steps to a value greater than 1 - this will change when task starts
+	totalNumberOfSteps = 100;
 }
 
 
@@ -425,6 +425,10 @@ void NetworkDaoThread::deleteNeuronGroups(){
 
 
 void NetworkDaoThread::loadConnections(){
+	//Reset progress
+	numberOfCompletedSteps = 0;
+	totalNumberOfSteps = getConnectionCount(connectionGroupList);
+
     //Work through all the connections to be loaded
     for(QList<ConnectionGroup*>::iterator iter = connectionGroupList.begin(); iter != connectionGroupList.end(); ++iter){
 
@@ -447,6 +451,9 @@ void NetworkDaoThread::loadConnections(){
 					);
 			(*iter)->addConnection(tmpConn);
 
+			//Track progress
+			++numberOfCompletedSteps;
+
 			//Quit if user cancels
 			if(stopThread)
 				return;
@@ -459,6 +466,10 @@ void NetworkDaoThread::loadConnections(){
 
 
 void NetworkDaoThread::loadNeurons(){
+	//Reset progress measure
+	numberOfCompletedSteps = 0;
+	totalNumberOfSteps = getNeuronCount(neuronGroupList);
+
     //Work through all the neurons to be loaded
     for(QList<NeuronGroup*>::iterator iter = neuronGroupList.begin(); iter != neuronGroupList.end(); ++iter){
 
@@ -487,6 +498,9 @@ void NetworkDaoThread::loadNeurons(){
 				firstTime = false;
 			}
 
+			//Track progress
+			++numberOfCompletedSteps;
+
 			//Quit if user cancels
 			if(stopThread)
 				return;
@@ -507,6 +521,7 @@ void NetworkDaoThread::loadNeurons(){
     The invoking method is responsible for checking whether an error occurred and throwing
     an exeption if necessary.*/
 void NetworkDaoThread::setError(const QString& msg){
+	qDebug()<<"ERROR FOUND: "<<msg<<" current task: "<<currentTask;
     errorMessage = msg;
     error = true;
     stopThread = true;

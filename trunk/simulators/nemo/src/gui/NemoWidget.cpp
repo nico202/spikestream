@@ -11,6 +11,7 @@ using namespace spikestream;
 #include <QAction>
 #include <QDebug>
 #include <QLayout>
+#include <QMessageBox>
 #include <QMutexLocker>
 
 
@@ -39,11 +40,12 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	connect(loadButton, SIGNAL(clicked()), this, SLOT(loadSimulation()));
 	unloadButton = new QPushButton("Unload");
 	connect(unloadButton, SIGNAL(clicked()), this, SLOT(unloadSimulation()));
-	neuronParametersButton = new QPushButton("Neuron Parameters");
+	unloadButton->setEnabled(false);
+	neuronParametersButton = new QPushButton(" Neuron Parameters ");
 	connect(neuronParametersButton, SIGNAL(clicked()), this, SLOT(setNeuronParameters()));
-	synapseParametersButton = new QPushButton("Synapse Parameters");
+	synapseParametersButton = new QPushButton(" Synapse Parameters ");
 	connect(synapseParametersButton, SIGNAL(clicked()), this, SLOT(setSynapseParameters()));
-	nemoParametersButton = new QPushButton("Nemo Parameters");
+	nemoParametersButton = new QPushButton(" Nemo Parameters ");
 	connect(nemoParametersButton, SIGNAL(clicked()), this, SLOT(setNemoParameters()));
 	QHBoxLayout* loadLayout = new QHBoxLayout();
 	loadLayout->addWidget(loadButton);
@@ -116,7 +118,12 @@ void NemoWidget::loadSimulation(){
 		qCritical()<<"Cannot load simulation: no network loaded.";
 		return;
 	}
+	if(nemoWrapper->isRunning()){
+		qCritical()<<"Loading thread is already running - wait 10 seconds and try again.";
+		return;
+	}
 	try{
+		taskCancelled = false;
 		nemoWrapper->prepareLoadSimulation();
 		progressDialog = new QProgressDialog("Loading simulation", "Cancel", 0, 100, this);
 		progressDialog->setWindowModality(Qt::WindowModal);
@@ -141,7 +148,10 @@ void NemoWidget::nemoWrapperFinished(){
 
 	switch (nemoWrapper->getCurrentTask()){
 		case NemoWrapper::LOAD_SIMULATION_TASK :
-			qDebug()<<"NemoWidget: Load simulation finished";
+			if(!taskCancelled){
+				loadButton->setEnabled(false);
+				unloadButton->setEnabled(true);
+			}
 		break;
 		case NemoWrapper::RUN_SIMULATION_TASK :
 			qDebug()<<"NemoWidget: Simulation run finished";
@@ -240,7 +250,17 @@ void NemoWidget::stopSimulation(){
 
 /*! Instructs the nemo wrapper to discard the current simulation */
 void NemoWidget::unloadSimulation(){
+	//Double check that user wants to unload simulation
+	int response = QMessageBox::warning(this, "Deleting Network", "Are you sure that you want to unload the simulation?", QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel);
+	if(response != QMessageBox::Ok)
+		return;
 
+	//Unload the simulation
+	nemoWrapper->unload();
+
+	//Set buttons appropriately
+	loadButton->setEnabled(true);
+	unloadButton->setEnabled(false);
 }
 
 
@@ -252,15 +272,18 @@ void NemoWidget::updateProgress(int stepsCompleted, int totalSteps){
 	if(progressDialog == NULL)
 		return;
 
-	if(stepsCompleted < totalSteps){
-		//Update progress
+	//Check for cancellation
+	if(progressDialog->wasCanceled()){
+		delete progressDialog;
+		progressDialog = NULL;
+		taskCancelled = true;
+		nemoWrapper->stop();
+	}
+
+	//Update progress
+	else if(stepsCompleted < totalSteps){
 		progressDialog->setValue(stepsCompleted);
 		progressDialog->setMaximum(totalSteps);
-
-		//Check for cancellation
-		if(progressDialog->wasCanceled()){
-			nemoWrapper->stop();
-		}
 	}
 	else if(stepsCompleted > totalSteps){
 		qCritical()<<"Progress update error: Number of steps completed is greater than the number of possible steps.";

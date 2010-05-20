@@ -298,14 +298,14 @@ void NetworksWidget::checkLoadingProgress(){
 	else if(progressDialog->wasCanceled()){
 		loadingTimer->stop();
 		newNetwork->cancel();
-		progressDialog->setValue(progressDialog->maximum());
 		delete progressDialog;
+		progressDialog = NULL;
 		return;
 	}
 
 	//If networks is busy, update progress bar and return with loading timer still running
 	else if(newNetwork->isBusy()){
-		progressDialog->setValue(newNetwork->getNumberOfCompletedSteps());
+		progressDialog->setRange(newNetwork->getNumberOfCompletedSteps(), newNetwork->getTotalNumberOfSteps());
 		return;
 	}
 

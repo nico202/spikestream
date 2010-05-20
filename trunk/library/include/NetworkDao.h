@@ -36,13 +36,19 @@ namespace spikestream{
 			void deleteAllNetworks();
 			void getAllFromConnections(unsigned int networkID, QHash<unsigned int, QHash<unsigned int, bool> >& connMap);
 			void getAllToConnections(unsigned int networkID, QHash<unsigned int, QHash<unsigned int, bool> >& connMap);
+			unsigned int getConnectionCount(unsigned int networkID);
+			unsigned int getConnectionCount(const QList<ConnectionGroup*>& conGrpList);
+			QList<ConnectionGroupInfo> getConnectionGroupsInfo(unsigned int networkID);
+			unsigned int getConnectionGroupSize(unsigned int connGrpID);
+			QList<Connection> getConnections(unsigned int fromNeuronID, unsigned int toNeuronID);
+			QList<Connection*> getConnections(unsigned int connectionMode, unsigned int singleNeuronID, unsigned int toNeuronID);
+			QHash<QString, double> getDefaultNeuronParameters(unsigned int neuronTypeID);
+			QHash<QString, double> getDefaultSynapseParameters(unsigned int synapseTypeID);
 			QList<unsigned int> getFromConnections(unsigned int fromNeuronID);
 			QList<unsigned int> getToConnections(unsigned int toNeuronID);
-			QList<Connection> getConnections(unsigned int fromNeuronID, unsigned int toNeuronID);
-			unsigned int getConnectionGroupSize(unsigned int connGrpID);
-			QList<ConnectionGroupInfo> getConnectionGroupsInfo(unsigned int networkID);
-			QList<Connection*> getConnections(unsigned int connectionMode, unsigned int singleNeuronID, unsigned int toNeuronID);
 			QList<NetworkInfo> getNetworksInfo();
+			unsigned int getNeuronCount(unsigned int networkID);
+			unsigned int getNeuronCount(const QList<NeuronGroup*>& neurGrpList);
 			unsigned int getNeuronCount(unsigned int networkID, const Box& box);
 			Box getNeuronGroupBoundingBox(unsigned int neurGrpID);
 			unsigned int getNeuronGroupID(unsigned int neuronID);
@@ -55,7 +61,7 @@ namespace spikestream{
 			WeightlessNeuron* getWeightlessNeuron(unsigned int neuronID);
 			bool isWeightlessNetwork(unsigned int networkID);
 			bool isWeightlessNeuron(unsigned int neuronID);
-			void setNeuronParameters(QHash<QString, double>& paramMap);
+			void setNeuronParameters(const NeuronGroupInfo& info, QHash<QString, double>& paramMap);
 			void setTempWeight(unsigned int fromNeurID, unsigned int toNeurID, double tempWeight);
 
 		private:

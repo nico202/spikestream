@@ -22,7 +22,11 @@ namespace spikestream {
 			~NeuronParametersModel();
 			int columnCount(const QModelIndex& parent = QModelIndex()) const;
 			QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
+			NeuronGroupInfo getNeuronGroupInfo(int row);
+			QList<ParameterInfo> getParameterInfoList();
+			QHash<QString, double> getParameterValues(int row);
 			QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+			void reload();
 			int rowCount(const QModelIndex& parent = QModelIndex()) const;
 			bool setData(const QModelIndex& index, const QVariant& value, int role=Qt::EditRole);
 

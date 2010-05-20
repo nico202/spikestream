@@ -123,19 +123,23 @@ SOURCES += src/analysis/AnalysisLoaderWidget.cpp \
 #----------------------------------------------#
 #---                Dialogs                 ---#
 #----------------------------------------------#
-HEADERS += include/NRMImportDialog.h \
+HEADERS += include/AbstractParametersEditDialog.h \
+			include/NRMImportDialog.h \
 			include/LoadAnalysisDialog.h \
 			include/PluginsDialog.h \
 			include/TruthTableDialog.h \
 			include/NewNetworkDialog.h \
 			include/NeuronParametersDialog.h \
+			include/NeuronParametersEditDialog.h \
 			include/SynapseParametersDialog.h
-SOURCES += src/dialogs/NRMImportDialog.cpp \
+SOURCES += src/dialogs/AbstractParametersEditDialog.cpp \
+			src/dialogs/NRMImportDialog.cpp \
 			src/dialogs/LoadAnalysisDialog.cpp \
 			src/dialogs/PluginsDialog.cpp \
 			src/dialogs/TruthTableDialog.cpp \
 			src/dialogs/NewNetworkDialog.cpp \
 			src/dialogs/NeuronParametersDialog.cpp \
+			src/dialogs/NeuronParametersEditDialog.cpp \
 			src/dialogs/SynapseParametersDialog.cpp
 
 

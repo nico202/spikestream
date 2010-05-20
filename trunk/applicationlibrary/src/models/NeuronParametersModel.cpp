@@ -26,7 +26,6 @@ NeuronParametersModel::~NeuronParametersModel(){
 /*-------             PUBLIC METHODS               -------*/
 /*--------------------------------------------------------*/
 
-
 /*! Inherited from QAbstractTableModel. Returns the number of columns in the model */
 int NeuronParametersModel::columnCount(const QModelIndex&) const{
 	return parameterInfoList.size() + 2;
@@ -62,12 +61,45 @@ QVariant NeuronParametersModel::data(const QModelIndex & index, int role) const{
 	if (role == Qt::DecorationRole){
 		//Edit button
 		if(index.column() == parameterInfoList.size() + 1 ){
-			return QIcon(Globals::getSpikeStreamRoot() + "/images/export.png");
+			QIcon tmpIcon(Globals::getSpikeStreamRoot() + "/images/edit.png");
+			return tmpIcon;
+		}
+	}
+
+	//Size hint
+	if(role == Qt::SizeHintRole){
+		//Edit button
+		if(index.column() == parameterInfoList.size() + 1 ){
+			return QSize(40, 40);
 		}
 	}
 
 	//If we have reached this point ignore request
 	return QVariant();
+}
+
+
+/*! Returns the neuron group info associated with a particular row */
+NeuronGroupInfo NeuronParametersModel::getNeuronGroupInfo(int row){
+	if(row >= neurGrpInfoList.size())
+		throw SpikeStreamException("Request for neuron group info at row " + QString::number(row) + " is out of range.");
+	return neurGrpInfoList.at(row);
+}
+
+
+/*! Returns a list of information about the parameters */
+QList<ParameterInfo> NeuronParametersModel::getParameterInfoList(){
+	return parameterInfoList;
+}
+
+
+/*! Returns the parameter values associated with a neuron group in a specific row. */
+QHash<QString, double> NeuronParametersModel::getParameterValues(int row){
+	NeuronGroupInfo info = getNeuronGroupInfo(row);
+	if(!parameterMap.contains(info.getID()))
+		throw SpikeStreamException("Mismatch between parameter map and neuron group info list.");
+
+	return parameterMap[info.getID()];
 }
 
 
@@ -77,15 +109,6 @@ bool NeuronParametersModel::setData(const QModelIndex& index, const QVariant&, i
 		return false;
 	if (index.row() < 0 || index.row() >= rowCount())
 		return false;
-
-	//Edit parameters
-	if(index.column() == (parameterInfoList.size() - 1) ){
-		qDebug()<<"EDITING PARAMETERS";
-
-		//Emit signal that data has changed and return true to indicate data set succesfully.
-		emit dataChanged(index, index);
-		return true;
-	}
 
 	//If we have reached this point no data has been set
 	return false;
@@ -107,7 +130,11 @@ QVariant NeuronParametersModel::headerData(int section, Qt::Orientation orientat
 	}
 
 	return QVariant();
+}
 
+/*! Reloads the parameters from the database */
+void NeuronParametersModel::reload(){
+	loadParameters();
 }
 
 
@@ -117,13 +144,44 @@ int NeuronParametersModel::rowCount(const QModelIndex&) const{
 }
 
 
+/*--------------------------------------------------------*/
+/*-------              PRIVATE SLOTS               -------*/
+/*--------------------------------------------------------*/
+
 /*! Slot called when the network changes */
 void NeuronParametersModel::networkChanged(){
 	loadParameters();
 }
 
 
-/* Loads the current list of neuron groups if a network is present */
+/*--------------------------------------------------------*/
+/*-------             PRIVATE METHODS              -------*/
+/*--------------------------------------------------------*/
+
+/*! Runs a check on the loaded parameters to make sure that everything matches up */
+void NeuronParametersModel::checkParameters(){
+	foreach(NeuronGroupInfo neurGrpInfo, neurGrpInfoList){
+		if(!parameterMap.contains(neurGrpInfo.getID()))
+			throw SpikeStreamException("Parameter map does not contain a loaded neuron group");
+
+		//Check that keys in parameter map match keys for this neuron type
+		QHash<QString, double> neurGrpParamMap = parameterMap[neurGrpInfo.getID()];
+		QList<QString> paramKeys = neurGrpParamMap.keys();
+		foreach(QString key, paramKeys){
+			bool paramFound = false;
+			foreach(ParameterInfo paramInfo, parameterInfoList){
+				if(paramInfo.getName() == key)
+					paramFound = true;
+			}
+			if(!paramFound){
+				throw SpikeStreamException("Key " + key + " from neuron group not found in parameter info list");
+			}
+		}
+	}
+}
+
+
+/*! Loads the current list of neuron groups if a network is present */
 void NeuronParametersModel::loadParameters(){
 	//Clear lists of information
 	neurGrpInfoList.clear();
@@ -162,7 +220,6 @@ void NeuronParametersModel::loadParameters(){
 
 		//Check that it all matches up
 		checkParameters();
-
 	}
 	catch(SpikeStreamException& ex){
 		qCritical()<<ex.getMessage();
@@ -170,29 +227,6 @@ void NeuronParametersModel::loadParameters(){
 
 	//Instruct listening classes to reload data
 	this->reset();
-}
-
-
-/*! Runs a check on the loaded parameters to make sure that everything matches up */
-void NeuronParametersModel::checkParameters(){
-	foreach(NeuronGroupInfo neurGrpInfo, neurGrpInfoList){
-		if(!parameterMap.contains(neurGrpInfo.getID()))
-			throw SpikeStreamException("Parameter map does not contain a loaded neuron group");
-
-		//Check that keys in parameter map match keys for this neuron type
-		QHash<QString, double> neurGrpParamMap = parameterMap[neurGrpInfo.getID()];
-		QList<QString> paramKeys = neurGrpParamMap.keys();
-		foreach(QString key, paramKeys){
-			bool paramFound = false;
-			foreach(ParameterInfo paramInfo, parameterInfoList){
-				if(paramInfo.getName() == key)
-					paramFound = true;
-			}
-			if(!paramFound){
-				throw SpikeStreamException("Key " + key + " from neuron group not found in parameter info list");
-			}
-		}
-	}
 }
 
 

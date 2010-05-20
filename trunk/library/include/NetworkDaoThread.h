@@ -21,8 +21,8 @@ namespace spikestream {
 			NetworkDaoThread(const DBInfo& dbInfo);
 			~NetworkDaoThread();
 			void clearError();
-			int getTotalNumberOfSteps() { return totalNumberOfSteps; }
 			int getNumberOfCompletedSteps() { return numberOfCompletedSteps; }
+			int getTotalNumberOfSteps() { return totalNumberOfSteps; }
 			bool isError() { return error; }
 			QString getErrorMessage() { return errorMessage; }
 			void prepareAddConnectionGroup(unsigned int networkID, ConnectionGroup* connGrp);
@@ -70,8 +70,7 @@ namespace spikestream {
 			/*! Error message */
 			QString errorMessage;
 
-			/*! The total number of steps that the task involves.
-			FIXME: THESE SHOULD REFLECT THE SIZE OF THE NEURON AND CONNECTION GROUPS */
+			/*! The total number of steps for a task */
 			int totalNumberOfSteps;
 
 			/*! The number of steps that have been completed so far */

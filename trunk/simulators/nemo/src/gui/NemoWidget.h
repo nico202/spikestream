@@ -88,6 +88,9 @@ namespace spikestream {
 			/*! Mutex for preventing multiple access to functions */
 			QMutex mutex;
 
+			/*! Records if task has been cancelled */
+			bool taskCancelled;
+
 			//=======================  METHODS  =========================
 			void checkForErrors();
 			void checkWidgetEnabled();
