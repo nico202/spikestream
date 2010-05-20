@@ -186,6 +186,41 @@ void TestNetworkDao::testDeleteNetwork(){
 }
 
 
+
+void TestNetworkDao::testGetConnectionCount1(){
+	//Add a couple of networks
+	addTestNetwork1();
+	addTestNetwork2();
+
+	//Check counts are correct for the two networks
+	NetworkDao netDao(dbInfo);
+	QCOMPARE(netDao.getConnectionCount(testNetID), (unsigned int)6);
+	QCOMPARE(netDao.getConnectionCount(testNet2ID), (unsigned int)4);
+}
+
+
+void TestNetworkDao::testGetConnectionCount2(){
+	//Add a couple of networks
+	addTestNetwork1();
+	addTestNetwork2();
+
+	//Build list of connection groups for each network
+	QList<ConnectionGroup*> conGrpList1;
+	ConnectionGroup conGrp1(ConnectionGroupInfo(connGrp1ID, "DESC", 0, 0, QHash<QString,double>(), 1));
+	conGrpList1.append(&conGrp1);
+
+	QList<ConnectionGroup*> conGrpList2;
+	ConnectionGroup conGrp2(ConnectionGroupInfo(connGrp21ID, "DESC", 0, 0, QHash<QString,double>(), 1));
+	conGrpList2.append(&conGrp1);
+	conGrpList2.append(&conGrp2);
+
+	//Check counts are correct for the two lists
+	NetworkDao netDao(dbInfo);
+	QCOMPARE(netDao.getConnectionCount(conGrpList1), (unsigned int)6);
+	QCOMPARE(netDao.getConnectionCount(conGrpList2), (unsigned int)10);
+}
+
+
 void TestNetworkDao::testGetConnections1(){
 	//Add a test network to give us a valid connection id
 	addTestNetwork1();
@@ -326,6 +361,31 @@ void TestNetworkDao::testGetAllToConnections(){
 }
 
 
+void TestNetworkDao::testGetDefaultNeuronParameters(){
+	try{
+		//Get the parameter map - no need for data
+		NetworkDao networkDao(dbInfo);
+		QHash<QString, double> paramMap = networkDao.getDefaultNeuronParameters(1);
+
+		//Check the default values of the parameters are correct
+		QCOMPARE(paramMap.size(), (int)1);
+		QVERIFY(paramMap.contains("a"));
+		QCOMPARE(paramMap["a"], 1.0);
+	}
+	catch(SpikeStreamException ex){
+		QFAIL(ex.getMessage().toAscii());
+	}
+	catch(...){
+		QFAIL("Unrecognized exception thrown.");
+	}
+}
+
+
+void TestNetworkDao::testGetDefaultSynapseParameters(){
+
+}
+
+
 /*! Connections in test network 1 are:
 	0->1    4->3
 	0->2    4->1
@@ -460,7 +520,7 @@ void TestNetworkDao::testGetConnectionGroupsInfo(){
 }
 
 
-void TestNetworkDao::testGetNeuronCount(){
+void TestNetworkDao::testGetNeuronCount1(){
 	//Adds test network with known properties
 	addTestNetwork1();
 
@@ -475,6 +535,42 @@ void TestNetworkDao::testGetNeuronCount(){
 	QVERIFY(networkDao.getNeuronCount(testNetID, intersectBox1) > 0);
 	QVERIFY(networkDao.getNeuronCount(testNetID, intersectBox2) > 0);
 	QVERIFY(networkDao.getNeuronCount(testNetID, intersectBox3) == 0);
+}
+
+
+void TestNetworkDao::testGetNeuronCount2(){
+	//Add a couple of networks
+	addTestNetwork1();
+	addTestNetwork2();
+
+	//Check counts are correct for the two networks
+	NetworkDao netDao(dbInfo);
+	QCOMPARE(netDao.getNeuronCount(testNetID), (unsigned int)5);
+	QCOMPARE(netDao.getNeuronCount(testNet2ID), (unsigned int)4);
+}
+
+
+
+void TestNetworkDao::testGetNeuronCount3(){
+	//Add a couple of networks
+	addTestNetwork1();
+	addTestNetwork2();
+
+	//Build list of neuron groups for each network
+	QList<NeuronGroup*> neurGrpList1;
+	NeuronGroup neurGrp1(NeuronGroupInfo(neurGrp1ID, "NAME", "DESC", QHash<QString,double>(), 1));
+	neurGrpList1.append(&neurGrp1);
+
+	QList<NeuronGroup*> neurGrpList2;
+	NeuronGroup neurGrp2(NeuronGroupInfo(neurGrp21ID, "NAME", "DESC", QHash<QString,double>(), 1));
+	NeuronGroup neurGrp3(NeuronGroupInfo(neurGrp22ID, "NAME", "DESC", QHash<QString,double>(), 1));
+	neurGrpList2.append(&neurGrp2);
+	neurGrpList2.append(&neurGrp3);
+
+	//Check counts are correct for the two lists
+	NetworkDao netDao(dbInfo);
+	QCOMPARE(netDao.getNeuronCount(neurGrpList1), (unsigned int)3);
+	QCOMPARE(netDao.getNeuronCount(neurGrpList2), (unsigned int)4);
 }
 
 
@@ -800,7 +896,37 @@ void TestNetworkDao::testIsWeightlessNeuron(){
 
 
 void TestNetworkDao::testSetNeuronParameters(){
+	//Add test network
+	addTestNetwork1();
 
+	try{
+		//Build neuron group info and parameter map for the update
+		NeuronGroupInfo info(neurGrp1ID, "name", "description", QHash<QString, double>(), 1);
+		QHash<QString, double> paramMap;
+		paramMap["a"] = 27.3;
+
+		//Check values of parameters
+		NetworkDao netDao(dbInfo);
+		QHash<QString, double> resultsMap = netDao.getNeuronParameters(info);
+		QCOMPARE(resultsMap.size(), (int)1);
+		QVERIFY(resultsMap.contains("a"));
+		QCOMPARE(resultsMap["a"], 1.0);
+
+		//Set parameters to new values
+		netDao.setNeuronParameters(info, paramMap);
+
+		//Check that parameters have changed
+		resultsMap = netDao.getNeuronParameters(info);
+		QCOMPARE(resultsMap.size(), (int)1);
+		QVERIFY(resultsMap.contains("a"));
+		QCOMPARE(resultsMap["a"], 27.3);
+	}
+	catch(SpikeStreamException ex){
+		QFAIL(ex.getMessage().toAscii());
+	}
+	catch(...){
+		QFAIL("Unrecognized exception thrown.");
+	}
 }
 
 

@@ -31,20 +31,19 @@ namespace spikestream {
 	    void addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList, bool checkNetworkLocked=true);
 	    void addNeuronGroups(QList<NeuronGroup*>& neuronGroupList);
 	    void cancel();
-	    void clearError() { error = false; errorMessage = ""; }
+		void clearError();
 	    bool connectionGroupIsLoaded(unsigned int connGrpID);
 	    bool containsNeuron(unsigned int neurID);
 		void deleteConnectionGroups(QList<unsigned int>& conGrpIDList);
 		void deleteNeuronGroups(QList<unsigned int>& neurGrpIDList);
 	    Box getBoundingBox();
 	    unsigned int getID() { return info.getID(); }
-	    QString getErrorMessage() { return  errorMessage; }
+		QString getErrorMessage();
 	    int getConnectionGroupCount() { return connGrpMap.size(); }
 	    ConnectionGroup* getConnectionGroup(unsigned int id);
 	    ConnectionGroupInfo getConnectionGroupInfo(unsigned int id);
 	    QList<ConnectionGroupInfo> getConnectionGroupsInfo();
 	    int getNumberOfToConnections(unsigned int neuronID);
-	    int getTotalNumberOfSteps() { return totalNumberOfSteps; }
 	    int getNumberOfCompletedSteps();
 	    int getNeuronGroupCount() { return neurGrpMap.size(); }
 	    Box getNeuronGroupBoundingBox(unsigned int neurGrpID);
@@ -53,12 +52,14 @@ namespace spikestream {
 	    NeuronGroup* getNeuronGroup(unsigned int id);
 	    NeuronGroupInfo getNeuronGroupInfo(unsigned int id);
 	    QList<NeuronGroupInfo> getNeuronGroupsInfo();
+		int getTotalNumberOfSteps();
 	    bool isBusy();
 	    bool isError() { return error; }
 	    bool isLocked();
 	    void load();
 	    bool neuronGroupIsLoaded(unsigned int neurGrpID);
 		void setArchiveDao(ArchiveDao* archDao) { this->archiveDao = archDao; }
+		void setError(const QString& errorMsg);
 	    void setNetworkDao(NetworkDao* netDao) { this->networkDao = netDao; }
 	    int size();
 
@@ -102,9 +103,6 @@ namespace spikestream {
 
 	    /*! NetworkDaoThread to run in the background and handle connection loading. */
 	    NetworkDaoThread* connectionNetworkDaoThread;
-
-	    /*! The total number of steps that the task involves. */
-	    int totalNumberOfSteps;
 
 	    /*! Set to true when there is an error loading  */
 	    bool error;

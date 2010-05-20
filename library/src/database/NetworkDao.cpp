@@ -80,6 +80,34 @@ void NetworkDao::deleteAllNetworks(){
 }
 
 
+/*! Returns the number of connections in a network */
+unsigned int NetworkDao::getConnectionCount(unsigned int networkID){
+	QSqlQuery query = getQuery("SELECT COUNT(*) FROM Connections WHERE ConnectionGroupID IN (SELECT ConnectionGroupID FROM ConnectionGroups WHERE NetworkID=" + QString::number(networkID) + ")");
+	executeQuery(query);
+	query.next();
+	return Util::getUInt(query.value(0).toString());
+}
+
+
+/*! Returns the total number of neurons in the list of neuron groups */
+unsigned int NetworkDao::getConnectionCount(const QList<ConnectionGroup*>& conGrpList){
+	if(conGrpList.isEmpty())
+		return 0;
+
+	//Build query
+	QString queryStr = "SELECT COUNT(*) FROM Connections WHERE 1=0";
+	foreach(ConnectionGroup* conGrp, conGrpList){
+		queryStr += " OR ConnectionGroupID=" + QString::number(conGrp->getID());
+	}
+
+	//Execute query and return result
+	QSqlQuery query = getQuery(queryStr);
+	executeQuery(query);
+	query.next();
+	return Util::getUInt(query.value(0).toString());
+}
+
+
 /*! Returns all of the connections from the specified neuron to the specified neuron. */
 QList<Connection> NetworkDao::getConnections(unsigned int fromNeuronID, unsigned int toNeuronID){
 	QSqlQuery query = getQuery("SELECT ConnectionID, ConnectionGroupID, Delay, Weight, TempWeight FROM Connections WHERE FromNeuronID=" + QString::number(fromNeuronID) + " AND ToNeuronID="+ QString::number(toNeuronID));
@@ -254,6 +282,68 @@ QList<Connection*> NetworkDao::getConnections(unsigned int connectionMode, unsig
 
 	//Return the list
 	return conList;
+}
+
+
+/*! Returns a map containing the default neuron parameters for a neuron type */
+QHash<QString, double> NetworkDao::getDefaultNeuronParameters(unsigned int neuronTypeID){
+	NeuronType neuronType = getNeuronType(neuronTypeID);
+	QHash<QString, double> paramMap;
+
+	//Extract default values from parameter table
+	QSqlQuery query = getQuery("SHOW COLUMNS FROM " + neuronType.getParameterTableName());
+	executeQuery(query);
+	int defaultCol = query.record().indexOf("Default");
+	int variableNameCol = query.record().indexOf("Field");
+	while(query.next()){
+		QString variableName = query.value(variableNameCol).toString();
+		if(variableName != "NeuronGroupID"){
+			paramMap[variableName] = Util::getDouble( query.value(defaultCol).toString() );
+		}
+	}
+
+	//Check it matches the parameters stored in the neuron type
+	foreach(ParameterInfo info, neuronType.getParameterInfoList()){
+		if(!paramMap.contains(info.getName()))
+			throw SpikeStreamException("Parameter missing: " + info.getName() + " for neuron type " + QString::number(neuronType.getID()));
+	}
+
+	//Return map
+	return paramMap;
+}
+
+
+/*! Returns a map containing the default parameters for the specified synapse type */
+QHash<QString, double> NetworkDao::getDefaultSynapseParameters(unsigned int synapseTypeID){
+	return QHash<QString, double>();
+}
+
+
+/*! Returns the total number of neurons in the list of neuron groups */
+unsigned int NetworkDao::getNeuronCount(const QList<NeuronGroup*>& neurGrpList){
+	if(neurGrpList.isEmpty())
+		return 0;
+
+	//Build query
+	QString queryStr = "SELECT COUNT(*) FROM Neurons WHERE 1=0";
+	foreach(NeuronGroup* neurGrp, neurGrpList){
+		queryStr += " OR NeuronGroupID=" + QString::number(neurGrp->getID());
+	}
+
+	//Execute query and return result
+	QSqlQuery query = getQuery(queryStr);
+	executeQuery(query);
+	query.next();
+	return Util::getUInt(query.value(0).toString());
+}
+
+
+/*! Returns the number of neurons in a network */
+unsigned int NetworkDao::getNeuronCount(unsigned int networkID){
+	QSqlQuery query = getQuery("SELECT COUNT(*) FROM Neurons WHERE NeuronGroupID IN (SELECT NeuronGroupID FROM NeuronGroups WHERE NetworkID=" + QString::number(networkID) + ")");
+	executeQuery(query);
+	query.next();
+	return Util::getUInt(query.value(0).toString());
 }
 
 
@@ -529,8 +619,22 @@ bool NetworkDao::isWeightlessNetwork(unsigned int networkID){
 
 
 /*! Sets the neuron group's parameters */
-void NetworkDao::setNeuronParameters(QHash<QString, double>& paramMap){
+void NetworkDao::setNeuronParameters(const NeuronGroupInfo& neurGrpInfo, QHash<QString, double>& paramMap){
+	/* Get class describing the type of neuron in this group - this contains the parameter
+		table name and info about the parameters */
+	NeuronType neuronType = getNeuronType(neurGrpInfo.getNeuronTypeID());
 
+	//Build query to update parameters for this neuron group
+	QString queryStr = "UPDATE " + neuronType.getParameterTableName() + " SET ";
+	foreach(ParameterInfo paramInfo, neuronType.getParameterInfoList()){
+		if(!paramMap.contains(paramInfo.getName()))
+			throw SpikeStreamException("Parameters in neuron type and parameters in paramter map do not match.");
+
+		queryStr += paramInfo.getName() + "=" + QString::number(paramMap[paramInfo.getName()]) + ",";
+	}
+	queryStr.truncate(queryStr.length() - 1);//Take off the last trailing comma
+	queryStr += " WHERE NeuronGroupID=" + QString::number(neurGrpInfo.getID());
+	executeQuery(queryStr);
 }
 
 
