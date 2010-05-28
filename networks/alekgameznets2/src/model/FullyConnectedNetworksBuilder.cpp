@@ -13,6 +13,11 @@ using namespace spikestream;
 #include <algorithm>
 using namespace std;
 
+//Define the neuron and synapse types we are using
+#define NEURON_TYPE_ID 3
+#define SYNAPSE_TYPE_ID 2
+
+
 /*! Constructor  */
 FullyConnectedNetworksBuilder::FullyConnectedNetworksBuilder() : NetworksBuilder(){
 }
@@ -21,6 +26,7 @@ FullyConnectedNetworksBuilder::FullyConnectedNetworksBuilder() : NetworksBuilder
 /*! Destructor */
 FullyConnectedNetworksBuilder::~FullyConnectedNetworksBuilder(){
 }
+
 
 
 /*--------------------------------------------------------*/
@@ -108,7 +114,7 @@ void FullyConnectedNetworksBuilder::addBasicNetwork(const QString& networkName, 
 
 	//Build neuron group - store neurons in list and then put ids in map
 	QHash<QString, double> paramMap;
-	NeuronGroup neuronGroup(NeuronGroupInfo(0, "Neuron group 1", "Main neuron group", paramMap, 2));
+	NeuronGroup neuronGroup(NeuronGroupInfo(0, "Neuron group 1", "Main neuron group", paramMap, NEURON_TYPE_ID));
 	QList<Neuron*> neuronList;
 	neuronList.append(neuronGroup.addNeuron(3, 1, 1));
 	neuronList.append(neuronGroup.addNeuron(4, 1, 1));
@@ -144,7 +150,7 @@ void FullyConnectedNetworksBuilder::addBasicNetwork(const QString& networkName, 
 void FullyConnectedNetworksBuilder::addConnections(){
 	//Build the connection group that is to be added
 	QHash<QString, double> paramMap;
-	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neuronGroupID, neuronGroupID,  paramMap, 2);
+	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neuronGroupID, neuronGroupID,  paramMap, SYNAPSE_TYPE_ID);
 	ConnectionGroup connGrp(connGrpInfo);
 
 	//Array of lists to hold connections

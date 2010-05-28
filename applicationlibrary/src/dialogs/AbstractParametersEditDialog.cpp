@@ -35,11 +35,27 @@ void AbstractParametersEditDialog::addParameters(QVBoxLayout* mainVLayout){
 
 	//Add parameters to the layout
 	foreach(ParameterInfo info, parameterInfoList){
-		gridLayout->addWidget(new QLabel(info.getName()), cntr, 0);
-		QLineEdit* tmpLineEdit = new QLineEdit();
-		tmpLineEdit->setValidator(doubleValidator);
-		lineEditMap[info.getName()] = tmpLineEdit;
-		gridLayout->addWidget(tmpLineEdit, cntr, 1);
+		//Add double parameter
+		if(info.getType() == ParameterInfo::DOUBLE){
+			gridLayout->addWidget(new QLabel(info.getName()), cntr, 0);
+			QLineEdit* tmpLineEdit = new QLineEdit();
+			tmpLineEdit->setValidator(doubleValidator);
+			lineEditMap[info.getName()] = tmpLineEdit;
+			gridLayout->addWidget(tmpLineEdit, cntr, 1);
+		}
+		//Add boolean parameter
+		else if(info.getType() == ParameterInfo::BOOLEAN){
+			QCheckBox* chkBox = new QCheckBox(info.getName());
+			qDebug()<<"NAME: "<<info.getName();
+			checkBoxMap[info.getName()] = chkBox;
+			gridLayout->addWidget(chkBox, cntr, 0);
+		}
+		//Unknown parameter type
+		else{
+			throw SpikeStreamException("Parameter type not recognized: " + info.getType());
+		}
+
+		//Add help tool tip
 		QLabel* tmpLabel = new QLabel();
 		tmpLabel->setPixmap(QPixmap(Globals::getSpikeStreamRoot() + "/images/help.png"));
 		tmpLabel->setToolTip(info.getDescription());
@@ -69,6 +85,8 @@ void AbstractParametersEditDialog::addButtons(QVBoxLayout* mainVLayout){
 /*! Returns a map with the parameter values that have been entered by the user */
 QHash<QString, double> AbstractParametersEditDialog::getParameterValues(){
 	QHash<QString, double> paramMap;
+
+	//Extract double parameters
 	for(QHash<QString, QLineEdit*>::iterator iter = lineEditMap.begin(); iter != lineEditMap.end(); ++iter){
 		QString paramStr = iter.value()->text();
 		if(paramStr.isEmpty())
@@ -76,6 +94,21 @@ QHash<QString, double> AbstractParametersEditDialog::getParameterValues(){
 
 		paramMap[iter.key()] = Util::getDouble(paramStr);
 	}
+
+	//Extract boolean parameters - store as 1 or 0 in parameter map
+	for(QHash<QString, QCheckBox*>::iterator iter = checkBoxMap.begin(); iter != checkBoxMap.end(); ++iter){
+		if(iter.value()->isChecked())
+			paramMap[iter.key()] = 1.0;
+		else
+			paramMap[iter.key()] = 0.0;
+	}
+
+	//Check all parameters have been extracted
+	if(paramMap.size() != parameterInfoList.size()){
+		throw SpikeStreamException("Failed to find all parameters in list or map has too many entries.");
+	}
+
+	//Return populated map
 	return paramMap;
 }
 
@@ -90,8 +123,17 @@ void AbstractParametersEditDialog::setParameterValues(const QHash<QString, doubl
 	for(QHash<QString, QLineEdit*>::iterator iter = lineEditMap.begin(); iter != lineEditMap.end(); ++iter){
 		if( !paramMap.contains(iter.key()) )
 			throw SpikeStreamException("A value for parameter " + iter.key() + " cannot be found in the parameter map.");
-
 		iter.value()->setText(QString::number(paramMap[iter.key()]));
+	}
+
+	//Set check box values
+	for(QHash<QString, QCheckBox*>::iterator iter = checkBoxMap.begin(); iter != checkBoxMap.end(); ++iter){
+		if( !paramMap.contains(iter.key()) )
+			throw SpikeStreamException("A value for parameter " + iter.key() + " cannot be found in the parameter map.");
+		if(paramMap[iter.key()] == 0)
+			iter.value()->setChecked(false);
+		else
+			iter.value()->setChecked(true);
 	}
 }
 

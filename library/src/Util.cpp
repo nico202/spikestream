@@ -102,6 +102,16 @@ double Util::getDouble(const QString& str){
 }
 
 
+/*! Prints out the names and values of the parameters stored in the map */
+void Util::printParameterMap(const QHash<QString, double>& paramMap){
+	cout<<"---------------  Parameter map  -------------"<<endl;
+	for(QHash<QString, double>::const_iterator iter = paramMap.begin(); iter != paramMap.end(); ++iter){
+		cout<<"\tKey: "<<iter.key().toStdString().data()<<" value: "<<iter.value()<<endl;
+	}
+	cout<<endl;
+}
+
+
 /*! Returns a random number in the range specified */
 int Util::getRandom(int min, int max){
 	if(max <= min)

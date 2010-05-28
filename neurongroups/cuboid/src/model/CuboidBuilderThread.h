@@ -21,9 +21,8 @@ namespace spikestream {
 			CuboidBuilderThread();
 			~CuboidBuilderThread();
 			QString getErrorMessage(){ return errorMessage; }
-			unsigned int getNeuronGroupID();
 			bool isError() { return error; }
-			void prepareAddNeuronGroup(const NeuronGroupInfo& neurGrpInfo);
+			void prepareAddNeuronGroups(const QString& name, const QString& description, QHash<QString, double>& paramMap);
 			void run();
 			void stop();
 
@@ -35,11 +34,15 @@ namespace spikestream {
 
 		private:
 			//=======================  VARIABLES  ========================
-			/*! Holds information about the neuron group that is being added */
-			NeuronGroupInfo neuronGroupInfo;
+			/*! The neuron group(s) being added.
+				The key is the neuron type ID. */
+			QHash<unsigned int, NeuronGroup*> newNeuronGroupMap;
 
-			/*! Neuron group being added */
-			NeuronGroup* newNeuronGroup;
+			/*! The threshold of the percentages used to add the different neuron types.
+				If a random number is above the threshold, then the neuron is added to the group.
+				The algorithm starts with the  lowest threshold
+				The key is the percentage; the value is the neuron type ID. */
+			QMap<double, unsigned int> neuronTypePercentThreshMap;
 
 			/*! Network Dao used by Network when in thread */
 			NetworkDao* threadNetworkDao;
@@ -85,12 +88,14 @@ namespace spikestream {
 
 
 			//=======================  METHODS  ==========================
-			void addNeuronGroup();
+			void addNeuronGroupsToDatabase();
+			void addNeurons();
 			void clearError();
-			void buildNeuronGroup();
-			double getParameter(const QString& paramName);
+			void createNeuronGroups(const QString& name, const QString& description, QHash<QString, double>& paramMap);
+			double getParameter(const QString& paramName, const QHash<QString, double>& paramMap);
+			void printSummary();
 			void setError(const QString& errorMessage);
-			void storeParameters();
+			void storeParameters(const QHash<QString, double>& paramMap);
 
 	};
 }

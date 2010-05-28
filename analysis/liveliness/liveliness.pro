@@ -12,7 +12,7 @@ OBJECTS_DIR = build/objects
 
 MOC_DIR = build/moc
 
-CONFIG += release thread exceptions
+CONFIG += debug thread exceptions
 
 QT += xml opengl sql
 
@@ -25,13 +25,7 @@ INCLUDEPATH += src \
 				src/models \
 				src/views \
 				$${SPIKESTREAM_ROOT_DIR}/library/include \
-				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src \
-				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src/analysis \
-				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src/database \
-				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src/widgets \
-				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src/dialogs \
-				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src/models \
-				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/src/views
+				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/include
 win32 {
 	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/gmp/include $${SPIKESTREAM_ROOT_DIR}/extlib/qwt/include
 }

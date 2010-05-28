@@ -99,7 +99,7 @@ void TestDao::cleanTestDatabases(){
     executeQuery("DELETE FROM Connections");
     executeQuery("DELETE FROM WeightlessConnections");
     executeQuery("DELETE FROM WeightlessNeuronTrainingPatterns");
-	executeQuery("DELETE FROM IzhikevichNeuronParameters");
+	executeQuery("DELETE FROM IzhikevichExcitatoryNeuronParameters");
 	executeQuery("DELETE FROM WeightlessNeuronParameters");
 
     //Clean up archive database
@@ -253,14 +253,14 @@ void TestDao::addTestNetwork1(){
     query = getQuery(queryStr);
     executeQuery(query);
     neurGrp1ID = query.lastInsertId().toUInt();
-	executeQuery("INSERT INTO IzhikevichNeuronParameters (NeuronGroupID) VALUES (" + QString::number(neurGrp1ID) + ")");
+	executeQuery("INSERT INTO IzhikevichExcitatoryNeuronParameters (NeuronGroupID) VALUES (" + QString::number(neurGrp1ID) + ")");
 
     queryStr = "INSERT INTO NeuronGroups (NetworkID, Name, Description, Parameters, NeuronTypeID ) VALUES (";
     queryStr += QString::number(testNetID) + ", " + "'name2', 'desc2', '" + getNeuronParameterXML() + "', 1)";
     query = getQuery(queryStr);
     executeQuery(query);
     neurGrp2ID = query.lastInsertId().toUInt();
-	executeQuery("INSERT INTO IzhikevichNeuronParameters (NeuronGroupID) VALUES (" + QString::number(neurGrp2ID) + ")");
+	executeQuery("INSERT INTO IzhikevichExcitatoryNeuronParameters (NeuronGroupID) VALUES (" + QString::number(neurGrp2ID) + ")");
 
     //Create connection group between the two neuron groups
     queryStr = "INSERT INTO ConnectionGroups (NetworkID, Description, FromNeuronGroupID, ToNeuronGroupID, Parameters, SynapseTypeID ) VALUES (";
@@ -284,6 +284,9 @@ void TestDao::addTestNetwork1(){
     testConnIDList.append(addTestConnection(connGrp1ID, testNeurIDList[4], testNeurIDList[3], 0.4, 1.4));
     testConnIDList.append(addTestConnection(connGrp1ID, testNeurIDList[4], testNeurIDList[1], 0.5, 1.5));
     testConnIDList.append(addTestConnection(connGrp1ID, testNeurIDList[3], testNeurIDList[2], 0.6, 1.6));
+
+	executeQuery("INSERT INTO IzhikevichSynapseParameters (ConnectionGroupID) VALUES (" + QString::number(connGrp1ID) + ")");
+
 }
 
 
@@ -410,7 +413,7 @@ void TestDao::addWeightlessTestNetwork1(){
     addTestNetwork1();
 
     //Change the neuron group type
-    executeQuery("UPDATE NeuronGroups SET NeuronTypeID=2 WHERE NetworkID=" + QString::number(testNetID));
+	executeQuery("UPDATE NeuronGroups SET NeuronTypeID=3 WHERE NetworkID=" + QString::number(testNetID));
 
     //Add pattern indexes - exact number does not matter for the moment
     addWeightlessPatternIndex(testConnIDList[0], 0);

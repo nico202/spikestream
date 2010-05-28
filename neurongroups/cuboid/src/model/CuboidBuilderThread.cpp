@@ -1,7 +1,14 @@
+//SpikeStream includes
 #include "CuboidBuilderThread.h"
 #include "Globals.h"
 #include "SpikeStreamException.h"
+#include "Util.h"
 using namespace spikestream;
+
+//Other includes
+#include <iostream>
+using namespace std;
+
 
 /*! Constructor */
 CuboidBuilderThread::CuboidBuilderThread(){
@@ -17,21 +24,13 @@ CuboidBuilderThread::~CuboidBuilderThread(){
 /*-----                 PUBLIC METHODS                 -----*/
 /*----------------------------------------------------------*/
 
-/*! Returns the id of the newly created neuron group or 0 if no neuron group has been created */
-unsigned int CuboidBuilderThread::getNeuronGroupID(){
-	if(newNeuronGroup == NULL)
-		return 0;
-	return newNeuronGroup->getID();
-}
-
-
-/*! Prepares class before it runs as a separate thread to add a neuron group */
-void CuboidBuilderThread::prepareAddNeuronGroup(const NeuronGroupInfo& neurGrpInfo){
-	//Store information about the neuron group to be added
-	this->neuronGroupInfo = neurGrpInfo;
+/*! Prepares class before it runs as a separate thread to add one or more neuron groups */
+void CuboidBuilderThread::prepareAddNeuronGroups(const QString& name, const QString& description, QHash<QString, double>& paramMap){
+	//Create the neuron groups to be added. A separate neuron group is added for each neuron type
+	createNeuronGroups(name, description, paramMap);
 
 	//Extract parameters from neuron group
-	storeParameters();
+	storeParameters(paramMap);
 
 	if(!Globals::networkLoaded())
 		throw SpikeStreamException("Cannot add neuron group - no network loaded.");
@@ -42,7 +41,6 @@ void CuboidBuilderThread::prepareAddNeuronGroup(const NeuronGroupInfo& neurGrpIn
 void CuboidBuilderThread::run(){
 	clearError();
 	stopThread = false;
-	newNeuronGroup = NULL;
 	networkFinished = false;
 	try{
 		//Seed the random number generator
@@ -52,8 +50,8 @@ void CuboidBuilderThread::run(){
 		threadNetworkDao = new NetworkDao(Globals::getNetworkDao()->getDBInfo());
 		threadArchiveDao = new ArchiveDao(Globals::getArchiveDao()->getDBInfo());
 
-		//Add the neuron group
-		addNeuronGroup();
+		//Add the neuron groups to the database
+		addNeuronGroupsToDatabase();
 
 		//Wait for network to finish
 		while(!networkFinished)
@@ -86,6 +84,10 @@ void CuboidBuilderThread::stop(){
 
 /*! Called when network has finished adding the neuron groups */
 void CuboidBuilderThread::networkTaskFinished(){
+	//Check for errors
+	if(Globals::getNetwork()->isError())
+		setError(Globals::getNetwork()->getErrorMessage());
+
 	//Inform other classes that loading has completed
 	emit progress(width+1, width+1);
 
@@ -106,17 +108,20 @@ void CuboidBuilderThread::networkTaskFinished(){
 /*----------------------------------------------------------*/
 
 /*! Adds a neuron group with the specified parameters to the database */
-void CuboidBuilderThread::addNeuronGroup(){
+void CuboidBuilderThread::addNeuronGroupsToDatabase(){
 	Network* currentNetwork = Globals::getNetwork();
 
 	//Need to set a new network and archive dao in the network because we are running as a separate thread
 	currentNetwork->setNetworkDao(threadNetworkDao);
 	currentNetwork->setArchiveDao(threadArchiveDao);
 
-	//Add neuron group to network
-	buildNeuronGroup();
+	//Add the neurons to the neuron groups
+	addNeurons();
+
+	//Add the neuron groups to the network
 	QList<NeuronGroup*> neurGrpList;
-	neurGrpList.append(newNeuronGroup);
+	for(QHash<unsigned int, NeuronGroup*>::iterator iter = newNeuronGroupMap.begin(); iter != newNeuronGroupMap.end(); ++iter)
+		neurGrpList.append(iter.value());
 	connect(currentNetwork, SIGNAL(taskFinished()), this, SLOT(networkTaskFinished()),  Qt::UniqueConnection);
 	currentNetwork->addNeuronGroups(neurGrpList);
 }
@@ -129,63 +134,115 @@ void CuboidBuilderThread::clearError(){
 }
 
 
+/*! Creates a neuron group for each type of neuron.
+	NOTE: Only call this within the prepare method. */
+void CuboidBuilderThread::createNeuronGroups(const QString& name, const QString& description, QHash<QString, double>& paramMap){
+	//Reset maps
+	newNeuronGroupMap.clear();
+	neuronTypePercentThreshMap.clear();
+
+	//Get all the available neuron types
+	QList<NeuronType> neurTypeList = Globals::getNetworkDao()->getNeuronTypes();
+	double total = 0.0;
+	foreach(NeuronType neurType, neurTypeList){
+		unsigned int neurTypeID = neurType.getID();
+		if(paramMap.contains("neuron_type_id_" + QString::number(neurTypeID))){
+			total += paramMap["neuron_type_id_" + QString::number(neurTypeID)];
+			qDebug()<<"TOTAL: "<<total;
+			neuronTypePercentThreshMap[total] = neurTypeID;
+			newNeuronGroupMap[neurTypeID] = new NeuronGroup(NeuronGroupInfo(0, name, description, paramMap, neurTypeID));
+		}
+	}
+
+	//Check for errors
+	if(newNeuronGroupMap.isEmpty()){
+		Util::printParameterMap(paramMap);
+		throw SpikeStreamException("Neuron type error - no neuron types found to load.");
+	}
+}
+
+
 /*! Returns a neuron group whose neurons are constructed according to the
 	parameters in the neuron group info. */
-void CuboidBuilderThread::buildNeuronGroup(){
-	newNeuronGroup = new NeuronGroup(neuronGroupInfo);
-
-	//Add the neurons to the neuron group
+void CuboidBuilderThread::addNeurons(){
+	int cntr = 0;
 	for(int xPos = xStart; xPos < xStart+width && !stopThread; xPos += spacing){
 		for(int yPos = yStart; yPos < yStart+length && !stopThread; yPos += spacing){
 			for(int zPos = zStart; zPos < zStart+height && !stopThread; zPos += spacing){
-				double ranNum = (double)rand() / (double)RAND_MAX;
-				if(ranNum <= density)
-					newNeuronGroup->addNeuron(xPos, yPos, zPos);
+				//Random number for density
+				double ranNumDensity = (double)rand() / (double)RAND_MAX;
+
+				if(ranNumDensity <= density){
+					//Random number for type of neuron
+					double ranNumPercent = 100.0 * ( (double)rand() / (double)RAND_MAX );
+
+					QMap<double, unsigned int>::iterator neurTypePercentThreshMapEnd = neuronTypePercentThreshMap.end();
+					for(QMap<double, unsigned int>::iterator iter = neuronTypePercentThreshMap.begin(); iter != neurTypePercentThreshMapEnd; ++iter){
+						qDebug()<<"COUNTER: "<<cntr<<" ranNumDensity: "<<ranNumDensity<<" ranNumPercent: "<<ranNumPercent<<" threshold: "<<iter.key()<<" neur type id: "<<iter.value();
+						//Add neuron if the random number is less than the threshold
+						if(ranNumPercent <= iter.key()){
+							qDebug()<<"ADDING NEURON TO GROUP TYPE: "<<iter.value();
+							newNeuronGroupMap[iter.value()]->addNeuron(xPos, yPos, zPos);
+							break;
+						}
+					}
+				}
+				++cntr;
 			}
 		}
 
 		//Give some idea about progress
 		emit progress(xPos, width+1);
 	}
-	qDebug()<<"STOP THREAD: "<<stopThread<<" EXPECTED NEURON GROUP SIZE: "<<(width*length*height)<<" PRE-DATABASE NEURON GROUP SIZE: "<<newNeuronGroup->size();
+
+	//Print information about the pre-database state of the neuron groups
+	printSummary();
 }
 
 
 /*! Returns a parameter from the neuron group info parameter map checking that it actually exists */
-double CuboidBuilderThread::getParameter(const QString& paramName){
-	QHash<QString, double> paramMap = neuronGroupInfo.getParameterMap();
+double CuboidBuilderThread::getParameter(const QString& paramName, const QHash<QString, double>& paramMap){
 	if(!paramMap.contains(paramName))
 		throw SpikeStreamException("Parameter with " + paramName + " does not exist in parameter map.");
 	return paramMap[paramName];
 }
 
 
+/*! Prints a summary of the neuron group(s) that have been created. */
+void CuboidBuilderThread::printSummary(){
+	cout<<newNeuronGroupMap.size()<<" neuron groups added. Width: "<<width<< " length: "<<length<<" height: "<<height<<endl;
+	for(QHash<unsigned int, NeuronGroup*>::iterator iter = newNeuronGroupMap.begin(); iter != newNeuronGroupMap.end(); ++iter){
+		cout<<"Neuron type "<<iter.key()<<" added "<<iter.value()->size()<<"neurons."<<endl;
+	}
+}
+
+
+/*! Puts the thread into error state and stores the message */
 void CuboidBuilderThread::setError(const QString& errorMessage){
 	error = true;
 	this->errorMessage = errorMessage;
 	stopThread = true;
-	qDebug()<<"SETTING ERROR: "<<errorMessage;
 }
 
 
 /*! Extracts parameters from neuron group info and stores them in the appropriate format */
-void CuboidBuilderThread::storeParameters(){
-	xStart = (int)getParameter("x");
-	yStart = (int)getParameter("y");
-	zStart = (int)getParameter("z");
-	width = (int)getParameter("width");
+void CuboidBuilderThread::storeParameters(const QHash<QString, double>& paramMap){
+	xStart = (int)getParameter("x", paramMap);
+	yStart = (int)getParameter("y", paramMap);
+	zStart = (int)getParameter("z", paramMap);
+	width = (int)getParameter("width", paramMap);
 	if(width <=0)
 		throw SpikeStreamException("Width of neuron group is out of range: " + QString::number(width));
-	length = (int)getParameter("length");
+	length = (int)getParameter("length", paramMap);
 	if(length <=0)
 		throw SpikeStreamException("Length of neuron group is out of range: " + QString::number(length));
-	height = (int)getParameter("height");
+	height = (int)getParameter("height", paramMap);
 	if(height <=0)
 		throw SpikeStreamException("Height of neuron group is out of range: " + QString::number(height));
-	spacing = (int)getParameter("spacing");
+	spacing = (int)getParameter("spacing", paramMap);
 	if(spacing <=0)
 		throw SpikeStreamException("Spacing of neurons is out of range: " + QString::number(spacing));
-	density = getParameter("density");
+	density = getParameter("density", paramMap);
 	if(density < 0.0 || density > 1.0)
 		throw SpikeStreamException("Density is out of range: " + QString::number(density));
 }

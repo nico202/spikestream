@@ -42,6 +42,7 @@ namespace spikestream {
 	    int getConnectionGroupCount() { return connGrpMap.size(); }
 	    ConnectionGroup* getConnectionGroup(unsigned int id);
 	    ConnectionGroupInfo getConnectionGroupInfo(unsigned int id);
+		QList<ConnectionGroupInfo> getConnectionGroupsInfo(unsigned int synapseTypeID);
 	    QList<ConnectionGroupInfo> getConnectionGroupsInfo();
 	    int getNumberOfToConnections(unsigned int neuronID);
 	    int getNumberOfCompletedSteps();
@@ -52,6 +53,7 @@ namespace spikestream {
 	    NeuronGroup* getNeuronGroup(unsigned int id);
 	    NeuronGroupInfo getNeuronGroupInfo(unsigned int id);
 	    QList<NeuronGroupInfo> getNeuronGroupsInfo();
+		QList<NeuronGroupInfo> getNeuronGroupsInfo(unsigned int neuronTypeID);
 		int getTotalNumberOfSteps();
 	    bool isBusy();
 	    bool isError() { return error; }

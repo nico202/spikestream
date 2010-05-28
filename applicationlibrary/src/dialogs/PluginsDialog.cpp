@@ -46,15 +46,6 @@ PluginsDialog::PluginsDialog(QWidget* parent, const QString pluginFolder, const 
 		//Connect combo changed signal to slot loading appropriate analysis widget
 		connect(pluginsCombo, SIGNAL(currentIndexChanged(int)), stackedWidget, SLOT(setCurrentIndex(int)) );
 
-		//Add Ok and Cancel buttons
-		QHBoxLayout* buttonBox = new QHBoxLayout();
-		QPushButton* okButton = new QPushButton("Ok");
-		connect (okButton, SIGNAL(clicked()), this, SLOT(accept()));
-		buttonBox->addWidget(okButton);
-		QPushButton* cancelButton = new QPushButton("Cancel");
-		buttonBox->addWidget(cancelButton);
-		connect (cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
-		mainVerticalBox->addLayout(buttonBox);
 
 	}
 	catch(SpikeStreamException& ex){

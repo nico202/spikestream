@@ -9,11 +9,11 @@ ConnectionGroupInfo::ConnectionGroupInfo(){
     description = "undefined";
     fromNeuronGroupID = 0;
     toNeuronGroupID = 0;
-    synapseType = 0;
+	synapseTypeID = 0;
 }
 
 /*! Standard constructor */
-ConnectionGroupInfo::ConnectionGroupInfo(unsigned int id, const QString& desc, unsigned int fromID, unsigned int toID, QHash<QString, double> paramMap, unsigned int synType){
+ConnectionGroupInfo::ConnectionGroupInfo(unsigned int id, const QString& desc, unsigned int fromID, unsigned int toID, QHash<QString, double> paramMap, unsigned int synTypeID){
 	//Check that name and description will fit in the database
     if(desc.size() > MAX_DATABASE_DESCRIPTION_LENGTH)
 	throw SpikeStreamException("ConnectionGroup: Description length exceeds maximum possible size in database.");
@@ -22,7 +22,7 @@ ConnectionGroupInfo::ConnectionGroupInfo(unsigned int id, const QString& desc, u
     this->description = desc;
     this->fromNeuronGroupID = fromID;
     this->toNeuronGroupID = toID;
-    this->synapseType = synType;
+	this->synapseTypeID = synTypeID;
     this->parameterMap = paramMap;
 }
 
@@ -33,7 +33,7 @@ ConnectionGroupInfo::ConnectionGroupInfo(const ConnectionGroupInfo& conGrpInfo){
     this->description = conGrpInfo.description;
     this->fromNeuronGroupID = conGrpInfo.fromNeuronGroupID;
     this->toNeuronGroupID = conGrpInfo.toNeuronGroupID;
-    this->synapseType = conGrpInfo.synapseType;
+	this->synapseTypeID = conGrpInfo.synapseTypeID;
     this->parameterMap = conGrpInfo.parameterMap;
 }
 
@@ -53,7 +53,7 @@ ConnectionGroupInfo& ConnectionGroupInfo::operator=(const ConnectionGroupInfo& r
     this->description = rhs.description;
     this->fromNeuronGroupID = rhs.fromNeuronGroupID;
     this->toNeuronGroupID = rhs.toNeuronGroupID;
-    this->synapseType = rhs.synapseType;
+	this->synapseTypeID = rhs.synapseTypeID;
     this->parameterMap = rhs.parameterMap;
 
     return *this;

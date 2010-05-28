@@ -1,7 +1,11 @@
 #ifndef NEMOWRAPPER_H
 #define NEMOWRAPPER_H
 
+//SpikeStream includes
+#include "ParameterInfo.h"
+
 //Qt includes
+#include <QHash>
 #include <QThread>
 
 
@@ -17,6 +21,8 @@ namespace spikestream {
 			~NemoWrapper();
 			int getCurrentTask() { return currentTaskID; }
 			QString getErrorMessage() { return errorMessage; }
+			QList<ParameterInfo> getParameterInfoList(){ return parameterInfoList; }
+			QHash<QString, double> getParameterValues(){ return parameterMap; }
 			bool isError() { return error; }
 			bool isSimulationLoaded() { return simulationLoaded; }
 			void prepareLoadSimulation();
@@ -63,7 +69,15 @@ namespace spikestream {
 			/*! Controls whether the thread is running or not */
 			bool stopThread;
 
+			/*! List of information about the parameters associated with Nemo */
+			QList<ParameterInfo> parameterInfoList;
+
+			/*! Values of the parameters associated with Nemo.
+				The key is the parameter name; the value is the value of the parameter. */
+			QHash<QString, double> parameterMap;
+
 			//======================  METHODS  ========================
+			void buildParameters();
 			void clearError();
 			void loadSimulation();
 			void runSimulation();

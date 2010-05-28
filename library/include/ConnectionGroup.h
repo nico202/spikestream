@@ -24,11 +24,14 @@ namespace spikestream {
 			const ConnectionList getFromConnections(unsigned int neurID);
 			unsigned int getFromNeuronGroupID() { return info.getFromNeuronGroupID(); }
 			ConnectionGroupInfo getInfo() { return info; }
+			QHash<QString, double> getParameters() { return parameterMap; }
 			const ConnectionList getToConnections(unsigned int neurID);
 			unsigned int getToNeuronGroupID() { return info.getToNeuronGroupID(); }
 			bool isLoaded() { return loaded; }
 			void setID(unsigned int id) { info.setID(id); }
 			void setLoaded(bool loaded) { this->loaded = loaded; }
+			void setParameters(QHash<QString, double>& paramMap) { this->parameterMap = paramMap; }
+
 			int size() { return connectionList.size(); }
 
 		private:
@@ -50,6 +53,9 @@ namespace spikestream {
 				This should be false if no connections have been loaded and false
 				if the connection array is full of connections that are not in the database */
 		   bool loaded;
+
+		   /*! Map of parameters for the synapses in the connection group */
+		   QHash<QString, double> parameterMap;
 
 		   //====================  METHODS  ==========================
 		   ConnectionGroup(const ConnectionGroup& connGrp);

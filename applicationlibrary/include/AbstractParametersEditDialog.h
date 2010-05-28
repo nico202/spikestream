@@ -5,6 +5,7 @@
 #include "ParameterInfo.h"
 
 //Qt includes
+#include <QCheckBox>
 #include <QDialog>
 #include <QHash>
 #include <QLayout>
@@ -39,8 +40,13 @@ namespace spikestream {
 
 		private:
 			//===================  VARIABLES  ====================
-			/*! Map of the current line edits. Key is the name of the parameter; value is a pointer to the line edit */
+			/*! Map of the line edits for double parameters.
+				Key is the name of the parameter; value is a pointer to the line edit */
 			QHash<QString, QLineEdit*> lineEditMap;
+
+			/*! Map of the check boxes for boolean parameters.
+				Key is the name of the parameter; value is a pointer to the check box */
+			QHash<QString, QCheckBox*> checkBoxMap;
 	};
 
 }

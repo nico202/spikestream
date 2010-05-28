@@ -11,8 +11,14 @@ using namespace spikestream;
 
 
 /*! Constructor */
-NeuronParametersModel::NeuronParametersModel(){
+NeuronParametersModel::NeuronParametersModel(unsigned int neuronTypeID){
+	//Listen for changes in the network
 	connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(networkChanged()));
+
+	//Store the neuron type - this class can only handle neurons of a single type
+	this->neuronTypeID = neuronTypeID;
+
+	//Load up the parameters for the current network
 	loadParameters();
 }
 
@@ -195,8 +201,8 @@ void NeuronParametersModel::loadParameters(){
 	}
 
 	try{
-		//Get list of current neuron group info
-		neurGrpInfoList = Globals::getNetwork()->getNeuronGroupsInfo();
+		//Get list of current neuron group info filtered by the neuron type
+		neurGrpInfoList = Globals::getNetwork()->getNeuronGroupsInfo(neuronTypeID);
 
 		//Check that they are all the same type
 		bool firstTime = true;

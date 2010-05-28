@@ -57,16 +57,20 @@ namespace spikestream{
 			NeuronType getNeuronType(unsigned int neuronTypeID);
 			QList<NeuronType> getNeuronTypes();
 			QHash<QString, double> getNeuronParameters(const NeuronGroupInfo& neurGrpInfo);
+			QHash<QString, double> getSynapseParameters(const ConnectionGroupInfo& conGrpInfo);
+			SynapseType getSynapseType(unsigned int synapseTypeID);
 			QList<SynapseType> getSynapseTypes();
 			WeightlessNeuron* getWeightlessNeuron(unsigned int neuronID);
 			bool isWeightlessNetwork(unsigned int networkID);
 			bool isWeightlessNeuron(unsigned int neuronID);
 			void setNeuronParameters(const NeuronGroupInfo& info, QHash<QString, double>& paramMap);
+			void setSynapseParameters(const ConnectionGroupInfo& info, QHash<QString, double>& paramMap);
 			void setTempWeight(unsigned int fromNeurID, unsigned int toNeurID, double tempWeight);
 
 		private:
 			//=========================  METHODS  ===========================
 			QList<ParameterInfo> getNeuronParameterInfo(const NeuronType& neuronType);
+			QList<ParameterInfo> getSynapseParameterInfo(const SynapseType& synapseType);
 
 	};
 

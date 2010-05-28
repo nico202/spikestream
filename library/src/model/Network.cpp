@@ -224,6 +224,18 @@ QList<ConnectionGroupInfo> Network::getConnectionGroupsInfo(){
 }
 
 
+
+/*! Returns a list of connection group infos filtered by the specified synapse type ID */
+QList<ConnectionGroupInfo> Network::getConnectionGroupsInfo(unsigned int synapseTypeID){
+	QList<ConnectionGroupInfo> tmpList;
+	for(QHash<unsigned int, ConnectionGroup*>::iterator iter = connGrpMap.begin(); iter != connGrpMap.end(); ++iter){
+		if(iter.value()->getInfo().getSynapseTypeID() == synapseTypeID)
+			tmpList.append(iter.value()->getInfo());
+	}
+	return tmpList;
+}
+
+
 /*! Returns a complete list of neuron group infos */
 QList<NeuronGroupInfo> Network::getNeuronGroupsInfo(){
     QList<NeuronGroupInfo> tmpList;
@@ -231,6 +243,18 @@ QList<NeuronGroupInfo> Network::getNeuronGroupsInfo(){
 		tmpList.append(iter.value()->getInfo());
     return tmpList;
 }
+
+
+/*! Returns a list of neuron group infos filtered by the specified neuron type ID */
+QList<NeuronGroupInfo> Network::getNeuronGroupsInfo(unsigned int neuronTypeID){
+	QList<NeuronGroupInfo> tmpList;
+	for(QHash<unsigned int, NeuronGroup*>::iterator iter = neurGrpMap.begin(); iter != neurGrpMap.end(); ++iter){
+		if(iter.value()->getInfo().getNeuronTypeID() == neuronTypeID)
+			tmpList.append(iter.value()->getInfo());
+	}
+	return tmpList;
+}
+
 
 
 /*! Returns the number of neurons that connect to the specified neuron */

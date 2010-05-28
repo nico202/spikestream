@@ -290,6 +290,10 @@ QHash<QString, double> NetworkDao::getDefaultNeuronParameters(unsigned int neuro
 	NeuronType neuronType = getNeuronType(neuronTypeID);
 	QHash<QString, double> paramMap;
 
+	//Check for case where there are no parameters.
+	if(neuronType.getParameterInfoList().isEmpty())
+		return paramMap;
+
 	//Extract default values from parameter table
 	QSqlQuery query = getQuery("SHOW COLUMNS FROM " + neuronType.getParameterTableName());
 	executeQuery(query);
@@ -315,7 +319,33 @@ QHash<QString, double> NetworkDao::getDefaultNeuronParameters(unsigned int neuro
 
 /*! Returns a map containing the default parameters for the specified synapse type */
 QHash<QString, double> NetworkDao::getDefaultSynapseParameters(unsigned int synapseTypeID){
-	return QHash<QString, double>();
+	SynapseType synapseType = getSynapseType(synapseTypeID);
+	QHash<QString, double> paramMap;
+
+	//Check for case where there are no parameters.
+	if(synapseType.getParameterInfoList().isEmpty())
+		return paramMap;
+
+	//Extract default values from parameter table
+	QSqlQuery query = getQuery("SHOW COLUMNS FROM " + synapseType.getParameterTableName());
+	executeQuery(query);
+	int defaultCol = query.record().indexOf("Default");
+	int variableNameCol = query.record().indexOf("Field");
+	while(query.next()){
+		QString variableName = query.value(variableNameCol).toString();
+		if(variableName != "ConnectionGroupID"){
+			paramMap[variableName] = Util::getDouble( query.value(defaultCol).toString() );
+		}
+	}
+
+	//Check it matches the parameters stored in the synapse type
+	foreach(ParameterInfo info, synapseType.getParameterInfoList()){
+		if(!paramMap.contains(info.getName()))
+			throw SpikeStreamException("Parameter missing: " + info.getName() + " for synapse type " + QString::number(synapseType.getID()));
+	}
+
+	//Return map
+	return paramMap;
 }
 
 
@@ -446,6 +476,10 @@ QHash<QString, double> NetworkDao::getNeuronParameters(const NeuronGroupInfo& ne
 		table name and info about the parameters */
 	NeuronType neuronType = getNeuronType(neurGrpInfo.getNeuronTypeID());
 
+	//Return empty map if there are no parameters
+	if(neuronType.getParameterInfoList().isEmpty())
+		return QHash<QString, double>();
+
 	//Build query to extract values of parameters for this neuron group
 	QString queryStr = "SELECT ";
 	QList<ParameterInfo> parameterInfoList = neuronType.getParameterInfoList();
@@ -478,7 +512,6 @@ QHash<QString, double> NetworkDao::getNeuronParameters(const NeuronGroupInfo& ne
 }
 
 
-
 /*! Returns the neuron type for a specific neuron group */
 NeuronType NetworkDao::getNeuronType(unsigned int neuronTypeID){
 	//Resuse other method - not efficient, but more likely to be reliable than duplicating code.
@@ -488,7 +521,6 @@ NeuronType NetworkDao::getNeuronType(unsigned int neuronTypeID){
 			return neurType;
 	}
 	throw SpikeStreamException("Neuron type with ID " + QString::number(neuronTypeID) + " not found.");
-
 }
 
 
@@ -518,6 +550,60 @@ QList<NeuronType> NetworkDao::getNeuronTypes(){
 }
 
 
+/*! Returns the synapse type for a specific connection group */
+SynapseType NetworkDao::getSynapseType(unsigned int synapseTypeID){
+	//Resuse other method - not efficient, but more likely to be reliable than duplicating code.
+	QList<SynapseType> synTypesList = getSynapseTypes();
+	foreach(SynapseType synType, synTypesList){
+		if(synType.getID() == synapseTypeID)
+			return synType;
+	}
+	throw SpikeStreamException("Synapse type with ID " + QString::number(synapseTypeID) + " not found.");
+}
+
+
+/*! Returns a map containing the parameters for the specified connection group */
+QHash<QString, double> NetworkDao::getSynapseParameters(const ConnectionGroupInfo& conGrpInfo){
+	/* Get class describing the type of synapse in this group - this contains the parameter
+		table name and info about the parameters */
+	SynapseType synapseType = getSynapseType(conGrpInfo.getSynapseTypeID());
+
+	//Return empty map if there are no parameters
+	if(synapseType.getParameterInfoList().isEmpty())
+		return QHash<QString, double>();
+
+	//Build query to extract values of parameters for this connection group
+	QString queryStr = "SELECT ";
+	QList<ParameterInfo> parameterInfoList = synapseType.getParameterInfoList();
+	foreach(ParameterInfo paramInfo, parameterInfoList){
+		queryStr += paramInfo.getName() + ",";
+	}
+	queryStr.truncate(queryStr.length() - 1);
+	queryStr += " FROM " + synapseType.getParameterTableName() + " WHERE ConnectionGroupID=" + QString::number(conGrpInfo.getID());
+	QSqlQuery query = getQuery(queryStr);
+	executeQuery(query);
+
+	//Check only one row exists
+	if(query.size() != 1)
+		throw SpikeStreamException("Zero or multiple parameter entries for connection group in table " + synapseType.getParameterTableName() + ": " + QString::number(query.size()));
+
+	//Extract parameters
+	query.next();
+	QHash<QString, double> paramMap;
+	int indx = 0;
+	foreach(ParameterInfo paramInfo, parameterInfoList){
+		if(paramMap.contains(paramInfo.getName()))
+			throw SpikeStreamException("Duplicate entries in parameter map!");
+
+		paramMap[paramInfo.getName()] = Util::getDouble(query.value(indx).toString());
+		++indx;
+	}
+
+	//Return the finished map
+	return paramMap;
+}
+
+
 /*! Returns the current list of available synapse types.
 	This information is stored in the SynapseTypes table. */
 QList<SynapseType> NetworkDao::getSynapseTypes(){
@@ -534,6 +620,13 @@ QList<SynapseType> NetworkDao::getSynapseTypes(){
 		);
 		synapseTypesList.append(tmpSynType);
 	}
+
+	//Add the information about parameters for each synapse type
+	for(int i=0; i<synapseTypesList.size(); ++i){
+		QList<ParameterInfo> paramInfoList = getSynapseParameterInfo(synapseTypesList.at(i));
+		synapseTypesList[i].setParameterInfoList(paramInfoList);
+	}
+
 	return synapseTypesList;
 }
 
@@ -638,6 +731,26 @@ void NetworkDao::setNeuronParameters(const NeuronGroupInfo& neurGrpInfo, QHash<Q
 }
 
 
+/*! Sets the connection group's parameters */
+void NetworkDao::setSynapseParameters(const ConnectionGroupInfo& conGrpInfo, QHash<QString, double>& paramMap){
+	/* Get class describing the type of synapse in this group - this contains the parameter
+		table name and info about the parameters */
+	SynapseType synapseType = getSynapseType(conGrpInfo.getSynapseTypeID());
+
+	//Build query to update parameters for this neuron group
+	QString queryStr = "UPDATE " + synapseType.getParameterTableName() + " SET ";
+	foreach(ParameterInfo paramInfo, synapseType.getParameterInfoList()){
+		if(!paramMap.contains(paramInfo.getName()))
+			throw SpikeStreamException("Parameters in neuron type and parameters in paramter map do not match.");
+
+		queryStr += paramInfo.getName() + "=" + QString::number(paramMap[paramInfo.getName()]) + ",";
+	}
+	queryStr.truncate(queryStr.length() - 1);//Take off the last trailing comma
+	queryStr += " WHERE ConnectionGroupID=" + QString::number(conGrpInfo.getID());
+	executeQuery(queryStr);
+}
+
+
 /*! Sets the temporary weight between two neurons. In the event of multiple connections between two neurons
 	all of the temporary weights will be updated */
 void NetworkDao::setTempWeight(unsigned int fromNeurID, unsigned int toNeurID, double tempWeight){
@@ -660,13 +773,40 @@ QList<ParameterInfo> NetworkDao::getNeuronParameterInfo(const NeuronType& neuron
 	executeQuery(query);
 	int variableNameCol = query.record().indexOf("Field");
 	int commentCol = query.record().indexOf("Comment");
+	int typeCol = query.record().indexOf("Type");
 	while(query.next()){
 		QString variableName = query.value(variableNameCol).toString();
 		if(variableName != "NeuronGroupID"){
-			paramInfoList.append(ParameterInfo(variableName, query.value(commentCol).toString()));
+			if(query.value(typeCol).toString() == "tinyint(1)")
+				paramInfoList.append(ParameterInfo(variableName, query.value(commentCol).toString(), ParameterInfo::BOOLEAN));
+			else
+				paramInfoList.append(ParameterInfo(variableName, query.value(commentCol).toString(), ParameterInfo::DOUBLE));
 		}
 	}
 	return paramInfoList;
 }
 
+
+/*! Returns a list of ParameterInfos describing the parameters available for a
+	particular synapse type. The description of the parameters is stored as comments in the table. */
+QList<ParameterInfo> NetworkDao::getSynapseParameterInfo(const SynapseType& synapseType){
+	QList<ParameterInfo> paramInfoList;
+
+	//Extract variable names and descriptions (as comments) from parameter table
+	QSqlQuery query = getQuery("SHOW FULL COLUMNS FROM " + synapseType.getParameterTableName());
+	executeQuery(query);
+	int variableNameCol = query.record().indexOf("Field");
+	int commentCol = query.record().indexOf("Comment");
+	int typeCol = query.record().indexOf("Type");
+	while(query.next()){
+		QString variableName = query.value(variableNameCol).toString();
+		if(variableName != "ConnectionGroupID"){
+			if(query.value(typeCol).toString() == "tinyint(1)")
+				paramInfoList.append(ParameterInfo(variableName, query.value(commentCol).toString(), ParameterInfo::BOOLEAN));
+			else
+				paramInfoList.append(ParameterInfo(variableName, query.value(commentCol).toString(), ParameterInfo::DOUBLE));
+		}
+	}
+	return paramInfoList;
+}
 
