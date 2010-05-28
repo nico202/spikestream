@@ -1,8 +1,8 @@
-#ifndef NEURONPARAMETERSMODEL_H
-#define NEURONPARAMETERSMODEL_H
+#ifndef SYNAPSEPARAMETERSMODEL_H
+#define SYNAPSEPARAMETERSMODEL_H
 
 //SpikeStream includes
-#include "NeuronGroupInfo.h"
+#include "ConnectionGroupInfo.h"
 #include "ParameterInfo.h"
 
 //Qt includes
@@ -10,19 +10,19 @@
 
 namespace spikestream {
 
-	/*! Model of the current neuron parameters for the current network.
+	/*! Model of the current synapse parameters for the current network.
 		Synchronized with the database.
 		NOTE: Not thread safe.
-		NOTE: Can only handle parameters or a single type of neuron. */
-	class NeuronParametersModel : public QAbstractTableModel  {
+		NOTE: Can only handle parameters or a single type of synapse. */
+	class SynapseParametersModel : public QAbstractTableModel  {
 		Q_OBJECT
 
 		public:
-			NeuronParametersModel(unsigned int neuronTypeID);
-			~NeuronParametersModel();
+			SynapseParametersModel(unsigned int synapseTypeID);
+			~SynapseParametersModel();
 			int columnCount(const QModelIndex& parent = QModelIndex()) const;
 			QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
-			NeuronGroupInfo getNeuronGroupInfo(int row);
+			ConnectionGroupInfo getConnectionGroupInfo(int row);
 			QList<ParameterInfo> getParameterInfoList();
 			QHash<QString, double> getParameterValues(int row);
 			QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
@@ -37,18 +37,19 @@ namespace spikestream {
 
 		private:
 			//======================  VARIABLES  =======================
-			/*! List containing the information about the neuron groups in the current network
+			/*! List containing the information about the connection groups in the current network
+				of the type supported by this class.
 				This list is automatically refreshed when the network changes. */
-			QList<NeuronGroupInfo> neurGrpInfoList;
+			QList<ConnectionGroupInfo> conGrpInfoList;
 
-			/*! The type of neuron being handled by this model */
-			unsigned int neuronTypeID;
+			/*! The type of synapse being handled by this model */
+			unsigned int synapseTypeID;
 
-			/*! Map linking each neuron group ID with the parameter map for that neuron group*/
+			/*! Map linking each connection group ID with the parameter map for that connection group*/
 			QHash<unsigned int, QHash<QString, double> > parameterMap;
 
 			/*! List of available parameters.
-				NOTE: This class can only handle parameters for a single neuron type. */
+				NOTE: This class can only handle parameters for a single connection type. */
 			QList<ParameterInfo> parameterInfoList;
 
 
@@ -60,4 +61,4 @@ namespace spikestream {
 
 }
 
-#endif//NEURONPARAMETERSMODEL_H
+#endif//SYNAPSEPARAMETERSMODEL_H

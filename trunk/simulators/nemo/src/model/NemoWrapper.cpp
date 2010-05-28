@@ -16,6 +16,9 @@ NemoWrapper::NemoWrapper(){
 	currentTaskID = NO_TASK_DEFINED;
 	simulationLoaded = false;
 	stopThread = true;
+
+	//Construct the information about the parameters and their default values
+	buildParameters();
 }
 
 
@@ -100,6 +103,22 @@ void NemoWrapper::updateProgress(int stepsComplete, int totalSteps){
 /*----------------------------------------------------------*/
 /*-----                 PRIVATE METHODS                -----*/
 /*----------------------------------------------------------*/
+
+/*! Constructs the set of parameters associated with Nemo and sets their default values */
+void NemoWrapper::buildParameters(){
+	parameterMap.clear();
+	parameterInfoList.clear();
+
+	parameterInfoList.append(ParameterInfo("Logging", "Enable or disable logging.", ParameterInfo::BOOLEAN));
+	parameterInfoList.append(ParameterInfo("CudaPartitionSize", "Size of the CUDA partition.", ParameterInfo::UNSIGNED_INTEGER));
+	parameterInfoList.append(ParameterInfo("CudaFiringBufferLength", "Set the size of the firing buffer such that it can contain a \nfixed number of cycles worth of firing data before overflowing.", ParameterInfo::UNSIGNED_INTEGER));
+	parameterInfoList.append(ParameterInfo("CudaDevice", "Set the cuda device to \a dev. The CUDA library allows the device to be set only once per thread, so this function may fail if called multiple times.", ParameterInfo::INTEGER));
+
+	parameterMap["Logging"] = 0;
+	parameterMap["CudaPartitionSize"] = 3;
+	parameterMap["CudaFiringBufferLength"] = 4;
+	parameterMap["CudaDevice"] = 0;
+}
 
 /*! Clears the error state */
 void NemoWrapper::clearError(){

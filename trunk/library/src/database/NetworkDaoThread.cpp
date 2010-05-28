@@ -239,7 +239,7 @@ void NetworkDaoThread::addConnectionGroups(){
 		queryStr += QString::number(connGrpInfo.getFromNeuronGroupID()) + ", ";
 		queryStr += QString::number(connGrpInfo.getToNeuronGroupID()) + ", ";
 		queryStr += "'" + connGrpInfo.getParameterXML() + "', ";
-		queryStr += QString::number(connGrpInfo.getSynapseType()) + ")";
+		queryStr += QString::number(connGrpInfo.getSynapseTypeID()) + ")";
 		QSqlQuery query = getQuery(queryStr);
 		executeQuery(query);
 
@@ -251,6 +251,17 @@ void NetworkDaoThread::addConnectionGroups(){
 			setError("Insert ID for ConnectionGroup is invalid.");
 			return;
 		}
+
+		//Add entry for connection group parameters
+		//Get name of table
+		SynapseType synapseType = getSynapseType(connGrpInfo.getSynapseTypeID());
+
+		//Add parameter table entry for this connection group
+		executeQuery( "INSERT INTO " + synapseType.getParameterTableName() + "(ConnectionGroupID) VALUES (" + QString::number(connectionGroup->getID()) + ")" );
+
+		//Set parameters in connection group
+		QHash<QString, double> tmpParamMap = getSynapseParameters(connectionGroup->getInfo());
+		connectionGroup->setParameters(tmpParamMap);
 
 		//Check for cancellation of task
 		if(stopThread)
@@ -458,6 +469,10 @@ void NetworkDaoThread::loadConnections(){
 			if(stopThread)
 				return;
 		}
+
+		//Load parameters in connection group
+		QHash<QString, double> tmpParamMap = getSynapseParameters( (*iter)->getInfo());
+		(*iter)->setParameters(tmpParamMap);
 
 		//Connection group now matches the database
 		(*iter)->setLoaded(true);

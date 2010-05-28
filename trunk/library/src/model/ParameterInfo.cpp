@@ -2,9 +2,10 @@
 using namespace spikestream;
 
 /*! Standard constructor */
-ParameterInfo::ParameterInfo(const QString& name, const QString& description){
+ParameterInfo::ParameterInfo(const QString& name, const QString& description, int type){
 	this->name = name;
 	this->description = description;
+	this->type = type;
 }
 
 
@@ -12,6 +13,7 @@ ParameterInfo::ParameterInfo(const QString& name, const QString& description){
 ParameterInfo::ParameterInfo(const ParameterInfo& info){
 	this->name = info.name;
 	this->description = info.description;
+	this->type = info.type;
 }
 
 /*! Destructor */
@@ -26,6 +28,7 @@ ParameterInfo& ParameterInfo::operator=(const ParameterInfo& rhs){
 
 	this->name = rhs.name;
 	this->description = rhs.description;
+	this->type = rhs.type;
 
 	return *this;
 }

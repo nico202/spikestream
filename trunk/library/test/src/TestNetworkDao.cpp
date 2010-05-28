@@ -365,12 +365,26 @@ void TestNetworkDao::testGetDefaultNeuronParameters(){
 	try{
 		//Get the parameter map - no need for data
 		NetworkDao networkDao(dbInfo);
-		QHash<QString, double> paramMap = networkDao.getDefaultNeuronParameters(1);
+		QHash<QString, double> resultsMap = networkDao.getDefaultNeuronParameters(1);
 
 		//Check the default values of the parameters are correct
-		QCOMPARE(paramMap.size(), (int)1);
-		QVERIFY(paramMap.contains("a"));
-		QCOMPARE(paramMap["a"], 1.0);
+		QCOMPARE(resultsMap.size(), (int)8);
+		QVERIFY(resultsMap.contains("a"));
+		QCOMPARE(resultsMap["a"], 0.02);
+		QVERIFY(resultsMap.contains("b"));
+		QCOMPARE(resultsMap["b"], 0.2);
+		QVERIFY(resultsMap.contains("c_1"));
+		QCOMPARE(resultsMap["c_1"], 15.0);
+		QVERIFY(resultsMap.contains("d_1"));
+		QCOMPARE(resultsMap["d_1"], 8.0);
+		QVERIFY(resultsMap.contains("d_2"));
+		QCOMPARE(resultsMap["d_2"], 6.0);
+		QVERIFY(resultsMap.contains("v"));
+		QCOMPARE(resultsMap["v"], -65.0);
+		QVERIFY(resultsMap.contains("sigma"));
+		QCOMPARE(resultsMap["sigma"], 5.0);
+		QVERIFY(resultsMap.contains("seed"));
+		QCOMPARE(resultsMap["seed"], 123456789.0);
 	}
 	catch(SpikeStreamException ex){
 		QFAIL(ex.getMessage().toAscii());
@@ -382,7 +396,24 @@ void TestNetworkDao::testGetDefaultNeuronParameters(){
 
 
 void TestNetworkDao::testGetDefaultSynapseParameters(){
+	try{
+		//Get the parameter map - no need for data
+		NetworkDao networkDao(dbInfo);
+		QHash<QString, double> resultsMap = networkDao.getDefaultSynapseParameters(1);
 
+		//Check the default values of the parameters are correct
+		QCOMPARE(resultsMap.size(), (int)2);
+		QVERIFY(resultsMap.contains("Learning"));
+		QCOMPARE(resultsMap["Learning"], 0.0);
+		QVERIFY(resultsMap.contains("Disable"));
+		QCOMPARE(resultsMap["Disable"], 0.0);
+	}
+	catch(SpikeStreamException ex){
+		QFAIL(ex.getMessage().toAscii());
+	}
+	catch(...){
+		QFAIL("Unrecognized exception thrown.");
+	}
 }
 
 
@@ -510,13 +541,13 @@ void TestNetworkDao::testGetConnectionGroupsInfo(){
 	QCOMPARE(connGrpInfoList[0].getFromNeuronGroupID(), neurGrp1ID);
 	QCOMPARE(connGrpInfoList[0].getToNeuronGroupID(), neurGrp2ID);
 	QCOMPARE(connGrpInfoList[0].getParameterMap()["connparam2"], 1.31);
-	QCOMPARE(connGrpInfoList[0].getSynapseType(), (unsigned int)1);
+	QCOMPARE(connGrpInfoList[0].getSynapseTypeID(), (unsigned int)1);
 
 	QCOMPARE(connGrpInfoList[1].getID(), connGrp2ID);
 	QCOMPARE(connGrpInfoList[1].getDescription(), QString("conngrpdesc2"));
 	QCOMPARE(connGrpInfoList[1].getFromNeuronGroupID(), neurGrp2ID);
 	QCOMPARE(connGrpInfoList[1].getToNeuronGroupID(), neurGrp1ID);
-	QCOMPARE(connGrpInfoList[1].getSynapseType(), (unsigned int)1);
+	QCOMPARE(connGrpInfoList[1].getSynapseTypeID(), (unsigned int)1);
 }
 
 
@@ -700,8 +731,23 @@ void TestNetworkDao::testGetNeuronParameters(){
 		QHash<QString, double> neurParamMap = networkDao.getNeuronParameters(neurGrpInfo);
 
 		//Check parameters
-		QCOMPARE(neurParamMap.size(), (int)1);
-		QCOMPARE(neurParamMap["a"], 1.0);
+		QCOMPARE(neurParamMap.size(), (int)8);
+		QVERIFY(neurParamMap.contains("a"));
+		QCOMPARE(neurParamMap["a"], 0.02);
+		QVERIFY(neurParamMap.contains("b"));
+		QCOMPARE(neurParamMap["b"], 0.2);
+		QVERIFY(neurParamMap.contains("c_1"));
+		QCOMPARE(neurParamMap["c_1"], 15.0);
+		QVERIFY(neurParamMap.contains("d_1"));
+		QCOMPARE(neurParamMap["d_1"], 8.0);
+		QVERIFY(neurParamMap.contains("d_2"));
+		QCOMPARE(neurParamMap["d_2"], 6.0);
+		QVERIFY(neurParamMap.contains("v"));
+		QCOMPARE(neurParamMap["v"], -65.0);
+		QVERIFY(neurParamMap.contains("sigma"));
+		QCOMPARE(neurParamMap["sigma"], 5.0);
+		QVERIFY(neurParamMap.contains("seed"));
+		QCOMPARE(neurParamMap["seed"], 123456789.0);
 	}
 	catch(SpikeStreamException ex){
 		QFAIL(ex.getMessage().toAscii());
@@ -718,14 +764,26 @@ void TestNetworkDao::testGetNeuronType(){
 
 		//Test type 1 neurons
 		NeuronType type = networkDao.getNeuronType(1);
-		QCOMPARE(type.getDescription(), QString("Izhikevich Neuron"));
-		QCOMPARE(type.getParameterTableName(), QString("IzhikevichNeuronParameters"));
-		QCOMPARE(type.getParameterInfoList().size(), (int)1);
+		QCOMPARE(type.getDescription(), QString("Izhikevich Excitatory Neuron"));
+		QCOMPARE(type.getParameterTableName(), QString("IzhikevichExcitatoryNeuronParameters"));
+		QCOMPARE(type.getParameterInfoList().size(), (int)8);
 		QCOMPARE(type.getParameterInfoList().at(0).getName(), QString("a"));
-		QCOMPARE(type.getParameterInfoList().at(0).getDescription(), QString("Time scale of the recovery variable."));
+		QCOMPARE(type.getParameterInfoList().at(0).getDescription(), QString("Time scale of the recovery variable, u."));
+		QCOMPARE(type.getParameterInfoList().at(5).getName(), QString("v"));
+		QCOMPARE(type.getParameterInfoList().at(5).getDescription(), QString("Initial value for the membrane potential."));
 
 		//Test type 2 neurons
 		type = networkDao.getNeuronType(2);
+		QCOMPARE(type.getDescription(), QString("Izhikevich Inhibitory Neuron"));
+		QCOMPARE(type.getParameterTableName(), QString("IzhikevichInhibitoryNeuronParameters"));
+		QCOMPARE(type.getParameterInfoList().size(), (int)8);
+		QCOMPARE(type.getParameterInfoList().at(0).getName(), QString("a_1"));
+		QCOMPARE(type.getParameterInfoList().at(4).getDescription(), QString("After-spike reset of the recovery variable, u."));
+		QCOMPARE(type.getParameterInfoList().at(1).getName(), QString("a_2"));
+		QCOMPARE(type.getParameterInfoList().at(5).getDescription(), QString("Initial value for the membrane potential."));
+
+		//Test type 3 neurons
+		type = networkDao.getNeuronType(3);
 		QCOMPARE(type.getDescription(), QString("Weightless Neuron"));
 		QCOMPARE(type.getParameterTableName(), QString("WeightlessNeuronParameters"));
 		QCOMPARE(type.getParameterInfoList().size(), (int)1);
@@ -747,19 +805,22 @@ void TestNetworkDao::testGetNeuronTypes(){
 	NetworkDao networkDao(dbInfo);
 	try{
 		QList<NeuronType> neurTypesList = networkDao.getNeuronTypes();
-		QCOMPARE(neurTypesList.size(), (int)2);
+		QCOMPARE(neurTypesList.size(), (int)3);
 
 		//Check ids
 		QCOMPARE(neurTypesList.at(0).getID(), (unsigned int)1);
 		QCOMPARE(neurTypesList.at(1).getID(), (unsigned int)2);
+		QCOMPARE(neurTypesList.at(2).getID(), (unsigned int)3);
 
 		//Check descriptions
-		QCOMPARE(neurTypesList.at(0).getDescription(), QString("Izhikevich Neuron"));
-		QCOMPARE(neurTypesList.at(1).getDescription(), QString("Weightless Neuron"));
+		QCOMPARE(neurTypesList.at(0).getDescription(), QString("Izhikevich Excitatory Neuron"));
+		QCOMPARE(neurTypesList.at(1).getDescription(), QString("Izhikevich Inhibitory Neuron"));
+		QCOMPARE(neurTypesList.at(2).getDescription(), QString("Weightless Neuron"));
 
 		//Check parameter table names
-		QCOMPARE(neurTypesList.at(0).getParameterTableName(), QString("IzhikevichNeuronParameters"));
-		QCOMPARE(neurTypesList.at(1).getParameterTableName(), QString("WeightlessNeuronParameters"));
+		QCOMPARE(neurTypesList.at(0).getParameterTableName(), QString("IzhikevichExcitatoryNeuronParameters"));
+		QCOMPARE(neurTypesList.at(1).getParameterTableName(), QString("IzhikevichInhibitoryNeuronParameters"));
+		QCOMPARE(neurTypesList.at(2).getParameterTableName(), QString("WeightlessNeuronParameters"));
 
 		//Check class names
 		QCOMPARE(neurTypesList.at(0).getClassLibaryName(), QString(""));
@@ -775,12 +836,56 @@ void TestNetworkDao::testGetNeuronTypes(){
 
 
 void TestNetworkDao::testGetSynapseParameters(){
+	//Add test network
+	addTestNetwork1();
 
+	try{
+		//Get the values of the parameters - this should be the default
+		NetworkDao networkDao(dbInfo);
+		ConnectionGroupInfo info(connGrp1ID, "description", 0, 0, QHash<QString, double>(), 1);
+		QHash<QString, double> conParamMap = networkDao.getSynapseParameters(info);
+
+		//Check parameters
+		QCOMPARE(conParamMap.size(), (int)2);
+		QVERIFY(conParamMap.contains("Learning"));
+		QCOMPARE(conParamMap["Learning"], 0.0);
+		QVERIFY(conParamMap.contains("Disable"));
+		QCOMPARE(conParamMap["Disable"], 0.0);
+	}
+	catch(SpikeStreamException ex){
+		QFAIL(ex.getMessage().toAscii());
+	}
+	catch(...){
+		QFAIL("Unrecognized exception thrown.");
+	}
 }
 
 
 void TestNetworkDao::testGetSynapseType(){
+	try{
+		NetworkDao networkDao(dbInfo);
 
+		//Test type 1 synapses
+		SynapseType type = networkDao.getSynapseType(1);
+		QCOMPARE(type.getDescription(), QString("Izhikevich Synapse"));
+		QCOMPARE(type.getParameterTableName(), QString("IzhikevichSynapseParameters"));
+		QCOMPARE(type.getParameterInfoList().size(), (int)2);
+		QCOMPARE(type.getParameterInfoList().at(0).getName(), QString("Learning"));
+		QCOMPARE(type.getParameterInfoList().at(0).getDescription(), QString("Switches STDP learning on and off."));
+		QCOMPARE(type.getParameterInfoList().at(1).getName(), QString("Disable"));
+		QCOMPARE(type.getParameterInfoList().at(1).getDescription(), QString("Disables the connection group, which will not be included in the simulation."));
+
+		//Test type 2 synapses
+		type = networkDao.getSynapseType(2);
+		QCOMPARE(type.getDescription(), QString("Weightless Synapse"));
+		QCOMPARE(type.getParameterTableName(), QString("WeightlessSynapseParameters"));
+	}
+	catch(SpikeStreamException ex){
+		QFAIL(ex.getMessage().toAscii());
+	}
+	catch(...){
+		QFAIL("Unrecognized exception thrown.");
+	}
 }
 
 
@@ -797,16 +902,20 @@ void TestNetworkDao::testGetSynapseTypes(){
 		QCOMPARE(synTypesList.at(1).getID(), (unsigned int)2);
 
 		//Check descriptions
-		QCOMPARE(synTypesList.at(0).getDescription(), QString("Izhikevich Synapse 1"));
+		QCOMPARE(synTypesList.at(0).getDescription(), QString("Izhikevich Synapse"));
 		QCOMPARE(synTypesList.at(1).getDescription(), QString("Weightless Synapse"));
 
 		//Check parameter table names
-		QCOMPARE(synTypesList.at(0).getParameterTableName(), QString("IzhikevichSynapse1Parameters"));
+		QCOMPARE(synTypesList.at(0).getParameterTableName(), QString("IzhikevichSynapseParameters"));
 		QCOMPARE(synTypesList.at(1).getParameterTableName(), QString("WeightlessSynapseParameters"));
 
 		//Check class names
 		QCOMPARE(synTypesList.at(0).getClassLibaryName(), QString(""));
 		QCOMPARE(synTypesList.at(1).getClassLibaryName(), QString(""));
+
+		//Check parameters
+		QCOMPARE(synTypesList.at(0).getParameterInfoList().size(), (int)2);
+		QCOMPARE(synTypesList.at(1).getParameterInfoList().size(), (int)0);
 	}
 	catch(SpikeStreamException ex){
 		QFAIL(ex.getMessage().toAscii());
@@ -903,23 +1012,58 @@ void TestNetworkDao::testSetNeuronParameters(){
 		//Build neuron group info and parameter map for the update
 		NeuronGroupInfo info(neurGrp1ID, "name", "description", QHash<QString, double>(), 1);
 		QHash<QString, double> paramMap;
-		paramMap["a"] = 27.3;
+		paramMap["a"] = 20.3;
+		paramMap["b"] = 21.3;
+		paramMap["c_1"] = 22.3;
+		paramMap["d_1"] = 23.3;
+		paramMap["d_2"] = 24.3;
+		paramMap["v"] = 25.3;
+		paramMap["sigma"] = 26.3;
+		paramMap["seed"] = 27.3;
 
 		//Check values of parameters
 		NetworkDao netDao(dbInfo);
 		QHash<QString, double> resultsMap = netDao.getNeuronParameters(info);
-		QCOMPARE(resultsMap.size(), (int)1);
+		QCOMPARE(resultsMap.size(), (int)8);
 		QVERIFY(resultsMap.contains("a"));
-		QCOMPARE(resultsMap["a"], 1.0);
+		QCOMPARE(resultsMap["a"], 0.02);
+		QVERIFY(resultsMap.contains("b"));
+		QCOMPARE(resultsMap["b"], 0.2);
+		QVERIFY(resultsMap.contains("c_1"));
+		QCOMPARE(resultsMap["c_1"], 15.0);
+		QVERIFY(resultsMap.contains("d_1"));
+		QCOMPARE(resultsMap["d_1"], 8.0);
+		QVERIFY(resultsMap.contains("d_2"));
+		QCOMPARE(resultsMap["d_2"], 6.0);
+		QVERIFY(resultsMap.contains("v"));
+		QCOMPARE(resultsMap["v"], -65.0);
+		QVERIFY(resultsMap.contains("sigma"));
+		QCOMPARE(resultsMap["sigma"], 5.0);
+		QVERIFY(resultsMap.contains("seed"));
+		QCOMPARE(resultsMap["seed"], 123456789.0);
 
 		//Set parameters to new values
 		netDao.setNeuronParameters(info, paramMap);
 
 		//Check that parameters have changed
 		resultsMap = netDao.getNeuronParameters(info);
-		QCOMPARE(resultsMap.size(), (int)1);
+		QCOMPARE(resultsMap.size(), (int)8);
 		QVERIFY(resultsMap.contains("a"));
-		QCOMPARE(resultsMap["a"], 27.3);
+		QCOMPARE(resultsMap["a"], 20.3);
+		QVERIFY(resultsMap.contains("b"));
+		QCOMPARE(resultsMap["b"], 21.3);
+		QVERIFY(resultsMap.contains("c_1"));
+		QCOMPARE(resultsMap["c_1"], 22.3);
+		QVERIFY(resultsMap.contains("d_1"));
+		QCOMPARE(resultsMap["d_1"], 23.3);
+		QVERIFY(resultsMap.contains("d_2"));
+		QCOMPARE(resultsMap["d_2"], 24.3);
+		QVERIFY(resultsMap.contains("v"));
+		QCOMPARE(resultsMap["v"], 25.3);
+		QVERIFY(resultsMap.contains("sigma"));
+		QCOMPARE(resultsMap["sigma"], 26.3);
+		QVERIFY(resultsMap.contains("seed"));
+		QCOMPARE(resultsMap["seed"], 27.3);
 	}
 	catch(SpikeStreamException ex){
 		QFAIL(ex.getMessage().toAscii());
@@ -931,7 +1075,42 @@ void TestNetworkDao::testSetNeuronParameters(){
 
 
 void TestNetworkDao::testSetSynapseParameters(){
+	//Add test network
+	addTestNetwork1();
 
+	try{
+		//Build connection group info and parameter map for the update
+		ConnectionGroupInfo info(connGrp1ID, "description", 0, 0, QHash<QString, double>(), 1);
+		QHash<QString, double> paramMap;
+		paramMap["Learning"] = 1;
+		paramMap["Disable"] = 1;
+
+		//Check values of parameters
+		NetworkDao netDao(dbInfo);
+		QHash<QString, double> resultsMap = netDao.getSynapseParameters(info);
+		QCOMPARE(resultsMap.size(), (int)2);
+		QVERIFY(resultsMap.contains("Learning"));
+		QVERIFY(resultsMap.contains("Disable"));
+		QCOMPARE(resultsMap["Learning"], 0.0);
+		QCOMPARE(resultsMap["Disable"], 0.0);
+
+		//Set parameters to new values
+		netDao.setSynapseParameters(info, paramMap);
+
+		//Check that parameters have changed
+		resultsMap = netDao.getSynapseParameters(info);
+		QCOMPARE(resultsMap.size(), (int)2);
+		QVERIFY(resultsMap.contains("Learning"));
+		QVERIFY(resultsMap.contains("Disable"));
+		QCOMPARE(resultsMap["Learning"], 1.0);
+		QCOMPARE(resultsMap["Disable"], 1.0);
+	}
+	catch(SpikeStreamException ex){
+		QFAIL(ex.getMessage().toAscii());
+	}
+	catch(...){
+		QFAIL("Unrecognized exception thrown.");
+	}
 }
 
 

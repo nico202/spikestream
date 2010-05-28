@@ -2,6 +2,8 @@
 #include "SynapseType.h"
 using namespace spikestream;
 
+//Qt includes
+#include <QDebug>
 
 /*! Standard constructor */
 SynapseType::SynapseType(unsigned int synapseTypeID, const QString& description, const QString& paramTableName, const QString& classLibraryName){
@@ -17,6 +19,7 @@ SynapseType::SynapseType(const SynapseType& synType){
 	this->description = synType.description;
 	this->parameterTableName = synType.parameterTableName;
 	this->classLibraryName = synType.classLibraryName;
+	this->parameterInfoList = synType.parameterInfoList;
 }
 
 
@@ -63,8 +66,23 @@ SynapseType& SynapseType::operator=(const SynapseType& rhs){
 	this->description = rhs.description;
 	this->parameterTableName = rhs.parameterTableName;
 	this->classLibraryName = rhs.classLibraryName;
+	this->parameterInfoList = rhs.parameterInfoList;
 
 	return *this;
 }
+
+
+
+/*! Returns the list of parameter types */
+QList<ParameterInfo> SynapseType::getParameterInfoList() const{
+	return parameterInfoList;
+}
+
+
+/*! Sets the information about the parameters associated with this synapse type */
+void SynapseType::setParameterInfoList(QList<ParameterInfo>& parameterInfoList){
+	this->parameterInfoList = parameterInfoList;
+}
+
 
 

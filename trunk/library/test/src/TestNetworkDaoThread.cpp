@@ -80,7 +80,7 @@ void TestNetworkDaoThread::testAddConnectionGroup(){
 		QCOMPARE(query.value(2).toString(), QString::number(fromGrp.getID()));//Check from neuron group id
 		QCOMPARE(query.value(3).toString(), QString::number(toGrp.getID()));//Check to neuron group id
 		QCOMPARE(query.value(4).toString(), connGrpInfo.getParameterXML());//Check parameters
-		QCOMPARE(query.value(5).toString(), QString::number(connGrpInfo.getSynapseType()));//Check synapse type
+		QCOMPARE(query.value(5).toString(), QString::number(connGrpInfo.getSynapseTypeID()));//Check synapse type
 		QVERIFY(connGrp.getID() != 0);
 
 		//Check that connections were added correctly

@@ -188,8 +188,10 @@ void  NemoWidget::setNeuronParameters(){
 
 /*! Sets the parameters of Nemo */
 void NemoWidget::setNemoParameters(){
-	NemoParametersDialog* dialog = new NemoParametersDialog(this);
+	NemoParametersDialog* dialog = new NemoParametersDialog(nemoWrapper->getParameterInfoList(), nemoWrapper->getParameterValues(), this);
 	dialog->exec();
+	if(nemoWrapper->isAccepted())
+		nemoWrapper->setParameters(dialog->getParameterValues());
 	delete dialog;
 }
 

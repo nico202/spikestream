@@ -131,7 +131,8 @@ HEADERS += include/AbstractParametersEditDialog.h \
 			include/NewNetworkDialog.h \
 			include/NeuronParametersDialog.h \
 			include/NeuronParametersEditDialog.h \
-			include/SynapseParametersDialog.h
+			include/SynapseParametersDialog.h \
+			include/SynapseParametersEditDialog.h
 SOURCES += src/dialogs/AbstractParametersEditDialog.cpp \
 			src/dialogs/NRMImportDialog.cpp \
 			src/dialogs/LoadAnalysisDialog.cpp \
@@ -140,7 +141,8 @@ SOURCES += src/dialogs/AbstractParametersEditDialog.cpp \
 			src/dialogs/NewNetworkDialog.cpp \
 			src/dialogs/NeuronParametersDialog.cpp \
 			src/dialogs/NeuronParametersEditDialog.cpp \
-			src/dialogs/SynapseParametersDialog.cpp
+			src/dialogs/SynapseParametersDialog.cpp \
+			src/dialogs/SynapseParametersEditDialog.cpp
 
 
 #----------------------------------------------#
@@ -158,13 +160,15 @@ HEADERS += include/NeuronGroupModel.h \
 			include/ConnectionsModel.h \
 			include/AnalysesModel.h \
 			include/TruthTableModel.h \
-			include/NeuronParametersModel.h
+			include/NeuronParametersModel.h \
+			include/SynapseParametersModel.h
 SOURCES += src/models/NeuronGroupModel.cpp \
 			src/models/ConnectionGroupModel.cpp \
 			src/models/ConnectionsModel.cpp \
 			src/models/AnalysesModel.cpp \
 			src/models/TruthTableModel.cpp \
-			src/models/NeuronParametersModel.cpp
+			src/models/NeuronParametersModel.cpp \
+			src/models/SynapseParametersModel.cpp
 
 
 #----------------------------------------------#
@@ -175,13 +179,15 @@ HEADERS += include/NeuronGroupTableView.h \
 			include/ConnectionsTableView.h \
 			include/AnalysesTableView.h \
 			include/TruthTableView.h \
-			include/NeuronParametersView.h
+			include/NeuronParametersView.h \
+			include/SynapseParametersView.h
 SOURCES += src/views/NeuronGroupTableView.cpp \
 			src/views/ConnectionGroupTableView.cpp \
 			src/views/ConnectionsTableView.cpp \
 			src/views/AnalysesTableView.cpp \
 			src/views/TruthTableView.cpp \
-			src/views/NeuronParametersView.cpp
+			src/views/NeuronParametersView.cpp \
+			src/views/SynapseParametersView.cpp
 
 
 #----------------------------------------------#

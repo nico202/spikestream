@@ -65,8 +65,9 @@ namespace spikestream {
 			/*! To enter density of neuron group - the probability that a neuron is added at a particular position */
 			QLineEdit* densityEdit;
 
-			/*! To enter the type of neuron */
-			QComboBox* neuronTypeCombo;
+			/*! Map of line edits to set the percentage of neurons of different types
+				Key is the neuron type ID. */
+			QHash<unsigned int, QLineEdit*> neuronTypeEditMap;
 
 
 			//=====================  METHODS  =======================

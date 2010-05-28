@@ -39,6 +39,7 @@ CuboidWidget::CuboidWidget(QWidget* parent) : QWidget(parent) {
 
 	//Validators for double and integer parameters
 	QDoubleValidator* doubleValidator = new QDoubleValidator(0.0, 1.0, 2, this);
+	QDoubleValidator* percentValidator = new QDoubleValidator(0.0, 100.0, 2, this);
 	QIntValidator* posValidator = new QIntValidator(-1000000, 1000000, this);
 	QIntValidator* positiveIntValidator = new QIntValidator(0, 1000000, this);
 
@@ -95,25 +96,42 @@ CuboidWidget::CuboidWidget(QWidget* parent) : QWidget(parent) {
 	mainVBox->addLayout(sizeLayout);
 	mainVBox->addSpacing(10);
 
-	//Add spacing, density and neuron type inputs
+	//Add spacing and density inputs
 	spacingEdit = new QLineEdit("1");
 	spacingEdit->setMaximumSize(100, 30);
 	spacingEdit->setValidator(positiveIntValidator);
 	densityEdit = new QLineEdit("1.0");
 	densityEdit->setMaximumSize(100, 30);
 	densityEdit->setValidator(doubleValidator);
-	neuronTypeCombo = new QComboBox();
-	addNeuronTypes(neuronTypeCombo);
 	QHBoxLayout* miscLayout = new QHBoxLayout();
 	miscLayout->addWidget(new QLabel("Spacing (neurons): "));
 	miscLayout->addWidget(spacingEdit);
 	miscLayout->addWidget(new QLabel(" Density (0-1): "));
 	miscLayout->addWidget(densityEdit);
-	miscLayout->addWidget(new QLabel(" Neuron type: "));
-	miscLayout->addWidget(neuronTypeCombo);
 	miscLayout->addStretch(5);
 	mainVBox->addLayout(miscLayout);
 	mainVBox->addSpacing(5);
+
+	//Add neuron types along with box to enter percentages
+	QList<NeuronType> neurTypeList = Globals::getNetworkDao()->getNeuronTypes();
+	mainVBox->addWidget(new QLabel("Neuron types: "));
+	bool firstTime = true;
+	foreach(NeuronType neurType, neurTypeList){
+		QHBoxLayout* tmpLayout = new QHBoxLayout();
+		if(firstTime){
+			neuronTypeEditMap[neurType.getID()] = new QLineEdit("100");
+			firstTime = false;
+		}
+		else
+			neuronTypeEditMap[neurType.getID()] = new QLineEdit("0");
+		neuronTypeEditMap[neurType.getID()]->setValidator(percentValidator);
+		tmpLayout->addSpacing(20);
+		tmpLayout->addWidget(new QLabel(neurType.getDescription() + ": "));
+		tmpLayout->addWidget( neuronTypeEditMap[neurType.getID()] );
+		tmpLayout->addStretch(5);
+		mainVBox->addLayout(tmpLayout);
+	}
+
 
 	//Add button
 	QHBoxLayout *addButtonBox = new QHBoxLayout();
@@ -125,7 +143,7 @@ CuboidWidget::CuboidWidget(QWidget* parent) : QWidget(parent) {
 	mainVBox->addLayout(addButtonBox);
 
 	mainGroupBox->setLayout(mainVBox);
-	this->setMinimumSize(650, 210);
+	this->setMinimumSize(800, 600);
 
 	//Create builder thread class
 	builderThread = new CuboidBuilderThread();
@@ -149,6 +167,20 @@ void CuboidWidget::addButtonClicked(){
 	//Double check network is loaded
 	if(!Globals::networkLoaded()){
 		QMessageBox::critical(this, "Cuboid Neuron Group Builder Error", "No network loaded.", QMessageBox::Ok);
+		return;
+	}
+
+	//Check that the percentages of types add up to 100
+	double total = 0.0;
+	for(QHash<unsigned int, QLineEdit*>::iterator iter = neuronTypeEditMap.begin(); iter != neuronTypeEditMap.end(); ++iter){
+		if(iter.value()->text().isEmpty()){
+			QMessageBox::warning(this, "Cuboid Neuron Group Builder", "Percentage field for neuron type is empty.", QMessageBox::Ok);
+			return;
+		}
+		total += Util::getDouble(iter.value()->text());
+	}
+	if(total != 100.0){
+		QMessageBox::warning(this, "Cuboid Neuron Group Builder", "Percentages for neuron types must add up to 100.", QMessageBox::Ok);
 		return;
 	}
 
@@ -183,7 +215,6 @@ void CuboidWidget::addButtonClicked(){
 	int height = Util::getInt(heightEdit->text());
 	int spacing = Util::getInt(spacingEdit->text());
 	double density = Util::getDouble(densityEdit->text());
-	int neuronType = getNeuronTypeID(neuronTypeCombo->currentText());
 
 	//Store parameters in parameter map
 	QHash<QString, double> paramMap;
@@ -196,6 +227,13 @@ void CuboidWidget::addButtonClicked(){
 	paramMap["spacing"] = spacing;
 	paramMap["density"] = density;
 
+	//Store neuron types in parameter map
+	for(QHash<unsigned int, QLineEdit*>::iterator iter = neuronTypeEditMap.begin(); iter != neuronTypeEditMap.end(); ++iter){
+		double tmpPercent = Util::getDouble(iter.value()->text());
+		if(tmpPercent > 0)
+			paramMap["neuron_type_id_" + QString::number(iter.key())] = tmpPercent;
+	}
+
 	/* Check that there are no conflicts with existing neurons
 	   Neurons are added starting at (x,y,z) and finishing when x<x+width, y<y+length and z<z+height */
 	Box neurGrpBox(xPos, yPos, zPos, xPos+width-1, yPos+length-1, zPos+height-1);
@@ -204,14 +242,21 @@ void CuboidWidget::addButtonClicked(){
 		QMessageBox::critical(this, "Cuboid Neuron Group Builder Error", "Proposed neuron group overlaps with a neuron group that is already in the database.\nPlease change the position and/or the width, length and height.", QMessageBox::Ok);
 		return;
 	}
-
+	Util::printParameterMap(paramMap);
 	//Start thread to add neuron group
-	NeuronGroupInfo info(0, nameEdit->text(), descriptionEdit->text(), paramMap, neuronType);
-	builderThread->prepareAddNeuronGroup(info);
-	progressDialog = new QProgressDialog("Building neuron group", "Cancel", 0, 100, this);
-	progressDialog->setWindowModality(Qt::WindowModal);
-	progressDialog->setMinimumDuration(2000);
-	builderThread->start();
+	try{
+		builderThread->prepareAddNeuronGroups(nameEdit->text(), descriptionEdit->text(), paramMap);
+		progressDialog = new QProgressDialog("Building neuron group", "Cancel", 0, 100, this);
+		progressDialog->setWindowModality(Qt::WindowModal);
+		progressDialog->setMinimumDuration(2000);
+		builderThread->start();
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<ex.getMessage();
+	}
+	catch(...){
+		qCritical()<<"An unknown exception occurred";
+	}
 }
 
 

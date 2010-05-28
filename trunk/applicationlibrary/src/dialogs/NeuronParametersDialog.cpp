@@ -1,23 +1,37 @@
 //SpikeStream includes
+#include "Globals.h"
 #include "NeuronParametersDialog.h"
 #include "NeuronParametersModel.h"
 #include "NeuronParametersView.h"
 using namespace spikestream;
 
 //Qt includes
-#include <QLayout>
+#include <QTabWidget>
 
 
 /*! Constructor */
 NeuronParametersDialog::NeuronParametersDialog(QWidget *parent) : QDialog(parent) {
-	QVBoxLayout* mainVBox = new QVBoxLayout(this);
+	//Set title
+	this->setWindowTitle("Neuron Parameters");
 
-	//Construct table view and model
-	NeuronParametersModel* neuronParametersModel = new NeuronParametersModel();
-	QTableView* neuronParametersView = new NeuronParametersView(this, neuronParametersModel);
-	mainVBox->addWidget(neuronParametersView);
+	//Get a list of the neuron groups in the network
+	QList<NeuronGroupInfo> infoList = Globals::getNetwork()->getNeuronGroupsInfo();
 
-	setMinimumSize(600, 400);
+	//Create a tab for each neuron type in the network
+	QTabWidget* tabWidget = new QTabWidget(this);
+	QHash<unsigned int, bool> neurTypeMap;
+	foreach(NeuronGroupInfo neurGrpInfo, infoList){
+		unsigned int tmpNeurTypeID = neurGrpInfo.getNeuronTypeID();
+		if(!neurTypeMap.contains(tmpNeurTypeID)){
+			NeuronParametersModel* neuronParametersModel = new NeuronParametersModel(tmpNeurTypeID);
+			QTableView* neuronParametersView = new NeuronParametersView(tabWidget, neuronParametersModel);
+			NeuronType neurType = Globals::getNetworkDao()->getNeuronType(tmpNeurTypeID);
+			tabWidget->addTab(neuronParametersView, neurType.getDescription());
+			neurTypeMap[tmpNeurTypeID] = true;
+		}
+	}
+
+	tabWidget->setMinimumSize(600, 400);
 }
 
 

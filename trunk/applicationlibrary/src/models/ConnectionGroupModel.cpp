@@ -60,7 +60,7 @@ QVariant ConnectionGroupModel::data(const QModelIndex & index, int role) const{
 		if(index.column() == toNeurIDCol)
 			return conGrpInfoList[index.row()].getToNeuronGroupID();
 		if(index.column() == synapseTypeCol)
-			return conGrpInfoList[index.row()].getSynapseType();
+			return conGrpInfoList[index.row()].getSynapseTypeID();
     }
 
 	//Icons

@@ -216,7 +216,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow(){
 	//Set up editor window
 	QSplitter *layerSplitterWidget = new QSplitter(tabWidget);
 	NeuronGroupWidget* neuronGrpWidget = new NeuronGroupWidget();
-	ConnectionWidget* conWidget = new ConnectionWidget(this);
+	ConnectionWidget* conWidget = new ConnectionWidget();
 	layerSplitterWidget->addWidget(neuronGrpWidget);
 	layerSplitterWidget->addWidget(conWidget);
 	layerSplitterWidget->setOrientation(Qt::Vertical);

@@ -34,6 +34,7 @@ namespace spikestream {
 			static void printByteArray(byte* byteArr, int arrLen);
 			static void printByteArray(const QByteArray& byteArr);
 			static void printBoolArray(bool arr[], int arrLen);
+			static void printParameterMap(const QHash<QString, double>& paramMap);
 			static double rDouble(double num, int numPlaces);
 			static unsigned int rUInt(double num);
 			static void safeCStringCopy(char target[], const char source[], int targetSize);

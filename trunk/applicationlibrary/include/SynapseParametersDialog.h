@@ -8,7 +8,7 @@
 namespace spikestream {
 
 	/*! Displays the current synapse parameters for the currently loaded network.
-		Clicking on a particular row launches a dialog to edit parameters for the corresponding neuron group
+		Clicking on a particular row launches a dialog to edit parameters for the corresponding connection group
 		NOTE: Not thread safe. */
 	class SynapseParametersDialog : public QDialog {
 		Q_OBJECT
