@@ -27,8 +27,8 @@ unix{
 }
 win32{
 	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/gmp/include
-#	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/nemo/include
-#	LIBS += -lnemo -L$${SPIKESTREAM_ROOT_DIR}/extlib/nemo/lib
+	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/nemo/include
+	LIBS += -lnemo -L$${SPIKESTREAM_ROOT_DIR}/extlib/nemo/lib
 	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/lib -lspikestreamapplication0 -lspikestream0
 }
 

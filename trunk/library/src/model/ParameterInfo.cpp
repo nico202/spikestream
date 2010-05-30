@@ -14,6 +14,7 @@ ParameterInfo::ParameterInfo(const ParameterInfo& info){
 	this->name = info.name;
 	this->description = info.description;
 	this->type = info.type;
+	this->optionNames = info.optionNames;
 }
 
 /*! Destructor */
@@ -29,6 +30,7 @@ ParameterInfo& ParameterInfo::operator=(const ParameterInfo& rhs){
 	this->name = rhs.name;
 	this->description = rhs.description;
 	this->type = rhs.type;
+	this->optionNames = rhs.optionNames;
 
 	return *this;
 }

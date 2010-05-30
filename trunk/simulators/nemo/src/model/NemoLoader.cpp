@@ -23,6 +23,6 @@ void NemoLoader::loadSimulation(Network* network, const bool* stop){
 
 
 	//Return the new simulation object
-	//return NULL;
+	//0return NULL;
 }
 
