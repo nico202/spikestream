@@ -20,6 +20,7 @@ namespace spikestream {
 			NemoWrapper();
 			~NemoWrapper();
 			int getCurrentTask() { return currentTaskID; }
+			QHash<QString, double> getDefaultParameterValues(){ return defaultParameterMap; }
 			QString getErrorMessage() { return errorMessage; }
 			QList<ParameterInfo> getParameterInfoList(){ return parameterInfoList; }
 			QHash<QString, double> getParameterValues(){ return parameterMap; }
@@ -28,6 +29,7 @@ namespace spikestream {
 			void prepareLoadSimulation();
 			void prepareRunSimulation();
 			void run();
+			void setParameters(const QHash<QString, double>& parameterMap);
 			void stop();
 			void unload();
 			void updatePprogress(int stepsComplete, int totalSteps);
@@ -75,6 +77,11 @@ namespace spikestream {
 			/*! Values of the parameters associated with Nemo.
 				The key is the parameter name; the value is the value of the parameter. */
 			QHash<QString, double> parameterMap;
+
+			/*! Default values of the parameters associated with Nemo.
+				The key is the parameter name; the value is the value of the parameter. */
+			QHash<QString, double> defaultParameterMap;
+
 
 			//======================  METHODS  ========================
 			void buildParameters();

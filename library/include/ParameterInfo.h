@@ -2,6 +2,7 @@
 #define PARAMETERINFO_H
 
 //Qt includes
+#include <QList>
 #include <QString>
 
 namespace spikestream {
@@ -17,8 +18,10 @@ namespace spikestream {
 			~ParameterInfo();
 			QString getDescription() const { return description; }
 			QString getName() const { return name; }
+			QList<QString> getOptionNames(){ return optionNames; }
 			int getType() const { return type; }
 			ParameterInfo& operator=(const ParameterInfo& rhs);
+			void setOptionNames(const QList<QString>& optionNames){ this->optionNames = optionNames; }
 
 
 			//=================  STATIC VARIABLES  ==================
@@ -34,6 +37,9 @@ namespace spikestream {
 			/*! Parameter is an unsigned integer */
 			static const int UNSIGNED_INTEGER = 4;
 
+			/*! Parameter is one of a predefined set of options */
+			static const int OPTION = 5;
+
 
 		private:
 			//====================  VARIABLES  ======================
@@ -45,6 +51,9 @@ namespace spikestream {
 
 			/*! The type of the parameter - double, boolean, etc. */
 			int type;
+
+			/*! List of options available where appropriate */
+			QList<QString> optionNames;
 
 	};
 

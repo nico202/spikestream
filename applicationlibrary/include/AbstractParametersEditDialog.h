@@ -6,6 +6,7 @@
 
 //Qt includes
 #include <QCheckBox>
+#include <QComboBox>
 #include <QDialog>
 #include <QHash>
 #include <QLayout>
@@ -23,7 +24,10 @@ namespace spikestream {
 
 
 		protected slots:
+			/*! Loads up the default parameters */
 			virtual void defaultButtonClicked() = 0;
+
+			/*! Accepts the dialog and extracts the parameters */
 			virtual void okButtonClicked() = 0;
 
 
@@ -40,13 +44,16 @@ namespace spikestream {
 
 		private:
 			//===================  VARIABLES  ====================
-			/*! Map of the line edits for double parameters.
+			/*! Map of the line edits for double, int and unsigned int parameters.
 				Key is the name of the parameter; value is a pointer to the line edit */
 			QHash<QString, QLineEdit*> lineEditMap;
 
 			/*! Map of the check boxes for boolean parameters.
 				Key is the name of the parameter; value is a pointer to the check box */
 			QHash<QString, QCheckBox*> checkBoxMap;
+
+			/*! Map of the combo boxes for option parameters */
+			QHash<QString, QComboBox*> comboMap;
 	};
 
 }

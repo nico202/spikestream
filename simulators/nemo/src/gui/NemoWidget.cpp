@@ -188,11 +188,14 @@ void  NemoWidget::setNeuronParameters(){
 
 /*! Sets the parameters of Nemo */
 void NemoWidget::setNemoParameters(){
-	NemoParametersDialog* dialog = new NemoParametersDialog(nemoWrapper->getParameterInfoList(), nemoWrapper->getParameterValues(), this);
-	dialog->exec();
-	if(nemoWrapper->isAccepted())
-		nemoWrapper->setParameters(dialog->getParameterValues());
-	delete dialog;
+	try{
+		NemoParametersDialog dialog(nemoWrapper->getParameterInfoList(), nemoWrapper->getParameterValues(), nemoWrapper->getDefaultParameterValues(), this);
+		if(dialog.exec() == QDialog::Accepted)
+			nemoWrapper->setParameters(dialog.getParameters());
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<ex.getMessage();
+	}
 }
 
 
