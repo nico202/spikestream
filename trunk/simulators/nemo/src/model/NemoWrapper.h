@@ -8,6 +8,9 @@
 #include <QHash>
 #include <QThread>
 
+//Nemo includes
+#include "nemo.hpp"
+
 
 namespace spikestream {
 
@@ -31,7 +34,7 @@ namespace spikestream {
 			void run();
 			void setParameters(const QHash<QString, double>& parameterMap);
 			void stop();
-			void unload();
+			void unloadSimulation();
 			void updatePprogress(int stepsComplete, int totalSteps);
 
 
@@ -81,6 +84,9 @@ namespace spikestream {
 			/*! Default values of the parameters associated with Nemo.
 				The key is the parameter name; the value is the value of the parameter. */
 			QHash<QString, double> defaultParameterMap;
+
+			/*! Pointer to the Nemo simulation that has been constructed. */
+			nemo::Simulation* nemoSimulation;
 
 
 			//======================  METHODS  ========================

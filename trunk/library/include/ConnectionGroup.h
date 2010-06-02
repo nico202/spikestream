@@ -18,14 +18,17 @@ namespace spikestream {
 
 			Connection* addConnection(Connection* newConn);
 			ConnectionList::const_iterator begin();
+			QHash<unsigned int, ConnectionList >::const_iterator fromMapBegin() { return fromConnectionMap.begin(); }
+			QHash<unsigned int, ConnectionList >::const_iterator fromMapEnd() { return fromConnectionMap.end(); }
 			ConnectionList::const_iterator end();
 			ConnectionList getConnections() { return connectionList; }
 			unsigned int getID() { return info.getID(); }
-			const ConnectionList getFromConnections(unsigned int neurID);
+			ConnectionList getFromConnections(unsigned int neurID);
 			unsigned int getFromNeuronGroupID() { return info.getFromNeuronGroupID(); }
 			ConnectionGroupInfo getInfo() { return info; }
+			double getParameter(const QString& paramName);
 			QHash<QString, double> getParameters() { return parameterMap; }
-			const ConnectionList getToConnections(unsigned int neurID);
+			ConnectionList getToConnections(unsigned int neurID);
 			unsigned int getToNeuronGroupID() { return info.getToNeuronGroupID(); }
 			bool isLoaded() { return loaded; }
 			void setID(unsigned int id) { info.setID(id); }

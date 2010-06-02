@@ -24,6 +24,7 @@ namespace spikestream {
 			unsigned int getID() { return info.getID(); }
 			unsigned int getNeuronAtLocation(const Point3D& location);
 			QHash<QString, double> getParameters() { return parameterMap; }
+			double getParameter(const QString& key);
 			unsigned int getStartNeuronID() { return startNeuronID; }
 			NeuronGroupInfo getInfo() {return info;}
 			QList<unsigned int> getNeuronIDs() { return neuronMap->keys(); }
@@ -36,6 +37,7 @@ namespace spikestream {
 			void setParameters(QHash<QString, double>& paramMap){ this->parameterMap = paramMap; }
 			void setStartNeuronID(unsigned int id) { this->startNeuronID = id; }
 			int size();
+
 
 		private:
 			//==========================  VARIABLES  =========================
@@ -59,6 +61,7 @@ namespace spikestream {
 
 			/*! Map of parameters for the neuron group */
 			QHash<QString, double> parameterMap;
+
 
 			//====================  METHODS  ==========================
 			NeuronGroup(const NeuronGroup& connGrp);

@@ -2,18 +2,22 @@
 #define SPIKESTREAMEXCEPTION_H
 
 #include <QString>
+namespace spikestream {
 
-class SpikeStreamException {
-    public:
-        SpikeStreamException(QString details = QString("No details available"));
-        virtual ~SpikeStreamException();
-	virtual QString getMessage();
+	/*! A SpikeStream specific exception. Other SpikeStream exception classes inherit from this class. */
+	class SpikeStreamException {
+		public:
+			SpikeStreamException(QString details = QString("No details available"));
+			virtual ~SpikeStreamException();
+			virtual QString getMessage();
 
-    protected:
-	QString type;
+		protected:
+			QString type;
 
-    private:
-        QString details;
-};
+		private:
+			QString details;
+	};
+
+}
 
 #endif // SPIKESTREAMEXCEPTION_H

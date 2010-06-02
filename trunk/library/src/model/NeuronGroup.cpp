@@ -97,6 +97,15 @@ Point3D& NeuronGroup::getNeuronLocation(unsigned int neuronID){
 }
 
 
+/*! Returns a parameter with the specified key.
+	Throws an exception if the parameter cannot be found */
+double NeuronGroup::getParameter(const QString &key){
+	if(!parameterMap.contains(key))
+		throw SpikeStreamException("Cannot find parameter with key: " + key + " in neuron group with ID " + QString::number(info.getID()));
+	return  parameterMap[key];
+}
+
+
 /*! Returns the number of neurons in the group. */
 int NeuronGroup::size(){
 	return neuronMap->size();
