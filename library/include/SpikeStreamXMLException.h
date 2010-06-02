@@ -4,12 +4,17 @@
 //SpikeStream includes
 #include "SpikeStreamException.h"
 
-class SpikeStreamXMLException : public SpikeStreamException {
-    public:
-	SpikeStreamXMLException(QString details);
-	~SpikeStreamXMLException();
+namespace spikestream{
 
-};
+	/*! Exception related to XML processing. */
+	class SpikeStreamXMLException : public SpikeStreamException {
+		public:
+		SpikeStreamXMLException(QString details);
+		~SpikeStreamXMLException();
+
+	};
+
+}
 
 #endif//SPIKESTREAMXMLEXCEPTION_H
 

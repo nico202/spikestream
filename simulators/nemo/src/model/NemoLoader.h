@@ -13,6 +13,17 @@ using namespace spikestream;
 //Qt includes
 #include <QObject>
 
+//Other includes
+#include "boost/random.hpp"
+
+
+/*! The random number generator type */
+typedef boost::mt19937 rng_t;
+
+/*! The variate generator type, which includes the random number generator type. */
+typedef boost::variate_generator<rng_t&, boost::uniform_real<double> > urng_t;
+
+
 namespace spikestream {
 
 	/*! Loads the network into the graphics hardware ready to run with Nemo */
@@ -22,7 +33,7 @@ namespace spikestream {
 		public:
 			NemoLoader();
 			~NemoLoader();
-			void loadSimulation(Network* network, const bool* stop);
+			nemo::Network* buildNemoNetwork(Network* network, const bool* stop);
 
 		signals:
 			void progress(int stepsCompleted, int totalSteps);
@@ -36,6 +47,10 @@ namespace spikestream {
 			ArchiveDao* archiveDao;
 
 
+			//======================  METHODS  =======================
+			void addExcitatoryNeuronGroup(NeuronGroup* neuronGroup, nemo::Network* nemoNet, urng_t& ranNumGen);
+			void addInhibitoryNeuronGroup(NeuronGroup* neuronGroup, nemo::Network* nemoNet, urng_t& ranNumGen);
+			void addConnectionGroup(ConnectionGroup* conGroup, nemo::Network* nemoNet);
 	};
 }
 

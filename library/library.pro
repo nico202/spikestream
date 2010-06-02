@@ -82,13 +82,15 @@ HEADERS += include/SpikeStreamDBException.h \
 			include/SpikeStreamException.h \
 			include/SpikeStreamXMLException.h \
 			include/NumberConversionException.h \
-			include/SpikeStreamAnalysisException.h
+			include/SpikeStreamAnalysisException.h \
+			include/SpikeStreamSimulationException.h
 SOURCES += src/exceptions/SpikeStreamDBException.cpp \
 			src/exceptions/SpikeStreamIOException.cpp \
 			src/exceptions/SpikeStreamException.cpp \
 			src/exceptions/SpikeStreamXMLException.cpp \
 			src/exceptions/NumberConversionException.cpp \
-			src/exceptions/SpikeStreamAnalysisException.cpp
+			src/exceptions/SpikeStreamAnalysisException.cpp \
+			src/exceptions/SpikeStreamSimulationException.cpp
 
 #----------------------------------------------#
 #---                model                   ---#

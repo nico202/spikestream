@@ -1,4 +1,5 @@
 #include "SpikeStreamException.h"
+using namespace spikestream;
 
 SpikeStreamException::SpikeStreamException(QString details){
        this->type = "SpikeStreamException";

@@ -161,6 +161,7 @@ void NemoWidget::nemoWrapperFinished(){
 	}
 }
 
+
 /*! Called when the network is changed.
 	Shows an error if this simulation is running, otherwise enables or disables the toolbar. */
 void NemoWidget::networkChanged(){
@@ -261,7 +262,7 @@ void NemoWidget::unloadSimulation(){
 		return;
 
 	//Unload the simulation
-	nemoWrapper->unload();
+	nemoWrapper->unloadSimulation();
 
 	//Set buttons appropriately
 	loadButton->setEnabled(true);
@@ -326,37 +327,37 @@ void NemoWidget::checkWidgetEnabled(){
 /*! Builds the toolbar that goes at the top of the page. */
 QToolBar* NemoWidget::getToolBar(){
 	QToolBar* tmpToolBar = new QToolBar(this);
-
-	QAction* tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/play.png"), "Start simulation", this);
-	connect(tmpAction, SIGNAL(triggered()), this, SLOT(startSimulation()));
-	//connect(Globals::getEventRouter(), SIGNAL(analysisNotRunningSignal(bool)), tmpAction, SLOT(setEnabled(bool)));
-	tmpToolBar->addAction (tmpAction);
-
-	tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/stop.png"), "Stop simulation", this);
-	connect(tmpAction, SIGNAL(triggered()), this, SLOT(stopSimulation()));
-	tmpToolBar->addAction (tmpAction);
-
-	tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/step.png"), "Step simulation", this);
-	connect(tmpAction, SIGNAL(triggered()), this, SLOT(stepSimulation()));
-
-	tmpToolBar->addAction (tmpAction);
-	simulationRateCombo = new QComboBox();
-	simulationRateCombo->addItem("1");
-	simulationRateCombo->addItem("5");
-	simulationRateCombo->addItem("10");
-	simulationRateCombo->addItem("15");
-	simulationRateCombo->addItem("20");
-	simulationRateCombo->addItem("25");
-	simulationRateCombo->addItem("Max");
-	connect(simulationRateCombo, SIGNAL(activated(int)), this, SLOT(simulationRateChanged(int)));
-	tmpToolBar->addWidget(simulationRateCombo);
-
-	timeStepLabel = new QLabel ("0");
-	timeStepLabel->setStyleSheet( "QLabel { margin-left: 5px; background-color: #ffffff; border-color: #555555; border-width: 2px; border-style: outset; font-weight: bold;}");
-	timeStepLabel->setMinimumSize(50, 20);
-	timeStepLabel->setMaximumSize(50, 20);
-	timeStepLabel->setAlignment(Qt::AlignCenter);
-	tmpToolBar->addWidget(timeStepLabel);
+//
+//	QAction* tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/play.png"), "Start simulation", this);
+//	connect(tmpAction, SIGNAL(triggered()), this, SLOT(startSimulation()));
+//	//connect(Globals::getEventRouter(), SIGNAL(analysisNotRunningSignal(bool)), tmpAction, SLOT(setEnabled(bool)));
+//	tmpToolBar->addAction (tmpAction);
+//
+//	tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/stop.png"), "Stop simulation", this);
+//	connect(tmpAction, SIGNAL(triggered()), this, SLOT(stopSimulation()));
+//	tmpToolBar->addAction (tmpAction);
+//
+//	tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/step.png"), "Step simulation", this);
+//	connect(tmpAction, SIGNAL(triggered()), this, SLOT(stepSimulation()));
+//
+//	tmpToolBar->addAction (tmpAction);
+//	simulationRateCombo = new QComboBox();
+//	simulationRateCombo->addItem("1");
+//	simulationRateCombo->addItem("5");
+//	simulationRateCombo->addItem("10");
+//	simulationRateCombo->addItem("15");
+//	simulationRateCombo->addItem("20");
+//	simulationRateCombo->addItem("25");
+//	simulationRateCombo->addItem("Max");
+//	connect(simulationRateCombo, SIGNAL(activated(int)), this, SLOT(simulationRateChanged(int)));
+//	tmpToolBar->addWidget(simulationRateCombo);
+//
+//	timeStepLabel = new QLabel ("0");
+//	timeStepLabel->setStyleSheet( "QLabel { margin-left: 5px; background-color: #ffffff; border-color: #555555; border-width: 2px; border-style: outset; font-weight: bold;}");
+//	timeStepLabel->setMinimumSize(50, 20);
+//	timeStepLabel->setMaximumSize(50, 20);
+//	timeStepLabel->setAlignment(Qt::AlignCenter);
+//	tmpToolBar->addWidget(timeStepLabel);
 
 	return tmpToolBar;
 }

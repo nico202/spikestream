@@ -3,11 +3,9 @@
 #include "NemoLoader.h"
 #include "NemoWrapper.h"
 #include "SpikeStreamException.h"
+#include "SpikeStreamSimulationException.h"
 using namespace spikestream;
 
-//Nemo includes
-//#include "nemo.hpp"
-//using namespace nemo;
 
 //Default parameter values
 #define DEFAULT_LOGGING 0
@@ -31,6 +29,8 @@ NemoWrapper::NemoWrapper(){
 
 /*! Destructor */
 NemoWrapper::~NemoWrapper(){
+	if(simulationLoaded)
+		unloadSimulation();
 
 }
 
@@ -109,8 +109,12 @@ void NemoWrapper::stop(){
 
 
 /*! Unloads the current simulation */
-void NemoWrapper::unload(){
-
+void NemoWrapper::unloadSimulation(){
+	if(nemoSimulation != NULL){
+		delete nemoSimulation;
+		nemoSimulation = NULL;
+		//FIXME: DELETE NETWORK??
+	}
 }
 
 
@@ -121,6 +125,7 @@ void NemoWrapper::unload(){
 /*! Called by other classes being executed by this class to inform this
 	class about progress with an operation */
 void NemoWrapper::updateProgress(int stepsComplete, int totalSteps){
+	qDebug()<<"NemoWrapper, progress: "<<stepsComplete<<" out of "<<totalSteps;
 	emit progress(stepsComplete, totalSteps);
 }
 
@@ -176,6 +181,11 @@ void NemoWrapper::clearError(){
 /*! Loads the simulation into the CUDA hardware */
 void NemoWrapper::loadSimulation(){
 	simulationLoaded = false;
+	nemoSimulation = NULL;
+
+	//Get the network
+	if(!Globals::networkLoaded())
+		throw SpikeStreamSimulationException("Cannot load simulation: no network loaded.");
 	Network* currentNetwork = Globals::getNetwork();
 
 	//Create network and archive daos and set them in the network
@@ -184,19 +194,20 @@ void NemoWrapper::loadSimulation(){
 	currentNetwork->setNetworkDao(netDao);
 	currentNetwork->setArchiveDao(archDao);
 
-	//Load the simulation
+	//Set up the configuration with the appropriate parameters
+	nemo::Configuration nemoConfig;
+
+	//Build the Nemo network
 	NemoLoader* nemoLoader = new NemoLoader();
 	connect(nemoLoader, SIGNAL(progress(int, int)), this, SLOT(updateProgress(int, int)));
-	//nemo::Simulation* nemoSim = nemoLoader->loadSimulation(currentNetwork, &stopThread);
+	nemo::Network* nemoNet = nemoLoader->buildNemoNetwork(currentNetwork, &stopThread);
 
 	//Load the network into the simulator
-	int cntr = 0;
-	while(cntr < 20 && !stopThread){
-		qDebug()<<"LOADING SIMULATION. COUNTER="<<cntr;
-		sleep(1);
-		++cntr;
-		emit progress(cntr, 20);
+	nemoSimulation = nemo::Simulation::create(*nemoNet, nemoConfig);
+	if(nemoSimulation == NULL) {
+		throw SpikeStreamSimulationException("Failed to create Nemo simulation - null returned.");
 	}
+
 	if(!stopThread)
 		simulationLoaded = true;
 

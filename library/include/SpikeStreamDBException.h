@@ -4,12 +4,16 @@
 //SpikeStream includes
 #include "SpikeStreamException.h"
 
-class SpikeStreamDBException : public SpikeStreamException {
-    public:
-	SpikeStreamDBException(QString details);
-	~SpikeStreamDBException();
+namespace spikestream {
 
-};
+	/*! Exception specific to database-related functionality */
+	class SpikeStreamDBException : public SpikeStreamException {
+		public:
+		SpikeStreamDBException(QString details);
+		~SpikeStreamDBException();
+
+	};
+}
 
 #endif//SPIKESTREAMDBEXCEPTION_H
 

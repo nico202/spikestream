@@ -215,6 +215,15 @@ void Network::deleteNeuronGroups(QList<unsigned int>& neurGrpIDList){
 }
 
 
+/*! Returns a complete list of connection groups */
+QList<ConnectionGroup*> Network::getConnectionGroups(){
+	QList<ConnectionGroup*> tmpList;
+	for(QHash<unsigned int, ConnectionGroup*>::iterator iter = connGrpMap.begin(); iter != connGrpMap.end(); ++iter)
+		tmpList.append(iter.value());
+	return tmpList;
+}
+
+
 /*! Returns a complete list of connection group infos */
 QList<ConnectionGroupInfo> Network::getConnectionGroupsInfo(){
     QList<ConnectionGroupInfo> tmpList;
@@ -232,6 +241,15 @@ QList<ConnectionGroupInfo> Network::getConnectionGroupsInfo(unsigned int synapse
 		if(iter.value()->getInfo().getSynapseTypeID() == synapseTypeID)
 			tmpList.append(iter.value()->getInfo());
 	}
+	return tmpList;
+}
+
+
+/*! Returns a list of the neuron groups in the network. */
+QList<NeuronGroup*> Network::getNeuronGroups(){
+	QList<NeuronGroup*> tmpList;
+	for(QHash<unsigned int, NeuronGroup*>::iterator iter = neurGrpMap.begin(); iter != neurGrpMap.end(); ++iter)
+		tmpList.append(iter.value());
 	return tmpList;
 }
 

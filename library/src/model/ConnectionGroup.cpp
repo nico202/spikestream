@@ -1,4 +1,5 @@
 #include "ConnectionGroup.h"
+#include "SpikeStreamException.h"
 using namespace spikestream;
 
 #include <iostream>
@@ -61,16 +62,25 @@ void ConnectionGroup::clearConnections(){
 
 /*! Returns a list of connections from the neuron with this ID.
     Empty list is returned if neuron id cannot be found. */
-const ConnectionList ConnectionGroup::getFromConnections(unsigned int neurID){
+ConnectionList ConnectionGroup::getFromConnections(unsigned int neurID){
     if(!fromConnectionMap.contains(neurID))
 		return ConnectionList();//Returns an empty connection list without filling map with invalid from and to neurons
     return fromConnectionMap[neurID];
 }
 
 
+/*! Returns the value of a named parameter.
+	Throws an exception if the parameter cannot be found. */
+double ConnectionGroup::getParameter(const QString& paramName){
+	if(!parameterMap.contains(paramName))
+		throw SpikeStreamException("Cannot find parameter with key: " + paramName + " in connection group with ID " + QString::number(info.getID()));
+	return  parameterMap[paramName];
+}
+
+
 /*! Returns a list of connections to the neuron with the specified id.
     Exception is thrown if the neuron cannot be found. */
-const ConnectionList ConnectionGroup::getToConnections(unsigned int neurID){
+ConnectionList ConnectionGroup::getToConnections(unsigned int neurID){
 	if(!toConnectionMap.contains(neurID))
 		return ConnectionList();//Returns an empty connection list without filling map with invalid from and to neurons
 	return toConnectionMap[neurID];
