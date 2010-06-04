@@ -2,13 +2,12 @@
 #define NEMOLOADER_H
 
 //SpikeStream includes
-#include "ArchiveDao.h"
-#include "NetworkDao.h"
 #include "Network.h"
 using namespace spikestream;
 
 //Nemo includes
-#include "nemo.hpp"
+#include "nemo.h"
+//#include "nemo.hpp"
 
 //Qt includes
 #include <QObject>
@@ -33,24 +32,18 @@ namespace spikestream {
 		public:
 			NemoLoader();
 			~NemoLoader();
-			nemo::Network* buildNemoNetwork(Network* network, const bool* stop);
+			nemo_network_t buildNemoNetwork(Network* network, const bool* stop);
 
 		signals:
 			void progress(int stepsCompleted, int totalSteps);
 
 		private:
 			//======================  VARIABLES  =======================
-			/*! Network to be loaded into the  */
-			NetworkDao* networkDao;
-
-			/*! Dao for the archive database - pass to class to enable it to run as a separate thread */
-			ArchiveDao* archiveDao;
-
 
 			//======================  METHODS  =======================
-			void addExcitatoryNeuronGroup(NeuronGroup* neuronGroup, nemo::Network* nemoNet, urng_t& ranNumGen);
-			void addInhibitoryNeuronGroup(NeuronGroup* neuronGroup, nemo::Network* nemoNet, urng_t& ranNumGen);
-			void addConnectionGroup(ConnectionGroup* conGroup, nemo::Network* nemoNet);
+			void addExcitatoryNeuronGroup(NeuronGroup* neuronGroup, nemo_network_t nemoNetwork, urng_t& ranNumGen);
+			void addInhibitoryNeuronGroup(NeuronGroup* neuronGroup, nemo_network_t nemoNetwork, urng_t& ranNumGen);
+			void addConnectionGroup(ConnectionGroup* conGroup, nemo_network_t nemoNetwork);
 	};
 }
 

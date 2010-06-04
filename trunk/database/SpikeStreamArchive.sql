@@ -31,7 +31,7 @@ ENGINE=InnoDB;
 CREATE TABLE ArchiveData (
 	ArchiveID MEDIUMINT UNSIGNED NOT NULL, /* References the meta data about the simulation run in the SimulationRun table. */
 	TimeStep INT UNSIGNED NOT NULL, /* The time step of the firing pattern. */
-	FiringNeurons LONGTEXT NOT NULL, /* Comma separated list of neuron ids that were firing at the time step. */
+	FiringNeurons LONGTEXT NOT NULL, /* List of neuron ids that were firing at the time step. Each four bytes is an ID*/
 
 	PRIMARY KEY (ArchiveID, TimeStep), /* Each simulation run is associated with a number of time steps, which should all be different. */
 	FOREIGN KEY ArchiveID_FK(ArchiveID) REFERENCES Archives(ArchiveID) ON DELETE CASCADE

@@ -2,14 +2,18 @@
 #define NEMOWRAPPER_H
 
 //SpikeStream includes
+#include "ArchiveDao.h"
+#include "ArchiveInfo.h"
+#include "NetworkDao.h"
 #include "ParameterInfo.h"
 
 //Qt includes
 #include <QHash>
+#include <QMutex>
 #include <QThread>
 
 //Nemo includes
-#include "nemo.hpp"
+#include "nemo.h"
 
 
 namespace spikestream {
@@ -22,20 +26,28 @@ namespace spikestream {
 		public:
 			NemoWrapper();
 			~NemoWrapper();
+			void clearWaitForGraphics() { waitForGraphics = false; }
+			unsigned getArchiveID() { return archiveInfo.getID(); }
 			int getCurrentTask() { return currentTaskID; }
 			QHash<QString, double> getDefaultParameterValues(){ return defaultParameterMap; }
 			QString getErrorMessage() { return errorMessage; }
 			QList<ParameterInfo> getParameterInfoList(){ return parameterInfoList; }
 			QHash<QString, double> getParameterValues(){ return parameterMap; }
+			unsigned getUpdateInterval_ms() { return this->updateInterval_ms; }
 			bool isError() { return error; }
+			bool isMonitorMode() { return monitorMode; }
 			bool isSimulationLoaded() { return simulationLoaded; }
 			void prepareLoadSimulation();
 			void prepareRunSimulation();
 			void run();
+			void setArchiveMode(bool mode);
+			void setFrameRate(unsigned int frameRate);
+			void setMonitorMode(bool mode);
 			void setParameters(const QHash<QString, double>& parameterMap);
+			void setUpdateInterval_ms(unsigned int interval) { this->updateInterval_ms = interval; }
+			void stepSimulation();
 			void stop();
 			void unloadSimulation();
-			void updatePprogress(int stepsComplete, int totalSteps);
 
 
 			///====================  VARIABLES  ==========================
@@ -51,6 +63,7 @@ namespace spikestream {
 
 		signals:
 			void progress(int stepsComplete, int totalSteps);
+			void timeStepChanged(unsigned int timeStep, const QList<unsigned>& neuronIDList);
 
 
 		private slots:
@@ -59,11 +72,29 @@ namespace spikestream {
 
 		private:
 			//======================  VARIABLES  ========================
+			/*! Thread specific version of the network dao */
+			NetworkDao* networkDao;
+
+			/*! Thread specific version of the archive dao */
+			ArchiveDao* archiveDao;
+
+			/*! Information about the archive */
+			ArchiveInfo archiveInfo;
+
 			/*! ID of the current task that is running */
 			int currentTaskID;
 
 			/*! Records that simulation is currently loaded and ready to play */
 			bool simulationLoaded;
+
+			/*! In archive mode the current firing neurons are written to disk */
+			bool archiveMode;
+
+			/*! In monitor mode a signal is emitted containing a list of the firing neurons */
+			bool monitorMode;
+
+			/*! The time step of the simulation */
+			unsigned int timeStepCounter;
 
 			/*! Records if an error has occurred */
 			bool error;
@@ -86,11 +117,28 @@ namespace spikestream {
 			QHash<QString, double> defaultParameterMap;
 
 			/*! Pointer to the Nemo simulation that has been constructed. */
-			nemo::Simulation* nemoSimulation;
+			nemo_simulation_t nemoSimulation;
 
+			/*! Interval between each time step in milliseconds. */
+			unsigned updateInterval_ms;
+
+			/*! In monitor mode we need to wait for the graphics to update before
+				moving on to the next time step */
+			bool waitForGraphics;
+
+			/*! Mutex controlling access to variables */
+			QMutex mutex;
+
+
+			//TEMPORARY FOR TESTING
+			QList<unsigned int> firingNeuronList;
+			unsigned int startNeuronID;
+			unsigned int networkSize;
+			void getRandomFiringNeurons(QList<unsigned>& neurIDList, unsigned percent);
 
 			//======================  METHODS  ========================
 			void buildParameters();
+			void checkNemoOutput(nemo_status_t result, const QString& message);
 			void clearError();
 			void loadSimulation();
 			void runSimulation();
