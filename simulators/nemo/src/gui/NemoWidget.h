@@ -3,8 +3,10 @@
 
 //SpikeStream includes
 #include "NemoWrapper.h"
+#include "RGBColor.h"
 
 //Qt includes
+#include <QAction>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QGroupBox>
@@ -36,7 +38,7 @@ namespace spikestream {
 			void setNeuronParameters();
 			void setNemoParameters();
 			void setSynapseParameters();
-			void simulationAdvanceOccurred(unsigned int timeStep);
+			void updateTimeStep(unsigned int timeStep, const QList<unsigned>& neuronIDList);
 			void simulationRateChanged(int comboIndex);
 			void startSimulation();
 			void stepSimulation();
@@ -51,6 +53,9 @@ namespace spikestream {
 
 			/*! Box holding all widgets - makes it easy to enable and disable everything. */
 			QGroupBox* mainGroupBox;
+
+			/*! Box holding widgets that need to be enabled when simulation is loaded */
+			QWidget* controlsWidget;
 
 			/*! Button for loading simulation */
 			QPushButton* loadButton;
@@ -69,6 +74,12 @@ namespace spikestream {
 
 			/*! Tool bar with transport controls for loading, playing, etc. */
 			QToolBar* toolBar;
+
+			/*! Play action */
+			QAction* playAction;
+
+			/*! Stop action */
+			QAction* stopAction;
 
 			/*! For user to enter a description of the archive */
 			QLineEdit* archiveDescriptionEdit;
@@ -90,6 +101,9 @@ namespace spikestream {
 
 			/*! Records if task has been cancelled */
 			bool taskCancelled;
+
+			/*! The colour of neurons that are currently firing */
+			RGBColor* neuronColor;
 
 			//=======================  METHODS  =========================
 			void checkForErrors();

@@ -15,13 +15,15 @@ namespace spikestream {
 
 	    void addArchive(ArchiveInfo& archiveInfo);
 	    void addArchiveData(unsigned int archiveID, unsigned int timeStep, const QString& firingNeuronString);
+		void addArchiveData(unsigned int archiveID, unsigned int timeStep, const QList<unsigned>& firingNeuronList);//UNTESTED
 	    void deleteArchive(unsigned int archiveID);
 	    QList<ArchiveInfo> getArchivesInfo(unsigned int networkID);
 	    int getArchiveSize(unsigned int archiveID);
 	    QStringList getFiringNeuronIDs(unsigned int archiveID, unsigned int timeStep);
 	    unsigned int getMaxTimeStep(unsigned int archiveID);
 	    unsigned int getMinTimeStep(unsigned int archiveID);
-            bool networkIsLocked(unsigned int networkID);
+		bool networkIsLocked(unsigned int networkID);
+		void setArchiveDescription(unsigned archiveID, const QString& description);//UNTESTED
 	};
 
 }

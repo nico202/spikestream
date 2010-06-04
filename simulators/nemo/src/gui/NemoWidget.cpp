@@ -3,12 +3,12 @@
 #include "NemoParametersDialog.h"
 #include "NemoWidget.h"
 #include "NeuronParametersDialog.h"
-#include "SpikeStreamException.h"
+#include "SpikeStreamSimulationException.h"
 #include "SynapseParametersDialog.h"
+#include "Util.h"
 using namespace spikestream;
 
 //Qt includes
-#include <QAction>
 #include <QDebug>
 #include <QLayout>
 #include <QMessageBox>
@@ -31,9 +31,15 @@ extern "C" {
 
 /*! Constructor */
 NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
-	//Create layout for the widget
+	//Register QList<unsigned> type to enable signals slots to work
+	qRegisterMetaType< QList<unsigned> >("QList<unsigned>");
+
+	//Create layout for the entire widget
 	QVBoxLayout* mainVBox = new QVBoxLayout(this);
 	mainGroupBox = new QGroupBox("Nemo CUDA Simulator", this);
+	controlsWidget = new QWidget();
+	controlsWidget->setEnabled(false);
+	QVBoxLayout* controlsVBox = new QVBoxLayout(controlsWidget);
 
 	//Add load, unload and parameters buttons
 	loadButton = new QPushButton("Load");
@@ -57,26 +63,29 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 
 	//Add the tool bar
 	toolBar = getToolBar();
-	mainVBox->addWidget(toolBar);
+	controlsVBox->addWidget(toolBar);
 
 	//Add widget to control live monitoring of simulation
 	QCheckBox* monitorCheckBox = new QCheckBox("Monitor");
 	connect(monitorCheckBox, SIGNAL(stateChanged(int)), this, SLOT(monitorStateChanged(int)));
-	mainVBox->addWidget(monitorCheckBox);
+	controlsVBox->addWidget(monitorCheckBox);
 
 	//Add widgets to control archiving
-	QCheckBox* archiveCheckBox = new QCheckBox("Archive. Description: ");
+	QCheckBox* archiveCheckBox = new QCheckBox("Archive.");
 	connect(archiveCheckBox, SIGNAL(stateChanged(int)), this, SLOT(archiveStateChanged(int)));
 	archiveDescriptionEdit = new QLineEdit("Undescribed");
-	setArchiveDescriptionButton = new QPushButton("Set");
+	archiveDescriptionEdit->setEnabled(false);
+	setArchiveDescriptionButton = new QPushButton("Set Description");
+	setArchiveDescriptionButton->setEnabled(false);
 	connect(setArchiveDescriptionButton, SIGNAL(clicked()), this, SLOT(setArchiveDescription()));
 	QHBoxLayout* archiveLayout = new QHBoxLayout();
 	archiveLayout->addWidget(archiveCheckBox);
 	archiveLayout->addWidget(archiveDescriptionEdit);
 	archiveLayout->addWidget(setArchiveDescriptionButton);
-	mainVBox->addLayout(archiveLayout);
+	controlsVBox->addLayout(archiveLayout);
 
 	//Put layout into enclosing box
+	mainVBox->addWidget(controlsWidget);
 	mainGroupBox->setLayout(mainVBox);
 	this->setMinimumSize(800, 700);
 
@@ -84,6 +93,7 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	nemoWrapper = new NemoWrapper();
 	connect(nemoWrapper, SIGNAL(finished()), this, SLOT(nemoWrapperFinished()));
 	connect(nemoWrapper, SIGNAL(progress(int,int)), this, SLOT(updateProgress(int, int)), Qt::QueuedConnection);
+	connect(nemoWrapper, SIGNAL(timeStepChanged(unsigned, const QList<unsigned>&)), this, SLOT(updateTimeStep(unsigned, const QList<unsigned>&)), Qt::QueuedConnection);
 
 	//Listen for network changes
 	connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(networkChanged()));
@@ -108,12 +118,24 @@ NemoWidget::~NemoWidget(){
 
 /*! Switches the archiving of the simulation on or off */
 void NemoWidget::archiveStateChanged(int state){
-
+	if(state == Qt::Checked){
+		archiveDescriptionEdit->setEnabled(true);
+		setArchiveDescriptionButton->setEnabled(true);
+		nemoWrapper->setArchiveMode(true);
+	}
+	else{
+		archiveDescriptionEdit->setEnabled(false);
+		setArchiveDescriptionButton->setEnabled(false);
+		nemoWrapper->setArchiveMode(false);
+	}
 }
 
 
 /*! Instructs the Nemo wrapper to load the network from the database into Nemo */
 void NemoWidget::loadSimulation(){
+
+	RESET CHECK BOXES AFTER AN UNLOAD
+
 	if(!Globals::networkLoaded()){
 		qCritical()<<"Cannot load simulation: no network loaded.";
 		return;
@@ -123,6 +145,10 @@ void NemoWidget::loadSimulation(){
 		return;
 	}
 	try{
+		//Store the current neuron colour for monitoring
+		neuronColor = Globals::getNetworkDisplay()->getFiringNeuronColor();
+
+		//Start loading of simulation
 		taskCancelled = false;
 		nemoWrapper->prepareLoadSimulation();
 		progressDialog = new QProgressDialog("Loading simulation", "Cancel", 0, 100, this);
@@ -138,7 +164,16 @@ void NemoWidget::loadSimulation(){
 
 /*! Switches the monitoring of the simulation on or off */
 void NemoWidget::monitorStateChanged(int state){
+	if(state == Qt::Checked)
+		nemoWrapper->setMonitorMode(true);
+	else{
+		//Set the monitor mode
+		nemoWrapper->setMonitorMode(false);
 
+		//Clear highlights
+		QHash<unsigned int, RGBColor*>* newHighlightMap = new QHash<unsigned int, RGBColor*>();
+		Globals::getNetworkDisplay()->setNeuronColorMap(newHighlightMap);
+	}
 }
 
 
@@ -151,9 +186,15 @@ void NemoWidget::nemoWrapperFinished(){
 			if(!taskCancelled){
 				loadButton->setEnabled(false);
 				unloadButton->setEnabled(true);
+				neuronParametersButton->setEnabled(false);
+				synapseParametersButton->setEnabled(false);
+				nemoParametersButton->setEnabled(false);
+				controlsWidget->setEnabled(true);
 			}
 		break;
 		case NemoWrapper::RUN_SIMULATION_TASK :
+			playAction->setEnabled(true);
+			stopAction->setEnabled(false);
 			qDebug()<<"NemoWidget: Simulation run finished";
 		break;
 		default :
@@ -175,7 +216,11 @@ void NemoWidget::networkChanged(){
 
 /*! Sets the archive description using the contents of the archiveDescriptionEdit text field */
 void NemoWidget::setArchiveDescription(){
-
+	if(archiveDescriptionEdit->text().isEmpty())
+		archiveDescriptionEdit->setText("Undescribed");
+	if(nemoWrapper->getArchiveID() == 0)
+		throw SpikeStreamSimulationException("Attempting to set archive description when no archive is loaded.");
+	Globals::getArchiveDao()->setArchiveDescription(nemoWrapper->getArchiveID(), archiveDescriptionEdit->text());
 }
 
 
@@ -209,20 +254,35 @@ void NemoWidget::setSynapseParameters(){
 
 
 /*! Called when the simulation has advanced one time step */
-void NemoWidget::simulationAdvanceOccurred(unsigned int timeStep){
+void NemoWidget::updateTimeStep(unsigned int timeStep, const QList<unsigned>& neuronIDList){
+	timeStepLabel->setText(QString::number(timeStep));
 
+	if(nemoWrapper->isMonitorMode()){
+		//Fill map with neuron ids
+		QHash<unsigned int, RGBColor*>* newHighlightMap = new QHash<unsigned int, RGBColor*>();
+		QList<unsigned>::const_iterator endList = neuronIDList.end();
+		for(QList<unsigned>::const_iterator iter = neuronIDList.begin(); iter != endList; ++iter){
+			(*newHighlightMap)[*iter] = neuronColor;
+		}
 
-	//Update the time step label
-	//timeStepLabel->setText(nemoWrapper->getTimeStep());
+		//Set network display
+		Globals::getNetworkDisplay()->setNeuronColorMap(newHighlightMap);
+	}
 
+	//Allow simulation to proceed on to next step
+	nemoWrapper->clearWaitForGraphics();
 }
 
 
 /*! Called when the rate of the simulation has been changed by the user. */
-void NemoWidget::simulationRateChanged(int comboIndex){
-
+void NemoWidget::simulationRateChanged(int){
+	if(simulationRateCombo->currentText() == "Max")
+		nemoWrapper->setFrameRate(0);
+	else{
+		unsigned int frameRate = Util::getUInt(simulationRateCombo->currentText());
+		nemoWrapper->setFrameRate(frameRate);
+	}
 }
-
 
 
 /*! Starts the simulation running */
@@ -234,6 +294,8 @@ void NemoWidget::startSimulation(){
 	try{
 		nemoWrapper->prepareRunSimulation();
 		nemoWrapper->start();
+		playAction->setEnabled(false);
+		stopAction->setEnabled(true);
 	}
 	catch(SpikeStreamException& ex){
 		qCritical()<<ex.getMessage();
@@ -243,21 +305,28 @@ void NemoWidget::startSimulation(){
 
 /*! Advances the simulation by one time step */
 void NemoWidget::stepSimulation(){
+    //Stop thread if it is running. Step will be done when thread finishes
+	if(nemoWrapper->isRunning()){
+		nemoWrapper->stop();
+	}
 
+	//Simulation not running, so just step
+	else{
+		nemoWrapper->stepSimulation();
+	}
 }
 
 
 /*! Stops the simulation */
 void NemoWidget::stopSimulation(){
 	nemoWrapper->stop();
-
 }
 
 
 /*! Instructs the nemo wrapper to discard the current simulation */
 void NemoWidget::unloadSimulation(){
 	//Double check that user wants to unload simulation
-	int response = QMessageBox::warning(this, "Deleting Network", "Are you sure that you want to unload the simulation?", QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel);
+	int response = QMessageBox::warning(this, "Unload?", "Are you sure that you want to unload the simulation?", QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel);
 	if(response != QMessageBox::Ok)
 		return;
 
@@ -267,6 +336,10 @@ void NemoWidget::unloadSimulation(){
 	//Set buttons appropriately
 	loadButton->setEnabled(true);
 	unloadButton->setEnabled(false);
+	neuronParametersButton->setEnabled(true);
+	synapseParametersButton->setEnabled(true);
+	nemoParametersButton->setEnabled(true);
+	controlsWidget->setEnabled(false);
 }
 
 
@@ -327,37 +400,37 @@ void NemoWidget::checkWidgetEnabled(){
 /*! Builds the toolbar that goes at the top of the page. */
 QToolBar* NemoWidget::getToolBar(){
 	QToolBar* tmpToolBar = new QToolBar(this);
-//
-//	QAction* tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/play.png"), "Start simulation", this);
-//	connect(tmpAction, SIGNAL(triggered()), this, SLOT(startSimulation()));
-//	//connect(Globals::getEventRouter(), SIGNAL(analysisNotRunningSignal(bool)), tmpAction, SLOT(setEnabled(bool)));
-//	tmpToolBar->addAction (tmpAction);
-//
-//	tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/stop.png"), "Stop simulation", this);
-//	connect(tmpAction, SIGNAL(triggered()), this, SLOT(stopSimulation()));
-//	tmpToolBar->addAction (tmpAction);
-//
-//	tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/step.png"), "Step simulation", this);
-//	connect(tmpAction, SIGNAL(triggered()), this, SLOT(stepSimulation()));
-//
-//	tmpToolBar->addAction (tmpAction);
-//	simulationRateCombo = new QComboBox();
-//	simulationRateCombo->addItem("1");
-//	simulationRateCombo->addItem("5");
-//	simulationRateCombo->addItem("10");
-//	simulationRateCombo->addItem("15");
-//	simulationRateCombo->addItem("20");
-//	simulationRateCombo->addItem("25");
-//	simulationRateCombo->addItem("Max");
-//	connect(simulationRateCombo, SIGNAL(activated(int)), this, SLOT(simulationRateChanged(int)));
-//	tmpToolBar->addWidget(simulationRateCombo);
-//
-//	timeStepLabel = new QLabel ("0");
-//	timeStepLabel->setStyleSheet( "QLabel { margin-left: 5px; background-color: #ffffff; border-color: #555555; border-width: 2px; border-style: outset; font-weight: bold;}");
-//	timeStepLabel->setMinimumSize(50, 20);
-//	timeStepLabel->setMaximumSize(50, 20);
-//	timeStepLabel->setAlignment(Qt::AlignCenter);
-//	tmpToolBar->addWidget(timeStepLabel);
+
+	playAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/play.png"), "Start simulation", this);
+	connect(playAction, SIGNAL(triggered()), this, SLOT(startSimulation()));
+	tmpToolBar->addAction (playAction);
+
+	stopAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/stop.png"), "Stop simulation", this);
+	connect(stopAction, SIGNAL(triggered()), this, SLOT(stopSimulation()));
+	stopAction->setEnabled(false);
+	tmpToolBar->addAction (stopAction);
+
+	QAction* tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/step.png"), "Step simulation", this);
+	connect(tmpAction, SIGNAL(triggered()), this, SLOT(stepSimulation()));
+
+	tmpToolBar->addAction (tmpAction);
+	simulationRateCombo = new QComboBox();
+	simulationRateCombo->addItem("1");
+	simulationRateCombo->addItem("5");
+	simulationRateCombo->addItem("10");
+	simulationRateCombo->addItem("15");
+	simulationRateCombo->addItem("20");
+	simulationRateCombo->addItem("25");
+	simulationRateCombo->addItem("Max");
+	connect(simulationRateCombo, SIGNAL(activated(int)), this, SLOT(simulationRateChanged(int)));
+	tmpToolBar->addWidget(simulationRateCombo);
+
+	timeStepLabel = new QLabel ("0");
+	timeStepLabel->setStyleSheet( "QLabel { margin-left: 5px; background-color: #ffffff; border-color: #555555; border-width: 2px; border-style: outset; font-weight: bold;}");
+	timeStepLabel->setMinimumSize(50, 20);
+	timeStepLabel->setMaximumSize(50, 20);
+	timeStepLabel->setAlignment(Qt::AlignCenter);
+	tmpToolBar->addWidget(timeStepLabel);
 
 	return tmpToolBar;
 }

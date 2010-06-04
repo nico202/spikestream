@@ -14,6 +14,9 @@ namespace spikestream {
 	public:
 
 	public slots:
+		//Archive slots
+		void archiveListChangedSlot() { emit archiveListChangedSignal(); }
+
 		//Analysis slots
 		void analysisStarted() { emit analysisStartedSignal(); emit analysisNotRunningSignal(false); }
 		void analysisStopped() { emit analysisStoppedSignal(); emit analysisNotRunningSignal(true); }
@@ -30,6 +33,7 @@ namespace spikestream {
 
 		//Archive signals
 		void archiveChangedSignal();
+		void archiveListChangedSignal();
 		void archiveTimeStepChangedSignal();
 
 		//OpenGL signals

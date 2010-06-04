@@ -87,8 +87,8 @@ void ArchivePlayerThread::run(){
 
     //Check archive has been set
     if(archiveID == 0){
-	setError("No archive set.");
-	return;
+		setError("No archive set.");
+		return;
     }
 
     //Connect to the database
@@ -103,55 +103,55 @@ void ArchivePlayerThread::run(){
     unsigned int lastTimeStep = archiveDao->getMaxTimeStep(archiveID);
 
     if(timeStep > lastTimeStep){
-	setError("Play time step is greater than the maximum time step.");
+		setError("Play time step is greater than the maximum time step.");
     }
 
     Globals::setArchivePlaying(true);
 
     while(!stopThread){
-	//Record the current time
-	startTime = QTime::currentTime();
+		//Record the current time
+		startTime = QTime::currentTime();
 
-	try{
-	    //Get a map of the neurons firing at this time step with the appropriate highlight color
-	    QHash<unsigned int, RGBColor*>* newHighlightMap = getNeuronColorMap(timeStep);
+		try{
+			//Get a map of the neurons firing at this time step with the appropriate highlight color
+			QHash<unsigned int, RGBColor*>* newHighlightMap = getNeuronColorMap(timeStep);
 
-	    //Pass map to network display, which will delete the old map
-	    Globals::getNetworkDisplay()->setNeuronColorMap(newHighlightMap);
-	    Globals::getArchive()->setTimeStep(timeStep);
+			//Pass map to network display, which will delete the old map
+			Globals::getNetworkDisplay()->setNeuronColorMap(newHighlightMap);
+			Globals::getArchive()->setTimeStep(timeStep);
 
-	    //Signal to other classes that time step has changed
-	    emit archiveTimeStepChanged();
+			//Signal to other classes that time step has changed
+			emit archiveTimeStepChanged();
 
-	    //Increase time step and quit if we are at the maximum
-	    ++timeStep;
-	    if(timeStep > lastTimeStep){
-		stopThread = true;
-	    }
-	    //Only display one time step in step mode
-	    else if (stepMode){
-		stopThread = true;
-		stepMode = false;
-	    }
-	    //Sleep until the next time step
-	    else {
-		//Lock mutex so that update time interval cannot change during this calculation
-		mutex.lock();
+			//Increase time step and quit if we are at the maximum
+			++timeStep;
+			if(timeStep > lastTimeStep){
+				stopThread = true;
+			}
+			//Only display one time step in step mode
+			else if (stepMode){
+				stopThread = true;
+				stepMode = false;
+			}
+			//Sleep until the next time step
+			else {
+				//Lock mutex so that update time interval cannot change during this calculation
+				mutex.lock();
 
-		//Sleep if task was completed in less than the prescribed interval
-		elapsedTime_ms = startTime.msecsTo(QTime::currentTime());
-		if(elapsedTime_ms < updateInterval_ms){
-		     //Sleep for remaning time
-		     usleep(1000 * (updateInterval_ms - elapsedTime_ms));
+				//Sleep if task was completed in less than the prescribed interval
+				elapsedTime_ms = startTime.msecsTo(QTime::currentTime());
+				if(elapsedTime_ms < updateInterval_ms){
+					//Sleep for remaning time
+					usleep(1000 * (updateInterval_ms - elapsedTime_ms));
+				}
+
+				//Unlock mutex
+				mutex.unlock();
+			}
 		}
-
-		//Unlock mutex
-		mutex.unlock();
-	    }
-	}
-	catch(SpikeStreamException &ex){
-	    setError(ex.getMessage());
-	}
+		catch(SpikeStreamException &ex){
+			setError(ex.getMessage());
+		}
     }
 
     Globals::setArchivePlaying(false);
@@ -177,7 +177,7 @@ void ArchivePlayerThread::clearError(){
 QHash<unsigned int, RGBColor*>* ArchivePlayerThread::getNeuronColorMap(int timeStep){
     //Check archive dao has been initialized
     if(archiveDao == NULL){
-	throw SpikeStreamException("ArchiveDao has not been set.");
+		throw SpikeStreamException("ArchiveDao has not been set.");
     }
 
     //Get string list of firing neuron ids
@@ -189,12 +189,12 @@ QHash<unsigned int, RGBColor*>* ArchivePlayerThread::getNeuronColorMap(int timeS
 
     //Return empty map if no neurons are firing at this time step
     if(neuronIDList.isEmpty())
-	return newHighlightMap;
+		return newHighlightMap;
 
     //Fill map with neuron ids
     QStringListIterator iter(neuronIDList);
     while (iter.hasNext()){
-	(*newHighlightMap)[Util::getUInt(iter.next())] = neuronColor;
+		(*newHighlightMap)[Util::getUInt(iter.next())] = neuronColor;
     }
 
     //Return the pointer to the map that has been created

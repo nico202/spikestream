@@ -6,10 +6,7 @@ using namespace spikestream;
 
 /*! Empty constructor */
 ArchiveInfo::ArchiveInfo(){
-    this->id = 0;
-    this->networkID = 0;
-    this->startDateTime = QDateTime::fromTime_t(0);
-    this->description = "";
+	reset();
 }
 
 
@@ -40,6 +37,11 @@ ArchiveInfo::~ArchiveInfo(){
 }
 
 
+/*----------------------------------------------------------*/
+/*-----                PUBLIC METHODS                  -----*/
+/*----------------------------------------------------------*/
+
+
 /*! Assignment operator */
 ArchiveInfo& ArchiveInfo::operator=(const ArchiveInfo& rhs){
     //Check for self assignment
@@ -51,6 +53,14 @@ ArchiveInfo& ArchiveInfo::operator=(const ArchiveInfo& rhs){
     this->startDateTime = rhs.startDateTime;
     this->description = rhs.description;
     return *this;
+}
+
+/*! Resets the class to default values */
+void ArchiveInfo::reset(){
+	this->id = 0;
+	this->networkID = 0;
+	this->startDateTime = QDateTime::fromTime_t(0);
+	this->description = "Undescribed";
 }
 
 

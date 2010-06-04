@@ -26,15 +26,43 @@ void ArchiveDao::addArchive(ArchiveInfo& archInfo){
     //Check id is correct and add to network info if it is
     int lastInsertID = query.lastInsertId().toInt();
     if(lastInsertID >= START_ARCHIVE_ID)
-	archInfo.setID(lastInsertID);
+		archInfo.setID(lastInsertID);
     else
-	throw SpikeStreamDBException("Insert ID for Archives is invalid: " + QString::number(lastInsertID));
+		throw SpikeStreamDBException("Insert ID for Archives is invalid: " + QString::number(lastInsertID));
 }
 
 
 /*! Adds data to the archive with the specified ID.*/
 void ArchiveDao::addArchiveData(unsigned int archiveID, unsigned int timeStep, const QString& firingNeuronString){
     executeQuery("INSERT INTO ArchiveData(ArchiveID, TimeStep, FiringNeurons) VALUES (" + QString::number(archiveID) + ", " + QString::number(timeStep) + ", '"  + firingNeuronString + "')");
+}
+
+
+/*! Adds data to the archive with the specified ID.*/
+void ArchiveDao::addArchiveData(unsigned int archiveID, unsigned int timeStep, const QList<unsigned>& firingNeuronList){
+
+//	QByteArray ba;
+//	QFile f(fileName);
+//	if(f.open(QIODevice::ReadOnly))
+//	{
+//	ba = f.readAll();
+//	f.close();
+//	}
+//
+//	// Writing the image into table
+//	QSqlDatabase::database().transaction();
+//	QSqlQuery query;
+//	query.prepare( "INSERT INTO picture ( IMAGE ) VALUES (:IMAGE)" );
+//	query.bindValue(":IMAGE", ba);
+
+	//FIXME: SORT THIS OUT WHEN I CONVERT TO BLOB
+	//Build firing neuron string
+	QString tmpStr;
+	QList<unsigned>::const_iterator endList = firingNeuronList.end();
+	for(QList<unsigned>::const_iterator iter = firingNeuronList.begin(); iter != endList; ++iter)
+		tmpStr += QString::number(*iter) + ",";
+	tmpStr.truncate(tmpStr.size() - 1);
+	addArchiveData(archiveID, timeStep, tmpStr);
 }
 
 
@@ -50,16 +78,16 @@ QList<ArchiveInfo> ArchiveDao::getArchivesInfo(unsigned int networkID){
     executeQuery(query);
     QList<ArchiveInfo> tmpList;
     for(int i=0; i<query.size(); ++i){
-	query.next();
-	unsigned int archiveID = Util::getUInt(query.value(0).toString());
-	tmpList.append(
-		ArchiveInfo(
-			archiveID,
-			networkID,
-			Util::getUInt(query.value(1).toString()),//Start time as a unix timestamp
-			query.value(2).toString()//Description
-		)
-	);
+		query.next();
+		unsigned int archiveID = Util::getUInt(query.value(0).toString());
+		tmpList.append(
+				ArchiveInfo(
+						archiveID,
+						networkID,
+						Util::getUInt(query.value(1).toString()),//Start time as a unix timestamp
+						query.value(2).toString()//Description
+						)
+				);
     }
     return tmpList;
 }
@@ -99,7 +127,7 @@ QStringList ArchiveDao::getFiringNeuronIDs(unsigned int archiveID, unsigned int 
     executeQuery(query);
     //Return empty string if no entries for this time step
     if(query.size() == 0)
-	return QStringList();
+		return QStringList();
 
     //Return the list of firing neuron ids
     query.next();
@@ -114,10 +142,15 @@ bool ArchiveDao::networkIsLocked(unsigned int networkID){
     executeQuery(query);
     query.next();
     if(query.value(0).toUInt() == 0)
-	return false;
+		return false;
     return true;
 }
 
+
+/*! Sets the archive description */
+void ArchiveDao::setArchiveDescription(unsigned archiveID, const QString &description){
+	executeQuery("UPDATE Archives SET Description='" + description + "' WHERE ArchiveID=" + QString::number(archiveID));
+}
 
 
 
