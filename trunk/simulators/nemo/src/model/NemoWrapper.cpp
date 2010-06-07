@@ -51,7 +51,6 @@ void NemoWrapper::prepareLoadSimulation(){
 
 	//Set the task to load
 	currentTaskID = LOAD_SIMULATION_TASK;
-
 }
 
 
@@ -67,6 +66,7 @@ void NemoWrapper::prepareRunSimulation(){
 void NemoWrapper::run(){
 	stopThread = false;
 	clearError();
+
 	try{
 		//Create thread specific network and arhive daos
 		networkDao = new NetworkDao(Globals::getNetworkDao()->getDBInfo());
@@ -78,7 +78,9 @@ void NemoWrapper::run(){
 				loadSimulation();
 			break;
 			case RUN_SIMULATION_TASK:
+				Globals::setSimulationRunning(true);
 				runSimulation();
+				Globals::setSimulationRunning(false);
 			break;
 			default:
 				throw SpikeStreamException("Task ID not recognized.");
@@ -94,6 +96,7 @@ void NemoWrapper::run(){
 	catch(...){
 		setError("An unknown error occurred while NemoWrapper thread was running.");
 	}
+
 	stopThread = true;
 }
 
@@ -109,11 +112,12 @@ void NemoWrapper::setFrameRate(unsigned int frameRate){
 		this->updateInterval_ms = 1000 / frameRate;
 }
 
+
 /*! Sets the archive mode.
 	An archive is created the first time this method is called after the simulation has loaded. */
 void NemoWrapper::setArchiveMode(bool mode){
-	if(!simulationLoaded)
-		throw SpikeStreamSimulationException("Cannot set archive mode unless simulation is loaded.");
+	if(mode && !simulationLoaded)
+		throw SpikeStreamSimulationException("Cannot switch archive mode on unless simulation is loaded.");
 
 	/* Create archive if this is the first time the mode has been set
 		Use globals archive dao because this method is called from a separate thread */
@@ -124,6 +128,7 @@ void NemoWrapper::setArchiveMode(bool mode){
 
 	this->archiveMode = mode;
 }
+
 
 /*! Sets the monitor mode, which controls whether data is extracted from the simulation at each time step */
 void NemoWrapper::setMonitorMode(bool mode){
@@ -200,6 +205,7 @@ void NemoWrapper::unloadSimulation(){
 //		//FIXME: DELETE NETWORK??
 //	}
 	simulationLoaded = false;
+	Globals::setSimulationLoaded(false);
 }
 
 
@@ -275,6 +281,8 @@ void NemoWrapper::loadSimulation(){
 	nemoSimulation = NULL;
 	timeStepCounter = 0;
 	waitForGraphics = false;
+	archiveMode = false;
+	monitorMode = false;
 
 	//Get the network
 	if(!Globals::networkLoaded())

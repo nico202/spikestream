@@ -6,10 +6,12 @@
 #include "ConnectionGroupInfo.h"
 using namespace spikestream;
 
+/*! A list of conneections */
 typedef QList<Connection*> ConnectionList;
 
 namespace spikestream {
 
+	/*! Holds all of the connections in a connection group along with their parameters. */
     class ConnectionGroup {
 		public:
 			ConnectionGroup(const ConnectionGroupInfo& connGrpInfo);

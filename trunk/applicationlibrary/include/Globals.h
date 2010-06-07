@@ -24,6 +24,7 @@ namespace spikestream {
 		public:
 			static bool archiveLoaded();
 			static void cleanUp();
+			static void clearAnalysisRunning(const QString& analysisName);
 			static unsigned int getAnalysisID(const QString& analysisName);
 			static AnalysisDao* getAnalysisDao();
 			static Archive* getArchive();
@@ -35,14 +36,21 @@ namespace spikestream {
 			static QString getSpikeStreamRoot();
 			static QString getWorkingDirectory();
 			static float getVertexSize();
+			static bool isAnalysisRunning();
 			static bool isArchivePlaying();
 			static bool isAnalysisLoaded(const QString& analysisName);
 			static bool isDrawAxes();
+			static bool isSimulationLoaded();
+			static bool isSimulationRunning();
 			static bool isRendering();
 			static bool networkLoaded();
 			static void setAnalysisID(const QString& analysisName, unsigned int id);
+			static void setAnalysisRunning(const QString& analysisName);
 			static void setArchivePlaying(bool archivePlaying);
 			static void setDrawAxes(bool drawAxes);
+			static void setSimulationLoaded(bool simulationLoaded);
+			static void setSimulationLoading(bool simulationLoading);
+			static void setSimulationRunning(bool simulationRunning);
 			static void setVertexSize(float vertexSize);
 
 			/* Friend classes that are allowed to change the state of Globals
@@ -79,6 +87,18 @@ namespace spikestream {
 			/*! Stores the id for each analysis type.
 				An ID of 0 indicates that no analysis is loaded for that type. */
 			static QHash<QString, unsigned int> analysisMap;
+
+			/*! Records whether a particular analysis is running. */
+			static QHash<QString, bool> analysisRunningMap;
+
+			/*! Records if a simulation is loaded */
+			static bool simulationLoaded;
+
+			/*! Records if a simulation is in the process of being loaded */
+			static bool simulationLoading;
+
+			/*! Records if a simulation is running */
+			static bool simulationRunning;
 
 			/*! Class controlling how the current network is displayed */
 			static NetworkDisplay* networkDisplay;

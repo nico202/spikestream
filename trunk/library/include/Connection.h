@@ -4,7 +4,7 @@
 namespace spikestream {
 
     /*! Holds information about each connection. Should match the information stored
-	in the Connections table of the SpikeStream database */
+		in the Connections table of the SpikeStreamNetwork database. */
     class Connection{
 		public:
 			Connection (unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight, float tempWeight);

@@ -11,6 +11,7 @@ using namespace std;
 
 //Declare static variables
 QHash<QString, unsigned int> Globals::analysisMap;
+QHash<QString, bool> Globals::analysisRunningMap;
 AnalysisDao* Globals::analysisDao = NULL;
 Archive* Globals::archive = NULL;
 ArchiveDao* Globals::archiveDao = NULL;
@@ -24,11 +25,19 @@ QString Globals::spikeStreamRoot = "";
 QString Globals::workingDirectory = "";
 bool Globals::drawAxes = true;
 float Globals::vertexSize = 7.5f;
+bool Globals::simulationLoaded = false;
+bool Globals::simulationRunning = false;
 
 
 /*---------------------------------------------------------------------------------*/
 /*----------                  PUBLIC METHODS                          -------------*/
 /*---------------------------------------------------------------------------------*/
+
+/*! Clears the running state for a particular analysis */
+void Globals::clearAnalysisRunning(const QString &analysisName){
+	analysisRunningMap.remove(analysisName);
+}
+
 
 /*! Returns true if an analysis is loaded */
 bool Globals::isAnalysisLoaded(const QString& analysisName){
@@ -41,6 +50,15 @@ bool Globals::isAnalysisLoaded(const QString& analysisName){
 
 	//No entry in map so no analysis loaded
 	return false;
+}
+
+
+/*! Returns true if any analysis is running */
+bool Globals::isAnalysisRunning(){
+	//Analysis running map is empty, so no analyses are running
+	if(analysisRunningMap.isEmpty())
+		return false;
+	return true;
 }
 
 
@@ -172,15 +190,45 @@ bool Globals::isArchivePlaying() {
 }
 
 
+/*! Returns true if a simulation is being loaded */
+bool  Globals::isSimulationLoaded(){
+	return Globals::simulationLoaded;
+}
+
+
+/*! Returns true if a simulation is running */
+bool  Globals::isSimulationRunning(){
+	return Globals::simulationRunning;
+}
+
+
 /*! Sets the analysis id. An id of 0 indicates that no analysis is loaded. */
 void Globals::setAnalysisID(const QString& analysisName, unsigned int id){
 	analysisMap[analysisName] = id;
 }
 
 
+/*! Records that a particular analysis is running */
+void Globals::setAnalysisRunning(const QString &analysisName){
+	analysisRunningMap[analysisName] = true;
+}
+
+
 /*! Sets parameter controlling whether axes are displayed in the 3D viewer */
 void Globals::setDrawAxes(bool drawAxes){
 	Globals::drawAxes = drawAxes;
+}
+
+
+/*! Sets the simulation loaded state */
+void Globals::setSimulationLoaded(bool simulationLoaded){
+	Globals::simulationLoaded = simulationLoaded;
+}
+
+
+/*! Sets the simulation running state */
+void Globals::setSimulationRunning(bool simulationRunning){
+	Globals::simulationRunning = simulationRunning;
 }
 
 

@@ -6,7 +6,7 @@
 
 namespace spikestream {
 
-	/*! Holds information about a database  */
+	/*! Holds information about a database.  */
     class DBInfo {
 		public:
 			DBInfo(QString host, QString user, QString password, QString database);

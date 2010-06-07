@@ -13,7 +13,7 @@ SUBDIRS =   library applicationlibrary application
 
 
 #================  NEURON GROUP PLUGINS  =================
-SUBDIRS += neurongroups/cuboid
+#SUBDIRS += neurongroups/cuboid
 
 
 #================  SIMULATION PLUGINS  =================
@@ -25,7 +25,7 @@ SUBDIRS += simulators/nemo
 
 
 #=================  TESTS  ===================
-SUBDIRS += testlibrary library/test
+#SUBDIRS += testlibrary library/test
 #applicationlibrary/test analysis/statebasedphi/test analysis/liveliness/test
 
 
