@@ -6,7 +6,6 @@
 using namespace spikestream;
 
 //Qt includes
-#include <QAction>
 #include <QLabel>
 #include <QMessageBox>
 #include <QPixmap>
@@ -42,8 +41,8 @@ ArchiveWidget_V2::ArchiveWidget_V2(QWidget* parent) : QWidget(parent){
     verticalBox->addStretch(1);
 
     //Listen for changes in the network and archive
-	//connect(Globals::getEventRouter(), SIGNAL(archiveChangedSignal()), this, SLOT(loadArchiveList()));
     connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(loadArchiveList()));
+	connect(Globals::getEventRouter(), SIGNAL(archiveListChangedSignal()), this, SLOT(loadArchiveList()));
 
     //Inform other classes when a different archive is loaded
     connect(this, SIGNAL(archiveChanged()), Globals::getEventRouter(), SLOT(archiveChangedSlot()));
@@ -250,6 +249,9 @@ void ArchiveWidget_V2::rewindButtonPressed(){
     //Archive player not running, so just rewind
     else{
 		rewindArchive();
+		playAction->setEnabled(true);
+		stopAction->setEnabled(false);
+		fastForwardAction->setEnabled(true);
     }
 }
 
@@ -270,11 +272,18 @@ void ArchiveWidget_V2::playButtonPressed(){
 		return;
     }
 
+	//Update the maximum time step label in case we are playing from an archive connected to a simulator
+	setMaxTimeStepLabel();
+
     //Start the player thread playing
     unsigned int frameRate = Util::getUInt(frameRateCombo->currentText());
     unsigned int startTimeStep = Globals::getArchive()->getTimeStep();
     archivePlayer->play(startTimeStep, Globals::getArchive()->getID(), frameRate);
 
+	//Fix the actions
+	playAction->setEnabled(false);
+	fastForwardAction->setEnabled(true);
+	stopAction->setEnabled(true);
 }
 
 
@@ -310,6 +319,9 @@ void ArchiveWidget_V2::fastForwardButtonPressed(){
 		unsigned int startTimeStep = Globals::getArchive()->getTimeStep();
 		archivePlayer->play(startTimeStep, Globals::getArchive()->getID(), 25);
     }
+	playAction->setEnabled(true);
+	stopAction->setEnabled(true);
+	fastForwardAction->setEnabled(false);
 }
 
 
@@ -341,7 +353,9 @@ void ArchiveWidget_V2::archivePlayerStopped(){
     }
 
     //Reset the state of all the buttons
-
+	playAction->setEnabled(true);
+	fastForwardAction->setEnabled(true);
+	stopAction->setEnabled(false);
 }
 
 
@@ -357,23 +371,21 @@ QToolBar* ArchiveWidget_V2::getToolBar(){
     connect(tmpAction, SIGNAL(triggered()), this, SLOT(rewindButtonPressed()));
     tmpToolBar->addAction (tmpAction);
 
-    tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/play.png"), "Play", this);
-    connect(tmpAction, SIGNAL(triggered()), this, SLOT(playButtonPressed()));
-    //connect(Globals::getEventRouter(), SIGNAL(analysisNotPlayingSignal(bool)), tmpAction, SLOT(setEnabled(bool)));
-    tmpToolBar->addAction (tmpAction);
+	playAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/play.png"), "Play", this);
+	connect(playAction, SIGNAL(triggered()), this, SLOT(playButtonPressed()));
+	tmpToolBar->addAction (playAction);
 
-    tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/step.png"), "Step", this);
-    connect(tmpAction, SIGNAL(triggered()), this, SLOT(stepButtonPressed()));
-    tmpToolBar->addAction (tmpAction);
+	tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/step.png"), "Step", this);
+	connect(tmpAction, SIGNAL(triggered()), this, SLOT(stepButtonPressed()));
+	tmpToolBar->addAction (tmpAction);
 
-    tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/forward.png"), "Fast forward", this);
-    connect(tmpAction, SIGNAL(triggered()), this, SLOT(fastForwardButtonPressed()));
-    //connect(Globals::getEventRouter(), SIGNAL(analysisNotPlayingSignal(bool)), tmpAction, SLOT(setEnabled(bool)));
-    tmpToolBar->addAction (tmpAction);
+	fastForwardAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/forward.png"), "Fast forward", this);
+	connect(fastForwardAction, SIGNAL(triggered()), this, SLOT(fastForwardButtonPressed()));
+	tmpToolBar->addAction (fastForwardAction);
 
-    tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/stop.png"), "Stop", this);
-    connect(tmpAction, SIGNAL(triggered()), this, SLOT(stopButtonPressed()));
-    tmpToolBar->addAction (tmpAction);
+	stopAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/stop.png"), "Stop", this);
+	connect(stopAction, SIGNAL(triggered()), this, SLOT(stopButtonPressed()));
+	tmpToolBar->addAction (stopAction);
 
     frameRateCombo = new QComboBox();
 	frameRateCombo->addItem("1");
@@ -419,16 +431,18 @@ void ArchiveWidget_V2::loadArchive(ArchiveInfo& archiveInfo){
     newArchive->setTimeStep(minTimeStep);
     Globals::setArchive(newArchive);
 
-
 	//Inform classes about the change
     emit archiveChanged();
 
-    //Set the time step labels
-    timeStepLabel->setText(QString::number(minTimeStep));
-    maxTimeStepLabel->setText(QString::number(Globals::getArchiveDao()->getMaxTimeStep(newArchive->getID())));
+	//Set the time step labels
+	timeStepLabel->setText( QString::number(minTimeStep) );
+	setMaxTimeStepLabel();
 
     //Enable the transport controls
     toolBar->setEnabled(true);
+	playAction->setEnabled(true);
+	stopAction->setEnabled(false);
+	fastForwardAction->setEnabled(true);
 
     //Nothing has yet been displayed of the archive firing patterns
     archiveOpen = false;
@@ -497,6 +511,18 @@ void ArchiveWidget_V2::rewindArchive(){
     Globals::getEventRouter()->archiveTimeStepChangedSlot();
     Globals::getNetworkDisplay()->clearNeuronColorMap();
     archiveOpen = false;
+}
+
+
+/*! Sets the maximum time step label. */
+void ArchiveWidget_V2::setMaxTimeStepLabel(){
+	if(!Globals::archiveLoaded()){
+		qCritical()<<"Cannot set time step labels when no archive is loaded";
+		return;
+	}
+	unsigned int tmpArchiveID = Globals::getArchive()->getID();
+
+	maxTimeStepLabel->setText( QString::number(Globals::getArchiveDao()->getMaxTimeStep(tmpArchiveID)) );
 }
 
 

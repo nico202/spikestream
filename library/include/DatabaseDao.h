@@ -1,5 +1,5 @@
 #ifndef DATABASEDAO_H
-#define NETWORKDAO_H
+#define DATABASEDAO_H
 
 //SpikeStream includes
 #include "AbstractDao.h"
@@ -34,6 +34,6 @@ namespace spikestream{
 
 }
 
-#endif//NETWORKDAO_H
+#endif//DATABASEDAO_H
 
 

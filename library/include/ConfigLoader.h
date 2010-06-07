@@ -9,7 +9,6 @@ namespace spikestream{
 
 	/*! Loads the configuration from the specified file. */
 	class ConfigLoader{
-
 		public:
 			ConfigLoader(const QString& fileLocation);
 			~ConfigLoader();

@@ -140,8 +140,6 @@ SOURCES += src/xml/XMLParameterParser.cpp
 #----------------------------------------------#
 
 HEADERS += include/ConfigLoader.h \
-			include/ConfigEditor.h \
-			include/LogWriter.h
+			include/ConfigEditor.h
 SOURCES += src/file/ConfigLoader.cpp \
-			src/file/ConfigEditor.cpp \
-			src/file/LogWriter.cpp
+			src/file/ConfigEditor.cpp

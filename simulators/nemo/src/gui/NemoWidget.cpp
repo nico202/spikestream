@@ -66,12 +66,12 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	controlsVBox->addWidget(toolBar);
 
 	//Add widget to control live monitoring of simulation
-	QCheckBox* monitorCheckBox = new QCheckBox("Monitor");
+	monitorCheckBox = new QCheckBox("Monitor");
 	connect(monitorCheckBox, SIGNAL(stateChanged(int)), this, SLOT(monitorStateChanged(int)));
 	controlsVBox->addWidget(monitorCheckBox);
 
 	//Add widgets to control archiving
-	QCheckBox* archiveCheckBox = new QCheckBox("Archive.");
+	archiveCheckBox = new QCheckBox("Archive.");
 	connect(archiveCheckBox, SIGNAL(stateChanged(int)), this, SLOT(archiveStateChanged(int)));
 	archiveDescriptionEdit = new QLineEdit("Undescribed");
 	archiveDescriptionEdit->setEnabled(false);
@@ -118,6 +118,7 @@ NemoWidget::~NemoWidget(){
 
 /*! Switches the archiving of the simulation on or off */
 void NemoWidget::archiveStateChanged(int state){
+	qDebug()<<"ARCHIVE STATE CHANGED";
 	if(state == Qt::Checked){
 		archiveDescriptionEdit->setEnabled(true);
 		setArchiveDescriptionButton->setEnabled(true);
@@ -133,9 +134,6 @@ void NemoWidget::archiveStateChanged(int state){
 
 /*! Instructs the Nemo wrapper to load the network from the database into Nemo */
 void NemoWidget::loadSimulation(){
-
-	RESET CHECK BOXES AFTER AN UNLOAD
-
 	if(!Globals::networkLoaded()){
 		qCritical()<<"Cannot load simulation: no network loaded.";
 		return;
@@ -190,12 +188,12 @@ void NemoWidget::nemoWrapperFinished(){
 				synapseParametersButton->setEnabled(false);
 				nemoParametersButton->setEnabled(false);
 				controlsWidget->setEnabled(true);
+				Globals::setSimulationLoaded(true);
 			}
 		break;
 		case NemoWrapper::RUN_SIMULATION_TASK :
 			playAction->setEnabled(true);
 			stopAction->setEnabled(false);
-			qDebug()<<"NemoWidget: Simulation run finished";
 		break;
 		default :
 			qCritical()<<"Nemo has finished executing, but task is not defined";
@@ -209,6 +207,9 @@ void NemoWidget::networkChanged(){
 	if(nemoWrapper->isRunning())
 		qCritical()<<"Network should not be changed while simulation is running";
 
+	//Unload simulation if it is loaded
+	unloadSimulation(false);
+
 	//Fix enabled status of toolbar
 	checkWidgetEnabled();
 }
@@ -221,6 +222,7 @@ void NemoWidget::setArchiveDescription(){
 	if(nemoWrapper->getArchiveID() == 0)
 		throw SpikeStreamSimulationException("Attempting to set archive description when no archive is loaded.");
 	Globals::getArchiveDao()->setArchiveDescription(nemoWrapper->getArchiveID(), archiveDescriptionEdit->text());
+	Globals::getEventRouter()->archiveListChangedSlot();
 }
 
 
@@ -324,11 +326,13 @@ void NemoWidget::stopSimulation(){
 
 
 /*! Instructs the nemo wrapper to discard the current simulation */
-void NemoWidget::unloadSimulation(){
+void NemoWidget::unloadSimulation(bool confirmWithUser){
 	//Double check that user wants to unload simulation
-	int response = QMessageBox::warning(this, "Unload?", "Are you sure that you want to unload the simulation?", QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel);
-	if(response != QMessageBox::Ok)
-		return;
+	if(confirmWithUser){
+		int response = QMessageBox::warning(this, "Unload?", "Are you sure that you want to unload the simulation?", QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel);
+		if(response != QMessageBox::Ok)
+			return;
+	}
 
 	//Unload the simulation
 	nemoWrapper->unloadSimulation();
@@ -340,6 +344,10 @@ void NemoWidget::unloadSimulation(){
 	synapseParametersButton->setEnabled(true);
 	nemoParametersButton->setEnabled(true);
 	controlsWidget->setEnabled(false);
+	archiveDescriptionEdit->setText("Undescribed");
+	archiveCheckBox->setChecked(false);
+	monitorCheckBox->setChecked(false);
+	timeStepLabel->setText("0");
 }
 
 

@@ -7,6 +7,7 @@
 using namespace spikestream;
 
 //Qt includes
+#include <QAction>
 #include <QToolBar>
 #include <QWidget>
 #include <QLayout>
@@ -67,13 +68,25 @@ namespace spikestream{
 			bool step;
 
 			/*! Records if any of the neuron firing patterns have been displayed.
-			Important for the step function to display the first pattern in the archive */
+				Important for the step function to display the first pattern in the archive */
 			bool archiveOpen;
 
+			/*! Action to play archive */
+			QAction* playAction;
 
+			/*! Action to stop playback of archive */
+			QAction* stopAction;
+
+			/*! Action to fast forward playback of archive */
+			QAction* fastForwardAction;
+
+			/*! Sets the rate of play back of the archive */
 			QComboBox* frameRateCombo;
 
+			/*! Displays the current time step */
 			QLabel* timeStepLabel;
+
+			/*! Displays the maximum time step */
 			QLabel* maxTimeStepLabel;
 
 
@@ -89,6 +102,7 @@ namespace spikestream{
 			void loadArchive(ArchiveInfo& archiveInfo);
 			void reset();
 			void rewindArchive();
+			void setMaxTimeStepLabel();
 			void stepArchive();
 
     };

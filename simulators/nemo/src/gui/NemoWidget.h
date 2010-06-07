@@ -43,7 +43,7 @@ namespace spikestream {
 			void startSimulation();
 			void stepSimulation();
 			void stopSimulation();
-			void unloadSimulation();
+			void unloadSimulation(bool confirmWithUser=true);
 			void updateProgress(int stepsCompleted, int totalSteps);
 
 		private:
@@ -80,6 +80,12 @@ namespace spikestream {
 
 			/*! Stop action */
 			QAction* stopAction;
+
+			/*! Sets the simulation into monitor mode */
+			QCheckBox* monitorCheckBox;
+
+			/*! Sets the simulation into archive mode */
+			QCheckBox* archiveCheckBox;
 
 			/*! For user to enter a description of the archive */
 			QLineEdit* archiveDescriptionEdit;

@@ -3,10 +3,11 @@
 
 namespace spikestream {
 
+	/*! Holds information about a three dimensional box with a few basic manipulation functions. */
     class Box {
 		public:
 			Box();
-			Box(float x1, float y1, float z1,float x2, float y2, float z2);
+			Box(float x1, float y1, float z1, float x2, float y2, float z2);
 			Box(const Box& box);
 			Box& operator=(const Box& rhs);
 			~Box();
