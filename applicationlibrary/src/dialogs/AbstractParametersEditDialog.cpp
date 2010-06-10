@@ -16,10 +16,10 @@ AbstractParametersEditDialog::AbstractParametersEditDialog(const QList<Parameter
 	this->parameterInfoList = paramInfoList;
 }
 
+
 /*! Destructor */
 AbstractParametersEditDialog::~AbstractParametersEditDialog(){
 }
-
 
 
 /*----------------------------------------------------------*/

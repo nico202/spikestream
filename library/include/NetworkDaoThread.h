@@ -42,7 +42,7 @@ namespace spikestream {
 		private:
 			//========================  VARIABLES  =========================
 			/*! List of connection groups to load connections into or used for
-			adding connection groups to the database. */
+				adding connection groups to the database. */
 			QList<ConnectionGroup*> connectionGroupList;
 
 			/*! List of connection group ids used for deleting connection groups */

@@ -11,42 +11,36 @@
 #include <string>
 using namespace std;
 
+namespace spikestream {
 
-/*! Holds information about a connection */
-struct cons {
+	/*! Loads up information from an NRM configuration file. File should have extension .cfg */
+	class NRMConfigLoader{
+		public:
+			NRMConfigLoader(void);
+			~NRMConfigLoader(void);
 
-};
+			void loadConfig(const char* filePath);
+			int getOpVer(){ return 2; }//Returns the current version of NRM
 
-/*! Loads up information from an NRM configuration file. File should have extension .cfg */
-class NRMConfigLoader{
-	public:
-		NRMConfigLoader(void);
-		~NRMConfigLoader(void);
-
-		void loadConfig(const char* filePath);
-		int getOpVer(){ return 2; }//Returns the current version of NRM
-
-		NRMNetwork* getNetwork();
-		void reset();
+			NRMNetwork* getNetwork();
+			void reset();
 
 
-	private:
-		//=========================  VARIABLES  ==============================
-		/*! The network that is loaded from the configuration file */
-		NRMNetwork* network;
+		private:
+			//=========================  VARIABLES  ==============================
+			/*! The network that is loaded from the configuration file */
+			NRMNetwork* network;
 
-		//==========================  METHODS  ===============================
-		void loadConfigVersion(FILE* file);
-		void loadConnectionParameters(conType& conParams, FILE* file);
-		void loadConnections(FILE* file);
-		void loadInputs(FILE* file);
-		void loadNeuralLayers(FILE* file);
+			//==========================  METHODS  ===============================
+			void loadConfigVersion(FILE* file);
+			void loadConnectionParameters(conType& conParams, FILE* file);
+			void loadConnections(FILE* file);
+			void loadInputs(FILE* file);
+			void loadNeuralLayers(FILE* file);
 
-};
+	};
 
-
-
-
+}
 
 #endif//NRMCONFIGLOADER_H
 

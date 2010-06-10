@@ -16,7 +16,7 @@ namespace spikestream {
 
 	typedef unsigned char byte;
 
-	/*! Set of static utility methods intended eventually to supersede Utilities.h */
+	/*! Set of static utility methods. */
 	class Util {
 		public:
 			static void addTraining(WeightlessNeuron& neuron, QString trainingPattern, int output);

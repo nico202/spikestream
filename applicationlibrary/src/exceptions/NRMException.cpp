@@ -1,6 +1,6 @@
-
 //SpikeStream includes
 #include "NRMException.h"
+using namespace spikestream;
 
 //Other includes
 #include <sstream>

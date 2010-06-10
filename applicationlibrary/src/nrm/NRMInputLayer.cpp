@@ -1,4 +1,5 @@
 #include "NRMInputLayer.h"
+using namespace spikestream;
 
 #include <iostream>
 using namespace std;

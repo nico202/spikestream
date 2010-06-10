@@ -1,5 +1,5 @@
-#ifndef ARCHIVEWIDGET_V2
-#define ARCHIVEWIDGET_V2
+#ifndef ARCHIVEWIDGET_H
+#define ARCHIVEWIDGET_H
 
 //SpikeStream includes
 #include "ArchiveInfo.h"
@@ -16,15 +16,14 @@ using namespace spikestream;
 #include <QLabel>
 #include <QComboBox>
 
-
 namespace spikestream{
 
-    class ArchiveWidget_V2 : public QWidget {
+	class ArchiveWidget : public QWidget {
 		Q_OBJECT
 
 		public:
-			ArchiveWidget_V2(QWidget* parent=0);
-			~ArchiveWidget_V2();
+			ArchiveWidget(QWidget* parent=0);
+			~ArchiveWidget();
 
 		signals:
 			void archiveChanged();
@@ -108,5 +107,5 @@ namespace spikestream{
     };
 }
 
-#endif//ARCHIVEWIDGET_V2
+#endif//ARCHIVEWIDGET_H
 

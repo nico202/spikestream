@@ -6,6 +6,7 @@
 
 namespace spikestream{
 
+	/*! Exception thrown when an error is encountered converting numbers */
 	class NumberConversionException : public SpikeStreamException {
 		public:
 			NumberConversionException(QString details);

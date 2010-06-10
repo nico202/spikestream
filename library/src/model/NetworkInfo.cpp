@@ -3,6 +3,7 @@
 #include "SpikeStreamException.h"
 using namespace spikestream;
 
+
 /*! Normal constructor */
 NetworkInfo::NetworkInfo(unsigned int id, const QString& name, const QString& desc){
     //Check that name and description will fit in the database
@@ -35,6 +36,10 @@ NetworkInfo::NetworkInfo(const NetworkInfo& netInfo){
 NetworkInfo::~NetworkInfo(){
 }
 
+
+/*--------------------------------------------------------- */
+/*-----                PUBLIC METHODS                 ----- */
+/*--------------------------------------------------------- */
 
 /*! Assignment operator. */
 NetworkInfo& NetworkInfo::operator=(const NetworkInfo& rhs) {

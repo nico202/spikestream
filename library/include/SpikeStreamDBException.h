@@ -6,7 +6,7 @@
 
 namespace spikestream {
 
-	/*! Exception specific to database-related functionality */
+	/*! Exception specific to database-related functionality. */
 	class SpikeStreamDBException : public SpikeStreamException {
 		public:
 		SpikeStreamDBException(QString details);

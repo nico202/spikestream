@@ -13,6 +13,7 @@ using namespace spikestream;
 #include <iostream>
 using namespace std;
 
+
 /*! Returns the factorial of a number */
 mpf_class Util::factorial (unsigned int num){
 	mpz_class result=1;
@@ -20,7 +21,6 @@ mpf_class Util::factorial (unsigned int num){
 		result *= i;
 	return result;
 }
-
 
 
 /*! Fills an array to select k neurons out of n. */
@@ -235,6 +235,7 @@ bool Util::bitsEqual(unsigned char* byteArr, QString bitPattStr, int output){
 }
 
 
+/*! Fills the suplied array with the 1s and 0s specified in the string. */
 void Util::fillByteArray(unsigned char*& byteArr, int& arrLen, QString byteStr){
 	if(byteStr.length() % 8 == 0)
 		arrLen = byteStr.length() / 8;
@@ -254,6 +255,7 @@ void Util::fillByteArray(unsigned char*& byteArr, int& arrLen, QString byteStr){
 }
 
 
+/*! Sets the generalization in a map of weightless neurons. */
 void Util::setGeneralization(QHash<unsigned int, WeightlessNeuron*>& weiNeurMap, double gen){
 	for(QHash<unsigned int, WeightlessNeuron*>::iterator iter = weiNeurMap.begin(); iter != weiNeurMap.end(); ++iter)
 		iter.value()->setGeneralization(gen);

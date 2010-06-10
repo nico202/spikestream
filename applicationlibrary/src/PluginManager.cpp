@@ -1,5 +1,5 @@
 //SpikeStream includes
-#include "PluginManager_V2.h"
+#include "PluginManager.h"
 #include "SpikeStreamException.h"
 using namespace spikestream;
 
@@ -13,7 +13,7 @@ using namespace spikestream;
 
 
 /*! Constructor */
-PluginManager_V2::PluginManager_V2(QString& pluginFolder) throw(SpikeStreamException){
+PluginManager::PluginManager(QString& pluginFolder) throw(SpikeStreamException){
 	//Store widget and plugin folder
 	this->pluginFolder = pluginFolder;
 
@@ -22,7 +22,7 @@ PluginManager_V2::PluginManager_V2(QString& pluginFolder) throw(SpikeStreamExcep
 }
 
 /*! Destructor */
-PluginManager_V2::~PluginManager_V2(){
+PluginManager::~PluginManager(){
 
 }
 
@@ -31,13 +31,13 @@ PluginManager_V2::~PluginManager_V2(){
 /*----------                  PUBLIC METHODS                          -------------*/
 /*---------------------------------------------------------------------------------*/
 /*! Returns a list of names of the available plugins */
-QStringList PluginManager_V2::getPluginNames() throw(SpikeStreamException){
+QStringList PluginManager::getPluginNames() throw(SpikeStreamException){
 	return pluginFunctionMap.keys();
 }
 
 
 /*! Returns plugin as  QWidget */
-QWidget* PluginManager_V2::getPlugin(QString pluginName) throw(SpikeStreamException){
+QWidget* PluginManager::getPlugin(QString pluginName) throw(SpikeStreamException){
 	if(pluginFunctionMap.contains(pluginName)){
 		QWidget* tempWidget = pluginFunctionMap[pluginName]();
 		qDebug()<<"Getting new plugin with name "<<pluginName<<endl;
@@ -48,7 +48,7 @@ QWidget* PluginManager_V2::getPlugin(QString pluginName) throw(SpikeStreamExcept
 
 
 /*! Loads up all of the plugins in the plugin directory */
-void PluginManager_V2::loadPlugins(){
+void PluginManager::loadPlugins(){
 	//Get a list of files in the plugins directory
 	QDir pluginDirectory(this->pluginFolder);
 

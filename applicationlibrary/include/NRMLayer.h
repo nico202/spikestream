@@ -6,7 +6,7 @@
 #include <string>
 using namespace std;
 
-namespace nrm {
+namespace spikestream {
 
     /*! Holds information that is common to all types of layers.
 		    Neural layer and input layer extend this class. */

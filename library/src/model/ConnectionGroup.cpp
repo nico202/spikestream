@@ -1,9 +1,12 @@
+//SpikeStream includes
 #include "ConnectionGroup.h"
 #include "SpikeStreamException.h"
 using namespace spikestream;
 
+//Other includes
 #include <iostream>
 using namespace std;
+
 
 /*! Constructor */
 ConnectionGroup::ConnectionGroup(const ConnectionGroupInfo& connGrpInfo){

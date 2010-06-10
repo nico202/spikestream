@@ -1,7 +1,9 @@
+//SpikeStream includes
 #include "ConnectionGroupInfo.h"
 #include "GlobalVariables.h"
 #include "SpikeStreamException.h"
 using namespace spikestream;
+
 
 /*! Empty constructor */
 ConnectionGroupInfo::ConnectionGroupInfo(){
@@ -11,6 +13,7 @@ ConnectionGroupInfo::ConnectionGroupInfo(){
     toNeuronGroupID = 0;
 	synapseTypeID = 0;
 }
+
 
 /*! Standard constructor */
 ConnectionGroupInfo::ConnectionGroupInfo(unsigned int id, const QString& desc, unsigned int fromID, unsigned int toID, QHash<QString, double> paramMap, unsigned int synTypeID){
@@ -43,6 +46,10 @@ ConnectionGroupInfo::~ConnectionGroupInfo(){
 }
 
 
+/*--------------------------------------------------------- */
+/*-----                PUBLIC METHODS                 ----- */
+/*--------------------------------------------------------- */
+
 /*! Assignment operator */
 ConnectionGroupInfo& ConnectionGroupInfo::operator=(const ConnectionGroupInfo& rhs){
     //Check for self assignment
@@ -58,7 +65,6 @@ ConnectionGroupInfo& ConnectionGroupInfo::operator=(const ConnectionGroupInfo& r
 
     return *this;
 }
-
 
 
 /*! Returns the parameters as an XML string */

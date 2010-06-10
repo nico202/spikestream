@@ -4,7 +4,6 @@
 
 #define FRAME_WIN 0
 
-
 //Input panel
 #define MULTI_WIN 1
 

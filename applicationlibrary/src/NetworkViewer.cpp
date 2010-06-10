@@ -2,7 +2,7 @@
 #include "EventRouter.h"
 #include "Globals.h"
 #include "GlobalVariables.h"
-#include "NetworkViewer_V2.h"
+#include "NetworkViewer.h"
 #include "SpikeStreamException.h"
 using namespace spikestream;
 
@@ -26,7 +26,7 @@ using namespace std;
 
 
 /*! Constructor */
-NetworkViewer_V2::NetworkViewer_V2(QWidget* parent) : QGLWidget(parent) {
+NetworkViewer::NetworkViewer(QWidget* parent) : QGLWidget(parent) {
     //Connect refresh to changes in the display of network or archive
     connect(Globals::getEventRouter(), SIGNAL(networkDisplayChangedSignal()), this, SLOT(refresh()), Qt::QueuedConnection);
     connect(Globals::getEventRouter(), SIGNAL(archiveTimeStepChangedSignal()), this, SLOT(refresh()), Qt::QueuedConnection);
@@ -66,7 +66,7 @@ NetworkViewer_V2::NetworkViewer_V2(QWidget* parent) : QGLWidget(parent) {
 
 
 /*! Destructor */
-NetworkViewer_V2::~NetworkViewer_V2(){
+NetworkViewer::~NetworkViewer(){
 }
 
 
@@ -75,7 +75,7 @@ NetworkViewer_V2::~NetworkViewer_V2(){
 /*----------------------------------------------------------*/
 
 /*! Inherited from QGLWidget */
-void NetworkViewer_V2::initializeGL(){
+void NetworkViewer::initializeGL(){
     //White background
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -85,7 +85,7 @@ void NetworkViewer_V2::initializeGL(){
 
 
 /*! Inherited from QGLWidget */
-void NetworkViewer_V2::paintGL(){
+void NetworkViewer::paintGL(){
     //If we are already painting, skip further calls to this method triggered by accelerator keys
     if(Globals::isRendering()){
 		paintGLSkipped = true;
@@ -168,7 +168,7 @@ void NetworkViewer_V2::paintGL(){
 
 
 /*! Inherited from QGLWidget */
-void NetworkViewer_V2::resizeGL(int screenWidth, int screenHeight){
+void NetworkViewer::resizeGL(int screenWidth, int screenHeight){
     if(Globals::isRendering()){
 		resizeGLSkipped = true;
 
@@ -203,7 +203,7 @@ void NetworkViewer_V2::resizeGL(int screenWidth, int screenHeight){
 }
 
 /*! Adapted from: http://www.lighthouse3d.com/opengl/picking/index.php?openglway */
-void NetworkViewer_V2::mouseDoubleClickEvent (QMouseEvent* event){
+void NetworkViewer::mouseDoubleClickEvent (QMouseEvent* event){
     //Window coordinates in OpenGL start in the bottom left, so have to subtract the window height
     int mouseYPos = height() - event->y();
     int mouseXPos = event->x();
@@ -273,83 +273,83 @@ void NetworkViewer_V2::mouseDoubleClickEvent (QMouseEvent* event){
 /*-----                PRIVATE SLOTS                   -----*/
 /*----------------------------------------------------------*/
 
-void NetworkViewer_V2::moveUp(){
+void NetworkViewer::moveUp(){
     cameraMatrix[12] += cameraMatrix[8];
     cameraMatrix[13] += cameraMatrix[9];
     cameraMatrix[14] += cameraMatrix[10];
     updateGL();
 }
 
-void NetworkViewer_V2::moveDown(){
+void NetworkViewer::moveDown(){
     cameraMatrix[12] -= cameraMatrix[8];
     cameraMatrix[13] -= cameraMatrix[9];
     cameraMatrix[14] -= cameraMatrix[10];
     updateGL();
 }
 
-void NetworkViewer_V2::moveLeft(){
+void NetworkViewer::moveLeft(){
     cameraMatrix[12] -= cameraMatrix[0];
     cameraMatrix[13] -= cameraMatrix[1];
     cameraMatrix[14] -= cameraMatrix[2];
     updateGL();
 }
 
-void NetworkViewer_V2::moveRight(){
+void NetworkViewer::moveRight(){
     cameraMatrix[12] += cameraMatrix[0];
     cameraMatrix[13] += cameraMatrix[1];
     cameraMatrix[14] += cameraMatrix[2];
     updateGL();
 }
 
-void NetworkViewer_V2::moveForward(){
+void NetworkViewer::moveForward(){
     cameraMatrix[12] += cameraMatrix[4];
     cameraMatrix[13] += cameraMatrix[5];
     cameraMatrix[14] += cameraMatrix[6];
     updateGL();
 }
 
-void NetworkViewer_V2::moveBackward(){
+void NetworkViewer::moveBackward(){
     cameraMatrix[12] -= cameraMatrix[4];
     cameraMatrix[13] -= cameraMatrix[5];
     cameraMatrix[14] -= cameraMatrix[6];
     updateGL();
 }
 
-void NetworkViewer_V2::resetView(){
+void NetworkViewer::resetView(){
     viewClippingVolume_Horizontal(defaultClippingVol);
     updateGL();
 }
 
-void NetworkViewer_V2::rotateUp(){
+void NetworkViewer::rotateUp(){
     sceneRotateX += 2.5f;
     updateGL();
 }
 
-void NetworkViewer_V2::rotateDown(){
+void NetworkViewer::rotateDown(){
     sceneRotateX -= 2.5f;
     updateGL();
 }
 
-void NetworkViewer_V2::rotateLeft(){
+void NetworkViewer::rotateLeft(){
     sceneRotateZ += 2.5f;
     updateGL();
 }
 
-void NetworkViewer_V2::rotateRight(){
+void NetworkViewer::rotateRight(){
     sceneRotateZ -= 2.5f;
     updateGL();
 }
 
 
 /*! Re-draws the network */
-void NetworkViewer_V2::refresh(){
+void NetworkViewer::refresh(){
     useDisplayList = false;
     updateGL();
 }
 
 
 /*! Resets the view completely typically after the network has changed */
-void NetworkViewer_V2::reset(){
+void NetworkViewer::reset(){
     //Load up the volume enclosing the entire network
     loadDefaultClippingVolume();
 
@@ -370,7 +370,7 @@ void NetworkViewer_V2::reset(){
 /*----------------------------------------------------------*/
 
 /*! Checks for errors in OpenGL. */
-void NetworkViewer_V2::checkOpenGLErrors(){
+void NetworkViewer::checkOpenGLErrors(){
     //Check to see if error has occurred
     GLenum err = glGetError();
     if(err != GL_NO_ERROR){
@@ -389,7 +389,7 @@ void NetworkViewer_V2::checkOpenGLErrors(){
 
 /*! Draw X, Y and Z axes
 	These are drawn so that they cover the clipping volume plus a bit of extra length. */
-void NetworkViewer_V2::drawAxes(void){
+void NetworkViewer::drawAxes(void){
 	//Do nothing if drawAxes is set to false
 	if(!Globals::isDrawAxes())
 		return;
@@ -453,7 +453,7 @@ void NetworkViewer_V2::drawAxes(void){
 
 
 /*! Draws the connections */
-void NetworkViewer_V2::drawConnections(){
+void NetworkViewer::drawConnections(){
     //Nothing to do if no network is loaded
     if(!Globals::networkLoaded())
 		return;
@@ -559,7 +559,7 @@ void NetworkViewer_V2::drawConnections(){
 
 
 /*! Draws the visible neurons in the network */
-void NetworkViewer_V2::drawNeurons(){
+void NetworkViewer::drawNeurons(){
     //Nothing to do if no network is loaded
     if(!Globals::networkLoaded())
 		return;
@@ -631,7 +631,7 @@ void NetworkViewer_V2::drawNeurons(){
 
 
 /*! Point camera towards position specified in struct for camera and rotate scene appropriately */
-void NetworkViewer_V2::positionCamera(){    //
+void NetworkViewer::positionCamera(){    //
     gluLookAt(
 			//Location defined by fourth column of camera matrix
 			cameraMatrix[12], cameraMatrix[13], cameraMatrix[14],
@@ -650,7 +650,7 @@ void NetworkViewer_V2::positionCamera(){    //
 /*! Adapted from gltools
 	Fills the 4x4 rotation matrix to enable it to be used to rotate camera frame
 	Note that angle is in radians NOT degrees. */
-void NetworkViewer_V2::fillRotationMatrix(float angle, float x, float y, float z){
+void NetworkViewer::fillRotationMatrix(float angle, float x, float y, float z){
     float vecLength, sinSave, cosSave, oneMinusCos;
     float xx, yy, zz, xy, yz, zx, xs, ys, zs;
 
@@ -706,7 +706,7 @@ void NetworkViewer_V2::fillRotationMatrix(float angle, float x, float y, float z
 
 /*! Identifies the closest neuron to the viewer within the select buffer.
     Returns an invalid neuron ID if no hits are present */
-unsigned int NetworkViewer_V2::getSelectedNeuron(GLuint selectBuffer[], int hitCount, int bufferSize){
+unsigned int NetworkViewer::getSelectedNeuron(GLuint selectBuffer[], int hitCount, int bufferSize){
     if(hitCount == 0)
 		return 0;
     if(hitCount * 4 > bufferSize)
@@ -749,7 +749,7 @@ unsigned int NetworkViewer_V2::getSelectedNeuron(GLuint selectBuffer[], int hitC
 
 
 /*! Sets the camera parameters to their starting values. */
-void NetworkViewer_V2::initialiseCameraParameters(){
+void NetworkViewer::initialiseCameraParameters(){
 	//Scene rotate parameters are used to control the rotation of the scene
 	sceneRotateX = 0.0f;
 	sceneRotateZ = 0.0f;
@@ -781,7 +781,7 @@ void NetworkViewer_V2::initialiseCameraParameters(){
 
 
 /*! Loads up a box that encloses the entire network plus the origin. */
-void NetworkViewer_V2::loadDefaultClippingVolume(){
+void NetworkViewer::loadDefaultClippingVolume(){
     /*If the network is empty or contains no neurons.
 	set up default clipping volume around origin */
     if(!Globals::networkLoaded() || Globals::getNetwork()->size() == 0){
@@ -818,7 +818,7 @@ void NetworkViewer_V2::loadDefaultClippingVolume(){
 
 /*! Adapated from gltools
 	Rotates a vector using a 4x4 matrix. Translation column is ignored. */
-void NetworkViewer_V2::rotateVector(GLfloat x, GLfloat y, GLfloat z, GLfloat result[]){
+void NetworkViewer::rotateVector(GLfloat x, GLfloat y, GLfloat z, GLfloat result[]){
     result[0] = rotationMatrix[0] * x + rotationMatrix[4] * y + rotationMatrix[8] *  z;
     result[1] = rotationMatrix[1] * x + rotationMatrix[5] * y + rotationMatrix[9] *  z;
     result[2] = rotationMatrix[2] * x + rotationMatrix[6] * y + rotationMatrix[10] * z;
@@ -826,7 +826,7 @@ void NetworkViewer_V2::rotateVector(GLfloat x, GLfloat y, GLfloat z, GLfloat res
 
 
 /*! Rotates camera around its own X axis. */
-void NetworkViewer_V2::rotateXAxis(float angle){
+void NetworkViewer::rotateXAxis(float angle){
 	//Rotating around X axis so pass vector defining this axis for the camera to fillRotationMatrix
 	fillRotationMatrix(angle, cameraMatrix[0], cameraMatrix[1], cameraMatrix[2]);
 
@@ -852,7 +852,7 @@ void NetworkViewer_V2::rotateXAxis(float angle){
 
 
 /*! Rotates camera around its own Z axis. */
-void NetworkViewer_V2::rotateZAxis(float angle){
+void NetworkViewer::rotateZAxis(float angle){
 	//Rotating around Z axis, so pass vector defining this axis for the camera to fillRotationMatrix
 	fillRotationMatrix(angle, cameraMatrix[8], cameraMatrix[9], cameraMatrix[10]);
 
@@ -878,7 +878,7 @@ void NetworkViewer_V2::rotateZAxis(float angle){
 
 
 /*! Sets the view so that the perspective fits the clipping volume seen horizontally. */
-void NetworkViewer_V2::viewClippingVolume_Horizontal(Box& clipVolume){
+void NetworkViewer::viewClippingVolume_Horizontal(Box& clipVolume){
     //First set camera parameters to their starting values
     initialiseCameraParameters();
 
@@ -908,7 +908,7 @@ void NetworkViewer_V2::viewClippingVolume_Horizontal(Box& clipVolume){
 
 
 /*! Sets the view so that the perspective fits the clipping volume seen horizontally. */
-void NetworkViewer_V2::viewClippingVolume_Vertical(Box& clipVolume){
+void NetworkViewer::viewClippingVolume_Vertical(Box& clipVolume){
     //First set camera parameters to their starting values
     initialiseCameraParameters();
 
@@ -945,7 +945,7 @@ void NetworkViewer_V2::viewClippingVolume_Vertical(Box& clipVolume){
 }
 
 
-void NetworkViewer_V2::setZoomLevel(){
+void NetworkViewer::setZoomLevel(){
     if(Globals::getNetworkDisplay()->isZoomEnabled()){
 		unsigned int tmpZoomNeurGrpID = Globals::getNetworkDisplay()->getZoomNeuronGroupID();
 		if(tmpZoomNeurGrpID == 0)
@@ -962,7 +962,7 @@ void NetworkViewer_V2::setZoomLevel(){
 
 
 /*! Resets the view so all neural networks can be seen. */
-void NetworkViewer_V2::zoomDefaultView(){
+void NetworkViewer::zoomDefaultView(){
     viewClippingVolume_Horizontal(defaultClippingVol);
 }
 
@@ -970,7 +970,7 @@ void NetworkViewer_V2::zoomDefaultView(){
 /*! Moves viewing position above selected layer and resizes it appropriately
 	Don't need to set viewStateChanged here since the viewing angle is
 	outside of the main list. */
-void NetworkViewer_V2::zoomAboveNeuronGroup(unsigned int neuronGroupID){
+void NetworkViewer::zoomAboveNeuronGroup(unsigned int neuronGroupID){
     if(!Globals::networkLoaded())
 		return;
     Box neurGrpBox = Globals::getNetwork()->getNeuronGroupBoundingBox(neuronGroupID);
@@ -981,7 +981,7 @@ void NetworkViewer_V2::zoomAboveNeuronGroup(unsigned int neuronGroupID){
 /*! Moves viewing position beside selected layer and resizes it appropriately
 	Don't need to set viewStateChanged here since the viewing angle is
 	outside of the main list. */
-void NetworkViewer_V2::zoomToNeuronGroup(unsigned int neuronGroupID){
+void NetworkViewer::zoomToNeuronGroup(unsigned int neuronGroupID){
     if(!Globals::networkLoaded())
 		return;
     Box neurGrpBox = Globals::getNetwork()->getNeuronGroupBoundingBox(neuronGroupID);

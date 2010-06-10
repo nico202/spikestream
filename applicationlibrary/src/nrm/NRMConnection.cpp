@@ -5,6 +5,7 @@
 #include "NRMLayer.h"
 #include "NRMException.h"
 #include "NRMConstants.h"
+using namespace spikestream;
 
 //Other includes
 #include <iostream>

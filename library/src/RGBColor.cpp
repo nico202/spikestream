@@ -5,6 +5,7 @@ using namespace spikestream;
 RGBColor RGBColor::BLACK = RGBColor(0.0f, 0.0f, 0.0f);
 
 
+/*! Default constructor */
 RGBColor::RGBColor(){
 	this->red = 0.0f;
 	this->green = 0.0f;
@@ -12,6 +13,7 @@ RGBColor::RGBColor(){
 }
 
 
+/*! Standard constructor */
 RGBColor::RGBColor(float red, float green, float blue){
 	this->red = red;
 	this->green = green;
@@ -19,6 +21,7 @@ RGBColor::RGBColor(float red, float green, float blue){
 }
 
 
+/*! Copy constructor */
 RGBColor::RGBColor(const RGBColor& rgbColor){
 	this->red = rgbColor.red;
 	this->green = rgbColor.green;
@@ -26,6 +29,11 @@ RGBColor::RGBColor(const RGBColor& rgbColor){
 }
 
 
+/*----------------------------------------------------------*/
+/*------                PUBLIC METHODS                ------*/
+/*----------------------------------------------------------*/
+
+/*! Assignment operator */
 RGBColor& RGBColor::operator=(const RGBColor& rhs){
 	if(this == &rhs)
 	return *this;
@@ -37,6 +45,8 @@ RGBColor& RGBColor::operator=(const RGBColor& rhs){
 	return *this;
 }
 
+
+/*! Sets the colour. */
 void RGBColor::set(float red, float green, float blue){
 	this->red = red;
 	this->green = green;

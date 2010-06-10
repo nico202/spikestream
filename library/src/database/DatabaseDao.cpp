@@ -11,6 +11,7 @@ using namespace spikestream;
 #include <iostream>
 using namespace std;
 
+
 /*! Constructor. DBInfo is stored by AbstractDao */
 DatabaseDao::DatabaseDao(const DBInfo& dbInfo) : AbstractDao(dbInfo){
 }

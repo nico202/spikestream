@@ -6,32 +6,34 @@
 
 namespace spikestream{
 
+	/*! Holds information about a particular network.
+		Corresponds to the Network table in the SpikeStreamNetwork database. */
     class NetworkInfo {
-	public:
-	    NetworkInfo();
-	    NetworkInfo(unsigned int id, const QString& name, const QString& desc);
-	    NetworkInfo(const NetworkInfo& netInfo);
-	    ~NetworkInfo();
-	    NetworkInfo& operator=(const NetworkInfo& rhs);
+		public:
+			NetworkInfo();
+			NetworkInfo(unsigned int id, const QString& name, const QString& desc);
+			NetworkInfo(const NetworkInfo& netInfo);
+			~NetworkInfo();
+			NetworkInfo& operator=(const NetworkInfo& rhs);
 
-	    unsigned int getID(){ return id; }
-	    QString getDescription(){ return description; }
-	    QString getName(){ return name; }
-	    void setID(unsigned int id) { this->id = id; }
-	    void setName(const QString& name) { this->name = name; }
-	    void setDescription(const QString& description) { this->description = description; }
+			unsigned int getID(){ return id; }
+			QString getDescription(){ return description; }
+			QString getName(){ return name; }
+			void setID(unsigned int id) { this->id = id; }
+			void setName(const QString& name) { this->name = name; }
+			void setDescription(const QString& description) { this->description = description; }
 
-	private:
-	    /*! Id of the network in SpikeStreamNetwork database */
-	    unsigned int id;
+		private:
+			/*! Id of the network in SpikeStreamNetwork database */
+			unsigned int id;
 
-	    /*! Name of the network */
-	    QString name;
+			/*! Name of the network */
+			QString name;
 
-	    /*! Description of the network */
-	    QString description;
+			/*! Description of the network */
+			QString description;
 
-    };
+		};
 }
 
 #endif//NETWORKINFO_H

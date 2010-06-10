@@ -22,6 +22,7 @@
 
 namespace spikestream {
 
+	/*! Zoom class required by Qwt. */
 	class MyZoomer: public QwtPlotZoomer {
 		public:
 			MyZoomer(QwtPlotCanvas *canvas): QwtPlotZoomer(canvas)	{
@@ -38,7 +39,7 @@ namespace spikestream {
 	};
 
 
-
+	/*! Displays a spectrogram using the supplied data. Used for information spectrogram plots. */
 	class AnalysisSpectrogram : public QwtPlot {
 		Q_OBJECT
 

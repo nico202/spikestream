@@ -1,5 +1,5 @@
 #include "NRMLayer.h"
-using namespace nrm;
+using namespace spikestream;
 
 NRMLayer::NRMLayer(){
 }

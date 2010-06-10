@@ -32,6 +32,10 @@ Point3D::~Point3D(){
 }
 
 
+/*--------------------------------------------------------- */
+/*-----                PUBLIC METHODS                 ----- */
+/*--------------------------------------------------------- */
+
 /*! Assignment operator */
 Point3D& Point3D::operator =(const Point3D& point){
     if(&point == this)
@@ -67,10 +71,4 @@ QString Point3D::toString() const{
     tmpStr += QString::number(zPos) + ")";
     return tmpStr;
 }
-
-
-
-
-
-
 

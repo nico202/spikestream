@@ -3,30 +3,34 @@
 
 #include "NRMNetwork.h"
 
-class NRMTrainingLoader {
-	public:
-		NRMTrainingLoader(NRMNetwork* network);
-		~NRMTrainingLoader();
-		NRMNetwork* getNetwork();
-		void loadTraining(const char* filePath);
-		void loadTrainingHeader(FILE* file, int numNetworkLayers, int& numTrainedLayers, int*& trainedLayerIDArray);
-		void loadLayerTraining(int layerID, FILE* file);
-		void printTrainingPattern(unsigned char* patternArray, unsigned int arraySize, int trainingStrNumber);
+namespace spikestream {
 
-	private:
-		//===========================  VARIABLES  ===============================
-		/*! Network loaded from the configuration file */
-		NRMNetwork* network;
+	class NRMTrainingLoader {
+		public:
+			NRMTrainingLoader(NRMNetwork* network);
+			~NRMTrainingLoader();
+			NRMNetwork* getNetwork();
+			void loadTraining(const char* filePath);
+			void loadTrainingHeader(FILE* file, int numNetworkLayers, int& numTrainedLayers, int*& trainedLayerIDArray);
+			void loadLayerTraining(int layerID, FILE* file);
+			void printTrainingPattern(unsigned char* patternArray, unsigned int arraySize, int trainingStrNumber);
 
-		/*! The version of file */
-		int loadVersion;
+		private:
+			//===========================  VARIABLES  ===============================
+			/*! Network loaded from the configuration file */
+			NRMNetwork* network;
 
-		/*! Record of the number of bytes read from file for debugging */
-		int fileByteCount;
+			/*! The version of file */
+			int loadVersion;
 
-		//============================  METHODS  ================================
-		void fReadFile(void* dataStruct, size_t sizeOfElement, size_t numElements, FILE * file );
+			/*! Record of the number of bytes read from file for debugging */
+			int fileByteCount;
 
-};
+			//============================  METHODS  ================================
+			void fReadFile(void* dataStruct, size_t sizeOfElement, size_t numElements, FILE * file );
+
+	};
+
+}
 
 #endif // NRMTRAININGLOADER_H

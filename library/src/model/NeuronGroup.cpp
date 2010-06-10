@@ -2,6 +2,7 @@
 #include "SpikeStreamException.h"
 using namespace spikestream;
 
+
 /*! Constructor */
 NeuronGroup::NeuronGroup(const NeuronGroupInfo& info){
 	this->info = info;

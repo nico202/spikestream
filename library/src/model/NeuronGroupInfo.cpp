@@ -76,6 +76,3 @@ QString NeuronGroupInfo::getParameterXML(){
 }
 
 
-
-
-

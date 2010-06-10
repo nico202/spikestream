@@ -1,5 +1,5 @@
 //SpikeStream includes
-#include "ArchiveWidget_V2.h"
+#include "ArchiveWidget.h"
 #include "Globals.h"
 #include "SpikeStreamException.h"
 #include "Util.h"
@@ -11,8 +11,9 @@ using namespace spikestream;
 #include <QPixmap>
 #include <QPushButton>
 
+
 /*! Constructor */
-ArchiveWidget_V2::ArchiveWidget_V2(QWidget* parent) : QWidget(parent){
+ArchiveWidget::ArchiveWidget(QWidget* parent) : QWidget(parent){
 	QVBoxLayout* verticalBox = new QVBoxLayout(this);
 
     //Add tool bar
@@ -63,7 +64,7 @@ ArchiveWidget_V2::ArchiveWidget_V2(QWidget* parent) : QWidget(parent){
 
 
 /*! Destructor */
-ArchiveWidget_V2::~ArchiveWidget_V2(){
+ArchiveWidget::~ArchiveWidget(){
     delete archivePlayer;
 }
 
@@ -73,7 +74,7 @@ ArchiveWidget_V2::~ArchiveWidget_V2(){
 /*----------------------------------------------------------*/
 
 /*! Deletes an archive */
-void ArchiveWidget_V2::deleteArchive(){
+void ArchiveWidget::deleteArchive(){
     //Get the ID of the archive to be deleted
     unsigned int archiveID = Util::getUInt(sender()->objectName());
     if(!archiveInfoMap.contains(archiveID)){
@@ -119,7 +120,7 @@ void ArchiveWidget_V2::deleteArchive(){
 
 
 /*! Loads a particular archive into memory */
-void ArchiveWidget_V2::loadArchive(){
+void ArchiveWidget::loadArchive(){
     unsigned int archiveID = sender()->objectName().toUInt();
     if(!archiveInfoMap.contains(archiveID)){
 		qCritical()<<"Archive with ID "<<archiveID<<" cannot be found.";
@@ -132,7 +133,7 @@ void ArchiveWidget_V2::loadArchive(){
 
 
 /*! Loads up a list of archives corresponding to the current network. */
-void ArchiveWidget_V2::loadArchiveList(){
+void ArchiveWidget::loadArchiveList(){
     //Reset widget
     reset();
 
@@ -234,13 +235,14 @@ void ArchiveWidget_V2::loadArchiveList(){
 
 
 /*! Called when the time step changes and updates the time step counter */
-void ArchiveWidget_V2::archiveTimeStepChanged(){
+void ArchiveWidget::archiveTimeStepChanged(){
     //Update the time step counter
     timeStepLabel->setText(QString::number(Globals::getArchive()->getTimeStep()));
 }
 
 
-void ArchiveWidget_V2::rewindButtonPressed(){
+/*! Rewinds the archive */
+void ArchiveWidget::rewindButtonPressed(){
     //Stop thread if it is running. Rewind will be done when thread finishes
     if(archivePlayer->isRunning()){
 		archivePlayer->stop();
@@ -255,7 +257,9 @@ void ArchiveWidget_V2::rewindButtonPressed(){
     }
 }
 
-void ArchiveWidget_V2::playButtonPressed(){
+
+/*! Starts the archive playing. */
+void ArchiveWidget::playButtonPressed(){
     //Reset variables
     rewind = false;
     step = false;
@@ -288,7 +292,7 @@ void ArchiveWidget_V2::playButtonPressed(){
 
 
 /*! Called when the step button is pressed */
-void ArchiveWidget_V2::stepButtonPressed(){
+void ArchiveWidget::stepButtonPressed(){
     //Stop thread if it is running. Step will be done when thread finishes
     if(archivePlayer->isRunning()){
 		archivePlayer->stop();
@@ -303,7 +307,7 @@ void ArchiveWidget_V2::stepButtonPressed(){
 
 
 /*! Called when the fast forward button is pressed */
-void ArchiveWidget_V2::fastForwardButtonPressed(){
+void ArchiveWidget::fastForwardButtonPressed(){
     //Do nothing if no archive is loaded
     if(!Globals::archiveLoaded()){
 		return;
@@ -325,13 +329,14 @@ void ArchiveWidget_V2::fastForwardButtonPressed(){
 }
 
 
-void ArchiveWidget_V2::stopButtonPressed(){
+/*! Stops the archive playback */
+void ArchiveWidget::stopButtonPressed(){
     archivePlayer->stop();
 }
 
 
 /*! Called when the frame rate combo is changed */
-void ArchiveWidget_V2::frameRateComboChanged(int){
+void ArchiveWidget::frameRateComboChanged(int){
     unsigned int frameRate = Util::getUInt(frameRateCombo->currentText());
     archivePlayer->setFrameRate(frameRate);
 }
@@ -339,7 +344,7 @@ void ArchiveWidget_V2::frameRateComboChanged(int){
 
 /*! Called when the player thread finishes.
     Resets the state of the buttons. */
-void ArchiveWidget_V2::archivePlayerStopped(){
+void ArchiveWidget::archivePlayerStopped(){
     //Rewind if this has been set
     if(rewind){
 		rewindArchive();
@@ -364,7 +369,7 @@ void ArchiveWidget_V2::archivePlayerStopped(){
 /*----------------------------------------------------------*/
 
 /*! Adds the transport controls to the supplied layout */
-QToolBar* ArchiveWidget_V2::getToolBar(){
+QToolBar* ArchiveWidget::getToolBar(){
     QToolBar* tmpToolBar = new QToolBar(this);
 
     QAction* tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/rewind.png"), "Rewind", this);
@@ -419,7 +424,7 @@ QToolBar* ArchiveWidget_V2::getToolBar(){
 
 
 /*! Loads the archive */
-void ArchiveWidget_V2::loadArchive(ArchiveInfo& archiveInfo){
+void ArchiveWidget::loadArchive(ArchiveInfo& archiveInfo){
     if(!archiveInfoMap.contains(archiveInfo.getID())){
 		qCritical()<<"Archive with ID "<<archiveInfo.getID()<<" cannot be found.";
 		return;
@@ -454,7 +459,7 @@ void ArchiveWidget_V2::loadArchive(ArchiveInfo& archiveInfo){
 
 /*! Resets the state of the widget.
     Deleting the widget automatically removes it from the layout. */
-void ArchiveWidget_V2::reset(){
+void ArchiveWidget::reset(){
     //Remove no archives label if it exists
     if(archiveInfoMap.size() == 0){
     	QLayoutItem* item = gridLayout->itemAtPosition(0, 0);
@@ -501,7 +506,7 @@ void ArchiveWidget_V2::reset(){
 
 
 /*! Rewinds the archive back to the beginning */
-void ArchiveWidget_V2::rewindArchive(){
+void ArchiveWidget::rewindArchive(){
     if(!Globals::archiveLoaded()){
 		qCritical()<<"No archive loaded,so cannot rewind archive.";
 		return;
@@ -515,7 +520,7 @@ void ArchiveWidget_V2::rewindArchive(){
 
 
 /*! Sets the maximum time step label. */
-void ArchiveWidget_V2::setMaxTimeStepLabel(){
+void ArchiveWidget::setMaxTimeStepLabel(){
 	if(!Globals::archiveLoaded()){
 		qCritical()<<"Cannot set time step labels when no archive is loaded";
 		return;
@@ -527,7 +532,7 @@ void ArchiveWidget_V2::setMaxTimeStepLabel(){
 
 
 /*! Steps the archive forward one step */
-void ArchiveWidget_V2::stepArchive(){
+void ArchiveWidget::stepArchive(){
     if(!Globals::archiveLoaded()){
 		qCritical()<<"No archive loaded,so cannot step archive.";
 		return;

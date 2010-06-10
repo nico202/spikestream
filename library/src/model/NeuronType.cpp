@@ -13,6 +13,7 @@ NeuronType::NeuronType(unsigned int neuronTypeID, const QString& description, co
 	this->classLibraryName = classLibraryName;
 }
 
+
 /*! Copy constructor */
 NeuronType::NeuronType(const NeuronType& neurType){
 	this->id = neurType.id;
@@ -77,6 +78,8 @@ QString NeuronType::getClassLibaryName() const{
 	return classLibraryName;
 }
 
+
+/*! Sets the information about the parameters */
 void NeuronType::setParameterInfoList(QList<ParameterInfo>& parameterInfoList){
 	this->parameterInfoList = parameterInfoList;
 }

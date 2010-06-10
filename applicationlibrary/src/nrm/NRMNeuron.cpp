@@ -1,6 +1,7 @@
 //SpikeStream includes
 #include "NRMNeuron.h"
 #include "NRMException.h"
+using namespace spikestream;
 
 //Other includes
 #include <iostream>

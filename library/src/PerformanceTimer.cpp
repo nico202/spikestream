@@ -17,6 +17,7 @@ PerformanceTimer::PerformanceTimer(){
 PerformanceTimer::~PerformanceTimer(){
 }
 
+
 /*----------------------------------------------------------*/
 /*------                PUBLIC METHODS                ------*/
 /*----------------------------------------------------------*/

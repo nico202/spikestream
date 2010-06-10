@@ -25,6 +25,10 @@ AnalysisDao::~AnalysisDao(){
 }
 
 
+/*----------------------------------------------------------*/
+/*-----                 PUBLIC METHODS                 -----*/
+/*----------------------------------------------------------*/
+
 /*! Adds the specified analysis to the database */
 void AnalysisDao::addAnalysis(AnalysisInfo& analysisInfo){
     QString tmpQStr = "INSERT INTO Analyses (NetworkID, ArchiveID, StartTime, Description, Parameters, AnalysisTypeID) VALUES (";
@@ -40,9 +44,9 @@ void AnalysisDao::addAnalysis(AnalysisInfo& analysisInfo){
     //Check id is correct and add to network info if it is
     int lastInsertID = query.lastInsertId().toInt();
     if(lastInsertID >= START_ANALYSIS_ID)
-	analysisInfo.setID(lastInsertID);
+		analysisInfo.setID(lastInsertID);
     else
-	throw SpikeStreamDBException("Insert ID for Analyses is invalid: " + QString::number(lastInsertID));
+		throw SpikeStreamDBException("Insert ID for Analyses is invalid: " + QString::number(lastInsertID));
 }
 
 
@@ -62,24 +66,24 @@ QList<AnalysisInfo> AnalysisDao::getAnalysesInfo(unsigned int networkID, unsigne
     executeQuery(query);
     QList<AnalysisInfo> tmpList;
     for(int i=0; i<query.size(); ++i){
-	query.next();
+		query.next();
 
-	//Extract the parameters
-	XMLParameterParser parser;
-	QHash<QString, double> paramMap = parser.getParameterMap(query.value(3).toString());
+		//Extract the parameters
+		XMLParameterParser parser;
+		QHash<QString, double> paramMap = parser.getParameterMap(query.value(3).toString());
 
-	//Create the analysis info and add it to the list
-	tmpList.append(
-		AnalysisInfo(
-			Util::getUInt(query.value(0).toString()),//AnalysisID
-			networkID,
-			archiveID,
-			QDateTime::fromTime_t(Util::getUInt(query.value(1).toString())),//Date time
-			query.value(2).toString(),//Description
-			paramMap,//Parameter map
-			Util::getUInt(query.value(4).toString())//Analysis type
-		)
-	);
+		//Create the analysis info and add it to the list
+		tmpList.append(
+				AnalysisInfo(
+						Util::getUInt(query.value(0).toString()),//AnalysisID
+						networkID,
+						archiveID,
+						QDateTime::fromTime_t(Util::getUInt(query.value(1).toString())),//Date time
+						query.value(2).toString(),//Description
+						paramMap,//Parameter map
+						Util::getUInt(query.value(4).toString())//Analysis type
+						)
+				);
     }
     return tmpList;
 }

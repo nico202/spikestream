@@ -1,13 +1,14 @@
-#include "NRMNetwork.h"
-
 //SpikeStream includes
+#include "NRMNetwork.h"
 #include "NRMException.h"
 #include "NRMConstants.h"
+using namespace spikestream;
 
 //Other includes
 #include <sstream>
 #include <iostream>
 using namespace std;
+
 
 /*! Constructor */
 NRMNetwork::NRMNetwork(){

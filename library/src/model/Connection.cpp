@@ -5,6 +5,8 @@ using namespace spikestream;
 #include <iostream>
 using namespace std;
 
+
+/*! Constructor */
 Connection::Connection (unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight, float tempWeight){
     id = 0;
     connectionGroupID = 0;
@@ -16,6 +18,7 @@ Connection::Connection (unsigned int fromNeuronID, unsigned int toNeuronID, floa
 }
 
 
+/*! Constructor */
 Connection::Connection (unsigned int id, unsigned int conGrpID, unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight, float tempWeight){
     this->id = id;
     this->connectionGroupID = conGrpID;
@@ -27,6 +30,7 @@ Connection::Connection (unsigned int id, unsigned int conGrpID, unsigned int fro
 }
 
 
+/*! Copy constructor */
 Connection::Connection(const Connection& conn){
     this->id = conn.id;
     this->connectionGroupID = conn.connectionGroupID;
@@ -37,6 +41,10 @@ Connection::Connection(const Connection& conn){
     this->tempWeight = conn.tempWeight;
 }
 
+
+/*--------------------------------------------------------*/
+/*-------             PUBLIC METHODS               -------*/
+/*--------------------------------------------------------*/
 
 /*! Assignment operator */
 Connection& Connection::operator=(const Connection& rhs){
@@ -56,7 +64,7 @@ Connection& Connection::operator=(const Connection& rhs){
 }
 
 
-/*! Prints out the connection */
+/*! Prints out information about the connection. */
 void Connection::print(){
    cout<<"Connection: id="<<id<<"; connectionGroupID="<<connectionGroupID<<"; fromNeuronID="<<fromNeuronID;
    cout<<" toNeuronID="<<toNeuronID<<"; delay="<<delay<<"; weight="<<weight<<"; tempWeight="<<tempWeight<<endl;

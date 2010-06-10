@@ -9,6 +9,7 @@
 
 namespace spikestream {
 
+	/*! Holds functions common to the export of any type of analysis to a file. */
 	class AbstractExportAnalysisDialog : public QDialog {
 		Q_OBJECT
 

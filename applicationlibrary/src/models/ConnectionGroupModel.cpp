@@ -105,6 +105,7 @@ QList<unsigned int> ConnectionGroupModel::getSelectedConnectionGroupIDs(){
 }
 
 
+/*! Inherited from QAbstractTableModel */
 bool ConnectionGroupModel::setData(const QModelIndex& index, const QVariant&, int) {
     if (!index.isValid() || !Globals::networkLoaded())
 		return false;

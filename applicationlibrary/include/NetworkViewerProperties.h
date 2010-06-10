@@ -1,5 +1,5 @@
-#ifndef NETWORKVIEWERPROPERTIES_V2
-#define NETWORKVIEWERPROPERTIES_V2
+#ifndef NETWORKVIEWERPROPERTIES
+#define NETWORKVIEWERPROPERTIES
 
 //SpikeStream includes
 #include "TruthTableDialog.h"
@@ -14,12 +14,12 @@ using namespace spikestream;
 
 namespace spikestream {
 
-	class NetworkViewerProperties_V2 : public QWidget {
+	class NetworkViewerProperties : public QWidget {
 	Q_OBJECT
 
 	public:
-		NetworkViewerProperties_V2(QWidget* parent=0);
-		~NetworkViewerProperties_V2();
+		NetworkViewerProperties(QWidget* parent=0);
+		~NetworkViewerProperties();
 
 	private slots:
 		void fromToSelectionChanged(int index);
@@ -75,5 +75,5 @@ namespace spikestream {
 
 }
 
-#endif// NETWORKVIEWERPROPERTIES_V2
+#endif// NETWORKVIEWERPROPERTIES
 

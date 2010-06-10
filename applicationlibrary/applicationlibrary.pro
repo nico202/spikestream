@@ -194,16 +194,16 @@ SOURCES += src/views/NeuronGroupTableView.cpp \
 #---                 Widgets                ---#
 #----------------------------------------------#
 HEADERS += include/NetworksWidget.h \
-			include/ArchiveWidget_V2.h \
+			include/ArchiveWidget.h \
 			include/NeuronGroupWidget.h \
 			include/ConnectionWidget.h \
-			include/NetworkViewerProperties_V2.h \
+			include/NetworkViewerProperties.h \
 			include/SimulationLoaderWidget.h
 SOURCES += src/widgets/NetworksWidget.cpp \
-			src/widgets/ArchiveWidget_V2.cpp \
+			src/widgets/ArchiveWidget.cpp \
 			src/widgets/NeuronGroupWidget.cpp \
 			src/widgets/ConnectionWidget.cpp \
-			src/widgets/NetworkViewerProperties_V2.cpp \
+			src/widgets/NetworkViewerProperties.cpp \
 			src/widgets/SimulationLoaderWidget.cpp
 
 
@@ -212,19 +212,19 @@ SOURCES += src/widgets/NetworksWidget.cpp \
 #----------------------------------------------#
 HEADERS += include/SpikeStreamApplication.h \
 		   include/SpikeStreamMainWindow.h \
-		   include/PluginManager_V2.h \
+		   include/PluginManager.h \
 		   include/Globals.h \
 		   include/EventRouter.h \
-		   include/NetworkViewer_V2.h \
+		   include/NetworkViewer.h \
 		   include/NetworkDisplay.h \
 		   include/ArchivePlayerThread.h \
 		   include/NetworksBuilder.h
 SOURCES += src/SpikeStreamApplication.cpp \
 		   src/SpikeStreamMainWindow.cpp \
-		   src/PluginManager_V2.cpp \
+		   src/PluginManager.cpp \
 		   src/Globals.cpp \
 		   src/EventRouter.cpp \
-		   src/NetworkViewer_V2.cpp \
+		   src/NetworkViewer.cpp \
 		   src/NetworkDisplay.cpp \
 		   src/ArchivePlayerThread.cpp \
 		   src/NetworksBuilder.cpp

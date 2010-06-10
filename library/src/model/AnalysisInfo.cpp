@@ -11,6 +11,7 @@ AnalysisInfo::AnalysisInfo(){
 	reset();
 }
 
+
 /*! Standard constructor */
 AnalysisInfo::AnalysisInfo(unsigned int analysisID, unsigned int networkID, unsigned int archiveID, const QDateTime& startDateTime, const QString& description, const QHash<QString, double>& parameterMap, unsigned int analysisType){
 	this->id = analysisID;
@@ -36,6 +37,10 @@ AnalysisInfo::AnalysisInfo(const AnalysisInfo& analysisInfo){
 	this->numberOfThreads = analysisInfo.numberOfThreads;
 }
 
+
+/*----------------------------------------------------------*/
+/*-----                PUBLIC METHODS                  -----*/
+/*----------------------------------------------------------*/
 
 /*! Assignment operator */
 AnalysisInfo& AnalysisInfo::operator=(const AnalysisInfo& rhs){

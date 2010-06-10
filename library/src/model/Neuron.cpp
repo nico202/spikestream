@@ -2,6 +2,7 @@
 #include "Neuron.h"
 using namespace spikestream;
 
+
 /*! Constructor */
 Neuron::Neuron(float xPos, float yPos, float zPos){
     location.setXPos(xPos);

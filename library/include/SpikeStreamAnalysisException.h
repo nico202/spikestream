@@ -6,7 +6,7 @@
 
 namespace spikestream {
 
-	/*! Exception specific to analysis-related functionality */
+	/*! Exception specific to analysis-related functionality. */
     class SpikeStreamAnalysisException : public SpikeStreamException {
 		public:
 			SpikeStreamAnalysisException(QString details);
