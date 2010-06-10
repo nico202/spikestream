@@ -4,7 +4,7 @@
 #include <QString>
 namespace spikestream {
 
-	/*! A SpikeStream specific exception. Other SpikeStream exception classes inherit from this class. */
+	/*! SpikeStream specific exception. Other SpikeStream exception classes inherit from this class. */
 	class SpikeStreamException {
 		public:
 			SpikeStreamException(QString details = QString("No details available"));

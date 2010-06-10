@@ -47,7 +47,6 @@ win32 {
 HEADERS = include/GlobalVariables.h \
 			include/PerformanceTimer.h \
 			include/RGBColor.h \
-			include/SimulationTypes.h \
 			include/Box.h \
 			include/Util.h
 

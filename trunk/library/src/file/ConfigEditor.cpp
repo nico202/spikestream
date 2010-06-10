@@ -20,9 +20,12 @@ ConfigEditor::ConfigEditor(){
 
 /*! Destructor */
 ConfigEditor::~ConfigEditor(){
-
 }
 
+
+/*----------------------------------------------------------*/
+/*-----                 PUBLIC METHODS                 -----*/
+/*----------------------------------------------------------*/
 
 /*! Sets the parameters in the config file or throws an exception if it cannot be found */
 void ConfigEditor::setConfigParameters(QHash<QString, QString> newParamMap){
@@ -60,6 +63,10 @@ void ConfigEditor::setConfigParameters(QHash<QString, QString> newParamMap){
 }
 
 
+/*----------------------------------------------------------*/
+/*-----                PRIVATE METHODS                 -----*/
+/*----------------------------------------------------------*/
+
 /*! Sets the parameter in the line from the config map using the value in the
 	parameter map if it exists. */
 void ConfigEditor::setParameter(QHash<QString, QString>& paramMap, QString& configFileLine){
@@ -76,8 +83,5 @@ void ConfigEditor::setParameter(QHash<QString, QString>& paramMap, QString& conf
 		}
 	}
 }
-
-
-
 
 

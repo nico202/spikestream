@@ -13,6 +13,7 @@ using namespace spikestream;
 
 namespace spikestream {
 
+	/*! Abstract spectrogram class that can be used to display information spectrograms for different types of analysis. */
 	class AbstractSpectrogramData : public QwtRasterData {
 		public:
 			AbstractSpectrogramData(const AnalysisInfo& analysisInfo);
@@ -51,6 +52,7 @@ namespace spikestream {
 
 			/*! Neuron IDs are displayed instead of numbers from 1 */
 			bool showNeuronIDs;
+
 
 			//=======================  METHODS  ===========================
 			void addAllTimeStepsMap(const QList<unsigned int>& neurIDList);

@@ -1,26 +1,30 @@
 #ifndef NRMRANDOM_H
 #define NRMRANDOM_H
 
-/*! Seed for the random number */
-struct RandomSeed {
-	unsigned int lo;
-	unsigned int hi;
-};
+namespace spikestream {
 
-class NRMRandom {
-	public:
-		static void setSeed(unsigned int seed);
+	/*! Seed for the random number */
+	struct RandomSeed {
+		unsigned int lo;
+		unsigned int hi;
+	};
 
-		static int getRandNum(int num);
+	class NRMRandom {
+		public:
+			static void setSeed(unsigned int seed);
 
-	private:
-		//====================  VARIABLES  =======================
-		static RandomSeed seed;
+			static int getRandNum(int num);
 
-		//=====================  METHODS  ========================
-		static long generateRandNum(void);
-		static void multiply64Bit(unsigned int& multiplicand, unsigned int multiplier, unsigned int& overflow);
-};
+		private:
+			//====================  VARIABLES  =======================
+			static RandomSeed seed;
+
+			//=====================  METHODS  ========================
+			static long generateRandNum(void);
+			static void multiply64Bit(unsigned int& multiplicand, unsigned int multiplier, unsigned int& overflow);
+	};
+
+}
 
 
 #endif // NRMRANDOM_H

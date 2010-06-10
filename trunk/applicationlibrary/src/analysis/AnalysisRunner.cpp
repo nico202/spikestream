@@ -10,6 +10,7 @@ using namespace spikestream;
 #include <iostream>
 using namespace std;
 
+
 /*! Constructor */
 AnalysisRunner::AnalysisRunner(const DBInfo& netDBInfo, const DBInfo& archDBInfo, const DBInfo& anaDBInfo){
 	//Store information about databases

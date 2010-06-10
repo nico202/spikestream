@@ -1,5 +1,5 @@
-#ifndef PLUGINMANAGER_V2_H
-#define PLUGINMANAGER_V2_H
+#ifndef PLUGINMANAGER_H
+#define PLUGINMANAGER_H
 
 //SpikeStream includes
 #include "SpikeStreamException.h"
@@ -18,10 +18,10 @@ typedef QString (*GetPluginNameFunctionType)();
 
 namespace spikestream {
 
-    class PluginManager_V2 {
+	class PluginManager {
 	public:
-	    PluginManager_V2(QString& pluginFolder) throw(SpikeStreamException);
-	    ~PluginManager_V2();
+		PluginManager(QString& pluginFolder) throw(SpikeStreamException);
+		~PluginManager();
 
 	    QStringList getPluginNames() throw(SpikeStreamException);
 	    QWidget* getPlugin(QString pluginName) throw(SpikeStreamException);
@@ -43,4 +43,4 @@ namespace spikestream {
 
 }
 
-#endif // PLUGINMANAGER_V2_H
+#endif // PLUGINMANAGER_H

@@ -2,10 +2,12 @@
 #include "NRMFileLoader.h"
 #include "NRMException.h"
 #include "NRMTrainingLoader.h"
+using namespace spikestream;
 
 //Other includes
 #include <iostream>
 using namespace std;
+
 
 /*! Constructor */
 NRMFileLoader::NRMFileLoader(){

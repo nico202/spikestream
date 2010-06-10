@@ -4,14 +4,14 @@
 //SpikeStream includes
 #include "AnalysisDao.h"
 #include "Archive.h"
-#include "ArchiveWidget_V2.h"
+#include "ArchiveWidget.h"
 #include "NetworksWidget.h"
 #include "EventRouter.h"
 #include "ArchiveDao.h"
 #include "NetworkDao.h"
 #include "Network.h"
 #include "NetworkDisplay.h"
-#include "NetworkViewer_V2.h"
+#include "NetworkViewer.h"
 #include "SpikeStreamMainWindow.h"
 using namespace spikestream;
 
@@ -57,8 +57,8 @@ namespace spikestream {
 				by accessing private setter methods*/
 			friend class SpikeStreamMainWindow;
 			friend class spikestream::NetworksWidget;
-			friend class spikestream::NetworkViewer_V2;
-			friend class spikestream::ArchiveWidget_V2;
+			friend class spikestream::NetworkViewer;
+			friend class spikestream::ArchiveWidget;
 
 		private:
 			//=====================  VARIABLES ============================

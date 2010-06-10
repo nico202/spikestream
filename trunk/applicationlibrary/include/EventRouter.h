@@ -7,7 +7,7 @@
 namespace spikestream {
 
 	/*! Class held within globals that enables other classes to listen for application
-	wide events, such as reload, etc. */
+		wide events, such as reload, etc. */
 	class EventRouter : public QObject {
 	Q_OBJECT
 

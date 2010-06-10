@@ -1,6 +1,6 @@
 //SpikeStream includes
 #include "Globals.h"
-#include "PluginManager_V2.h"
+#include "PluginManager.h"
 #include "PluginsDialog.h"
 using namespace spikestream;
 
@@ -20,7 +20,7 @@ PluginsDialog::PluginsDialog(QWidget* parent, const QString pluginFolder, const 
 	try{
 		//Get list of available analysis plugins
 		QString pluginPath = Globals::getSpikeStreamRoot() + pluginFolder;
-		PluginManager_V2* pluginManager = new PluginManager_V2(pluginPath);
+		PluginManager* pluginManager = new PluginManager(pluginPath);
 		QStringList pluginList = pluginManager->getPluginNames();
 
 		//Add list to combo box

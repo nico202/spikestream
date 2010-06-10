@@ -1,7 +1,7 @@
 //SpikeStream includes
 #include "SimulationLoaderWidget.h"
 #include "Globals.h"
-#include "PluginManager_V2.h"
+#include "PluginManager.h"
 using namespace spikestream;
 
 //Qt includes
@@ -17,7 +17,7 @@ SimulationLoaderWidget::SimulationLoaderWidget(QWidget* parent) : QWidget(parent
 	try{
 		//Get list of available analysis plugins
 		QString pluginPath = Globals::getSpikeStreamRoot() + "/plugins/simulation";
-		PluginManager_V2* pluginManager = new PluginManager_V2(pluginPath);
+		PluginManager* pluginManager = new PluginManager(pluginPath);
 		QStringList pluginList = pluginManager->getPluginNames();
 
 		//Add list to combo box

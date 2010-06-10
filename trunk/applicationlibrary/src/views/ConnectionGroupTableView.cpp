@@ -24,6 +24,10 @@ ConnectionGroupTableView::~ConnectionGroupTableView(){
 }
 
 
+/*--------------------------------------------------------*/
+/*-------             PUBLIC METHODS               -------*/
+/*--------------------------------------------------------*/
+
 /*! Sets up the size of the headers. Does not work in the constructor because there
 	is not any data or model */
 void ConnectionGroupTableView::resizeHeaders(){
@@ -38,6 +42,10 @@ void ConnectionGroupTableView::resizeHeaders(){
 	hHeader->setDefaultAlignment(Qt::AlignLeft);
 }
 
+
+/*--------------------------------------------------------*/
+/*-------             PRIVATE SLOTS                -------*/
+/*--------------------------------------------------------*/
 
 /*! Called when the table is clicked and passes this information on to model. */
 void ConnectionGroupTableView::tableClicked(QModelIndex index){

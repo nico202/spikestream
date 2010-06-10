@@ -7,16 +7,17 @@
 
 namespace spikestream {
 
+	/*! A table view of the connection group information. */
 	class ConnectionGroupTableView : public QTableView {
-	Q_OBJECT
+		Q_OBJECT
 
-	public:
-		ConnectionGroupTableView(QWidget* parent, QAbstractTableModel* model);
-		~ConnectionGroupTableView();
-		void resizeHeaders();
+		public:
+			ConnectionGroupTableView(QWidget* parent, QAbstractTableModel* model);
+			~ConnectionGroupTableView();
+			void resizeHeaders();
 
-	private slots:
-		void tableClicked(QModelIndex index);
+		private slots:
+			void tableClicked(QModelIndex index);
 
 	};
 

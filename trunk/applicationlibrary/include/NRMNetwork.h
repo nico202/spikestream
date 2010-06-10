@@ -1,56 +1,58 @@
 #ifndef NRMNETWORK_H
 #define NRMNETWORK_H
 
-//Qt includes
-#include <QHash>
-
+//SpikeStream includes
 #include "NRMConnection.h"
 #include "NRMInputLayer.h"
 #include "NRMNeuralLayer.h"
 
-class NRMNetwork {
-	public:
-		NRMNetwork();
-		~NRMNetwork();
+//Qt includes
+#include <QHash>
 
-		void addInputLayer(int id, NRMInputLayer* inputLayer);
-		void addNeuralLayer(int id, NRMNeuralLayer* neuralLayer);
-		void createConnections();
-		QList<NRMInputLayer*> getAllInputs();
-		int getConfigVersion();
-		int getInputLayerCount();
-		int getNeuralLayerCount();
-		int getNumberOfLayers() { return getInputLayerCount() + getNeuralLayerCount(); }
-		QList<NRMInputLayer*> getPanelInputs();
-		QList<NRMInputLayer*> getFramedImageInputs();
-		NRMInputLayer* getInputById(int id);
-		QList<NRMNeuralLayer*> getAllNeuralLayers();
-		QList<NRMNeuralLayer*> getTrainedNeuralLayers();
-		NRMLayer* getLayerById(int layerId, int objectType);
-		NRMNeuralLayer* getNeuralLayerById(int id);
-		void setConfigVersion(int version);
+namespace spikestream {
 
-		void printConnections();
-		void printInputLayers();
-		void printNeuralLayers();
+	class NRMNetwork {
+		public:
+			NRMNetwork();
+			~NRMNetwork();
 
-	private:
-		//=========================  VARIABLES  ==============================
-		/*! Version of the configuration file */
-		int configVersion;
+			void addInputLayer(int id, NRMInputLayer* inputLayer);
+			void addNeuralLayer(int id, NRMNeuralLayer* neuralLayer);
+			void createConnections();
+			QList<NRMInputLayer*> getAllInputs();
+			int getConfigVersion();
+			int getInputLayerCount();
+			int getNeuralLayerCount();
+			int getNumberOfLayers() { return getInputLayerCount() + getNeuralLayerCount(); }
+			QList<NRMInputLayer*> getPanelInputs();
+			QList<NRMInputLayer*> getFramedImageInputs();
+			NRMInputLayer* getInputById(int id);
+			QList<NRMNeuralLayer*> getAllNeuralLayers();
+			QList<NRMNeuralLayer*> getTrainedNeuralLayers();
+			NRMLayer* getLayerById(int layerId, int objectType);
+			NRMNeuralLayer* getNeuralLayerById(int id);
+			void setConfigVersion(int version);
 
-		/*! Holds information about the input layers */
-		QHash<int, NRMInputLayer*> inputLayerMap;
+			void printConnections();
+			void printInputLayers();
+			void printNeuralLayers();
 
-		/*! Holds information about the neural layers */
-		QHash<int, NRMNeuralLayer*> neuralLayerMap;
+		private:
+			//=========================  VARIABLES  ==============================
+			/*! Version of the configuration file */
+			int configVersion;
+
+			/*! Holds information about the input layers */
+			QHash<int, NRMInputLayer*> inputLayerMap;
+
+			/*! Holds information about the neural layers */
+			QHash<int, NRMNeuralLayer*> neuralLayerMap;
 
 
-		//==========================  METHODS  ===============================
+			//==========================  METHODS  ===============================
 
-};
+	};
 
-
-
+}
 
 #endif // NRMNETWORK_H

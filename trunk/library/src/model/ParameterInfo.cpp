@@ -17,10 +17,15 @@ ParameterInfo::ParameterInfo(const ParameterInfo& info){
 	this->optionNames = info.optionNames;
 }
 
+
 /*! Destructor */
 ParameterInfo::~ParameterInfo(){
 }
 
+
+/*--------------------------------------------------------- */
+/*-----                PUBLIC METHODS                 ----- */
+/*--------------------------------------------------------- */
 
 /*! Assignment operator */
 ParameterInfo& ParameterInfo::operator=(const ParameterInfo& rhs){

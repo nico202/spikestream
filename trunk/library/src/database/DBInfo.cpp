@@ -37,6 +37,10 @@ DBInfo::~DBInfo(){
 }
 
 
+/*----------------------------------------------------------*/
+/*-----                 PUBLIC METHODS                 -----*/
+/*----------------------------------------------------------*/
+
 /*! Assignment operator. */
 DBInfo& DBInfo::operator=(const DBInfo &rhs) {
     // Check for self-assignment!

@@ -435,6 +435,7 @@ void NetworkDaoThread::deleteNeuronGroups(){
 }
 
 
+/*! Loads the prepared list of connection groups from the database. */
 void NetworkDaoThread::loadConnections(){
 	//Reset progress
 	numberOfCompletedSteps = 0;
@@ -480,6 +481,7 @@ void NetworkDaoThread::loadConnections(){
 }
 
 
+/*! Loads the prepared list of neuron groups from the database */
 void NetworkDaoThread::loadNeurons(){
 	//Reset progress measure
 	numberOfCompletedSteps = 0;

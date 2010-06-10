@@ -13,6 +13,7 @@
 
 namespace spikestream {
 
+	/*! Sets up and runs an analysis that extends over one or more time steps. */
 	class AnalysisRunner : public QThread {
 		Q_OBJECT
 
@@ -79,6 +80,7 @@ namespace spikestream {
 
 			/*! Pointer to a function that creates a new time step thread of the appropriate class */
 			AbstractAnalysisTimeStepThread* (*createAnalysisTimeStepThread)(const DBInfo& netDBInfo, const DBInfo& archDBInfo, const DBInfo& anaDBInfo);
+
 
 			//=========================  METHODS  ===========================
 			void clearError();

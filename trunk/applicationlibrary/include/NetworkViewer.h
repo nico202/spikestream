@@ -11,12 +11,12 @@
 namespace spikestream {
 
     /*! Draws the current network using OpenGL */
-    class NetworkViewer_V2 : public QGLWidget  {
+	class NetworkViewer : public QGLWidget  {
 		Q_OBJECT
 
 		public:
-			NetworkViewer_V2(QWidget* parent);
-			~NetworkViewer_V2();
+			NetworkViewer(QWidget* parent);
+			~NetworkViewer();
 
 
 		public slots:

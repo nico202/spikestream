@@ -5,7 +5,7 @@
 #include "GlobalVariables.h"
 #include "NetworkDisplay.h"
 #include "EventRouter.h"
-#include "NetworkViewerProperties_V2.h"
+#include "NetworkViewerProperties.h"
 #include "SpikeStreamException.h"
 using namespace spikestream;
 
@@ -15,7 +15,7 @@ using namespace spikestream;
 
 
 /*! Constructor */
-NetworkViewerProperties_V2::NetworkViewerProperties_V2(QWidget* parent) : QWidget(parent){
+NetworkViewerProperties::NetworkViewerProperties(QWidget* parent) : QWidget(parent){
 	//Main vertical layout
 	QVBoxLayout* mainVerticalBox = new QVBoxLayout(this);
 
@@ -101,14 +101,14 @@ NetworkViewerProperties_V2::NetworkViewerProperties_V2(QWidget* parent) : QWidge
 
 
 /*! Destructor */
-NetworkViewerProperties_V2::~NetworkViewerProperties_V2(){
+NetworkViewerProperties::~NetworkViewerProperties(){
 }
 
 
 /*----------------------------------------------------------*/
 /*-----                PRIVATE SLOTS                   -----*/
 /*----------------------------------------------------------*/
-void NetworkViewerProperties_V2::fromToSelectionChanged(int index){
+void NetworkViewerProperties::fromToSelectionChanged(int index){
 	if(index == 0){
 		Globals::getNetworkDisplay()->clearDirectionFiltering();
 	}
@@ -121,7 +121,7 @@ void NetworkViewerProperties_V2::fromToSelectionChanged(int index){
 }
 
 
-void NetworkViewerProperties_V2::networkDisplayChanged(){
+void NetworkViewerProperties::networkDisplayChanged(){
 	unsigned int connectionMode = Globals::getNetworkDisplay()->getConnectionMode();
 	if(connectionMode & CONNECTION_MODE_ENABLED){
 		if(connectionMode & SHOW_BETWEEN_CONNECTIONS)
@@ -135,7 +135,7 @@ void NetworkViewerProperties_V2::networkDisplayChanged(){
 }
 
 
-void NetworkViewerProperties_V2::posNegSelectionChanged(int index){
+void NetworkViewerProperties::posNegSelectionChanged(int index){
 	if(index == 0){
 		Globals::getNetworkDisplay()->clearWeightFiltering();
 	}
@@ -149,7 +149,7 @@ void NetworkViewerProperties_V2::posNegSelectionChanged(int index){
 
 
 /*! Shows a dialog with the truth table for the selected neuron */
-void NetworkViewerProperties_V2::showTruthTable(){
+void NetworkViewerProperties::showTruthTable(){
 	//Get neuron id.
 	unsigned int tmpNeurID = Globals::getNetworkDisplay()->getSingleNeuronID();
 	if(tmpNeurID == 0)
@@ -164,7 +164,7 @@ void NetworkViewerProperties_V2::showTruthTable(){
 /*-----               PRIVATE METHODS                  -----*/
 /*----------------------------------------------------------*/
 
-void NetworkViewerProperties_V2::showAllConnections(){
+void NetworkViewerProperties::showAllConnections(){
 	allConsButt->setChecked(true);
 	allConsButt->setEnabled(true);
 	conBetweenNeurButt->setEnabled(false);
@@ -183,7 +183,7 @@ void NetworkViewerProperties_V2::showAllConnections(){
 }
 
 
-void NetworkViewerProperties_V2::showBetweenConnections(){
+void NetworkViewerProperties::showBetweenConnections(){
 	conBetweenNeurButt->setChecked(true);
 	conBetweenNeurButt->setEnabled(true);
 	fromNeuronIDLabel->setEnabled(true);
@@ -202,7 +202,7 @@ void NetworkViewerProperties_V2::showBetweenConnections(){
 }
 
 
-void NetworkViewerProperties_V2::showSingleConnections(){
+void NetworkViewerProperties::showSingleConnections(){
 	//Id of the single neuron
 	unsigned int singleNeuronID = Globals::getNetworkDisplay()->getSingleNeuronID();
 
@@ -243,7 +243,7 @@ void NetworkViewerProperties_V2::showSingleConnections(){
 }
 
 /*! Shows the dialog with the specified neuron's truth table */
-void NetworkViewerProperties_V2::showTruthTableDialog(unsigned int neuronID){
+void NetworkViewerProperties::showTruthTableDialog(unsigned int neuronID){
 	if(truthTableDialog == NULL)
 		truthTableDialog = new TruthTableDialog();
 	truthTableDialog->show(neuronID);
@@ -251,7 +251,7 @@ void NetworkViewerProperties_V2::showTruthTableDialog(unsigned int neuronID){
 
 
 /*! Hides the dialog with the neuron's truth table */
-void NetworkViewerProperties_V2::hideTruthTableDialog(){
+void NetworkViewerProperties::hideTruthTableDialog(){
 	if(truthTableDialog != NULL)
 		truthTableDialog->hide();
 }

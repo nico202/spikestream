@@ -7,6 +7,7 @@
 
 namespace spikestream {
 
+	/*! View of model listing the different types of analysis. Used for loading and deleting analyses. */
     class AnalysesTableView : public QTableView {
 		Q_OBJECT
 

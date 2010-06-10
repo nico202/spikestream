@@ -12,7 +12,8 @@ using namespace spikestream;
 #include <iostream>
 using namespace std;
 
-/*! I think this is an array where each number represents the Hamming distance
+/*! Copied from NRM.
+	I think this is an array where each number represents the Hamming distance
 	between XORed bytes. So for example, if the two bytes 10000111 and 00000111
 	are XORed, you get the number 10000000, or 128, which should result in 1 when
 	looked up in the array.
@@ -280,6 +281,8 @@ void WeightlessNeuron::buildInputPattern(byte inPatArr[], int inPatArrSize, bool
 	}
 }
 
+
+/*! Prints out the map linking each position in the pattern string with a neuron id. */
 void WeightlessNeuron::printConnectionMap(){
 	for(QHash<unsigned int, QList<unsigned int> >::iterator iter = connectionMap.begin(); iter != connectionMap.end(); ++iter){
 		foreach(unsigned int tmpPattIndx, iter.value())
@@ -287,6 +290,8 @@ void WeightlessNeuron::printConnectionMap(){
 	}
 }
 
+
+/*! Prints out array used to select combinations of undefined neurons */
 void WeightlessNeuron::printSelectionArray(bool selArr[], int arrSize){
 	for(int i=0; i<arrSize; ++i){
 		if(selArr[i])
@@ -298,6 +303,7 @@ void WeightlessNeuron::printSelectionArray(bool selArr[], int arrSize){
 }
 
 
+/*! Prints out the training of the neuron. */
 void WeightlessNeuron::printTraining(){
 	foreach(byte* byteArr, trainingData)
 		Util::printByteArray(byteArr, trainingDataLength);

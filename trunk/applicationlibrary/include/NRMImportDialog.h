@@ -17,124 +17,127 @@ using namespace spikestream;
 #include <QString>
 #include <QWidget>
 
-class NRMImportDialog : public QDialog {
-    Q_OBJECT
+namespace spikestream {
 
-    public:
-	NRMImportDialog(QWidget* parent);
-	~NRMImportDialog();
+	class NRMImportDialog : public QDialog {
+		Q_OBJECT
 
-    signals:
-	void networkListChanged();
+		public:
+		NRMImportDialog(QWidget* parent);
+		~NRMImportDialog();
 
-    private slots:
-	void addNetwork();
-	void cancel();
-	void getConfigFile();
-	void getDatasetFile();
-	void getTrainingFile();
-	void loadNetworkFromFiles();
-	void showBusyPage(QString msg);
-	void showPage1();
-	void showPage2();
-	void showSuccessPage();
-	void threadFinished();
+		signals:
+		void networkListChanged();
 
-    private:
-	//======================  VARIABLES  =======================
-	/*! Allows user to enter the path to the configuration file */
-	QLineEdit* configFilePath;
+		private slots:
+		void addNetwork();
+		void cancel();
+		void getConfigFile();
+		void getDatasetFile();
+		void getTrainingFile();
+		void loadNetworkFromFiles();
+		void showBusyPage(QString msg);
+		void showPage1();
+		void showPage2();
+		void showSuccessPage();
+		void threadFinished();
 
-	/*! Allows user to enter the path to the training file */
-	QLineEdit* trainingFilePath;
+		private:
+		//======================  VARIABLES  =======================
+		/*! Allows user to enter the path to the configuration file */
+		QLineEdit* configFilePath;
 
-	/*! Allows user to enter the path to the dataset file */
-	QLineEdit* datasetFilePath;
+		/*! Allows user to enter the path to the training file */
+		QLineEdit* trainingFilePath;
 
-	/*! Displayed when thread-based operations are taking place, such as
-	    file loading and data importing */
-	QWidget* busyWidget;
+		/*! Allows user to enter the path to the dataset file */
+		QLineEdit* datasetFilePath;
 
-	/*! Label explaning which operation is in progress */
-	QLabel* busyLabel;
+		/*! Displayed when thread-based operations are taking place, such as
+			file loading and data importing */
+		QWidget* busyWidget;
 
-	/*! Grid layout for page2 holding components that enable
-	    user to edit location of layers */
-	QGridLayout* layerLocationGrid;
+		/*! Label explaning which operation is in progress */
+		QLabel* busyLabel;
 
-	/*! Holds all of the controls for the first stage of the dialog */
-	QWidget* page1Widget;
+		/*! Grid layout for page2 holding components that enable
+			user to edit location of layers */
+		QGridLayout* layerLocationGrid;
 
-	/*! Holds all of the controls for the second stage of the dialog */
-	QWidget* page2Widget;
+		/*! Holds all of the controls for the first stage of the dialog */
+		QWidget* page1Widget;
 
-	/*! Displayed when data has been successfully imported */
-	QWidget* successWidget;
+		/*! Holds all of the controls for the second stage of the dialog */
+		QWidget* page2Widget;
 
-	/*! Records if an operation has been cancelled by the user */
-	bool operationCancelled;
+		/*! Displayed when data has been successfully imported */
+		QWidget* successWidget;
 
-	/*! The current task the dialog is performing. Different task types are given below */
-	int currentTask;
+		/*! Records if an operation has been cancelled by the user */
+		bool operationCancelled;
 
-	/*! Task of loading file in a separate thread */
-	static const int FILE_LOADING_TASK = 1;
+		/*! The current task the dialog is performing. Different task types are given below */
+		int currentTask;
 
-	/*! Task of adding a network to the database */
-	static const int ADD_NEURON_GROUPS_TASK = 2;
+		/*! Task of loading file in a separate thread */
+		static const int FILE_LOADING_TASK = 1;
 
-	/*! Task of adding a network to the database */
-	static const int ADD_CONNECTION_GROUPS_TASK = 3;
+		/*! Task of adding a network to the database */
+		static const int ADD_NEURON_GROUPS_TASK = 2;
 
-	/*! Task of converting data sets to archives */
-	static const int ADD_ARCHIVES_TASK = 4;
+		/*! Task of adding a network to the database */
+		static const int ADD_CONNECTION_GROUPS_TASK = 3;
 
-	/*! Task of adding training to the database */
-	static const int ADD_TRAINING_TASK = 5;
+		/*! Task of converting data sets to archives */
+		static const int ADD_ARCHIVES_TASK = 4;
 
-	/*! Runs as a separate thread to load data from configuration and training files */
-	NRMFileLoader* fileLoader;
+		/*! Task of adding training to the database */
+		static const int ADD_TRAINING_TASK = 5;
 
-	/*! Runs as a separate thread to load connections */
-	NRMDataImporter* dataImporter;
+		/*! Runs as a separate thread to load data from configuration and training files */
+		NRMFileLoader* fileLoader;
 
-	/*! Network that is being imported */
-	Network* newNetwork;
+		/*! Runs as a separate thread to load connections */
+		NRMDataImporter* dataImporter;
 
-	/*! List of neuron groups that are added to the network */
-	QList<NeuronGroup*> newNeuronGroupList;
+		/*! Network that is being imported */
+		Network* newNetwork;
 
-	/*! Name assigned to the network being imported */
-	QLineEdit* networkName;
+		/*! List of neuron groups that are added to the network */
+		QList<NeuronGroup*> newNeuronGroupList;
 
-	/*! Description of the network being imported */
-	QLineEdit* networkDescription;
+		/*! Name assigned to the network being imported */
+		QLineEdit* networkName;
 
-	/*! Location of the x QLineEdit widget */
-	static const int page2XCol = 4;
+		/*! Description of the network being imported */
+		QLineEdit* networkDescription;
 
-	/*! Location of the y QLineEdit widget */
-	static const int page2YCol = 6;
+		/*! Location of the x QLineEdit widget */
+		static const int page2XCol = 4;
 
-	/*! Location of the z QLineEdit widget */
-	static const int page2ZCol = 8;
+		/*! Location of the y QLineEdit widget */
+		static const int page2YCol = 6;
+
+		/*! Location of the z QLineEdit widget */
+		static const int page2ZCol = 8;
 
 
-	//=======================  METHODS  =========================
-	void addArchives();
-	void addConnectionGroups();
-	void addLayersToPage2();
-	void addNeuronGroupIDsToNRMNetwork();
-	void addTraining();
-	void buildBusyPage();
-	void buildPage1();
-	void buildPage2();
-	void buildSuccessPage();
-	QString getFilePath(QString fileFilter);
-	int getInt();
-	void showMessage();
+		//=======================  METHODS  =========================
+		void addArchives();
+		void addConnectionGroups();
+		void addLayersToPage2();
+		void addNeuronGroupIDsToNRMNetwork();
+		void addTraining();
+		void buildBusyPage();
+		void buildPage1();
+		void buildPage2();
+		void buildSuccessPage();
+		QString getFilePath(QString fileFilter);
+		int getInt();
+		void showMessage();
+	};
 
-};
+}
 
 #endif//NRMIMPORTDIALOG_H
 

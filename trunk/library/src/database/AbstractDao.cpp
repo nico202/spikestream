@@ -74,11 +74,13 @@ bool AbstractDao::isConnected(){
 }
 
 
+/*! Closes the database connection. */
 void AbstractDao::closeDatabaseConnection(){
     QSqlDatabase::removeDatabase(dbName);
 }
 
 
+/*! Connects to the database */
 void AbstractDao::connectToDatabase(){
 	//Record the thread that this database was created in - this class cannot be used across multiple threads
     dbThread = QThread::currentThread();

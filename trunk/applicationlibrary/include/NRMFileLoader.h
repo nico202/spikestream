@@ -12,52 +12,56 @@ using namespace spikestream;
 #include <QString>
 #include <QThread>
 
-class NRMFileLoader : public QThread{
-    public:
-	NRMFileLoader();
-	~NRMFileLoader();
+namespace spikestream {
 
-	NRMDataSet* getDataSet();
-	QString getErrorMessage() { return errorMessage; }
-	NRMNetwork* getNetwork();
-	bool isError() { return error; }
-	void run();
-	void setConfigFilePath(QString configFilePath);
-	void setDatasetFilePath(QString configFilePath);
-	void setTrainingFilePath(QString trainingFilePath);
-	void stop();
+	class NRMFileLoader : public QThread{
+		public:
+		NRMFileLoader();
+		~NRMFileLoader();
 
-    private:
-	//========================  VARIABLES  =========================
-	/*! Set to true to stop the thread running */
-	bool stopThread;
+		NRMDataSet* getDataSet();
+		QString getErrorMessage() { return errorMessage; }
+		NRMNetwork* getNetwork();
+		bool isError() { return error; }
+		void run();
+		void setConfigFilePath(QString configFilePath);
+		void setDatasetFilePath(QString configFilePath);
+		void setTrainingFilePath(QString trainingFilePath);
+		void stop();
 
-	/*! Path to the NRM configuration file */
-	QString configFilePath;
+		private:
+		//========================  VARIABLES  =========================
+		/*! Set to true to stop the thread running */
+		bool stopThread;
 
-	/*! Path to the NRM configuration file */
-	QString datasetFilePath;
+		/*! Path to the NRM configuration file */
+		QString configFilePath;
 
-	/*! Path to the training file */
-	QString trainingFilePath;
+		/*! Path to the NRM configuration file */
+		QString datasetFilePath;
 
-	/*! Responsible for loading config file */
-	NRMConfigLoader* configLoader;
+		/*! Path to the training file */
+		QString trainingFilePath;
 
-	/*! Responsible for loading the dataset from file */
-	NRMDataSetImporter* dataSetImporter;
+		/*! Responsible for loading config file */
+		NRMConfigLoader* configLoader;
 
-	bool configLoaded;
-	bool datasetLoaded;
-	bool trainingLoaded;
+		/*! Responsible for loading the dataset from file */
+		NRMDataSetImporter* dataSetImporter;
 
-	bool error;
-	QString errorMessage;
+		bool configLoaded;
+		bool datasetLoaded;
+		bool trainingLoaded;
 
-	//=============================  METHODS  ==============================
-	void clearError();
-	void setError(const QString& errorMessage);
-};
+		bool error;
+		QString errorMessage;
+
+		//=============================  METHODS  ==============================
+		void clearError();
+		void setError(const QString& errorMessage);
+	};
+
+}
 
 #endif //NRMFILELOADER_H
 

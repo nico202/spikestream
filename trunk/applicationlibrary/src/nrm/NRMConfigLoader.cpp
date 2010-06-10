@@ -1,8 +1,8 @@
-
-//Project includes
+//SpikeStream includes
 #include "NRMConfigLoader.h"
 #include "NRMException.h"
 #include "NRMConstants.h"
+using namespace spikestream;
 
 //Other includes
 #include <stdio.h>

@@ -5,6 +5,7 @@ using namespace spikestream;
 //Qt includes
 #include <QDebug>
 
+
 /*! Standard constructor */
 SynapseType::SynapseType(unsigned int synapseTypeID, const QString& description, const QString& paramTableName, const QString& classLibraryName){
 	this->id = synapseTypeID;
@@ -12,6 +13,7 @@ SynapseType::SynapseType(unsigned int synapseTypeID, const QString& description,
 	this->parameterTableName = paramTableName;
 	this->classLibraryName = classLibraryName;
 }
+
 
 /*! Copy constructor */
 SynapseType::SynapseType(const SynapseType& synType){
@@ -72,7 +74,6 @@ SynapseType& SynapseType::operator=(const SynapseType& rhs){
 }
 
 
-
 /*! Returns the list of parameter types */
 QList<ParameterInfo> SynapseType::getParameterInfoList() const{
 	return parameterInfoList;
@@ -83,6 +84,5 @@ QList<ParameterInfo> SynapseType::getParameterInfoList() const{
 void SynapseType::setParameterInfoList(QList<ParameterInfo>& parameterInfoList){
 	this->parameterInfoList = parameterInfoList;
 }
-
 
 

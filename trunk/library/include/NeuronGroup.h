@@ -6,10 +6,12 @@
 #include "Neuron.h"
 using namespace spikestream;
 
+/*! Structure holding pointers to neurons. */
 typedef QHash<unsigned int, Neuron*> NeuronMap;
 
 namespace spikestream {
 
+	/*! A group of neurons. */
     class NeuronGroup {
 		public:
 			NeuronGroup(const NeuronGroupInfo& info);

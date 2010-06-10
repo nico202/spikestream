@@ -9,6 +9,7 @@ using namespace spikestream;
 #include <QDebug>
 #include <QIcon>
 
+
 /*! Constructor */
 AnalysesModel::AnalysesModel(unsigned int analysisType) : QAbstractTableModel(){
 	this->analysisType = analysisType;
@@ -20,6 +21,10 @@ AnalysesModel::AnalysesModel(unsigned int analysisType) : QAbstractTableModel(){
 AnalysesModel::~AnalysesModel(){
 }
 
+
+/*------------------------------------------------------------*/
+/*------               PUBLIC METHODS                   ------*/
+/*------------------------------------------------------------*/
 
 /*! Inherited from QAbstractTableModel. Returns the number of columns in the model */
 int AnalysesModel::columnCount(const QModelIndex&) const{
@@ -73,6 +78,7 @@ QVariant AnalysesModel::data(const QModelIndex & index, int role) const{
 }
 
 
+/*! Returns a list of the currently selected analyses */
 QList<AnalysisInfo> AnalysesModel::getSelectedAnalyses(){
     QList<AnalysisInfo> tmpList;
     for(int i=0; i<analysisInfoList.size(); ++i){
@@ -83,6 +89,7 @@ QList<AnalysisInfo> AnalysesModel::getSelectedAnalyses(){
 }
 
 
+/*! Sets data in the model. */
 bool AnalysesModel::setData(const QModelIndex& index, const QVariant&, int) {
     if (!index.isValid() || index.row() < 0 || index.row() >= rowCount())
 	return false;

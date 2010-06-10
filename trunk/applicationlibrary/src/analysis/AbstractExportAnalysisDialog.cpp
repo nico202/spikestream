@@ -10,8 +10,10 @@ using namespace spikestream;
 #include <QFileDialog>
 #include <QLayout>
 #include <QLabel>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QTextStream>
+
 
 /*! Constructor */
 AbstractExportAnalysisDialog::AbstractExportAnalysisDialog(const QString& analysisName, QWidget* parent) : QDialog(parent){
@@ -75,9 +77,12 @@ void AbstractExportAnalysisDialog::okButtonClicked(){
 		return;
 	}
 
-
-	//FIXME: CHECK IF FILE ALREADY EXISTS
-
+	//If file exists, check to see if user wants to overwrite file
+	if(QFile::exists(fileLineEdit->text())){
+		int response = QMessageBox::warning(this, "Overwrite File?", fileLineEdit->text() + " already exists.\nAre you sure that you want to overwrite it?", QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel);
+		if(response != QMessageBox::Ok)
+			return;
+	}
 
 	try{
 		qDebug()<<"Exporting analysis to file: "<<fileLineEdit->text()<<". Export type: "<<exportTypeCombo->currentIndex();

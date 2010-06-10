@@ -5,18 +5,21 @@
 #include <string>
 using namespace std;
 
+namespace spikestream {
 
-class NRMException{
-	public:
-		NRMException(string msg);
-		NRMException(const char* msg);
-		NRMException(const char* msg, int data1);
-		virtual ~NRMException(void);
-		const char* getMessage();
+	class NRMException{
+		public:
+			NRMException(string msg);
+			NRMException(const char* msg);
+			NRMException(const char* msg, int data1);
+			virtual ~NRMException(void);
+			const char* getMessage();
 
-	private:
-		string message;
-};
+		private:
+			string message;
+	};
+
+}
 
 
 #endif//NRMEXCEPTION_H

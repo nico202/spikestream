@@ -6,6 +6,7 @@
 
 namespace spikestream {
 
+	/*! A weightless neuron */
 	class WeightlessNeuron {
 		 public:
 				WeightlessNeuron(QHash<unsigned int, QList<unsigned int> >& connectionMap, unsigned int id);

@@ -1,7 +1,7 @@
-
 //SpikeStream includes
 #include "NRMNeuralLayer.h"
 #include "NRMException.h"
+using namespace spikestream;
 
 //Other includes
 #include <iostream>

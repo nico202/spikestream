@@ -11,7 +11,7 @@ using namespace spikestream;
 #include <QMutexLocker>
 
 /*! Constructor.
-    Cannot initialize archive dao here because constructor is called by a separate thread. */
+	NOTE: Cannot initialize archive dao here because constructor is called by a separate thread. */
 ArchivePlayerThread::ArchivePlayerThread(DBInfo archiveDBInfo) {
     this->archiveDBInfo = archiveDBInfo;
     archiveDao = NULL;

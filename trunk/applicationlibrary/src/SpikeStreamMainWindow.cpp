@@ -7,11 +7,11 @@
 #include "NRMImportDialog.h"
 #include "SpikeStreamException.h"
 #include "NetworksWidget.h"
-#include "ArchiveWidget_V2.h"
+#include "ArchiveWidget.h"
 #include "NeuronGroupWidget.h"
 #include "ConnectionWidget.h"
-#include "NetworkViewer_V2.h"
-#include "NetworkViewerProperties_V2.h"
+#include "NetworkViewer.h"
+#include "NetworkViewerProperties.h"
 #include "SimulationLoaderWidget.h"
 #include "Util.h"
 using namespace spikestream;
@@ -224,12 +224,12 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow(){
 
 
 	//Create network viewer for right half of screen
-	new NetworkViewer_V2(mainSplitterWidget);
+	new NetworkViewer(mainSplitterWidget);
 
 	//Set up viewer tab
 	QScrollArea* networkViewPropsScrollArea = new QScrollArea(tabWidget);
-	NetworkViewerProperties_V2* networkViewerProperties_V2 = new NetworkViewerProperties_V2(networkViewPropsScrollArea);
-	networkViewPropsScrollArea->setWidget(networkViewerProperties_V2);
+	NetworkViewerProperties* networkViewerProperties = new NetworkViewerProperties(networkViewPropsScrollArea);
+	networkViewPropsScrollArea->setWidget(networkViewerProperties);
 	tabWidget->addTab(networkViewPropsScrollArea, "Viewer");
 
 	//Set up simulation tab
@@ -240,7 +240,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow(){
 
 	//Set up archive tab
 	QScrollArea* archiveScrollArea = new QScrollArea(tabWidget);
-	ArchiveWidget_V2* archiveWidget = new ArchiveWidget_V2();
+	ArchiveWidget* archiveWidget = new ArchiveWidget();
 	archiveScrollArea->setWidget(archiveWidget);
 	tabWidget->addTab(archiveScrollArea, "Archives");
 

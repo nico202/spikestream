@@ -86,6 +86,11 @@ AnalysisSpectrogram::~AnalysisSpectrogram(){
 }
 
 
+/*----------------------------------------------------------*/
+/*-----                 PUBLIC METHODS                 -----*/
+/*----------------------------------------------------------*/
+
+/*! Rescales the plot */
 void AnalysisSpectrogram::rescale(){
 	setAxisScale(QwtPlot::yLeft, d_spectrogram->data().boundingRect().y(),d_spectrogram->data().boundingRect().y() + d_spectrogram->data().boundingRect().height(), 1);
 	setAxisScale(QwtPlot::xBottom, d_spectrogram->data().boundingRect().x(),d_spectrogram->data().boundingRect().x() + d_spectrogram->data().boundingRect().width(), 1);
@@ -93,12 +98,14 @@ void AnalysisSpectrogram::rescale(){
 }
 
 
+/*! Shows the contours of the plot */
 void AnalysisSpectrogram::showContour(bool on){
 	d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ContourMode, on);
 	replot();
 }
 
 
+/*! Makes the spectrogram visible */
 void AnalysisSpectrogram::showSpectrogram(bool on){
 	d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ImageMode, on);
 	d_spectrogram->setDefaultContourPen(on ? QPen() : QPen(Qt::NoPen));
@@ -106,6 +113,8 @@ void AnalysisSpectrogram::showSpectrogram(bool on){
 }
 
 
+/*! Prints the plot to a pdf file
+	FIXME: THIS PROBABLY DOESN'T WORK. */
 void AnalysisSpectrogram::printPlot() {
 	QPrinter printer;
 	printer.setOrientation(QPrinter::Landscape);

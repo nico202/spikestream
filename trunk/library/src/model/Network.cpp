@@ -85,8 +85,7 @@ Network::~Network(){
 /*-----                PUBLIC METHODS                 ----- */
 /*--------------------------------------------------------- */
 
-/*! Adds a connection group to the network without saving it to the database.
-    #FIXME#: MAKE THIS WORK IN THE SAME WAY AS A NEURON GROUP. WILL HAVE TO CHANGE NRM IMPORTER WHEN THIS IS DONE. */
+/*! Adds a connection group to the network without saving it to the database. */
 void Network::addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList, bool checkNetworkLocked){
     if(checkNetworkLocked && isLocked())//Check if network is editable or not
 		throw SpikeStreamException("Cannot add connection groups to a locked network.");
@@ -233,7 +232,6 @@ QList<ConnectionGroupInfo> Network::getConnectionGroupsInfo(){
 }
 
 
-
 /*! Returns a list of connection group infos filtered by the specified synapse type ID */
 QList<ConnectionGroupInfo> Network::getConnectionGroupsInfo(unsigned int synapseTypeID){
 	QList<ConnectionGroupInfo> tmpList;
@@ -272,7 +270,6 @@ QList<NeuronGroupInfo> Network::getNeuronGroupsInfo(unsigned int neuronTypeID){
 	}
 	return tmpList;
 }
-
 
 
 /*! Returns the number of neurons that connect to the specified neuron */
@@ -615,15 +612,15 @@ void Network::loadNeuronGroupsInfo(){
 }
 
 
-
+/*! Deletes all connection groups */
 void Network::deleteConnectionGroups(){
-    //Delete all connection groups
     for(QHash<unsigned int, ConnectionGroup*>::iterator iter = connGrpMap.begin(); iter != connGrpMap.end(); ++iter)
 		delete iter.value();
     connGrpMap.clear();
 }
 
 
+/*! Deletes all neuron groups */
 void Network::deleteNeuronGroups(){
     //Delete all neuron groups
     for(QHash<unsigned int, NeuronGroup*>::iterator iter = neurGrpMap.begin(); iter != neurGrpMap.end(); ++iter)
