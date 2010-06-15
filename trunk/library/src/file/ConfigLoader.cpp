@@ -6,6 +6,7 @@ using namespace spikestream;
 //Qt includes
 #include <QFile>
 #include <QTextStream>
+#include <QCoreApplication>
 
 //Other includes
 #include <iostream>
@@ -13,9 +14,17 @@ using namespace std;
 
 
 /*! Constructor loads up the configuration data from the given file path. */
-ConfigLoader::ConfigLoader(const QString& fileLocation){
+ConfigLoader::ConfigLoader(){
+	//Get root directory.
+	QString rootDirectory = QCoreApplication::applicationDirPath();
+	rootDirectory.truncate(rootDirectory.size() - 4);//Trim the "/bin" off the end
+
+	/* Make sure that there is a config file already by attempting to copy from the template
+	   This function will not overwrite an existing config file */
+	QFile::copy (rootDirectory + "/spikestream.config.template", rootDirectory + "/spikestream.config");
+
 	//Create config file
-	QFile configFile(fileLocation);
+	QFile configFile(rootDirectory + "/spikestream.config");
 	if(!configFile.exists())
 		throw SpikeStreamIOException("Cannot find config file.");
 

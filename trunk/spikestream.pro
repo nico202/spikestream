@@ -21,7 +21,7 @@ SUBDIRS += simulators/nemo
 	
 	
 #================  INSTALLATION  =====================
-#SUBDIRS += installation/dbconfigtool
+SUBDIRS += installation/dbconfigtool
 
 
 #=================  TESTS  ===================

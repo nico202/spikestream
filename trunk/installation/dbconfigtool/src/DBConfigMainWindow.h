@@ -12,6 +12,7 @@
 
 namespace spikestream {
 
+	/*! Main window of the database configuration tool. */
 	class DBConfigMainWindow : public QMainWindow{
 		Q_OBJECT
 

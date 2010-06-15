@@ -2,23 +2,20 @@
 # Each configuration item must have a unique name.
 # SpikeStream needs to be restarted for any changes to take effect
 
-# PARAMETERS FOR NETWORK DATABASE
+# PARAMETERS FOR SpikeStreamNetwork DATABASE 
 spikeStreamNetworkHost = localhost
 spikeStreamNetworkUser = SpikeStream
 spikeStreamNetworkPassword = password
-spikeStreamNetworkDatabase = SpikeStreamNetwork
 
-# PARAMETERS FOR ARCHIVE DATABASE
+# PARAMETERS FOR SpikeStreamArchive DATABASE
 spikeStreamArchiveHost = localhost
 spikeStreamArchiveUser = SpikeStream
 spikeStreamArchivePassword = password
-spikeStreamArchiveDatabase = SpikeStreamArchive
 
-# PARAMETERS FOR ANALYSIS DATABASE
+# PARAMETERS FOR SpikeStreamAnalysis DATABASE
 spikeStreamAnalysisHost = localhost
 spikeStreamAnalysisUser = SpikeStream
 spikeStreamAnalysisPassword = password
-spikeStreamAnalysisDatabase = SpikeStreamAnalysis
 
 # FILE PARAMETERS
 default_file_location = /home/terry/spikestream
