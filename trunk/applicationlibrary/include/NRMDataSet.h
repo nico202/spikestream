@@ -6,25 +6,30 @@
 
 namespace spikestream {
 
+	/*! Set of NRM firing data */
     class NRMDataSet {
-	public:
-	    NRMDataSet();
-	    ~NRMDataSet();
+		public:
+			NRMDataSet();
+			~NRMDataSet();
+				void addData(unsigned char* data);
+			QList<unsigned char*> getDataList() { return dataList; }
+			void print();
+			void reset();
+			int size() { return dataList.size(); }
 
-	    void addData(unsigned char* data);
-	    QList<unsigned char*> getDataList() { return dataList; }
-	    void reset();
+			/*! The width of the data */
+			int width;
 
-	    void print();
-	    int size() { return dataList.size(); }
+			/*! The height of the data */
+			int height;
 
-	    int width;
-	    int height;
-	    int colorPlanes;
+			/*! The type of colour information in the data - see NRM code for further details. */
+			int colorPlanes;
 
-	private:
-	    //===========================  VARIABLES  ==========================
-	    QList<unsigned char*> dataList;
+		private:
+			//===========================  VARIABLES  ==========================
+			/*! The data */
+			QList<unsigned char*> dataList;
     };
 }
 

@@ -1,9 +1,11 @@
+//SpikeStream includes
 #include "ConnectionGroupInfo.h"
 #include "Globals.h"
 #include "SynapseParametersDialog.h"
 #include "SynapseParametersModel.h"
 #include "SynapseParametersView.h"
 using namespace spikestream;
+
 
 /*! Constructor */
 SynapseParametersDialog::SynapseParametersDialog(QWidget *parent) : QDialog(parent) {

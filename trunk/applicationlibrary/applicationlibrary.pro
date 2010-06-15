@@ -223,7 +223,6 @@ SOURCES += src/SpikeStreamApplication.cpp \
 		   src/SpikeStreamMainWindow.cpp \
 		   src/PluginManager.cpp \
 		   src/Globals.cpp \
-		   src/EventRouter.cpp \
 		   src/NetworkViewer.cpp \
 		   src/NetworkDisplay.cpp \
 		   src/ArchivePlayerThread.cpp \

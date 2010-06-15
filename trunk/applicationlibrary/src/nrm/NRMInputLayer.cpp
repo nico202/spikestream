@@ -4,14 +4,17 @@ using namespace spikestream;
 #include <iostream>
 using namespace std;
 
+/*! Constructor */
 NRMInputLayer::NRMInputLayer(){
     type = NRM_INPUT_LAYER;
 }
 
+/*! Destructor */
 NRMInputLayer::~NRMInputLayer(){
 }
 
 
+/*! Prints out information about the layer. */
 void NRMInputLayer::print(){
 	cout<<"   Name: "<<frameName<<endl;
 	cout<<"   WinType: "<<winType<<endl;

@@ -13,7 +13,7 @@ using namespace spikestream;
 namespace spikestream {
 
 	/*! Holds display information about the current network in global scope,
-	including which neuron and connection groups are displayed, colours etc. */
+		including which neuron and connection groups are displayed, colours etc. */
 	class NetworkDisplay : public QObject {
 		Q_OBJECT
 
@@ -52,18 +52,18 @@ namespace spikestream {
 			void setZoom(unsigned int neurGrpID, int status);
 			void unlockMutex();
 
-
 			unsigned int getSingleNeuronID() { return singleNeuronID; }
 			unsigned int getToNeuronID() { return toNeuronID; }
 			void setSelectedNeuronID(unsigned int id, bool ctrlBtnDown=false);
 
-			void showPositiveConnections();
-			void showNegativeConnections();
 			void clearWeightFiltering();
+			void showNegativeConnections();
+			void showPositiveConnections();
 
+			void clearDirectionFiltering();
 			void showFromConnections();
 			void showToConnections();
-			void clearDirectionFiltering();
+
 
 			//=========================  VARIABLES  =========================
 			/*! Zoom disabled */
@@ -145,7 +145,6 @@ namespace spikestream {
 
 			//=========================  METHODS  =========================
 			void checkConnectionModeFlag(unsigned int flag);
-
 	};
 
 }

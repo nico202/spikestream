@@ -17,6 +17,10 @@ NetworksBuilder::~NetworksBuilder(){
 }
 
 
+/*----------------------------------------------------------*/
+/*-----                PRIVATE METHODS                 -----*/
+/*----------------------------------------------------------*/
+
 /*! Sets pointer to point to a byte array that is filled with the specified training pattern */
 void NetworksBuilder::addTraining(unsigned int neuronID, QString trainingStr, bool output){
 	//Create arry of appropriate length
@@ -73,6 +77,4 @@ void NetworksBuilder::setError(const QString &errMsg){
 	errorMessage = errMsg;
 	error = true;
 }
-
-
 

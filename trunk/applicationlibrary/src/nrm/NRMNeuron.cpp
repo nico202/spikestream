@@ -8,14 +8,21 @@ using namespace spikestream;
 using namespace std;
 
 
+/*! Constructor */
 NRMNeuron::NRMNeuron(){
 	//Initialize variables
 	trainingArrayLength = 0;
 }
 
+
+/*! Destructor */
 NRMNeuron::~NRMNeuron(){
 }
 
+
+/*-------------------------------------------------------*/
+/*-----                PUBLIC METHODS               -----*/
+/*-------------------------------------------------------*/
 
 /*! Adds training to the neuron */
 void NRMNeuron::addTraining(unsigned char* inBitArray, unsigned int inBitArrLen, unsigned char output){
@@ -63,8 +70,6 @@ void NRMNeuron::printTraining(){
 		else
 			cout<<": Output 0"<<endl;
 	}
-
-
 }
 
 

@@ -10,7 +10,7 @@
 
 namespace spikestream {
 
-    /*! Draws the current network using OpenGL */
+	/*! Draws the current network in 3D using OpenGL. */
 	class NetworkViewer : public QGLWidget  {
 		Q_OBJECT
 
@@ -107,6 +107,7 @@ namespace spikestream {
 			render is in progress */
 			int newTempScreenHeight;
 
+
 			//======================  METHODS  ===========================
 			void checkOpenGLErrors();
 			void drawAxes();
@@ -124,7 +125,6 @@ namespace spikestream {
 			void zoomDefaultView();
 			void zoomAboveNeuronGroup(unsigned int neuronGroupID);
 			void zoomToNeuronGroup(unsigned int neuronGroupID);
-
     };
 
 }

@@ -11,6 +11,7 @@ using namespace spikestream;
 #include <iostream>
 using namespace std;
 
+
 /*! Constructor */
 TruthTableModel::TruthTableModel() : QAbstractTableModel(){
 }

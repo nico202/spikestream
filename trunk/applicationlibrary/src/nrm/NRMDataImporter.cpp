@@ -1,3 +1,4 @@
+//SpikeStream includes
 #include "ArchiveInfo.h"
 #include "ArchiveDao.h"
 #include "Globals.h"
@@ -6,8 +7,10 @@
 #include "SpikeStreamException.h"
 using namespace spikestream;
 
+//Other includes
 #include <iostream>
 using namespace std;
+
 
 /*! Constructor */
 NRMDataImporter::NRMDataImporter(const DBInfo& networkDBInfo, const DBInfo& archiveDBInfo){
@@ -21,6 +24,10 @@ NRMDataImporter::NRMDataImporter(const DBInfo& networkDBInfo, const DBInfo& arch
 NRMDataImporter::~NRMDataImporter(){
 }
 
+
+/*----------------------------------------------------------*/
+/*-----                PUBLIC METHODS                  -----*/
+/*----------------------------------------------------------*/
 
 /*! Sets class up to add connections to the database */
 void NRMDataImporter::prepareAddConnections(NRMNetwork* nrmNetwork, Network* network){
@@ -89,6 +96,10 @@ void NRMDataImporter::stop(){
 	stopThread = true;
 }
 
+
+/*----------------------------------------------------------*/
+/*-----                PRIVATE METHODS                 -----*/
+/*----------------------------------------------------------*/
 
 /*! Adds archives to the archive database.
 	Each dataset is assigned to the input layers in ascending order, then the neural layers,

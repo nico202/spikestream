@@ -7,8 +7,13 @@ using namespace spikestream;
 #include <iostream>
 using namespace std;
 
+//Initialize static variables
 RandomSeed NRMRandom::seed = { 1, 0 };
 
+
+/*-------------------------------------------------------*/
+/*-----                PUBLIC METHODS               -----*/
+/*-------------------------------------------------------*/
 
 /*! Returns a new random number */
 int NRMRandom::getRandNum(int num){
@@ -22,6 +27,10 @@ void  NRMRandom::setSeed(unsigned int newSeed){
 		seed.hi = 0;
 }
 
+
+/*--------------------------------------------------------*/
+/*-----                PRIVATE METHODS               -----*/
+/*--------------------------------------------------------*/
 
 /*! Generates a new random number.
 	This is a reworking of the NRM assembler code for random number generation. Porting the assembler

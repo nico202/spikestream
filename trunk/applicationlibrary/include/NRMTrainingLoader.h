@@ -1,10 +1,12 @@
 #ifndef NRMTRAININGLOADER_H
 #define NRMTRAININGLOADER_H
 
+//SpikeStream includes
 #include "NRMNetwork.h"
 
 namespace spikestream {
 
+	/*! Loads up the weightless neuron training from an NRM file. */
 	class NRMTrainingLoader {
 		public:
 			NRMTrainingLoader(NRMNetwork* network);
@@ -26,9 +28,9 @@ namespace spikestream {
 			/*! Record of the number of bytes read from file for debugging */
 			int fileByteCount;
 
+
 			//============================  METHODS  ================================
 			void fReadFile(void* dataStruct, size_t sizeOfElement, size_t numElements, FILE * file );
-
 	};
 
 }

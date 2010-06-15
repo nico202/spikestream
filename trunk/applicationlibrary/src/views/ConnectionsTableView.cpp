@@ -5,6 +5,7 @@ using namespace spikestream;
 #include <QDebug>
 #include <QHeaderView>
 
+
 /*! Constructor */
 ConnectionsTableView::ConnectionsTableView(QWidget* parent, QAbstractTableModel* model) : QTableView(parent) {
 	//Set up the view
@@ -22,6 +23,10 @@ ConnectionsTableView::ConnectionsTableView(QWidget* parent, QAbstractTableModel*
 ConnectionsTableView::~ConnectionsTableView(){
 }
 
+
+/*----------------------------------------------------------*/
+/*-----                 PUBLIC METHODS                 -----*/
+/*----------------------------------------------------------*/
 
 /*! Sets up the size of the headers. Does not work in the constructor because there
 	is not any data or model */

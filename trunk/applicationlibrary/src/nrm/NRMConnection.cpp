@@ -27,6 +27,10 @@ NRMConnection::~NRMConnection(){
 }
 
 
+/*----------------------------------------------------------*/
+/*-----                PUBLIC METHODS                  -----*/
+/*----------------------------------------------------------*/
+
 /*! Connections are not saved by NRM, which recreates them using the same random seed each time the network is
 	built. So a lot of crufty NRM code had to be pasted in here to reconstruct wRandCons, which contains the list of
 	connections. In wRandCons the offset is the source neuron number multiplied by the number of connections per neuron in the
@@ -460,6 +464,10 @@ void NRMConnection::printNeuronConnections(unsigned int neurNum){
 	cout<<endl;
 }
 
+
+/*----------------------------------------------------------*/
+/*-----                PRIVATE METHODS                 -----*/
+/*----------------------------------------------------------*/
 
 /*! Prints out the parameters of the connection */
 void NRMConnection::printParameters(){

@@ -7,6 +7,7 @@ using namespace std;
 
 namespace spikestream {
 
+	/*! Exception associated with NRM importing. */
 	class NRMException{
 		public:
 			NRMException(string msg);
@@ -15,7 +16,9 @@ namespace spikestream {
 			virtual ~NRMException(void);
 			const char* getMessage();
 
+
 		private:
+			/*! The message associated with the exception. */
 			string message;
 	};
 

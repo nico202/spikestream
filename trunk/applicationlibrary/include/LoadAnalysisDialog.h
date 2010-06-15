@@ -15,29 +15,30 @@ using namespace spikestream;
 
 namespace spikestream {
 
+	/*! Dialog that allows the user to load and delete analyses. */
     class LoadAnalysisDialog : public QDialog {
-	Q_OBJECT
+		Q_OBJECT
 
-	public:
-		LoadAnalysisDialog(QWidget* parent, unsigned int analysisType);
-	    ~LoadAnalysisDialog();
-	   const AnalysisInfo& getAnalysisInfo();
+		public:
+			LoadAnalysisDialog(QWidget* parent, unsigned int analysisType);
+			~LoadAnalysisDialog();
+		   const AnalysisInfo& getAnalysisInfo();
 
-	private slots:
-	   void deleteButtonPressed();
-	    void okButtonPressed();
+		private slots:
+		   void deleteButtonPressed();
+			void okButtonPressed();
 
-	private:
-	    //====================  VARIABLES  =======================
-	     /*! Holds information about the currently selected analysis if there is one.
-			If dialog is accepted the calling class should request this with getAnalysisInfo(). */
-	     AnalysisInfo analysisInfo;
+		private:
+			//====================  VARIABLES  =======================
+			 /*! Holds information about the currently selected analysis if there is one.
+				If dialog is accepted the calling class should request this with getAnalysisInfo(). */
+			 AnalysisInfo analysisInfo;
 
-		 /*! Type of analysis being displayed by the dialog */
-		 unsigned int analysisType;
+			 /*! Type of analysis being displayed by the dialog */
+			 unsigned int analysisType;
 
-	     /*! Model */
-	     AnalysesModel* analysesModel;
+			 /*! Model */
+			 AnalysesModel* analysesModel;
     };
 
 }

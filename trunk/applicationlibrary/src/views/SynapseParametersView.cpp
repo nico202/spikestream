@@ -32,6 +32,10 @@ SynapseParametersView::~SynapseParametersView(){
 }
 
 
+/*----------------------------------------------------------*/
+/*-----                  PRIVATE SLOTS                 -----*/
+/*----------------------------------------------------------*/
+
 /*! Sets up the size of the headers. Does not work in the constructor because there
 	is not any data or model */
 void SynapseParametersView::resizeHeaders(){

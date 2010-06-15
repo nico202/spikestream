@@ -5,9 +5,6 @@
 #include "AbstractParametersEditDialog.h"
 #include "NeuronGroupInfo.h"
 
-//Qt includes
-
-
 namespace spikestream {
 
 	/*! Edits the parameters for a particular neuron group */

@@ -7,6 +7,7 @@ using namespace spikestream;
 #include <QDebug>
 #include <QHeaderView>
 
+
 /*! Constructor */
 NeuronParametersView::NeuronParametersView(QWidget* parent, NeuronParametersModel* model) : QTableView(parent) {
 	this->model = model;
@@ -30,6 +31,10 @@ NeuronParametersView::NeuronParametersView(QWidget* parent, NeuronParametersMode
 NeuronParametersView::~NeuronParametersView(){
 }
 
+
+/*----------------------------------------------------------*/
+/*-----                 PRIVATE SLOTS                  -----*/
+/*----------------------------------------------------------*/
 
 /*! Sets up the size of the headers. Does not work in the constructor because there
 	is not any data or model */

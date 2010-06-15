@@ -15,7 +15,6 @@ namespace spikestream {
 		public:
 			NeuronParametersDialog(QWidget* parent=0);
 			~NeuronParametersDialog();
-
 	};
 
 }

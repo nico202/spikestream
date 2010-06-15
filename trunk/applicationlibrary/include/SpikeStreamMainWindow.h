@@ -15,13 +15,14 @@ using namespace spikestream;
 namespace spikestream {
 
     /*! The main class of the application and the widget below the Spike Stream
-	Application. Responsible for setting up the various widgets and for loading and saving databases.*/
+		Application. Responsible for initializing the application and setting up the various widgets.*/
     class SpikeStreamMainWindow: public QMainWindow {
 		Q_OBJECT
 
 		public:
 			SpikeStreamMainWindow();
 			~SpikeStreamMainWindow();
+
 
 		private slots:
 			void about();

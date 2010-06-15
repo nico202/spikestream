@@ -10,6 +10,7 @@ using namespace spikestream;
 
 namespace spikestream {
 
+	/*! Displays a weightless neuron's truth table.  */
 	class TruthTableDialog : public QDialog {
 		Q_OBJECT
 
@@ -27,7 +28,6 @@ namespace spikestream {
 		private:
 			//========================  VARIABLES  ========================
 			TruthTableModel* truthTableModel;
-
 
 	};
 

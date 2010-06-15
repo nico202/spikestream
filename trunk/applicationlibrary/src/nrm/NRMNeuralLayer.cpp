@@ -7,6 +7,7 @@ using namespace spikestream;
 #include <iostream>
 using namespace std;
 
+
 /*! Constructor */
 NRMNeuralLayer::NRMNeuralLayer(){
 	trainingStringCount = 0;
@@ -23,6 +24,10 @@ NRMNeuralLayer::~NRMNeuralLayer(){
 	}
 }
 
+
+/*-------------------------------------------------------*/
+/*-----                PUBLIC METHODS               -----*/
+/*-------------------------------------------------------*/
 
 /*! Adds a connection path between two layers.
 	This method stores high level details about the connection. */

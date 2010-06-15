@@ -202,6 +202,7 @@ void NetworkViewer::resizeGL(int screenWidth, int screenHeight){
     checkOpenGLErrors();
 }
 
+
 /*! Adapted from: http://www.lighthouse3d.com/opengl/picking/index.php?openglway */
 void NetworkViewer::mouseDoubleClickEvent (QMouseEvent* event){
     //Window coordinates in OpenGL start in the bottom left, so have to subtract the window height
@@ -273,6 +274,7 @@ void NetworkViewer::mouseDoubleClickEvent (QMouseEvent* event){
 /*-----                PRIVATE SLOTS                   -----*/
 /*----------------------------------------------------------*/
 
+/*! Moves the camera up along the Z axis. */
 void NetworkViewer::moveUp(){
     cameraMatrix[12] += cameraMatrix[8];
     cameraMatrix[13] += cameraMatrix[9];
@@ -280,6 +282,7 @@ void NetworkViewer::moveUp(){
     updateGL();
 }
 
+/*! Moves the camera down along the Z axis. */
 void NetworkViewer::moveDown(){
     cameraMatrix[12] -= cameraMatrix[8];
     cameraMatrix[13] -= cameraMatrix[9];
@@ -287,6 +290,8 @@ void NetworkViewer::moveDown(){
     updateGL();
 }
 
+
+/*! Moves the camera negatively along the X axis. */
 void NetworkViewer::moveLeft(){
     cameraMatrix[12] -= cameraMatrix[0];
     cameraMatrix[13] -= cameraMatrix[1];
@@ -294,6 +299,8 @@ void NetworkViewer::moveLeft(){
     updateGL();
 }
 
+
+/*! Moves the camera positively along the X axis. */
 void NetworkViewer::moveRight(){
     cameraMatrix[12] += cameraMatrix[0];
     cameraMatrix[13] += cameraMatrix[1];
@@ -301,6 +308,8 @@ void NetworkViewer::moveRight(){
     updateGL();
 }
 
+
+/*! Moves the camera positively along the Y axis */
 void NetworkViewer::moveForward(){
     cameraMatrix[12] += cameraMatrix[4];
     cameraMatrix[13] += cameraMatrix[5];
@@ -308,6 +317,8 @@ void NetworkViewer::moveForward(){
     updateGL();
 }
 
+
+/*! Moves the camera negatively along the Y axis */
 void NetworkViewer::moveBackward(){
     cameraMatrix[12] -= cameraMatrix[4];
     cameraMatrix[13] -= cameraMatrix[5];
@@ -315,26 +326,36 @@ void NetworkViewer::moveBackward(){
     updateGL();
 }
 
+
+/*! Resets view to default setting in which all network is visible. */
 void NetworkViewer::resetView(){
     viewClippingVolume_Horizontal(defaultClippingVol);
     updateGL();
 }
 
+
+/*! Rotates camera clockwise around X axis looking towards the origin. */
 void NetworkViewer::rotateUp(){
     sceneRotateX += 2.5f;
     updateGL();
 }
 
+
+/*! Rotates camera anticlockwise around X axis looking towards the origin. */
 void NetworkViewer::rotateDown(){
     sceneRotateX -= 2.5f;
     updateGL();
 }
 
+
+/*! Rotates camera anticlockwise around Z axis looking towards the origin. */
 void NetworkViewer::rotateLeft(){
     sceneRotateZ += 2.5f;
     updateGL();
 }
 
+
+/*! Rotates camera clockwise around Z axis looking towards the origin. */
 void NetworkViewer::rotateRight(){
     sceneRotateZ -= 2.5f;
     updateGL();
@@ -629,7 +650,6 @@ void NetworkViewer::drawNeurons(){
 }
 
 
-
 /*! Point camera towards position specified in struct for camera and rotate scene appropriately */
 void NetworkViewer::positionCamera(){    //
     gluLookAt(
@@ -744,7 +764,6 @@ unsigned int NetworkViewer::getSelectedNeuron(GLuint selectBuffer[], int hitCoun
 
     //Return the name with the minimum z
     return minZName;
-
 }
 
 
@@ -945,6 +964,7 @@ void NetworkViewer::viewClippingVolume_Vertical(Box& clipVolume){
 }
 
 
+/*! Zooms into a particular neuron group or zooms out to show whole network. */
 void NetworkViewer::setZoomLevel(){
     if(Globals::getNetworkDisplay()->isZoomEnabled()){
 		unsigned int tmpZoomNeurGrpID = Globals::getNetworkDisplay()->getZoomNeuronGroupID();
@@ -958,7 +978,6 @@ void NetworkViewer::setZoomLevel(){
 		}
     }
 }
-
 
 
 /*! Resets the view so all neural networks can be seen. */

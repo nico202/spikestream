@@ -5,14 +5,14 @@
 #include <QApplication>
 
 //Other includes
-
+#ifdef LINUX32_SPIKESTREAM
 	#include <sys/time.h>
-
+#endif//LINUX32_SPIKESTREAM
 
 namespace spikestream {
 
     /*! Inherits from QApplication so that it can filter out XEvents during
-	slow renders. Is the QApplication for the application. */
+		slow renders. Is the QApplication for the application. */
     class SpikeStreamApplication : public QApplication {
 		Q_OBJECT
 
@@ -41,13 +41,13 @@ namespace spikestream {
 			/*! Records the time of each key press event.*/
 			unsigned int keyEventTime;
 
-
+			#ifdef LINUX32_SPIKESTREAM
 				/*! Time structure to record the start of the render.*/
 				timeval startRenderTime;
 
 				/*! Time structure to record the end of the render.*/
 				timeval stopRenderTime;
-
+			#endif//LINUX32_SPIKESTREAM
 
 			/*! Records when rendering is in progress.*/
 			bool rendering;

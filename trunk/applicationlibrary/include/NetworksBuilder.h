@@ -10,6 +10,7 @@ using namespace spikestream;
 
 namespace spikestream {
 
+	/*! Adds training and connection groups to the database */
 	class NetworksBuilder {
 		public:
 			NetworksBuilder();
@@ -32,6 +33,7 @@ namespace spikestream {
 			virtual void runThread(NetworkDaoThread& thread);
 			void clearError();
 			void setError(const QString& errMsg);
+
 
 		private:
 			//=====================  VARIABLES  =========================

@@ -9,6 +9,7 @@ using namespace spikestream;
 #include <QLayout>
 #include <QStackedWidget>
 
+
 /*! Constructor */
 PluginsDialog::PluginsDialog(QWidget* parent, const QString pluginFolder, const QString title) : QDialog(parent){
 	//Set caption
@@ -18,7 +19,7 @@ PluginsDialog::PluginsDialog(QWidget* parent, const QString pluginFolder, const 
 	QVBoxLayout* mainVerticalBox = new QVBoxLayout(this);
 
 	try{
-		//Get list of available analysis plugins
+		//Get list of available plugins
 		QString pluginPath = Globals::getSpikeStreamRoot() + pluginFolder;
 		PluginManager* pluginManager = new PluginManager(pluginPath);
 		QStringList pluginList = pluginManager->getPluginNames();

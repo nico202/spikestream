@@ -14,51 +14,62 @@ using namespace spikestream;
 
 namespace spikestream {
 
+	/*! Loads up the configuration, dataset and training from NRM files.
+		NOTE: Only works with the most recent and probably final version of NRM. */
 	class NRMFileLoader : public QThread{
 		public:
-		NRMFileLoader();
-		~NRMFileLoader();
+			NRMFileLoader();
+			~NRMFileLoader();
+			NRMDataSet* getDataSet();
+			QString getErrorMessage() { return errorMessage; }
+			NRMNetwork* getNetwork();
+			bool isError() { return error; }
+			void run();
+			void setConfigFilePath(QString configFilePath);
+			void setDatasetFilePath(QString configFilePath);
+			void setTrainingFilePath(QString trainingFilePath);
+			void stop();
 
-		NRMDataSet* getDataSet();
-		QString getErrorMessage() { return errorMessage; }
-		NRMNetwork* getNetwork();
-		bool isError() { return error; }
-		void run();
-		void setConfigFilePath(QString configFilePath);
-		void setDatasetFilePath(QString configFilePath);
-		void setTrainingFilePath(QString trainingFilePath);
-		void stop();
 
 		private:
-		//========================  VARIABLES  =========================
-		/*! Set to true to stop the thread running */
-		bool stopThread;
+			//========================  VARIABLES  =========================
+			/*! Set to true to stop the thread running */
+			bool stopThread;
 
-		/*! Path to the NRM configuration file */
-		QString configFilePath;
+			/*! Path to the NRM configuration file */
+			QString configFilePath;
 
-		/*! Path to the NRM configuration file */
-		QString datasetFilePath;
+			/*! Path to the NRM configuration file */
+			QString datasetFilePath;
 
-		/*! Path to the training file */
-		QString trainingFilePath;
+			/*! Path to the training file */
+			QString trainingFilePath;
 
-		/*! Responsible for loading config file */
-		NRMConfigLoader* configLoader;
+			/*! Responsible for loading config file */
+			NRMConfigLoader* configLoader;
 
-		/*! Responsible for loading the dataset from file */
-		NRMDataSetImporter* dataSetImporter;
+			/*! Responsible for loading the dataset from file */
+			NRMDataSetImporter* dataSetImporter;
 
-		bool configLoaded;
-		bool datasetLoaded;
-		bool trainingLoaded;
+			/*! Records if the configuration has been loaded. */
+			bool configLoaded;
 
-		bool error;
-		QString errorMessage;
+			/*! Records if the dataset has been loaded. */
+			bool datasetLoaded;
 
-		//=============================  METHODS  ==============================
-		void clearError();
-		void setError(const QString& errorMessage);
+			/*! Records if the training has been loaded. */
+			bool trainingLoaded;
+
+			/*! Flag set to true if an error has occurred. */
+			bool error;
+
+			/*! Message associated with an error */
+			QString errorMessage;
+
+
+			//=============================  METHODS  ==============================
+			void clearError();
+			void setError(const QString& errorMessage);
 	};
 
 }

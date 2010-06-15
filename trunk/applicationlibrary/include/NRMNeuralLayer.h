@@ -33,6 +33,7 @@ namespace spikestream {
 			void printTraining();
 			void setTrained(bool trained){ this->trained = trained; }
 
+
 			//========================  VARIABLES  ===========================
 			int generalisation;
 			int spreading;

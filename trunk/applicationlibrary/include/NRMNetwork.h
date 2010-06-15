@@ -11,11 +11,11 @@
 
 namespace spikestream {
 
+	/*! Holds information about an NRM network */
 	class NRMNetwork {
 		public:
 			NRMNetwork();
 			~NRMNetwork();
-
 			void addInputLayer(int id, NRMInputLayer* inputLayer);
 			void addNeuralLayer(int id, NRMNeuralLayer* neuralLayer);
 			void createConnections();
@@ -31,11 +31,11 @@ namespace spikestream {
 			QList<NRMNeuralLayer*> getTrainedNeuralLayers();
 			NRMLayer* getLayerById(int layerId, int objectType);
 			NRMNeuralLayer* getNeuralLayerById(int id);
-			void setConfigVersion(int version);
-
 			void printConnections();
 			void printInputLayers();
 			void printNeuralLayers();
+			void setConfigVersion(int version);
+
 
 		private:
 			//=========================  VARIABLES  ==============================
@@ -47,9 +47,6 @@ namespace spikestream {
 
 			/*! Holds information about the neural layers */
 			QHash<int, NRMNeuralLayer*> neuralLayerMap;
-
-
-			//==========================  METHODS  ===============================
 
 	};
 

@@ -1,7 +1,6 @@
 #ifndef SYNAPSEPARAMETERSDIALOG_H
 #define SYNAPSEPARAMETERSDIALOG_H
 
-
 //Qt includes
 #include <QDialog>
 
@@ -16,8 +15,6 @@ namespace spikestream {
 		public:
 			SynapseParametersDialog(QWidget* parent = 0);
 			~SynapseParametersDialog();
-
-
 	};
 
 }
