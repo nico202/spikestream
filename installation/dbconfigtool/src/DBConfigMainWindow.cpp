@@ -35,8 +35,8 @@ DBConfigMainWindow::DBConfigMainWindow(QWidget* parent) : QMainWindow(parent) {
 
 /*! Destructor */
 DBConfigMainWindow::~DBConfigMainWindow(){
-
 }
+
 
 /*----------------------------------------------------------*/
 /*-----                  PRIVATE SLOTS                 -----*/
@@ -46,6 +46,7 @@ DBConfigMainWindow::~DBConfigMainWindow(){
 void DBConfigMainWindow::closeApplication(){
 	this->close();
 }
+
 
 /*! Configures each database, checking for confirmation from the user if the database already exists */
 void DBConfigMainWindow::configureDatabases(const DBInfo& networkDBInfo, const DBInfo& archiveDBInfo, const DBInfo& analysisDBInfo){
@@ -222,6 +223,7 @@ bool DBConfigMainWindow::addAnalysisDatabases(const DBInfo& analysisDBInfo){
 }
 
 
+/*! Stores the configuration information that has been entered in the configuration file. */
 void DBConfigMainWindow::writeDBInfoToConfigFile(bool writeNetDB, const DBInfo& networkDBInfo, bool writeArchDB,  const DBInfo& archiveDBInfo, bool writeAnaDB, const DBInfo& analysisDBInfo){
 	//Create a hash map with the parameters that are to be written
 	QHash<QString, QString> configParams;
@@ -247,6 +249,7 @@ void DBConfigMainWindow::writeDBInfoToConfigFile(bool writeNetDB, const DBInfo& 
 	ConfigEditor configEditor;
 	configEditor.setConfigParameters(configParams);
 }
+
 
 /*! Shows a message box to confirm that the user wants to carry out a particular operation */
 bool DBConfigMainWindow::showConfirmMessage(const QString& msg){

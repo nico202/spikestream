@@ -2,6 +2,7 @@
 using namespace spikestream;
 
 //SpikeStream includes
+#include "ConfigLoader.h"
 #include "DBInfo.h"
 #include "SpikeStreamException.h"
 using namespace spikestream;
@@ -17,74 +18,82 @@ using namespace spikestream;
 DBDetailsWidget::DBDetailsWidget(QWidget* parent) : QWidget(parent){
 	QVBoxLayout* mainVBox = new QVBoxLayout(this);
 
+	//Create a config loader so that we can load up existing settings
+	ConfigLoader configLoader;
+
 	//Add instructions at the top of the widget
 	QString instructionStr = "Enter the host, username and password for the databases that you want to configure.\n";
 	instructionStr += "These can be on the same or different machines.\n";
 	instructionStr += "You must have MySQL running on the specified  hosts before running this tool.";
 	mainVBox->addWidget(new QLabel(instructionStr));
 
-	//Add SpikeSreamNetwork fields
-	QGroupBox* networkGroupBox = new QGroupBox("");
-	netChkBox = new QCheckBox("Configure SpikeStreamNetwork database");
-	netChkBox->setChecked(false);
-	connect(netChkBox, SIGNAL(stateChanged(int)), this, SLOT(enableNetworkDBConfiguration(int)));
-	networkHost = new QLineEdit("localhost");
-	networkUsername = new QLineEdit("username");
-	networkPassword = new QLineEdit("password");
-	networkPassword->setEchoMode(QLineEdit::Password);
-	QGridLayout* netGridLayout = new QGridLayout();
-	netGridLayout->addWidget(netChkBox, 0, 0, 1, 2);
-	netGridLayout->addWidget(new QLabel("Host "), 1, 0);
-	netGridLayout->addWidget(networkHost, 1, 1);
-	netGridLayout->addWidget(new QLabel("Username "), 2, 0);
-	netGridLayout->addWidget(networkUsername, 2, 1);
-	netGridLayout->addWidget(new QLabel("Password "), 3, 0);
-	netGridLayout->addWidget(networkPassword, 3, 1);
-	networkGroupBox->setLayout(netGridLayout);
-	enableNetworkDBConfiguration(Qt::Unchecked);
-	mainVBox->addWidget(networkGroupBox);
+	try{
+		//Add SpikeSreamNetwork fields
+		QGroupBox* networkGroupBox = new QGroupBox("");
+		netChkBox = new QCheckBox("Configure SpikeStreamNetwork database");
+		netChkBox->setChecked(false);
+		connect(netChkBox, SIGNAL(stateChanged(int)), this, SLOT(enableNetworkDBConfiguration(int)));
+		networkHost = new QLineEdit(configLoader.getParameter("spikeStreamNetworkHost"));
+		networkUsername = new QLineEdit(configLoader.getParameter("spikeStreamNetworkUser"));
+		networkPassword = new QLineEdit(configLoader.getParameter("spikeStreamNetworkPassword"));
+		networkPassword->setEchoMode(QLineEdit::Password);
+		QGridLayout* netGridLayout = new QGridLayout();
+		netGridLayout->addWidget(netChkBox, 0, 0, 1, 2);
+		netGridLayout->addWidget(new QLabel("Host "), 1, 0);
+		netGridLayout->addWidget(networkHost, 1, 1);
+		netGridLayout->addWidget(new QLabel("Username "), 2, 0);
+		netGridLayout->addWidget(networkUsername, 2, 1);
+		netGridLayout->addWidget(new QLabel("Password "), 3, 0);
+		netGridLayout->addWidget(networkPassword, 3, 1);
+		networkGroupBox->setLayout(netGridLayout);
+		enableNetworkDBConfiguration(Qt::Unchecked);
+		mainVBox->addWidget(networkGroupBox);
 
-	//Add SpikeSreamArchive fields
-	QGroupBox* archiveGroupBox = new QGroupBox("");
-	archChkBox = new QCheckBox("Configure SpikeStreamArchive database");
-	archChkBox->setChecked(false);
-	connect(archChkBox, SIGNAL(stateChanged(int)), this, SLOT(enableArchiveDBConfiguration(int)));
-	archiveHost = new QLineEdit("localhost");
-	archiveUsername = new QLineEdit("username");
-	archivePassword = new QLineEdit("password");
-	archivePassword->setEchoMode(QLineEdit::Password);
-	QGridLayout* archGridLayout = new QGridLayout();
-	archGridLayout->addWidget(archChkBox, 0, 0, 1, 2);
-	archGridLayout->addWidget(new QLabel("Host "), 1, 0);
-	archGridLayout->addWidget(archiveHost, 1, 1);
-	archGridLayout->addWidget(new QLabel("Username "), 2, 0);
-	archGridLayout->addWidget(archiveUsername, 2, 1);
-	archGridLayout->addWidget(new QLabel("Password "), 3, 0);
-	archGridLayout->addWidget(archivePassword, 3, 1);
-	archiveGroupBox->setLayout(archGridLayout);
-	enableArchiveDBConfiguration(Qt::Unchecked);
-	mainVBox->addWidget(archiveGroupBox);
+		//Add SpikeSreamArchive fields
+		QGroupBox* archiveGroupBox = new QGroupBox("");
+		archChkBox = new QCheckBox("Configure SpikeStreamArchive database");
+		archChkBox->setChecked(false);
+		connect(archChkBox, SIGNAL(stateChanged(int)), this, SLOT(enableArchiveDBConfiguration(int)));
+		archiveHost = new QLineEdit(configLoader.getParameter("spikeStreamArchiveHost"));
+		archiveUsername = new QLineEdit(configLoader.getParameter("spikeStreamArchiveUser"));
+		archivePassword = new QLineEdit(configLoader.getParameter("spikeStreamArchivePassword"));
+		archivePassword->setEchoMode(QLineEdit::Password);
+		QGridLayout* archGridLayout = new QGridLayout();
+		archGridLayout->addWidget(archChkBox, 0, 0, 1, 2);
+		archGridLayout->addWidget(new QLabel("Host "), 1, 0);
+		archGridLayout->addWidget(archiveHost, 1, 1);
+		archGridLayout->addWidget(new QLabel("Username "), 2, 0);
+		archGridLayout->addWidget(archiveUsername, 2, 1);
+		archGridLayout->addWidget(new QLabel("Password "), 3, 0);
+		archGridLayout->addWidget(archivePassword, 3, 1);
+		archiveGroupBox->setLayout(archGridLayout);
+		enableArchiveDBConfiguration(Qt::Unchecked);
+		mainVBox->addWidget(archiveGroupBox);
 
-	//Add SpikeSreamAnalysis fields
-	QGroupBox* analysisGroupBox = new QGroupBox("");
-	anaChkBox = new QCheckBox("Configure SpikeStreamAnalysis database");
-	anaChkBox->setChecked(false);
-	connect(anaChkBox, SIGNAL(stateChanged(int)), this, SLOT(enableAnalysisDBConfiguration(int)));
-	analysisHost = new QLineEdit("localhost");
-	analysisUsername = new QLineEdit("username");
-	analysisPassword = new QLineEdit("password");
-	analysisPassword->setEchoMode(QLineEdit::Password);
-	QGridLayout* anaGridLayout = new QGridLayout();
-	anaGridLayout->addWidget(anaChkBox, 0, 0, 1, 2);
-	anaGridLayout->addWidget(new QLabel("Host "), 1, 0);
-	anaGridLayout->addWidget(analysisHost, 1, 1);
-	anaGridLayout->addWidget(new QLabel("Username "), 2, 0);
-	anaGridLayout->addWidget(analysisUsername, 2, 1);
-	anaGridLayout->addWidget(new QLabel("Password "), 3, 0);
-	anaGridLayout->addWidget(analysisPassword, 3, 1);
-	analysisGroupBox->setLayout(anaGridLayout);
-	enableAnalysisDBConfiguration(Qt::Unchecked);
-	mainVBox->addWidget(analysisGroupBox);
+		//Add SpikeSreamAnalysis fields
+		QGroupBox* analysisGroupBox = new QGroupBox("");
+		anaChkBox = new QCheckBox("Configure SpikeStreamAnalysis database");
+		anaChkBox->setChecked(false);
+		connect(anaChkBox, SIGNAL(stateChanged(int)), this, SLOT(enableAnalysisDBConfiguration(int)));
+		analysisHost = new QLineEdit(configLoader.getParameter("spikeStreamAnalysisHost"));
+		analysisUsername = new QLineEdit(configLoader.getParameter("spikeStreamAnalysisUser"));
+		analysisPassword = new QLineEdit(configLoader.getParameter("spikeStreamAnalysisPassword"));
+		analysisPassword->setEchoMode(QLineEdit::Password);
+		QGridLayout* anaGridLayout = new QGridLayout();
+		anaGridLayout->addWidget(anaChkBox, 0, 0, 1, 2);
+		anaGridLayout->addWidget(new QLabel("Host "), 1, 0);
+		anaGridLayout->addWidget(analysisHost, 1, 1);
+		anaGridLayout->addWidget(new QLabel("Username "), 2, 0);
+		anaGridLayout->addWidget(analysisUsername, 2, 1);
+		anaGridLayout->addWidget(new QLabel("Password "), 3, 0);
+		anaGridLayout->addWidget(analysisPassword, 3, 1);
+		analysisGroupBox->setLayout(anaGridLayout);
+		enableAnalysisDBConfiguration(Qt::Unchecked);
+		mainVBox->addWidget(analysisGroupBox);
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<ex.getMessage();
+	}
 
 	//Buttons at bottom of dialog
 	QHBoxLayout *buttonBox = new QHBoxLayout();
@@ -111,6 +120,7 @@ DBDetailsWidget::~DBDetailsWidget(){
 void DBDetailsWidget::cancelButtonPressed(){
 	emit cancel();
 }
+
 
 /*! Enables or disables the controls for setting the analysis information */
 void DBDetailsWidget::enableAnalysisDBConfiguration(int state){

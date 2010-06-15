@@ -9,7 +9,6 @@
 #include <QLineEdit>
 #include <QCheckBox>
 
-
 namespace spikestream {
 
 	/*! Class that enables user to enter the host, username and password of the

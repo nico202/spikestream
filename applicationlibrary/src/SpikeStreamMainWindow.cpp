@@ -51,7 +51,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow(){
 	//Set up config
 	ConfigLoader* configLoader;
 	try{
-		configLoader = new ConfigLoader(Globals::getSpikeStreamRoot() + "/spikestream.config");
+		configLoader = new ConfigLoader();
 	}
 	catch(SpikeStreamException& ex){
 		qCritical()<<"Error loading configuration: "<<ex.getMessage()<<".\nApplication will now exit.";
