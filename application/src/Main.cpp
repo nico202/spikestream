@@ -35,25 +35,27 @@ void logMessageOutput(QtMsgType type, const char *msg){
 }
 
 
-//-------------------------- Main ------------------------------------------
-/*! Main method for simulator that launches the application. */
-//--------------------------------------------------------------------------
-
+/*! Main method for SpikeStream that launches the application. */
 int main( int argc, char ** argv ) {
 	//Install message handler for logging
 	qInstallMsgHandler(logMessageOutput);
 
-	//Create QApplication
-	SpikeStreamApplication spikeStrApp(argc, argv);
+	try{
+		//Create QApplication
+		SpikeStreamApplication spikeStrApp(argc, argv);
 
-	//Start up main window of application
-	SpikeStreamMainWindow *spikeStrMainWin = new SpikeStreamMainWindow();
-	spikeStrMainWin->show();
+		//Start up main window of application
+		SpikeStreamMainWindow *spikeStrMainWin = new SpikeStreamMainWindow();
+		spikeStrMainWin->show();
 
-	//Listen for window closing events
-	spikeStrApp.connect( &spikeStrApp, SIGNAL(lastWindowClosed()), &spikeStrApp, SLOT(quit()) );
+		//Listen for window closing events
+		spikeStrApp.connect( &spikeStrApp, SIGNAL(lastWindowClosed()), &spikeStrApp, SLOT(quit()) );
 
-	//Execute application
-	return spikeStrApp.exec();
+		//Execute application
+		return spikeStrApp.exec();
+	}
+	catch(...){
+		return EXIT_FAILURE;
+	}
 }
 

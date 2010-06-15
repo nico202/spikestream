@@ -13,23 +13,24 @@ namespace spikestream {
 
     /*! Loads a data set from NRM *.set files */
     class NRMDataSetImporter {
-	public:
-	    NRMDataSetImporter();
-	    ~NRMDataSetImporter();
+		public:
+			NRMDataSetImporter();
+			~NRMDataSetImporter();
+			NRMDataSet* getDataSet() { return &dataSet; }
+			void loadDataSet(const char* filePath);
+			void reset();
 
-	    NRMDataSet* getDataSet() { return &dataSet; }
-	    void loadDataSet(const char* filePath);
-	    void reset();
+		private:
+			//======================  VARIABLES  =====================
+			/*! Record of the number of bytes read from file for debugging */
+			int fileByteCount;
 
-	private:
-	    /*! Record of the number of bytes read from file for debugging */
-	    int fileByteCount;
-
-	    /*! Dataset holding loaded data */
-	    NRMDataSet dataSet;
+			/*! Dataset holding loaded data */
+			NRMDataSet dataSet;
 
 
-	    void fReadFile(void* dataStruct, size_t sizeOfElement, size_t numElements, FILE* file );
+			//======================  METHODS  =======================
+			void fReadFile(void* dataStruct, size_t sizeOfElement, size_t numElements, FILE* file );
     };
 }
 

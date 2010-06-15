@@ -440,7 +440,6 @@ void SpikeStreamMainWindow::loadDatabases(){
 }
 
 
-
 /*! Saves databases
 	Allows user to choose file and then launches database manager so that user can choose
 	which databases to save. */

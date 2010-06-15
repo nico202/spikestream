@@ -32,7 +32,6 @@ NRMFileLoader::~NRMFileLoader(){
 }
 
 
-
 /*----------------------------------------------------------*/
 /*-----                 PUBLIC METHODS                 -----*/
 /*----------------------------------------------------------*/
@@ -40,14 +39,15 @@ NRMFileLoader::~NRMFileLoader(){
 /*! Returns the dataset that has been loaded */
 NRMDataSet* NRMFileLoader::getDataSet(){
     if(!datasetLoaded)
-	throw NRMException("No dataset loaded");
+		throw NRMException("No dataset loaded");
     return dataSetImporter->getDataSet();
 }
+
 
 /*! Returns the network that has been loaded */
 NRMNetwork* NRMFileLoader::getNetwork(){
     if(!configLoaded)
-	throw NRMException("No config loaded");
+		throw NRMException("No config loaded");
     return configLoader->getNetwork();
 }
 
@@ -62,39 +62,39 @@ void NRMFileLoader::run(){
     clearError();
 
     if(configFilePath == "" || datasetFilePath == "" || trainingFilePath == ""){
-	setError("Training or configuration file path(s) missing!");
-	return;
+		setError("Training or configuration file path(s) missing!");
+		return;
     }
 
     try{
-	//Load up configuration
-	configLoader->reset();
-	configLoader->loadConfig(configFilePath.toAscii());
-	configLoaded = true;
+		//Load up configuration
+		configLoader->reset();
+		configLoader->loadConfig(configFilePath.toAscii());
+		configLoaded = true;
 
-	//Check to see if operation has been cancelled before loading training data
-	if(stopThread)
-	    return;
+		//Check to see if operation has been cancelled before loading training data
+		if(stopThread)
+			return;
 
-	//Load up training
-	NRMTrainingLoader trainingLoader(configLoader->getNetwork());
-	trainingLoader.loadTraining(trainingFilePath.toAscii());
-	trainingLoaded = true;
+		//Load up training
+		NRMTrainingLoader trainingLoader(configLoader->getNetwork());
+		trainingLoader.loadTraining(trainingFilePath.toAscii());
+		trainingLoaded = true;
 
-	//Check to see if operation has been cancelled before loading training data
-	if(stopThread)
-	    return;
+		//Check to see if operation has been cancelled before loading training data
+		if(stopThread)
+			return;
 
-	//Load dataset
-	dataSetImporter->reset();
-	dataSetImporter->loadDataSet(datasetFilePath.toAscii());
-	datasetLoaded = true;
+		//Load dataset
+		dataSetImporter->reset();
+		dataSetImporter->loadDataSet(datasetFilePath.toAscii());
+		datasetLoaded = true;
     }
     catch(NRMException& ex){
-	setError(ex.getMessage());
+		setError(ex.getMessage());
     }
     catch(...){
-	setError("Unknown exception occurred.");
+		setError("Unknown exception occurred.");
     }
 
     stopThread = true;
@@ -126,6 +126,9 @@ void NRMFileLoader::stop(){
 }
 
 
+/*--------------------------------------------------------*/
+/*-----                PRIVATE METHODS               -----*/
+/*--------------------------------------------------------*/
 
 /*! Clears the error message and state */
 void NRMFileLoader::clearError(){

@@ -10,6 +10,7 @@ using namespace spikestream;
 #include <stdio.h>
 using namespace std;
 
+
 /*! Constructor */
 NRMTrainingLoader::NRMTrainingLoader(NRMNetwork* network){
 	this->network = network;
@@ -20,6 +21,10 @@ NRMTrainingLoader::NRMTrainingLoader(NRMNetwork* network){
 NRMTrainingLoader::~NRMTrainingLoader(){
 }
 
+
+/*-------------------------------------------------------*/
+/*-----                PUBLIC METHODS               -----*/
+/*-------------------------------------------------------*/
 
 /*! Loads up the training from the specified file */
 void NRMTrainingLoader::loadTraining(const char* filePath){
@@ -152,8 +157,8 @@ void NRMTrainingLoader::loadLayerTraining(int layerId, FILE* file){
 	QList<NRMConnection*> layerConns = neuralLayer->getConnections();
 	fReadFile(&val, 2, 1, file);
 	if ( val != layerConns.size() ) {
-			fclose(file);
-			throw NRMException("Number of connection paths in training data and connection do not match");
+		fclose(file);
+		throw NRMException("Number of connection paths in training data and connection do not match");
 	}
 
 	//Check that the training connection paths match those of the network connection paths
@@ -179,14 +184,14 @@ void NRMTrainingLoader::loadLayerTraining(int layerId, FILE* file){
 			ostringstream errMsg;
 			errMsg<<"Layer "<<layerId<<", Connection path "<<n<<". Training data in file is for connections to layer "<<layerConns[n]->destLayerId;
 			switch ( val ) {
-			case MAGNUS_PREV_OB:
-				errMsg<<" MAGNUS Previous object";
+				case MAGNUS_PREV_OB:
+					errMsg<<" MAGNUS Previous object";
 				break;
-			case MAGNUS_STATE_OB:
-				errMsg<<" MAGNUS State object";
+				case MAGNUS_STATE_OB:
+					errMsg<<" MAGNUS State object";
 				break;
-			case IMG_INPUT_OB: case 55:
-				errMsg<<" Input object";
+				case IMG_INPUT_OB: case 55:
+				   errMsg<<" Input object";
 				break;
 			}
 			throw NRMException(errMsg.str());
@@ -308,31 +313,7 @@ void NRMTrainingLoader::loadLayerTraining(int layerId, FILE* file){
 }
 
 
-/*! Wrapper for fread that does error checking and throws an exception if an unexpected number of bytes is read */
-void NRMTrainingLoader::fReadFile(void* dataStruct, size_t sizeOfElement, size_t numElements, FILE* file ){
-		size_t result = fread(dataStruct, sizeOfElement, numElements, file);
-		if(result != numElements){
-			//cout<<"Actual number of elements read="<<result<<"; expected number of elements = "<<numElements<<endl;
-			if( feof(file) ){
-				ostringstream errMsg;
-				errMsg<<"Unexpected end of file. Tried to read "<<sizeOfElement * numElements<<" elements. ";
-				errMsg<<"Read "<<result<<" elements. ";
-				errMsg<<"ByteCount="<<fileByteCount;
-				throw NRMException (errMsg.str());
-			}
-			else if( ferror(file) ){
-				throw NRMException ("ferror encountered reading from file", fileByteCount);
-			}
-			else{
-				throw NRMException ("Unknown error encountered when reading from file. ByteCount=", fileByteCount);
-			}
-		}
-		else{
-			fileByteCount += (sizeOfElement * numElements);
-		}
-}
-
-
+/*! Prints out the loaded training pattern.  */
 void NRMTrainingLoader::printTrainingPattern(unsigned char* patternArray, unsigned int arraySize, int trainingStrNumber){
 	unsigned char bitComparator;
 	cout<<"------------------ Training String "<<trainingStrNumber<<"-------------------"<<endl;
@@ -351,13 +332,33 @@ void NRMTrainingLoader::printTrainingPattern(unsigned char* patternArray, unsign
 }
 
 
+/*-------------------------------------------------------*/
+/*-----                PRIVATE METHODS               -----*/
+/*-------------------------------------------------------*/
 
-
-
-
-
-
-
+/*! Wrapper for fread that does error checking and throws an exception if an unexpected number of bytes is read */
+void NRMTrainingLoader::fReadFile(void* dataStruct, size_t sizeOfElement, size_t numElements, FILE* file ){
+	size_t result = fread(dataStruct, sizeOfElement, numElements, file);
+	if(result != numElements){
+		//cout<<"Actual number of elements read="<<result<<"; expected number of elements = "<<numElements<<endl;
+		if( feof(file) ){
+			ostringstream errMsg;
+			errMsg<<"Unexpected end of file. Tried to read "<<sizeOfElement * numElements<<" elements. ";
+			errMsg<<"Read "<<result<<" elements. ";
+			errMsg<<"ByteCount="<<fileByteCount;
+			throw NRMException (errMsg.str());
+		}
+		else if( ferror(file) ){
+			throw NRMException ("ferror encountered reading from file", fileByteCount);
+		}
+		else{
+			throw NRMException ("Unknown error encountered when reading from file. ByteCount=", fileByteCount);
+		}
+	}
+	else{
+		fileByteCount += (sizeOfElement * numElements);
+	}
+}
 
 
 

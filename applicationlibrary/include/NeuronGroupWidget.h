@@ -11,6 +11,8 @@
 
 namespace spikestream {
 
+	/*! Holds the table displaying information about the neuron groups in the current network.
+		Includes buttons to add and delete neuron groups. */
 	class NeuronGroupWidget : public QWidget {
 		Q_OBJECT
 
@@ -24,6 +26,7 @@ namespace spikestream {
 			void deleteSelectedNeurons();
 			void networkChanged();
 			void networkTaskFinished();
+
 
 		private:
 			//========================  VARIABLES  ========================

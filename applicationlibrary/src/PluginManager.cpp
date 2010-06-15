@@ -3,9 +3,6 @@
 #include "SpikeStreamException.h"
 using namespace spikestream;
 
-//Other includes
-//#include <dlfcn.h>
-
 //Qt includes
 #include <QDir>
 #include <QtDebug>
@@ -21,15 +18,17 @@ PluginManager::PluginManager(QString& pluginFolder) throw(SpikeStreamException){
 	loadPlugins();
 }
 
+
 /*! Destructor */
 PluginManager::~PluginManager(){
 
 }
 
 
-/*---------------------------------------------------------------------------------*/
-/*----------                  PUBLIC METHODS                          -------------*/
-/*---------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/*--------                  PUBLIC METHODS                    -------*/
+/*-------------------------------------------------------------------*/
+
 /*! Returns a list of names of the available plugins */
 QStringList PluginManager::getPluginNames() throw(SpikeStreamException){
 	return pluginFunctionMap.keys();
@@ -46,6 +45,10 @@ QWidget* PluginManager::getPlugin(QString pluginName) throw(SpikeStreamException
 	throw SpikeStreamException("ClassLoader: CANNOT FIND OR RESOLVE CLASS: ");
 }
 
+
+/*-------------------------------------------------------------------*/
+/*--------                  PRIVATE METHODS                   -------*/
+/*-------------------------------------------------------------------*/
 
 /*! Loads up all of the plugins in the plugin directory */
 void PluginManager::loadPlugins(){

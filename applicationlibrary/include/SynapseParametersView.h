@@ -7,7 +7,6 @@
 //Qt includes
 #include <QTableView>
 
-
 namespace spikestream {
 
 	/*! A table of synapse parameters for the current network.

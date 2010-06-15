@@ -108,6 +108,8 @@ NetworkViewerProperties::~NetworkViewerProperties(){
 /*----------------------------------------------------------*/
 /*-----                PRIVATE SLOTS                   -----*/
 /*----------------------------------------------------------*/
+
+/*! User has selected or deselected a from neuron. Settings are adjusted to take account of this. */
 void NetworkViewerProperties::fromToSelectionChanged(int index){
 	if(index == 0){
 		Globals::getNetworkDisplay()->clearDirectionFiltering();
@@ -121,6 +123,7 @@ void NetworkViewerProperties::fromToSelectionChanged(int index){
 }
 
 
+/*! The network display settings have changed. */
 void NetworkViewerProperties::networkDisplayChanged(){
 	unsigned int connectionMode = Globals::getNetworkDisplay()->getConnectionMode();
 	if(connectionMode & CONNECTION_MODE_ENABLED){
@@ -135,6 +138,7 @@ void NetworkViewerProperties::networkDisplayChanged(){
 }
 
 
+/*! Filtering for showing/hiding positive/negative connections has been changed. */
 void NetworkViewerProperties::posNegSelectionChanged(int index){
 	if(index == 0){
 		Globals::getNetworkDisplay()->clearWeightFiltering();
@@ -164,6 +168,7 @@ void NetworkViewerProperties::showTruthTable(){
 /*-----               PRIVATE METHODS                  -----*/
 /*----------------------------------------------------------*/
 
+/*! Sets widget state to match situation in which all connections are visible. */
 void NetworkViewerProperties::showAllConnections(){
 	allConsButt->setChecked(true);
 	allConsButt->setEnabled(true);
@@ -183,6 +188,7 @@ void NetworkViewerProperties::showAllConnections(){
 }
 
 
+/*! Sets widget state to match situation in which the connections between two neurons are visible. */
 void NetworkViewerProperties::showBetweenConnections(){
 	conBetweenNeurButt->setChecked(true);
 	conBetweenNeurButt->setEnabled(true);
@@ -202,6 +208,7 @@ void NetworkViewerProperties::showBetweenConnections(){
 }
 
 
+/*! Sets widget state to match situation in which the connections to/from a single neuron are shown. */
 void NetworkViewerProperties::showSingleConnections(){
 	//Id of the single neuron
 	unsigned int singleNeuronID = Globals::getNetworkDisplay()->getSingleNeuronID();
@@ -241,6 +248,7 @@ void NetworkViewerProperties::showSingleConnections(){
 		hideTruthTableDialog();
 	}
 }
+
 
 /*! Shows the dialog with the specified neuron's truth table */
 void NetworkViewerProperties::showTruthTableDialog(unsigned int neuronID){

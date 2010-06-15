@@ -5,6 +5,7 @@ using namespace spikestream;
 #include <QDebug>
 #include <QMutexLocker>
 
+
 /*! Constructor */
 ProgressWidget::ProgressWidget(QWidget* parent) : QWidget(parent) {
 	QVBoxLayout* mainVerticalBox = new QVBoxLayout(this);
@@ -83,6 +84,7 @@ void ProgressWidget::updateProgress(const QString& msg, unsigned int timeStep, u
 /*-------------------------------------------------------------*/
 /*-------                PRIVATE METHODS                 ------*/
 /*-------------------------------------------------------------*/
+
 /*! Adds a progress bar to the bottom of the layout */
 void ProgressWidget::addProgressBar(unsigned int timeStep, unsigned int stepsCompleted, unsigned int totalSteps){
 	if(progressBarMap.contains(timeStep)){
@@ -107,9 +109,4 @@ void ProgressWidget::addProgressBar(unsigned int timeStep, unsigned int stepsCom
 	gridLayout->addWidget(progDetails, progressDetailsMap.size(), 2);
 	progressDetailsMap[timeStep] = progDetails;
 }
-
-
-
-
-
 

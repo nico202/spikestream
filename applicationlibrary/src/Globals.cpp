@@ -117,6 +117,7 @@ Archive* Globals::getArchive(){
 	return archive;
 }
 
+
 /*! Returns the archive dao, which provides a layer of abstraction on top of the
 	SpikeStreamArchive database */
 ArchiveDao* Globals::getArchiveDao(){
@@ -238,10 +239,9 @@ void Globals::setVertexSize(float vertexSize){
 }
 
 
-
-/*---------------------------------------------------------------------------------*/
-/*----------                  PRIVATE METHODS                         -------------*/
-/*---------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+/*------                 PRIVATE METHODS                 ------*/
+/*-------------------------------------------------------------*/
 
 /*! Sets the analysis Dao */
 void Globals::setAnalysisDao(AnalysisDao* newAnalysisDao){

@@ -18,10 +18,8 @@ namespace spikestream {
 		public:
 			NRMConfigLoader(void);
 			~NRMConfigLoader(void);
-
 			void loadConfig(const char* filePath);
 			int getOpVer(){ return 2; }//Returns the current version of NRM
-
 			NRMNetwork* getNetwork();
 			void reset();
 

@@ -117,6 +117,7 @@ QList<unsigned int> NeuronGroupModel::getSelectedNeuronGroupIDs(){
 }
 
 
+/*! Inherited from QAbstractTableModel. */
 bool NeuronGroupModel::setData(const QModelIndex& index, const QVariant&, int) {
     if (!index.isValid() || !Globals::networkLoaded())
 		return false;

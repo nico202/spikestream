@@ -6,11 +6,11 @@
 
 namespace spikestream {
 
+	/*! Holds information about a neuron loaded from an NRM file. */
 	class NRMNeuron {
 		public:
 			NRMNeuron();
 			~NRMNeuron();
-
 			void addTraining(unsigned char* inBitArray, unsigned int inBitArrLen, unsigned char output);
 			QList<unsigned char*> getTraining();
 			unsigned int getTrainingArrayLength() { return trainingArrayLength; }

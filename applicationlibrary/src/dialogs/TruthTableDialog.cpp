@@ -8,6 +8,7 @@ using namespace spikestream;
 #include <QLayout>
 #include <QPushButton>
 
+
 /*! Constructor */
 TruthTableDialog::TruthTableDialog(QWidget* parent) : QDialog(parent) {
 	QVBoxLayout *mainVBox = new QVBoxLayout(this);
@@ -52,15 +53,14 @@ void TruthTableDialog::show(unsigned int neuronID){
 /*-----                 PRIVATE SLOTS                  -----*/
 /*----------------------------------------------------------*/
 
-
+/*! Hides the dialog when the cancel button is pressed. */
 void TruthTableDialog::cancelButtonPressed(){
 	this->hide();
 }
 
 
+/*! Hides the dialog when the ok button is pressed. */
 void TruthTableDialog::okButtonPressed(){
 	this->hide();
 }
-
-
 

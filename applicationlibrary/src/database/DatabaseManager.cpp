@@ -20,9 +20,12 @@ DatabaseManager::DatabaseManager(const DBInfo& networkDBInfo, const DBInfo& arch
 
 /*! Destuctor */
 DatabaseManager::~DatabaseManager(){
-
 }
 
+
+/*----------------------------------------------------------*/
+/*-----                 PUBLIC METHODS                 -----*/
+/*----------------------------------------------------------*/
 
 /*! Sets up class for the clear databases task, which is executed when the thread is run. */
 void DatabaseManager::prepareClearDatabases(){
@@ -58,6 +61,10 @@ void DatabaseManager::run(){
 }
 
 
+/*----------------------------------------------------------*/
+/*-----                PRIVATE METHODS                 -----*/
+/*----------------------------------------------------------*/
+
 /*! Clears the error state of the class. */
 void DatabaseManager::clearError(){
 	error = false;
@@ -72,6 +79,7 @@ void DatabaseManager::setError(const QString &errMsg){
 }
 
 
+/*! Deletes database classes that are specific to the thread. */
 void DatabaseManager::cleanUp(){
 	if(networkDao != NULL)
 		delete networkDao;

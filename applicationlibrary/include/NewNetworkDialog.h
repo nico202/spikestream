@@ -7,6 +7,7 @@
 
 namespace spikestream {
 
+	/*! Dialog for adding a new network to the database. */
 	class NewNetworkDialog : public QDialog {
 		Q_OBJECT
 
@@ -14,9 +15,11 @@ namespace spikestream {
 			NewNetworkDialog(QWidget* parent=0);
 			~NewNetworkDialog();
 
+
 		private slots:
 			void okButtonPressed();
 			void cancelButtonPressed();
+
 
 		private:
 			//====================  VARIABLES ====================
@@ -25,8 +28,6 @@ namespace spikestream {
 
 			/*! Where user enters a description of the network */
 			QLineEdit* descLineEdit;
-
-
 	};
 }
 

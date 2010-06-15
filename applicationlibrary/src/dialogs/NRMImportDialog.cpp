@@ -19,6 +19,7 @@ using namespace spikestream;
 #include <iostream>
 using namespace std;
 
+
 /*! Constructor */
 NRMImportDialog::NRMImportDialog(QWidget* parent) : QDialog(parent){
 
@@ -407,6 +408,7 @@ void NRMImportDialog::loadNetworkFromFiles(){
 /*-----                 PRIVATE METHODS                -----*/
 /*----------------------------------------------------------*/
 
+/*! Stores data set containing firing pattern as an archive. */
 void NRMImportDialog::addArchives(){
     //Do nothing if there is no data
     if(fileLoader->getDataSet()->size() == 0)
@@ -706,8 +708,5 @@ QString NRMImportDialog::getFilePath(QString fileFilter){
     else
 		return QString("");
 }
-
-
-
 
 

@@ -10,6 +10,7 @@ using namespace spikestream;
 #include <QDebug>
 #include <QIcon>
 
+
 /*! Constructor */
 ConnectionsModel::ConnectionsModel() : QAbstractTableModel(){
     connect(Globals::getEventRouter(), SIGNAL(networkDisplayChangedSignal()), this, SLOT(networkDisplayChanged()));
@@ -21,6 +22,10 @@ ConnectionsModel::~ConnectionsModel(){
     clearConnectionsList();
 }
 
+
+/*----------------------------------------------------------*/
+/*-----                 PUBLIC METHODS                 -----*/
+/*----------------------------------------------------------*/
 
 /*! Inherited from QAbstractTableModel. Returns the number of columns in the model */
 int ConnectionsModel::columnCount(const QModelIndex&) const{
@@ -117,6 +122,10 @@ void ConnectionsModel::networkDisplayChanged(){
     reset();
 }
 
+
+/*----------------------------------------------------------*/
+/*-----                PRIVATE METHODS                 -----*/
+/*----------------------------------------------------------*/
 
 /*! Empties the connection list and deletes the Connection classes */
 void ConnectionsModel::clearConnectionsList(){

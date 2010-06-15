@@ -119,12 +119,3 @@ void ConnectionWidget::networkTaskFinished(){
 	Globals::getEventRouter()->networkChangedSlot();
 }
 
-
-
-
-
-
-
-
-
-

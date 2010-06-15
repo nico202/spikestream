@@ -10,19 +10,20 @@
 
 namespace spikestream {
 
+	/*! Table view for the display of the truth table associated with a particular weightless neuron. */
     class TruthTableView : public QTableView {
-	Q_OBJECT
+		Q_OBJECT
 
-	public:
-	    TruthTableView(TruthTableModel* model);
-	    ~TruthTableView();
+		public:
+			TruthTableView(TruthTableModel* model);
+			~TruthTableView();
 
-	private slots:
-	    void resizeHeaders();
+		private slots:
+			void resizeHeaders();
 
-	private:
-	    //=====================  VARIABLES  =======================
-	    TruthTableModel* truthTableModel;
+		private:
+			//=====================  VARIABLES  =======================
+			TruthTableModel* truthTableModel;
 
     };
 

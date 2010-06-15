@@ -1,4 +1,3 @@
-
 //SpikeStream includes
 #include "AnalysisLoaderWidget.h"
 #include "AbstractAnalysisWidget.h"

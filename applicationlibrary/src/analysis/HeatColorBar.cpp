@@ -13,6 +13,7 @@ using namespace spikestream;
 //Other includes
 #include "math.h"
 
+
 /*! Constructor */
 HeatColorBar::HeatColorBar(QWidget* parent) : QWidget(parent){
 	//Set the size of the color bar
@@ -45,7 +46,22 @@ HeatColorBar::~HeatColorBar(){
 }
 
 
-/*! Overriddedn paint event inherited from QWidget */
+/*----------------------------------------------------------*/
+/*------                PUBLIC METHODS                ------*/
+/*----------------------------------------------------------*/
+
+/*! Sets the maximum value of the heat color bar. */
+void HeatColorBar::setMaxValue(double maxValue){
+	this->maxValue = maxValue;
+	update();
+}
+
+
+/*----------------------------------------------------------*/
+/*------               PROTECTED METHODS              ------*/
+/*----------------------------------------------------------*/
+
+/*! Overridden paint method inherited from QWidget */
 void HeatColorBar::paintEvent(QPaintEvent*){
 	QPainter painter(this);
 	int areaWidth = width()/11;
@@ -91,11 +107,5 @@ void HeatColorBar::paintEvent(QPaintEvent*){
 	fontRect.moveTopLeft( QPointF(areaWidth * 10, 0) );
 	painter.drawText(fontRect, Qt::AlignCenter, QString::number( Util::rDouble( maxValue, 1 ) ) );
 }
-
- void HeatColorBar::setMaxValue(double maxValue){
-	 this->maxValue = maxValue;
-	 update();
- }
-
 
 

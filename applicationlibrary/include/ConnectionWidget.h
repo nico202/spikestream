@@ -11,6 +11,8 @@
 
 namespace spikestream {
 
+	/*! Displays a table listing the connection groups in the current network and tools to add,
+		delete, show and hide connection groups. */
 	class ConnectionWidget : public QWidget {
 		Q_OBJECT
 

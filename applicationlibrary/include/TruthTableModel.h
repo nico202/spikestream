@@ -7,32 +7,33 @@
 
 namespace spikestream {
 
+	/*! Model used for the display of a truth table associated with a particular weightless neuron. */
     class TruthTableModel : public QAbstractTableModel {
-	Q_OBJECT
+		Q_OBJECT
 
-	public:
-	    TruthTableModel();
-	    ~TruthTableModel();
-	    int columnCount(const QModelIndex& parent = QModelIndex()) const;
-	    QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
-	    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-	    int rowCount(const QModelIndex& parent = QModelIndex()) const;
-	    void setNeuronID(unsigned int neuronID);
+		public:
+			TruthTableModel();
+			~TruthTableModel();
+			int columnCount(const QModelIndex& parent = QModelIndex()) const;
+			QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
+			QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+			int rowCount(const QModelIndex& parent = QModelIndex()) const;
+			void setNeuronID(unsigned int neuronID);
 
-	private slots:
+		private slots:
 
 
-	private:
-	    //====================  VARIABLES  ====================
-	    /*! 2D List containing the data. Outer list corresponds to the rows
-		inner list corresponds to the firing state of the pattern at each point in the row. */
-	    QList< QList<unsigned int> > dataList;
+		private:
+			//====================  VARIABLES  ====================
+			/*! 2D List containing the data. Outer list corresponds to the rows
+			inner list corresponds to the firing state of the pattern at each point in the row. */
+			QList< QList<unsigned int> > dataList;
 
-	    /*! List containing the header data. Each position holds the appropriate neuron id for the column */
-	    QList<unsigned int> headerList;
+			/*! List containing the header data. Each position holds the appropriate neuron id for the column */
+			QList<unsigned int> headerList;
 
-	    //=====================  METHODS  ======================
-	    void clearModelData();
+			//=====================  METHODS  ======================
+			void clearModelData();
     };
 
 }

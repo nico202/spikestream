@@ -11,6 +11,8 @@ using namespace spikestream;
 
 namespace spikestream {
 
+	/*! Used for the display of information about a neuron group.
+		Based on the NeuronGroup table in the SpikeStream database. */
     class NeuronGroupModel : public QAbstractTableModel {
 		Q_OBJECT
 

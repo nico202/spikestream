@@ -5,6 +5,7 @@ using namespace spikestream;
 #include <QDebug>
 #include <QHeaderView>
 
+
 /*! Constructor */
 TruthTableView::TruthTableView(TruthTableModel* model) : QTableView() {
     //Set up the view
@@ -26,15 +27,19 @@ TruthTableView::~TruthTableView(){
 }
 
 
+/*-------------------------------------------------------------*/
+/*-------                   PRIVATE SLOTS                ------*/
+/*-------------------------------------------------------------*/
+
 /*! Sets up the size of the headers. */
 void TruthTableView::resizeHeaders(){
     QHeaderView* hHeader = horizontalHeader();
 
     //Resize columns
     if(truthTableModel->columnCount() > 0){
-	for(int i=0; i<truthTableModel->columnCount()-1; ++i)
-		hHeader->resizeSection(hHeader->logicalIndex(i), 40);//Neuron ID column
-	hHeader->resizeSection(hHeader->logicalIndex(truthTableModel->columnCount()-1), 50);//Output column
+		for(int i=0; i<truthTableModel->columnCount()-1; ++i)
+			hHeader->resizeSection(hHeader->logicalIndex(i), 40);//Neuron ID column
+		hHeader->resizeSection(hHeader->logicalIndex(truthTableModel->columnCount()-1), 50);//Output column
     }
 
     hHeader->setDefaultAlignment(Qt::AlignLeft);

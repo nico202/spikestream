@@ -25,6 +25,9 @@ NRMConfigLoader::~NRMConfigLoader(void){
 	reset();
 }
 
+/*----------------------------------------------------------*/
+/*-----                PUBLIC METHODS                  -----*/
+/*----------------------------------------------------------*/
 
 /*! Loads up the input layers, neural layers and connections from an NRM configuration file.
 	This file should have the extension .cfg.  */
@@ -216,6 +219,25 @@ void NRMConfigLoader::loadConfig(const char* filePath){
 	fclose(file);
 }
 
+
+/*! Returns the network tha has been loaded */
+NRMNetwork* NRMConfigLoader::getNetwork(){
+	return network;
+}
+
+
+/*! Resets and cleans up the data structures associated with this class */
+void NRMConfigLoader::reset(){
+	if(network != NULL){
+		delete network;
+		network = NULL;
+	}
+}
+
+
+/*----------------------------------------------------------*/
+/*-----                PRIVATE METHODS                 -----*/
+/*----------------------------------------------------------*/
 
 /*! Identifies the config number of the file */
 void NRMConfigLoader::loadConfigVersion(FILE* file){
@@ -907,23 +929,5 @@ void NRMConfigLoader::loadConnectionParameters(conType& conParams, FILE* file){
 	fread(&conParams.rHeight, 4, 1, file);
 	fread(&conParams.segRev, 1, 1, file);
 }
-
-
-/*! Returns the network tha has been loaded */
-NRMNetwork* NRMConfigLoader::getNetwork(){
-	return network;
-}
-
-/*! Resets and cleans up the data structures associated with this class */
-void NRMConfigLoader::reset(){
-	if(network != NULL){
-		delete network;
-		network = NULL;
-	}
-}
-
-
-
-
 
 

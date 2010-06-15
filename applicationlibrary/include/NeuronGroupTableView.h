@@ -7,6 +7,8 @@
 
 namespace spikestream {
 
+	/*! A view of the NeuronGroupModel displaying information about the
+		neuron groups in the current network. */
 	class NeuronGroupTableView : public QTableView {
 		Q_OBJECT
 

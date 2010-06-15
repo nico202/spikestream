@@ -30,6 +30,10 @@ NRMNetwork::~NRMNetwork(){
 }
 
 
+/*-------------------------------------------------------*/
+/*-----                PUBLIC METHODS               -----*/
+/*-------------------------------------------------------*/
+
 /*! Adds an input layer to the network with a specified id */
 void NRMNetwork::addInputLayer(int id, NRMInputLayer* inputLayer){
 	if(inputLayerMap.contains(id)){
@@ -92,7 +96,6 @@ QList<NRMInputLayer*> NRMNetwork::getFramedImageInputs(){
 int NRMNetwork::getInputLayerCount(){
 	return inputLayerMap.size();
 }
-
 
 
 /*! Returns the number of neural layers */

@@ -1,7 +1,6 @@
 #ifndef NRMLAYER_H
 #define NRMLAYER_H
 
-
 //Other imports
 #include <string>
 using namespace std;

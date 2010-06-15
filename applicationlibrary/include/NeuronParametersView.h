@@ -7,7 +7,6 @@
 //Qt includes
 #include <QTableView>
 
-
 namespace spikestream {
 
 	/*! A table of neuron parameters for the current network */
@@ -18,9 +17,11 @@ namespace spikestream {
 			NeuronParametersView(QWidget* parent, NeuronParametersModel* model);
 			~NeuronParametersView();
 
+
 		private slots:
 			void resizeHeaders();
 			void tableClicked(QModelIndex index);
+
 
 		private:
 			//======================  VARIABLES  =====================

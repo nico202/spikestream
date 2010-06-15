@@ -1,3 +1,4 @@
+//SpikeStream includes
 #include "Globals.h"
 #include "LoadAnalysisDialog.h"
 #include "Util.h"

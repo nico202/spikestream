@@ -192,6 +192,7 @@ bool NetworkDisplay::neuronGroupVisible(unsigned int neurGrpID){
 }
 
 
+/*! Locks the mutex associated with this class */
 void NetworkDisplay::lockMutex(){
 	mutex.lock();
 }
@@ -270,17 +271,20 @@ void NetworkDisplay::setVisibleNeuronGroupIDs(const QList<unsigned int>& neurGrp
 }
 
 
+/*! Unlocks the mutex associated with this class. */
 void NetworkDisplay::unlockMutex(){
 	mutex.unlock();
 }
 
 
+/*! Sets the type of connection display - single neuron, from/to, between etc. */
 void NetworkDisplay::setConnectionModeFlag(unsigned int flag){
 	checkConnectionModeFlag(flag);
 	connectionMode |= flag;
 }
 
 
+/*! Clears the type of connection display */
 void NetworkDisplay::unsetConnectionModeFlag(unsigned int flag){
 	checkConnectionModeFlag(flag);
 	//Flip the bits in the flag and then AND it with the connection mode
@@ -359,7 +363,6 @@ void NetworkDisplay::setSelectedNeuronID(unsigned int id, bool ctrlBtnDown){
 }
 
 
-
 /*! Sets display to only show positive connections */
 void NetworkDisplay::showPositiveConnections() {
 	setConnectionModeFlag(SHOW_POSITIVE_CONNECTIONS);
@@ -408,11 +411,9 @@ void NetworkDisplay::clearDirectionFiltering(){
 }
 
 
-
 /*----------------------------------------------------------*/
 /*-----               PRIVATE METHODS                  -----*/
 /*----------------------------------------------------------*/
-
 
 /*! Checks that a particular connection mode flag is valid and throws an exception if not */
 void NetworkDisplay::checkConnectionModeFlag(unsigned int flag){

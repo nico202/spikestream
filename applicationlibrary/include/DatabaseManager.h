@@ -10,7 +10,6 @@
 //Qt includes
 #include <QThread>
 
-
 namespace spikestream {
 
 	/*! Handles potentially heavy database tasks, such as deleting all databases */

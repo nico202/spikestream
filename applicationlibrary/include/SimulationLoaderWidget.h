@@ -13,14 +13,16 @@ namespace spikestream {
 	/*! Holds the different types of simulation widget and allows
 		selection using a combo box.  */
 	class SimulationLoaderWidget : public QWidget {
-	  Q_OBJECT
+		Q_OBJECT
 
 		public:
 			SimulationLoaderWidget(QWidget* parent=0);
 			~SimulationLoaderWidget();
 
+
 		private slots:
 			void showSimulationWidget(int layerID);
+
 
 		private:
 			//=========================  VARIABLES  =============================

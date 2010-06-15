@@ -15,6 +15,7 @@ using namespace spikestream;
 
 namespace spikestream {
 
+	/*! Thread that adds NRM data to the database */
     class NRMDataImporter : public QThread {
 		public:
 			NRMDataImporter(const DBInfo& networkDBInfo, const DBInfo& archiveDBInfo);

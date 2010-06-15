@@ -5,9 +5,6 @@
 #include "AbstractParametersEditDialog.h"
 #include "ConnectionGroupInfo.h"
 
-//Qt includes
-
-
 namespace spikestream {
 
 	/*! Edits the parameters for a particular connection group */

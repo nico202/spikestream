@@ -15,8 +15,10 @@ using namespace spikestream;
 #include <QPushButton>
 #include <QTimer>
 
+//Other includes
 #include <iostream>
 using namespace std;
+
 
 /*! Constructor */
 NetworksWidget::NetworksWidget(QWidget* parent) : QWidget(parent){
@@ -262,9 +264,7 @@ void NetworksWidget::loadNetworkList(){
 /*-----                PRIVATE METHODS                 -----*/
 /*----------------------------------------------------------*/
 
-
-
-
+/*! Loads up the specified network into memory. */
 void NetworksWidget::loadNetwork(NetworkInfo& netInfo){
 	if(!networkInfoMap.contains(netInfo.getID())){
 		qCritical()<<"Network with ID "<<netInfo.getID()<<" cannot be found.";
@@ -298,7 +298,8 @@ void NetworksWidget::loadNetwork(NetworkInfo& netInfo){
 }
 
 
-
+/*! Called by a timer to establish whether the network has finished loading its neurons and connections
+	or whether an error has occurred. */
 void NetworksWidget::checkLoadingProgress(){
 	//Check for errors during loading
 	if(newNetwork->isError()){
@@ -439,8 +440,5 @@ void NetworksWidget::reset(){
 	}
 	networkInfoMap.clear();
 }
-
-
-
 
 

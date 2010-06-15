@@ -1,10 +1,12 @@
 #include "NRMLayer.h"
 using namespace spikestream;
 
+/*! Constructor */
 NRMLayer::NRMLayer(){
 }
 
 
+/*! Destructor */
 NRMLayer::~NRMLayer(){
 }
 

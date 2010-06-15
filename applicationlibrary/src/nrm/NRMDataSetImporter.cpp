@@ -29,7 +29,7 @@ NRMDataSetImporter::~NRMDataSetImporter(){
 void NRMDataSetImporter::loadDataSet(const char* filePath){
     FILE* file = fopen(filePath, "rb");
     if ( !file )
-	throw NRMException("Unable to open data set file.");
+		throw NRMException("Unable to open data set file.");
 
     //Reset count of bytes we have read
     fileByteCount = 0;
@@ -42,7 +42,7 @@ void NRMDataSetImporter::loadDataSet(const char* filePath){
     txt[9] = '\0';
 
     if(QString(txt) != "MacConD02")
-	throw NRMException("Dataset version not recognized.");
+		throw NRMException("Dataset version not recognized.");
 
     //Dataset version should be 2 if we have reached this point
     datSetVer = 2;
@@ -63,28 +63,28 @@ void NRMDataSetImporter::loadDataSet(const char* filePath){
     fReadFile(&val, 2, 1, file);
     dataSet.colorPlanes = val;
     if ( datSetVer > 1 )  {
-	fReadFile(&val2, 4, 1, file);
-	numImgs = val2;
+		fReadFile(&val2, 4, 1, file);
+		numImgs = val2;
     }
     else {
-	fReadFile(&val, 2, 1, file);
-	numImgs = val;
+		fReadFile(&val, 2, 1, file);
+		numImgs = val;
     }
 
     //Read in the data from the file
     for ( int n = 0; n < numImgs; n++ ) {
-	//Create array to hold data
-	unsigned char* tmpArray = new unsigned char[dataSet.width * dataSet.height];
+		//Create array to hold data
+		unsigned char* tmpArray = new unsigned char[dataSet.width * dataSet.height];
 
-	//Read data into array
-	fReadFile(tmpArray, dataSet.height * dataSet.width, 1, file);
+		//Read data into array
+		fReadFile(tmpArray, dataSet.height * dataSet.width, 1, file);
 
-	//Add array to dataset
-	dataSet.addData(tmpArray);
+		//Add array to dataset
+		dataSet.addData(tmpArray);
     }
 
     if ( ferror(file) )
-	throw NRMException("Error in data set file.");
+		throw NRMException("Error in data set file.");
 
     //Close the file
     fclose(file);
@@ -93,32 +93,37 @@ void NRMDataSetImporter::loadDataSet(const char* filePath){
 }
 
 
+/*! Resets class ready for another load */
 void NRMDataSetImporter::reset(){
     fileByteCount = 0;
     dataSet.reset();
 }
 
 
+/*----------------------------------------------------------*/
+/*-----                 PRIVATE METHODS                -----*/
+/*----------------------------------------------------------*/
+
 /*! Wrapper for fread that does error checking and throws an exception if an unexpected number of bytes is read */
 void NRMDataSetImporter::fReadFile(void* dataStruct, size_t sizeOfElement, size_t numElements, FILE* file ){
     size_t result = fread(dataStruct, sizeOfElement, numElements, file);
     if(result != numElements){
-	cout<<"Actual number of elements read="<<result<<"; expected number of elements = "<<numElements<<endl;
-	if( feof(file) ){
-	    ostringstream errMsg;
-	    errMsg<<"Unexpected end of file. Tried to read "<<sizeOfElement * numElements<<" elements. ";
-	    errMsg<<"Read "<<result<<" elements. ";
-	    errMsg<<"ByteCount="<<fileByteCount;
-	    throw NRMException (errMsg.str());
-	}
-	else if( ferror(file) ){
-	    throw NRMException ("ferror encountered reading from file", fileByteCount);
-	}
-	else{
-	    throw NRMException ("Unknown error encountered when reading from file. ByteCount=", fileByteCount);
-	}
+		cout<<"Actual number of elements read="<<result<<"; expected number of elements = "<<numElements<<endl;
+		if( feof(file) ){
+			ostringstream errMsg;
+			errMsg<<"Unexpected end of file. Tried to read "<<sizeOfElement * numElements<<" elements. ";
+			errMsg<<"Read "<<result<<" elements. ";
+			errMsg<<"ByteCount="<<fileByteCount;
+			throw NRMException (errMsg.str());
+		}
+		else if( ferror(file) ){
+			throw NRMException ("ferror encountered reading from file", fileByteCount);
+		}
+		else{
+			throw NRMException ("Unknown error encountered when reading from file. ByteCount=", fileByteCount);
+		}
     }
     else{
-	fileByteCount += (sizeOfElement * numElements);
+		fileByteCount += (sizeOfElement * numElements);
     }
 }

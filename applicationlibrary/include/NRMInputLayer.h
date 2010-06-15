@@ -9,8 +9,8 @@ namespace spikestream {
 	class NRMInputLayer : public NRMLayer {
 		public:
 			//========================  METHODS  =========================
-					NRMInputLayer();
-					virtual ~NRMInputLayer();
+			NRMInputLayer();
+			virtual ~NRMInputLayer();
 			void print();
 
 
