@@ -93,7 +93,7 @@ void Network::addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList, 
 	//Store the list of connection groups to be added
 	newConnectionGroups = connectionGroupList;
 
-	//Start thread that adds neuron groups to database
+	//Start thread that adds connection groups to database
 	clearError();
 	connectionNetworkDaoThread->prepareAddConnectionGroups(getID(), connectionGroupList);
 	currentConnectionTask = ADD_CONNECTIONS_TASK;

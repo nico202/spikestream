@@ -65,17 +65,17 @@ void NRMDataImporter::run(){
 
 	try{
 		switch(currentTask){
-  case ADD_ARCHIVES_TASK:
-			addArchives();
+			case ADD_ARCHIVES_TASK:
+				addArchives();
 			break;
-  case ADD_CONNECTIONS_TASK:
-			addConnections();
+			case ADD_CONNECTIONS_TASK:
+				addConnections();
 			break;
-  case ADD_TRAINING_TASK:
-			addTraining();
+			case ADD_TRAINING_TASK:
+				addTraining();
 			break;
-  default:
-			setError("Current task not recognized: " + QString::number(currentTask));
+			default:
+				setError("Current task not recognized: " + QString::number(currentTask));
 		}
 	}
 	catch(SpikeStreamException& ex){
@@ -84,7 +84,7 @@ void NRMDataImporter::run(){
 	catch(...){
 		setError("Unknown Exception thrown by DataImporter.");
 	}
-
+	qDebug()<<"DATA IMPORTER FINISHED. Task="<<currentTask;
 	currentTask = -1;
 	stopThread = true;
 }
@@ -207,14 +207,14 @@ void NRMDataImporter::addConnections(){
 			NRMConnection* nrmConGrp = nrmConnGrpList[j];
 
 			/* Double check that the to neuron group is the to neuron group in the connection.
-		   In NRM the src layer is the current layer. */
+				In NRM the src layer is the current layer. */
 			NRMLayer* tmpLayer = nrmNetwork->getLayerById(nrmConGrp->srcLayerId, nrmConGrp->srcObjectType);
 			if(tmpLayer != nrmToLayer)
 				throw SpikeStreamException("To layer in connection does not match to neuron group.");
 
 			/* Get the layer that this connection is from .
-		In NRM the src layer is the current layer and the dest layer is the layer
-		connecting to the src current layer. */
+				In NRM the src layer is the current layer and the dest layer is the layer
+				connecting to the src current layer. */
 			NRMLayer* nrmFromLayer= nrmNetwork->getLayerById(nrmConGrp->destLayerId, nrmConGrp->destObjectType);
 
 			//Check that SpikeStream IDs have been set
@@ -264,22 +264,13 @@ void NRMDataImporter::addConnections(){
 
 	}//Finished working through all of the NRM neural layers
 
-	//Add connections to the database
-	networkDaoThread->prepareAddConnectionGroups(network->getID(), newConnectionGrpsList);
-	networkDaoThread->start();
+	//Add connections to network - this also adds connections to database
+	network->addConnectionGroups(newConnectionGrpsList, false);
 
-	/* Wait for thread to finish - this task is already running as a separate thread
-	and has nothing else to do, so waiting will not affect the main application.*/
-	networkDaoThread->wait();
-
-	//Check for errors
-	if(networkDaoThread->isError()){
-		setError(networkDaoThread->getErrorMessage());
-	}
-	else{
-		//Add connections to network
-		network->addConnectionGroups(newConnectionGrpsList, false);
-	}
+	//Wait for network to finish task
+	while(network->isBusy())
+		usleep(50000);
+	qDebug()<<"FINISHED SLEEPING::::::::::::";
 }
 
 
@@ -309,8 +300,8 @@ void NRMDataImporter::addTraining(){
 			//Work out the neuron's ID in the database
 			unsigned int neuronID = neurCtr + neuronGroup->getStartNeuronID();
 
-			/* The lenght of each training string for this neuron.
-		   The returned training array length is the pattern string length + 1 for the output */
+			/* The length of each training string for this neuron.
+				The returned training array length is the pattern string length + 1 for the output */
 			unsigned int trainingArrayLength = nrmLayer->neuronArray[neurCtr]->getTrainingArrayLength();
 
 			//Add the training strings to the database
@@ -325,8 +316,8 @@ void NRMDataImporter::addTraining(){
 			QList<NRMConnection*> conList = nrmLayer->getConnections();
 			for(QList<NRMConnection*>::iterator iter = conList.begin(); iter != conList.end(); ++iter){
 				/* Get the NRM layer connecting to this layer
-			In NRM the src layer is the current layer and the destination layer is the layer
-			connecting to this layer. */
+					In NRM the src layer is the current layer and the destination layer is the layer
+					connecting to this layer. */
 				NRMLayer* nrmFromLayer= nrmNetwork->getLayerById((*iter)->destLayerId, (*iter)->destObjectType);
 				unsigned int fromGrpStartNeurID = network->getNeuronGroup(nrmFromLayer->spikeStreamID)->getStartNeuronID();
 
@@ -334,7 +325,7 @@ void NRMDataImporter::addTraining(){
 				QList<unsigned int> neurCons = (*iter)->getNeuronConnections(neurCtr);
 
 				/* Append the connections to the current list.to get a list of connections made from
-			the other layer to this layer*/
+					the other layer to this layer*/
 				QList<unsigned int>::iterator neurConsEnd = neurCons.end();
 				for(QList<unsigned int>::iterator neurConsIter = neurCons.begin(); neurConsIter != neurConsEnd; ++neurConsIter){
 					neuronConnectionList.append(*neurConsIter + fromGrpStartNeurID);
@@ -342,8 +333,8 @@ void NRMDataImporter::addTraining(){
 			}
 
 			/* Should now have a complete list of all the neurons connecting to this neuron.
-		   The neuron ids should match the neuron ids in the database.
-		   The order of these neuron ids should match the order in the pattern string. */
+				The neuron ids should match the neuron ids in the database.
+				The order of these neuron ids should match the order in the pattern string. */
 
 			//Check that the number of connections matches the number of connections in the network
 			if(network->getNumberOfToConnections(neuronID) != neuronConnectionList.size()){
@@ -375,8 +366,8 @@ void NRMDataImporter::addTraining(){
 					throw SpikeStreamException( "No matching connection found in database from " + QString::number(tmpFromNeurID) + " to " + QString::number(neuronID) );
 
 				/* Add the index of the weightless connection to the database using the id of the connection
-		   In the case of multiple connections between neurons, need to use the first connection id for the
-		   first connection, the second connection id for the second connection and so on */
+					In the case of multiple connections between neurons, need to use the first connection id for the
+					first connection, the second connection id for the second connection and so on */
 				if(duplicateMap.contains(tmpFromNeurID)){
 					//Double check size
 					if(duplicateMap[tmpFromNeurID] >= tmpConList.size())

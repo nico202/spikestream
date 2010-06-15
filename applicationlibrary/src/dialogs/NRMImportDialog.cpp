@@ -20,6 +20,10 @@ using namespace spikestream;
 using namespace std;
 
 
+/*! The type ID of a weightless neuron in the NeuronTypes table of the SpikeStreamNetwork database */
+#define WEIGHTLESS_NEURON_TYPE_ID 3
+
+
 /*! Constructor */
 NRMImportDialog::NRMImportDialog(QWidget* parent) : QDialog(parent){
 
@@ -99,7 +103,7 @@ void NRMImportDialog::addNetwork(){
 		}
 
 		//Create a neuron info describing group and use it to create a new group
-		NeuronGroupInfo tmpGrpInfo(0, inputList[i]->frameName.data(), inputList[i]->frameName.data(), QHash<QString, double>(), 2);
+		NeuronGroupInfo tmpGrpInfo(0, inputList[i]->frameName.data(), inputList[i]->frameName.data(), QHash<QString, double>(), WEIGHTLESS_NEURON_TYPE_ID);
 		NeuronGroup* tmpNeurGrp = new NeuronGroup(tmpGrpInfo);
 
 		//Add layer with width, height and position to group
@@ -129,7 +133,7 @@ void NRMImportDialog::addNetwork(){
 		}
 
 		//Create a neuron info describing group and use it to create a new group
-		NeuronGroupInfo tmpGrpInfo(0, neuralList[i]->frameName.data(), neuralList[i]->frameName.data(), QHash<QString, double>(), 2);
+		NeuronGroupInfo tmpGrpInfo(0, neuralList[i]->frameName.data(), neuralList[i]->frameName.data(), QHash<QString, double>(), WEIGHTLESS_NEURON_TYPE_ID);
 		NeuronGroup* tmpNeurGrp = new NeuronGroup(tmpGrpInfo);
 
 		//Add layer with width, height and position to group
@@ -142,14 +146,16 @@ void NRMImportDialog::addNetwork(){
     //Add neuron groups and connection groups to database
     newNetwork = NULL;
     try{
+		//FIXME: THIS IS MESSY: MOVE INTO DATA IMPORTER
+
 		//Create network
 		newNetwork = new Network(Globals::getNetworkDao(), Globals::getArchiveDao(), networkName->text(), networkDescription->text());
 		connect(newNetwork, SIGNAL(taskFinished()), this, SLOT(threadFinished()));
 		showBusyPage("Adding neurons to database...");
 
 		/* Add all of the neuron groups to the network
-	   This network starts a thread. Need to show busy dialog and periodically check to see if thread has
-	   finished using a timer. */
+			This network starts a thread. Need to show busy dialog and periodically check to see if thread has
+			finished using a timer. */
 		newNetwork->addNeuronGroups(newNeuronGroupList);
 
 		//Show busy page and wait for thread to finish
@@ -191,15 +197,15 @@ void NRMImportDialog::threadFinished(){
     //Operation has been cancelled by user interaction with buttons in this widget
     if(operationCancelled){
 		switch (currentTask){
-  case FILE_LOADING_TASK:
-			showPage1();
+			case FILE_LOADING_TASK:
+				showPage1();
 			break;
-  case ADD_NEURON_GROUPS_TASK: case ADD_CONNECTION_GROUPS_TASK: case ADD_TRAINING_TASK:
-			  showPage2();
-	  break;
-  default:
-	  qCritical()<<"Current task with id " + QString::number(currentTask) + " is not recognized.";
-  }
+			case ADD_NEURON_GROUPS_TASK: case ADD_CONNECTION_GROUPS_TASK: case ADD_TRAINING_TASK:
+				showPage2();
+			break;
+			default:
+				qCritical()<<"Current task with id " + QString::number(currentTask) + " is not recognized.";
+		}
 		currentTask = -1;
 		operationCancelled = false;
 		return;
@@ -208,27 +214,27 @@ void NRMImportDialog::threadFinished(){
     //Check for errors
     bool threadError = false;
     switch (currentTask){
-	case FILE_LOADING_TASK:
-	    if(fileLoader->isError()){
-			qCritical()<<fileLoader->getErrorMessage();
-			threadError = true;
-	    }
+		case FILE_LOADING_TASK:
+			if(fileLoader->isError()){
+				qCritical()<<fileLoader->getErrorMessage();
+				threadError = true;
+			}
 		break;
-	case ADD_NEURON_GROUPS_TASK:
-	    if(newNetwork->isError()){
-			qCritical()<<newNetwork->getErrorMessage();
-			Globals::getNetworkDao()->deleteNetwork(newNetwork->getID());
-			threadError = true;
-	    }
+		case ADD_NEURON_GROUPS_TASK:
+			if(newNetwork->isError()){
+				qCritical()<<newNetwork->getErrorMessage();
+				Globals::getNetworkDao()->deleteNetwork(newNetwork->getID());
+				threadError = true;
+			}
 		break;
-	case ADD_CONNECTION_GROUPS_TASK: case ADD_ARCHIVES_TASK: case ADD_TRAINING_TASK:
-				if(dataImporter->isError()){
-			qCritical()<<dataImporter->getErrorMessage();
-			threadError = true;
-	    }
+		case ADD_CONNECTION_GROUPS_TASK: case ADD_ARCHIVES_TASK: case ADD_TRAINING_TASK:
+			if(dataImporter->isError()){
+				qCritical()<<dataImporter->getErrorMessage();
+				threadError = true;
+			}
 		break;
-	default:
-	    qCritical()<<"Current task with id " + QString::number(currentTask) + " is not recognized.";
+		default:
+			qCritical()<<"Current task with id " + QString::number(currentTask) + " is not recognized.";
     }
     if(threadError){
 		showPage1();
@@ -237,41 +243,47 @@ void NRMImportDialog::threadFinished(){
     }
 
     /* Operation has not been cancelled and thread has terminated normally and without errors
-	Carry out appropriate operation depending on the current task */
+		Carry out appropriate operation depending on the current task */
     switch (currentTask){
-	case FILE_LOADING_TASK:
-	    addLayersToPage2();
-	    showPage2();
+		case FILE_LOADING_TASK:
+			addLayersToPage2();
+			showPage2();
 		break;
-	case ADD_NEURON_GROUPS_TASK:
-	    //Store the new neuron group IDs in the NRM network
-	    addNeuronGroupIDsToNRMNetwork();
+		case ADD_NEURON_GROUPS_TASK:
+			qDebug()<<"IMPORT DIALOG FINISHED ADDING NEURONS";
+			//Store the new neuron group IDs in the NRM network
+			addNeuronGroupIDsToNRMNetwork();
 
-	    //Start the add connection groups to network task
-	    addConnectionGroups();
-		break;
-	case ADD_CONNECTION_GROUPS_TASK:
-	    //Add the archives to the database
-	    addArchives();
-		break;
-	case ADD_ARCHIVES_TASK:
-	    //Add training to the database
-	    addTraining();
-		break;
-	case ADD_TRAINING_TASK:
-	    /* Inform other classes that the list of networks has changed
-	       No need to inform about archive changes because the new network is not loaded. */
-	    emit networkListChanged();
+			//Disconnect network - FIXME ADD NEURONS SHOULD BE MOVED INTO DATA IMPORTER
+			disconnect(newNetwork, SIGNAL(taskFinished()), this, SLOT(threadFinished()));
 
-	    //Inform user that it went ok
-	    showSuccessPage();
-
-	    //Clean up network from memory - this does not affect the network stored in the database
-	    if(newNetwork != NULL)
-			delete newNetwork;
+			//Start the add connection groups to network task
+			addConnectionGroups();
 		break;
-	default:
-	    qCritical()<<"Current task with id " + QString::number(currentTask) + " is not recognized.";
+		case ADD_CONNECTION_GROUPS_TASK:
+			qDebug()<<"IMPORT DIALOG FINISHED ADDING CONNECTIONS";
+			//Add the archives to the database
+			addArchives();
+		break;
+		case ADD_ARCHIVES_TASK:
+			qDebug()<<"IMPORT DIALOG FINISHED ADDING ARCHIVES";
+			//Add training to the database
+			addTraining();
+		break;
+		case ADD_TRAINING_TASK:
+			/* Inform other classes that the list of networks has changed
+			   No need to inform about archive changes because the new network is not loaded. */
+			emit networkListChanged();
+
+			//Inform user that it went ok
+			showSuccessPage();
+
+			//Clean up network from memory - this does not affect the network stored in the database
+			if(newNetwork != NULL)
+				delete newNetwork;
+		break;
+		default:
+			qCritical()<<"Current task with id " + QString::number(currentTask) + " is not recognized.";
     }
 
 }
@@ -410,15 +422,20 @@ void NRMImportDialog::loadNetworkFromFiles(){
 
 /*! Stores data set containing firing pattern as an archive. */
 void NRMImportDialog::addArchives(){
+	qDebug()<<"IMPORT DIALOG ADDING ARCHIVES";
     //Do nothing if there is no data
-    if(fileLoader->getDataSet()->size() == 0)
+	if(fileLoader->getDataSet()->size() == 0){
+		qDebug()<<"No archive data.";
 		return;
+	}
 
     //Reset variables
     operationCancelled = false;
     currentTask = ADD_ARCHIVES_TASK;
     showBusyPage("Adding archives to database...");
     try{
+		if(dataImporter->isRunning())
+			throw SpikeStreamException("Trying to add archives, but data importer is already running.");
 		dataImporter->prepareAddArchives(fileLoader->getNetwork(), newNetwork, fileLoader->getDataSet());
 		dataImporter->start();
     }
@@ -438,7 +455,6 @@ void NRMImportDialog::addConnectionGroups(){
     showBusyPage("Adding connections to database...");
     dataImporter->prepareAddConnections(fileLoader->getNetwork(), newNetwork);
     dataImporter->start();
-
 }
 
 
@@ -532,6 +548,7 @@ void NRMImportDialog::addNeuronGroupIDsToNRMNetwork(){
 
 /*! Prepares the data importer to add training to the database */
 void NRMImportDialog::addTraining(){
+	qDebug()<<"IMPORT DIALOG ADDING TRAINING";
     operationCancelled = false;
     currentTask = ADD_TRAINING_TASK;
     showBusyPage("Adding training to database...");
