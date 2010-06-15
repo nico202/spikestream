@@ -5,9 +5,7 @@
 #include <QApplication>
 
 //Other includes
-#ifdef LINUX32_SPIKESTREAM
-	#include <sys/time.h>
-#endif//LINUX32_SPIKESTREAM
+#include <sys/time.h>
 
 namespace spikestream {
 
@@ -41,13 +39,11 @@ namespace spikestream {
 			/*! Records the time of each key press event.*/
 			unsigned int keyEventTime;
 
-			#ifdef LINUX32_SPIKESTREAM
-				/*! Time structure to record the start of the render.*/
-				timeval startRenderTime;
+			/*! Time structure to record the start of the render.*/
+			timeval startRenderTime;
 
-				/*! Time structure to record the end of the render.*/
-				timeval stopRenderTime;
-			#endif//LINUX32_SPIKESTREAM
+			/*! Time structure to record the end of the render.*/
+			timeval stopRenderTime;
 
 			/*! Records when rendering is in progress.*/
 			bool rendering;

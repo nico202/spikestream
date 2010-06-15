@@ -5,7 +5,7 @@ SUBDIRS =   library applicationlibrary application
 
 
 #================  ANALYSIS PLUGINS  =================
-#SUBDIRS += analysis/statebasedphi analysis/liveliness
+SUBDIRS += analysis/statebasedphi analysis/liveliness
 
 
 #================  NETWORKS PLUGINS  =================
