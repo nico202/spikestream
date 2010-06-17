@@ -26,11 +26,10 @@ namespace spikestream {
 			void run();
 			void stop();
 
+
 		signals:
 			void progress(int stepsCompleted, int totalSteps);
 
-		private slots:
-			void networkTaskFinished();
 
 		private:
 			//=======================  VARIABLES  ========================

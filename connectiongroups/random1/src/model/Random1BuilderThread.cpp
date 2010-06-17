@@ -36,27 +36,29 @@ void Random1BuilderThread::run(){
 	clearError();
 	stopThread = false;
 	newConnectionGroup = NULL;
-	networkFinished = false;
+	//networkFinished = false;
 	try{
 		//Seed the random number generator
 		srand(12345678);
 
 		//Create network and archive dao for this thread
+		Network* currentNetwork = Globals::getNetwork();
 		threadNetworkDao = new NetworkDao(Globals::getNetworkDao()->getDBInfo());
 		threadArchiveDao = new ArchiveDao(Globals::getArchiveDao()->getDBInfo());
-		Globals::getNetwork()->setNetworkDao(threadNetworkDao);
-		Globals::getNetwork()->setArchiveDao(threadArchiveDao);
+		currentNetwork->setNetworkDao(threadNetworkDao);
+		currentNetwork->setArchiveDao(threadArchiveDao);
 
 		//Add the connection group
 		addConnectionGroup();
 
-		//Wait for network to finish
-		while(!networkFinished)
-			msleep(250);
+		//Wait for network to finish adding connection groups
+		while(currentNetwork->isBusy()){
+			msleep(50);
+		}
 
 		//Reset network and archive daos in network
-		Globals::getNetwork()->setNetworkDao(Globals::getNetworkDao());
-		Globals::getNetwork()->setArchiveDao(Globals::getArchiveDao());
+		currentNetwork->setNetworkDao(Globals::getNetworkDao());
+		currentNetwork->setArchiveDao(Globals::getArchiveDao());
 
 		//Clean up network and archive dao
 		delete threadNetworkDao;
@@ -68,31 +70,12 @@ void Random1BuilderThread::run(){
 	catch(...){
 		setError("An unknown error occurred.");
 	}
-
-	qDebug()<<"RANDOM1 BUILDER COMPLETE";
 }
 
 
 /*! Stops the thread running  */
 void Random1BuilderThread::stop(){
 	stopThread = true;
-}
-
-
-/*----------------------------------------------------------*/
-/*-----                 PRIVATE SLOTS                  -----*/
-/*----------------------------------------------------------*/
-
-/*! Called when network has finished adding the neuron groups */
-void Random1BuilderThread::networkTaskFinished(){
-	//Inform other classes that loading has completed
-	emit progress(numberOfProgressSteps, numberOfProgressSteps);
-
-	//Prevent this method being called when network finishes other tasks
-	this->disconnect(Globals::getNetwork(), SIGNAL(taskFinished()));
-
-	//Record that network has finished
-	networkFinished = true;
 }
 
 
@@ -105,7 +88,6 @@ void Random1BuilderThread::addConnectionGroup(){
 	buildConnectionGroup();
 	QList<ConnectionGroup*> conGrpList;
 	conGrpList.append(newConnectionGroup);
-	connect(Globals::getNetwork(), SIGNAL(taskFinished()), this, SLOT(networkTaskFinished()),  Qt::UniqueConnection);
 	Globals::getNetwork()->addConnectionGroups(conGrpList);
 }
 
@@ -159,8 +141,6 @@ void Random1BuilderThread::buildConnectionGroup(){
 		++cntr;
 		emit progress(cntr, numberOfProgressSteps);
 	}
-
-	//qDebug()<<"STOP THREAD: "<<stopThread<<" EXPECTED NEURON GROUP SIZE: "<<(width*length*height)<<" PRE-DATABASE NEURON GROUP SIZE: "<<newNeuronGroup->size();
 }
 
 
@@ -199,7 +179,6 @@ void Random1BuilderThread::setError(const QString& errorMessage){
 	error = true;
 	this->errorMessage = errorMessage;
 	stopThread = true;
-	qDebug()<<"SETTING ERROR: "<<errorMessage;
 }
 
 

@@ -2,12 +2,15 @@
 #include "GlobalVariables.h"
 #include "NetworkDaoThread.h"
 #include "Neuron.h"
+#include "PerformanceTimer.h"
 #include "SpikeStreamException.h"
 #include "SpikeStreamDBException.h"
 using namespace spikestream;
 
 #include <iostream>
 using namespace std;
+
+#define TIME_PERFORMANCE
 
 /*! Constructor  */
 NetworkDaoThread::NetworkDaoThread(const DBInfo& dbInfo) : NetworkDao(dbInfo) {
@@ -267,19 +270,25 @@ void NetworkDaoThread::addConnectionGroups(){
 		if(stopThread)
 			return;
 
+		#ifdef TIME_PERFORMANCE
+			PerformanceTimer timer;
+		#endif//TIME_PERFORMANCE
+
+		//Build query
+		query = getQuery();
+		query.prepare("INSERT INTO Connections ( ConnectionGroupID, FromNeuronID, ToNeuronID, Delay, Weight) VALUES (?, ?, ?, ?, ?)");
+
 		//Add connections to database
 		ConnectionList::const_iterator endConGrp = connectionGroup->end();
 		for(ConnectionList::const_iterator iter = connectionGroup->begin(); iter != endConGrp; ++iter){
-			//Build query string
-			queryStr = "INSERT INTO Connections ( ConnectionGroupID, FromNeuronID, ToNeuronID, Delay, Weight) VALUES (";
-			queryStr += QString::number(connectionGroup->getID()) + ", ";
-			queryStr += QString::number((*iter)->fromNeuronID) + ", ";
-			queryStr += QString::number((*iter)->toNeuronID) + ", ";
-			queryStr += QString::number((*iter)->delay) + ", ";
-			queryStr += QString::number((*iter)->weight) + ")";
+			//Bind values to query
+			query.bindValue(0, connectionGroup->getID());
+			query.bindValue(1, (*iter)->fromNeuronID);
+			query.bindValue(2, (*iter)->toNeuronID);
+			query.bindValue(3, (*iter)->delay);
+			query.bindValue(4, (*iter)->weight);
 
 			//Execute query
-			query = getQuery(queryStr);
 			executeQuery(query);
 
 			//Add connection id to connection
@@ -294,6 +303,10 @@ void NetworkDaoThread::addConnectionGroups(){
 			if(stopThread)
 				return;
 		}
+
+		#ifdef TIME_PERFORMANCE
+				timer.printTime("Adding connections");
+		#endif//TIME_PERFORMANCE
 
 		//ConnectionGroup should now match information in database
 		connectionGroup->setLoaded(true);
@@ -538,7 +551,6 @@ void NetworkDaoThread::loadNeurons(){
     The invoking method is responsible for checking whether an error occurred and throwing
     an exeption if necessary.*/
 void NetworkDaoThread::setError(const QString& msg){
-	qDebug()<<"ERROR FOUND: "<<msg<<" current task: "<<currentTask;
     errorMessage = msg;
     error = true;
     stopThread = true;

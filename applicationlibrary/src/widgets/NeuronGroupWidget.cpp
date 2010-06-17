@@ -114,7 +114,7 @@ void NeuronGroupWidget::networkTaskFinished(){
 	neuronGroupModel->clearSelection();
 
 	//Prevent this method being called when network finishes other tasks
-	this->disconnect(Globals::getNetwork(), SIGNAL(taskFinished()));
+	disconnect(Globals::getNetwork(), SIGNAL(taskFinished()), this, SLOT(networkTaskFinished()));
 
 	//Inform other classes that network has changed
 	Globals::getEventRouter()->networkChangedSlot();

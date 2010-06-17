@@ -13,7 +13,11 @@ SUBDIRS += analysis/statebasedphi analysis/liveliness
 
 
 #================  NEURON GROUP PLUGINS  =================
-#SUBDIRS += neurongroups/cuboid
+SUBDIRS += neurongroups/cuboid
+
+
+#================  CONNECTION GROUP PLUGINS  =================
+SUBDIRS += connectiongroups/random1
 
 
 #================  SIMULATION PLUGINS  =================

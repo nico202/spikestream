@@ -223,10 +223,11 @@ void Random1Widget::builderThreadFinished(){
 	if(builderThread->isError())
 		qCritical()<<builderThread->getErrorMessage();
 
+	//Close progress dialog
+	progressDialog->close();
+
 	//Inform other classes that network has changed
-	qDebug()<<"BEFORE SLOT";
 	Globals::getEventRouter()->networkChangedSlot();
-	qDebug()<<"AFTER SLOT";
 }
 
 
