@@ -285,7 +285,8 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow(){
 	QPixmap iconPixmap(Globals::getSpikeStreamRoot() + "/images/spikestream_icon_64.png" );
 	setWindowIcon(iconPixmap);
 	setCentralWidget( mainSplitterWidget );
-	//setWindowState(Qt::WindowMaximized);
+	if( Util::getBool(configLoader->getParameter("maximize_gui") ))
+		setWindowState(Qt::WindowMaximized);
 
 	//Get rid of splash screen if it is showing
 	if(splashScreen){

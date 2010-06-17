@@ -41,7 +41,7 @@ NemoWrapper::~NemoWrapper(){
 void testFunction(){
 	//Set up the configuration with the default parameters
 	nemo_configuration_t nemoConfig = nemo_new_configuration();
-
+qDebug()<<"PROBE1";
 	//Add neurons
 	nemo_network_t nemoNet = nemo_new_network();
 
@@ -60,12 +60,21 @@ void testFunction(){
 	result = nemo_add_neuron(nemoNet, 4, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7);
 	if(result != NEMO_OK)
 		throw SpikeStreamException("Error code returned from Nemo when adding neuron." + QString(nemo_strerror()));
-
+qDebug()<<"PROBE2";
 	//Load the network into the simulator
-	nemo_simulation_t nemoSim = nemo_new_simulation(nemoNet, nemoConfig);
+	nemo_simulation_t nemoSim ;
+	try{
+		nemoSim = nemo_new_simulation(nemoNet, nemoConfig);
+	}
+	catch(...){
+		qDebug()<<"ERROR LOADING NEMO SIMULATION."<<endl;
+	}
+
+	qDebug()<<"PROBE2A"<<nemoSim;
 	if(nemoSim == NULL) {
 		throw SpikeStreamSimulationException(QString("Failed to create Nemo simulation: ") + nemo_strerror());
 	}
+	qDebug()<<"PROBE3";
 }
 
 

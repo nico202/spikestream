@@ -76,6 +76,9 @@ namespace spikestream {
 			/*! The number of steps that have been completed so far */
 			int numberOfCompletedSteps;
 
+			/*! The number of values statement used when adding connections */
+			int numConBuffers;
+
 			const static unsigned int NO_TASK_DEFINED = 1;
 			const static unsigned int ADD_CONNECTION_GROUPS_TASK = 2;
 			const static unsigned int ADD_NEURON_GROUPS_TASK = 3;
