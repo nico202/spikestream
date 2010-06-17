@@ -51,7 +51,7 @@ ConfigLoader::~ConfigLoader(){
 /*-----                 PUBLIC METHODS                 -----*/
 /*----------------------------------------------------------*/
 
-/*! Extracts the configuration parameter as a cstring. */
+/*! Extracts the configuration parameter as a QString. */
 QString ConfigLoader::getParameter(const QString& paramName){
 	if(!configMap.contains(paramName))
 		throw SpikeStreamException("Configuration file does not contain a parameter with name: " + paramName);

@@ -56,6 +56,10 @@ void Random1BuilderThread::run(){
 			msleep(50);
 		}
 
+		//Check for errors
+		if(currentNetwork->isError())
+			setError(currentNetwork->getErrorMessage());
+
 		//Reset network and archive daos in network
 		currentNetwork->setNetworkDao(Globals::getNetworkDao());
 		currentNetwork->setArchiveDao(Globals::getArchiveDao());

@@ -1,22 +1,31 @@
 //SpikeStream includes
+#include "ConfigLoader.h"
+#include "Connection.h"
 #include "GlobalVariables.h"
 #include "NetworkDaoThread.h"
 #include "Neuron.h"
 #include "PerformanceTimer.h"
 #include "SpikeStreamException.h"
 #include "SpikeStreamDBException.h"
+#include "Util.h"
 using namespace spikestream;
 
 #include <iostream>
 using namespace std;
 
+/*! Controls whether performance measurements are made for this class */
 #define TIME_PERFORMANCE
+
 
 /*! Constructor  */
 NetworkDaoThread::NetworkDaoThread(const DBInfo& dbInfo) : NetworkDao(dbInfo) {
     currentTask = NO_TASK_DEFINED;
     clearError();
     stopThread = true;
+
+	//Load up configuration parameters
+	ConfigLoader configLoader;
+	numConBuffers = Util::getInt(configLoader.getParameter("number_insert_connection_buffers"));
 }
 
 
@@ -251,8 +260,7 @@ void NetworkDaoThread::addConnectionGroups(){
 		if(lastInsertID >= START_CONNECTIONGROUP_ID)
 			connectionGroup->setID(lastInsertID);
 		else{
-			setError("Insert ID for ConnectionGroup is invalid.");
-			return;
+			throw SpikeStreamException("Insert ID for ConnectionGroup is invalid.");
 		}
 
 		//Add entry for connection group parameters
@@ -276,36 +284,88 @@ void NetworkDaoThread::addConnectionGroups(){
 
 		//Build query
 		query = getQuery();
-		query.prepare("INSERT INTO Connections ( ConnectionGroupID, FromNeuronID, ToNeuronID, Delay, Weight) VALUES (?, ?, ?, ?, ?)");
+		queryStr = "INSERT INTO Connections ( ConnectionGroupID, FromNeuronID, ToNeuronID, Delay, Weight) VALUES ";
+		for(int i=0; i<numConBuffers-1; ++i)
+			queryStr += "(?, ?, ?, ?, ?),";
+		queryStr += "(?, ?, ?, ?, ?)";
+		query.prepare(queryStr);
 
 		//Add connections to database
+		int conCntr = 0, offset = 0, conAddedCntr = 0;
+		QList<Connection*> tmpConList;
 		ConnectionList::const_iterator endConGrp = connectionGroup->end();
 		for(ConnectionList::const_iterator iter = connectionGroup->begin(); iter != endConGrp; ++iter){
+			offset = 5 * (conCntr % numConBuffers);
+
 			//Bind values to query
-			query.bindValue(0, connectionGroup->getID());
-			query.bindValue(1, (*iter)->fromNeuronID);
-			query.bindValue(2, (*iter)->toNeuronID);
-			query.bindValue(3, (*iter)->delay);
-			query.bindValue(4, (*iter)->weight);
+			tmpConList.append(*iter);
+			query.bindValue(0 + offset, connectionGroup->getID());
+			query.bindValue(1 + offset, (*iter)->fromNeuronID);
+			query.bindValue(2 + offset, (*iter)->toNeuronID);
+			query.bindValue(3 + offset, (*iter)->delay);
+			query.bindValue(4 + offset, (*iter)->weight);
 
 			//Execute query
-			executeQuery(query);
+			if(conCntr % numConBuffers == numConBuffers-1){
+				executeQuery(query);
 
-			//Add connection id to connection
-			int lastInsertID = query.lastInsertId().toInt();
-			if(lastInsertID < START_CONNECTION_ID){
-				setError("Insert ID for Connection is invalid.");
-				return;
+				//Add connection id to connection - last insert id is the id of the first connection in the list of value entries
+				int lastInsertID = query.lastInsertId().toInt();
+				if(lastInsertID < START_CONNECTION_ID)
+					throw SpikeStreamException("Insert ID for Connection is invalid.");
+				if(tmpConList.size() != numConBuffers)
+					throw SpikeStreamException("Temporary connection list size " + QString::number(tmpConList.size()) + " does not match number of buffers: " + QString::number(numConBuffers));
+
+				//Set connection ID in connection groups
+				for(int i=0; i<tmpConList.size(); ++i){
+					tmpConList.at(i)->setID(lastInsertID + i);
+				}
+
+				//Count number of connections that have been added
+				conAddedCntr += numConBuffers;
+
+				//Clear up list
+				tmpConList.clear();
 			}
 
-			(*iter)->setID(lastInsertID);
+			//Keep track of the number of connections
+			++conCntr;
 
 			if(stopThread)
 				return;
 		}
 
+		//Add remaining connections individually
+		if(!tmpConList.isEmpty()){
+			query = getQuery();
+			query.prepare("INSERT INTO Connections ( ConnectionGroupID, FromNeuronID, ToNeuronID, Delay, Weight) VALUES (?, ?, ?, ?, ?)");
+			for(QList<Connection*>::iterator iter = tmpConList.begin(); iter != tmpConList.end(); ++iter){
+				query.bindValue(0, connectionGroup->getID());
+				query.bindValue(1, (*iter)->fromNeuronID);
+				query.bindValue(2, (*iter)->toNeuronID);
+				query.bindValue(3, (*iter)->delay);
+				query.bindValue(4, (*iter)->weight);
+
+				//Execute query
+				executeQuery(query);
+
+				//Add connection id to connection
+				int lastInsertID = query.lastInsertId().toInt();
+				if(lastInsertID < START_CONNECTION_ID)
+					throw SpikeStreamException("Insert ID for Connection is invalid.");
+				(*iter)->setID(lastInsertID);
+
+				//Count number of connections that have been added
+				++conAddedCntr;
+			}
+		}
+
+		//Check that we have added all the connections
+		if(connectionGroup->size() != conAddedCntr)
+			throw SpikeStreamException("Number of connections added to database: " + QString::number(conCntr) + " does not match size of connection group: " + QString::number(connectionGroup->size()));
+
 		#ifdef TIME_PERFORMANCE
-				timer.printTime("Adding connections");
+			timer.printTime("Number of buffers: " + QString::number(numConBuffers) + ". Number of connections remaining: " + QString::number(tmpConList.size()) + ". Adding " + QString::number(conCntr) + " connections");
 		#endif//TIME_PERFORMANCE
 
 		//ConnectionGroup should now match information in database
