@@ -632,6 +632,5 @@ void Network::deleteNeuronGroups(){
 /*! Sets the class into error state and adds error message */
 void Network::setError(const QString& errorMsg){
 	this->errorMessage += " " + errorMsg;
-	qDebug()<<"NETWORK ERROR: "<<errorMessage;
 	error = true;
 }

@@ -177,11 +177,29 @@ void NemoWidget::monitorStateChanged(int state){
 
 /*! Called when the nemo wrapper finishes a task it is engaged in */
 void NemoWidget::nemoWrapperFinished(){
-	checkForErrors();
+	//Handle errors
+	if(checkForErrors()){
+		switch (nemoWrapper->getCurrentTask()){
+			case NemoWrapper::LOAD_SIMULATION_TASK :
+				unloadSimulation(false);
+			break;
+			case NemoWrapper::RUN_SIMULATION_TASK :
+				playAction->setEnabled(true);
+				stopAction->setEnabled(false);
+			break;
+			default :
+				qCritical()<<"Nemo has finished executing, but task is not defined";
+		}
+		return;
+	}
 
+	//Finish off task
 	switch (nemoWrapper->getCurrentTask()){
 		case NemoWrapper::LOAD_SIMULATION_TASK :
-			if(!taskCancelled){
+			if(taskCancelled){
+				unloadSimulation(false);
+			}
+			else{
 				loadButton->setEnabled(false);
 				unloadButton->setEnabled(true);
 				neuronParametersButton->setEnabled(false);
@@ -389,10 +407,12 @@ void NemoWidget::updateProgress(int stepsCompleted, int totalSteps){
 /*----------------------------------------------------------*/
 
 /*! Checks the nemo wrapper for errors */
-void NemoWidget::checkForErrors(){
+bool NemoWidget::checkForErrors(){
 	if(nemoWrapper->isError()){
 		qCritical()<<"NemoWrapper error: '"<<nemoWrapper->getErrorMessage()<<"'.";
+		return true;
 	}
+	return false;
 }
 
 

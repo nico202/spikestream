@@ -42,7 +42,6 @@ nemo_network_t NemoLoader::buildNemoNetwork(Network* network, const bool* stop){
 	int totalSteps = neurGrpList.size() + conGrpList.size();
 	int stepsCompleted = 0;
 
-
 	//Add the neuron groups
 	for(int i=0; i<neurGrpList.size() && !*stop; ++i){
 		unsigned int neurTypeID = neurGrpList.at(i)->getInfo().getNeuronTypeID();

@@ -38,6 +38,38 @@ NemoWrapper::~NemoWrapper(){
 }
 
 
+void testFunction(){
+	//Set up the configuration with the default parameters
+	nemo_configuration_t nemoConfig = nemo_new_configuration();
+
+	//Add neurons
+	nemo_network_t nemoNet = nemo_new_network();
+
+	nemo_status_t result = nemo_add_neuron(nemoNet, 1, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7);
+	if(result != NEMO_OK)
+		throw SpikeStreamException("Error code returned from Nemo when adding neuron." + QString(nemo_strerror()));
+
+	result = nemo_add_neuron(nemoNet, 2, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7);
+	if(result != NEMO_OK)
+		throw SpikeStreamException("Error code returned from Nemo when adding neuron." + QString(nemo_strerror()));
+
+	result = nemo_add_neuron(nemoNet, 3, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7);
+	if(result != NEMO_OK)
+		throw SpikeStreamException("Error code returned from Nemo when adding neuron." + QString(nemo_strerror()));
+
+	result = nemo_add_neuron(nemoNet, 4, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7);
+	if(result != NEMO_OK)
+		throw SpikeStreamException("Error code returned from Nemo when adding neuron." + QString(nemo_strerror()));
+
+	//Load the network into the simulator
+	nemo_simulation_t nemoSim = nemo_new_simulation(nemoNet, nemoConfig);
+	if(nemoSim == NULL) {
+		throw SpikeStreamSimulationException(QString("Failed to create Nemo simulation: ") + nemo_strerror());
+	}
+}
+
+
+
 /*----------------------------------------------------------*/
 /*-----                 PUBLIC METHODS                 -----*/
 /*----------------------------------------------------------*/
@@ -156,29 +188,31 @@ void NemoWrapper::setParameters(const QHash<QString, double>& parameterMap){
 
 /*! Advances the simulation by one step */
 void NemoWrapper::stepSimulation(){
+	firingNeuronList.clear();
+
 	//Advance the simulation one time step
-	//checkNemoOutput( nemo_step(nemoSimulation, 0, 0), "Nemo error on step" );
+	checkNemoOutput( nemo_step(nemoSimulation, 0, 0), "Nemo error on step" );
 
 	//Retrieve list of firing neurons
-//	if(archiveMode || monitorMode){
-//		unsigned** cycles;
-//		unsigned** nidx;
-//		unsigned* nfired;
-//		unsigned* ncycles;
-//		checkNemoOutput( nemo_read_firing(nemoSimulation, cycles, nidx, nfired, ncycles), "Nemo error reading firing neurons" );
-//
-//		qDebug()<<"NUMBER FIRED="<<nfired<<" NUM CYCLES="<<ncycles;
-//
-//		checkNemoOutput( nemo_flush_firing_buffer(nemoSimulation), "Nemo error flushing firing buffer");
-//
-//	}
+	if(archiveMode || monitorMode){
+		unsigned** cycles;
+		unsigned** nidx;
+		unsigned* nfired;
+		unsigned* ncycles;
+		checkNemoOutput( nemo_read_firing(nemoSimulation, cycles, nidx, nfired, ncycles), "Nemo error reading firing neurons" );
+
+		qDebug()<<"NUMBER FIRED="<<nfired<<" NUM CYCLES="<<ncycles;
+
+		checkNemoOutput( nemo_flush_firing_buffer(nemoSimulation), "Nemo error flushing firing buffer" );
+
+	}
 	//Retrieve list of firing neurons
-	if(monitorMode || archiveMode)
-		getRandomFiringNeurons(firingNeuronList, 50);
+//	if(monitorMode || archiveMode)
+//		getRandomFiringNeurons(firingNeuronList, 50);
 
 	//Store firing neurons in database
 	if(archiveMode){
-		archiveDao->addArchiveData(archiveInfo.getID(), timeStepCounter, firingNeuronList);
+		;//FIXME: archiveDao->addArchiveData(archiveInfo.getID(), timeStepCounter, firingNeuronList);
 	}
 
 	/* Set flag to cause thread to wait for graphics to update.
@@ -298,25 +332,27 @@ void NemoWrapper::loadSimulation(){
 	archiveInfo.setNetworkID(currentNetwork->getID());
 
 	//Set up the configuration with the appropriate parameters
-	nemo_configuration_t nemoConfig = nemo_new_configuration();
+//	nemo_configuration_t nemoConfig = nemo_new_configuration();
+//
+//	//Build the Nemo network
+//	NemoLoader* nemoLoader = new NemoLoader();
+//	connect(nemoLoader, SIGNAL(progress(int, int)), this, SLOT(updateProgress(int, int)));
+//	nemo_network_t nemoNet = nemoLoader->buildNemoNetwork(currentNetwork, &stopThread);
 
-	//Build the Nemo network
-	NemoLoader* nemoLoader = new NemoLoader();
-	connect(nemoLoader, SIGNAL(progress(int, int)), this, SLOT(updateProgress(int, int)));
-	nemo_network_t nemoNet = nemoLoader->buildNemoNetwork(currentNetwork, &stopThread);
+	testFunction();
 
 
 	//START TEST CODE - GET MINIMUM NEURON ID AND NETWORK SIZE
-	bool firstTime = false;
-	foreach(NeuronGroup* neurGrp, currentNetwork->getNeuronGroups()){
-		if(firstTime){
-			startNeuronID = neurGrp->getStartNeuronID();
-			firstTime = false;
-		}
-		else if(neurGrp->getStartNeuronID() < startNeuronID)
-			startNeuronID = neurGrp->getStartNeuronID();
-	}
-	networkSize = currentNetwork->size();
+//	bool firstTime = false;
+//	foreach(NeuronGroup* neurGrp, currentNetwork->getNeuronGroups()){
+//		if(firstTime){
+//			startNeuronID = neurGrp->getStartNeuronID();
+//			firstTime = false;
+//		}
+//		else if(neurGrp->getStartNeuronID() < startNeuronID)
+//			startNeuronID = neurGrp->getStartNeuronID();
+//	}
+//	networkSize = currentNetwork->size();
 	//END TEST CODE
 
 
@@ -325,12 +361,37 @@ void NemoWrapper::loadSimulation(){
 	currentNetwork->setArchiveDao(Globals::getArchiveDao());
 
 	//Clean up
-	delete nemoLoader;
+//	delete nemoLoader;
+
+
+	//TEST CODE
+	//Initialize the nemo network
+//	nemo_network_t nemoNet = nemo_new_network();
+//
+//	nemo_status_t result = nemo_add_neuron(nemoNet, 1, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7);
+//	if(result != NEMO_OK)
+//		throw SpikeStreamException("Error code returned from Nemo when adding neuron." + QString(nemo_strerror()));
+//
+//	result = nemo_add_neuron(nemoNet, 2, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7);
+//	if(result != NEMO_OK)
+//		throw SpikeStreamException("Error code returned from Nemo when adding neuron." + QString(nemo_strerror()));
+//
+//	result = nemo_add_neuron(nemoNet, 3, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7);
+//	if(result != NEMO_OK)
+//		throw SpikeStreamException("Error code returned from Nemo when adding neuron." + QString(nemo_strerror()));
+//
+//	result = nemo_add_neuron(nemoNet, 4, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7);
+//	if(result != NEMO_OK)
+//		throw SpikeStreamException("Error code returned from Nemo when adding neuron." + QString(nemo_strerror()));
+//	//END TEST CODE
+//
+
+
 
 	//Load the network into the simulator
 //	nemoSimulation = nemo_new_simulation(nemoNet, nemoConfig);
 //	if(nemoSimulation == NULL) {
-//		throw SpikeStreamSimulationException("Failed to create Nemo simulation.");
+//		throw SpikeStreamSimulationException(QString("Failed to create Nemo simulation: ") + nemo_strerror());
 //	}
 
 	if(!stopThread)
@@ -360,7 +421,7 @@ void NemoWrapper::runSimulation(){
 //			stopThread = true;
 //			stepMode = false;
 //		}
-		//Sleep until the next time step
+//		//Sleep until the next time step
 //		else {
 			//Lock mutex so that update time interval cannot change during this calculation
 			mutex.lock();
@@ -393,13 +454,13 @@ void NemoWrapper::setError(const QString& errorMessage){
 
 
 //TEST METHOD TO REPLACE NEMO
-void NemoWrapper::getRandomFiringNeurons(QList<unsigned int> &neurIDList, unsigned  percent){
-	unsigned numNeur = (unsigned)rint((percent / 100.0) * networkSize);
-	neurIDList.clear();
-	for(unsigned i=0; i<numNeur; ++i){
-		neurIDList.append(startNeuronID + rand() % networkSize);
-	}
-}
+//void NemoWrapper::getRandomFiringNeurons(QList<unsigned int> &neurIDList, unsigned  percent){
+//	unsigned numNeur = (unsigned)rint((percent / 100.0) * networkSize);
+//	neurIDList.clear();
+//	for(unsigned i=0; i<numNeur; ++i){
+//		neurIDList.append(startNeuronID + rand() % networkSize);
+//	}
+//}
 
 
 

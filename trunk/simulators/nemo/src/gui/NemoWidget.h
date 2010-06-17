@@ -112,7 +112,7 @@ namespace spikestream {
 			RGBColor* neuronColor;
 
 			//=======================  METHODS  =========================
-			void checkForErrors();
+			bool checkForErrors();
 			void checkWidgetEnabled();
 			QToolBar* getToolBar();
 	};

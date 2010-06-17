@@ -129,12 +129,13 @@ namespace spikestream {
 			/*! Mutex controlling access to variables */
 			QMutex mutex;
 
+			QList<unsigned int> firingNeuronList;
 
 			//TEMPORARY FOR TESTING
-			QList<unsigned int> firingNeuronList;
-			unsigned int startNeuronID;
-			unsigned int networkSize;
-			void getRandomFiringNeurons(QList<unsigned>& neurIDList, unsigned percent);
+//			QList<unsigned int> firingNeuronList;
+//			unsigned int startNeuronID;
+//			unsigned int networkSize;
+//			void getRandomFiringNeurons(QList<unsigned>& neurIDList, unsigned percent);
 
 			//======================  METHODS  ========================
 			void buildParameters();
