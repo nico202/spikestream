@@ -4,6 +4,7 @@
 #include "NRMTrainingLoader.h"
 #include "NRMConfigLoader.h"
 #include "NRMException.h"
+using namespace spikestream;
 
 //Other includes
 #include <iostream>

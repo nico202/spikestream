@@ -7,6 +7,10 @@
 #include "SpikeStreamException.h"
 using namespace spikestream;
 
+//Define the neuron and synapse types we are using
+#define NEURON_TYPE_ID 3
+#define SYNAPSE_TYPE_ID 2
+
 
 /*! Constructor */
 AleksanderNetworksBuilder::AleksanderNetworksBuilder(){
@@ -39,7 +43,7 @@ void AleksanderNetworksBuilder::add4NeuronNetwork1(const QString& networkName, c
 
 	//Build the connection group that is to be added
 	QHash<QString, double> paramMap;
-	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neuronGroup->getID(), neuronGroup->getID(),  paramMap, 2);
+	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neuronGroup->getID(), neuronGroup->getID(),  paramMap, SYNAPSE_TYPE_ID);
 	ConnectionGroup connGrp(connGrpInfo);
 
 	//Add connections
@@ -75,7 +79,7 @@ void AleksanderNetworksBuilder::add4NeuronNetwork2_AND(const QString& networkNam
 
 	//Build the connection group that is to be added
 	QHash<QString, double> paramMap;
-	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neuronGroup->getID(), neuronGroup->getID(),  paramMap, 2);
+	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neuronGroup->getID(), neuronGroup->getID(),  paramMap, SYNAPSE_TYPE_ID);
 	ConnectionGroup connGrp(connGrpInfo);
 
 	//Add connections
@@ -117,7 +121,7 @@ void AleksanderNetworksBuilder::add4NeuronNetwork2_XOR(const QString& networkNam
 
 	//Build the connection group that is to be added
 	QHash<QString, double> paramMap;
-	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neuronGroup->getID(), neuronGroup->getID(),  paramMap, 2);
+	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neuronGroup->getID(), neuronGroup->getID(),  paramMap, SYNAPSE_TYPE_ID);
 	ConnectionGroup connGrp(connGrpInfo);
 
 	//Add connections
@@ -159,7 +163,7 @@ void AleksanderNetworksBuilder::add4NeuronNetwork3_AND(const QString& networkNam
 
 	//Build the connection group that is to be added
 	QHash<QString, double> paramMap;
-	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neuronGroup->getID(), neuronGroup->getID(),  paramMap, 2);
+	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neuronGroup->getID(), neuronGroup->getID(),  paramMap, SYNAPSE_TYPE_ID);
 	ConnectionGroup connGrp(connGrpInfo);
 
 	//Add connections
@@ -205,7 +209,7 @@ void AleksanderNetworksBuilder::add4NeuronNetwork3_XOR(const QString& networkNam
 
 	//Build the connection group that is to be added
 	QHash<QString, double> paramMap;
-	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neuronGroup->getID(), neuronGroup->getID(),  paramMap, 2);
+	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neuronGroup->getID(), neuronGroup->getID(),  paramMap, SYNAPSE_TYPE_ID);
 	ConnectionGroup connGrp(connGrpInfo);
 
 	//Add connections
@@ -252,7 +256,7 @@ void AleksanderNetworksBuilder::add4NeuronNetwork4_AND(const QString& networkNam
 
 	//Build the connection group that is to be added
 	QHash<QString, double> paramMap;
-	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neuronGroup->getID(), neuronGroup->getID(),  paramMap, 2);
+	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neuronGroup->getID(), neuronGroup->getID(),  paramMap, SYNAPSE_TYPE_ID);
 	ConnectionGroup connGrp(connGrpInfo);
 
 	//Add connections
@@ -304,7 +308,7 @@ void AleksanderNetworksBuilder::add4NeuronNetwork4_XOR(const QString& networkNam
 
 	//Build the connection group that is to be added
 	QHash<QString, double> paramMap;
-	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neuronGroup->getID(), neuronGroup->getID(),  paramMap, 2);
+	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neuronGroup->getID(), neuronGroup->getID(),  paramMap, SYNAPSE_TYPE_ID);
 	ConnectionGroup connGrp(connGrpInfo);
 
 	//Add connections
@@ -356,7 +360,7 @@ void AleksanderNetworksBuilder::add4NeuronNetwork5_AND(const QString& networkNam
 
 	//Build the connection group that is to be added
 	QHash<QString, double> paramMap;
-	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neuronGroup->getID(), neuronGroup->getID(),  paramMap, 2);
+	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neuronGroup->getID(), neuronGroup->getID(),  paramMap, SYNAPSE_TYPE_ID);
 	ConnectionGroup connGrp(connGrpInfo);
 
 	//Add connections. Each neuron has three connections to it
@@ -435,7 +439,7 @@ void AleksanderNetworksBuilder::add4NeuronNetwork5_XOR(const QString& networkNam
 
 	//Build the connection group that is to be added
 	QHash<QString, double> paramMap;
-	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neuronGroup->getID(), neuronGroup->getID(),  paramMap, 2);
+	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neuronGroup->getID(), neuronGroup->getID(),  paramMap, SYNAPSE_TYPE_ID);
 	ConnectionGroup connGrp(connGrpInfo);
 
 	//Add connections. Each neuron has three connections to it
@@ -537,7 +541,7 @@ void AleksanderNetworksBuilder::add4NeuronBasicNetwork(const QString& networkNam
 
 	//Build neuron group - store neurons in map
 	QHash<QString, double> paramMap;
-	neuronGroup = new NeuronGroup(NeuronGroupInfo(0, "Neuron group 1", "Main neuron group", paramMap, 2));
+	neuronGroup = new NeuronGroup(NeuronGroupInfo(0, "Neuron group 1", "Main neuron group", paramMap, NEURON_TYPE_ID));
 	neuronMap[1] = neuronGroup->addNeuron(1, 2, 1);//A
 	neuronMap[2] = neuronGroup->addNeuron(1, 1, 1);//B
 	neuronMap[3] = neuronGroup->addNeuron(2, 2, 1);//C

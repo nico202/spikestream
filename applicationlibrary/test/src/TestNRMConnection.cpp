@@ -3,6 +3,7 @@
 #include "NRMConfigLoader.h"
 #include "NRMException.h"
 #include "NRMConnection.h"
+using namespace spikestream;
 
 //Qt includes
 #include <QList>

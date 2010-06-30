@@ -51,6 +51,8 @@ namespace spikestream {
 			QProgressDialog* progressDialog;
 
 			//=======================  METHODS  =======================
+			void initializeApplication();
+
 			/*! Declare copy constructor private so it cannot be used inadvertently. */
 			SpikeStreamMainWindow (const SpikeStreamMainWindow&);
 

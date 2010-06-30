@@ -5,6 +5,7 @@
 #include "NRMNetwork.h"
 #include "NRMInputLayer.h"
 #include "NRMNeuralLayer.h"
+using namespace spikestream;
 
 //Test includes
 #include "TestNRMConfigLoader.h"
