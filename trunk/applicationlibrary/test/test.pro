@@ -1,3 +1,5 @@
+# Test functions for the SpikeStream Application library
+
 SPIKESTREAM_ROOT_DIR = ../..
 
 TARGET = testspikestreamapplication
@@ -10,10 +12,8 @@ OBJECTS_DIR = build/objects
 
 MOC_DIR = build/moc
 
-INCLUDEPATH += .src \
-				../src \
-				../src/exceptions \
-				../src/nrm
+INCLUDEPATH += ../include
+
 unix {
 	LIBS += -lspikestreamapplication -L$${SPIKESTREAM_ROOT_DIR}/lib
 }
@@ -21,7 +21,7 @@ win32 {
 	LIBS += -lspikestreamapplication0 -L$${SPIKESTREAM_ROOT_DIR}/lib
 }
 
-CONFIG += debug console qtestlib
+CONFIG += release console qtestlib
 
 #----------------------------------------------#
 #---            Test Files                  ---#

@@ -1,6 +1,7 @@
 //SpikeStream includes
 #include "NRMRandom.h"
 #include "TestNRMRandom.h"
+using namespace spikestream;
 
 //Other includes
 #include <iostream>

@@ -9,7 +9,7 @@ SUBDIRS += analysis/statebasedphi analysis/liveliness
 
 
 #================  NETWORKS PLUGINS  =================
-#SUBDIRS += networks/tononinetworks networks/aleksandernetworks networks/alekgameznets2
+SUBDIRS += networks/tononinetworks networks/aleksandernetworks networks/alekgameznets2
 
 
 #================  NEURON GROUP PLUGINS  =================
@@ -29,7 +29,6 @@ SUBDIRS += installation/dbconfigtool
 
 
 #=================  TESTS  ===================
-#SUBDIRS += testlibrary library/test
-#applicationlibrary/test analysis/statebasedphi/test analysis/liveliness/test
+SUBDIRS += testlibrary library/test applicationlibrary/test analysis/statebasedphi/test analysis/liveliness/test
 
 

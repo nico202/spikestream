@@ -55,6 +55,7 @@ int main( int argc, char ** argv ) {
 		return spikeStrApp.exec();
 	}
 	catch(...){
+		qCritical()<<"SpikeStream has thrown an unknown exception and will now exit.";
 		return EXIT_FAILURE;
 	}
 }

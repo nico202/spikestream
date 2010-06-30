@@ -134,6 +134,9 @@ void NemoWidget::archiveStateChanged(int state){
 
 /*! Instructs the Nemo wrapper to load the network from the database into Nemo */
 void NemoWidget::loadSimulation(){
+	qCritical()<<"The Nemo simulator is not fully implemented and does not work!\nA working release will be available in the 3rd quarter of 2010.";
+	return;
+
 	if(!Globals::networkLoaded()){
 		qCritical()<<"Cannot load simulation: no network loaded.";
 		return;

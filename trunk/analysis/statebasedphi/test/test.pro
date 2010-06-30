@@ -27,7 +27,7 @@ win32 {
 
 QT += xml opengl sql
 
-CONFIG += debug qtestlib console
+CONFIG += release qtestlib console
 
 #----------------------------------------------#
 #---            Test Files                  ---#
