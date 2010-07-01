@@ -12,7 +12,7 @@ OBJECTS_DIR = build/objects
 
 MOC_DIR = build/moc
 
-CONFIG += dll release thread exceptions
+CONFIG += dll debug thread exceptions
 
 QT += xml opengl sql
 

@@ -49,7 +49,7 @@ win32 {
 }
 
 
-CONFIG += release thread exceptions
+CONFIG += debug thread exceptions
 
 QT += xml opengl sql
 
