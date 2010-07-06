@@ -1,0 +1,13 @@
+*.o
+*.so*
+*.user
+.directory
+Makefile*
+moc_*
+spikestream.config
+*.dll
+*.pro.user
+*.Release
+*.Debug
+*.exe
+*resource.rc

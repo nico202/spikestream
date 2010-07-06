@@ -82,22 +82,22 @@ void TestUtil::testRDouble(){
 
 
 void TestUtil::testRandom(){
-    Util::seedRandom();
+	Util::seedRandom(0);
 
     for(int i=0; i< 10; ++i){
 	int ranNum = Util::getRandom(-50, 50);
-	QVERIFY(ranNum <= 50 && ranNum >= -50);
+		QVERIFY(ranNum <= 50 && ranNum >= -50);
     }
 
     for(int i=0; i<10; ++i){
 	int ranNum = Util::getRandom(0, 10000);
-	QVERIFY(ranNum <= 10000 && ranNum >= 0);
+		QVERIFY(ranNum <= 10000 && ranNum >= 0);
     }
 
     Util::seedRandom(100);
-    QCOMPARE(Util::getRandom(25, 250), (int)168);
-    QCOMPARE(Util::getRandom(25, 250), (int)92);
-    QCOMPARE(Util::getRandom(25, 250), (int)142);
-    QCOMPARE(Util::getRandom(25, 250), (int)115);
-    QCOMPARE(Util::getRandom(25, 250), (int)226);
+	QCOMPARE(Util::getRandom(25, 250), (int)165);
+	QCOMPARE(Util::getRandom(25, 250), (int)116);
+	QCOMPARE(Util::getRandom(25, 250), (int)40);
+	QCOMPARE(Util::getRandom(25, 250), (int)79);
+	QCOMPARE(Util::getRandom(25, 250), (int)229);
 }

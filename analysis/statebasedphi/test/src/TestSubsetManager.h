@@ -14,14 +14,14 @@ class TestSubsetManager : public QObject {
     Q_OBJECT
 
     private slots:
-	void testBuildSubsetList();
-	void testIdentifyComplexes();
-	void testSubsetConnected();
+		void testBuildSubsetList();
+		void testIdentifyComplexes();
+		void testSubsetConnected();
 
-    private:
-	bool complexExists(QList<Complex>& complexList, const QString neurIDStr, double phi);
-	AnalysisInfo getAnalysisInfo();
-	bool subsetContains(QList<Subset*>& subsetList, const QString neuronIDs);
+	private:
+		bool complexExists(QList<Complex>& complexList, const QString neurIDStr, double phi);
+		AnalysisInfo getAnalysisInfo();
+		bool subsetContains(QList<Subset*>& subsetList, const QString neuronIDs);
 };
 
 

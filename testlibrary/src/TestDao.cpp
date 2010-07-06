@@ -115,6 +115,7 @@ void TestDao::cleanTestDatabases(){
 /*! Closes all the open databases.
     FIXME: THIS CURRENTLY GENERATES A WARNING ABOUT OPEN QUERIES */
 void TestDao::closeDatabases(){
+	//Remove static database references
     QSqlDatabase::removeDatabase(dbRefName);
     QSqlDatabase::removeDatabase(archiveDBRefName);
     QSqlDatabase::removeDatabase(analysisDBRefName);

@@ -13,8 +13,9 @@ class TestNRMConfigLoader : public QObject {
 		void testLoadConnectionParameters();
 		void testLoadInputs();
 		void testLoadNeuralLayers();
+
     private:
-	QString workingDirectory;
+		QString workingDirectory;
 };
 
 

@@ -79,6 +79,7 @@ void NRMConnection::createConnections(){
 		wRandCons = new short[conListSize];
 	}
 	catch (exception ex){
+		cout<<"conListSize="<<conListSize<<" curLayer->getSize():"<<curLayer->getSize()<<" conParams.numCons:"<<conParams.numCons<<endl;
 		throw NRMException("Memory cannot be allocated for connections array.");
 	}
 

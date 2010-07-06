@@ -36,6 +36,7 @@ SubsetManager::SubsetManager(){
 	networkDao = NULL;
 	archiveDao = NULL;
 	stateDao = NULL;
+	phiCalculator = NULL;
 
 	//Fix stop variable so that class is always running
 	bool* tmpStop = new bool;
@@ -51,8 +52,9 @@ SubsetManager::SubsetManager(){
 /*! Destructor */
 SubsetManager::~SubsetManager(){
 	deleteSubsets();
-	delete phiCalculator;
 
+	if(phiCalculator != NULL)
+		delete phiCalculator;
 	if(networkDao != NULL)
 		delete networkDao;
 	if(archiveDao != NULL)

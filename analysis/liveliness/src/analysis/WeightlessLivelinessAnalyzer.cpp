@@ -28,6 +28,9 @@ WeightlessLivelinessAnalyzer::WeightlessLivelinessAnalyzer(){
 	archiveDao = NULL;
 	livelinessDao = NULL;
 
+	//Set default values of parameters
+	analysisInfo.setParameter("minimum_cluster_liveliness", 0.0);
+
 	//Fix stop variable so that class is always running
 	bool* tmpStop = new bool;
 	*tmpStop = false;

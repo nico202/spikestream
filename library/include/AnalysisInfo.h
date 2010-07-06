@@ -33,6 +33,7 @@ namespace spikestream {
 			void setAnalysisType(unsigned int typeID) { this->analysisType = typeID; }
 			void setArchiveID(unsigned int archiveID) { this->archiveID = archiveID; }
 			void setNetworkID(unsigned int networkID) { this->networkID = networkID; }
+			void setParameter(const QString& paramKey, double paramValue);
 
 
 		private:
