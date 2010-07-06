@@ -95,3 +95,10 @@ void AnalysisInfo::reset(){
 	this->parameterMap.clear();
 	this->numberOfThreads = DEFAULT_NUMBER_OF_THREADS;
 }
+
+
+/*! Sets a parameter value */
+void AnalysisInfo::setParameter(const QString& paramKey, double paramValue){
+	parameterMap[paramKey] = paramValue;
+}
+

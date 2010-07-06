@@ -14,6 +14,12 @@ using namespace std;
 
 /*! Runs all of the tests */
 void TestRunner::runTests(){
+
+	//Create core application object so that drivers load in Windows
+	int argsSize = 0;
+	char* argsChar[0];
+	QCoreApplication coreApplication(argsSize, argsChar);
+
 	TestNRMConfigLoader testNRMConfigLoader;
 	QTest::qExec(&testNRMConfigLoader);
 

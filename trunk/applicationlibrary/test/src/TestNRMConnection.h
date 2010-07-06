@@ -7,7 +7,11 @@ class TestNRMConnection : public QObject {
 	Q_OBJECT
 
 	private slots:
+		void init();
 		void testCreateConnections();
+
+	private:
+		QString workingDirectory;
 
 };
 

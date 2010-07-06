@@ -1,16 +1,4 @@
-SpikeStream 0.2 - Installation 
+Installation information can be found in the SpikeStream manual, which is in the doc folder of the distribution.
 
-The prerequisites for SpikeStream 0.2 are largely the same as for SpikeStream 0.1 and the manual should be consulted for more information about setting up the databases, setting SPIKESTREAM_ROOT and the required libraries. The two main differences are that all of the build process is automated using qmake and SpikeStream 0.2 is built against Qt4.
-
-Before building SpikeStream take a look through all of the .pro files to make sure that the locations of the third party libraries are correct (sorry, not automatic way of doing this at present). 
-
-To build SpikeStream 0.2 use the following commands
-
-cd $SPIKESTREAM_ROOT
-qmake spikestream.pro
-make
-
-To run SpikeStream you need to set the environment variable LD_LIBRARY_PATH to point to $SPIKESTREAM_ROOT/lib. To run simulations spikestreamarchiver and spikestreamsimulator need to be in the PVM bin directory and in my installation I created symbolic links pointing to $SPIKESTREAM_ROOT/bin.
-
-Support with the installation process is available at: http://spikestream.sourceforge.net/pages/support.html
+The manual can also be downloaded from http://spikestream.sf.net.
 

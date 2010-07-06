@@ -61,19 +61,19 @@ void NRMConfigLoader::loadConfig(const char* filePath){
 
 	/* Window configuration information.
 		Leave the read statements to keep place in file, ignore the rest */
-	fread(&val, 2, 1, file);
+	fReadFile(&val, 2, 1, file);
 	if ( val ) {
 		//TRect recx;
 		//((MDIChildren*) childBase)->FrameRect(recx);
 		//int x = recx.Left() + 2;
 		//int y = recx.Top() + 2;
-		fread(&val, 2, 1, file);
+		fReadFile(&val, 2, 1, file);
 		//int left = val - x;
-		fread(&val, 2, 1, file);
+		fReadFile(&val, 2, 1, file);
 		//int top = val - y;
-		fread(&val, 2, 1, file);
+		fReadFile(&val, 2, 1, file);
 		//int right = val - x;
-		fread(&val, 2, 1, file);
+		fReadFile(&val, 2, 1, file);
 		//int bottom = val - y;
 		//TRect rect(left,top,right,bottom);
 		//((MDIChildren*) childBase)->CmNewInputTextViewer();
@@ -89,53 +89,53 @@ void NRMConfigLoader::loadConfig(const char* filePath){
 	/* Loading black and white and colour information
 		- don't think this is needed by me */
 	//bwAscii* bw = new bwAscii;
-	fread(&val2, 4, 1, file);
+	fReadFile(&val2, 4, 1, file);
 	//wsprintf(bw->width, "%d", val2);
-	fread(&val2, 4, 1, file);
+	fReadFile(&val2, 4, 1, file);
 	//wsprintf(bw->height, "%d", val2);
-	fread(&val2, 4, 1, file);
+	fReadFile(&val2, 4, 1, file);
 	//wsprintf(bw->black, "%d", val2);
-	fread(&val2, 4, 1, file);
+	fReadFile(&val2, 4, 1, file);
 	//wsprintf(bw->white, "%d", val2);
-	fread(&val2, 4, 1, file);
+	fReadFile(&val2, 4, 1, file);
 	//wsprintf(bw->start, "%d", val2);
-	fread(&val2, 4, 1, file);
+	fReadFile(&val2, 4, 1, file);
 	//wsprintf(bw->num, "%d", val2);
 
 	//((MDIChildren*) base)->SetbwASCII(bw);
 	//delete bw;
 
 	//colAscii* col = new colAscii;
-	fread(&val2, 4, 1, file);
+	fReadFile(&val2, 4, 1, file);
 	//wsprintf(col->width, "%d", val2);
-	fread(&val2, 4, 1, file);
+	fReadFile(&val2, 4, 1, file);
 	//wsprintf(col->height, "%d", val2);
-	fread(&val2, 4, 1, file);
+	fReadFile(&val2, 4, 1, file);
 	//wsprintf(col->black, "%d", val2);
-	fread(&val2, 4, 1, file);
+	fReadFile(&val2, 4, 1, file);
 	//wsprintf(col->red, "%d", val2);
-	fread(&val2, 4, 1, file);
+	fReadFile(&val2, 4, 1, file);
 	//wsprintf(col->green, "%d", val2);
-	fread(&val2, 4, 1, file);
+	fReadFile(&val2, 4, 1, file);
 	//wsprintf(col->yellow, "%d", val2);
-	fread(&val2, 4, 1, file);
+	fReadFile(&val2, 4, 1, file);
 	//wsprintf(col->blue, "%d", val2);
-	fread(&val2, 4, 1, file);
+	fReadFile(&val2, 4, 1, file);
 	//wsprintf(col->magenta, "%d", val2);
-	fread(&val2, 4, 1, file);
+	fReadFile(&val2, 4, 1, file);
 	//wsprintf(col->cyan, "%d", val2);
-	fread(&val2, 4, 1, file);
+	fReadFile(&val2, 4, 1, file);
 	//wsprintf(col->white, "%d", val2);
-	fread(&val2, 4, 1, file);
+	fReadFile(&val2, 4, 1, file);
 	//wsprintf(col->start, "%d", val2);
-	fread(&val2, 4, 1, file);
+	fReadFile(&val2, 4, 1, file);
 	//wsprintf(col->num, "%d", val2);
 
 	//((MDIChildren*) base)->SetcolASCII(col);
 	//delete col;
 
 	//Read the recall delay
-	fread(&val, 2, 1, file);
+	fReadFile(&val, 2, 1, file);
 	//((MDIChildren*) base)->SetRecallDelay(val);
 
 	//Load up information about the connections
@@ -228,6 +228,7 @@ NRMNetwork* NRMConfigLoader::getNetwork(){
 
 /*! Resets and cleans up the data structures associated with this class */
 void NRMConfigLoader::reset(){
+	fileByteCount = 0;
 	if(network != NULL){
 		delete network;
 		network = NULL;
@@ -239,13 +240,38 @@ void NRMConfigLoader::reset(){
 /*-----                PRIVATE METHODS                 -----*/
 /*----------------------------------------------------------*/
 
+/*! Wrapper for fread that does error checking and throws an exception if an unexpected number of bytes is read */
+void NRMConfigLoader::fReadFile(void* dataStruct, size_t sizeOfElement, size_t numElements, FILE* file ){
+	size_t result = fread(dataStruct, sizeOfElement, numElements, file);
+	if(result != numElements){
+		cout<<"Actual number of elements read="<<result<<"; expected number of elements = "<<numElements<<endl;
+		if( feof(file) ){
+			ostringstream errMsg;
+			errMsg<<"Unexpected end of file. Tried to read "<<sizeOfElement * numElements<<" elements. ";
+			errMsg<<"Read "<<result<<" elements. ";
+			errMsg<<"ByteCount="<<fileByteCount;
+			throw NRMException (errMsg.str());
+		}
+		else if( ferror(file) ){
+			throw NRMException ("ferror encountered reading from file", fileByteCount);
+		}
+		else{
+			throw NRMException ("Unknown error encountered when reading from file. ByteCount=", fileByteCount);
+		}
+	}
+	else{
+		fileByteCount += (sizeOfElement * numElements);
+	}
+}
+
+
 /*! Identifies the config number of the file */
 void NRMConfigLoader::loadConfigVersion(FILE* file){
 	//Variables used for loading
 	char buf[10];
 
 	//Read the version of NRM used to create the file
-	fread(buf, 9, 1, file);
+	fReadFile(buf, 9, 1, file);
 	buf[9] = '\0';
 	if ( !strcmp(buf, "macconC26") )
 		network->setConfigVersion(26);
@@ -324,29 +350,29 @@ void NRMConfigLoader::loadInputs(FILE* file){
 	bool newFrame;
 	unsigned char bVal, b2Val;
 
-	fread(&numInputWins, 2, 1, file);
+	fReadFile(&numInputWins, 2, 1, file);
 	for (int n = 0; n < numInputWins; n++) {
 		tmpId = n;//ID of the input layer
 
 		NRMInputLayer* inputLayer = new NRMInputLayer();
 
 		//Identify the type of input layer
-		fread(&val, 2, 1, file);
+		fReadFile(&val, 2, 1, file);
 		inputLayer->winType = val;
 
 		//Read information about input layer differently depending on the type.
 		switch ( val ) {
 			case FRAME_WIN: case _FRAME_WIN://Single or double frame within an image
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				inputLayer->width = val;
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				inputLayer->height = val;
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				inputLayer->colPlanes = val;
 				if ( inputLayer->winType == _FRAME_WIN ) {//Double input frame
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					inputLayer->width2 = val;
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					inputLayer->height2 = val;
 				}
 				//rec.Set(0, 0, width + 2, height + 2);
@@ -357,34 +383,34 @@ void NRMConfigLoader::loadInputs(FILE* file){
 				else  {
 					;//((MDIChildren*) base)->CmNewDualFrameInput();
 				}
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				inputLayer->x = val - 2;
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				inputLayer->y = val - 2;
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				inputLayer->r = val - 2;
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				inputLayer->b = val - 2;
 				//rec.Set(x, y, r, b);
 				//SetWindowRect(n, rec);
 
 				//Large number of config specific conditionals
 				if ( network->getConfigVersion() > 2 ) {
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					//SetInputMagControl(n, val);
 				}
 				if ( network->getConfigVersion() == 11 ) {
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					//SetFrameBrightConv(n, val, false);
 				}
 				if ( network->getConfigVersion() > 11 ) {
-					fread(&val, 2, 1, file);
-					fread(&uval, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
+					fReadFile(&uval, 2, 1, file);
 				   //SetFrameBrightConv(n, val, uval);
 				}
 				if ( network->getConfigVersion() > 12 ) {
-					fread(&bVal, 1, 1, file);
-					fread(&b2Val, 1, 1, file);
+					fReadFile(&bVal, 1, 1, file);
+					fReadFile(&b2Val, 1, 1, file);
 					//SetFrameColMasks(n, bVal, b2Val);
 					if ( winType == FRAME_WIN ){
 						;//RandomizeFramedInput(n);
@@ -392,10 +418,10 @@ void NRMConfigLoader::loadInputs(FILE* file){
 				}
 				//Read in name of framed image
 				if ( network->getConfigVersion() > 16 ) {
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					tmpName = new char [val + 1];
 					for (int i = 0; i < val; i++ ) {
-						fread(&bVal, 1, 1, file);
+						fReadFile(&bVal, 1, 1, file);
 						tmpName[i] = bVal;
 					}
 					tmpName[val] = '\0';
@@ -405,11 +431,11 @@ void NRMConfigLoader::loadInputs(FILE* file){
 					delete [] tmpName;
 				}
 				if ( network->getConfigVersion() > 4 ) {
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					if ( val ) {
 						tmpName = new char [val + 1];
 						for (int i = 0; i < val; i++ ) {
-							fread(&bVal, 1, 1, file);
+							fReadFile(&bVal, 1, 1, file);
 							tmpName[i] = bVal;
 						}
 						tmpName[val] = '\0';
@@ -419,7 +445,7 @@ void NRMConfigLoader::loadInputs(FILE* file){
 					}
 				}
 				if ( network->getConfigVersion() > 9 ) {
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					if ( val ) {
 						fclose(file);
 						//((MDIChildren*) base)->DestConfig();
@@ -429,26 +455,26 @@ void NRMConfigLoader::loadInputs(FILE* file){
 				}
 				if ( network->getConfigVersion() > 14 ) {
 					//int posWin, width, height;
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					//posWin = val;
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					//width = val;
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					//height = val;
 					//SetFramePosParams(n, posWin, width, height);
 				}
 				if ( network->getConfigVersion() > 18 ) {
 					//int noDisp; int colThresh; bool invHor; bool invVer; int segBorder;
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					inputLayer->noDisp = val;
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					inputLayer->colThresh = val;
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					inputLayer->invHor = val;
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					inputLayer->invVer = val;
 					if ( network->getConfigVersion() > 23 ) {
-						fread(&val, 2, 1, file);
+						fReadFile(&val, 2, 1, file);
 						inputLayer->segBorder = val;
 					}
 					if ( inputLayer->noDisp )
@@ -461,33 +487,33 @@ void NRMConfigLoader::loadInputs(FILE* file){
 				}
 			break;
 			case MULTI_WIN: //Input held within an input panel
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				inputLayer->width = val;
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				inputLayer->height = val;
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				inputLayer->colPlanes = val;
 
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				inputLayer->x = val;
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				inputLayer->y = val;
 				//rec.SetWH(0, 0, x, y);
 
 				//SetCopyAtt(width, height, colPlanes, rec, 0);
 
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				if ( val == FRAME_REQ ) {
 					//((MDIChildren*) base)->CmNewMultipleInputs();
-					fread(&frameNum, 2, 1, file);
-					fread(&val, 2, 1, file);
+					fReadFile(&frameNum, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					inputLayer->x = val - 2;
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					inputLayer->y = val - 2;
 					//SetInputFrameRect(frameNum, x, y);
 				}
 				else{
-					fread(&frameNum, 2, 1, file);
+					fReadFile(&frameNum, 2, 1, file);
 					//NewMultipleInputs(frameNum);
 				}
 
@@ -504,13 +530,13 @@ void NRMConfigLoader::loadInputs(FILE* file){
 				//Config number specific conditionals
 				//Read in the name of the frame the input is in
 				if ( newFrame && network->getConfigVersion() > 16 ) {//Starting to load new frame
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					//SetInputFrameDir(frameNum, val);
 
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					tmpName = new char [val + 1];
 					for (int i = 0; i < val; i++ ) {
-						fread(&bVal, 1, 1, file);
+						fReadFile(&bVal, 1, 1, file);
 						tmpName[i] = bVal;
 					}
 					tmpName[val] = '\0';
@@ -527,17 +553,17 @@ void NRMConfigLoader::loadInputs(FILE* file){
 				}
 
 				if ( network->getConfigVersion() == 11 ) {
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					//SetInputBrightConv(n, val);
 				}
 				if ( network->getConfigVersion() > 11 ) {
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					//SetInputBrightConv(n, val);
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					//SetInputGrey(n, val);
 				}
 				if ( network->getConfigVersion() > 12 ) {
-					fread(&bVal, 1, 1, file);
+					fReadFile(&bVal, 1, 1, file);
 					//SetFixedColMask(n, bVal);
 					if ( bVal != 255 ){
 						;//RandomizeInput(n);
@@ -570,7 +596,7 @@ void NRMConfigLoader::loadNeuralLayers(FILE* file){
 	char* tmpName;
 
 	//Read the number of neural windows
-	fread(&numNeuralWins, 2, 1, file);
+	fReadFile(&numNeuralWins, 2, 1, file);
 	if ( numNeuralWins > 3 && getOpVer() < 2 ) {
 		fclose(file);
 		//((MDIChildren*) base)->DestConfig();
@@ -584,29 +610,29 @@ void NRMConfigLoader::loadNeuralLayers(FILE* file){
 		//Create neural layer to be populated with the loaded information
 		NRMNeuralLayer* neuralLayer = new NRMNeuralLayer();
 
-		fread(&val, 2, 1, file);
+		fReadFile(&val, 2, 1, file);
 		switch ( val ) {
 			case MAGNUS_WIN:
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				neuralLayer->width = val;
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				neuralLayer->height = val;
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				neuralLayer->colPlanes = val;
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				neuralLayer->x = val;
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				neuralLayer->y = val;
 				//rec.SetWH(0, 0, x, y);
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				neuralLayer->inTrack = val;
 
 				//SetCopyAtt(width, height, colPlanes, rec, inTrack);
 
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				neuralLayer->neuralType = val;
 
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				if ( val == FRAME_REQ ) {
 					if ( neuralLayer->neuralType == MAGNUS_WIN_PREV ){
 						;//((MDIChildren*) base)->CmNewMAGNUSFrame();
@@ -614,16 +640,16 @@ void NRMConfigLoader::loadNeuralLayers(FILE* file){
 					else{
 						;//((MDIChildren*) base)->CmNewMAGNUSFrameNP();
 					}
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					neuralLayer->frameNum = val;
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					neuralLayer->x = val - 2;
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					neuralLayer->y = val - 2;
 					//SetNeuralFrameRect(frameNum, x, y);
 				}
 				else{
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					neuralLayer->frameNum = val;
 					if ( neuralLayer->neuralType == MAGNUS_WIN_PREV ){
 						;//NewMAGNUS(frameNum, true);
@@ -642,13 +668,13 @@ void NRMConfigLoader::loadNeuralLayers(FILE* file){
 
 
 				if ( newFrame && network->getConfigVersion() > 16 ) {
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					//SetNeuralFrameDir(frameNum, val);
 
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					tmpName = new char [val + 1];
 					for (int i = 0; i < val; i++ ) {
-						fread(&bVal, 1, 1, file);
+						fReadFile(&bVal, 1, 1, file);
 						tmpName[i] = bVal;
 					}
 					tmpName[val] = '\0';
@@ -660,39 +686,39 @@ void NRMConfigLoader::loadNeuralLayers(FILE* file){
 
 
 				//Load in assorted parameters of the neural layer.
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				neuralLayer->generalisation = val;//Store generalization parameter
 				//SetGeneralisation(n, val);
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				neuralLayer->spreading = val;//Store spreading parameter
 				//SetSpreading(n, val);
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				//SetGenBound(n, val);
 				neuralLayer->altParam1 = val;//Store alt parameter 1
 
 				//Configuration specific conditionals
 				if ( network->getConfigVersion() > 15 ) {
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					//SetGenBound2(n, val);
 					neuralLayer->altParam2 = val;//Store alt parameter 2
 				}
 				if ( network->getConfigVersion() > 2 ) {
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					//MacCon->SetControlledInput(n, val);
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					//MacCon->SetConvCycles(n, val);
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 				}
 				if ( network->getConfigVersion() > 11 ) {
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					//SetNeuralBrightConv(n, val);
-					fread(&val, 2, 1, file);
+					fReadFile(&val, 2, 1, file);
 					//SetNeuralGrey(n, val);
 				}
 				if ( network->getConfigVersion() > 12 ) {
 					unsigned char bPVal;
-					fread(&bVal, 1, 1, file);
-					fread(&bPVal, 1, 1, file);
+					fReadFile(&bVal, 1, 1, file);
+					fReadFile(&bPVal, 1, 1, file);
 					//SetNeuralColMasks(n, bVal, bPVal);
 				}
 			break;
@@ -718,7 +744,7 @@ void NRMConfigLoader::loadConnections(FILE* file){
 	int InCurMaxCons, NeuPrevCurMaxCons, NeuStateCurMaxCons, *HorizCurMaxCons;
 	int *CurMaxUpCons, CanvWidth, CanvHeight;
 
-	fread(&val, 2, 1, file);
+	fReadFile(&val, 2, 1, file);
 	if ( val ) {
 		//((MDIChildren*) base)->CmConnectionsChart();
 		int numNeuralLayers = network->getNeuralLayerCount();
@@ -738,57 +764,57 @@ void NRMConfigLoader::loadConnections(FILE* file){
 		}
 
 		//Read in connection variables
-		fread(&val, 2, 1, file);
+		fReadFile(&val, 2, 1, file);
 		DefConsWidth = val;
-		fread(&val, 2, 1, file);
+		fReadFile(&val, 2, 1, file);
 		InConsWidth = val;
-		fread(&val, 2, 1, file);
+		fReadFile(&val, 2, 1, file);
 		NeuPrevConsWidth = val;
-		fread(&val, 2, 1, file);
+		fReadFile(&val, 2, 1, file);
 		NeuStateConsWidth = val;
-		fread(&val, 2, 1, file);
+		fReadFile(&val, 2, 1, file);
 		InConnections = val;
-		fread(&val, 2, 1, file);
+		fReadFile(&val, 2, 1, file);
 		NeuInConnections = val;
-		fread(&val, 2, 1, file);
+		fReadFile(&val, 2, 1, file);
 		NeuPrevConnections = val;
-		fread(&val, 2, 1, file);
+		fReadFile(&val, 2, 1, file);
 		NeuStateConnections = val;
-		fread(&val, 2, 1, file);
+		fReadFile(&val, 2, 1, file);
 		NumConnectSchemes = val;
-		fread(&val, 2, 1, file);
+		fReadFile(&val, 2, 1, file);
 		CurMaxCons = val;
-		fread(&val, 2, 1, file);
+		fReadFile(&val, 2, 1, file);
 		InCurMaxCons = val;
-		fread(&val, 2, 1, file);
+		fReadFile(&val, 2, 1, file);
 		NeuPrevCurMaxCons = val;
-		fread(&val, 2, 1, file);
+		fReadFile(&val, 2, 1, file);
 		NeuStateCurMaxCons = val;
-		fread(&val, 2, 1, file);
+		fReadFile(&val, 2, 1, file);
 		CanvWidth = val;
-		fread(&val, 2, 1, file);
+		fReadFile(&val, 2, 1, file);
 		CanvHeight = val;
 
 		if ( numNeuralLayers >= numInputLayers )
 			for ( int i = 0; i < numNeuralLayers; i++) {
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				HorizConsWidth[i] = val;
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				ObHeight[i] = val;
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				HorizCurMaxCons[i] = val;
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				CurMaxUpCons[i] = val;
 			}
 		else {
 			for ( int i = 0; i < numInputLayers; i++) {
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				HorizConsWidth[i] = val;
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				ObHeight[i] = val;
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				HorizCurMaxCons[i] = val;
-				fread(&val, 2, 1, file);
+				fReadFile(&val, 2, 1, file);
 				CurMaxUpCons[i] = val;
 			}
 		}
@@ -819,47 +845,47 @@ void NRMConfigLoader::loadConnections(FILE* file){
 		delete [] CurMaxUpCons;
 
 		//cons* con;
-		fread(&numCons, 2, 1, file);
+		fReadFile(&numCons, 2, 1, file);
 		//cout<<"Number of connections "<<numCons<<endl;
 		for ( int n = 0; n < numCons; n++ ) {
 			NRMConnection* con = new NRMConnection(network);
-			fread(&uval, 2, 1, file);
+			fReadFile(&uval, 2, 1, file);
 			con->x1 = uval;
-			fread(&uval, 2, 1, file);
+			fReadFile(&uval, 2, 1, file);
 			con->y1 = uval;
-			fread(&uval, 2, 1, file);
+			fReadFile(&uval, 2, 1, file);
 			con->x2 = uval;
-			fread(&uval, 2, 1, file);
+			fReadFile(&uval, 2, 1, file);
 			con->y2 = uval;
-			fread(&uval, 2, 1, file);
+			fReadFile(&uval, 2, 1, file);
 			con->x3 = uval;
-			fread(&uval, 2, 1, file);
+			fReadFile(&uval, 2, 1, file);
 			con->y3 = uval;
-			fread(&uval, 2, 1, file);
+			fReadFile(&uval, 2, 1, file);
 			con->x4 = uval;
-			fread(&uval, 2, 1, file);
+			fReadFile(&uval, 2, 1, file);
 			con->y4 = uval;
-			fread(&uval, 2, 1, file);
+			fReadFile(&uval, 2, 1, file);
 			con->x5 = uval;
-			fread(&uval, 2, 1, file);
+			fReadFile(&uval, 2, 1, file);
 			con->y5 = uval;
-			fread(&uval, 2, 1, file);
+			fReadFile(&uval, 2, 1, file);
 			con->x6 = uval;
-			fread(&uval, 2, 1, file);
+			fReadFile(&uval, 2, 1, file);
 			con->y6 = uval;
-			fread(&uval, 2, 1, file);
+			fReadFile(&uval, 2, 1, file);
 			con->selected = uval;
-			fread(&uval, 2, 1, file);
+			fReadFile(&uval, 2, 1, file);
 			con->srcLayerId = uval;
-			fread(&uval, 2, 1, file);
+			fReadFile(&uval, 2, 1, file);
 			con->srcObjectType = uval;
-			fread(&uval, 2, 1, file);
+			fReadFile(&uval, 2, 1, file);
 			con->destLayerId = uval;
-			fread(&uval, 2, 1, file);
+			fReadFile(&uval, 2, 1, file);
 			con->destObject = uval;
-			fread(&uval, 2, 1, file);
+			fReadFile(&uval, 2, 1, file);
 			con->destObjectType = uval;
-			fread(&uval, 2, 1, file);
+			fReadFile(&uval, 2, 1, file);
 			con->connection = uval;
 
 			loadConnectionParameters(con->conParams, file);
@@ -874,7 +900,7 @@ void NRMConfigLoader::loadConnections(FILE* file){
 
 		short chartChildren;
 		//int Selected, Connections, LayerConnections, MoreNeuLayers;
-		fread(&chartChildren, 2, 1, file);
+		fReadFile(&chartChildren, 2, 1, file);
 
 	/*	for ( int n = 0; n < chartChildren; n++ ) {
 			fread(&uval, 2, 1, file);
@@ -909,25 +935,25 @@ void NRMConfigLoader::loadConnections(FILE* file){
 
 /*! Loads up the connection parameters from the specified file */
 void NRMConfigLoader::loadConnectionParameters(conType& conParams, FILE* file){
-	fread(&conParams.randomCon, 1, 1, file);
-	fread(&conParams.fullCon, 1, 1, file);
-	fread(&conParams.spatialAlignment, 1, 1, file);
-	fread(&conParams.HFlipped, 1, 1, file);
-	fread(&conParams.VFlipped, 1, 1, file);
-	fread(&conParams.globalMap, 1, 1, file);
-	fread(&conParams.iconicMap, 1, 1, file);
-	fread(&conParams.segmentedMap, 1, 1, file);
-	fread(&conParams.gazeMap, 1, 1, file);
-	fread(&conParams.tileMap, 1, 1, file);
-	fread(&conParams.colScheme, 4, 1, file);
-	fread(&conParams.numCons, 4, 1, file);
-	fread(&conParams.sWidth, 4, 1, file);
-	fread(&conParams.sHeight, 4, 1, file);
-	fread(&conParams.sLeft, 4, 1, file);
-	fread(&conParams.sTop, 4, 1, file);
-	fread(&conParams.rWidth, 4, 1, file);
-	fread(&conParams.rHeight, 4, 1, file);
-	fread(&conParams.segRev, 1, 1, file);
+	fReadFile(&conParams.randomCon, 1, 1, file);
+	fReadFile(&conParams.fullCon, 1, 1, file);
+	fReadFile(&conParams.spatialAlignment, 1, 1, file);
+	fReadFile(&conParams.HFlipped, 1, 1, file);
+	fReadFile(&conParams.VFlipped, 1, 1, file);
+	fReadFile(&conParams.globalMap, 1, 1, file);
+	fReadFile(&conParams.iconicMap, 1, 1, file);
+	fReadFile(&conParams.segmentedMap, 1, 1, file);
+	fReadFile(&conParams.gazeMap, 1, 1, file);
+	fReadFile(&conParams.tileMap, 1, 1, file);
+	fReadFile(&conParams.colScheme, 4, 1, file);
+	fReadFile(&conParams.numCons, 4, 1, file);
+	fReadFile(&conParams.sWidth, 4, 1, file);
+	fReadFile(&conParams.sHeight, 4, 1, file);
+	fReadFile(&conParams.sLeft, 4, 1, file);
+	fReadFile(&conParams.sTop, 4, 1, file);
+	fReadFile(&conParams.rWidth, 4, 1, file);
+	fReadFile(&conParams.rHeight, 4, 1, file);
+	fReadFile(&conParams.segRev, 1, 1, file);
 }
 
 

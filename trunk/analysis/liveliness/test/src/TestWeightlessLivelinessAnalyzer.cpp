@@ -269,7 +269,7 @@ void TestWeightlessLivelinessAnalyzer::testIdentifyClusters(){
 		//Run analysis and check results
 		daoDuck->reset();
 		weiLivAna.identifyClusters();
-		checkClusters(daoDuck->getClusterList(), "1,2;3,4;5", "0.25;0.25;0.0");
+		checkClusters(daoDuck->getClusterList(), "1,2;3,4", "0.25;0.25");
 
 		// Build lively connections 2->1, 2->3
 		fromConLivMap.clear();
@@ -291,7 +291,7 @@ void TestWeightlessLivelinessAnalyzer::testIdentifyClusters(){
 		//Run analysis and check results
 		daoDuck->reset();
 		weiLivAna.identifyClusters();
-		checkClusters(daoDuck->getClusterList(), "1,2,3;4;5", "0.444;0;0");
+		checkClusters(daoDuck->getClusterList(), "1,2,3", "0.444");
 
 	}
 	catch(SpikeStreamException& ex){

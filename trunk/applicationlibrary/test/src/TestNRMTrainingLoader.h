@@ -7,7 +7,11 @@ class TestNRMTrainingLoader : public QObject {
 	Q_OBJECT
 
 	private slots:
-            void testLoadTraining();
+		void init();
+		void testLoadTraining();
+
+	private:
+		QString workingDirectory;
 
 };
 

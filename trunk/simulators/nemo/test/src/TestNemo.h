@@ -9,7 +9,8 @@ class TestNemo : public QObject {
 	Q_OBJECT
 
 	private slots:
-		void testNemoDLL();
+		void testNemoDLL1();
+		void testNemoDLL2();
 
 };
 

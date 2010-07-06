@@ -17,6 +17,7 @@ using namespace std;
 void TestNRMConfigLoader::cleanup(){
 }
 
+
 void TestNRMConfigLoader::init(){
 	workingDirectory = QCoreApplication::applicationDirPath();
 	workingDirectory.truncate(workingDirectory.size() - 4);//Trim the "/bin" off the end
@@ -60,12 +61,12 @@ void TestNRMConfigLoader::testLoadInputs(){
 
 
 void TestNRMConfigLoader::testLoadNeuralLayers(){
-	const char* fileName = "../applicationlibrary/test/test_files/multiple_neural_test.cfg";
+	QString fileName = workingDirectory + "/applicationlibrary/test/test_files/multiple_neural_test.cfg";
 
 	//Load up the test configuration
 	NRMConfigLoader configLoader;
 	try{
-		configLoader.loadConfig(fileName);
+		configLoader.loadConfig(fileName.toStdString().data());
 	}
 	catch(NRMException& ex){
 		QFAIL(ex.getMessage());
@@ -96,15 +97,15 @@ void TestNRMConfigLoader::testLoadNeuralLayers(){
 
 /*! Checks that connection parameters are loaded correctly */
 void TestNRMConfigLoader::testLoadConnectionParameters(){
-	const char* fileName;
+	QString fileName;
 	NRMNeuralLayer* neuralLayer;
 	NRMConfigLoader configLoader;
 	NRMConnection* conn;
 
 	//Load up the test configuration
-	fileName = "../applicationlibrary/test/test_files/connection_parameters/randomdist_lincols_12conns.cfg";
+	fileName = workingDirectory + "/applicationlibrary/test/test_files/connection_parameters/randomdist_lincols_12conns.cfg";
 	try{
-	    configLoader.loadConfig(fileName);
+		configLoader.loadConfig(fileName.toStdString().data());
 
 	    //Get the neural layer with the connections
 	    neuralLayer = configLoader.getNetwork()->getNeuralLayerById(0);
@@ -123,9 +124,9 @@ void TestNRMConfigLoader::testLoadConnectionParameters(){
 	}
 
 	//Load up the test configuration
-	fileName = "../applicationlibrary/test/test_files/connection_parameters/iconic_4w5h_flipvertical_6conns.cfg";
+	fileName = workingDirectory + "/applicationlibrary/test/test_files/connection_parameters/iconic_4w5h_flipvertical_6conns.cfg";
 	try{
-	    configLoader.loadConfig(fileName);
+		configLoader.loadConfig(fileName.toStdString().data());
 
 	    //Get the loaded network
 	    neuralLayer = configLoader.getNetwork()->getNeuralLayerById(0);
@@ -148,9 +149,9 @@ void TestNRMConfigLoader::testLoadConnectionParameters(){
 
 
 	//Load up the test configuration
-	fileName = "../applicationlibrary/test/test_files/connection_parameters/global_spatial_9-10-11-12_7conns.cfg";
+	fileName = workingDirectory + "/applicationlibrary/test/test_files/connection_parameters/global_spatial_9-10-11-12_7conns.cfg";
 	try{
-	    configLoader.loadConfig(fileName);
+		configLoader.loadConfig(fileName.toStdString().data());
 
 	    //Get the loaded network
 	    neuralLayer = configLoader.getNetwork()->getNeuralLayerById(0);
@@ -177,9 +178,9 @@ void TestNRMConfigLoader::testLoadConnectionParameters(){
 
 
 	//Load up the test configuration
-	fileName = "../applicationlibrary/test/test_files/connection_parameters/seg_segrev_rancols_11conns.cfg";
+	fileName = workingDirectory + "/applicationlibrary/test/test_files/connection_parameters/seg_segrev_rancols_11conns.cfg";
 	try{
-	    configLoader.loadConfig(fileName);
+		configLoader.loadConfig(fileName.toStdString().data());
 
 	    //Get the loaded network
 	    neuralLayer = configLoader.getNetwork()->getNeuralLayerById(0);
@@ -205,9 +206,9 @@ void TestNRMConfigLoader::testLoadConnectionParameters(){
 
 
 	//Load up the test configuration
-	fileName = "../applicationlibrary/test/test_files/connection_parameters/2connections.cfg";
+	fileName = workingDirectory + "/applicationlibrary/test/test_files/connection_parameters/2connections.cfg";
 	try{
-	    configLoader.loadConfig(fileName);
+		configLoader.loadConfig(fileName.toStdString().data());
 
 	    //Get the loaded network
 	    neuralLayer = configLoader.getNetwork()->getNeuralLayerById(0);

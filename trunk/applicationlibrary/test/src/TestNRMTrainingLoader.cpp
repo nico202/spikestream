@@ -10,13 +10,20 @@ using namespace spikestream;
 #include <iostream>
 using namespace std;
 
+
+void TestNRMTrainingLoader::init(){
+	workingDirectory = QCoreApplication::applicationDirPath();
+	workingDirectory.truncate(workingDirectory.size() - 4);//Trim the "/bin" off the end
+}
+
+
 void TestNRMTrainingLoader::testLoadTraining(){
 
 	//Start by loading up the configuration file that matches the training data
-	const char* configFileName = "../applicationlibrary/test/test_files/training/test_training_8.cfg";
+	QString configFileName = workingDirectory + "/applicationlibrary/test/test_files/training/test_training_8.cfg";
 	NRMConfigLoader configLoader;
 	try{
-		configLoader.loadConfig(configFileName);
+		configLoader.loadConfig(configFileName.toStdString().data());
 	}
 	catch(NRMException& ex){
 		QFAIL(ex.getMessage());
@@ -24,10 +31,10 @@ void TestNRMTrainingLoader::testLoadTraining(){
 	NRMNetwork* network = configLoader.getNetwork();
 
 	//Load up the test configuration
-	const char* trainingFileName = "../applicationlibrary/test/test_files/training/test_training_8.ntr";
+	QString trainingFileName = workingDirectory + "/applicationlibrary/test/test_files/training/test_training_8.ntr";
 	NRMTrainingLoader trainingLoader(configLoader.getNetwork());
 	try{
-		trainingLoader.loadTraining(trainingFileName);
+		trainingLoader.loadTraining(trainingFileName.toStdString().data());
 	}
 	catch(NRMException& ex){
 		QFAIL(ex.getMessage());

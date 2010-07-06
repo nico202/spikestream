@@ -13,15 +13,21 @@ using namespace spikestream;
 using namespace std;
 
 
+void TestNRMConnection::init(){
+	workingDirectory = QCoreApplication::applicationDirPath();
+	workingDirectory.truncate(workingDirectory.size() - 4);//Trim the "/bin" off the end
+}
+
+
 /*! Tests connection building by loading up config files and examining the resulting networks
 	NOTE: Not a 'unit' way of doing it because there are many dependencies on other components! */
 void TestNRMConnection::testCreateConnections(){
 	NRMConfigLoader configLoader;
 
 	//Load up the test configuration
-	const char* fileName = "../applicationlibrary/test/test_files/connection_building/test_connectionbuilding_1.cfg";
+	QString fileName = workingDirectory + "/applicationlibrary/test/test_files/connection_building/test_connectionbuilding_1.cfg";
 	try{
-		configLoader.loadConfig(fileName);
+		configLoader.loadConfig(fileName.toStdString().data());
 	}
 	catch(NRMException& ex){
 		QFAIL(ex.getMessage());

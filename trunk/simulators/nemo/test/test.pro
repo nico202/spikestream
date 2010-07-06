@@ -19,7 +19,7 @@ win32 {
 	LIBS += -lnemo -L$${SPIKESTREAM_ROOT_DIR}/extlib/nemo/lib
 }
 
-CONFIG += release qtestlib console
+CONFIG += debug qtestlib console
 
 
 #----------------------------------------------#

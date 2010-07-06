@@ -29,7 +29,11 @@ namespace spikestream {
 			/*! The network that is loaded from the configuration file */
 			NRMNetwork* network;
 
+			/*! Count of the bytes read from the file */
+			int fileByteCount;
+
 			//==========================  METHODS  ===============================
+			void fReadFile(void* dataStruct, size_t sizeOfElement, size_t numElements, FILE* file );
 			void loadConfigVersion(FILE* file);
 			void loadConnectionParameters(conType& conParams, FILE* file);
 			void loadConnections(FILE* file);

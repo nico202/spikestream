@@ -23,16 +23,17 @@ void TestRunner::runTests(){
 	int argsSize = 0;
 	char* argsChar[0];
 	QCoreApplication coreApplication(argsSize, argsChar);
+		qDebug()<<"DIRECTORY PATH: "<<QCoreApplication::applicationDirPath();
 
-//	TestDatabaseDao testDatabaseDao;
-	//QTest::qExec(&testDatabaseDao);
+	TestDatabaseDao testDatabaseDao;
+	QTest::qExec(&testDatabaseDao);
 
 	TestNetworkDao testNetworkDao;
     QTest::qExec(&testNetworkDao);
 
 	TestNetworkDaoThread testNetworkDaoThread;
     QTest::qExec(&testNetworkDaoThread);
-/*
+
     TestXMLParameterParser testXMLParameterParser;
     QTest::qExec(&testXMLParameterParser);
 
@@ -52,7 +53,7 @@ void TestRunner::runTests(){
     QTest::qExec(&testUtil);
 
     TestWeightlessNeuron testWeightlessNeuron;
-	QTest::qExec(&testWeightlessNeuron); */
+	QTest::qExec(&testWeightlessNeuron);
 }
 
 
