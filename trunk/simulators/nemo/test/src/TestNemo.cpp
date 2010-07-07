@@ -95,7 +95,7 @@ void c_runSimulation(const nemo_network_t net, const nemo_configuration_t conf, 
 			unsigned nfired;
 			unsigned ncycles;
 
-			if(ms >= 6){
+			//if(ms >= 6){
 				qDebug()<<"Reading firing";
 				nemo_status_t result = nemo_read_firing(sim, &cycles_tmp, &nidx_tmp, &nfired, &ncycles);
 				if(result != NEMO_OK)
@@ -107,7 +107,7 @@ void c_runSimulation(const nemo_network_t net, const nemo_configuration_t conf, 
 				std::copy(cycles_tmp, cycles_tmp + nfired, back_inserter(*fcycles));
 				std::copy(nidx_tmp, nidx_tmp + nfired, back_inserter(*fnidx));
 				qDebug()<<"Firing data successfully copied";
-			}
+			//}
 		}
 //	}
 
@@ -168,20 +168,29 @@ void TestNemo::testNemoDLL2(){
 	nemo_network_t nemoNet = nemo_new_network();
 
 	nemo_status_t result = nemo_add_neuron(nemoNet, 1, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7);
-	if(result != NEMO_OK)
+	if(result != NEMO_OK){
+		qDebug()<<"Add neuron failed.";
 		QFAIL(nemo_strerror());
+	}
 
 	result = nemo_add_neuron(nemoNet, 2, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7);
-	if(result != NEMO_OK)
+	if(result != NEMO_OK){
+		qDebug()<<"Add neuron failed.";
 		QFAIL(nemo_strerror());
+	}
 
 	result = nemo_add_neuron(nemoNet, 3, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7);
-	if(result != NEMO_OK)
+	if(result != NEMO_OK){
+		qDebug()<<"Add neuron failed.";
 		QFAIL(nemo_strerror());
+	}
 
 	result = nemo_add_neuron(nemoNet, 4, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7);
-	if(result != NEMO_OK)
+	if(result != NEMO_OK){
+		qDebug()<<"Add neuron failed.";
 		QFAIL(nemo_strerror());
+	}
+
 	qDebug()<<"Neurons successfully added.";
 
 	//Load the network into the simulator
@@ -194,6 +203,7 @@ void TestNemo::testNemoDLL2(){
 		QFAIL("ERROR LOADING NEMO SIMULATION.");
 	}
 	if(nemoSim == NULL) {
+		qDebug()<<"Nemo simulation is null";
 		QFAIL(nemo_strerror());
 	}
 	qDebug()<<"Neurons successfully loaded into simulator";
