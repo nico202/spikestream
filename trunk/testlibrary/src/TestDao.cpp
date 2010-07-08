@@ -1,3 +1,4 @@
+#include "ConfigLoader.h"
 #include "TestDao.h"
 #include "SpikeStreamException.h"
 #include "SpikeStreamDBException.h"
@@ -49,12 +50,19 @@ void TestDao::initTestCase(){
 /*-----                PROTECTED METHODS               -----*/
 /*----------------------------------------------------------*/
 
-/*! Connects to the test database.
-    FIXME: LOAD PARAMETERS FROM FILE. */
+/*! Connects to the test database. */
 void TestDao::connectToDatabases(const QString& networkDBName, const QString& archiveDBName, const QString& analysisDBName){    //Set the database parameters to be used in the test
-    //Connect to the network database. This is the default database
+	//Create config loader to access user, host and password information
+	ConfigLoader configLoader;
+
+	//Connect to the network database. This is the default database
     dbRefName = "NetworkTestDBRef";
-    dbInfo = DBInfo("localhost", "SpikeStream", "ekips", networkDBName);
+	dbInfo = DBInfo(
+			configLoader.getParameter("spikeStreamNetworkHost"),
+			configLoader.getParameter("spikeStreamNetworkUser"),
+			configLoader.getParameter("spikeStreamNetworkPassword"),
+			networkDBName
+	);
     database = QSqlDatabase::addDatabase("QMYSQL", dbRefName);
     database.setHostName(dbInfo.getHost());
     database.setDatabaseName(dbInfo.getDatabase());
@@ -62,11 +70,16 @@ void TestDao::connectToDatabases(const QString& networkDBName, const QString& ar
     database.setPassword(dbInfo.getPassword());
     bool ok = database.open();
     if(!ok)
-	throw SpikeStreamDBException( QString("Cannot connect to network database ") + dbInfo.toString() + ". Error: " + database.lastError().text() );
+		throw SpikeStreamDBException( QString("Cannot connect to network database ") + dbInfo.toString() + ". Error: " + database.lastError().text() );
 
     //Connect to the archive database
     archiveDBRefName = "ArchiveTestDBRef";
-    archiveDBInfo = DBInfo("localhost", "SpikeStream", "ekips", archiveDBName);
+	archiveDBInfo = DBInfo(
+			configLoader.getParameter("spikeStreamArchiveHost"),
+			configLoader.getParameter("spikeStreamArchiveUser"),
+			configLoader.getParameter("spikeStreamArchivePassword"),
+			archiveDBName
+	);
     archiveDatabase = QSqlDatabase::addDatabase("QMYSQL", archiveDBRefName);
     archiveDatabase.setHostName(archiveDBInfo.getHost());
     archiveDatabase.setDatabaseName(archiveDBInfo.getDatabase());
@@ -74,11 +87,16 @@ void TestDao::connectToDatabases(const QString& networkDBName, const QString& ar
     archiveDatabase.setPassword(archiveDBInfo.getPassword());
     ok = archiveDatabase.open();
     if(!ok)
-	throw SpikeStreamDBException( QString("Cannot connect to archive database ") + archiveDBInfo.toString() + ". Error: " + archiveDatabase.lastError().text() );
+		throw SpikeStreamDBException( QString("Cannot connect to archive database ") + archiveDBInfo.toString() + ". Error: " + archiveDatabase.lastError().text() );
 
     //Connect to the analysis database
     analysisDBRefName = "AnalysisTestDBRef";
-    analysisDBInfo = DBInfo("localhost", "SpikeStream", "ekips", analysisDBName);
+	analysisDBInfo = DBInfo(
+			configLoader.getParameter("spikeStreamAnalysisHost"),
+			configLoader.getParameter("spikeStreamAnalysisUser"),
+			configLoader.getParameter("spikeStreamAnalysisPassword"),
+			analysisDBName
+	);
     analysisDatabase = QSqlDatabase::addDatabase("QMYSQL", analysisDBRefName);
     analysisDatabase.setHostName(analysisDBInfo.getHost());
     analysisDatabase.setDatabaseName(analysisDBInfo.getDatabase());
@@ -86,7 +104,7 @@ void TestDao::connectToDatabases(const QString& networkDBName, const QString& ar
     analysisDatabase.setPassword(analysisDBInfo.getPassword());
     ok = analysisDatabase.open();
     if(!ok)
-	throw SpikeStreamDBException( QString("Cannot connect to analysis database ") + analysisDBInfo.toString() + ". Error: " + analysisDatabase.lastError().text() );
+		throw SpikeStreamDBException( QString("Cannot connect to analysis database ") + analysisDBInfo.toString() + ". Error: " + analysisDatabase.lastError().text() );
 }
 
 /*! Cleans up everything from the test networks database */
@@ -126,8 +144,8 @@ void TestDao::closeDatabases(){
 void TestDao::executeQuery(QSqlQuery& query){
     bool result = query.exec();
     if(!result){
-	QString errMsg = "Error executing query: '" + query.lastQuery() + "'; Error='" + query.lastError().text() + "'.";
-	QFAIL(errMsg.toAscii());
+		QString errMsg = "Error executing query: '" + query.lastQuery() + "'; Error='" + query.lastError().text() + "'.";
+		QFAIL(errMsg.toAscii());
     }
 }
 
@@ -367,17 +385,17 @@ void TestDao::addWeightlessTrainingData(unsigned int neuronID, const QString& pa
     //Create a byte array with the training data
     int arrSize;
     if(pattern.size() % 8 == 0)
-	arrSize = pattern.size() / 8;
+		arrSize = pattern.size() / 8;
     else
-	arrSize = pattern.size() / 8 + 1;
+		arrSize = pattern.size() / 8 + 1;
     byte byteArr[arrSize];
 
     //Initialize byte array and fill it with data from the string
     for(int i=0; i<arrSize; ++i)
-	byteArr[i] = 0;
+		byteArr[i] = 0;
     for(int i=0; i<pattern.size(); ++i){
-	if(pattern[i] == '1')
-	    byteArr[i/8] |= 1<<(i % 8);
+		if(pattern[i] == '1')
+			byteArr[i/8] |= 1<<(i % 8);
     }
 
     //Add data to database
