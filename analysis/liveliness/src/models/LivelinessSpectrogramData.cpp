@@ -1,5 +1,4 @@
 //SpikeStream includes
-#include "Complex.h"
 #include "Globals.h"
 #include "LivelinessSpectrogramData.h"
 #include "LivelinessDao.h"

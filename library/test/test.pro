@@ -10,22 +10,30 @@ OBJECTS_DIR = build/objects
 
 MOC_DIR = build/moc
 
+QT += sql xml
+
+CONFIG += debug qtestlib console
+
+
+#----------------------------------------------#
+#---              INCLUDE PATH              ---#
+#----------------------------------------------#
 INCLUDEPATH += src ../include $${SPIKESTREAM_ROOT_DIR}/testlibrary/include
 win32 {
 	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/gmp/include
 }
 
+
+#----------------------------------------------#
+#---               LIBRARIES                ---#
+#----------------------------------------------#
+LIBS += -lgmpxx
 unix {
-	LIBS += -lspikestreamtest -L$${SPIKESTREAM_ROOT_DIR}/lib -lgmpxx
+	LIBS += -lspikestreamtest -L$${SPIKESTREAM_ROOT_DIR}/lib
 }
 win32 {
-	LIBS += -lspikestreamtest0 -L$${SPIKESTREAM_ROOT_DIR}/lib -lspikestream0 -lgmpxx -lgmp -L$${SPIKESTREAM_ROOT_DIR}/extlib/gmp/lib
+	LIBS += -lspikestreamtest0 -L$${SPIKESTREAM_ROOT_DIR}/lib -lspikestream0 -L$${SPIKESTREAM_ROOT_DIR}/extlib/gmp/lib
 }
-
-
-QT += sql xml
-
-CONFIG += debug qtestlib console
 
 
 #----------------------------------------------#

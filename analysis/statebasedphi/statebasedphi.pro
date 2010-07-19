@@ -16,31 +16,35 @@ CONFIG += dll debug thread exceptions
 
 QT += xml opengl sql
 
+
 #----------------------------------------------#
-#---                INCLUDE                 ---#
+#---              INCLUDE PATH              ---#
 #----------------------------------------------#
-INCLUDEPATH += src \
-				src/database \
-				src/analysis \
-				src/models \
-				src/views \
+INCLUDEPATH += src src/database src/analysis src/models src/views \
 				$${SPIKESTREAM_ROOT_DIR}/library/include \
 				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/include
+unix {
+	INCLUDEPATH += /usr/local/qwt-5.2.1-svn/include
+}
 win32 {
 	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/gmp/include $${SPIKESTREAM_ROOT_DIR}/extlib/qwt/include
 }
 
+
 #----------------------------------------------#
 #---               LIBRARIES                ---#
 #----------------------------------------------#
+LIBS += -lgmpxx
 unix {
-	LIBS += -lgmpxx -L$${SPIKESTREAM_ROOT_DIR}/lib -lspikestream -lspikestreamapplication
+	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/lib -lspikestream -lspikestreamapplication
+	LIBS += -lqwt -L/usr/local/qwt-5.2.1-svn/lib
 }
 win32 {
 	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/lib -lspikestreamapplication0 -lspikestream0
-	LIBS += -lgmpxx -lgmp -L$${SPIKESTREAM_ROOT_DIR}/extlib/gmp/lib
+	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/extlib/gmp/lib
 	LIBS += -lqwt5 -L$${SPIKESTREAM_ROOT_DIR}/extlib/qwt/lib
 }
+
 
 #====================  GUI  =====================
 HEADERS = src/gui/StateBasedPhiWidget.h \

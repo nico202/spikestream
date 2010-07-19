@@ -12,8 +12,18 @@ OBJECTS_DIR = build/objects
 
 MOC_DIR = build/moc
 
+CONFIG += debug console qtestlib
+
+
+#----------------------------------------------#
+#---              INCLUDE PATH              ---#
+#----------------------------------------------#
 INCLUDEPATH += ../include
 
+
+#----------------------------------------------#
+#---               LIBRARIES                ---#
+#----------------------------------------------#
 unix {
 	LIBS += -lspikestreamapplication -L$${SPIKESTREAM_ROOT_DIR}/lib
 }
@@ -21,7 +31,6 @@ win32 {
 	LIBS += -lspikestreamapplication0 -L$${SPIKESTREAM_ROOT_DIR}/lib
 }
 
-CONFIG += debug console qtestlib
 
 #----------------------------------------------#
 #---            Test Files                  ---#

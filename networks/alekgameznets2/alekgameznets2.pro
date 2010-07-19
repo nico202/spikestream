@@ -16,20 +16,34 @@ CONFIG += debug thread exceptions
 
 QT += xml opengl sql
 
+
+#----------------------------------------------#
+#---              INCLUDE PATH              ---#
+#----------------------------------------------#
 INCLUDEPATH += src \
 				src/gui \
 				src/model \
 				$${SPIKESTREAM_ROOT_DIR}/library/include \
 				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/include
+win32 {
+	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/gmp/include
+}
 
+
+#----------------------------------------------#
+#---               LIBRARIES                ---#
+#----------------------------------------------#
 unix{
 	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/lib  -lspikestreamapplication -lspikestream
 }
 win32{
-	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/gmp/include
-	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/lib  -lspikestreamapplication0 -lspikestream0 -lgmp -L$${SPIKESTREAM_ROOT_DIR}/extlib/gmp/lib
+	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/lib  -lspikestreamapplication0 -lspikestream0
 }
 
+
+#----------------------------------------------#
+#---                 FILES                  ---#
+#----------------------------------------------#
 HEADERS = src/gui/AlekGam2NetworksWidget.h \
 			src/model/FullyConnectedNetworksBuilder.h \
 			src/model/PartitionedNetworksBuilder.h \

@@ -24,20 +24,20 @@ QT += sql xml
 
 
 #----------------------------------------------#
-#---               LIBRARIES                ---#
-#----------------------------------------------#
-LIBS += -lgmpxx
-win32 {
-	LIBS += -lgmp -L$${SPIKESTREAM_ROOT_DIR}/extlib/gmp/lib
-}
-
-
-#----------------------------------------------#
-#---                INCLUDE                 ---#
+#---              INCLUDE PATH              ---#
 #----------------------------------------------#
 INCLUDEPATH += include
 win32 {
 	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/gmp/include
+}
+
+
+#----------------------------------------------#
+#---               LIBRARIES                ---#
+#----------------------------------------------#
+LIBS += -lgmpxx
+win32 {
+	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/extlib/gmp/lib
 }
 
 

@@ -22,8 +22,16 @@ CONFIG += debug qtestlib
 
 QT += sql
 
+
+#----------------------------------------------#
+#---              INCLUDE PATH              ---#
+#----------------------------------------------#
 INCLUDEPATH += include 	$${SPIKESTREAM_ROOT_DIR}/library/include
 
+
+#----------------------------------------------#
+#---               LIBRARIES                ---#
+#----------------------------------------------#
 unix{
 	LIBS += -lspikestream -L$${SPIKESTREAM_ROOT_DIR}/lib
 }
@@ -31,6 +39,10 @@ win32 {
 	LIBS += -lspikestream0 -L$${SPIKESTREAM_ROOT_DIR}/lib
 }
 
+
+#----------------------------------------------#
+#---                 FILES                  ---#
+#----------------------------------------------#
 HEADERS = include/TestDao.h
 
 SOURCES = src/TestDao.cpp
