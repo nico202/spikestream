@@ -12,6 +12,21 @@ OBJECTS_DIR = build/objects
 
 MOC_DIR = build/moc
 
+CONFIG += debug exceptions
+
+QT += sql xml
+
+
+#----------------------------------------------#
+#---              INCLUDE PATH              ---#
+#----------------------------------------------#
+INCLUDEPATH += src  \
+				$${SPIKESTREAM_ROOT_DIR}/library/include
+
+
+#----------------------------------------------#
+#---               LIBRARIES                ---#
+#----------------------------------------------#
 unix{
 	LIBS += -lspikestream -L$${SPIKESTREAM_ROOT_DIR}/lib
 }
@@ -20,13 +35,9 @@ win32{
 }
 
 
-INCLUDEPATH += src  \
-				$${SPIKESTREAM_ROOT_DIR}/library/include
-
-CONFIG += debug exceptions
-
-QT += sql xml
-
+#----------------------------------------------#
+#---                 FILES                  ---#
+#----------------------------------------------#
 HEADERS = src/DBConfigMainWindow.h \
 			src/DBDetailsWidget.h \
 			src/SuccessWidget.h

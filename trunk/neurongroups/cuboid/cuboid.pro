@@ -16,20 +16,29 @@ CONFIG += debug thread exceptions
 
 QT += xml opengl sql
 
-INCLUDEPATH += src \
-				src/model \
-				src/gui \
+
+#----------------------------------------------#
+#---              INCLUDE PATH              ---#
+#----------------------------------------------#
+INCLUDEPATH += src src/model src/gui \
 				$${SPIKESTREAM_ROOT_DIR}/library/include \
 				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/include
 
+
+#----------------------------------------------#
+#---               LIBRARIES                ---#
+#----------------------------------------------#
 unix{
 	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/lib  -lspikestreamapplication -lspikestream
 }
 win32{
-	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/gmp/include
 	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/lib  -lspikestreamapplication0 -lspikestream0
 }
 
+
+#----------------------------------------------#
+#---                 FILES                  ---#
+#----------------------------------------------#
 HEADERS = src/gui/CuboidWidget.h \
 			src/model/CuboidBuilderThread.h
 

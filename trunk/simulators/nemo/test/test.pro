@@ -10,14 +10,22 @@ OBJECTS_DIR = build/objects
 
 MOC_DIR = build/moc
 
+
+#----------------------------------------------#
+#---              INCLUDE PATH              ---#
+#----------------------------------------------#
 INCLUDEPATH += src ../src/model
 win32 {
 	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/nemo/include
 }
 
-win32 {
-	LIBS += -lnemo -L$${SPIKESTREAM_ROOT_DIR}/extlib/nemo/lib
-}
+
+#----------------------------------------------#
+#---               LIBRARIES                ---#
+#----------------------------------------------#
+#win32 {
+#	LIBS += -lnemo -L$${SPIKESTREAM_ROOT_DIR}/extlib/nemo/lib
+#}
 
 CONFIG += debug qtestlib console
 

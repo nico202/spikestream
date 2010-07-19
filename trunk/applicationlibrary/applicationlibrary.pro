@@ -18,6 +18,11 @@ OBJECTS_DIR = build/objects
 
 MOC_DIR = build/moc
 
+CONFIG += debug thread exceptions
+
+QT += xml opengl sql
+
+
 #----------------------------------------------#
 #---                DEFINES                 ---#
 #----------------------------------------------#
@@ -28,30 +33,32 @@ win32 {
 	DEFINES += WIN32_SPIKESTREAM
 }
 
-#----------------------------------------------#
-#---               LIBRARIES                ---#
-#----------------------------------------------#
-unix {
-	LIBS += -lspikestream -L$${SPIKESTREAM_ROOT_DIR}/lib -lgmp
-}
-win32 {
-	LIBS += -lspikestream0 -L$${SPIKESTREAM_ROOT_DIR}/lib
-	LIBS += -lgmp -L$${SPIKESTREAM_ROOT_DIR}/extlib/gmp/lib
-	LIBS += -lqwt5 -L$${SPIKESTREAM_ROOT_DIR}/extlib/qwt/lib
-}
 
 #----------------------------------------------#
-#---                INCLUDE                 ---#
+#---             INCLUDE PATH               ---#
 #----------------------------------------------#
 INCLUDEPATH += include $${SPIKESTREAM_ROOT_DIR}/library/include
+unix {
+	INCLUDEPATH += /usr/local/qwt-5.2.1-svn/include
+}
 win32 {
 	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/gmp/include  $${SPIKESTREAM_ROOT_DIR}/extlib/qwt/include
 }
 
+#----------------------------------------------#
+#---               LIBRARIES                ---#
+#----------------------------------------------#
+LIBS += -lgmp
+unix {
+	LIBS += -lspikestream -L$${SPIKESTREAM_ROOT_DIR}/lib
+	LIBS += -lqwt -L/usr/local/qwt-5.2.1-svn/lib
+}
+win32 {
+	LIBS += -lspikestream0 -L$${SPIKESTREAM_ROOT_DIR}/lib
+	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/extlib/gmp/lib
+	LIBS += -lqwt5 -L$${SPIKESTREAM_ROOT_DIR}/extlib/qwt/lib
+}
 
-CONFIG += debug thread exceptions
-
-QT += xml opengl sql
 
 
 #----------------------------------------------#
