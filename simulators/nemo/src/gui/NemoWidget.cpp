@@ -134,9 +134,6 @@ void NemoWidget::archiveStateChanged(int state){
 
 /*! Instructs the Nemo wrapper to load the network from the database into Nemo */
 void NemoWidget::loadSimulation(){
-//	qCritical()<<"The Nemo simulator is not fully implemented and does not work!\nA working release will be available in the 3rd quarter of 2010.";
-//	return;
-
 	if(!Globals::networkLoaded()){
 		qCritical()<<"Cannot load simulation: no network loaded.";
 		return;
@@ -190,6 +187,10 @@ void NemoWidget::nemoWrapperFinished(){
 				playAction->setEnabled(true);
 				stopAction->setEnabled(false);
 			break;
+			case NemoWrapper::STEP_SIMULATION_TASK :
+				playAction->setEnabled(true);
+				stopAction->setEnabled(false);
+			break;
 			default :
 				qCritical()<<"Nemo has finished executing, but task is not defined";
 		}
@@ -213,6 +214,10 @@ void NemoWidget::nemoWrapperFinished(){
 			}
 		break;
 		case NemoWrapper::RUN_SIMULATION_TASK :
+			playAction->setEnabled(true);
+			stopAction->setEnabled(false);
+		break;
+		case NemoWrapper::STEP_SIMULATION_TASK :
 			playAction->setEnabled(true);
 			stopAction->setEnabled(false);
 		break;
@@ -328,14 +333,17 @@ void NemoWidget::startSimulation(){
 
 /*! Advances the simulation by one time step */
 void NemoWidget::stepSimulation(){
-    //Stop thread if it is running. Step will be done when thread finishes
+	//Stop thread if it is running.
 	if(nemoWrapper->isRunning()){
 		nemoWrapper->stop();
 	}
 
 	//Simulation not running, so just step
 	else{
-		nemoWrapper->stepSimulation();
+		nemoWrapper->prepareStepSimulation();
+		nemoWrapper->start();
+		playAction->setEnabled(false);
+		stopAction->setEnabled(true);
 	}
 }
 
