@@ -7,7 +7,6 @@ using namespace spikestream;
 
 //Nemo includes
 #include "nemo.h"
-//#include "nemo.hpp"
 
 //Qt includes
 #include <QObject>

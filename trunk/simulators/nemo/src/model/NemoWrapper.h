@@ -39,13 +39,13 @@ namespace spikestream {
 			bool isSimulationLoaded() { return simulationLoaded; }
 			void prepareLoadSimulation();
 			void prepareRunSimulation();
+			void prepareStepSimulation();
 			void run();
 			void setArchiveMode(bool mode);
 			void setFrameRate(unsigned int frameRate);
 			void setMonitorMode(bool mode);
 			void setParameters(const QHash<QString, double>& parameterMap);
 			void setUpdateInterval_ms(unsigned int interval) { this->updateInterval_ms = interval; }
-			void stepSimulation();
 			void stop();
 			void unloadSimulation();
 
@@ -59,6 +59,9 @@ namespace spikestream {
 
 			/*! Task of playing simulation */
 			static const int RUN_SIMULATION_TASK = 2;
+
+			/*! Task of advancing one time step of the simulation. */
+			static const int STEP_SIMULATION_TASK = 3;
 
 
 		signals:
@@ -131,11 +134,6 @@ namespace spikestream {
 
 			QList<unsigned int> firingNeuronList;
 
-			//TEMPORARY FOR TESTING
-//			QList<unsigned int> firingNeuronList;
-//			unsigned int startNeuronID;
-//			unsigned int networkSize;
-//			void getRandomFiringNeurons(QList<unsigned>& neurIDList, unsigned percent);
 
 			//======================  METHODS  ========================
 			void buildParameters();
@@ -144,6 +142,7 @@ namespace spikestream {
 			void loadSimulation();
 			void runSimulation();
 			void setError(const QString& errorMessage);
+			void stepSimulation();
 
 	};
 

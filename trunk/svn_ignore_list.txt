@@ -1,5 +1,6 @@
 *.o
 *.so*
+*.a
 *.user
 .directory
 Makefile*
@@ -11,3 +12,4 @@ spikestream.config
 *.Debug
 *.exe
 *resource.rc
+extlib
