@@ -1,38 +1,30 @@
 SPIKESTREAM_ROOT_DIR = ../..
 
-TARGET = testspikestreamlibrary
+include( $${SPIKESTREAM_ROOT_DIR}/spikestream.pri )
 
-VERSION = 0.2
+TARGET = testspikestreamlibrary
 
 DESTDIR = $${SPIKESTREAM_ROOT_DIR}/bin
 
-OBJECTS_DIR = build/objects
-
-MOC_DIR = build/moc
-
 QT += sql xml
 
-CONFIG += debug qtestlib console
+CONFIG += qtestlib console
 
 
 #----------------------------------------------#
 #---              INCLUDE PATH              ---#
 #----------------------------------------------#
 INCLUDEPATH += src ../include $${SPIKESTREAM_ROOT_DIR}/testlibrary/include
-win32 {
-	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/gmp/include
-}
 
 
 #----------------------------------------------#
 #---               LIBRARIES                ---#
 #----------------------------------------------#
-LIBS += -lgmpxx
 unix {
 	LIBS += -lspikestreamtest -L$${SPIKESTREAM_ROOT_DIR}/lib
 }
 win32 {
-	LIBS += -lspikestreamtest0 -L$${SPIKESTREAM_ROOT_DIR}/lib -lspikestream0 -L$${SPIKESTREAM_ROOT_DIR}/extlib/gmp/lib
+	LIBS += -lspikestreamtest0 -L$${SPIKESTREAM_ROOT_DIR}/lib -lspikestream0
 }
 
 

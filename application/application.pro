@@ -1,18 +1,16 @@
 SPIKESTREAM_ROOT_DIR = ..
 
+include( $${SPIKESTREAM_ROOT_DIR}/spikestream.pri )
+
 TEMPLATE = app
 
 TARGET = spikestream
-
-VERSION = 0.2
 
 RC_FILE = spikestream.rc
 
 DESTDIR = $${SPIKESTREAM_ROOT_DIR}/bin
 
-OBJECTS_DIR = build/objects
-
-CONFIG += console debug thread exceptions
+CONFIG += console
 
 QT += xml opengl sql
 

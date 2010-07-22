@@ -1,18 +1,12 @@
 SPIKESTREAM_ROOT_DIR = ../..
 
+include( $${SPIKESTREAM_ROOT_DIR}/spikestream.pri )
+
 TEMPLATE = lib
 
 TARGET = liveliness
 
-VERSION = 0.2
-
 DESTDIR = $${SPIKESTREAM_ROOT_DIR}/plugins/analysis
-
-OBJECTS_DIR = build/objects
-
-MOC_DIR = build/moc
-
-CONFIG += debug thread exceptions
 
 QT += xml opengl sql
 
@@ -27,25 +21,15 @@ INCLUDEPATH += src \
 				src/views \
 				$${SPIKESTREAM_ROOT_DIR}/library/include \
 				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/include
-unix {
-	INCLUDEPATH += /usr/local/qwt-5.2.1-svn/include
-}
-win32 {
-	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/gmp/include $${SPIKESTREAM_ROOT_DIR}/extlib/qwt/include
-}
 
 #----------------------------------------------#
 #---               LIBRARIES                ---#
 #----------------------------------------------#
-LIBS += -lgmpxx
 unix {
 	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/lib -lspikestream -lspikestreamapplication
-	LIBS += -lqwt -L/usr/local/qwt-5.2.1-svn/lib
 }
 win32 {
 	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/lib -lspikestreamapplication0 -lspikestream0
-	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/extlib/gmp/lib
-	LIBS += -lqwt5 -L$${SPIKESTREAM_ROOT_DIR}/extlib/qwt/lib
 }
 
 

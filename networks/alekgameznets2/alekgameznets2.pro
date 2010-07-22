@@ -1,18 +1,12 @@
 SPIKESTREAM_ROOT_DIR = ../..
 
+include( $${SPIKESTREAM_ROOT_DIR}/spikestream.pri )
+
 TEMPLATE = lib
 
 TARGET = alekgameznets2
 
-VERSION = 0.2
-
 DESTDIR = $${SPIKESTREAM_ROOT_DIR}/plugins/networks
-
-OBJECTS_DIR = build/objects
-
-MOC_DIR = build/moc
-
-CONFIG += debug thread exceptions
 
 QT += xml opengl sql
 
@@ -20,14 +14,9 @@ QT += xml opengl sql
 #----------------------------------------------#
 #---              INCLUDE PATH              ---#
 #----------------------------------------------#
-INCLUDEPATH += src \
-				src/gui \
-				src/model \
+INCLUDEPATH += src src/gui src/model \
 				$${SPIKESTREAM_ROOT_DIR}/library/include \
 				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/include
-win32 {
-	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/gmp/include
-}
 
 
 #----------------------------------------------#

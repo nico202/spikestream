@@ -1,18 +1,14 @@
 SPIKESTREAM_ROOT_DIR = ../../..
 
-TARGET = testliveliness
+include( $${SPIKESTREAM_ROOT_DIR}/spikestream.pri )
 
-VERSION = 0.2
+TARGET = testliveliness
 
 DESTDIR = $${SPIKESTREAM_ROOT_DIR}/bin
 
-OBJECTS_DIR = build/objects
-
-MOC_DIR = build/moc
-
 QT += sql
 
-CONFIG += debug qtestlib console
+CONFIG += qtestlib console
 
 
 #----------------------------------------------#
@@ -23,9 +19,6 @@ INCLUDEPATH += src \
 				$${SPIKESTREAM_ROOT_DIR}/testlibrary/include \
 				$${SPIKESTREAM_ROOT_DIR}/analysis/liveliness/src/database \
 				$${SPIKESTREAM_ROOT_DIR}/analysis/liveliness/src/analysis
-win32 {
-	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/gmp/include
-}
 
 
 #----------------------------------------------#

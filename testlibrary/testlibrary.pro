@@ -1,5 +1,7 @@
 SPIKESTREAM_ROOT_DIR = ..
 
+include( $${SPIKESTREAM_ROOT_DIR}/spikestream.pri )
+
 TEMPLATE = lib
 
 TARGET = spikestreamtest
@@ -10,15 +12,9 @@ win32 {
 	INSTALLS += target
 }
 
-VERSION = 0.2
-
 DESTDIR = $${SPIKESTREAM_ROOT_DIR}/lib
 
-OBJECTS_DIR = build/objects
-
-MOC_DIR = build/moc
-
-CONFIG += debug qtestlib
+CONFIG += qtestlib
 
 QT += sql
 

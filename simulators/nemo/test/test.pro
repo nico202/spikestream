@@ -1,14 +1,12 @@
 SPIKESTREAM_ROOT_DIR = ../../../
 
-TARGET = testnemo
+include( $${SPIKESTREAM_ROOT_DIR}/spikestream.pri )
 
-VERSION = 0.2
+TARGET = testnemo
 
 DESTDIR = $${SPIKESTREAM_ROOT_DIR}/bin
 
-OBJECTS_DIR = build/objects
-
-MOC_DIR = build/moc
+CONFIG += qtestlib console
 
 
 #----------------------------------------------#
@@ -23,11 +21,9 @@ win32 {
 #----------------------------------------------#
 #---               LIBRARIES                ---#
 #----------------------------------------------#
-#win32 {
-#	LIBS += -lnemo -L$${SPIKESTREAM_ROOT_DIR}/extlib/nemo/lib
-#}
-
-CONFIG += debug qtestlib console
+win32 {
+	LIBS += -lnemo -L$${SPIKESTREAM_ROOT_DIR}/extlib/nemo/lib
+}
 
 
 #----------------------------------------------#

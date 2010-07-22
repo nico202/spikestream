@@ -1,18 +1,12 @@
 SPIKESTREAM_ROOT_DIR = ../..
 
+include( $${SPIKESTREAM_ROOT_DIR}/spikestream.pri )
+
 TEMPLATE = lib
 
 TARGET = random1
 
-VERSION = 0.2
-
 DESTDIR = $${SPIKESTREAM_ROOT_DIR}/plugins/connections
-
-OBJECTS_DIR = build/objects
-
-MOC_DIR = build/moc
-
-CONFIG += debug thread exceptions
 
 QT += xml opengl sql
 
@@ -23,9 +17,6 @@ QT += xml opengl sql
 INCLUDEPATH += src src/model src/gui \
 				$${SPIKESTREAM_ROOT_DIR}/library/include \
 				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/include
-win32 {
-	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/gmp/include
-}
 
 
 #----------------------------------------------#
