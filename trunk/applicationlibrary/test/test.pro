@@ -1,18 +1,13 @@
-# Test functions for the SpikeStream Application library
-
+# Tests for the SpikeStream Application library
 SPIKESTREAM_ROOT_DIR = ../..
+
+include( $${SPIKESTREAM_ROOT_DIR}/spikestream.pri )
 
 TARGET = testspikestreamapplication
 
-VERSION = 0.2
-
 DESTDIR = $${SPIKESTREAM_ROOT_DIR}/bin
 
-OBJECTS_DIR = build/objects
-
-MOC_DIR = build/moc
-
-CONFIG += debug console qtestlib
+CONFIG += console qtestlib
 
 
 #----------------------------------------------#

@@ -1,5 +1,7 @@
 SPIKESTREAM_ROOT_DIR = ..
 
+include( $${SPIKESTREAM_ROOT_DIR}/spikestream.pri )
+
 TEMPLATE = lib
 
 TARGET = spikestream
@@ -10,15 +12,7 @@ win32 {
 	INSTALLS += target
 }
 
-VERSION = 0.2
-
 DESTDIR = $${SPIKESTREAM_ROOT_DIR}/lib
-
-OBJECTS_DIR = build/objects
-
-MOC_DIR = build/moc
-
-CONFIG += debug thread exceptions
 
 QT += sql xml
 
@@ -27,18 +21,6 @@ QT += sql xml
 #---              INCLUDE PATH              ---#
 #----------------------------------------------#
 INCLUDEPATH += include
-win32 {
-	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/gmp/include
-}
-
-
-#----------------------------------------------#
-#---               LIBRARIES                ---#
-#----------------------------------------------#
-LIBS += -lgmpxx
-win32 {
-	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/extlib/gmp/lib
-}
 
 
 #----------------------------------------------#

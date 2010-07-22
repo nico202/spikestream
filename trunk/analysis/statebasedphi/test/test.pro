@@ -1,18 +1,14 @@
 SPIKESTREAM_ROOT_DIR = ../../..
 
-TARGET = teststatebasedphi
+include( $${SPIKESTREAM_ROOT_DIR}/spikestream.pri )
 
-VERSION = 0.2
+TARGET = teststatebasedphi
 
 DESTDIR = $${SPIKESTREAM_ROOT_DIR}/bin
 
-OBJECTS_DIR = build/objects
-
-MOC_DIR = build/moc
-
 QT += xml opengl sql
 
-CONFIG += debug qtestlib console
+CONFIG += qtestlib console
 
 
 #----------------------------------------------#
@@ -24,9 +20,6 @@ INCLUDEPATH += src \
 				$${SPIKESTREAM_ROOT_DIR}/analysis/statebasedphi/src/database \
 				$${SPIKESTREAM_ROOT_DIR}/analysis/statebasedphi/src/analysis \
 				$${SPIKESTREAM_ROOT_DIR}/analysis/statebasedphi/src/models
-#win32{
-#	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/gmp/include
-#}
 
 
 #----------------------------------------------#
@@ -38,6 +31,7 @@ unix {
 win32 {
 	LIBS += -lstatebasedphi0 -L$${SPIKESTREAM_ROOT_DIR}/plugins/analysis -lspikestreamtest0 -lspikestream0 -L$${SPIKESTREAM_ROOT_DIR}/lib
 }
+
 
 #----------------------------------------------#
 #---            Test Files                  ---#

@@ -1,18 +1,12 @@
 SPIKESTREAM_ROOT_DIR = ../..
 
+include( $${SPIKESTREAM_ROOT_DIR}/spikestream.pri )
+
 TEMPLATE = lib
 
 TARGET = tononinetworks
 
-VERSION = 0.2
-
 DESTDIR = $${SPIKESTREAM_ROOT_DIR}/plugins/networks
-
-OBJECTS_DIR = build/objects
-
-MOC_DIR = build/moc
-
-CONFIG += debug thread exceptions
 
 QT += xml opengl sql
 
@@ -44,7 +38,5 @@ HEADERS = src/gui/TononiNetworksWidget.h \
 
 SOURCES = src/gui/TononiNetworksWidget.cpp \
 			src/model/TononiNetworkBuilder.cpp
-
-
 
 

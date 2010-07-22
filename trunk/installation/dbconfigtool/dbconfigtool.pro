@@ -1,18 +1,12 @@
 SPIKESTREAM_ROOT_DIR = ../..
 
+include( $${SPIKESTREAM_ROOT_DIR}/spikestream.pri )
+
 TEMPLATE = app
 
 TARGET = dbconfigtool
 
-VERSION = 0.2
-
 DESTDIR = $${SPIKESTREAM_ROOT_DIR}/bin
-
-OBJECTS_DIR = build/objects
-
-MOC_DIR = build/moc
-
-CONFIG += debug exceptions
 
 QT += sql xml
 

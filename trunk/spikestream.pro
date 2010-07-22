@@ -1,3 +1,4 @@
+# Components of the SpikeStream build
 TEMPLATE = subdirs
 
 #===========  CORE SPIKESTREAM COMPONENTS  ===========
