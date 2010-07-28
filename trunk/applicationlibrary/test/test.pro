@@ -20,7 +20,7 @@ INCLUDEPATH += ../include
 #---               LIBRARIES                ---#
 #----------------------------------------------#
 unix {
-	LIBS += -lspikestreamapplication -L$${SPIKESTREAM_ROOT_DIR}/lib
+	LIBS += -lspikestreamapplication -lspikestream -L$${SPIKESTREAM_ROOT_DIR}/lib
 }
 win32 {
 	LIBS += -lspikestreamapplication0 -L$${SPIKESTREAM_ROOT_DIR}/lib

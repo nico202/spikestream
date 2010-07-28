@@ -10,8 +10,6 @@ RC_FILE = spikestream.rc
 
 DESTDIR = $${SPIKESTREAM_ROOT_DIR}/bin
 
-CONFIG += console
-
 QT += xml opengl sql
 
 

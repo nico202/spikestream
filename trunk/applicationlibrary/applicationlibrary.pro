@@ -6,6 +6,14 @@ TEMPLATE = lib
 
 TARGET = spikestreamapplication
 
+
+#----------------------------------------------#
+#---          INSTALLATION LOCATION         ---#
+#----------------------------------------------#
+unix {
+	target.path = /usr/local/lib
+	INSTALLS += target
+}
 win32 {
 	# Add a copy of the libary to the bin directory
 	target.path = $${SPIKESTREAM_ROOT_DIR}/bin

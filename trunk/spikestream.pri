@@ -8,16 +8,25 @@ CONFIG += debug
 
 
 #----------------------------------------------#
+#---             CONSOLE OUTPUT             ---#
+#----------------------------------------------#
+CONFIG += console
+
+
+#----------------------------------------------#
 #---       INCLUDE AND LIBRARY PATHS        ---#
 #----------------------------------------------#
 unix {
 	# Qwt
 	INCLUDEPATH += /usr/local/qwt-5.2.1-svn/include
 	LIBS += -lqwt -L/usr/local/qwt-5.2.1-svn/lib
+
+	# GMP
+	LIBS += -lgmpxx
 }
 win32 {
 	# Qwt
-	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/gmp/include  $${SPIKESTREAM_ROOT_DIR}/extlib/qwt/include
+	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/qwt/include
 	LIBS += -lqwt5 -L$${SPIKESTREAM_ROOT_DIR}/extlib/qwt/lib
 
 	# GMP

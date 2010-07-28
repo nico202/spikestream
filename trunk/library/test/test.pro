@@ -21,7 +21,7 @@ INCLUDEPATH += src ../include $${SPIKESTREAM_ROOT_DIR}/testlibrary/include
 #---               LIBRARIES                ---#
 #----------------------------------------------#
 unix {
-	LIBS += -lspikestreamtest -L$${SPIKESTREAM_ROOT_DIR}/lib
+	LIBS += -lspikestreamtest -lspikestream -L$${SPIKESTREAM_ROOT_DIR}/lib
 }
 win32 {
 	LIBS += -lspikestreamtest0 -L$${SPIKESTREAM_ROOT_DIR}/lib -lspikestream0

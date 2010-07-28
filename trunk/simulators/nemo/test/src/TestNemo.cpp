@@ -1,8 +1,5 @@
 #include "TestNemo.h"
 
-//Nemo includes
-#include "Nemo.h"
-
 //Qt includes
 #include <QDebug>
 

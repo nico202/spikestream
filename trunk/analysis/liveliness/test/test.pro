@@ -25,7 +25,7 @@ INCLUDEPATH += src \
 #---               LIBRARIES                ---#
 #----------------------------------------------#
 unix {
-	LIBS += -lliveliness -L$${SPIKESTREAM_ROOT_DIR}/plugins/analysis -lspikestreamtest -L$${SPIKESTREAM_ROOT_DIR}/lib
+	LIBS += -lliveliness -L$${SPIKESTREAM_ROOT_DIR}/plugins/analysis -lspikestreamtest -lspikestreamapplication -lspikestream -L$${SPIKESTREAM_ROOT_DIR}/lib
 }
 win32 {
 	LIBS += -lliveliness0 -L$${SPIKESTREAM_ROOT_DIR}/plugins/analysis -lspikestreamtest0 -lspikestream0 -L$${SPIKESTREAM_ROOT_DIR}/lib
