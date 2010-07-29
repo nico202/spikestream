@@ -84,7 +84,6 @@ void NRMDataImporter::run(){
 	catch(...){
 		setError("Unknown Exception thrown by DataImporter.");
 	}
-	qDebug()<<"DATA IMPORTER FINISHED. Task="<<currentTask;
 	currentTask = -1;
 	stopThread = true;
 }
@@ -270,7 +269,6 @@ void NRMDataImporter::addConnections(){
 	//Wait for network to finish task
 	while(network->isBusy())
 		usleep(50000);
-	qDebug()<<"FINISHED SLEEPING::::::::::::";
 }
 
 

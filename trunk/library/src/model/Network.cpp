@@ -199,7 +199,8 @@ void Network::deleteNeuronGroups(QList<unsigned int>& neurGrpIDList){
 	currentNeuronTask = DELETE_NEURONS_TASK;
 	neuronNetworkDaoThread->start();
 
-	//Identify connections to or from the neuron groups being deleted
+	/* Delete connections to or from the neuron groups being deleted from memory
+		The database deletion will be done automatically by the database */
 	QList<unsigned int> deleteConGrpIDs;
 	for(QHash<unsigned int, ConnectionGroup*>::iterator iter = connGrpMap.begin(); iter != connGrpMap.end(); ++iter){
 		foreach(unsigned int neurGrpID, neurGrpIDList){
@@ -208,9 +209,17 @@ void Network::deleteNeuronGroups(QList<unsigned int>& neurGrpIDList){
 			}
 		}
 	}
+	//Do the deletion outside of the map iteration
+	foreach(unsigned tmpConGrpID, deleteConGrpIDs){
+		if(!connGrpMap.contains(tmpConGrpID))
+			throw SpikeStreamException("Connection group ID " + QString::number(tmpConGrpID) + " cannot be found in network.");
+		delete connGrpMap[tmpConGrpID];
+		connGrpMap.remove(tmpConGrpID);
+	}
+
 
 	//Delete any connection groups to or from the deleted neuron groups
-	deleteConnectionGroups(deleteConGrpIDs);
+	//deleteConnectionGroups(deleteConGrpIDs);
 }
 
 

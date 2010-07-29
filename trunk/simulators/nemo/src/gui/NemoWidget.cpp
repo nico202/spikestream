@@ -118,7 +118,6 @@ NemoWidget::~NemoWidget(){
 
 /*! Switches the archiving of the simulation on or off */
 void NemoWidget::archiveStateChanged(int state){
-	qDebug()<<"ARCHIVE STATE CHANGED";
 	if(state == Qt::Checked){
 		archiveDescriptionEdit->setEnabled(true);
 		setArchiveDescriptionButton->setEnabled(true);

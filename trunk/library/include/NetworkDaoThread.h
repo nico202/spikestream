@@ -79,6 +79,9 @@ namespace spikestream {
 			/*! The number of values statement used when adding connections */
 			int numConBuffers;
 
+			/*! The number of values statement used when adding neurons */
+			int numNeurBuffers;
+
 			const static unsigned int NO_TASK_DEFINED = 1;
 			const static unsigned int ADD_CONNECTION_GROUPS_TASK = 2;
 			const static unsigned int ADD_NEURON_GROUPS_TASK = 3;

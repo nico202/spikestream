@@ -250,7 +250,6 @@ void NRMImportDialog::threadFinished(){
 			showPage2();
 		break;
 		case ADD_NEURON_GROUPS_TASK:
-			qDebug()<<"IMPORT DIALOG FINISHED ADDING NEURONS";
 			//Store the new neuron group IDs in the NRM network
 			addNeuronGroupIDsToNRMNetwork();
 
@@ -261,12 +260,10 @@ void NRMImportDialog::threadFinished(){
 			addConnectionGroups();
 		break;
 		case ADD_CONNECTION_GROUPS_TASK:
-			qDebug()<<"IMPORT DIALOG FINISHED ADDING CONNECTIONS";
 			//Add the archives to the database
 			addArchives();
 		break;
 		case ADD_ARCHIVES_TASK:
-			qDebug()<<"IMPORT DIALOG FINISHED ADDING ARCHIVES";
 			//Add training to the database
 			addTraining();
 		break;
@@ -422,7 +419,6 @@ void NRMImportDialog::loadNetworkFromFiles(){
 
 /*! Stores data set containing firing pattern as an archive. */
 void NRMImportDialog::addArchives(){
-	qDebug()<<"IMPORT DIALOG ADDING ARCHIVES";
     //Do nothing if there is no data
 	if(fileLoader->getDataSet()->size() == 0){
 		qDebug()<<"No archive data.";
@@ -548,7 +544,6 @@ void NRMImportDialog::addNeuronGroupIDsToNRMNetwork(){
 
 /*! Prepares the data importer to add training to the database */
 void NRMImportDialog::addTraining(){
-	qDebug()<<"IMPORT DIALOG ADDING TRAINING";
     operationCancelled = false;
     currentTask = ADD_TRAINING_TASK;
     showBusyPage("Adding training to database...");

@@ -550,6 +550,15 @@ QList<NeuronType> NetworkDao::getNeuronTypes(){
 }
 
 
+/*! Returns the first neuron ID in the group */
+unsigned NetworkDao::getStartNeuronID(unsigned neuronGroupID){
+	QSqlQuery query = getQuery("SELECT MIN(NeuronID) FROM Neurons WHERE NeuronGroupID=" + QString::number(neuronGroupID));
+	executeQuery(query);
+	query.next();
+	return Util::getUInt(query.value(0).toString());
+}
+
+
 /*! Returns the synapse type for a specific connection group */
 SynapseType NetworkDao::getSynapseType(unsigned int synapseTypeID){
 	//Resuse other method - not efficient, but more likely to be reliable than duplicating code.

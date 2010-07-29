@@ -52,7 +52,6 @@ AnalysisLoaderWidget::AnalysisLoaderWidget(QWidget* parent) : QWidget(parent) {
 
 /*! Destructor */
 AnalysisLoaderWidget::~AnalysisLoaderWidget(){
-	qDebug()<<"Destroying AnalysisLoaderWidget";
 }
 
 

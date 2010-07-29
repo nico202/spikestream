@@ -57,6 +57,7 @@ namespace spikestream{
 			NeuronType getNeuronType(unsigned int neuronTypeID);
 			QList<NeuronType> getNeuronTypes();
 			QHash<QString, double> getNeuronParameters(const NeuronGroupInfo& neurGrpInfo);
+			unsigned getStartNeuronID(unsigned neuronGroupID);
 			QHash<QString, double> getSynapseParameters(const ConnectionGroupInfo& conGrpInfo);
 			SynapseType getSynapseType(unsigned int synapseTypeID);
 			QList<SynapseType> getSynapseTypes();

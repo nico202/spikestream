@@ -19,7 +19,6 @@ TruthTableModel::TruthTableModel() : QAbstractTableModel(){
 
 /*! Destructor */
 TruthTableModel::~TruthTableModel(){
-	qDebug()<<"DELETING TRUTH TABLE MODEL";
 }
 
 

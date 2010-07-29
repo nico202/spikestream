@@ -42,6 +42,7 @@ class TestNetworkDao : public TestDao {
 		void testGetNeuronParameters();
 		void testGetNeuronType();
 		void testGetNeuronTypes();
+		void testGetStartNeuronID();
 		void testGetSynapseParameters();
 		void testGetSynapseType();
 		void testGetSynapseTypes();

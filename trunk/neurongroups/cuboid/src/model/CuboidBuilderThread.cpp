@@ -67,8 +67,6 @@ void CuboidBuilderThread::run(){
 	catch(...){
 		setError("An unknown error occurred.");
 	}
-
-	qDebug()<<"CUBOID BUILDER COMPLETE";
 }
 
 
@@ -148,7 +146,6 @@ void CuboidBuilderThread::createNeuronGroups(const QString& name, const QString&
 		unsigned int neurTypeID = neurType.getID();
 		if(paramMap.contains("neuron_type_id_" + QString::number(neurTypeID))){
 			total += paramMap["neuron_type_id_" + QString::number(neurTypeID)];
-			qDebug()<<"TOTAL: "<<total;
 			neuronTypePercentThreshMap[total] = neurTypeID;
 			newNeuronGroupMap[neurTypeID] = new NeuronGroup(NeuronGroupInfo(0, name, description, paramMap, neurTypeID));
 		}
@@ -178,10 +175,8 @@ void CuboidBuilderThread::addNeurons(){
 
 					QMap<double, unsigned int>::iterator neurTypePercentThreshMapEnd = neuronTypePercentThreshMap.end();
 					for(QMap<double, unsigned int>::iterator iter = neuronTypePercentThreshMap.begin(); iter != neurTypePercentThreshMapEnd; ++iter){
-						qDebug()<<"COUNTER: "<<cntr<<" ranNumDensity: "<<ranNumDensity<<" ranNumPercent: "<<ranNumPercent<<" threshold: "<<iter.key()<<" neur type id: "<<iter.value();
 						//Add neuron if the random number is less than the threshold
 						if(ranNumPercent <= iter.key()){
-							qDebug()<<"ADDING NEURON TO GROUP TYPE: "<<iter.value();
 							newNeuronGroupMap[iter.value()]->addNeuron(xPos, yPos, zPos);
 							break;
 						}
@@ -196,7 +191,7 @@ void CuboidBuilderThread::addNeurons(){
 	}
 
 	//Print information about the pre-database state of the neuron groups
-	printSummary();
+	//printSummary();
 }
 
 
@@ -212,7 +207,7 @@ double CuboidBuilderThread::getParameter(const QString& paramName, const QHash<Q
 void CuboidBuilderThread::printSummary(){
 	cout<<newNeuronGroupMap.size()<<" neuron groups added. Width: "<<width<< " length: "<<length<<" height: "<<height<<endl;
 	for(QHash<unsigned int, NeuronGroup*>::iterator iter = newNeuronGroupMap.begin(); iter != newNeuronGroupMap.end(); ++iter){
-		cout<<"Neuron type "<<iter.key()<<" added "<<iter.value()->size()<<"neurons."<<endl;
+		cout<<"Neuron type "<<iter.key()<<" added "<<iter.value()->size()<<" neurons."<<endl;
 	}
 }
 

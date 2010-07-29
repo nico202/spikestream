@@ -62,7 +62,6 @@ void AnalysisRunner::prepareAnalysisTask(const AnalysisInfo& analysisInfo, int f
 	until all of the time steps have been analyzed. */
 void AnalysisRunner::run(){
 	stopThread = false;
-	qDebug()<<"Analysis Runner thread started";
 
 	//Launch the first batch of threads
 	unsigned int threadCount = 0;
@@ -88,8 +87,6 @@ void AnalysisRunner::run(){
 	while(!stopThread){
 		usleep(500000);//Sleep for half a second
 	}
-
-	qDebug()<<"Analysis runner thread stopped.";
 }
 
 

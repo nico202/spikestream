@@ -9,6 +9,9 @@ using namespace spikestream;
 /*! Structure holding pointers to neurons. */
 typedef QHash<unsigned int, Neuron*> NeuronMap;
 
+/*! An iterator for working through all of the neurons in the group. */
+typedef NeuronMap::iterator NeuronIterator;
+
 namespace spikestream {
 
 	/*! A group of neurons. */
@@ -35,7 +38,7 @@ namespace spikestream {
 			bool isLoaded() { return loaded; }
 			void setLoaded(bool loaded) { this->loaded = loaded; }
 			void setID(unsigned int id){ info.setID(id); }
-			void setNeuronMap(NeuronMap* newMap) { this->neuronMap = newMap; }
+			void setNeuronMap(NeuronMap* newMap);
 			void setParameters(QHash<QString, double>& paramMap){ this->parameterMap = paramMap; }
 			void setStartNeuronID(unsigned int id) { this->startNeuronID = id; }
 			int size();

@@ -85,7 +85,6 @@ void AbstractExportAnalysisDialog::okButtonClicked(){
 	}
 
 	try{
-		qDebug()<<"Exporting analysis to file: "<<fileLineEdit->text()<<". Export type: "<<exportTypeCombo->currentIndex();
 		switch(exportTypeCombo->currentIndex()){
 			case 0: exportCommaSeparated(fileLineEdit->text());
 			break;

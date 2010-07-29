@@ -127,7 +127,6 @@ bool ConnectionGroupModel::setData(const QModelIndex& index, const QVariant&, in
 
 	//Change selection status of connection group
 	if(index.column() == selectCol){
-		qDebug()<<"SELECTION CHANGE "<<selectionMap.size()<<" row: "<<index.row()<<" col: "<<index.column();
 		if(selectionMap.contains(index.row()))
 			selectionMap.remove(index.row());
 		else

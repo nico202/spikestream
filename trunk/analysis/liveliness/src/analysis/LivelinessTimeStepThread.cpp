@@ -26,7 +26,6 @@ LivelinessTimeStepThread::~LivelinessTimeStepThread(){
 /*! Run method inherited from QThread */
 void LivelinessTimeStepThread::run(){
 	stop = false;
-	qDebug()<<"LivelinessTimeStepThread started for time step "<<timeStep<<".";
 
 	//Start timer
 	PerformanceTimer timer;
@@ -55,7 +54,6 @@ void LivelinessTimeStepThread::run(){
 	//Show time taken for the analysis
 	timer.printTime("Liveliness Analysis time step " + QString::number(timeStep));
 
-	qDebug()<<"LivelinessTimeStepThread stopped for time step "<<timeStep<<".";
 	stop = true;
 }
 

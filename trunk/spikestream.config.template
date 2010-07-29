@@ -27,4 +27,4 @@ maximize_gui = true
 
 # DATABASE OPTIMIZATION PARAMETERS
 number_insert_connection_buffers = 100
-
+number_insert_neuron_buffers = 100

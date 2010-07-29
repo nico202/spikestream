@@ -76,7 +76,6 @@ void AbstractParametersEditDialog::addParameters(QVBoxLayout* mainVLayout){
 		else if(info.getType() == ParameterInfo::OPTION){
 			gridLayout->addWidget(new QLabel(info.getName()), cntr, 0);
 			QComboBox* tmpComboBox = new QComboBox();
-			qDebug()<<"OPTION NAMES SIZE: "<<info.getOptionNames().size();
 			foreach(QString optionName, info.getOptionNames())
 				tmpComboBox->addItem(optionName);
 			comboMap[info.getName()] = tmpComboBox;
