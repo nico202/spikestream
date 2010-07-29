@@ -55,7 +55,6 @@ SimulationLoaderWidget::SimulationLoaderWidget(QWidget* parent) : QWidget(parent
 
 /*! Destructor */
 SimulationLoaderWidget::~SimulationLoaderWidget(){
-	qDebug()<<"Destroying SimulationLoaderWidget";
 }
 
 

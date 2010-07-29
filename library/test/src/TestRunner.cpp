@@ -23,13 +23,12 @@ void TestRunner::runTests(){
 	int argsSize = 0;
 	char* argsChar[0];
 	QCoreApplication coreApplication(argsSize, argsChar);
-		qDebug()<<"DIRECTORY PATH: "<<QCoreApplication::applicationDirPath();
 
 	TestDatabaseDao testDatabaseDao;
 	QTest::qExec(&testDatabaseDao);
 
 	TestNetworkDao testNetworkDao;
-    QTest::qExec(&testNetworkDao);
+	QTest::qExec(&testNetworkDao);
 
 	TestNetworkDaoThread testNetworkDaoThread;
     QTest::qExec(&testNetworkDaoThread);

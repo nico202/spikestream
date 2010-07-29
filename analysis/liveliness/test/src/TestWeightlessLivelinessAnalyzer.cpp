@@ -328,7 +328,6 @@ void TestWeightlessLivelinessAnalyzer::checkClusters(QList<Cluster>& clusterList
 		//Look for a cluster that has this neuron id string
 		bool clusterFound = false;
 		foreach(Cluster clstr, clusterList){
-			//qDebug()<<"COMPARING "<<clstrStr<<" WITH "<<clstr.getNeuronIDString();
 			if(clstr.getNeuronIDString() == clstrStr){
 				QCOMPARE( Util::rDouble(clstr.getLiveliness(), 3), clstrLiveliness );
 				clusterFound = true;
@@ -336,7 +335,6 @@ void TestWeightlessLivelinessAnalyzer::checkClusters(QList<Cluster>& clusterList
 			}
 		}
 		if(!clusterFound){
-			qDebug()<<"Cluster string: '"<<clstrStr<<"'";
 			QFAIL("Cluster in cluster string cannot be found in cluster list");
 			return;
 		}

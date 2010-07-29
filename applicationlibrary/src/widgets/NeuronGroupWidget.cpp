@@ -106,6 +106,11 @@ void NeuronGroupWidget::networkChanged(){
 /*! Called when the network has finished deleting neurons.
 	Informs other classes that network has changed. */
 void NeuronGroupWidget::networkTaskFinished(){
+	//Check for errors
+	if(Globals::getNetwork()->isError())
+		qCritical()<<Globals::getNetwork()->getErrorMessage();
+	Globals::getNetwork()->clearError();
+
 	progressDialog->setValue(100);
 	progressDialog->close();
 	//delete progressDialog;

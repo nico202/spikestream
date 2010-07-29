@@ -2,6 +2,8 @@
 #include "SpikeStreamException.h"
 using namespace spikestream;
 
+#include <QDebug>
+
 
 /*! Constructor */
 NeuronGroup::NeuronGroup(const NeuronGroupInfo& info){
@@ -16,10 +18,7 @@ NeuronGroup::NeuronGroup(const NeuronGroupInfo& info){
 NeuronGroup::~NeuronGroup(){
 	//Deletes neuron map and all its dynamically allocated objects
 	if(neuronMap != NULL){
-		NeuronMap::iterator mapEnd = neuronMap->end();//Saves accessing this function multiple times
-		for(NeuronMap::iterator iter=neuronMap->begin(); iter != mapEnd; ++iter){
-			delete iter.value();
-		}
+		clearNeurons();
 		delete neuronMap;
 	}
 }
@@ -104,6 +103,14 @@ double NeuronGroup::getParameter(const QString &key){
 	if(!parameterMap.contains(key))
 		throw SpikeStreamException("Cannot find parameter with key: " + key + " in neuron group with ID " + QString::number(info.getID()));
 	return  parameterMap[key];
+}
+
+
+/*! Replaces the neuron map with a new neuron map.
+	Neurons are not cleaned up because they might be included in the new map. */
+void NeuronGroup::setNeuronMap(NeuronMap* newMap){
+	delete neuronMap;
+	this->neuronMap = newMap;
 }
 
 

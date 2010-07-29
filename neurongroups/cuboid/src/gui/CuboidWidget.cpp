@@ -104,7 +104,7 @@ CuboidWidget::CuboidWidget(QWidget* parent) : QWidget(parent) {
 	densityEdit->setMaximumSize(100, 30);
 	densityEdit->setValidator(doubleValidator);
 	QHBoxLayout* miscLayout = new QHBoxLayout();
-	miscLayout->addWidget(new QLabel("Spacing (neurons): "));
+	miscLayout->addWidget(new QLabel("Spacing: "));
 	miscLayout->addWidget(spacingEdit);
 	miscLayout->addWidget(new QLabel(" Density (0-1): "));
 	miscLayout->addWidget(densityEdit);
@@ -242,7 +242,7 @@ void CuboidWidget::addButtonClicked(){
 		QMessageBox::critical(this, "Cuboid Neuron Group Builder Error", "Proposed neuron group overlaps with a neuron group that is already in the database.\nPlease change the position and/or the width, length and height.", QMessageBox::Ok);
 		return;
 	}
-	Util::printParameterMap(paramMap);
+
 	//Start thread to add neuron group
 	try{
 		builderThread->prepareAddNeuronGroups(nameEdit->text(), descriptionEdit->text(), paramMap);
@@ -316,7 +316,6 @@ unsigned int CuboidWidget::getNeuronTypeID(const QString& comboText){
 		throw SpikeStreamException("Cannot extract a neuron type ID from empty text.");
 
 	QRegExp regExp("[()]");
-	qDebug()<<"TEST SECTION: "<<comboText.section(regExp, 1, 1);
 	return Util::getUInt(comboText.section(regExp, 1, 1));
 }
 

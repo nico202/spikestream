@@ -59,7 +59,7 @@ namespace spikestream {
 			/*! To enter height of neuron group */
 			QLineEdit* heightEdit;
 
-			/*! To enter height of neuron group */
+			/*! To enter spacing between neurons */
 			QLineEdit* spacingEdit;
 
 			/*! To enter density of neuron group - the probability that a neuron is added at a particular position */

@@ -976,6 +976,24 @@ void TestNetworkDao::testGetNeuronGroupID(){
 }
 
 
+void TestNetworkDao::testGetStartNeuronID(){
+	//Add test network
+	addTestNetwork1();
+
+	//Check that method executes without crashing or returning null
+	try {
+		NetworkDao networkDao(dbInfo);
+		QVERIFY(networkDao.getStartNeuronID(neurGrp1ID) != 0);
+	}
+	catch(SpikeStreamException ex){
+		QFAIL(ex.getMessage().toAscii());
+	}
+	catch(...){
+		QFAIL("Unrecognized exception thrown.");
+	}
+}
+
+
 void TestNetworkDao::testIsWeightlessNetwork(){
 	//Add test networks
 	addWeightlessTestNetwork1();

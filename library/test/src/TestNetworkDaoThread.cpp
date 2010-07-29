@@ -28,22 +28,24 @@ void TestNetworkDaoThread::testAddConnectionGroup(){
 	   and we need neuron groups because of foreign key constraints */
 		//Add from neuron group
 		NeuronGroup fromGrp( NeuronGroupInfo(0, "fromNeuronGroup1Name", "fromNeuronGroup1Desc", QHash<QString, double>(), 1) );
-		NeuronMap* neurMap = fromGrp.getNeuronMap();
+		NeuronMap* neurMap = new NeuronMap();
 		(*neurMap)[1] = new Neuron(0, 0, 0);
 		(*neurMap)[2] = new Neuron(0, 1, 0);
 		(*neurMap)[3] = new Neuron(1, 0, 0);
 		(*neurMap)[4] = new Neuron(1, 1, 0);
+		fromGrp.setNeuronMap(neurMap);
 		NetworkDaoThread netDaoThread(dbInfo);
 		netDaoThread.prepareAddNeuronGroup(netInfo.getID(), &fromGrp);
 		runThread(netDaoThread);
 
 		//Add to neuron group
 		NeuronGroup toGrp( NeuronGroupInfo(0, "toNeuronGroup1Name", "toNeuronGroup1Desc", QHash<QString, double>(), 1) );
-		neurMap = toGrp.getNeuronMap();
+		neurMap = new NeuronMap();
 		(*neurMap)[1] = new Neuron(0, 0, 10);
 		(*neurMap)[2] = new Neuron(0, 3, 10);
 		(*neurMap)[3] = new Neuron(2, 0, 10);
 		(*neurMap)[4] = new Neuron(1, 7, 10);
+		toGrp.setNeuronMap(neurMap);
 		netDaoThread.prepareAddNeuronGroup(netInfo.getID(), &toGrp);
 		runThread(netDaoThread);
 
@@ -99,6 +101,9 @@ void TestNetworkDaoThread::testAddConnectionGroup(){
     catch(SpikeStreamException& ex){
 		QFAIL(ex.getMessage().toAscii());
     }
+	catch (...){
+		QFAIL("An unknown exception occurred.");
+	}
 }
 
 

@@ -26,6 +26,7 @@ NetworkDaoThread::NetworkDaoThread(const DBInfo& dbInfo) : NetworkDao(dbInfo) {
 	//Load up configuration parameters
 	ConfigLoader configLoader;
 	numConBuffers = Util::getInt(configLoader.getParameter("number_insert_connection_buffers"));
+	numNeurBuffers = Util::getInt(configLoader.getParameter("number_insert_neuron_buffers"));
 }
 
 
@@ -362,7 +363,7 @@ void NetworkDaoThread::addConnectionGroups(){
 
 		//Check that we have added all the connections
 		if(connectionGroup->size() != conAddedCntr)
-			throw SpikeStreamException("Number of connections added to database: " + QString::number(conCntr) + " does not match size of connection group: " + QString::number(connectionGroup->size()));
+			throw SpikeStreamException("Number of connections added to database: " + QString::number(conAddedCntr) + " does not match size of connection group: " + QString::number(connectionGroup->size()));
 
 		#ifdef TIME_PERFORMANCE
 			timer.printTime("Number of buffers: " + QString::number(numConBuffers) + ". Number of connections remaining: " + QString::number(tmpConList.size()) + ". Adding " + QString::number(conCntr) + " connections");
@@ -382,11 +383,10 @@ void NetworkDaoThread::addNeuronGroups(){
 		setError("Network ID has not been set.");
 		return;
     }
-
     //Work through the list of neuron groups
-    for(QList<NeuronGroup*>::iterator iter = neuronGroupList.begin(); iter != neuronGroupList.end(); ++iter){
+	for(QList<NeuronGroup*>::iterator neurGrpIter = neuronGroupList.begin(); neurGrpIter != neuronGroupList.end(); ++neurGrpIter){
 		//User friendly pointer to group
-		NeuronGroup* neuronGroup = *iter;
+		NeuronGroup* neuronGroup = *neurGrpIter;
 
 		//Get information about the neuron group
 		NeuronGroupInfo neurGrpInfo = neuronGroup->getInfo();
@@ -423,48 +423,104 @@ void NetworkDaoThread::addNeuronGroups(){
 		if(stopThread)
 			return;
 
-		//Add neurons
-		bool firstTime = true;
-		NeuronMap* neurMap = neuronGroup->getNeuronMap();
+		#ifdef TIME_PERFORMANCE
+			PerformanceTimer timer;
+		#endif//TIME_PERFORMANCE
+
+		//Build query
+		query = getQuery();
+		queryStr = "INSERT INTO Neurons (NeuronGroupID, X, Y, Z) VALUES ";
+		for(int i=0; i<numNeurBuffers-1; ++i)
+			queryStr += "(?, ?, ?, ?),";
+		queryStr += "(?, ?, ?, ?)";
+		query.prepare(queryStr);
+
+		//Add neurons to database
+		int neurCntr = 0, offset = 0, neurAddedCntr = 0, tmpNeurGrpID = neuronGroup->getID();
 		NeuronMap* newNeurMap = new NeuronMap();
-		NeuronMap::iterator mapEnd = neurMap->end();//Saves accessing this function multiple times
-		for(NeuronMap::iterator iter=neurMap->begin(); iter != mapEnd; ++iter){
-			QString queryStr("INSERT INTO Neurons (NeuronGroupID, X, Y, Z) VALUES (");
-			queryStr += QString::number(neuronGroup->getID()) + ", ";
-			queryStr += QString::number(iter.value()->getXPos()) + ", ";
-			queryStr += QString::number(iter.value()->getYPos()) + ", ";
-			queryStr += QString::number(iter.value()->getZPos()) + ")";
-			query = getQuery(queryStr);
-			executeQuery(query);
+		QList<Neuron*> tmpNeurList;
+		NeuronIterator endNeurGrp = neuronGroup->end();
+		for(NeuronIterator neurIter = neuronGroup->begin(); neurIter != endNeurGrp; ++neurIter){
+			offset = 4 * (neurCntr % numNeurBuffers);
 
-			//Add neuron with correct id to the new map
-			int lastInsertID = query.lastInsertId().toInt();
-			if(lastInsertID < START_NEURON_ID){
-				setError("Insert ID for Neuron is invalid.");
-				return;
+			//Bind values to query
+			tmpNeurList.append(neurIter.value());
+			query.bindValue(0 + offset, tmpNeurGrpID);
+			query.bindValue(1 + offset, neurIter.value()->getXPos());
+			query.bindValue(2 + offset, neurIter.value()->getYPos());
+			query.bindValue(3 + offset, neurIter.value()->getZPos());
+
+			//Execute query if we have added a whole number of buffers
+			if(neurCntr % numNeurBuffers == numNeurBuffers-1){
+				executeQuery(query);
+
+				//Add neuron id to neuron - last insert id is the id of the first neuron in the list of value entries
+				int lastInsertID = query.lastInsertId().toInt();
+				if(lastInsertID < START_NEURON_ID)
+					throw SpikeStreamException("Insert ID for Neuron is invalid.");
+				if(tmpNeurList.size() != numNeurBuffers)
+					throw SpikeStreamException("Temporary neuron list size " + QString::number(tmpNeurList.size()) + " does not match number of buffers: " + QString::number(numNeurBuffers));
+
+				//Set neuron IDs and add neurons to new map with the new ID
+				for(int i=0; i<tmpNeurList.size(); ++i){
+					tmpNeurList.at(i)->setID(lastInsertID + i);
+					(*newNeurMap)[lastInsertID + i] = tmpNeurList.at(i);
+				}
+
+				//Count number of neurons that have been added
+				neurAddedCntr += numNeurBuffers;
+
+				//Clear up list
+				tmpNeurList.clear();
 			}
-			(*newNeurMap)[lastInsertID] = iter.value();
 
-			//Store the id in the neuron
-			iter.value()->setID(lastInsertID);
-
-			/* Store the first neuron id in the group.
-				NOTE: Most neuron groups are stored with continuously increasing IDs, but
-				there may be exceptions, so take care! */
-			if(firstTime){
-				neuronGroup->setStartNeuronID(lastInsertID);
-				firstTime = false;
-			}
+			//Keep track of the number of neurons
+			++neurCntr;
 
 			if(stopThread)
 				return;
 		}
-		//Add the correct map to the neuron group. This should also clean up the old map
-		neuronGroup->setNeuronMap(newNeurMap);
 
-		/* Clean up the dynamically allocated neuron map, but keep the dynamically allocated
-			neurons, which are used in the new map */
-		delete neurMap;
+		//Add remaining neurons individually
+		if(!tmpNeurList.isEmpty()){
+			query = getQuery();
+			query.prepare("INSERT INTO Neurons ( NeuronGroupID, X, Y, Z) VALUES (?, ?, ?, ?)");
+			for(QList<Neuron*>::iterator neurListIter = tmpNeurList.begin(); neurListIter != tmpNeurList.end(); ++neurListIter){
+				query.bindValue(0, tmpNeurGrpID);
+				query.bindValue(1, (*neurListIter)->getXPos());
+				query.bindValue(2, (*neurListIter)->getYPos());
+				query.bindValue(3, (*neurListIter)->getZPos());
+
+				//Execute query
+				executeQuery(query);
+
+				//Add neuron id to neuron
+				int lastInsertID = query.lastInsertId().toInt();
+				if(lastInsertID < START_NEURON_ID)
+					throw SpikeStreamException("Insert ID for Neuron is invalid.");
+				(*neurListIter)->setID(lastInsertID);
+				(*newNeurMap)[lastInsertID] = *neurListIter;
+
+				//Count number of neurons that have been added
+				++neurAddedCntr;
+			}
+		}
+
+		//Check that we have added all the neurons
+		if(neuronGroup->size() != neurAddedCntr)
+			throw SpikeStreamException("Number of neurons added to database: " + QString::number(neurAddedCntr) + " does not match size of neuron group: " + QString::number(neuronGroup->size()));
+
+
+		//Set the start ID of the neuron group
+		NetworkDao networkDao(this->getDBInfo());
+		neuronGroup->setStartNeuronID( networkDao.getStartNeuronID(tmpNeurGrpID) );
+
+		#ifdef TIME_PERFORMANCE
+			timer.printTime("Adding neurons. Number of buffers: " + QString::number(numNeurBuffers) + ". Number of neurons remaining: " + QString::number(tmpNeurList.size()) + ". Added " + QString::number(neurAddedCntr) + " neurons");
+		#endif//TIME_PERFORMANCE
+
+		//Add the new map to the neuron group. This should also clean up the old map
+		neuronGroup->setNeuronMap(newNeurMap);
 
 		//Neuron group now reflects state of table in database, so set loaded to true
 		neuronGroup->setLoaded(true);
