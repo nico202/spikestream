@@ -117,12 +117,13 @@ void CuboidBuilderThread::addNeuronGroupsToDatabase(){
 	addNeurons();
 
 	//Add the neuron groups to the network
-	QList<NeuronGroup*> neurGrpList;
+	newNeuronGroupList.clear();
 	for(QHash<unsigned int, NeuronGroup*>::iterator iter = newNeuronGroupMap.begin(); iter != newNeuronGroupMap.end(); ++iter)
-		neurGrpList.append(iter.value());
+		newNeuronGroupList.append(iter.value());
 	connect(currentNetwork, SIGNAL(taskFinished()), this, SLOT(networkTaskFinished()),  Qt::UniqueConnection);
-	currentNetwork->addNeuronGroups(neurGrpList);
+	currentNetwork->addNeuronGroups(newNeuronGroupList);
 }
+
 
 
 /*! Clears error state and message */

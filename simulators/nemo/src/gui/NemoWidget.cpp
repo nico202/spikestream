@@ -41,7 +41,9 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	controlsWidget->setEnabled(false);
 	QVBoxLayout* controlsVBox = new QVBoxLayout(controlsWidget);
 
-	//Add load, unload and parameters buttons
+	//Add test, load, unload and parameters buttons
+	testButton = new QPushButton("Test");
+	connect(testButton, SIGNAL(clicked()), this, SLOT(testNemoInstallation()));
 	loadButton = new QPushButton("Load");
 	connect(loadButton, SIGNAL(clicked()), this, SLOT(loadSimulation()));
 	unloadButton = new QPushButton("Unload");
@@ -54,6 +56,7 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	nemoParametersButton = new QPushButton(" Nemo Parameters ");
 	connect(nemoParametersButton, SIGNAL(clicked()), this, SLOT(setNemoParameters()));
 	QHBoxLayout* loadLayout = new QHBoxLayout();
+	loadLayout->addWidget(testButton);
 	loadLayout->addWidget(loadButton);
 	loadLayout->addWidget(unloadButton);
 	loadLayout->addWidget(neuronParametersButton);
@@ -277,6 +280,13 @@ void NemoWidget::setSynapseParameters(){
 	SynapseParametersDialog* dialog = new SynapseParametersDialog(this);
 	dialog->exec();
 	delete dialog;
+}
+
+
+/*! Tests the installation of Nemo and the CUDA hardware */
+void NemoWidget::testNemoInstallation(){
+	QString testResult = nemoWrapper->testConfiguration();
+	QMessageBox::information (this, "Nemo Status", testResult, QMessageBox::Ok, QMessageBox::NoButton);
 }
 
 

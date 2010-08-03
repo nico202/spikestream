@@ -86,6 +86,8 @@ namespace spikestream {
 			/*! Density of the neurons */
 			double density;
 
+			QList<NeuronGroup*> newNeuronGroupList;
+
 
 			//=======================  METHODS  ==========================
 			void addNeuronGroupsToDatabase();
@@ -96,6 +98,8 @@ namespace spikestream {
 			void printSummary();
 			void setError(const QString& errorMessage);
 			void storeParameters(const QHash<QString, double>& paramMap);
+
+			void testCheckProgress();
 
 	};
 }

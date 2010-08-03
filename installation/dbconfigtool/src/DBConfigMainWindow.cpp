@@ -11,6 +11,7 @@ using namespace spikestream;
 #include <QDebug>
 #include <QLayout>
 #include <QMessageBox>
+#include <QProgressDialog>
 
 
 /*! Constructor */
@@ -50,29 +51,36 @@ void DBConfigMainWindow::closeApplication(){
 
 /*! Configures each database, checking for confirmation from the user if the database already exists */
 void DBConfigMainWindow::configureDatabases(const DBInfo& networkDBInfo, const DBInfo& archiveDBInfo, const DBInfo& analysisDBInfo){
+	//Show busy window
+	QProgressDialog progressDlg("Configuring databases...", "Abort Copy", 0, 3, this);
+	progressDlg.setWindowModality(Qt::WindowModal);
+
 	//Configure databases
 	bool netDBConfigured = false, archDBConfigured = false, anaDBConfigured = false;
 	try{
 		//Configure SpikeStreamNetwork database
 		if(networkDBInfo.getHost() != DBInfo::UNDEFINED){
-			if(!addNetworkDatabases(networkDBInfo))
+			if(!addNetworkDatabases(networkDBInfo) || progressDlg.wasCanceled())
 				return;
 			netDBConfigured = true;
 		}
+		progressDlg.setValue(1);
 
 		//Configure SpikeStreamArchive database
 		if(archiveDBInfo.getHost() != DBInfo::UNDEFINED){
-			if(!addArchiveDatabases(archiveDBInfo))
+			if(!addArchiveDatabases(archiveDBInfo) || progressDlg.wasCanceled())
 				return;
 			archDBConfigured = true;
 		}
+		progressDlg.setValue(2);
 
 		//Configure SpikeStreamAnalysis database
 		if(analysisDBInfo.getHost() != DBInfo::UNDEFINED){
-			if(!addAnalysisDatabases(analysisDBInfo))
+			if(!addAnalysisDatabases(analysisDBInfo) || progressDlg.wasCanceled())
 				return;
 			anaDBConfigured = true;
 		}
+		progressDlg.setValue(3);
 
 		//Return if no databases have been configured
 		if(!netDBConfigured && !archDBConfigured && !anaDBConfigured)

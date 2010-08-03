@@ -158,8 +158,6 @@ Random1Widget::~Random1Widget(){
 /*! Called when add button is clicked.
 	Checks the input and adds the specified network to the database */
 void Random1Widget::addButtonClicked(){
-	FIXME: CHANGE TO TIMER THAT CHECKS THE NUMBER OF CONNECTIONS IN THE DATABASE EVERY FEW SECONDS.
-
 	//Double check network is loaded
 	if(!Globals::networkLoaded()){
 		QMessageBox::critical(this, "Random1 Connection Group Builder Error", "No network loaded.", QMessageBox::Ok);

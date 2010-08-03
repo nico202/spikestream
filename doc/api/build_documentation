@@ -1,0 +1,49 @@
+#!/bin/bash
+
+
+# Clean up old documentation
+rm -R application
+rm -R applicationlibrary
+rm -R library
+rm -R random1
+rm -R cuboid
+rm -R alekgameznets2
+rm -R aleksandernetworks
+rm -R tononinetworks
+rm -R liveliness
+rm -R statebasedphi
+rm -R nemo
+rm -R dbconfigtool
+rm -R testlibrary
+
+
+# Core components
+doxygen application.doxygen
+doxygen applicationlibrary.doxygen
+doxygen library.doxygen
+
+# Connection group plugins
+doxygen random1.doxygen
+
+# Neuron group plugins
+doxygen cuboid.doxygen
+
+# Networks
+doxygen alekgameznets2.doxygen
+doxygen aleksandernetworks.doxygen
+doxygen tononinetworks.doxygen
+
+# Analysis
+doxygen liveliness.doxygen
+doxygen statebasedphi.doxygen
+
+# Simulation
+doxygen nemo.doxygen
+
+# Installation
+doxygen dbconfigtool.doxygen
+
+# Test
+doxygen testlibrary.doxygen
+
+

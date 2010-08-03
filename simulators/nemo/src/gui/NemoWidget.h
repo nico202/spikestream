@@ -43,6 +43,7 @@ namespace spikestream {
 			void startSimulation();
 			void stepSimulation();
 			void stopSimulation();
+			void testNemoInstallation();
 			void unloadSimulation(bool confirmWithUser=true);
 			void updateProgress(int stepsCompleted, int totalSteps);
 
@@ -56,6 +57,9 @@ namespace spikestream {
 
 			/*! Box holding widgets that need to be enabled when simulation is loaded */
 			QWidget* controlsWidget;
+
+			/*! Button for testing hardware etc. */
+			QPushButton* testButton;
 
 			/*! Button for loading simulation */
 			QPushButton* loadButton;

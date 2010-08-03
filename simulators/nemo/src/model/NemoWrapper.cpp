@@ -173,6 +173,28 @@ void NemoWrapper::stop(){
 }
 
 
+/*! Tests the configuration */
+QString NemoWrapper::testConfiguration(){
+	try{
+		nemo_configuration_t nemoConfig = nemo_new_configuration();
+		bool tstRes = nemo_test(nemoConfig);
+		const char* configDesc = nemo_get_backend_description(nemoConfig);
+		QString resultStr;
+		if(tstRes)
+			resultStr += "Nemo status: ok. \n";
+		else
+			resultStr += "Nemo status: error. \n";
+		return resultStr + configDesc;
+	}
+	catch(SpikeStreamException& ex){
+		return "Nemo error: " + ex.getMessage();
+	}
+	catch(...){
+		return "Unknown Nemo exception.";
+	}
+}
+
+
 /*! Unloads the current simulation */
 void NemoWrapper::unloadSimulation(){
 //	if(nemoSimulation != NULL){
@@ -275,6 +297,10 @@ void NemoWrapper::loadSimulation(){
 
 	//Set up the configuration with the appropriate parameters
 	nemo_configuration_t nemoConfig = nemo_new_configuration();
+	nemo_status_t result = nemo_set_fractional_bits(nemoConfig, 8);
+	if(result != NEMO_OK)
+		throw SpikeStreamException("Failed to set fractional bits." + QString(nemo_strerror()));
+
 
 	//Build the Nemo network
 	NemoLoader* nemoLoader = new NemoLoader();
