@@ -11,7 +11,10 @@ using namespace spikestream;
 
 //Other includes
 #include <vector>
+#include <iostream>
+using namespace std;
 
+#define DEBUG
 
 /*! Constructor */
 NemoLoader::NemoLoader(){
@@ -132,6 +135,9 @@ void NemoLoader::addExcitatoryNeuronGroup(NeuronGroup* neuronGroup, nemo_network
 		u = b * v;
 
 		//Add the neuron to the network
+		#ifdef DEBUG
+			cout<<"nemo_add_neuron(nemoNetwork, "<<iter.value()->getID()<<", "<<a<<", "<<b<<", "<<v<<", "<<d<<", "<<u<<", "<<v<<", "<<sigma<<");"<<endl;
+		#endif//DEBUG
 		nemo_status_t result = nemo_add_neuron(nemoNetwork, iter.value()->getID(), a, b, v, d, u, v, sigma);
 		if(result != NEMO_OK)
 			throw SpikeStreamException("Error code returned from Nemo when adding neuron." + QString(nemo_strerror()));
@@ -161,6 +167,9 @@ void NemoLoader::addInhibitoryNeuronGroup(NeuronGroup* neuronGroup, nemo_network
 		u = b * v;
 
 		//Add neuron to the network
+		#ifdef DEBUG
+			cout<<"nemo_add_neuron(nemoNetwork, "<<iter.value()->getID()<<", "<<a<<", "<<b<<", "<<v<<", "<<d<<", "<<u<<", "<<v<<", "<<sigma<<");"<<endl;
+		#endif//DEBUG
 		nemo_status_t result = nemo_add_neuron(nemoNetwork, iter.value()->getID(), a, b, v, d, u, v, sigma);
 		if(result != NEMO_OK)
 			throw SpikeStreamException("Error code returned from Nemo when adding neuron." + QString(nemo_strerror()));

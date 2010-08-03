@@ -18,7 +18,7 @@ INCLUDEPATH += src src/model src/gui \
 				$${SPIKESTREAM_ROOT_DIR}/library/include \
 				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/include
 unix {
-	INCLUDEPATH += /usr/local/include/nemo
+	INCLUDEPATH += /usr/local/include
 }
 win32 {
 	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/nemo/include
@@ -29,7 +29,7 @@ win32 {
 #---               LIBRARIES                ---#
 #----------------------------------------------#
 unix{
-	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/lib  -lspikestreamapplication -lspikestream
+	LIBS += -lnemo -L$${SPIKESTREAM_ROOT_DIR}/lib  -lspikestreamapplication -lspikestream
 }
 win32{
 	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/lib -lspikestreamapplication0 -lspikestream0

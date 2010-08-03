@@ -47,6 +47,7 @@ namespace spikestream {
 			void setParameters(const QHash<QString, double>& parameterMap);
 			void setUpdateInterval_ms(unsigned int interval) { this->updateInterval_ms = interval; }
 			void stop();
+			QString testConfiguration();
 			void unloadSimulation();
 
 
