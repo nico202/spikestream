@@ -41,9 +41,7 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	controlsWidget->setEnabled(false);
 	QVBoxLayout* controlsVBox = new QVBoxLayout(controlsWidget);
 
-	//Add test, load, unload and parameters buttons
-	testButton = new QPushButton("Test");
-	connect(testButton, SIGNAL(clicked()), this, SLOT(testNemoInstallation()));
+	//Add load, unload and parameters buttons
 	loadButton = new QPushButton("Load");
 	connect(loadButton, SIGNAL(clicked()), this, SLOT(loadSimulation()));
 	unloadButton = new QPushButton("Unload");
@@ -56,7 +54,6 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	nemoParametersButton = new QPushButton(" Nemo Parameters ");
 	connect(nemoParametersButton, SIGNAL(clicked()), this, SLOT(setNemoParameters()));
 	QHBoxLayout* loadLayout = new QHBoxLayout();
-	loadLayout->addWidget(testButton);
 	loadLayout->addWidget(loadButton);
 	loadLayout->addWidget(unloadButton);
 	loadLayout->addWidget(neuronParametersButton);
@@ -96,6 +93,7 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	nemoWrapper = new NemoWrapper();
 	connect(nemoWrapper, SIGNAL(finished()), this, SLOT(nemoWrapperFinished()));
 	connect(nemoWrapper, SIGNAL(progress(int,int)), this, SLOT(updateProgress(int, int)), Qt::QueuedConnection);
+	connect(nemoWrapper, SIGNAL(simulationStopped()), this, SLOT(simulationStopped()), Qt::QueuedConnection);
 	connect(nemoWrapper, SIGNAL(timeStepChanged(unsigned, const QList<unsigned>&)), this, SLOT(updateTimeStep(unsigned, const QList<unsigned>&)), Qt::QueuedConnection);
 
 	//Listen for network changes
@@ -136,25 +134,35 @@ void NemoWidget::archiveStateChanged(int state){
 
 /*! Instructs the Nemo wrapper to load the network from the database into Nemo */
 void NemoWidget::loadSimulation(){
+	//Run some checks
 	if(!Globals::networkLoaded()){
 		qCritical()<<"Cannot load simulation: no network loaded.";
 		return;
 	}
 	if(nemoWrapper->isRunning()){
-		qCritical()<<"Loading thread is already running - wait 10 seconds and try again.";
+		qCritical()<<"Nemo wrapper is already running - cannot load simulation.";
 		return;
 	}
+	if(nemoWrapper->isSimulationLoaded()){
+		qCritical()<<"Simulation is already loaded - you must unload the current simulation before loading another.";
+		return;
+	}
+
 	try{
 		//Store the current neuron colour for monitoring
 		neuronColor = Globals::getNetworkDisplay()->getFiringNeuronColor();
 
 		//Start loading of simulation
 		taskCancelled = false;
-		nemoWrapper->prepareLoadSimulation();
 		progressDialog = new QProgressDialog("Loading simulation", "Cancel", 0, 100, this);
 		progressDialog->setWindowModality(Qt::WindowModal);
-		progressDialog->setMinimumDuration(2000);
-		nemoWrapper->start();
+		progressDialog->setMinimumDuration(1000);
+		nemoWrapper->start();//Load carried out by run method
+
+		//Wait for loading to finish and update progress dialog
+		loadingTimer  = new QTimer(this);
+		connect(loadingTimer, SIGNAL(timeout()), this, SLOT(checkLoadingProgress()));
+		loadingTimer->start(200);
 	}
 	catch(SpikeStreamException& ex){
 		qCritical()<<ex.getMessage();
@@ -177,55 +185,11 @@ void NemoWidget::monitorStateChanged(int state){
 }
 
 
-/*! Called when the nemo wrapper finishes a task it is engaged in */
+/*! Called when the nemo wrapper thread exits.
+	Unloads simulation and resets everything. */
 void NemoWidget::nemoWrapperFinished(){
-	//Handle errors
-	if(checkForErrors()){
-		switch (nemoWrapper->getCurrentTask()){
-			case NemoWrapper::LOAD_SIMULATION_TASK :
-				unloadSimulation(false);
-			break;
-			case NemoWrapper::RUN_SIMULATION_TASK :
-				playAction->setEnabled(true);
-				stopAction->setEnabled(false);
-			break;
-			case NemoWrapper::STEP_SIMULATION_TASK :
-				playAction->setEnabled(true);
-				stopAction->setEnabled(false);
-			break;
-			default :
-				qCritical()<<"Nemo has finished executing, but task is not defined";
-		}
-		return;
-	}
-
-	//Finish off task
-	switch (nemoWrapper->getCurrentTask()){
-		case NemoWrapper::LOAD_SIMULATION_TASK :
-			if(taskCancelled){
-				unloadSimulation(false);
-			}
-			else{
-				loadButton->setEnabled(false);
-				unloadButton->setEnabled(true);
-				neuronParametersButton->setEnabled(false);
-				synapseParametersButton->setEnabled(false);
-				nemoParametersButton->setEnabled(false);
-				controlsWidget->setEnabled(true);
-				Globals::setSimulationLoaded(true);
-			}
-		break;
-		case NemoWrapper::RUN_SIMULATION_TASK :
-			playAction->setEnabled(true);
-			stopAction->setEnabled(false);
-		break;
-		case NemoWrapper::STEP_SIMULATION_TASK :
-			playAction->setEnabled(true);
-			stopAction->setEnabled(false);
-		break;
-		default :
-			qCritical()<<"Nemo has finished executing, but task is not defined";
-	}
+	checkForErrors();
+	unloadSimulation();
 }
 
 
@@ -265,9 +229,11 @@ void  NemoWidget::setNeuronParameters(){
 /*! Sets the parameters of Nemo */
 void NemoWidget::setNemoParameters(){
 	try{
-		NemoParametersDialog dialog(nemoWrapper->getParameterInfoList(), nemoWrapper->getParameterValues(), nemoWrapper->getDefaultParameterValues(), this);
-		if(dialog.exec() == QDialog::Accepted)
-			nemoWrapper->setParameters(dialog.getParameters());
+		NemoParametersDialog dialog(nemoWrapper->getNemoConfig(), nemoWrapper->getSTDPFunctionID(), this);
+		if(dialog.exec() == QDialog::Accepted){
+			nemoWrapper->setNemoConfig(dialog.getNemoConfig());
+			nemoWrapper->setSTDPFunctionID(dialog.getSTDPFunctionID());
+		}
 	}
 	catch(SpikeStreamException& ex){
 		qCritical()<<ex.getMessage();
@@ -283,10 +249,10 @@ void NemoWidget::setSynapseParameters(){
 }
 
 
-/*! Tests the installation of Nemo and the CUDA hardware */
-void NemoWidget::testNemoInstallation(){
-	QString testResult = nemoWrapper->testConfiguration();
-	QMessageBox::information (this, "Nemo Status", testResult, QMessageBox::Ok, QMessageBox::NoButton);
+/*! Called when NeMo stops playing */
+void NemoWidget::simulationStopped(){
+	playAction->setEnabled(true);
+	stopAction->setEnabled(false);
 }
 
 
@@ -329,8 +295,7 @@ void NemoWidget::startSimulation(){
 		return;
 	}
 	try{
-		nemoWrapper->prepareRunSimulation();
-		nemoWrapper->start();
+		nemoWrapper->playSimulation();
 		playAction->setEnabled(false);
 		stopAction->setEnabled(true);
 	}
@@ -342,24 +307,24 @@ void NemoWidget::startSimulation(){
 
 /*! Advances the simulation by one time step */
 void NemoWidget::stepSimulation(){
-	//Stop thread if it is running.
-	if(nemoWrapper->isRunning()){
-		nemoWrapper->stop();
+	if(!nemoWrapper->isSimulationLoaded()){
+		qCritical()<<"Cannot step simulation: no simulation loaded.";
+		return;
 	}
 
-	//Simulation not running, so just step
-	else{
-		nemoWrapper->prepareStepSimulation();
-		nemoWrapper->start();
-		playAction->setEnabled(false);
-		stopAction->setEnabled(true);
+	//Step simulation
+	try{
+		nemoWrapper->stepSimulation();
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<ex.getMessage();
 	}
 }
 
 
 /*! Stops the simulation */
 void NemoWidget::stopSimulation(){
-	nemoWrapper->stop();
+	nemoWrapper->stopSimulation();
 }
 
 
@@ -389,7 +354,7 @@ void NemoWidget::unloadSimulation(bool confirmWithUser){
 }
 
 
-/*! Updates progress with a long operation */
+/*! Updates progress with loading the simulation */
 void NemoWidget::updateProgress(int stepsCompleted, int totalSteps){
 	//Protect code against multiple access
 	QMutexLocker locker(&mutex);
@@ -397,27 +362,16 @@ void NemoWidget::updateProgress(int stepsCompleted, int totalSteps){
 	if(progressDialog == NULL)
 		return;
 
-	//Check for cancellation
-	if(progressDialog->wasCanceled()){
-		delete progressDialog;
-		progressDialog = NULL;
-		taskCancelled = true;
-		nemoWrapper->stop();
-	}
-
-	//Update progress
-	else if(stepsCompleted < totalSteps){
-		progressDialog->setValue(stepsCompleted);
-		progressDialog->setMaximum(totalSteps);
-	}
-	else if(stepsCompleted > totalSteps){
+	//Check numbers are sensible
+	if(stepsCompleted > totalSteps){
 		qCritical()<<"Progress update error: Number of steps completed is greater than the number of possible steps.";
 		return;
 	}
-	else{
-		progressDialog->close();
-		delete progressDialog;
-		progressDialog = NULL;
+
+	//Update progress
+	if(stepsCompleted < totalSteps){
+		progressDialog->setValue(stepsCompleted);
+		progressDialog->setMaximum(totalSteps);
 	}
 }
 
@@ -433,6 +387,51 @@ bool NemoWidget::checkForErrors(){
 		return true;
 	}
 	return false;
+}
+
+
+/*! Checks for progress with the loading. Has to be done with a timer because the thread is kept
+	running ready for playing or stepping the simulation. Updates to the progress bar are done
+	by the updateProgress method */
+void NemoWidget::checkLoadingProgress(){
+	//Check for errors during loading
+	if(nemoWrapper->isError()){
+		loadingTimer->stop();
+		progressDialog->setValue(progressDialog->maximum());
+		delete progressDialog;
+		progressDialog = NULL;
+		qCritical()<<"Error occurred loading simulation: '"<<nemoWrapper->getErrorMessage()<<"'.";
+		return;
+	}
+
+	//Check for cancelation - stop timer and abort operation
+	else if(progressDialog->wasCanceled()){
+		loadingTimer->stop();
+		nemoWrapper->cancelLoading();
+		delete progressDialog;
+		progressDialog = NULL;
+		return;
+	}
+
+	//If simulation has not been loaded return with loading timer still running
+	else if(!nemoWrapper->isSimulationLoaded()){
+		return;
+	}
+
+	//If we have reached this point, loading is complete
+	loadingTimer->stop();
+	progressDialog->setValue(progressDialog->maximum());
+	delete progressDialog;
+	progressDialog = NULL;
+
+	//Adjust buttons
+	loadButton->setEnabled(false);
+	unloadButton->setEnabled(true);
+	neuronParametersButton->setEnabled(false);
+	synapseParametersButton->setEnabled(false);
+	nemoParametersButton->setEnabled(false);
+	controlsWidget->setEnabled(true);
+	Globals::setSimulationLoaded(true);
 }
 
 

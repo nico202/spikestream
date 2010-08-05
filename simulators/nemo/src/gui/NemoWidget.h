@@ -15,6 +15,7 @@
 #include <QMutex>
 #include <QProgressDialog>
 #include <QPushButton>
+#include <QTimer>
 #include <QToolBar>
 #include <QWidget>
 
@@ -40,10 +41,10 @@ namespace spikestream {
 			void setSynapseParameters();
 			void updateTimeStep(unsigned int timeStep, const QList<unsigned>& neuronIDList);
 			void simulationRateChanged(int comboIndex);
+			void simulationStopped();
 			void startSimulation();
 			void stepSimulation();
 			void stopSimulation();
-			void testNemoInstallation();
 			void unloadSimulation(bool confirmWithUser=true);
 			void updateProgress(int stepsCompleted, int totalSteps);
 
@@ -57,9 +58,6 @@ namespace spikestream {
 
 			/*! Box holding widgets that need to be enabled when simulation is loaded */
 			QWidget* controlsWidget;
-
-			/*! Button for testing hardware etc. */
-			QPushButton* testButton;
 
 			/*! Button for loading simulation */
 			QPushButton* loadButton;
@@ -115,8 +113,13 @@ namespace spikestream {
 			/*! The colour of neurons that are currently firing */
 			RGBColor* neuronColor;
 
+			/*! Timer to check on loading progress */
+			QTimer* loadingTimer;
+
+
 			//=======================  METHODS  =========================
 			bool checkForErrors();
+			void checkLoadingProgress();
 			void checkWidgetEnabled();
 			QToolBar* getToolBar();
 	};

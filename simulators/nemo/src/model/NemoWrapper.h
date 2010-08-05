@@ -26,28 +26,27 @@ namespace spikestream {
 		public:
 			NemoWrapper();
 			~NemoWrapper();
+			void cancelLoading();
 			void clearWaitForGraphics() { waitForGraphics = false; }
 			unsigned getArchiveID() { return archiveInfo.getID(); }
 			int getCurrentTask() { return currentTaskID; }
-			QHash<QString, double> getDefaultParameterValues(){ return defaultParameterMap; }
 			QString getErrorMessage() { return errorMessage; }
-			QList<ParameterInfo> getParameterInfoList(){ return parameterInfoList; }
-			QHash<QString, double> getParameterValues(){ return parameterMap; }
+			nemo_configuration_t getNemoConfig(){ return nemoConfig; }
+			unsigned getSTDPFunctionID() { return stdpFunctionID; }
 			unsigned getUpdateInterval_ms() { return this->updateInterval_ms; }
 			bool isError() { return error; }
 			bool isMonitorMode() { return monitorMode; }
 			bool isSimulationLoaded() { return simulationLoaded; }
-			void prepareLoadSimulation();
-			void prepareRunSimulation();
-			void prepareStepSimulation();
 			void run();
 			void setArchiveMode(bool mode);
 			void setFrameRate(unsigned int frameRate);
 			void setMonitorMode(bool mode);
-			void setParameters(const QHash<QString, double>& parameterMap);
+			void setNemoConfig(nemo_configuration_t nemoConfig) { this->nemoConfig = nemoConfig; }
+			void setSTDPFunctionID(unsigned stdpFunctionID) { this->stdpFunctionID = stdpFunctionID; }
 			void setUpdateInterval_ms(unsigned int interval) { this->updateInterval_ms = interval; }
-			void stop();
-			QString testConfiguration();
+			void playSimulation();
+			void stepSimulation();
+			void stopSimulation();
 			void unloadSimulation();
 
 
@@ -55,18 +54,16 @@ namespace spikestream {
 			/*! No task defined */
 			static const int NO_TASK_DEFINED = 0;
 
-			/*! Task of loading simulation */
-			static const int LOAD_SIMULATION_TASK = 1;
-
 			/*! Task of playing simulation */
-			static const int RUN_SIMULATION_TASK = 2;
+			static const int RUN_SIMULATION_TASK = 1;
 
 			/*! Task of advancing one time step of the simulation. */
-			static const int STEP_SIMULATION_TASK = 3;
+			static const int STEP_SIMULATION_TASK = 2;
 
 
 		signals:
 			void progress(int stepsComplete, int totalSteps);
+			void simulationStopped();
 			void timeStepChanged(unsigned int timeStep, const QList<unsigned>& neuronIDList);
 
 
@@ -109,16 +106,8 @@ namespace spikestream {
 			/*! Controls whether the thread is running or not */
 			bool stopThread;
 
-			/*! List of information about the parameters associated with Nemo */
-			QList<ParameterInfo> parameterInfoList;
-
-			/*! Values of the parameters associated with Nemo.
-				The key is the parameter name; the value is the value of the parameter. */
-			QHash<QString, double> parameterMap;
-
-			/*! Default values of the parameters associated with Nemo.
-				The key is the parameter name; the value is the value of the parameter. */
-			QHash<QString, double> defaultParameterMap;
+			/*! Nemo configuration */
+			nemo_configuration_t nemoConfig;
 
 			/*! Pointer to the Nemo simulation that has been constructed. */
 			nemo_simulation_t nemoSimulation;
@@ -133,17 +122,19 @@ namespace spikestream {
 			/*! Mutex controlling access to variables */
 			QMutex mutex;
 
+			/*! ID of the STDP function */
+			unsigned stdpFunctionID;
+
 			QList<unsigned int> firingNeuronList;
 
 
 			//======================  METHODS  ========================
-			void buildParameters();
-			void checkNemoOutput(nemo_status_t result, const QString& message);
+			void checkNemoOutput(nemo_status_t result, const QString& errorMessage);
 			void clearError();
-			void loadSimulation();
-			void runSimulation();
+			void loadNemo();
+			void runNemo();
 			void setError(const QString& errorMessage);
-			void stepSimulation();
+			void stepNemo();
 
 	};
 

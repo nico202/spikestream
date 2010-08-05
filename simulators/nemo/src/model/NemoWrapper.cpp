@@ -4,15 +4,8 @@
 #include "NemoWrapper.h"
 #include "SpikeStreamException.h"
 #include "SpikeStreamSimulationException.h"
+#include "STDPFunctions.h"
 using namespace spikestream;
-
-
-//Default parameter values
-#define DEFAULT_LOGGING 0
-#define DEFAULT_CUDA_PARTITION_SIZE 0
-#define DEFAULT_CUDA_FIRING_BUFFER_LENGTH 0
-#define DEFAULT_CUDA_DEVICE 0
-#define DEFAULT_STDP_FUNCTION 0
 
 
 /*! Constructor */
@@ -25,8 +18,11 @@ NemoWrapper::NemoWrapper(){
 	monitorMode = false;
 	updateInterval_ms = 500;
 
-	//Construct the information about the parameters and their default values
-	buildParameters();
+	//Zero is the default STDP function
+	stdpFunctionID = 0;
+
+	//Get a nemo configuration object initialized with the default values
+	nemoConfig = nemo_new_configuration();
 }
 
 
@@ -34,7 +30,6 @@ NemoWrapper::NemoWrapper(){
 NemoWrapper::~NemoWrapper(){
 	if(simulationLoaded)
 		unloadSimulation();
-
 }
 
 
@@ -42,61 +37,64 @@ NemoWrapper::~NemoWrapper(){
 /*-----                 PUBLIC METHODS                 -----*/
 /*----------------------------------------------------------*/
 
-/*! Prepares the wrapper for the loading task */
-void NemoWrapper::prepareLoadSimulation(){
-	if(!Globals::networkLoaded())
-		throw SpikeStreamException("Cannot load simulation - no network loaded.");
-	if(simulationLoaded)
-		throw SpikeStreamException("Simulation is already loaded - you must unload the current simulation before loading another.");
-
-	//Set the task to load
-	currentTaskID = LOAD_SIMULATION_TASK;
+/*! Cancels the loading of a simulation */
+void NemoWrapper::cancelLoading(){
+	stopThread = true;
 }
 
 
-/*! Prepares the wrapper for the playing task */
-void NemoWrapper::prepareRunSimulation(){
+/*! Plays the simulation */
+void NemoWrapper::playSimulation(){
 	if(!simulationLoaded)
 		throw SpikeStreamException("Cannot run simulation - no simulation loaded.");
 	currentTaskID = RUN_SIMULATION_TASK;
 }
 
 
-/*! Prepares the wrapper for stepping through a single time step */
-void NemoWrapper::prepareStepSimulation(){
+/*! Steps through a single time step */
+void NemoWrapper::stepSimulation(){
 	if(!simulationLoaded)
 		throw SpikeStreamException("Cannot step simulation - no simulation loaded.");
 	currentTaskID = STEP_SIMULATION_TASK;
 }
 
 
-/*! Run method inherited from QThread */
+// Run method inherited from QThread
 void NemoWrapper::run(){
 	stopThread = false;
 	clearError();
 
 	try{
-		//Create thread specific network and arhive daos
+		//Create thread specific network and archive daos
 		networkDao = new NetworkDao(Globals::getNetworkDao()->getDBInfo());
 		archiveDao = new ArchiveDao(Globals::getArchiveDao()->getDBInfo());
 
-		//Execute the appropriate task
-		switch(currentTaskID){
-			case LOAD_SIMULATION_TASK:
-				loadSimulation();
-			break;
-			case RUN_SIMULATION_TASK:
-				Globals::setSimulationRunning(true);
-				runSimulation();
-				Globals::setSimulationRunning(false);
-			break;
-			case STEP_SIMULATION_TASK:
-				Globals::setSimulationRunning(true);
-				stepSimulation();
-				Globals::setSimulationRunning(false);
-			break;
-			default:
+		//Load up the simulation and reset the task ID
+		loadNemo();
+		currentTaskID = NO_TASK_DEFINED;
+
+		//Wait for run or step command
+		while(!stopThread){
+			//Run simulation
+			if(currentTaskID == RUN_SIMULATION_TASK){
+				runNemo();
+			}
+			//Step simulation
+			else if(currentTaskID == STEP_SIMULATION_TASK){
+				stepNemo();
+				currentTaskID = NO_TASK_DEFINED;//Don't want it to continue stepping.
+			}
+			//Do nothing
+			else if(currentTaskID == NO_TASK_DEFINED){
+				;//Do nothing
+			}
+			//Task ID not recognized
+			else{
 				throw SpikeStreamException("Task ID not recognized.");
+			}
+
+			//Short sleep waiting for the next command
+			msleep(200);
 		}
 
 		//Clean up the thread specific network and archive daos
@@ -149,49 +147,9 @@ void NemoWrapper::setMonitorMode(bool mode){
 }
 
 
-/*! Sets the parameters. Checks that each one is correct and throws an exception if an unexpected
-	parameter is present or a parameter is missing */
-void NemoWrapper::setParameters(const QHash<QString, double>& parameterMap){
-	//Check that the correct number of parameters is being set
-	if(parameterMap.size() != parameterInfoList.size())
-		throw SpikeStreamException("Parameter info list does not match size of parameter map");
-
-	//Check all parameters are present
-	foreach(ParameterInfo paramInfo, parameterInfoList){
-		if(!parameterMap.contains(paramInfo.getName()))
-			throw SpikeStreamException("Parameter " + paramInfo.getName() + " is missing from parameter map.");
-	}
-
-	//Copy parameters into map
-	this->parameterMap = parameterMap;
-}
-
-
 /*! Stops the thread running */
-void NemoWrapper::stop(){
+void NemoWrapper::stopSimulation(){
 	stopThread = true;
-}
-
-
-/*! Tests the configuration */
-QString NemoWrapper::testConfiguration(){
-	try{
-		nemo_configuration_t nemoConfig = nemo_new_configuration();
-		bool tstRes = nemo_test(nemoConfig);
-		const char* configDesc = nemo_get_backend_description(nemoConfig);
-		QString resultStr;
-		if(tstRes)
-			resultStr += "Nemo status: ok. \n";
-		else
-			resultStr += "Nemo status: error. \n";
-		return resultStr + configDesc;
-	}
-	catch(SpikeStreamException& ex){
-		return "Nemo error: " + ex.getMessage();
-	}
-	catch(...){
-		return "Unknown Nemo exception.";
-	}
 }
 
 
@@ -222,47 +180,10 @@ void NemoWrapper::updateProgress(int stepsComplete, int totalSteps){
 /*-----                 PRIVATE METHODS                -----*/
 /*----------------------------------------------------------*/
 
-/*! Constructs the set of parameters associated with Nemo and sets their default values */
-void NemoWrapper::buildParameters(){
-	parameterMap.clear();
-	defaultParameterMap.clear();
-	parameterInfoList.clear();
-
-	//Add simple parameters
-	parameterInfoList.append(ParameterInfo("Logging", "Enable or disable logging.", ParameterInfo::BOOLEAN));
-	parameterInfoList.append(ParameterInfo("CudaPartitionSize", "Size of the CUDA partition.", ParameterInfo::UNSIGNED_INTEGER));
-	parameterInfoList.append(ParameterInfo("CudaFiringBufferLength", "Set the size of the firing buffer such that it can contain a \nfixed number of cycles worth of firing data before overflowing.", ParameterInfo::UNSIGNED_INTEGER));
-	parameterInfoList.append(ParameterInfo("CudaDevice", "Set the cuda device to \a dev. The CUDA library allows the device to be set only once per thread, so this function may fail if called multiple times.", ParameterInfo::INTEGER));
-
-	//Add list of STDP functions
-	QList<QString> stdpNames;
-	stdpNames.append("Standard STDP function");
-	ParameterInfo tmpInfo("STDPFunction", "The type of STDP function. These are pre-defined in the Nemo Wrapper.", ParameterInfo::OPTION);
-	tmpInfo.setOptionNames(stdpNames);
-	parameterInfoList.append(tmpInfo);
-
-	//Set the default parameters and initialize parameters to default values
-	defaultParameterMap["Logging"] = DEFAULT_LOGGING;
-	parameterMap["Logging"] = defaultParameterMap["Logging"];
-
-	defaultParameterMap["CudaPartitionSize"] = DEFAULT_CUDA_PARTITION_SIZE;
-	parameterMap["CudaPartitionSize"] = defaultParameterMap["CudaPartitionSize"];
-
-	defaultParameterMap["CudaFiringBufferLength"] = DEFAULT_CUDA_FIRING_BUFFER_LENGTH;
-	parameterMap["CudaFiringBufferLength"] = defaultParameterMap["CudaFiringBufferLength"];
-
-	defaultParameterMap["CudaDevice"] = DEFAULT_CUDA_DEVICE;
-	parameterMap["CudaDevice"] = defaultParameterMap["CudaDevice"];
-
-	defaultParameterMap["STDPFunction"] = DEFAULT_STDP_FUNCTION;
-	parameterMap["STDPFunction"] = defaultParameterMap["STDPFunction"];
-}
-
-
 /*! Checks the output from a nemo function call and throws exception if there is an error */
-void NemoWrapper::checkNemoOutput(nemo_status_t result, const QString& message){
+void NemoWrapper::checkNemoOutput(nemo_status_t result, const QString& errorMessage){
 	if(result != NEMO_OK)
-		throw SpikeStreamException(message + ": " + nemo_strerror());
+		throw SpikeStreamException(errorMessage + ": " + nemo_strerror());
 }
 
 
@@ -274,7 +195,7 @@ void NemoWrapper::clearError(){
 
 
 /*! Loads the simulation into the CUDA hardware */
-void NemoWrapper::loadSimulation(){
+void NemoWrapper::loadNemo(){
 	simulationLoaded = false;
 	nemoSimulation = NULL;
 	timeStepCounter = 0;
@@ -295,13 +216,6 @@ void NemoWrapper::loadSimulation(){
 	archiveInfo.reset();
 	archiveInfo.setNetworkID(currentNetwork->getID());
 
-	//Set up the configuration with the appropriate parameters
-	nemo_configuration_t nemoConfig = nemo_new_configuration();
-	nemo_status_t result = nemo_set_fractional_bits(nemoConfig, 8);
-	if(result != NEMO_OK)
-		throw SpikeStreamException("Failed to set fractional bits." + QString(nemo_strerror()));
-
-
 	//Build the Nemo network
 	NemoLoader* nemoLoader = new NemoLoader();
 	connect(nemoLoader, SIGNAL(progress(int, int)), this, SLOT(updateProgress(int, int)));
@@ -311,8 +225,23 @@ void NemoWrapper::loadSimulation(){
 	currentNetwork->setNetworkDao(Globals::getNetworkDao());
 	currentNetwork->setArchiveDao(Globals::getArchiveDao());
 
-	//Clean up
+	//Clean up loader
 	delete nemoLoader;
+
+	//Set the STDP functionn in the configuration
+	nemo_set_stdp_function(nemoConfig,
+					   STDPFunctions::getPre(stdpFunctionID),
+					   STDPFunctions::getPreLength(stdpFunctionID),
+					   STDPFunctions::getPost(stdpFunctionID),
+					   STDPFunctions::getPostLength(stdpFunctionID),
+					   STDPFunctions::getMinWeight(stdpFunctionID),
+					   STDPFunctions::getMaxWeight(stdpFunctionID)
+	);
+
+	//Output summary of backend configuration
+	const char* backendDesc;
+	checkNemoOutput(nemo_get_backend_description(nemoConfig, &backendDesc), "Error getting backend description.");
+	qDebug()<<"Creating simulation with configuration: "<<backendDesc;
 
 	//Load the network into the simulator
 	nemoSimulation = nemo_new_simulation(nemoNet, nemoConfig);
@@ -326,7 +255,7 @@ void NemoWrapper::loadSimulation(){
 
 
 /*! Plays the current simulation */
-void NemoWrapper::runSimulation(){
+void NemoWrapper::runNemo(){
 	//Check simulation is loaded
 	if(!simulationLoaded)
 		throw SpikeStreamSimulationException("Cannot run simulation - no simulation loaded.");
@@ -335,12 +264,12 @@ void NemoWrapper::runSimulation(){
 	QTime startTime;
 	unsigned int elapsedTime_ms;
 
-	while(!stopThread){
+	while(currentTaskID == RUN_SIMULATION_TASK){
 		//Record the current time
 		startTime = QTime::currentTime();
 
 		//Advance simulation one step
-		stepSimulation();
+		stepNemo();
 
 		//Lock mutex so that update time interval cannot change during this calculation
 		mutex.lock();
@@ -359,6 +288,9 @@ void NemoWrapper::runSimulation(){
 		while(!stopThread && waitForGraphics)
 			usleep(1000);
 	}
+
+	//Inform other classes that simulation has stopped playing
+	emit simulationStopped();
 }
 
 
@@ -371,7 +303,7 @@ void NemoWrapper::setError(const QString& errorMessage){
 
 
 /*! Advances the simulation by one step */
-void NemoWrapper::stepSimulation(){
+void NemoWrapper::stepNemo(){
 	firingNeuronList.clear();
 
 	//Advance the simulation one time step

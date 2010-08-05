@@ -1,14 +1,18 @@
 #include "TestNemo.h"
 
+//SpikeStream includes
+#include "SpikeStreamException.h"
+using namespace spikestream;
+
 //Qt includes
 #include <QDebug>
 
-
+//Other includes
 #include <vector>
 #include <cstdlib>
 #include <iostream>
 #include <cassert>
-#include <nemo.h>
+
 
 
 void addExcitatoryNeuron(nemo_network_t c_net, unsigned nidx){
@@ -204,4 +208,73 @@ void TestNemo::testNemoDLL2(){
 		QFAIL(nemo_strerror());
 	}
 	qDebug()<<"Neurons successfully loaded into simulator";
+}
+
+
+void TestNemo::testNemoConfiguration(){
+	try{
+		//Create default configuration object
+		nemo_configuration_t nemoConfig = nemo_new_configuration();
+
+		//Set the number of threads
+		int numThreads;
+		checkNemoOutput(nemo_get_cpu_thread_count(nemoConfig, &numThreads), "Failed to get CPU thread count.");
+		qDebug()<<"Number of threads is "<<numThreads;
+
+		//Test the STDP function
+		float* pre = new float[20];
+		float* post = new float[20];
+		for(unsigned i = 0; i < 20; ++i) {
+			float dt = float(i + 1);
+			pre[i] = 1.0f * expf(-dt / 20.0f);
+			post[i] = -0.8f * expf(-dt / 20.0f);
+		}
+		nemo_set_stdp_function(nemoConfig, pre, 20,	post, 20, -10, 10);
+
+		//Test getting the cuda device
+		int cudaDev;
+		checkNemoOutput(nemo_get_cuda_device(nemoConfig, &cudaDev), "Error getting CUDA device from NeMo");
+		qDebug()<<"CUDA device is: "<<cudaDev;
+
+
+		//Test getting the backend
+		backend_t backend;
+		checkNemoOutput(nemo_get_backend(nemoConfig, &backend), "Failed to get NeMo backend.");
+		if(backend == NEMO_BACKEND_CUDA)
+			qDebug()<<"CUDA backend";
+		else if(backend == NEMO_BACKEND_CPU)
+			qDebug()<<"CPU backend";
+		else
+			QFAIL("Unrecognized backend from NeMo");
+
+		//Set backend to CUDA
+		checkNemoOutput(nemo_set_cuda_backend(nemoConfig, 0), "Failed to set CUDA device: ");
+		checkNemoOutput(nemo_get_backend(nemoConfig, &backend), "Failed to get NeMo backend.");
+		checkNemoOutput(nemo_get_cuda_device(nemoConfig, &cudaDev), "Error getting CUDA device from NeMo");
+		QVERIFY(backend == NEMO_BACKEND_CUDA);
+		QCOMPARE(cudaDev, 0);
+
+		//Set backend to CPU
+		checkNemoOutput(nemo_set_cpu_backend(nemoConfig, 4), "Failed to set backend to CPU: ");
+		checkNemoOutput(nemo_get_backend(nemoConfig, &backend), "Failed to get NeMo backend.");
+		checkNemoOutput(nemo_get_cpu_thread_count(nemoConfig, &numThreads), "Failed to get CPU thread count.");
+		QVERIFY(backend == NEMO_BACKEND_CPU);
+		QCOMPARE(numThreads, 4);
+
+	}
+	catch(SpikeStreamException& ex){
+		QFAIL(ex.getMessage().toAscii());
+	}
+	catch(...){
+		QFAIL("ERROR LOADING NEMO SIMULATION.");
+	}
+
+}
+
+
+
+/*! Checks the output from a nemo function call and throws exception if there is an error */
+void TestNemo::checkNemoOutput(nemo_status_t result, const QString& errorMessage){
+	if(result != NEMO_OK)
+		throw SpikeStreamException(errorMessage + ": " + nemo_strerror());
 }

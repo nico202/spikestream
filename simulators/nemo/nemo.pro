@@ -50,7 +50,9 @@ SOURCES += src/gui/NemoWidget.cpp \
 #-----              Model                 -----#
 #----------------------------------------------#
 HEADERS += src/model/NemoWrapper.h \
-			src/model/NemoLoader.h
+			src/model/NemoLoader.h \
+			src/model/STDPFunctions.h
 SOURCES += src/model/NemoWrapper.cpp \
-			src/model/NemoLoader.cpp
+			src/model/NemoLoader.cpp \
+			src/model/STDPFunctions.cpp
 

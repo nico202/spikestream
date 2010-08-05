@@ -14,7 +14,8 @@ CONFIG += qtestlib console
 #----------------------------------------------#
 INCLUDEPATH += src ../src/model
 unix {
-	INCLUDEPATH += /usr/local/include/nemo
+	INCLUDEPATH += /usr/local/include \
+					$${SPIKESTREAM_ROOT_DIR}/library/include
 }
 win32 {
 	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/nemo/include
@@ -25,7 +26,7 @@ win32 {
 #---               LIBRARIES                ---#
 #----------------------------------------------#
 unix {
-	LIBS += -lnemo
+	LIBS += -lnemo -lspikestream
 }
 win32 {
 	LIBS += -lnemo -L$${SPIKESTREAM_ROOT_DIR}/extlib/nemo/lib

@@ -2,38 +2,67 @@
 #define NEMOPARAMETERSDIALOG_H
 
 //SpikeStream includes
-#include "AbstractParametersEditDialog.h"
+
 
 //Qt includes
+#include <QComboBox>
 #include <QDialog>
+#include <QLayout>
+#include <QLineEdit>
+
+//Other includes
+#include "nemo.h"
+
 
 namespace spikestream {
 
 	/*! Displays the current  parameters for the Nemo CUDA simulator. */
-	class NemoParametersDialog : public AbstractParametersEditDialog {
+	class NemoParametersDialog : public QDialog {
 		Q_OBJECT
 
 		public:
-			NemoParametersDialog(const QList<ParameterInfo>& paramInfoList, const QHash<QString, double>& currParamValueMap, const QHash<QString, double>& defaultParamValueMap, QWidget* parent=0);
+			NemoParametersDialog(nemo_configuration_t nemoConfig, unsigned stdpFunctionID, QWidget* parent=0);
 			~NemoParametersDialog();
-			QHash<QString, double> getParameters(){ return parameterMap; }
-
+			nemo_configuration_t getNemoConfig(){ return currentNemoConfig; }
+			unsigned getSTDPFunctionID() { return stdpFunctionID; }
 
 		private slots:
+			void backendChanged(int index);
 			void defaultButtonClicked();
 			void okButtonClicked();
 
 
 		private:
 			//=====================  VARIABLES  ======================
-			/*! Map of the parameter values - only populated after the ok button has been
-				clicked and the dialog closed */
-			QHash<QString, double> parameterMap;
+			/*! Current configuration */
+			nemo_configuration_t currentNemoConfig;
 
-			/*! Map storing the default parameter values */
-			QHash<QString, double> defaultParameterMap;
+			/*! Default optimal configuration created by NeMo */
+			nemo_configuration_t defaultNemoConfig;
+
+			/*! The current stdp function ID */
+			unsigned stdpFunctionID;
+
+			/*! Combo box allowing selection of backend */
+			QComboBox* backendCombo;
+
+			/*! Combo containing current CUDA devices */
+			QComboBox* cudaDeviceCombo;
+
+			/*! Text field for editing the number of CPU threads. */
+			QLineEdit* threadsLineEdit;
+
+			/*! Combo box to select STDP function */
+			QComboBox* stdpCombo;
 
 
+			//=========================  METHODS  ===========================
+			void addButtons(QVBoxLayout* mainVLayout);
+			void checkNemoOutput(nemo_status_t result, const QString& errorMessage);
+			void getCudaDevices(QComboBox* combo);
+			void getStdpFunctions(QComboBox* combo);
+			void loadParameters(nemo_configuration_t config);
+			void storeParameterValues();
 	};
 
 }
