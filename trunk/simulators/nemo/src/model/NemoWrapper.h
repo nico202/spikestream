@@ -37,6 +37,7 @@ namespace spikestream {
 			bool isError() { return error; }
 			bool isMonitorMode() { return monitorMode; }
 			bool isSimulationLoaded() { return simulationLoaded; }
+			bool isSimulationRunning();
 			void run();
 			void setArchiveMode(bool mode);
 			void setFrameRate(unsigned int frameRate);
@@ -135,7 +136,7 @@ namespace spikestream {
 			void runNemo();
 			void setError(const QString& errorMessage);
 			void stepNemo();
-
+			void unloadNemo();
 	};
 
 }

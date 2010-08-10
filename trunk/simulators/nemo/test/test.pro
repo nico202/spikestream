@@ -6,6 +6,8 @@ TARGET = testnemo
 
 DESTDIR = $${SPIKESTREAM_ROOT_DIR}/bin
 
+QT += sql
+
 CONFIG += qtestlib console
 
 
@@ -15,7 +17,8 @@ CONFIG += qtestlib console
 INCLUDEPATH += src ../src/model
 unix {
 	INCLUDEPATH += /usr/local/include \
-					$${SPIKESTREAM_ROOT_DIR}/library/include
+					$${SPIKESTREAM_ROOT_DIR}/library/include \
+					$${SPIKESTREAM_ROOT_DIR}/simulators/nemo/src/model
 }
 win32 {
 	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/nemo/include
@@ -26,7 +29,7 @@ win32 {
 #---               LIBRARIES                ---#
 #----------------------------------------------#
 unix {
-	LIBS += -lnemo -lspikestream
+	LIBS +=  -lnemowrapper -L$${SPIKESTREAM_ROOT_DIR}/plugins/simulation -lnemo -lspikestream
 }
 win32 {
 	LIBS += -lnemo -L$${SPIKESTREAM_ROOT_DIR}/extlib/nemo/lib
@@ -37,11 +40,14 @@ win32 {
 #---            Test Files                  ---#
 #----------------------------------------------#
 HEADERS += src/TestRunner.h \
-			src/TestNemo.h
+			src/TestNemoLibrary.h \
+			src/TestNemoWrapper.h
 
 SOURCES += src/Main.cpp \
 			src/TestRunner.cpp \
-			src/TestNemo.cpp
+			src/TestNemoLibrary.cpp \
+			src/TestNemoWrapper.cpp
+
 
 
 

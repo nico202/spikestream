@@ -1,11 +1,8 @@
 
 //SpikeStream includes
 #include "TestRunner.h"
-#include "TestNemo.h"
-
-//Other includes
-#include <iostream>
-using namespace std;
+#include "TestNemoLibrary.h"
+#include "TestNemoWrapper.h"
 
 /*! Runs all of the tests */
 void TestRunner::runTests(){
@@ -15,8 +12,11 @@ void TestRunner::runTests(){
 	char* argsChar[0];
 	QCoreApplication coreApplication(argsSize, argsChar);
 
-	TestNemo testNemo;
-	QTest::qExec(&testNemo);
+	TestNemoLibrary testNemoLibrary;
+	QTest::qExec(&testNemoLibrary);
+
+	TestNemoWrapper testNemoWrapper;
+	QTest::qExec(&testNemoWrapper);
 
 }
 

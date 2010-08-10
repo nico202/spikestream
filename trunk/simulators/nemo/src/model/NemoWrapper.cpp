@@ -43,6 +43,76 @@ void NemoWrapper::cancelLoading(){
 }
 
 
+/*! Returns true if simulation is currently being played */
+bool NemoWrapper::isSimulationRunning(){
+	if(currentTaskID == RUN_SIMULATION_TASK || currentTaskID == STEP_SIMULATION_TASK)
+		return true;
+	return false;
+}
+
+
+/*! Loads the simulation into the CUDA hardware.
+	This method should only be invoked in the thread within which NeMo is played.
+	It has been made public for testing purposes. */
+void NemoWrapper::loadNemo(){
+	simulationLoaded = false;
+	nemoSimulation = NULL;
+	timeStepCounter = 0;
+	waitForGraphics = false;
+	archiveMode = false;
+	monitorMode = false;
+
+	//Get the network
+	if(!Globals::networkLoaded())
+		throw SpikeStreamSimulationException("Cannot load simulation: no network loaded.");
+	Network* currentNetwork = Globals::getNetwork();
+
+	//Create network and archive daos and set them in the network
+	currentNetwork->setNetworkDao(networkDao);
+	currentNetwork->setArchiveDao(archiveDao);
+
+	//Set up the archive info
+	archiveInfo.reset();
+	archiveInfo.setNetworkID(currentNetwork->getID());
+
+	//Build the Nemo network
+	NemoLoader* nemoLoader = new NemoLoader();
+	connect(nemoLoader, SIGNAL(progress(int, int)), this, SLOT(updateProgress(int, int)));
+	nemo_network_t nemoNet = nemoLoader->buildNemoNetwork(currentNetwork, &stopThread);
+
+	//Reset the daos in the SpikeStream network
+	currentNetwork->setNetworkDao(Globals::getNetworkDao());
+	currentNetwork->setArchiveDao(Globals::getArchiveDao());
+
+	//Clean up loader
+	delete nemoLoader;
+
+	//Set the STDP functionn in the configuration - FIXME
+//	nemo_set_stdp_function(nemoConfig,
+//					   STDPFunctions::getPre(stdpFunctionID),
+//					   STDPFunctions::getPreLength(stdpFunctionID),
+//					   STDPFunctions::getPost(stdpFunctionID),
+//					   STDPFunctions::getPostLength(stdpFunctionID),
+//					   STDPFunctions::getMinWeight(stdpFunctionID),
+//					   STDPFunctions::getMaxWeight(stdpFunctionID)
+//	);
+
+	//Output summary of backend configuration
+	const char* backendDesc;
+	checkNemoOutput(nemo_backend_description(nemoConfig, &backendDesc), "Error getting backend description.");
+	qDebug()<<"Creating simulation with configuration: "<<backendDesc;
+
+	//Load the network into the simulator
+	nemoSimulation = nemo_new_simulation(nemoNet, nemoConfig);
+	if(nemoSimulation == NULL) {
+		throw SpikeStreamSimulationException(QString("Failed to create Nemo simulation: ") + nemo_strerror());
+	}
+
+	if(!stopThread)
+		simulationLoaded = true;
+}
+
+
 /*! Plays the simulation */
 void NemoWrapper::playSimulation(){
 	if(!simulationLoaded)
@@ -108,6 +178,8 @@ void NemoWrapper::run(){
 		setError("An unknown error occurred while NemoWrapper thread was running.");
 	}
 
+	unloadNemo();
+
 	stopThread = true;
 }
 
@@ -126,8 +198,8 @@ void NemoWrapper::setFrameRate(unsigned int frameRate){
 
 /*! Sets the archive mode.
 	An archive is created the first time this method is called after the simulation has loaded. */
-void NemoWrapper::setArchiveMode(bool mode){
-	if(mode && !simulationLoaded)
+void NemoWrapper::setArchiveMode(bool newArchiveMode){
+	if(newArchiveMode && !simulationLoaded)
 		throw SpikeStreamSimulationException("Cannot switch archive mode on unless simulation is loaded.");
 
 	/* Create archive if this is the first time the mode has been set
@@ -137,31 +209,43 @@ void NemoWrapper::setArchiveMode(bool mode){
 		Globals::getEventRouter()->archiveListChangedSlot();
 	}
 
-	this->archiveMode = mode;
+	//Flush buffer if archiving is being turned on when monitoring is off
+	if(simulationLoaded && newArchiveMode && !archiveMode && !monitorMode){
+		mutex.lock();//Prevent interference with step
+		checkNemoOutput( nemo_flush_firing_buffer(nemoSimulation), "Nemo error flushing firing buffer" );
+		mutex.unlock();
+	}
+
+	this->archiveMode = newArchiveMode;
 }
 
 
 /*! Sets the monitor mode, which controls whether data is extracted from the simulation at each time step */
-void NemoWrapper::setMonitorMode(bool mode){
-	 this->monitorMode = mode;
+void NemoWrapper::setMonitorMode(bool newMonitorMode){
+	if(newMonitorMode && !simulationLoaded)
+		throw SpikeStreamSimulationException("Cannot switch monitor mode on unless simulation is loaded.");
+
+	//Flush buffer if monitoring is being turned on when archiving is off
+	if(simulationLoaded && newMonitorMode && !monitorMode && !archiveMode){
+		mutex.lock();//Prevent interference with step
+		checkNemoOutput( nemo_flush_firing_buffer(nemoSimulation), "Nemo error flushing firing buffer" );
+		mutex.unlock();
+	}
+
+	//Store new monitoring mode
+	this->monitorMode = newMonitorMode;
 }
 
 
-/*! Stops the thread running */
+/*! Stops the simulation playing without exiting the thread. */
 void NemoWrapper::stopSimulation(){
-	stopThread = true;
+	currentTaskID = NO_TASK_DEFINED;
 }
 
 
-/*! Unloads the current simulation */
+/*! Unloads the current simulation and exits run method. */
 void NemoWrapper::unloadSimulation(){
-//	if(nemoSimulation != NULL){
-//		delete nemoSimulation;
-//		nemoSimulation = NULL;
-//		//FIXME: DELETE NETWORK??
-//	}
-	simulationLoaded = false;
-	Globals::setSimulationLoaded(false);
+	stopThread = true;
 }
 
 
@@ -194,65 +278,6 @@ void NemoWrapper::clearError(){
 }
 
 
-/*! Loads the simulation into the CUDA hardware */
-void NemoWrapper::loadNemo(){
-	simulationLoaded = false;
-	nemoSimulation = NULL;
-	timeStepCounter = 0;
-	waitForGraphics = false;
-	archiveMode = false;
-	monitorMode = false;
-
-	//Get the network
-	if(!Globals::networkLoaded())
-		throw SpikeStreamSimulationException("Cannot load simulation: no network loaded.");
-	Network* currentNetwork = Globals::getNetwork();
-
-	//Create network and archive daos and set them in the network
-	currentNetwork->setNetworkDao(networkDao);
-	currentNetwork->setArchiveDao(archiveDao);
-
-	//Set up the archive info
-	archiveInfo.reset();
-	archiveInfo.setNetworkID(currentNetwork->getID());
-
-	//Build the Nemo network
-	NemoLoader* nemoLoader = new NemoLoader();
-	connect(nemoLoader, SIGNAL(progress(int, int)), this, SLOT(updateProgress(int, int)));
-	nemo_network_t nemoNet = nemoLoader->buildNemoNetwork(currentNetwork, &stopThread);
-
-	//Reset the daos in the SpikeStream network
-	currentNetwork->setNetworkDao(Globals::getNetworkDao());
-	currentNetwork->setArchiveDao(Globals::getArchiveDao());
-
-	//Clean up loader
-	delete nemoLoader;
-
-	//Set the STDP functionn in the configuration
-	nemo_set_stdp_function(nemoConfig,
-					   STDPFunctions::getPre(stdpFunctionID),
-					   STDPFunctions::getPreLength(stdpFunctionID),
-					   STDPFunctions::getPost(stdpFunctionID),
-					   STDPFunctions::getPostLength(stdpFunctionID),
-					   STDPFunctions::getMinWeight(stdpFunctionID),
-					   STDPFunctions::getMaxWeight(stdpFunctionID)
-	);
-
-	//Output summary of backend configuration
-	const char* backendDesc;
-	checkNemoOutput(nemo_get_backend_description(nemoConfig, &backendDesc), "Error getting backend description.");
-	qDebug()<<"Creating simulation with configuration: "<<backendDesc;
-
-	//Load the network into the simulator
-	nemoSimulation = nemo_new_simulation(nemoNet, nemoConfig);
-	if(nemoSimulation == NULL) {
-		throw SpikeStreamSimulationException(QString("Failed to create Nemo simulation: ") + nemo_strerror());
-	}
-
-	if(!stopThread)
-		simulationLoaded = true;
-}
-
 
 /*! Plays the current simulation */
 void NemoWrapper::runNemo(){
@@ -264,15 +289,16 @@ void NemoWrapper::runNemo(){
 	QTime startTime;
 	unsigned int elapsedTime_ms;
 
-	while(currentTaskID == RUN_SIMULATION_TASK){
+	while(currentTaskID == RUN_SIMULATION_TASK && !stopThread){
 		//Record the current time
 		startTime = QTime::currentTime();
+
+		//Lock mutex so that update time interval cannot change during this calculation
+		mutex.lock();
 
 		//Advance simulation one step
 		stepNemo();
 
-		//Lock mutex so that update time interval cannot change during this calculation
-		mutex.lock();
 
 		//Sleep if task was completed in less than the prescribed interval
 		elapsedTime_ms = startTime.msecsTo(QTime::currentTime());
@@ -307,9 +333,7 @@ void NemoWrapper::stepNemo(){
 	firingNeuronList.clear();
 
 	//Advance the simulation one time step
-//	qDebug()<<"Stepping";
 	checkNemoOutput( nemo_step(nemoSimulation, 0, 0), "Nemo error on step" );
-//	qDebug()<<"Stepping complete";
 
 	//Retrieve list of firing neurons
 	if(archiveMode || monitorMode){
@@ -317,30 +341,36 @@ void NemoWrapper::stepNemo(){
 		unsigned* nidx;
 		unsigned nfired;
 		unsigned ncycles;
-		qDebug()<<"Reading";
 		checkNemoOutput( nemo_read_firing(nemoSimulation, &cycles, &nidx, &nfired, &ncycles), "Nemo error reading firing neurons" );
-		qDebug()<<"Reading complete";
 
-		qDebug()<<"NUMBER FIRED="<<nfired<<" NUM CYCLES="<<ncycles;
+		//Add firing neuron ids to list
+		for(unsigned i=0; i<nfired; ++i)
+			firingNeuronList.append(nidx[i]);
 
-		qDebug()<<"flushing";
+		//Flush buffer
 		checkNemoOutput( nemo_flush_firing_buffer(nemoSimulation), "Nemo error flushing firing buffer" );
-		qDebug()<<"Flushing complete";
 	}
 
 	//Store firing neurons in database
 	if(archiveMode){
-		;//FIXME: archiveDao->addArchiveData(archiveInfo.getID(), timeStepCounter, firingNeuronList);
+		archiveDao->addArchiveData(archiveInfo.getID(), timeStepCounter, firingNeuronList);
 	}
 
 	/* Set flag to cause thread to wait for graphics to update.
 		This is needed even if we are just running a time step counter */
 	waitForGraphics = true;
 
+	//Inform listening classes that this time step has been processed
+	emit timeStepChanged(timeStepCounter, firingNeuronList);
+
 	//Update time step counter
 	++timeStepCounter;
-	emit timeStepChanged(timeStepCounter, firingNeuronList);
 }
 
 
+/*! Unloads NeMo and sets the simulation loaded state to false. */
+void NemoWrapper::unloadNemo(){
+	simulationLoaded = false;
+	Globals::setSimulationLoaded(simulationLoaded);
+}
 

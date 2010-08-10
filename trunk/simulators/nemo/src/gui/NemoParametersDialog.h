@@ -7,6 +7,7 @@
 //Qt includes
 #include <QComboBox>
 #include <QDialog>
+#include <QLabel>
 #include <QLayout>
 #include <QLineEdit>
 
@@ -49,8 +50,14 @@ namespace spikestream {
 			/*! Combo containing current CUDA devices */
 			QComboBox* cudaDeviceCombo;
 
+			/*! Label for CUDA devices, which needs to be shown and hidden. */
+			QLabel* cudaDeviceLabel;
+
 			/*! Text field for editing the number of CPU threads. */
 			QLineEdit* threadsLineEdit;
+
+			/*! Label for number of threads, which needs to be shown and hidden. */
+			QLabel* threadsLabel;
 
 			/*! Combo box to select STDP function */
 			QComboBox* stdpCombo;
