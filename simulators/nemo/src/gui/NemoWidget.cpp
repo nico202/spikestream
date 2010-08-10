@@ -132,6 +132,51 @@ void NemoWidget::archiveStateChanged(int state){
 }
 
 
+/*! Checks for progress with the loading. Has to be done with a timer because the thread is kept
+	running ready for playing or stepping the simulation. Updates to the progress bar are done
+	by the updateProgress method */
+void NemoWidget::checkLoadingProgress(){
+	//Check for errors during loading
+	if(nemoWrapper->isError()){
+		loadingTimer->stop();
+		progressDialog->setValue(progressDialog->maximum());
+		delete progressDialog;
+		progressDialog = NULL;
+		qCritical()<<"Error occurred loading simulation: '"<<nemoWrapper->getErrorMessage()<<"'.";
+		return;
+	}
+
+	//Check for cancelation - stop timer and abort operation
+	else if(progressDialog->wasCanceled()){
+		loadingTimer->stop();
+		nemoWrapper->cancelLoading();
+		delete progressDialog;
+		progressDialog = NULL;
+		return;
+	}
+
+	//If simulation has not been loaded return with loading timer still running
+	else if(!nemoWrapper->isSimulationLoaded()){
+		return;
+	}
+
+	//If we have reached this point, loading is complete
+	loadingTimer->stop();
+	progressDialog->setValue(progressDialog->maximum());
+	delete progressDialog;
+	progressDialog = NULL;
+
+	//Adjust buttons
+	loadButton->setEnabled(false);
+	unloadButton->setEnabled(true);
+	neuronParametersButton->setEnabled(false);
+	synapseParametersButton->setEnabled(false);
+	nemoParametersButton->setEnabled(false);
+	controlsWidget->setEnabled(true);
+	Globals::setSimulationLoaded(true);
+}
+
+
 /*! Instructs the Nemo wrapper to load the network from the database into Nemo */
 void NemoWidget::loadSimulation(){
 	//Run some checks
@@ -189,14 +234,14 @@ void NemoWidget::monitorStateChanged(int state){
 	Unloads simulation and resets everything. */
 void NemoWidget::nemoWrapperFinished(){
 	checkForErrors();
-	unloadSimulation();
+	unloadSimulation(false);
 }
 
 
 /*! Called when the network is changed.
 	Shows an error if this simulation is running, otherwise enables or disables the toolbar. */
 void NemoWidget::networkChanged(){
-	if(nemoWrapper->isRunning())
+	if(nemoWrapper->isSimulationRunning())
 		qCritical()<<"Network should not be changed while simulation is running";
 
 	//Unload simulation if it is loaded
@@ -387,51 +432,6 @@ bool NemoWidget::checkForErrors(){
 		return true;
 	}
 	return false;
-}
-
-
-/*! Checks for progress with the loading. Has to be done with a timer because the thread is kept
-	running ready for playing or stepping the simulation. Updates to the progress bar are done
-	by the updateProgress method */
-void NemoWidget::checkLoadingProgress(){
-	//Check for errors during loading
-	if(nemoWrapper->isError()){
-		loadingTimer->stop();
-		progressDialog->setValue(progressDialog->maximum());
-		delete progressDialog;
-		progressDialog = NULL;
-		qCritical()<<"Error occurred loading simulation: '"<<nemoWrapper->getErrorMessage()<<"'.";
-		return;
-	}
-
-	//Check for cancelation - stop timer and abort operation
-	else if(progressDialog->wasCanceled()){
-		loadingTimer->stop();
-		nemoWrapper->cancelLoading();
-		delete progressDialog;
-		progressDialog = NULL;
-		return;
-	}
-
-	//If simulation has not been loaded return with loading timer still running
-	else if(!nemoWrapper->isSimulationLoaded()){
-		return;
-	}
-
-	//If we have reached this point, loading is complete
-	loadingTimer->stop();
-	progressDialog->setValue(progressDialog->maximum());
-	delete progressDialog;
-	progressDialog = NULL;
-
-	//Adjust buttons
-	loadButton->setEnabled(false);
-	unloadButton->setEnabled(true);
-	neuronParametersButton->setEnabled(false);
-	synapseParametersButton->setEnabled(false);
-	nemoParametersButton->setEnabled(false);
-	controlsWidget->setEnabled(true);
-	Globals::setSimulationLoaded(true);
 }
 
 

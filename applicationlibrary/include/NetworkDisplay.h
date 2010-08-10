@@ -28,6 +28,7 @@ namespace spikestream {
 			unsigned int getConnectionMode() { return connectionMode; }
 			QHash<unsigned int, RGBColor*>& getNeuronColorMap() { return *neuronColorMap; }
 			RGBColor* getDefaultNeuronColor() { return &defaultNeuronColor; }
+			RGBColor* getDefaultNeuronColorFullRender() { return &defaultNeuronColorFullRender; }
 			RGBColor* getFiringNeuronColor() { return &firingNeuronColor; }
 			RGBColor* getHighlightNeuronColor() { return &highlightNeuronColor; }
 			RGBColor& getSingleNeuronColor() { return singleNeuronColor; }
@@ -38,6 +39,7 @@ namespace spikestream {
 			QList<unsigned int> getVisibleNeuronGroupIDs() { return neurGrpDisplayMap.keys(); }
 			unsigned int getZoomNeuronGroupID() { return zoomNeuronGroupID; }
 			int getZoomStatus () { return zoomStatus; }
+			bool isFullRenderMode() { return fullRenderMode; }
 			bool isZoomEnabled();
 			void lockMutex();
 			bool neuronGroupVisible(unsigned int neurGrpID);
@@ -102,6 +104,9 @@ namespace spikestream {
 			/*! Default color of a neuron */
 			RGBColor defaultNeuronColor;
 
+			/*! Default color of a neuron in full render mode */
+			RGBColor defaultNeuronColorFullRender;
+
 			/*! Color of single neuron whose connections are being shown */
 			RGBColor singleNeuronColor;
 
@@ -141,6 +146,9 @@ namespace spikestream {
 
 			/*! To neuron id used in SHOW_BETWEEN_NEURON_CONNECTIONS mode */
 			unsigned int toNeuronID;
+
+			/*! In full render mode, neurons are drawn as lighted spheres */
+			bool fullRenderMode;
 
 
 			//=========================  METHODS  =========================

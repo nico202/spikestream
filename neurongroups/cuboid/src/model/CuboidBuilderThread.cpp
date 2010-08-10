@@ -26,14 +26,17 @@ CuboidBuilderThread::~CuboidBuilderThread(){
 
 /*! Prepares class before it runs as a separate thread to add one or more neuron groups */
 void CuboidBuilderThread::prepareAddNeuronGroups(const QString& name, const QString& description, QHash<QString, double>& paramMap){
+	//Run some checks
+	if(!Globals::networkLoaded())
+		throw SpikeStreamException("Cannot add neuron group - no network loaded.");
+	if(Globals::getNetwork()->isLocked())
+		throw SpikeStreamException("Cannot add neuron group to a locked network.\nDelete archives linked with this network and try again");
+
 	//Create the neuron groups to be added. A separate neuron group is added for each neuron type
 	createNeuronGroups(name, description, paramMap);
 
 	//Extract parameters from neuron group
 	storeParameters(paramMap);
-
-	if(!Globals::networkLoaded())
-		throw SpikeStreamException("Cannot add neuron group - no network loaded.");
 }
 
 

@@ -26,7 +26,7 @@ namespace spikestream {
 			//=====================  VARIABLES  ====================
 			/*! Type ID for the standard STDP function.
 				NOTE: These should start at zero and increase continuously. */
-			static const unsigned STANDARD_STDP = 0;
+			static unsigned STANDARD_STDP;
 
 			/*! Map linking IDs with pre arrays */
 			static QHash<unsigned, float* > preArrayMap;

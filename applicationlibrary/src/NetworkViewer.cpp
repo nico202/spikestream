@@ -24,44 +24,52 @@ using namespace std;
 #define gltDegToRad(x)	((x)*GLT_PI_DIV_180)
 #define gltRadToDeg(x)	((x)*GLT_INV_PI_DIV_180)
 
+/* Light and material Data. */
+//FIXME THIS HAS BEEN PUT IN FAIRLY RANDOMLY TO ILLUMINATE THE NEURONS. SOMETHING BETTER COULD BE DONE HERE
+GLfloat fLightPos[4]   = { -100.0f, 100.0f, 50.0f, 1.0f };  // Point source
+GLfloat fNoLight[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+GLfloat fLowLight[] = { 0.25f, 0.25f, 0.25f, 1.0f };
+GLfloat fogColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
+GLfloat fBrightLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+
 
 /*! Constructor */
 NetworkViewer::NetworkViewer(QWidget* parent) : QGLWidget(parent) {
-    //Connect refresh to changes in the display of network or archive
-    connect(Globals::getEventRouter(), SIGNAL(networkDisplayChangedSignal()), this, SLOT(refresh()), Qt::QueuedConnection);
-    connect(Globals::getEventRouter(), SIGNAL(archiveTimeStepChangedSignal()), this, SLOT(refresh()), Qt::QueuedConnection);
+	//Connect refresh to changes in the display of network or archive
+	connect(Globals::getEventRouter(), SIGNAL(networkDisplayChangedSignal()), this, SLOT(refresh()), Qt::QueuedConnection);
+	connect(Globals::getEventRouter(), SIGNAL(archiveTimeStepChangedSignal()), this, SLOT(refresh()), Qt::QueuedConnection);
 
-    //Connect reset to changes in the network
-    connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(reset()), Qt::QueuedConnection);
+	//Connect reset to changes in the network
+	connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(reset()), Qt::QueuedConnection);
 
-    //Initialize variables
-    paintGLSkipped = false;
-    resizeGLSkipped = false;
-    useDisplayList = false;
+	//Initialize variables
+	paintGLSkipped = false;
+	resizeGLSkipped = false;
+	useDisplayList = false;
 
-    perspective_angle = 46.0f;
-    perspective_near = 1.0f;
-    perspective_far = 100000.0f;//Set this to a large number so everything will be visible
+	perspective_angle = 46.0f;
+	perspective_near = 1.0f;
+	perspective_far = 100000.0f;//Set this to a large number so everything will be visible
 
-    //Connect up signals to navigate around 3D environment
-    connect(Globals::getEventRouter(), SIGNAL(moveUpSignal()), this, SLOT(moveUp()), Qt::QueuedConnection);
-    connect(Globals::getEventRouter(), SIGNAL(moveDownSignal()), this, SLOT(moveDown()), Qt::QueuedConnection);
-    connect(Globals::getEventRouter(), SIGNAL(moveLeftSignal()), this, SLOT(moveLeft()), Qt::QueuedConnection);
-    connect(Globals::getEventRouter(), SIGNAL(moveRightSignal()), this, SLOT(moveRight()), Qt::QueuedConnection);
-    connect(Globals::getEventRouter(), SIGNAL(moveBackwardSignal()), this, SLOT(moveBackward()), Qt::QueuedConnection);
-    connect(Globals::getEventRouter(), SIGNAL(moveForwardSignal()), this, SLOT(moveForward()), Qt::QueuedConnection);
-    connect(Globals::getEventRouter(), SIGNAL(resetViewSignal()), this, SLOT(resetView()), Qt::QueuedConnection);
-    connect(Globals::getEventRouter(), SIGNAL(rotateUpSignal()), this, SLOT(rotateUp()), Qt::QueuedConnection);
-    connect(Globals::getEventRouter(), SIGNAL(rotateDownSignal()), this, SLOT(rotateDown()), Qt::QueuedConnection);
-    connect(Globals::getEventRouter(), SIGNAL(rotateLeftSignal()), this, SLOT(rotateLeft()), Qt::QueuedConnection);
-    connect(Globals::getEventRouter(), SIGNAL(rotateRightSignal()), this, SLOT(rotateRight()), Qt::QueuedConnection);
+	//Connect up signals to navigate around 3D environment
+	connect(Globals::getEventRouter(), SIGNAL(moveUpSignal()), this, SLOT(moveUp()), Qt::QueuedConnection);
+	connect(Globals::getEventRouter(), SIGNAL(moveDownSignal()), this, SLOT(moveDown()), Qt::QueuedConnection);
+	connect(Globals::getEventRouter(), SIGNAL(moveLeftSignal()), this, SLOT(moveLeft()), Qt::QueuedConnection);
+	connect(Globals::getEventRouter(), SIGNAL(moveRightSignal()), this, SLOT(moveRight()), Qt::QueuedConnection);
+	connect(Globals::getEventRouter(), SIGNAL(moveBackwardSignal()), this, SLOT(moveBackward()), Qt::QueuedConnection);
+	connect(Globals::getEventRouter(), SIGNAL(moveForwardSignal()), this, SLOT(moveForward()), Qt::QueuedConnection);
+	connect(Globals::getEventRouter(), SIGNAL(resetViewSignal()), this, SLOT(resetView()), Qt::QueuedConnection);
+	connect(Globals::getEventRouter(), SIGNAL(rotateUpSignal()), this, SLOT(rotateUp()), Qt::QueuedConnection);
+	connect(Globals::getEventRouter(), SIGNAL(rotateDownSignal()), this, SLOT(rotateDown()), Qt::QueuedConnection);
+	connect(Globals::getEventRouter(), SIGNAL(rotateLeftSignal()), this, SLOT(rotateLeft()), Qt::QueuedConnection);
+	connect(Globals::getEventRouter(), SIGNAL(rotateRightSignal()), this, SLOT(rotateRight()), Qt::QueuedConnection);
 
-    //Set size of widget
-    setMinimumSize(200, 60);
-    setBaseSize(700, 60);
+	//Set size of widget
+	setMinimumSize(200, 60);
+	setBaseSize(700, 60);
 
-    //Set display to initial state
-    reset();
+	//Set display to initial state
+	reset();
 }
 
 
@@ -76,50 +84,52 @@ NetworkViewer::~NetworkViewer(){
 
 /*! Inherited from QGLWidget */
 void NetworkViewer::initializeGL(){
-    //White background
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	//White background
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-    //Create a unique id for the main display list
-    mainDisplayList = glGenLists(1);
+	//Create a unique id for the main display list
+	mainDisplayList = glGenLists(1);
+
+	initialiseFullRender();
 }
 
 
 /*! Inherited from QGLWidget */
 void NetworkViewer::paintGL(){
-    //If we are already painting, skip further calls to this method triggered by accelerator keys
-    if(Globals::isRendering()){
+	//If we are already painting, skip further calls to this method triggered by accelerator keys
+	if(Globals::isRendering()){
 		paintGLSkipped = true;
 		return;
-    }
+	}
 
-    paintGLSkipped = false;
-    cancelRender = false;
+	paintGLSkipped = false;
+	cancelRender = false;
 
-    //Record that rendering is in progress to filter out accelerator keys */
-    Globals::setRendering(true);
+	//Record that rendering is in progress to filter out accelerator keys */
+	Globals::setRendering(true);
 
-    // Clear the window with current clearing color
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// Clear the window with current clearing color
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    //Store current matrix state
-    glPushMatrix();
+	//Store current matrix state
+	glPushMatrix();
 
-    //Set zoom level
-    setZoomLevel();
+	//Set zoom level
+	setZoomLevel();
 
-    //Position the camera appropriately
-    positionCamera();
+	//Position the camera appropriately
+	positionCamera();
 
-    /* Use an existing display list if one has already been created
+	/* Use an existing display list if one has already been created
 	Only use display lists when not in full render mode. They speed up
 	the graphics considerably, but crash when they are too big. */
-    if(useDisplayList){
+	if(useDisplayList){
 		//Call the display list
 		glCallList(mainDisplayList);
-    }
+	}
 
-    //Record a new display list
-    else{
+	//Record a new display list
+	else{
 		//Lock network display whilst rendering is taking place
 		//FIXME: MIGHT WANT TO LOCK NETWORK AS WELL
 		Globals::getNetworkDisplay()->lockMutex();
@@ -127,17 +137,17 @@ void NetworkViewer::paintGL(){
 		//Start recording new display list
 		glNewList(mainDisplayList, GL_COMPILE_AND_EXECUTE);
 
-	    //Draw the axes
-	    drawAxes();
+		//Draw the axes
+		drawAxes();
 
-	    //Draw the neurons without names
-	    drawNeurons();
+		//Draw the neurons without names
+		drawNeurons();
 
-	    //Draw the connections
-	    drawConnections();
+		//Draw the connections
+		drawConnections();
 
-	    //Restore the original state of the matrix
-	    glPopMatrix();
+		//Restore the original state of the matrix
+		glPopMatrix();
 
 		//Finished recording display list
 		glEndList();
@@ -147,126 +157,126 @@ void NetworkViewer::paintGL(){
 
 		//Unlock network display
 		Globals::getNetworkDisplay()->unlockMutex();
-    }
+	}
 
-    //Check for OpenGL errors
-    checkOpenGLErrors();
+	//Check for OpenGL errors
+	checkOpenGLErrors();
 
-    //Render has stopped
-    Globals::setRendering(false);
+	//Render has stopped
+	Globals::setRendering(false);
 
-    /* If during the render, start render or resize were called and
+	/* If during the render, start render or resize were called and
 		filtered out, need to re-render. */
-    if(resizeGLSkipped){
+	if(resizeGLSkipped){
 		resizeGL(newTempScreenWidth, newTempScreenHeight);
 		paintGLSkipped = true;
-    }
-    if(paintGLSkipped){
+	}
+	if(paintGLSkipped){
 		paintGL();
-    }
+	}
 }
 
 
 /*! Inherited from QGLWidget */
 void NetworkViewer::resizeGL(int screenWidth, int screenHeight){
-    if(Globals::isRendering()){
+	if(Globals::isRendering()){
 		resizeGLSkipped = true;
 
 		//Store new screen width and height
 		newTempScreenWidth = screenWidth;
 		newTempScreenHeight = screenHeight;
 		return;
-    }
+	}
 
-    //Reset resizeSkipped
-    resizeGLSkipped = false;
+	//Reset resizeSkipped
+	resizeGLSkipped = false;
 
-    // Prevent a divide by zero, when window is too short (you cant make a window of zero width).
-    if(screenHeight == 0)
+	// Prevent a divide by zero, when window is too short (you cant make a window of zero width).
+	if(screenHeight == 0)
 		screenHeight = 1;
 
-    glViewport(0, 0, screenWidth, screenHeight);
+	glViewport(0, 0, screenWidth, screenHeight);
 
-    // Reset the coordinate system before modifying
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
+	// Reset the coordinate system before modifying
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
 
-    // Set the clipping volume
-    GLfloat aspectRatio = (GLfloat)screenWidth / (GLfloat)screenHeight;
-    gluPerspective(perspective_angle, aspectRatio, perspective_near, perspective_far);
+	// Set the clipping volume
+	GLfloat aspectRatio = (GLfloat)screenWidth / (GLfloat)screenHeight;
+	gluPerspective(perspective_angle, aspectRatio, perspective_near, perspective_far);
 
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 
-    //Check for errors
-    checkOpenGLErrors();
+	//Check for errors
+	checkOpenGLErrors();
 }
 
 
 /*! Adapted from: http://www.lighthouse3d.com/opengl/picking/index.php?openglway */
 void NetworkViewer::mouseDoubleClickEvent (QMouseEvent* event){
-    //Window coordinates in OpenGL start in the bottom left, so have to subtract the window height
-    int mouseYPos = height() - event->y();
-    int mouseXPos = event->x();
+	//Window coordinates in OpenGL start in the bottom left, so have to subtract the window height
+	int mouseYPos = height() - event->y();
+	int mouseXPos = event->x();
 
-    //Determine if control button is down
-    bool ctrlBtnDown = false;
-    if(event->modifiers() & Qt::ControlModifier){
+	//Determine if control button is down
+	bool ctrlBtnDown = false;
+	if(event->modifiers() & Qt::ControlModifier){
 		ctrlBtnDown = true;
-    }
+	}
 
-    //Create the select buffer
-    int SELECT_BUFFER_SIZE = 512;
-    GLuint selectBuffer[SELECT_BUFFER_SIZE];
-    glSelectBuffer(SELECT_BUFFER_SIZE,selectBuffer);
+	//Create the select buffer
+	int SELECT_BUFFER_SIZE = 512;
+	GLuint selectBuffer[SELECT_BUFFER_SIZE];
+	glSelectBuffer(SELECT_BUFFER_SIZE,selectBuffer);
 
-    //Get the current viewport
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT,viewport);
+	//Get the current viewport
+	GLint viewport[4];
+	glGetIntegerv(GL_VIEWPORT,viewport);
 
-    //Start picking
-    glRenderMode(GL_SELECT);
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
-    gluPickMatrix(mouseXPos, mouseYPos, 15, 15, viewport);
+	//Start picking
+	glRenderMode(GL_SELECT);
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	gluPickMatrix(mouseXPos, mouseYPos, 15, 15, viewport);
 
-    float ratio = (float)viewport[2] / (float)viewport[3];
-    gluPerspective(45, ratio, 0.1, 1000);
-    glMatrixMode(GL_MODELVIEW);
+	float ratio = (float)viewport[2] / (float)viewport[3];
+	gluPerspective(45, ratio, 0.1, 1000);
+	glMatrixMode(GL_MODELVIEW);
 
-    //Render neurons with names
-    //Store current matrix state
-    glPushMatrix();
+	//Render neurons with names
+	//Store current matrix state
+	glPushMatrix();
 
-    //Set zoom level
-    setZoomLevel();
+	//Set zoom level
+	setZoomLevel();
 
-    //Position the camera appropriately
-    positionCamera();
+	//Position the camera appropriately
+	positionCamera();
 
-    //Draw the neurons
-    drawNeurons();
+	//Draw the neurons
+	drawNeurons();
 
-    //Restore the matrix state
-    glPopMatrix();
+	//Restore the matrix state
+	glPopMatrix();
 
-    // returning to normal rendering mode
-    int hitCount = glRenderMode(GL_RENDER);
+	// returning to normal rendering mode
+	int hitCount = glRenderMode(GL_RENDER);
 
-    if(hitCount != 0){//Neuron selected
+	if(hitCount != 0){//Neuron selected
 		unsigned int selectedNeuronID = getSelectedNeuron(selectBuffer, hitCount, SELECT_BUFFER_SIZE);
 		Globals::getNetworkDisplay()->setSelectedNeuronID(selectedNeuronID, ctrlBtnDown);
-    }
-    else{
+	}
+	else{
 		Globals::getNetworkDisplay()->setSelectedNeuronID(0);
-    }
+	}
 
-    //Restore render mode and the original projection matrix
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glFlush();
+	//Restore render mode and the original projection matrix
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glFlush();
 }
 
 
@@ -276,112 +286,112 @@ void NetworkViewer::mouseDoubleClickEvent (QMouseEvent* event){
 
 /*! Moves the camera up along the Z axis. */
 void NetworkViewer::moveUp(){
-    cameraMatrix[12] += cameraMatrix[8];
-    cameraMatrix[13] += cameraMatrix[9];
-    cameraMatrix[14] += cameraMatrix[10];
-    updateGL();
+	cameraMatrix[12] += cameraMatrix[8];
+	cameraMatrix[13] += cameraMatrix[9];
+	cameraMatrix[14] += cameraMatrix[10];
+	updateGL();
 }
 
 /*! Moves the camera down along the Z axis. */
 void NetworkViewer::moveDown(){
-    cameraMatrix[12] -= cameraMatrix[8];
-    cameraMatrix[13] -= cameraMatrix[9];
-    cameraMatrix[14] -= cameraMatrix[10];
-    updateGL();
+	cameraMatrix[12] -= cameraMatrix[8];
+	cameraMatrix[13] -= cameraMatrix[9];
+	cameraMatrix[14] -= cameraMatrix[10];
+	updateGL();
 }
 
 
 /*! Moves the camera negatively along the X axis. */
 void NetworkViewer::moveLeft(){
-    cameraMatrix[12] -= cameraMatrix[0];
-    cameraMatrix[13] -= cameraMatrix[1];
-    cameraMatrix[14] -= cameraMatrix[2];
-    updateGL();
+	cameraMatrix[12] -= cameraMatrix[0];
+	cameraMatrix[13] -= cameraMatrix[1];
+	cameraMatrix[14] -= cameraMatrix[2];
+	updateGL();
 }
 
 
 /*! Moves the camera positively along the X axis. */
 void NetworkViewer::moveRight(){
-    cameraMatrix[12] += cameraMatrix[0];
-    cameraMatrix[13] += cameraMatrix[1];
-    cameraMatrix[14] += cameraMatrix[2];
-    updateGL();
+	cameraMatrix[12] += cameraMatrix[0];
+	cameraMatrix[13] += cameraMatrix[1];
+	cameraMatrix[14] += cameraMatrix[2];
+	updateGL();
 }
 
 
 /*! Moves the camera positively along the Y axis */
 void NetworkViewer::moveForward(){
-    cameraMatrix[12] += cameraMatrix[4];
-    cameraMatrix[13] += cameraMatrix[5];
-    cameraMatrix[14] += cameraMatrix[6];
-    updateGL();
+	cameraMatrix[12] += cameraMatrix[4];
+	cameraMatrix[13] += cameraMatrix[5];
+	cameraMatrix[14] += cameraMatrix[6];
+	updateGL();
 }
 
 
 /*! Moves the camera negatively along the Y axis */
 void NetworkViewer::moveBackward(){
-    cameraMatrix[12] -= cameraMatrix[4];
-    cameraMatrix[13] -= cameraMatrix[5];
-    cameraMatrix[14] -= cameraMatrix[6];
-    updateGL();
+	cameraMatrix[12] -= cameraMatrix[4];
+	cameraMatrix[13] -= cameraMatrix[5];
+	cameraMatrix[14] -= cameraMatrix[6];
+	updateGL();
 }
 
 
 /*! Resets view to default setting in which all network is visible. */
 void NetworkViewer::resetView(){
-    viewClippingVolume_Horizontal(defaultClippingVol);
-    updateGL();
+	viewClippingVolume_Horizontal(defaultClippingVol);
+	updateGL();
 }
 
 
 /*! Rotates camera clockwise around X axis looking towards the origin. */
 void NetworkViewer::rotateUp(){
-    sceneRotateX += 2.5f;
-    updateGL();
+	sceneRotateX += 2.5f;
+	updateGL();
 }
 
 
 /*! Rotates camera anticlockwise around X axis looking towards the origin. */
 void NetworkViewer::rotateDown(){
-    sceneRotateX -= 2.5f;
-    updateGL();
+	sceneRotateX -= 2.5f;
+	updateGL();
 }
 
 
 /*! Rotates camera anticlockwise around Z axis looking towards the origin. */
 void NetworkViewer::rotateLeft(){
-    sceneRotateZ += 2.5f;
-    updateGL();
+	sceneRotateZ += 2.5f;
+	updateGL();
 }
 
 
 /*! Rotates camera clockwise around Z axis looking towards the origin. */
 void NetworkViewer::rotateRight(){
-    sceneRotateZ -= 2.5f;
-    updateGL();
+	sceneRotateZ -= 2.5f;
+	updateGL();
 }
 
 
 /*! Re-draws the network */
 void NetworkViewer::refresh(){
-    useDisplayList = false;
-    updateGL();
+	useDisplayList = false;
+	updateGL();
 }
 
 
 /*! Resets the view completely typically after the network has changed */
 void NetworkViewer::reset(){
-    //Load up the volume enclosing the entire network
-    loadDefaultClippingVolume();
+	//Load up the volume enclosing the entire network
+	loadDefaultClippingVolume();
 
-    //Look at this network horizontally
-    viewClippingVolume_Horizontal(defaultClippingVol);
+	//Look at this network horizontally
+	viewClippingVolume_Horizontal(defaultClippingVol);
 
-    //Network has changed so need to re-render the display list
-    useDisplayList = false;
+	//Network has changed so need to re-render the display list
+	useDisplayList = false;
 
-    //Re-draw
-    updateGL();
+	//Re-draw
+	updateGL();
 }
 
 
@@ -392,9 +402,9 @@ void NetworkViewer::reset(){
 
 /*! Checks for errors in OpenGL. */
 void NetworkViewer::checkOpenGLErrors(){
-    //Check to see if error has occurred
-    GLenum err = glGetError();
-    if(err != GL_NO_ERROR){
+	//Check to see if error has occurred
+	GLenum err = glGetError();
+	if(err != GL_NO_ERROR){
 		//May be more than one error message, so add them all to the error string if there is an error
 		QString errMsg = "OpenGL ERROR(S): ";
 		while(err != GL_NO_ERROR){
@@ -404,7 +414,7 @@ void NetworkViewer::checkOpenGLErrors(){
 
 		//Flag error to user
 		qCritical()<<errMsg;
-    }
+	}
 }
 
 
@@ -449,23 +459,23 @@ void NetworkViewer::drawAxes(void){
 
 	//Draw markings on X axis
 	for(float i=defaultClippingVol.x1 - extraLength; i < defaultClippingVol.x2 + extraLength; i += scaleMarkSpacing){
-	    glBegin(GL_POINTS);
+		glBegin(GL_POINTS);
 		glVertex3f(i, 0.0f, 0.0f);
-	    glEnd();
+		glEnd();
 	}
 
 	//Draw markings on Y axis
 	for(float i=defaultClippingVol.y1 - extraLength; i < defaultClippingVol.y2 + extraLength; i += scaleMarkSpacing){
-	    glBegin(GL_POINTS);
+		glBegin(GL_POINTS);
 		glVertex3f(0.0f, i, 0.0f);
-	    glEnd();
+		glEnd();
 	}
 
 	//Draw markings on Z axis
 	for(float i=defaultClippingVol.z1 - extraLength; i < defaultClippingVol.z2 + extraLength; i += scaleMarkSpacing){
-	    glBegin(GL_POINTS);
+		glBegin(GL_POINTS);
 		glVertex3f(0.0f, 0.0f, i);
-	    glEnd();
+		glEnd();
 	}
 
 	//Reset line width to original value
@@ -475,49 +485,49 @@ void NetworkViewer::drawAxes(void){
 
 /*! Draws the connections */
 void NetworkViewer::drawConnections(){
-    //Nothing to do if no network is loaded
-    if(!Globals::networkLoaded())
+	//Nothing to do if no network is loaded
+	if(!Globals::networkLoaded())
 		return;
 
-    //Local variables declared once here to save processing. These point to the points stored in the neurons
-    Point3D* fromNeuronPoint;
-    Point3D* toNeuronPoint;
+	//Local variables declared once here to save processing. These point to the points stored in the neurons
+	Point3D* fromNeuronPoint;
+	Point3D* toNeuronPoint;
 
-    //Get pointer to network that is to be drawn and its associated display
-    Network* network = Globals::getNetwork();
-    NetworkDisplay* netDisplay = Globals::getNetworkDisplay();
+	//Get pointer to network that is to be drawn and its associated display
+	Network* network = Globals::getNetwork();
+	NetworkDisplay* netDisplay = Globals::getNetworkDisplay();
 
-    //Default neuron colour
-    RGBColor positiveConnectionColor = *netDisplay->getPositiveConnectionColor();
-    RGBColor negativeConnectionColor = *netDisplay->getNegativeConnectionColor();
+	//Default neuron colour
+	RGBColor positiveConnectionColor = *netDisplay->getPositiveConnectionColor();
+	RGBColor negativeConnectionColor = *netDisplay->getNegativeConnectionColor();
 
-    //Sort out the connection mode
-    unsigned int singleNeuronID=0, toNeuronID=0;
-    unsigned int connectionMode = netDisplay->getConnectionMode();
-    if(connectionMode & CONNECTION_MODE_ENABLED){
+	//Sort out the connection mode
+	unsigned int singleNeuronID=0, toNeuronID=0;
+	unsigned int connectionMode = netDisplay->getConnectionMode();
+	if(connectionMode & CONNECTION_MODE_ENABLED){
 		singleNeuronID = netDisplay->getSingleNeuronID();
 		if(connectionMode & SHOW_BETWEEN_CONNECTIONS)
 			toNeuronID = netDisplay->getToNeuronID();
-    }
-    bool drawConnection;
+	}
+	bool drawConnection;
 
-    //Start drawing lines
-    glBegin(GL_LINES);
+	//Start drawing lines
+	glBegin(GL_LINES);
 
 	//Work through the connection groups listed in the network display
 	QList<unsigned int> conGrpIDs = Globals::getNetworkDisplay()->getVisibleConnectionGroupIDs();
 	for(QList<unsigned int>::iterator conGrpIter = conGrpIDs.begin(); conGrpIter != conGrpIDs.end(); ++conGrpIter){
 
-	    //Pointer to connection group
-	    ConnectionGroup* conGrp = network->getConnectionGroup(*conGrpIter);
+		//Pointer to connection group
+		ConnectionGroup* conGrp = network->getConnectionGroup(*conGrpIter);
 
-	    //Get neuron groups for extracting the position information
-	    NeuronGroup* fromNeuronGroup = network->getNeuronGroup(conGrp->getFromNeuronGroupID());
-	    NeuronGroup* toNeuronGroup = network->getNeuronGroup(conGrp->getToNeuronGroupID());
+		//Get neuron groups for extracting the position information
+		NeuronGroup* fromNeuronGroup = network->getNeuronGroup(conGrp->getFromNeuronGroupID());
+		NeuronGroup* toNeuronGroup = network->getNeuronGroup(conGrp->getToNeuronGroupID());
 
-	    //Draw all the connections in the group
-	    QList<Connection*>::const_iterator endConGrp = conGrp->end();
-	    for(QList<Connection*>::const_iterator conIter = conGrp->begin(); conIter != endConGrp; ++ conIter){
+		//Draw all the connections in the group
+		QList<Connection*>::const_iterator endConGrp = conGrp->end();
+		for(QList<Connection*>::const_iterator conIter = conGrp->begin(); conIter != endConGrp; ++ conIter){
 
 			//Decide if connection should be drawn, depending on the connection mode and neuron id
 			drawConnection = true;
@@ -570,38 +580,43 @@ void NetworkViewer::drawConnections(){
 				glVertex3f(fromNeuronPoint->getXPos(), fromNeuronPoint->getYPos(), fromNeuronPoint->getZPos());
 				glVertex3f(toNeuronPoint->getXPos(), toNeuronPoint->getYPos(), toNeuronPoint->getZPos());
 			}
-	    }
+		}
 	}
 
-    //End of line drawing
-    glEnd();
+	//End of line drawing
+	glEnd();
 }
 
 
 
 /*! Draws the visible neurons in the network */
 void NetworkViewer::drawNeurons(){
-    //Nothing to do if no network is loaded
-    if(!Globals::networkLoaded())
+	//Nothing to do if no network is loaded
+	if(!Globals::networkLoaded())
 		return;
 
-    //Local variables
-    RGBColor *tmpColor, tmpColor2;
+	//Local variables
+	RGBColor *tmpColor, tmpColor2;
 
-    //Get pointer to network that is to be drawn and its associated display
-    Network* network = Globals::getNetwork();
-    NetworkDisplay* netDisplay = Globals::getNetworkDisplay();
+	//Get pointer to network that is to be drawn and its associated display
+	Network* network = Globals::getNetwork();
+	NetworkDisplay* netDisplay = Globals::getNetworkDisplay();
 
-    //Connection mode
-    unsigned int connectionMode = netDisplay->getConnectionMode();
+	//Connection mode
+	unsigned int connectionMode = netDisplay->getConnectionMode();
 
-    //Default neuron colour
-    RGBColor defaultNeuronColor = *netDisplay->getDefaultNeuronColor();
+	//Default neuron colour
+	RGBColor defaultNeuronColor;
+	bool fullRenderMode = netDisplay->isFullRenderMode();//Local copy for speed
+	if(fullRenderMode)
+		defaultNeuronColor = *netDisplay->getDefaultNeuronColorFullRender();
+	else
+		defaultNeuronColor = *netDisplay->getDefaultNeuronColor();
 
-    //Get map with colours of neurons
-    QHash<unsigned int, RGBColor*> neuronColorMap = netDisplay->getNeuronColorMap();
+	//Get map with colours of neurons
+	QHash<unsigned int, RGBColor*> neuronColorMap = netDisplay->getNeuronColorMap();
 
-    //Set the size of points in OpenGL
+	//Set the size of points in OpenGL
 	glPointSize(Globals::getVertexSize());
 
 	glInitNames();
@@ -610,12 +625,12 @@ void NetworkViewer::drawNeurons(){
 	//Work through the neuron groups listed in the view vector
 	QList<unsigned int> neuronGrpIDs = Globals::getNetworkDisplay()->getVisibleNeuronGroupIDs();
 	for(QList<unsigned int>::iterator neurGrpIter = neuronGrpIDs.begin(); neurGrpIter != neuronGrpIDs.end(); ++neurGrpIter){
-	    //Get the map of neurons associated with this group
-	    NeuronMap* neuronMap = network->getNeuronGroup(*neurGrpIter)->getNeuronMap();
+		//Get the map of neurons associated with this group
+		NeuronMap* neuronMap = network->getNeuronGroup(*neurGrpIter)->getNeuronMap();
 
-	    //Draw the neurons in the map
-	    NeuronMap::iterator neurMapEnd = neuronMap->end();
-	    for(NeuronMap::iterator neurIter = neuronMap->begin(); neurIter != neurMapEnd; ++neurIter){
+		//Draw the neurons in the map
+		NeuronMap::iterator neurMapEnd = neuronMap->end();
+		for(NeuronMap::iterator neurIter = neuronMap->begin(); neurIter != neurMapEnd; ++neurIter){
 
 			//Set the color of the neuron
 			if(connectionMode & CONNECTION_MODE_ENABLED){
@@ -641,18 +656,71 @@ void NetworkViewer::drawNeurons(){
 
 			//Draw the neuron
 			glPushName((*neurIter)->getID());
-			glBegin(GL_POINTS);
-		    glVertex3f(neurIter.value()->getXPos(), neurIter.value()->getYPos(), neurIter.value()->getZPos());
-			glEnd();
+				if(!fullRenderMode){//Draw neurons as a vertex
+					glBegin(GL_POINTS);
+						glVertex3f(neurIter.value()->getXPos(), neurIter.value()->getYPos(), neurIter.value()->getZPos());
+					glEnd();
+				}
+				else{//Draw neurons as a sphere
+					drawSphere(neurIter.value()->getXPos(), neurIter.value()->getYPos(), neurIter.value()->getZPos());
+				}
 			glPopName();
-	    }
+		}
 	}
+}
+
+
+void NetworkViewer::drawSphere(float xPos, float yPos, float zPos) {
+	glPushMatrix();
+	glTranslatef(xPos, yPos, zPos);//Translate to sphere position
+	GLUquadricObj *pObj = gluNewQuadric();
+	gluQuadricDrawStyle(pObj, GLU_FILL);
+	gluQuadricNormals(pObj, GLU_SMOOTH);
+  /* NOTE If we ever changed/used the texture or orientation state
+	 of quadObj, we'd need to change it to the defaults here
+	 with gluQuadricTexture and/or gluQuadricOrientation. */
+	gluSphere(pObj, 0.1f, 21, 11);
+	glPopMatrix();
+}
+
+
+void NetworkViewer::initialiseFullRender(){
+	// Cull backs of polygons
+	glCullFace(GL_BACK);
+	glFrontFace(GL_CCW);
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+
+	// Setup light parameters
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, fNoLight);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, fLowLight);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, fBrightLight);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, fBrightLight);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+
+	// Mostly use material tracking
+	glEnable(GL_COLOR_MATERIAL);
+	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+	glMateriali(GL_FRONT, GL_SHININESS, 128);
+}
+
+
+/*! Switches off everything associated with full render mode. */
+void NetworkViewer::disableFullRender(){
+	glDisable(GL_CULL_FACE);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_LIGHT0);
+	glDisable(GL_COLOR_MATERIAL);
+//	fullRender = false;
+//	viewStateChanged = true;//Want to rebuild the display list with vertices not spheres
 }
 
 
 /*! Point camera towards position specified in struct for camera and rotate scene appropriately */
 void NetworkViewer::positionCamera(){    //
-    gluLookAt(
+	gluLookAt(
 			//Location defined by fourth column of camera matrix
 			cameraMatrix[12], cameraMatrix[13], cameraMatrix[14],
 			//Forward is the Y axis so add this to position
@@ -661,9 +729,9 @@ void NetworkViewer::positionCamera(){    //
 			cameraMatrix[8], cameraMatrix[9], cameraMatrix[10]
 			);
 
-    //Rotate scene
-    glRotatef(sceneRotateX, 1.0f, 0.0f, 0.0f);
-    glRotatef(sceneRotateZ, 0.0f, 0.0f, 1.0f);
+	//Rotate scene
+	glRotatef(sceneRotateX, 1.0f, 0.0f, 0.0f);
+	glRotatef(sceneRotateZ, 0.0f, 0.0f, 1.0f);
 }
 
 
@@ -671,72 +739,72 @@ void NetworkViewer::positionCamera(){    //
 	Fills the 4x4 rotation matrix to enable it to be used to rotate camera frame
 	Note that angle is in radians NOT degrees. */
 void NetworkViewer::fillRotationMatrix(float angle, float x, float y, float z){
-    float vecLength, sinSave, cosSave, oneMinusCos;
-    float xx, yy, zz, xy, yz, zx, xs, ys, zs;
+	float vecLength, sinSave, cosSave, oneMinusCos;
+	float xx, yy, zz, xy, yz, zx, xs, ys, zs;
 
-    // If NULL vector passed in, this will blow up...
-    if(x == 0.0f && y == 0.0f && z == 0.0f){
+	// If NULL vector passed in, this will blow up...
+	if(x == 0.0f && y == 0.0f && z == 0.0f){
 		qCritical()<<"NetworkViewer: NULL MATRIX PASSED TO fillRotationMatrix.";
 		return;
-    }
+	}
 
-    // Scale vector
-    vecLength = (float)sqrt( x*x + y*y + z*z );
+	// Scale vector
+	vecLength = (float)sqrt( x*x + y*y + z*z );
 
-    // Rotation matrix is normalized
-    x /= vecLength;
-    y /= vecLength;
-    z /= vecLength;
+	// Rotation matrix is normalized
+	x /= vecLength;
+	y /= vecLength;
+	z /= vecLength;
 
-    sinSave = (float)sin(angle);
-    cosSave = (float)cos(angle);
-    oneMinusCos = 1.0f - cosSave;
+	sinSave = (float)sin(angle);
+	cosSave = (float)cos(angle);
+	oneMinusCos = 1.0f - cosSave;
 
-    xx = x * x;
-    yy = y * y;
-    zz = z * z;
-    xy = x * y;
-    yz = y * z;
-    zx = z * x;
-    xs = x * sinSave;
-    ys = y * sinSave;
-    zs = z * sinSave;
+	xx = x * x;
+	yy = y * y;
+	zz = z * z;
+	xy = x * y;
+	yz = y * z;
+	zx = z * x;
+	xs = x * sinSave;
+	ys = y * sinSave;
+	zs = z * sinSave;
 
-    rotationMatrix[0] = (oneMinusCos * xx) + cosSave;
-    rotationMatrix[4] = (oneMinusCos * xy) - zs;
-    rotationMatrix[8] = (oneMinusCos * zx) + ys;
-    rotationMatrix[12] = 0.0f;
+	rotationMatrix[0] = (oneMinusCos * xx) + cosSave;
+	rotationMatrix[4] = (oneMinusCos * xy) - zs;
+	rotationMatrix[8] = (oneMinusCos * zx) + ys;
+	rotationMatrix[12] = 0.0f;
 
-    rotationMatrix[1] = (oneMinusCos * xy) + zs;
-    rotationMatrix[5] = (oneMinusCos * yy) + cosSave;
-    rotationMatrix[9] = (oneMinusCos * yz) - xs;
-    rotationMatrix[13] = 0.0f;
+	rotationMatrix[1] = (oneMinusCos * xy) + zs;
+	rotationMatrix[5] = (oneMinusCos * yy) + cosSave;
+	rotationMatrix[9] = (oneMinusCos * yz) - xs;
+	rotationMatrix[13] = 0.0f;
 
-    rotationMatrix[2] = (oneMinusCos * zx) - ys;
-    rotationMatrix[6] = (oneMinusCos * yz) + xs;
-    rotationMatrix[10] = (oneMinusCos * zz) + cosSave;
-    rotationMatrix[14] = 0.0f;
+	rotationMatrix[2] = (oneMinusCos * zx) - ys;
+	rotationMatrix[6] = (oneMinusCos * yz) + xs;
+	rotationMatrix[10] = (oneMinusCos * zz) + cosSave;
+	rotationMatrix[14] = 0.0f;
 
-    rotationMatrix[3] = 0.0f;
-    rotationMatrix[7] = 0.0f;
-    rotationMatrix[11] = 0.0f;
-    rotationMatrix[15] = 1.0f;
+	rotationMatrix[3] = 0.0f;
+	rotationMatrix[7] = 0.0f;
+	rotationMatrix[11] = 0.0f;
+	rotationMatrix[15] = 1.0f;
 }
 
 
 /*! Identifies the closest neuron to the viewer within the select buffer.
-    Returns an invalid neuron ID if no hits are present */
+	Returns an invalid neuron ID if no hits are present */
 unsigned int NetworkViewer::getSelectedNeuron(GLuint selectBuffer[], int hitCount, int bufferSize){
-    if(hitCount == 0)
+	if(hitCount == 0)
 		return 0;
-    if(hitCount * 4 > bufferSize)
+	if(hitCount * 4 > bufferSize)
 		throw SpikeStreamException("Hit data overflows buffer");
 
 
-    GLuint nameCount, *ptr, minZ, minZName=0, currentMinZ, name;
-    ptr = selectBuffer;
-    minZ = 0xffffffff;
-    for(int i=0; i<hitCount; ++i){
+	GLuint nameCount, *ptr, minZ, minZName=0, currentMinZ, name;
+	ptr = selectBuffer;
+	minZ = 0xffffffff;
+	for(int i=0; i<hitCount; ++i){
 		//First field is the number of names
 		nameCount = *ptr;
 		if(nameCount != 1)
@@ -760,10 +828,10 @@ unsigned int NetworkViewer::getSelectedNeuron(GLuint selectBuffer[], int hitCoun
 
 		//Increase pointer to the next hit if it exists
 		++ptr;
-    }
+	}
 
-    //Return the name with the minimum z
-    return minZName;
+	//Return the name with the minimum z
+	return minZName;
 }
 
 
@@ -801,9 +869,9 @@ void NetworkViewer::initialiseCameraParameters(){
 
 /*! Loads up a box that encloses the entire network plus the origin. */
 void NetworkViewer::loadDefaultClippingVolume(){
-    /*If the network is empty or contains no neurons.
+	/*If the network is empty or contains no neurons.
 	set up default clipping volume around origin */
-    if(!Globals::networkLoaded() || Globals::getNetwork()->size() == 0){
+	if(!Globals::networkLoaded() || Globals::getNetwork()->size() == 0){
 		defaultClippingVol.x1 = -100;
 		defaultClippingVol.x2 = 100;
 		defaultClippingVol.y1 = -100;
@@ -811,36 +879,36 @@ void NetworkViewer::loadDefaultClippingVolume(){
 		defaultClippingVol.z1 = -100;
 		defaultClippingVol.z2 = 100;
 		return;
-    }
+	}
 
-    //Get box enclosing network
-    defaultClippingVol = Globals::getNetwork()->getBoundingBox();
+	//Get box enclosing network
+	defaultClippingVol = Globals::getNetwork()->getBoundingBox();
 
-    //Want to include the origin in the starting clip volume
-    if(defaultClippingVol.x1 > 0)
+	//Want to include the origin in the starting clip volume
+	if(defaultClippingVol.x1 > 0)
 		defaultClippingVol.x1 = 0;
-    if(defaultClippingVol.x2 < 0)
+	if(defaultClippingVol.x2 < 0)
 		defaultClippingVol.x2 =0;
-    if(defaultClippingVol.y1 > 0)
+	if(defaultClippingVol.y1 > 0)
 		defaultClippingVol.y1 = 0;
-    if(defaultClippingVol.y2 < 0)
+	if(defaultClippingVol.y2 < 0)
 		defaultClippingVol.y2 = 0;
-    if(defaultClippingVol.z1 > 0)
+	if(defaultClippingVol.z1 > 0)
 		defaultClippingVol.z1 = 0;
-    if(defaultClippingVol.z2 < 0)
+	if(defaultClippingVol.z2 < 0)
 		defaultClippingVol.z2 = 0;
 
-    //Expand box by 20% to give a nice view
-    defaultClippingVol.expand_percent(20);
+	//Expand box by 20% to give a nice view
+	defaultClippingVol.expand_percent(20);
 }
 
 
 /*! Adapated from gltools
 	Rotates a vector using a 4x4 matrix. Translation column is ignored. */
 void NetworkViewer::rotateVector(GLfloat x, GLfloat y, GLfloat z, GLfloat result[]){
-    result[0] = rotationMatrix[0] * x + rotationMatrix[4] * y + rotationMatrix[8] *  z;
-    result[1] = rotationMatrix[1] * x + rotationMatrix[5] * y + rotationMatrix[9] *  z;
-    result[2] = rotationMatrix[2] * x + rotationMatrix[6] * y + rotationMatrix[10] * z;
+	result[0] = rotationMatrix[0] * x + rotationMatrix[4] * y + rotationMatrix[8] *  z;
+	result[1] = rotationMatrix[1] * x + rotationMatrix[5] * y + rotationMatrix[9] *  z;
+	result[2] = rotationMatrix[2] * x + rotationMatrix[6] * y + rotationMatrix[10] * z;
 }
 
 
@@ -898,75 +966,75 @@ void NetworkViewer::rotateZAxis(float angle){
 
 /*! Sets the view so that the perspective fits the clipping volume seen horizontally. */
 void NetworkViewer::viewClippingVolume_Horizontal(Box& clipVolume){
-    //First set camera parameters to their starting values
-    initialiseCameraParameters();
+	//First set camera parameters to their starting values
+	initialiseCameraParameters();
 
-    //Now adjust these parameters to view the whole of the clipping volume
-    //X location should be half way along the clipping volume
-    cameraMatrix[12] = clipVolume.x1 + (clipVolume.x2 - clipVolume.x1)/2.0f;
+	//Now adjust these parameters to view the whole of the clipping volume
+	//X location should be half way along the clipping volume
+	cameraMatrix[12] = clipVolume.x1 + (clipVolume.x2 - clipVolume.x1)/2.0f;
 
 
-    //Camera is looking down the Y axis. So need to move back far enough to see all of clipping volume within perspective
-    //First find whether z or x direction is longest
-    GLfloat backwardsDistance;
-    if((clipVolume.x2 - clipVolume.x1) > (clipVolume.z2 - clipVolume.z1)){//X direction is longest
+	//Camera is looking down the Y axis. So need to move back far enough to see all of clipping volume within perspective
+	//First find whether z or x direction is longest
+	GLfloat backwardsDistance;
+	if((clipVolume.x2 - clipVolume.x1) > (clipVolume.z2 - clipVolume.z1)){//X direction is longest
 		backwardsDistance = ((clipVolume.x2 - clipVolume.x1)/2.0f)/tan(gltDegToRad(perspective_angle)/2.0f);
-    }
-    else{//Z direction is longest
+	}
+	else{//Z direction is longest
 		backwardsDistance = ((clipVolume.z2 - clipVolume.z1)/2.0f)/tan(gltDegToRad(perspective_angle)/2.0f);
-    }
-    //Now move camera back so that it can see everything in both directions
-    //In this case this moves camera back along the negative y direction
-    cameraMatrix[13] = -1 * backwardsDistance;
+	}
+	//Now move camera back so that it can see everything in both directions
+	//In this case this moves camera back along the negative y direction
+	cameraMatrix[13] = -1 * backwardsDistance;
 
-    //Z location should be half way up clipping volume
-    cameraMatrix[14] = clipVolume.z1 + (clipVolume.z2 - clipVolume.z1)/2.0f;
+	//Z location should be half way up clipping volume
+	cameraMatrix[14] = clipVolume.z1 + (clipVolume.z2 - clipVolume.z1)/2.0f;
 
-    //Forward vector does not need to be calculated because camera is initilised looking along positive Y, which is correct for horizontal view
+	//Forward vector does not need to be calculated because camera is initilised looking along positive Y, which is correct for horizontal view
 }
 
 
 /*! Sets the view so that the perspective fits the clipping volume seen horizontally. */
 void NetworkViewer::viewClippingVolume_Vertical(Box& clipVolume){
-    //First set camera parameters to their starting values
-    initialiseCameraParameters();
+	//First set camera parameters to their starting values
+	initialiseCameraParameters();
 
-    //X location should be half way along the clipping volume
-    cameraMatrix[12] = clipVolume.x1 + (clipVolume.x2 - clipVolume.x1)/2.0f;
+	//X location should be half way along the clipping volume
+	cameraMatrix[12] = clipVolume.x1 + (clipVolume.x2 - clipVolume.x1)/2.0f;
 
-    //Camera is looking down the Z axis. So need to move back far enough to see all of clipping volume within perspective
-    //First find whether y or x direction is longest
-    GLfloat backwardsDistance;
-    if((clipVolume.x2 - clipVolume.x1) > (clipVolume.y2 - clipVolume.y1)){//X direction is longest
+	//Camera is looking down the Z axis. So need to move back far enough to see all of clipping volume within perspective
+	//First find whether y or x direction is longest
+	GLfloat backwardsDistance;
+	if((clipVolume.x2 - clipVolume.x1) > (clipVolume.y2 - clipVolume.y1)){//X direction is longest
 		backwardsDistance = ((clipVolume.x2 - clipVolume.x1)/2.0f)/tan(gltDegToRad(perspective_angle)/2.0f);
-    }
-    else{//Y direction is longest
+	}
+	else{//Y direction is longest
 		backwardsDistance = ((clipVolume.y2 - clipVolume.y1)/2.0f)/tan(gltDegToRad(perspective_angle)/2.0f);
-    }
+	}
 
-    //Now move camera back so that it can see everything in both directions
-    //To look above need to move up the positive direction of the Z axis
-    cameraMatrix[14] = 1.1f*(backwardsDistance + clipVolume.z2);
+	//Now move camera back so that it can see everything in both directions
+	//To look above need to move up the positive direction of the Z axis
+	cameraMatrix[14] = 1.1f*(backwardsDistance + clipVolume.z2);
 
-    //Y location should be half way along clipping volume
-    cameraMatrix[13] = clipVolume.y1 + (clipVolume.y2 - clipVolume.y1)/2.0f;
+	//Y location should be half way along clipping volume
+	cameraMatrix[13] = clipVolume.y1 + (clipVolume.y2 - clipVolume.y1)/2.0f;
 
-    //X axis stays the same
-    //Change camera Y axis so that it is pointing down negative Z
-    cameraMatrix[4] = 0.0f;
-    cameraMatrix[5] = 0.0f;
-    cameraMatrix[6] = -1.0f;
+	//X axis stays the same
+	//Change camera Y axis so that it is pointing down negative Z
+	cameraMatrix[4] = 0.0f;
+	cameraMatrix[5] = 0.0f;
+	cameraMatrix[6] = -1.0f;
 
-    //Change camera Z axis so that it points along positive Y
-    cameraMatrix[8] = 0.0f;
-    cameraMatrix[9] = 1.0f;
-    cameraMatrix[10] = 0.0f;
+	//Change camera Z axis so that it points along positive Y
+	cameraMatrix[8] = 0.0f;
+	cameraMatrix[9] = 1.0f;
+	cameraMatrix[10] = 0.0f;
 }
 
 
 /*! Zooms into a particular neuron group or zooms out to show whole network. */
 void NetworkViewer::setZoomLevel(){
-    if(Globals::getNetworkDisplay()->isZoomEnabled()){
+	if(Globals::getNetworkDisplay()->isZoomEnabled()){
 		unsigned int tmpZoomNeurGrpID = Globals::getNetworkDisplay()->getZoomNeuronGroupID();
 		if(tmpZoomNeurGrpID == 0)
 			zoomDefaultView();
@@ -976,13 +1044,13 @@ void NetworkViewer::setZoomLevel(){
 			else if (Globals::getNetworkDisplay()->getZoomStatus() == NetworkDisplay::ZOOM_ABOVE)
 				zoomAboveNeuronGroup(tmpZoomNeurGrpID);
 		}
-    }
+	}
 }
 
 
 /*! Resets the view so all neural networks can be seen. */
 void NetworkViewer::zoomDefaultView(){
-    viewClippingVolume_Horizontal(defaultClippingVol);
+	viewClippingVolume_Horizontal(defaultClippingVol);
 }
 
 
@@ -990,10 +1058,10 @@ void NetworkViewer::zoomDefaultView(){
 	Don't need to set viewStateChanged here since the viewing angle is
 	outside of the main list. */
 void NetworkViewer::zoomAboveNeuronGroup(unsigned int neuronGroupID){
-    if(!Globals::networkLoaded())
+	if(!Globals::networkLoaded())
 		return;
-    Box neurGrpBox = Globals::getNetwork()->getNeuronGroupBoundingBox(neuronGroupID);
-    viewClippingVolume_Vertical(neurGrpBox);
+	Box neurGrpBox = Globals::getNetwork()->getNeuronGroupBoundingBox(neuronGroupID);
+	viewClippingVolume_Vertical(neurGrpBox);
 }
 
 
@@ -1001,10 +1069,10 @@ void NetworkViewer::zoomAboveNeuronGroup(unsigned int neuronGroupID){
 	Don't need to set viewStateChanged here since the viewing angle is
 	outside of the main list. */
 void NetworkViewer::zoomToNeuronGroup(unsigned int neuronGroupID){
-    if(!Globals::networkLoaded())
+	if(!Globals::networkLoaded())
 		return;
-    Box neurGrpBox = Globals::getNetwork()->getNeuronGroupBoundingBox(neuronGroupID);
-    viewClippingVolume_Horizontal(neurGrpBox);
+	Box neurGrpBox = Globals::getNetwork()->getNeuronGroupBoundingBox(neuronGroupID);
+	viewClippingVolume_Horizontal(neurGrpBox);
 }
 
 

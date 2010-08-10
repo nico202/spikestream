@@ -31,6 +31,7 @@ namespace spikestream {
 
 		private slots:
 			void archiveStateChanged(int state);
+			void checkLoadingProgress();
 			void loadSimulation();
 			void monitorStateChanged(int state);
 			void nemoWrapperFinished();
@@ -119,7 +120,6 @@ namespace spikestream {
 
 			//=======================  METHODS  =========================
 			bool checkForErrors();
-			void checkLoadingProgress();
 			void checkWidgetEnabled();
 			QToolBar* getToolBar();
 	};

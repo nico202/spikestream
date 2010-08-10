@@ -8,6 +8,7 @@ using namespace spikestream;
 
 
 //Declare static variables
+unsigned STDPFunctions::STANDARD_STDP = 0;
 bool STDPFunctions::initialized = false;
 QHash<unsigned, float*> STDPFunctions::preArrayMap;
 QHash<unsigned, int> STDPFunctions::preArrayLengthMap;

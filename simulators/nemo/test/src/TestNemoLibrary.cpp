@@ -1,4 +1,4 @@
-#include "TestNemo.h"
+#include "TestNemoLibrary.h"
 
 //SpikeStream includes
 #include "SpikeStreamException.h"
@@ -13,7 +13,7 @@ using namespace spikestream;
 #include <iostream>
 #include <cassert>
 
-
+#define DEBUG false
 
 void addExcitatoryNeuron(nemo_network_t c_net, unsigned nidx){
 	float v = -65.0f;
@@ -75,9 +75,9 @@ void addInhibitorySynapses(nemo_network_t c_net, unsigned source, unsigned ncoun
 
 
 void c_runSimulation(const nemo_network_t net, const nemo_configuration_t conf, unsigned seconds,	std::vector<unsigned>* fcycles,	std::vector<unsigned>* fnidx){
-	qDebug()<<"About to create simulation";
+	if(DEBUG) qDebug()<<"About to create simulation";
 	nemo_simulation_t sim = nemo_new_simulation(net, conf);
-	qDebug()<<"Simulation created successfully.";
+	if(DEBUG) qDebug()<<"Simulation created successfully.";
 
 	fcycles->clear();
 	fnidx->clear();
@@ -86,9 +86,9 @@ void c_runSimulation(const nemo_network_t net, const nemo_configuration_t conf, 
 
 	//for(unsigned s = 0; s < 1; ++s){
 		for(unsigned ms = 0; ms < 10; ++ms) {
-			qDebug()<<"Stepping simulation; milliseconds="<<ms;
+			if(DEBUG) qDebug()<<"Stepping simulation; milliseconds="<<ms;
 			nemo_step(sim, NULL, 0);
-			qDebug()<<"Simulation stepped; milliseconds="<<ms;
+			if(DEBUG) qDebug()<<"Simulation stepped; milliseconds="<<ms;
 
 			//! \todo could modify API here to make this nicer
 			unsigned* cycles_tmp;
@@ -97,36 +97,36 @@ void c_runSimulation(const nemo_network_t net, const nemo_configuration_t conf, 
 			unsigned ncycles;
 
 			//if(ms >= 6){
-				qDebug()<<"Reading firing";
+				if(DEBUG) qDebug()<<"Reading firing";
 				nemo_status_t result = nemo_read_firing(sim, &cycles_tmp, &nidx_tmp, &nfired, &ncycles);
 				if(result != NEMO_OK)
 					QFAIL(nemo_strerror());
-				qDebug()<<"Firing successfully read.";
+				if(DEBUG) qDebug()<<"Firing successfully read.";
 
 				// push data back onto local buffers
-				qDebug()<<"Copying firing data";
+				if(DEBUG) qDebug()<<"Copying firing data";
 				std::copy(cycles_tmp, cycles_tmp + nfired, back_inserter(*fcycles));
 				std::copy(nidx_tmp, nidx_tmp + nfired, back_inserter(*fnidx));
-				qDebug()<<"Firing data successfully copied";
+				if(DEBUG) qDebug()<<"Firing data successfully copied";
 			//}
 		}
 //	}
 
-	qDebug()<<"Deleting simulation";
+	if(DEBUG) qDebug()<<"Deleting simulation";
 	nemo_delete_simulation(sim);
-	qDebug()<<"Simulation successfully deleted.";
+	if(DEBUG) qDebug()<<"Simulation successfully deleted.";
 }
 
 
 void compareSimulationResults(const std::vector<unsigned>& cycles2, const std::vector<unsigned>& nidx2){
-	std::cerr << "Comparing results (" << cycles2.size() << " firings)\n";
+	if(DEBUG) std::cerr << "Comparing results (" << cycles2.size() << " firings)\n";
 	assert(cycles2.size() == nidx2.size());
 
 }
 
 
 
-void TestNemo::testNemoDLL1(){
+void TestNemoLibrary::testNemoDLL1(){
 	unsigned ncount = 1000;
 	unsigned scount = 1000;
 
@@ -158,14 +158,14 @@ void TestNemo::testNemoDLL1(){
 }
 
 
-void TestNemo::testNemoDLL2(){
+void TestNemoLibrary::testNemoDLL2(){
 	//Set up the configuration with the default parameters
-	qDebug()<<"Creating nemo configuration.";
+	if(DEBUG) qDebug()<<"Creating nemo configuration.";
 	nemo_configuration_t nemoConfig = nemo_new_configuration();
-	qDebug()<<"Nemo configuration successfully created.";
+	if(DEBUG) qDebug()<<"Nemo configuration successfully created.";
 
 	//Add neurons
-	qDebug()<<"Adding neurons.";
+	if(DEBUG) qDebug()<<"Adding neurons.";
 	nemo_network_t nemoNet = nemo_new_network();
 
 	nemo_status_t result = nemo_add_neuron(nemoNet, 1, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7);
@@ -192,10 +192,10 @@ void TestNemo::testNemoDLL2(){
 		QFAIL(nemo_strerror());
 	}
 
-	qDebug()<<"Neurons successfully added.";
+	if(DEBUG) qDebug()<<"Neurons successfully added.";
 
 	//Load the network into the simulator
-	qDebug()<<"Loading neurons into simulator.";
+	if(DEBUG) qDebug()<<"Loading neurons into simulator.";
 	nemo_simulation_t nemoSim ;
 	try{
 		nemoSim = nemo_new_simulation(nemoNet, nemoConfig);
@@ -207,18 +207,18 @@ void TestNemo::testNemoDLL2(){
 		qDebug()<<"Nemo simulation is null";
 		QFAIL(nemo_strerror());
 	}
-	qDebug()<<"Neurons successfully loaded into simulator";
+	if(DEBUG) qDebug()<<"Neurons successfully loaded into simulator";
 }
 
 
-void TestNemo::testNemoConfiguration(){
+void TestNemoLibrary::testNemoConfiguration(){
 	try{
 		//Create default configuration object
 		nemo_configuration_t nemoConfig = nemo_new_configuration();
 
-		//Set the number of threads
+		//Get the number of threads
 		int numThreads;
-		checkNemoOutput(nemo_get_cpu_thread_count(nemoConfig, &numThreads), "Failed to get CPU thread count.");
+		checkNemoOutput(nemo_cpu_thread_count(nemoConfig, &numThreads), "Failed to get CPU thread count.");
 		qDebug()<<"Number of threads is "<<numThreads;
 
 		//Test the STDP function
@@ -233,13 +233,12 @@ void TestNemo::testNemoConfiguration(){
 
 		//Test getting the cuda device
 		int cudaDev;
-		checkNemoOutput(nemo_get_cuda_device(nemoConfig, &cudaDev), "Error getting CUDA device from NeMo");
+		checkNemoOutput(nemo_cuda_device(nemoConfig, &cudaDev), "Error getting CUDA device from NeMo");
 		qDebug()<<"CUDA device is: "<<cudaDev;
-
 
 		//Test getting the backend
 		backend_t backend;
-		checkNemoOutput(nemo_get_backend(nemoConfig, &backend), "Failed to get NeMo backend.");
+		checkNemoOutput(nemo_backend(nemoConfig, &backend), "Failed to get NeMo backend.");
 		if(backend == NEMO_BACKEND_CUDA)
 			qDebug()<<"CUDA backend";
 		else if(backend == NEMO_BACKEND_CPU)
@@ -247,20 +246,32 @@ void TestNemo::testNemoConfiguration(){
 		else
 			QFAIL("Unrecognized backend from NeMo");
 
+		//Test listing the CUDA devices
+//		unsigned numCudaDevices = 0;
+//		checkNemoOutput(nemo_cuda_device_count(&numCudaDevices), "Failed to get list of NeMo devices");
+//		if(numCudaDevices == 0)
+//			qDebug()<<"No CUDA devices available.";
+//		else {
+//			for(unsigned i=0; i<numCudaDevices; ++i){
+//				const char* devDesc;
+//				checkNemoOutput(nemo_cuda_device_description(i, &devDesc), "Error getting device description.");
+//				qDebug()<<"CUDA Device available: "<<devDesc;
+//			}
+//		}
+
+		//Set backend to CPU - FIXME: TEST MULTIPLE THREADS
+		checkNemoOutput(nemo_set_cpu_backend(nemoConfig, 1), "Failed to set backend to CPU: ");
+		checkNemoOutput(nemo_backend(nemoConfig, &backend), "Failed to get NeMo backend.");
+		QVERIFY(backend == NEMO_BACKEND_CPU);
+		checkNemoOutput(nemo_cpu_thread_count(nemoConfig, &numThreads), "Failed to get CPU thread count.");
+		QCOMPARE(numThreads, 1);
+
 		//Set backend to CUDA
 		checkNemoOutput(nemo_set_cuda_backend(nemoConfig, 0), "Failed to set CUDA device: ");
-		checkNemoOutput(nemo_get_backend(nemoConfig, &backend), "Failed to get NeMo backend.");
-		checkNemoOutput(nemo_get_cuda_device(nemoConfig, &cudaDev), "Error getting CUDA device from NeMo");
+		checkNemoOutput(nemo_backend(nemoConfig, &backend), "Failed to get NeMo backend.");
+		checkNemoOutput(nemo_cuda_device(nemoConfig, &cudaDev), "Error getting CUDA device from NeMo");
 		QVERIFY(backend == NEMO_BACKEND_CUDA);
 		QCOMPARE(cudaDev, 0);
-
-		//Set backend to CPU
-		checkNemoOutput(nemo_set_cpu_backend(nemoConfig, 4), "Failed to set backend to CPU: ");
-		checkNemoOutput(nemo_get_backend(nemoConfig, &backend), "Failed to get NeMo backend.");
-		checkNemoOutput(nemo_get_cpu_thread_count(nemoConfig, &numThreads), "Failed to get CPU thread count.");
-		QVERIFY(backend == NEMO_BACKEND_CPU);
-		QCOMPARE(numThreads, 4);
-
 	}
 	catch(SpikeStreamException& ex){
 		QFAIL(ex.getMessage().toAscii());
@@ -274,7 +285,7 @@ void TestNemo::testNemoConfiguration(){
 
 
 /*! Checks the output from a nemo function call and throws exception if there is an error */
-void TestNemo::checkNemoOutput(nemo_status_t result, const QString& errorMessage){
+void TestNemoLibrary::checkNemoOutput(nemo_status_t result, const QString& errorMessage){
 	if(result != NEMO_OK)
 		throw SpikeStreamException(errorMessage + ": " + nemo_strerror());
 }
