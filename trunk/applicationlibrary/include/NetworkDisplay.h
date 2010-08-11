@@ -2,6 +2,7 @@
 #define NETWORKDISPLAY_H
 
 //SpikeStream includes
+#include "ConfigLoader.h"
 #include "RGBColor.h"
 using namespace spikestream;
 
@@ -34,21 +35,29 @@ namespace spikestream {
 			RGBColor& getSingleNeuronColor() { return singleNeuronColor; }
 			RGBColor& getToNeuronColor() { return toNeuronColor; }
 			RGBColor* getNegativeConnectionColor(){ return &negativeConnectionColor; }
+			float getNeuronTransparency() { return neuronTransparency; }
 			RGBColor* getPositiveConnectionColor(){ return &positiveConnectionColor; }
+			unsigned getSphereQuality() { return sphereQuality; }
+			float getSphereRadius() { return sphereRadius; }
+			float getVertexSize() { return vertexSize; }
 			QList<unsigned int> getVisibleConnectionGroupIDs() { return connGrpDisplayMap.keys(); }
 			QList<unsigned int> getVisibleNeuronGroupIDs() { return neurGrpDisplayMap.keys(); }
 			unsigned int getZoomNeuronGroupID() { return zoomNeuronGroupID; }
 			int getZoomStatus () { return zoomStatus; }
 			bool isFullRenderMode() { return fullRenderMode; }
+			bool isDrawAxes() { return drawAxes; }
 			bool isZoomEnabled();
+			void loadDisplaySettings(ConfigLoader* configLoader);
 			void lockMutex();
 			bool neuronGroupVisible(unsigned int neurGrpID);
 			void setConnectionModeFlag(unsigned int flag);
 			void unsetConnectionModeFlag(unsigned int flag);
 			void setConnectionGroupVisibility(unsigned int conGrpID, bool visible);
 			void setDefaultNeuronColor(RGBColor& color) { defaultNeuronColor = color; }
+			void setFullRenderMode(bool fullRenderMode);
 			void setNeuronColorMap(QHash<unsigned int, RGBColor*>* newMap);
 			void setNeuronGroupVisibility(unsigned int neurGrpID, bool visible);
+			void setNeuronTransparency(float neuronTransparency);
 			void setVisibleConnectionGroupIDs(const QList<unsigned int>& connGrpIDs);
 			void setVisibleNeuronGroupIDs(const QList<unsigned int>& neurGrpIDs);
 			void setZoom(unsigned int neurGrpID, int status);
@@ -125,7 +134,6 @@ namespace spikestream {
 			/*! Default color for highlighting a neuron */
 			RGBColor highlightNeuronColor;
 
-
 			/*! Map recording the addresses of default colors, so that they don't get deleted
 			when the neuron color map is cleared. */
 			QHash<RGBColor*, bool> defaultColorMap;
@@ -149,6 +157,21 @@ namespace spikestream {
 
 			/*! In full render mode, neurons are drawn as lighted spheres */
 			bool fullRenderMode;
+
+			/*! Size of vertices in the 3D Network Viewer */
+			float vertexSize;
+
+			/*! Whether axes should be drawn or not */
+			bool drawAxes;
+
+			/*! Radius of sphere in full render mode */
+			float sphereRadius;
+
+			/*! Quality of sphere in full render mode. 3-10 are reasonable settings. */
+			unsigned sphereQuality;
+
+			/*! Transparency of the neuron. Should be between 0 and 1. */
+			float neuronTransparency;
 
 
 			//=========================  METHODS  =========================

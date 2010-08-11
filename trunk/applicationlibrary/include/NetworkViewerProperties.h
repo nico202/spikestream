@@ -6,11 +6,14 @@
 using namespace spikestream;
 
 //Qt includes
+#include <QCheckBox>
 #include <QComboBox>
 #include <QLabel>
+#include <QSlider>
 #include <QWidget>
 #include <QRadioButton>
 #include <QPushButton>
+#include <QProgressBar>
 
 namespace spikestream {
 
@@ -25,7 +28,9 @@ namespace spikestream {
 		private slots:
 			void fromToSelectionChanged(int index);
 			void networkDisplayChanged();
+			void neuronTransparencyChanged(int newTransparency);
 			void posNegSelectionChanged(int index);
+			void setRenderMode();
 			void showTruthTable();
 
 		private:
@@ -65,6 +70,18 @@ namespace spikestream {
 
 			/*! Non modal dialog to display truth table associated with a neuron */
 			TruthTableDialog* truthTableDialog;
+
+			/*! Check box to change to full render mode */
+			QCheckBox* renderCheckBox;
+
+			/*! Slider for setting the transparency */
+			QSlider* transparencySlider;
+
+			/*! Label for the transparency. Only enabled in full render mode. */
+			QLabel* transparencyLabel;
+
+			/*! Label for the maximum transparency. Only enabled in full render mode. */
+			QLabel* maxTransparencyLabel;
 
 
 			//=======================  METHODS  =========================

@@ -103,6 +103,14 @@ void NemoWrapper::loadNemo(){
 	qDebug()<<"Creating simulation with configuration: "<<backendDesc;
 
 	//Load the network into the simulator
+
+
+	//LOGGING - DELETE LATER
+	checkNemoOutput(nemo_log_stdout(nemoConfig), "Error setting logging.");
+	int cudaDev;
+	checkNemoOutput(nemo_cuda_device(nemoConfig, &cudaDev), "Error getting CUDA device from NeMo");
+	qDebug()<<"CUDA Device="<<cudaDev;
+
 	nemoSimulation = nemo_new_simulation(nemoNet, nemoConfig);
 	if(nemoSimulation == NULL) {
 		throw SpikeStreamSimulationException(QString("Failed to create Nemo simulation: ") + nemo_strerror());
@@ -346,8 +354,9 @@ void NemoWrapper::stepNemo(){
 		//Add firing neuron ids to list
 		for(unsigned i=0; i<nfired; ++i)
 			firingNeuronList.append(nidx[i]);
-
-		//Flush buffer
+	}
+	//Not monitoring, just flush buffer
+	else{
 		checkNemoOutput( nemo_flush_firing_buffer(nemoSimulation), "Nemo error flushing firing buffer" );
 	}
 

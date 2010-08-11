@@ -35,11 +35,9 @@ namespace spikestream {
 			static NetworkDisplay* getNetworkDisplay();
 			static QString getSpikeStreamRoot();
 			static QString getWorkingDirectory();
-			static float getVertexSize();
 			static bool isAnalysisRunning();
 			static bool isArchivePlaying();
 			static bool isAnalysisLoaded(const QString& analysisName);
-			static bool isDrawAxes();
 			static bool isSimulationLoaded();
 			static bool isSimulationRunning();
 			static bool isRendering();
@@ -47,11 +45,9 @@ namespace spikestream {
 			static void setAnalysisID(const QString& analysisName, unsigned int id);
 			static void setAnalysisRunning(const QString& analysisName);
 			static void setArchivePlaying(bool archivePlaying);
-			static void setDrawAxes(bool drawAxes);
 			static void setSimulationLoaded(bool simulationLoaded);
 			static void setSimulationLoading(bool simulationLoading);
 			static void setSimulationRunning(bool simulationRunning);
-			static void setVertexSize(float vertexSize);
 
 			/* Friend classes that are allowed to change the state of Globals
 				by accessing private setter methods*/
@@ -112,11 +108,6 @@ namespace spikestream {
 			/*! Is archive playback in progress */
 			static bool archivePlaying;
 
-			/*! Controls whether the axes will be drawn in the 3D viewer */
-			static bool drawAxes;
-
-			/*! Size of vertices in the 3D Network Viewer */
-			static float vertexSize;
 
 			//======================  METHODS  ============================
 			static void setAnalysisDao(AnalysisDao* analysisDao);

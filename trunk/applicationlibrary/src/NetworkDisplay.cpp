@@ -1,7 +1,9 @@
+//SpikeStream includes
 #include "Globals.h"
 #include "GlobalVariables.h"
 #include "NetworkDisplay.h"
 #include "SpikeStreamException.h"
+#include "Util.h"
 using namespace spikestream;
 
 
@@ -42,7 +44,14 @@ NetworkDisplay::NetworkDisplay(){
 	toNeuronID = 0;
 
 	//Default render settings
-	fullRenderMode = true;
+	fullRenderMode = false;
+
+	//Other defaults
+	vertexSize = 7.5;
+	sphereRadius = 0.1f;
+	sphereQuality = 10;
+	drawAxes = true;
+	neuronTransparency = 1.0;
 }
 
 
@@ -196,6 +205,16 @@ bool NetworkDisplay::neuronGroupVisible(unsigned int neurGrpID){
 }
 
 
+/*! Loads the network display settings from the configuration file.
+	Throws an exception if the parameters are not present in the file. */
+void NetworkDisplay::loadDisplaySettings(ConfigLoader* configLoader){
+	vertexSize = Util::getFloat( configLoader->getParameter("vertex_size") );
+	drawAxes = Util::getBool( configLoader->getParameter("draw_axes") );
+	sphereRadius = Util::getFloat( configLoader->getParameter("sphere_radius") );
+	sphereQuality = Util::getUInt( configLoader->getParameter("sphere_quality") );
+}
+
+
 /*! Locks the mutex associated with this class */
 void NetworkDisplay::lockMutex(){
 	mutex.lock();
@@ -212,6 +231,13 @@ void NetworkDisplay::setConnectionGroupVisibility(unsigned int conGrpID, bool vi
 	}
 
 	//Inform other classes that the display has changed
+	emit networkDisplayChanged();
+}
+
+
+/*! Sets the render mode of the 3D display */
+void NetworkDisplay::setFullRenderMode(bool fullRenderMode){
+	this->fullRenderMode = fullRenderMode;
 	emit networkDisplayChanged();
 }
 
@@ -243,6 +269,13 @@ void NetworkDisplay::setNeuronGroupVisibility(unsigned int neurGrpID, bool visib
 	}
 	//Inform other classes that the display has changed
 	emit networkDisplayChanged();
+}
+
+
+/*! Sets the transparency of the neurons */
+void NetworkDisplay::setNeuronTransparency(float neuronTransparency){
+	 this->neuronTransparency = neuronTransparency;
+	 emit networkDisplayChanged();
 }
 
 

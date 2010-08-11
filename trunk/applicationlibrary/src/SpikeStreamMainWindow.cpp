@@ -226,8 +226,7 @@ void SpikeStreamMainWindow::saveDatabases(){
 /*! Sets up application including databases and GUI. */
 void SpikeStreamMainWindow::initializeApplication(){
 	//Set up config
-	ConfigLoader* configLoader;
-	configLoader = new ConfigLoader();
+	ConfigLoader* configLoader = new ConfigLoader();
 
 	//Set up the data access objects wrapping the network database
 	DBInfo netDBInfo(
@@ -265,17 +264,15 @@ void SpikeStreamMainWindow::initializeApplication(){
 	AnalysisDao* analysisDao = new AnalysisDao(analysisDBInfo);
 	Globals::setAnalysisDao(analysisDao);
 
-
 	//Create Database manager
 	databaseManager = new DatabaseManager(Globals::getNetworkDao()->getDBInfo(), Globals::getArchiveDao()->getDBInfo(), Globals::getAnalysisDao()->getDBInfo());
 	progressDialog = NULL;
 
-	//Store configuration settings in Globals
-	Globals::setVertexSize( Util::getFloat( configLoader->getParameter("vertex_size") ) );
-	Globals::setDrawAxes( Util::getBool( configLoader->getParameter("draw_axes") ) );
-
 	//Get the default location for saving and loading databases
 	Globals::setWorkingDirectory(configLoader->getParameter("default_file_location"));
+
+	//Load display settings from configuration file
+	Globals::getNetworkDisplay()->loadDisplaySettings(configLoader);
 
 	//Actions
 	//Add OpenGL actions

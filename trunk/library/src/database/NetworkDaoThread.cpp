@@ -121,8 +121,8 @@ void NetworkDaoThread::prepareLoadConnections(QList<ConnectionGroup*>& connGrpLi
     //Set the taks that will run when the thread starts
     currentTask = LOAD_CONNECTIONS_TASK;
 
-	//Set total number of steps to a value greater than 1 - this will change when task starts
-	totalNumberOfSteps = 100;
+	//Calculate the total number of steps
+	totalNumberOfSteps = getConnectionCount(connectionGroupList);
 }
 
 
@@ -135,8 +135,8 @@ void NetworkDaoThread::prepareLoadConnections(ConnectionGroup* connGrp){
     //Set the task that will run when the thread starts
     currentTask = LOAD_CONNECTIONS_TASK;
 
-	//Set total number of steps to a value greater than 1 - this will change when task starts
-	totalNumberOfSteps = 100;
+	//Calculate the total number of steps
+	totalNumberOfSteps = getConnectionCount(connectionGroupList);
 }
 
 
@@ -148,8 +148,8 @@ void NetworkDaoThread::prepareLoadNeurons(const QList<NeuronGroup*>& neurGrpList
     //Set the task that will run when the thread starts
     currentTask = LOAD_NEURONS_TASK;
 
-	//Set total number of steps to a value greater than 1 - this will change when task starts
-	totalNumberOfSteps = 100;
+	//Calculate the total number of steps
+	totalNumberOfSteps = getNeuronCount(neuronGroupList);
 }
 
 
@@ -162,8 +162,8 @@ void NetworkDaoThread::prepareLoadNeurons(NeuronGroup* neurGrp){
     //Set the task that will run when the thread starts
     currentTask = LOAD_NEURONS_TASK;
 
-	//Set total number of steps to a value greater than 1 - this will change when task starts
-	totalNumberOfSteps = 100;
+	//Calculate the total number of steps
+	totalNumberOfSteps = getNeuronCount(neuronGroupList);
 }
 
 
@@ -568,7 +568,6 @@ void NetworkDaoThread::deleteNeuronGroups(){
 void NetworkDaoThread::loadConnections(){
 	//Reset progress
 	numberOfCompletedSteps = 0;
-	totalNumberOfSteps = getConnectionCount(connectionGroupList);
 
     //Work through all the connections to be loaded
     for(QList<ConnectionGroup*>::iterator iter = connectionGroupList.begin(); iter != connectionGroupList.end(); ++iter){
@@ -614,7 +613,6 @@ void NetworkDaoThread::loadConnections(){
 void NetworkDaoThread::loadNeurons(){
 	//Reset progress measure
 	numberOfCompletedSteps = 0;
-	totalNumberOfSteps = getNeuronCount(neuronGroupList);
 
     //Work through all the neurons to be loaded
     for(QList<NeuronGroup*>::iterator iter = neuronGroupList.begin(); iter != neuronGroupList.end(); ++iter){

@@ -25,7 +25,6 @@ using namespace std;
 #define gltRadToDeg(x)	((x)*GLT_INV_PI_DIV_180)
 
 /* Light and material Data. */
-//FIXME THIS HAS BEEN PUT IN FAIRLY RANDOMLY TO ILLUMINATE THE NEURONS. SOMETHING BETTER COULD BE DONE HERE
 GLfloat fLightPos[4]   = { -100.0f, 100.0f, 50.0f, 1.0f };  // Point source
 GLfloat fNoLight[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 GLfloat fLowLight[] = { 0.25f, 0.25f, 0.25f, 1.0f };
@@ -46,7 +45,6 @@ NetworkViewer::NetworkViewer(QWidget* parent) : QGLWidget(parent) {
 	paintGLSkipped = false;
 	resizeGLSkipped = false;
 	useDisplayList = false;
-
 	perspective_angle = 46.0f;
 	perspective_near = 1.0f;
 	perspective_far = 100000.0f;//Set this to a large number so everything will be visible
@@ -90,7 +88,9 @@ void NetworkViewer::initializeGL(){
 	//Create a unique id for the main display list
 	mainDisplayList = glGenLists(1);
 
-	initialiseFullRender();
+	gluSphereObj = gluNewQuadric();
+	gluQuadricDrawStyle(gluSphereObj, GLU_FILL);
+	gluQuadricNormals(gluSphereObj, GLU_SMOOTH);
 }
 
 
@@ -140,11 +140,18 @@ void NetworkViewer::paintGL(){
 		//Draw the axes
 		drawAxes();
 
-		//Draw the neurons without names
-		drawNeurons();
-
-		//Draw the connections
-		drawConnections();
+		//Draw the connections before the neurons in full render mode
+		if(Globals::getNetworkDisplay()->isFullRenderMode()){
+			this->initialiseFullRender();
+			drawConnections();
+			drawNeurons();
+		}
+		//Draw neurons first in fast render mode
+		else{
+			this->disableFullRender();
+			drawNeurons();
+			drawConnections();
+		}
 
 		//Restore the original state of the matrix
 		glPopMatrix();
@@ -422,7 +429,7 @@ void NetworkViewer::checkOpenGLErrors(){
 	These are drawn so that they cover the clipping volume plus a bit of extra length. */
 void NetworkViewer::drawAxes(void){
 	//Do nothing if drawAxes is set to false
-	if(!Globals::isDrawAxes())
+	if(!Globals::getNetworkDisplay()->isDrawAxes())
 		return;
 
 	//Set the drawing colour to red
@@ -597,6 +604,8 @@ void NetworkViewer::drawNeurons(){
 
 	//Local variables
 	RGBColor *tmpColor, tmpColor2;
+	unsigned sphereQuality;
+	float sphereRadius;
 
 	//Get pointer to network that is to be drawn and its associated display
 	Network* network = Globals::getNetwork();
@@ -608,19 +617,22 @@ void NetworkViewer::drawNeurons(){
 	//Default neuron colour
 	RGBColor defaultNeuronColor;
 	bool fullRenderMode = netDisplay->isFullRenderMode();//Local copy for speed
-	if(fullRenderMode)
+	if(fullRenderMode){
 		defaultNeuronColor = *netDisplay->getDefaultNeuronColorFullRender();
-	else
+		sphereQuality = Globals::getNetworkDisplay()->getSphereQuality();
+		sphereRadius = Globals::getNetworkDisplay()->getSphereRadius();
+	}
+	else{
 		defaultNeuronColor = *netDisplay->getDefaultNeuronColor();
+		glPointSize(netDisplay->getVertexSize());//Set the size of points in OpenGL
+	}
+	float neuronAlpha = netDisplay->getNeuronTransparency();
 
 	//Get map with colours of neurons
 	QHash<unsigned int, RGBColor*> neuronColorMap = netDisplay->getNeuronColorMap();
 
-	//Set the size of points in OpenGL
-	glPointSize(Globals::getVertexSize());
-
+	//Initialize list of names for clicking on neurons
 	glInitNames();
-
 
 	//Work through the neuron groups listed in the view vector
 	QList<unsigned int> neuronGrpIDs = Globals::getNetworkDisplay()->getVisibleNeuronGroupIDs();
@@ -636,22 +648,22 @@ void NetworkViewer::drawNeurons(){
 			if(connectionMode & CONNECTION_MODE_ENABLED){
 				if(netDisplay->getSingleNeuronID() == (*neurIter)->getID() ){
 					tmpColor2 = netDisplay->getSingleNeuronColor();
-					glColor3f(tmpColor2.red, tmpColor2.green, tmpColor2.blue);
+					glColor4f(tmpColor2.red, tmpColor2.green, tmpColor2.blue, neuronAlpha);
 				}
 				else if(netDisplay->getToNeuronID() == (*neurIter)->getID() ){
 					tmpColor2 = netDisplay->getToNeuronColor();
-					glColor3f(tmpColor2.red, tmpColor2.green, tmpColor2.blue);
+					glColor4f(tmpColor2.red, tmpColor2.green, tmpColor2.blue, neuronAlpha);
 				}
 				else{
-					glColor3f(defaultNeuronColor.red, defaultNeuronColor.green, defaultNeuronColor.blue);
+					glColor4f(defaultNeuronColor.red, defaultNeuronColor.green, defaultNeuronColor.blue, neuronAlpha);
 				}
 			}
 			else if(neuronColorMap.contains(neurIter.key())){
 				tmpColor = neuronColorMap[neurIter.key()];
-				glColor3f(tmpColor->red, tmpColor->green, tmpColor->blue);
+				glColor4f(tmpColor->red, tmpColor->green, tmpColor->blue, neuronAlpha);
 			}
 			else{
-				glColor3f(defaultNeuronColor.red, defaultNeuronColor.green, defaultNeuronColor.blue);
+				glColor4f(defaultNeuronColor.red, defaultNeuronColor.green, defaultNeuronColor.blue, neuronAlpha);
 			}
 
 			//Draw the neuron
@@ -662,7 +674,7 @@ void NetworkViewer::drawNeurons(){
 					glEnd();
 				}
 				else{//Draw neurons as a sphere
-					drawSphere(neurIter.value()->getXPos(), neurIter.value()->getYPos(), neurIter.value()->getZPos());
+					drawSphere(neurIter.value()->getXPos(), neurIter.value()->getYPos(), neurIter.value()->getZPos(), sphereRadius, sphereQuality);
 				}
 			glPopName();
 		}
@@ -670,20 +682,16 @@ void NetworkViewer::drawNeurons(){
 }
 
 
-void NetworkViewer::drawSphere(float xPos, float yPos, float zPos) {
+/*! Draws a sphere using OpenGL */
+void NetworkViewer::drawSphere(float xPos, float yPos, float zPos, float radius, unsigned quality) {
 	glPushMatrix();
 	glTranslatef(xPos, yPos, zPos);//Translate to sphere position
-	GLUquadricObj *pObj = gluNewQuadric();
-	gluQuadricDrawStyle(pObj, GLU_FILL);
-	gluQuadricNormals(pObj, GLU_SMOOTH);
-  /* NOTE If we ever changed/used the texture or orientation state
-	 of quadObj, we'd need to change it to the defaults here
-	 with gluQuadricTexture and/or gluQuadricOrientation. */
-	gluSphere(pObj, 0.1f, 21, 11);
+	gluSphere(gluSphereObj, radius, quality*2, quality);
 	glPopMatrix();
 }
 
 
+/*! Sets up OpenGL for a full render */
 void NetworkViewer::initialiseFullRender(){
 	// Cull backs of polygons
 	glCullFace(GL_BACK);
@@ -703,6 +711,10 @@ void NetworkViewer::initialiseFullRender(){
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 	glMateriali(GL_FRONT, GL_SHININESS, 128);
+
+	//Transparency settings
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 
@@ -713,8 +725,7 @@ void NetworkViewer::disableFullRender(){
 	glDisable(GL_LIGHTING);
 	glDisable(GL_LIGHT0);
 	glDisable(GL_COLOR_MATERIAL);
-//	fullRender = false;
-//	viewStateChanged = true;//Want to rebuild the display list with vertices not spheres
+	glDisable(GL_BLEND);
 }
 
 
