@@ -307,6 +307,8 @@ void NetworksWidget::checkLoadingProgress(){
 		newNetwork->cancel();
 		progressDialog->setValue(progressDialog->maximum());
 		delete progressDialog;
+		delete loadingTimer;
+		progressDialog = NULL;
 		qCritical()<<"Error occurred loading network: '"<<newNetwork->getErrorMessage()<<"'.";
 		return;
 	}
@@ -316,13 +318,14 @@ void NetworksWidget::checkLoadingProgress(){
 		loadingTimer->stop();
 		newNetwork->cancel();
 		delete progressDialog;
+		delete loadingTimer;
 		progressDialog = NULL;
 		return;
 	}
 
 	//If networks is busy, update progress bar and return with loading timer still running
 	else if(newNetwork->isBusy()){
-		progressDialog->setRange(newNetwork->getNumberOfCompletedSteps(), newNetwork->getTotalNumberOfSteps());
+		progressDialog->setValue(newNetwork->getNumberOfCompletedSteps());
 		return;
 	}
 
@@ -330,6 +333,8 @@ void NetworksWidget::checkLoadingProgress(){
 	loadingTimer->stop();
 	progressDialog->setValue(progressDialog->maximum());
 	delete progressDialog;
+	delete loadingTimer;
+	progressDialog = NULL;
 
 	//Store network in global scope
 	Globals::setNetwork(newNetwork);

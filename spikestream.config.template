@@ -24,6 +24,8 @@ default_file_location = /home/terry/spikestream
 vertex_size = 7.5
 draw_axes = true
 maximize_gui = true
+sphere_radius = 0.1
+sphere_quality = 10
 
 # DATABASE OPTIMIZATION PARAMETERS
 number_insert_connection_buffers = 100

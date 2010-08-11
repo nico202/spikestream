@@ -23,8 +23,6 @@ NetworkDisplay* Globals::networkDisplay = new NetworkDisplay();
 bool Globals::rendering = false;
 QString Globals::spikeStreamRoot = "";
 QString Globals::workingDirectory = "";
-bool Globals::drawAxes = true;
-float Globals::vertexSize = 7.5f;
 bool Globals::simulationLoaded = false;
 bool Globals::simulationRunning = false;
 
@@ -152,13 +150,6 @@ QString Globals::getSpikeStreamRoot(){
 }
 
 
-/*! Returns the size of vertexes in the 3D Network Viewer.
-	This is a configuration setting. */
-float Globals::getVertexSize(){
-	return vertexSize;
-}
-
-
 /*! Returns the working directory which is opened when loading projects, import files etc. */
 QString Globals::getWorkingDirectory(){
 	return workingDirectory;
@@ -170,12 +161,6 @@ bool Globals::networkLoaded(){
 	if(network == NULL)
 		return false;
 	return true;
-}
-
-
-/*! Returns true if draw axes mode is set */
-bool Globals::isDrawAxes(){
-	return drawAxes;
 }
 
 
@@ -215,12 +200,6 @@ void Globals::setAnalysisRunning(const QString &analysisName){
 }
 
 
-/*! Sets parameter controlling whether axes are displayed in the 3D viewer */
-void Globals::setDrawAxes(bool drawAxes){
-	Globals::drawAxes = drawAxes;
-}
-
-
 /*! Sets the simulation loaded state */
 void Globals::setSimulationLoaded(bool simulationLoaded){
 	Globals::simulationLoaded = simulationLoaded;
@@ -230,12 +209,6 @@ void Globals::setSimulationLoaded(bool simulationLoaded){
 /*! Sets the simulation running state */
 void Globals::setSimulationRunning(bool simulationRunning){
 	Globals::simulationRunning = simulationRunning;
-}
-
-
-/*! Sets the size of vertices in the 3D Network Viewer */
-void Globals::setVertexSize(float vertexSize){
-	Globals::vertexSize = vertexSize;
 }
 
 

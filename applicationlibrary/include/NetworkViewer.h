@@ -107,6 +107,9 @@ namespace spikestream {
 			render is in progress */
 			int newTempScreenHeight;
 
+			/*! Object used to draw a sphere */
+			GLUquadricObj* gluSphereObj;
+
 
 			//======================  METHODS  ===========================
 			void checkOpenGLErrors();
@@ -114,7 +117,7 @@ namespace spikestream {
 			void drawAxes();
 			void drawConnections();
 			void drawNeurons();
-			void drawSphere(float xPos, float yPos, float zPos);
+			void drawSphere(float xPos, float yPos, float zPos, float radius, unsigned quality);
 			void fillRotationMatrix(float angle, float x, float y, float z);
 			unsigned int getSelectedNeuron(GLuint selectBuffer[], int hitCount, int bufferSize);
 			void initialiseCameraParameters();

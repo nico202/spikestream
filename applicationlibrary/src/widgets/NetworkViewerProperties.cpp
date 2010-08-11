@@ -19,6 +19,33 @@ NetworkViewerProperties::NetworkViewerProperties(QWidget* parent) : QWidget(pare
 	//Main vertical layout
 	QVBoxLayout* mainVerticalBox = new QVBoxLayout(this);
 
+	//Set up check box to toggle full rendering of scene
+	QHBoxLayout *renderBox = new QHBoxLayout();
+	renderCheckBox = new QCheckBox("Render high quality view", this);
+	connect(renderCheckBox, SIGNAL(clicked()), this, SLOT(setRenderMode()));
+	renderBox->addWidget(renderCheckBox);
+	renderBox->addStretch(5);
+	mainVerticalBox->addLayout(renderBox);
+
+	//Slider for neuron transparency
+	QHBoxLayout* transparencyBox = new QHBoxLayout();
+	transparencySlider = new QSlider(Qt::Horizontal);
+	transparencySlider->setRange(0, 1000);
+	transparencySlider->setSliderPosition(1000);
+	connect(transparencySlider, SIGNAL(sliderMoved(int)), this, SLOT(neuronTransparencyChanged(int)));
+	transparencySlider->setEnabled(false);
+	transparencyBox->addSpacing(30);
+	transparencyLabel = new QLabel("Neuron opacity ");
+	transparencyLabel->setEnabled(false);
+	maxTransparencyLabel = new QLabel("max");
+	maxTransparencyLabel->setEnabled(false);
+	transparencyBox->addWidget(transparencyLabel);
+	transparencyBox->addWidget(transparencySlider);
+	transparencyBox->addWidget(maxTransparencyLabel);
+	transparencyBox->addStretch(5);
+	mainVerticalBox->addLayout(transparencyBox);
+	mainVerticalBox->addSpacing(10);
+
 	//Button group to set connection mode
 	QButtonGroup* conButGroup = new QButtonGroup();
 
@@ -137,6 +164,11 @@ void NetworkViewerProperties::networkDisplayChanged(){
 	}
 }
 
+/*! Called when the slider controlling neuron transparency is changed. */
+void NetworkViewerProperties::neuronTransparencyChanged(int sliderValue){
+	Globals::getNetworkDisplay()->setNeuronTransparency((float)sliderValue/1000.0f);
+}
+
 
 /*! Filtering for showing/hiding positive/negative connections has been changed. */
 void NetworkViewerProperties::posNegSelectionChanged(int index){
@@ -148,6 +180,23 @@ void NetworkViewerProperties::posNegSelectionChanged(int index){
 	}
 	else if (index == 2){
 		Globals::getNetworkDisplay()->showNegativeConnections();
+	}
+}
+
+
+/*! Switches between full render mode and fast render mode */
+void NetworkViewerProperties::setRenderMode(){
+	if(renderCheckBox->isChecked()){//Full render mode
+		Globals::getNetworkDisplay()->setFullRenderMode(true);
+		transparencyLabel->setEnabled(true);
+		maxTransparencyLabel->setEnabled(true);
+		transparencySlider->setEnabled(true);
+	}
+	else{
+		Globals::getNetworkDisplay()->setFullRenderMode(false);
+		transparencyLabel->setEnabled(false);
+		maxTransparencyLabel->setEnabled(false);
+		transparencySlider->setEnabled(false);
 	}
 }
 
