@@ -89,7 +89,20 @@ unsigned int NetworkDao::getConnectionCount(unsigned int networkID){
 }
 
 
-/*! Returns the total number of neurons in the list of neuron groups */
+/*! Returns the total number of connections in a single connection group */
+unsigned int NetworkDao::getConnectionCount(ConnectionGroup* conGrp){
+	//Build query
+	QString queryStr = "SELECT COUNT(*) FROM Connections WHERE ConnectionGroupID=" + QString::number(conGrp->getID());
+
+	//Execute query and return result
+	QSqlQuery query = getQuery(queryStr);
+	executeQuery(query);
+	query.next();
+	return Util::getUInt(query.value(0).toString());
+}
+
+
+/*! Returns the total number of connections in the list of connection groups */
 unsigned int NetworkDao::getConnectionCount(const QList<ConnectionGroup*>& conGrpList){
 	if(conGrpList.isEmpty())
 		return 0;

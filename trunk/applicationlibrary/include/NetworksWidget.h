@@ -56,7 +56,6 @@ namespace spikestream {
 
 			//=======================  METHODS  ======================
 			void loadNetwork(NetworkInfo& netInfo);
-			bool networkChangeOk();
 			void reset();
     };
 

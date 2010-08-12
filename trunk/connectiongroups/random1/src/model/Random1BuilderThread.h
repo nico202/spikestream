@@ -20,6 +20,7 @@ namespace spikestream {
 		public:
 			Random1BuilderThread();
 			~Random1BuilderThread();
+			void cancel();
 			QString getErrorMessage(){ return errorMessage; }
 			bool isError() { return error; }
 			void prepareAddConnectionGroup(const ConnectionGroupInfo& conGrpInfo);
@@ -28,7 +29,7 @@ namespace spikestream {
 
 
 		signals:
-			void progress(int stepsCompleted, int totalSteps);
+			void progress(int stepsCompleted, int totalSteps, QString message);
 
 
 		private:

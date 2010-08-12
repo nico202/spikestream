@@ -52,6 +52,9 @@ ConnectionWidget::~ConnectionWidget(){
 
 /*! Shows plugins dialog configured to load up available plugins for adding neurons */
 void ConnectionWidget::addConnections(){
+	//Run some checks - cannot change network if simulation or analysis is going on.
+	if(!Globals::networkChangeOk())
+		return;
 	PluginsDialog* pluginsDialog = new PluginsDialog(this, "/plugins/connections", "Add Connections");
 	pluginsDialog->exec();
 	delete pluginsDialog;
@@ -60,10 +63,13 @@ void ConnectionWidget::addConnections(){
 
 /*! Deletes the selected connections */
 void ConnectionWidget::deleteSelectedConnections(){
+	//Runs some checks - cannot change network if simulation or analysis is going on.
 	if(!Globals::networkLoaded()){
 		qCritical()<<"Attempting to delete connections when network is not loaded";
 		return;
 	}
+	if(!Globals::networkChangeOk())
+		return;
 
 	//Do nothing if no connection groups are selected
 	QList<unsigned int> deleteConIDList = connectionGroupModel->getSelectedConnectionGroupIDs();

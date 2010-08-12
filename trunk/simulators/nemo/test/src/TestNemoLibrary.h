@@ -11,11 +11,11 @@ class TestNemoLibrary : public QObject {
 	Q_OBJECT
 
 	private slots:
-		void testNemoConfiguration();
 		void testNemoDLL1();
+		void testNemoDLL2();
+		void testNemoConfiguration();
 
 	private:
-		void testNemoDLL2();
 		void checkNemoOutput(nemo_status_t result, const QString& errorMessage);
 
 };

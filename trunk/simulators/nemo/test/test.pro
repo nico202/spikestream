@@ -21,7 +21,9 @@ unix {
 					$${SPIKESTREAM_ROOT_DIR}/simulators/nemo/src/model
 }
 win32 {
-	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/nemo/include
+	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/nemo/include \
+					$${SPIKESTREAM_ROOT_DIR}/library/include \
+					$${SPIKESTREAM_ROOT_DIR}/simulators/nemo/src/model
 }
 
 
@@ -32,7 +34,9 @@ unix {
 	LIBS +=  -lnemowrapper -L$${SPIKESTREAM_ROOT_DIR}/plugins/simulation -lnemo -lspikestream
 }
 win32 {
+	LIBS += -lnemowrapper0 -L$${SPIKESTREAM_ROOT_DIR}/plugins/simulation
 	LIBS += -lnemo -L$${SPIKESTREAM_ROOT_DIR}/extlib/nemo/lib
+	LIBS += -lspikestream0 -L$${SPIKESTREAM_ROOT_DIR}/lib
 }
 
 

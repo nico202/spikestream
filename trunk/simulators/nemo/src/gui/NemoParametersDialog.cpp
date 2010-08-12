@@ -32,33 +32,44 @@ NemoParametersDialog::NemoParametersDialog(nemo_configuration_t nemoConfig, unsi
 	//Validators
 	QIntValidator* unsignedIntValidator = new QIntValidator(0, 1000, this);
 
+	int rowCntr = 0;
+
+	//Nemo version
+	QString versionStr = "Nemo version ";
+	gridLayout->addWidget(new QLabel(versionStr + nemo_version()), rowCntr, 0);
+	++rowCntr;
+
 	//Combo box to select backend
 	backendCombo = new QComboBox();
 	backendCombo->addItem("CUDA Hardware");
 	backendCombo->addItem("CPU");
-	gridLayout->addWidget(new QLabel("Backend: "), 0, 0);
-	gridLayout->addWidget(backendCombo, 0, 1);
+	gridLayout->addWidget(new QLabel("Backend: "), rowCntr, 0);
+	gridLayout->addWidget(backendCombo, rowCntr, 1);
 	connect(backendCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(backendChanged(int)));
+	++rowCntr;
 
 	//CPU threads line edit
 	threadsLineEdit = new QLineEdit();
 	threadsLineEdit->setValidator(unsignedIntValidator);
 	threadsLabel = new QLabel("Number of CPU threads: ");
-	gridLayout->addWidget(threadsLabel, 1, 0);
-	gridLayout->addWidget(threadsLineEdit, 1, 1);
+	gridLayout->addWidget(threadsLabel, rowCntr, 0);
+	gridLayout->addWidget(threadsLineEdit, rowCntr, 1);
+	++rowCntr;
 
 	//CUDA device list
 	cudaDeviceCombo = new QComboBox();
 	getCudaDevices(cudaDeviceCombo);
 	cudaDeviceLabel = new QLabel("CUDA device: ");
-	gridLayout->addWidget(cudaDeviceLabel, 2, 0);
-	gridLayout->addWidget(cudaDeviceCombo, 2, 1);
+	gridLayout->addWidget(cudaDeviceLabel, rowCntr, 0);
+	gridLayout->addWidget(cudaDeviceCombo, rowCntr, 1);
+	++rowCntr;
 
 	//Add combo with STDP functions
 	stdpCombo = new QComboBox();
 	getStdpFunctions(stdpCombo);
-	gridLayout->addWidget(new QLabel("STDP function: "), 3, 0);
-	gridLayout->addWidget(stdpCombo, 3, 1);
+	gridLayout->addWidget(new QLabel("STDP function: "), rowCntr, 0);
+	gridLayout->addWidget(stdpCombo, rowCntr, 1);
+	++rowCntr;
 
 	//Sets the fields to match the config
 	loadParameters(currentNemoConfig);
@@ -93,10 +104,10 @@ void NemoParametersDialog::backendChanged(int index){
 		cudaDeviceCombo->show();
 	}
 	else if(index == 1){
-		threadsLabel->show();
-		threadsLineEdit->show();
 		cudaDeviceLabel->hide();
 		cudaDeviceCombo->hide();
+		threadsLabel->show();
+		threadsLineEdit->show();
 	}
 }
 
@@ -186,17 +197,25 @@ void NemoParametersDialog::getStdpFunctions(QComboBox *combo){
 void NemoParametersDialog::loadParameters(nemo_configuration_t config){
 	//Backend
 	backend_t backend;
+	int index = 0;
 	checkNemoOutput(nemo_backend(config, &backend), "Failed to get NeMo backend.");
 	if(backend == NEMO_BACKEND_CUDA)
-		backendCombo->setCurrentIndex(0);
+		index = 0;
 	else if (backend == NEMO_BACKEND_CPU)
-		backendCombo->setCurrentIndex(1);
+		index = 1;
 	else
 		throw SpikeStreamException("Backend not recognized: " + QString::number(backend));
+
+	/* Set backend combo to index and call function to make sure inputs are correctly hidden or shown
+	   It may not change the current index, so need to call this function */
+	backendCombo->setCurrentIndex(index);
+	backendChanged(index);
 
 	//Number of threads
 	int numThreads;
 	checkNemoOutput(nemo_cpu_thread_count(config, &numThreads), "Failed to get CPU thread count.");
+	if(numThreads < 1)//No point in displaying threads less than 1 - will never want to set it to this value
+	  numThreads = 1;
 	threadsLineEdit->setText(QString::number(numThreads));
 
 	//CUDA device

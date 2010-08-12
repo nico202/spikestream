@@ -52,8 +52,9 @@ void DBConfigMainWindow::closeApplication(){
 /*! Configures each database, checking for confirmation from the user if the database already exists */
 void DBConfigMainWindow::configureDatabases(const DBInfo& networkDBInfo, const DBInfo& archiveDBInfo, const DBInfo& analysisDBInfo){
 	//Show busy window
-	QProgressDialog progressDlg("Configuring databases...", "Abort Copy", 0, 3, this);
+	QProgressDialog progressDlg("Configuring databases...", "Abort", 0, 3, this);
 	progressDlg.setWindowModality(Qt::WindowModal);
+	progressDlg.setMinimumDuration(500);
 
 	//Configure databases
 	bool netDBConfigured = false, archDBConfigured = false, anaDBConfigured = false;

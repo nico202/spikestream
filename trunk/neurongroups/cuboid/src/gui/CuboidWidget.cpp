@@ -148,7 +148,7 @@ CuboidWidget::CuboidWidget(QWidget* parent) : QWidget(parent) {
 	//Create builder thread class
 	builderThread = new CuboidBuilderThread();
 	connect (builderThread, SIGNAL(finished()), this, SLOT(builderThreadFinished()));
-	connect(builderThread, SIGNAL( progress(int, int) ), this, SLOT( updateProgress(int, int) ) );
+	connect(builderThread, SIGNAL( progress(int, int, QString) ), this, SLOT( updateProgress(int, int, QString) ) );
 }
 
 
@@ -246,9 +246,10 @@ void CuboidWidget::addButtonClicked(){
 	//Start thread to add neuron group
 	try{
 		builderThread->prepareAddNeuronGroups(nameEdit->text(), descriptionEdit->text(), paramMap);
-		progressDialog = new QProgressDialog("Building neuron group", "Cancel", 0, 100, this);
+		progressDialog = new QProgressDialog("Building neuron group", "Cancel", 0, 100, this, Qt::CustomizeWindowHint);
 		progressDialog->setWindowModality(Qt::WindowModal);
 		progressDialog->setMinimumDuration(2000);
+		progressDialog->setCancelButton(0);//Too complicated to implement cancel sensibly
 		builderThread->start();
 	}
 	catch(SpikeStreamException& ex){
@@ -265,26 +266,28 @@ void CuboidWidget::builderThreadFinished(){
 	if(builderThread->isError())
 		qCritical()<<builderThread->getErrorMessage();
 
+	progressDialog->close();
+
 	//Inform other classes that network has changed
 	Globals::getEventRouter()->networkChangedSlot();
 }
 
 
 /*! Updates user with feedback about progress with the operation */
-void CuboidWidget::updateProgress(int stepsCompleted, int totalSteps){
-	if(stepsCompleted < totalSteps){
-		//Update progress
+void CuboidWidget::updateProgress(int stepsCompleted, int totalSteps, QString message){
+	qDebug()<<"STEPS COMPLETED: "<<stepsCompleted<<" TOTAL STEPS: "<<totalSteps;
+	//Check for cancellation
+	if(progressDialog->wasCanceled()){
+		qCritical()<<"Cuboid plugin does not currently support cancellation of adding neurons.";
+	}
+	//Update progress
+	else if(stepsCompleted < totalSteps){
 		progressDialog->setValue(stepsCompleted);
 		progressDialog->setMaximum(totalSteps);
-
-		//Check for cancellation
-		if(progressDialog->wasCanceled()){
-			builderThread->stop();
-		}
+		progressDialog->setLabelText(message);
 	}
 	else{
 		progressDialog->close();
-		//delete progressDialog;
 	}
 }
 

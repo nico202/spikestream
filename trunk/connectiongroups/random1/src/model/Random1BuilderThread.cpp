@@ -36,7 +36,7 @@ void Random1BuilderThread::run(){
 	clearError();
 	stopThread = false;
 	newConnectionGroup = NULL;
-	//networkFinished = false;
+
 	try{
 		//Seed the random number generator
 		srand(12345678);
@@ -53,7 +53,8 @@ void Random1BuilderThread::run(){
 
 		//Wait for network to finish adding connection groups
 		while(currentNetwork->isBusy()){
-			msleep(50);
+			emit progress(threadNetworkDao->getConnectionCount(newConnectionGroup), newConnectionGroup->size(), "Adding connections to database...");
+			msleep(250);
 		}
 
 		//Check for errors
@@ -143,7 +144,7 @@ void Random1BuilderThread::buildConnectionGroup(){
 
 		//Update progress
 		++cntr;
-		emit progress(cntr, numberOfProgressSteps);
+		emit progress(cntr, numberOfProgressSteps, "Building connections...");
 	}
 }
 

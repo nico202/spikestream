@@ -24,7 +24,7 @@ namespace spikestream {
 		private slots:
 			void addButtonClicked();
 			void builderThreadFinished();
-			void updateProgress(int stepsCompleted, int totalSteps);
+			void updateProgress(int stepsCompleted, int totalSteps, QString message);
 
 
 		private:

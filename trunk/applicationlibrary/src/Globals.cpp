@@ -187,6 +187,43 @@ bool  Globals::isSimulationRunning(){
 	return Globals::simulationRunning;
 }
 
+/*! Runs checks when a network is loaded and the user attempts to load a different network or delete the current network.
+	If a simulation or analysis is running, the user is requested to stop them and try again.
+	If a simulation is loaded, confirmation is requested from the user.
+	True is returned if everything is ok. */
+bool Globals::networkChangeOk(){
+	//If no network is loaded, then simulation or analysis will not be running
+	if(!Globals::networkLoaded())
+		return true;
+
+	//Cannot change network when simulation is running
+	if(Globals::isSimulationRunning()){
+		qWarning()<<"Network cannot be changed or deleted whilst a simulation is running.\nStop the simulation and try again.";
+		return false;
+	}
+
+	//Cannot change network when analysis is running
+	if(Globals::isAnalysisRunning()){
+		qWarning()<<"Network cannot be changed or deleted whilst an analysis is running.\nStop all analyses and try again.";
+		return false;
+	}
+
+	//Cannot change network when archive is playing
+	if(Globals::isArchivePlaying()){
+		qWarning()<<"Network cannot be changed or deleted whilst an archive is playing.\nStop archive playback and try again.";
+		return false;
+	}
+
+	//Check that user wants to unload simulation
+	if(Globals::isSimulationLoaded()){
+		qWarning()<<"A simulation is currently loaded.\nUnload the simulation before changing or deleting the current network.";
+		return false;
+	}
+
+	//Network change is ok if we have reached this point
+	return true;
+}
+
 
 /*! Sets the analysis id. An id of 0 indicates that no analysis is loaded. */
 void Globals::setAnalysisID(const QString& analysisName, unsigned int id){

@@ -44,7 +44,6 @@ void CuboidBuilderThread::prepareAddNeuronGroups(const QString& name, const QStr
 void CuboidBuilderThread::run(){
 	clearError();
 	stopThread = false;
-	networkFinished = false;
 	try{
 		//Seed the random number generator
 		srand(12345678);
@@ -53,12 +52,27 @@ void CuboidBuilderThread::run(){
 		threadNetworkDao = new NetworkDao(Globals::getNetworkDao()->getDBInfo());
 		threadArchiveDao = new ArchiveDao(Globals::getArchiveDao()->getDBInfo());
 
+		//Need to set a new network and archive dao in the network because we are running as a separate thread
+		Network* currentNetwork = Globals::getNetwork();
+		currentNetwork->setNetworkDao(threadNetworkDao);
+		currentNetwork->setArchiveDao(threadArchiveDao);
+
 		//Add the neuron groups to the database
 		addNeuronGroupsToDatabase();
 
 		//Wait for network to finish
-		while(!networkFinished)
+		while(currentNetwork->isBusy()){
+			emit progress(threadNetworkDao->getNeuronCount(newNeuronGroupList), totalNumberOfNeurons, "Adding neurons to database...");
 			msleep(250);
+		}
+
+		//Check for errors
+		if(currentNetwork->isError())
+			setError(currentNetwork->getErrorMessage());
+
+		//Reset network and archive daos in network
+		currentNetwork->setNetworkDao(Globals::getNetworkDao());
+		currentNetwork->setArchiveDao(Globals::getArchiveDao());
 
 		//Clean up network and archive dao
 		delete threadNetworkDao;
@@ -80,51 +94,16 @@ void CuboidBuilderThread::stop(){
 
 
 /*----------------------------------------------------------*/
-/*-----                 PRIVATE SLOTS                  -----*/
-/*----------------------------------------------------------*/
-
-/*! Called when network has finished adding the neuron groups */
-void CuboidBuilderThread::networkTaskFinished(){
-	//Check for errors
-	if(Globals::getNetwork()->isError())
-		setError(Globals::getNetwork()->getErrorMessage());
-
-	//Inform other classes that loading has completed
-	emit progress(width+1, width+1);
-
-	//Prevent this method being called when network finishes other tasks
-	this->disconnect(Globals::getNetwork(), SIGNAL(taskFinished()));
-
-	//Reset network and archive daos in network
-	Globals::getNetwork()->setNetworkDao(Globals::getNetworkDao());
-	Globals::getNetwork()->setArchiveDao(Globals::getArchiveDao());
-
-	//Record that network has finished
-	networkFinished = true;
-}
-
-
-/*----------------------------------------------------------*/
 /*-----                PRIVATE METHODS                 -----*/
 /*----------------------------------------------------------*/
 
 /*! Adds a neuron group with the specified parameters to the database */
 void CuboidBuilderThread::addNeuronGroupsToDatabase(){
-	Network* currentNetwork = Globals::getNetwork();
-
-	//Need to set a new network and archive dao in the network because we are running as a separate thread
-	currentNetwork->setNetworkDao(threadNetworkDao);
-	currentNetwork->setArchiveDao(threadArchiveDao);
-
 	//Add the neurons to the neuron groups
 	addNeurons();
 
 	//Add the neuron groups to the network
-	newNeuronGroupList.clear();
-	for(QHash<unsigned int, NeuronGroup*>::iterator iter = newNeuronGroupMap.begin(); iter != newNeuronGroupMap.end(); ++iter)
-		newNeuronGroupList.append(iter.value());
-	connect(currentNetwork, SIGNAL(taskFinished()), this, SLOT(networkTaskFinished()),  Qt::UniqueConnection);
-	currentNetwork->addNeuronGroups(newNeuronGroupList);
+	Globals::getNetwork()->addNeuronGroups(newNeuronGroupList);
 }
 
 
@@ -189,13 +168,15 @@ void CuboidBuilderThread::addNeurons(){
 				++cntr;
 			}
 		}
-
-		//Give some idea about progress
-		emit progress(xPos, width+1);
 	}
 
-	//Print information about the pre-database state of the neuron groups
-	//printSummary();
+	//Convert map to list format and sum total number of neurons
+	newNeuronGroupList.clear();
+	totalNumberOfNeurons = 0;
+	for(QHash<unsigned int, NeuronGroup*>::iterator iter = newNeuronGroupMap.begin(); iter != newNeuronGroupMap.end(); ++iter){
+		newNeuronGroupList.append(iter.value());
+		totalNumberOfNeurons += iter.value()->size();
+	}
 }
 
 
