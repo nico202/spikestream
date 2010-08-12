@@ -30,11 +30,11 @@ SUBDIRS += installation/dbconfigtool
 
 
 #=================  TESTS  ===================
-SUBDIRS += testlibrary \
-			library/test \
-			applicationlibrary/test \
-			analysis/statebasedphi/test \
-			analysis/liveliness/test \
-			simulators/nemo/test
+SUBDIRS += testlibrary
+SUBDIRS += library/test
+SUBDIRS += applicationlibrary/test
+SUBDIRS += analysis/statebasedphi/test
+SUBDIRS += analysis/liveliness/test
+SUBDIRS += simulators/nemo/test
 
 

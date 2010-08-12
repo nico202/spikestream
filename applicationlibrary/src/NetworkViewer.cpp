@@ -137,18 +137,17 @@ void NetworkViewer::paintGL(){
 		//Start recording new display list
 		glNewList(mainDisplayList, GL_COMPILE_AND_EXECUTE);
 
-		//Draw the axes
-		drawAxes();
-
 		//Draw the connections before the neurons in full render mode
 		if(Globals::getNetworkDisplay()->isFullRenderMode()){
 			this->initialiseFullRender();
+			drawAxes();
 			drawConnections();
 			drawNeurons();
 		}
 		//Draw neurons first in fast render mode
 		else{
 			this->disableFullRender();
+			drawAxes();
 			drawNeurons();
 			drawConnections();
 		}

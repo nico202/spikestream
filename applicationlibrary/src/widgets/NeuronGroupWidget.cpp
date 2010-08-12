@@ -53,6 +53,9 @@ NeuronGroupWidget::~NeuronGroupWidget(){
 
 /*! Shows plugins dialog configured to load up available plugins for adding neurons */
 void NeuronGroupWidget::addNeurons(){
+	//Run some checks - cannot change network if simulation or analysis is going on.
+	if(!Globals::networkChangeOk())
+		return;
 	PluginsDialog* pluginsDialog = new PluginsDialog(this, "/plugins/neurons", "Add Neurons");
 	pluginsDialog->exec();
 	delete pluginsDialog;
@@ -61,10 +64,13 @@ void NeuronGroupWidget::addNeurons(){
 
 /*! Deletes selected neuron groups */
 void NeuronGroupWidget::deleteSelectedNeurons(){
+	//Run some checks - cannot change network if simulation or analysis is going on.
 	if(!Globals::networkLoaded()){
 		qCritical()<<"Attempting to delete neurons when network is not loaded";
 		return;
 	}
+	if(!Globals::networkChangeOk())
+		return;
 
 	//Do nothing if no neuron groups are selected
 	QList<unsigned int> deleteNeurIDList = neuronGroupModel->getSelectedNeuronGroupIDs();

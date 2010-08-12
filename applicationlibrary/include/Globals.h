@@ -41,6 +41,7 @@ namespace spikestream {
 			static bool isSimulationLoaded();
 			static bool isSimulationRunning();
 			static bool isRendering();
+			static bool networkChangeOk();
 			static bool networkLoaded();
 			static void setAnalysisID(const QString& analysisName, unsigned int id);
 			static void setAnalysisRunning(const QString& analysisName);

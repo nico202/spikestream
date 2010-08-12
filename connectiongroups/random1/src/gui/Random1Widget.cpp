@@ -142,7 +142,7 @@ Random1Widget::Random1Widget(QWidget* parent) : QWidget(parent) {
 	//Create builder thread class
 	builderThread = new Random1BuilderThread();
 	connect (builderThread, SIGNAL(finished()), this, SLOT(builderThreadFinished()));
-	connect(builderThread, SIGNAL( progress(int, int) ), this, SLOT( updateProgress(int, int) ) );
+	connect(builderThread, SIGNAL( progress(int, int, QString) ), this, SLOT( updateProgress(int, int, QString) ) );
 }
 
 
@@ -206,9 +206,10 @@ void Random1Widget::addButtonClicked(){
 		//Start thread to add neuron group
 		ConnectionGroupInfo info(0, descriptionEdit->text(), fromNeurGrpID, toNeurGrpID, paramMap, synapseType);
 		builderThread->prepareAddConnectionGroup(info);
-		progressDialog = new QProgressDialog("Adding connection group", "Cancel", 0, 100, this);
+		progressDialog = new QProgressDialog("Adding connection group", "Cancel", 0, 100, this, Qt::CustomizeWindowHint);
 		progressDialog->setWindowModality(Qt::WindowModal);
 		progressDialog->setMinimumDuration(2000);
+		progressDialog->setCancelButton(0);//Too complicated to implement cancel sensibly
 		builderThread->start();
 	}
 	catch(SpikeStreamException& ex){
@@ -232,20 +233,20 @@ void Random1Widget::builderThreadFinished(){
 
 
 /*! Updates user with feedback about progress with the operation */
-void Random1Widget::updateProgress(int stepsCompleted, int totalSteps){
-	if(stepsCompleted < totalSteps){
-		//Update progress
+void Random1Widget::updateProgress(int stepsCompleted, int totalSteps, QString message){
+	//Check for cancellation
+	if(progressDialog->wasCanceled()){
+		qCritical()<<"Cuboid plugin does not currently support cancellation of adding connections.";
+	}
+	//Update progress
+	else if(stepsCompleted < totalSteps){
 		progressDialog->setValue(stepsCompleted);
 		progressDialog->setMaximum(totalSteps);
-
-		//Check for cancellation
-		if(progressDialog->wasCanceled()){
-			builderThread->stop();
-		}
+		progressDialog->setLabelText(message);
 	}
+	//Progress has finished
 	else{
 		progressDialog->close();
-		//delete progressDialog;
 	}
 }
 

@@ -27,10 +27,7 @@ namespace spikestream {
 			void stop();
 
 		signals:
-			void progress(int stepsCompleted, int totalSteps);
-
-		private slots:
-			void networkTaskFinished();
+			void progress(int stepsCompleted, int totalSteps, QString message);
 
 		private:
 			//=======================  VARIABLES  ========================
@@ -49,9 +46,6 @@ namespace spikestream {
 
 			/*! Archive Dao used by Network when in thread */
 			ArchiveDao* threadArchiveDao;
-
-			/*! Set to true when network has finished adding the neuron groups */
-			bool networkFinished;
 
 			/*! Used to cancel the operation */
 			bool stopThread;
@@ -86,7 +80,11 @@ namespace spikestream {
 			/*! Density of the neurons */
 			double density;
 
+			/*! Neuron groups to be added, stored as a list */
 			QList<NeuronGroup*> newNeuronGroupList;
+
+			/*! The total number of neurons to be added. */
+			unsigned totalNumberOfNeurons;
 
 
 			//=======================  METHODS  ==========================

@@ -115,7 +115,7 @@ void NetworksWidget::deleteNetwork(){
 
 	//Run checks if we are deleting the current network
 	if(Globals::networkLoaded() && Globals::getNetwork()->getID() == networkID){
-		if(!networkChangeOk())
+		if(!Globals::networkChangeOk())
 			return;
 	}
 
@@ -158,7 +158,7 @@ void NetworksWidget::loadNetwork(){
 	}
 
 	//Run checks to make sure that we want to change network
-	if(!networkChangeOk())
+	if(!Globals::networkChangeOk())
 		return;
 
 
@@ -346,45 +346,6 @@ void NetworksWidget::checkLoadingProgress(){
 		Should not lead to an infinite loop because network in Globals
 		should match one in the list returned from the database */
 	loadNetworkList();
-}
-
-
-/*! Runs checks when a network is loaded and the user attempts to load a different network or delete the current network.
-	If a simulation or analysis is running, the user is requested to stop them and try again.
-	If a simulation is loaded, confirmation is requested from the user.
-	True is returned if everything is ok. */
-bool NetworksWidget::networkChangeOk(){
-	//If no network is loaded, then simulation or analysis will not be running
-	if(!Globals::networkLoaded())
-		return true;
-
-	//Cannot change network when simulation is running
-	if(Globals::isSimulationRunning()){
-		qCritical()<<"Network cannot be changed or deleted whilst a simulation is running.\nStop the simulation and try again.";
-		return false;
-	}
-
-	//Cannot change network when analysis is running
-	if(Globals::isAnalysisRunning()){
-		qCritical()<<"Network cannot be changed or deleted whilst an analysis is running.\nStop all analyses and try again.";
-		return false;
-	}
-
-	//Cannot change network when archive is playing
-	if(Globals::isArchivePlaying()){
-		qCritical()<<"Network cannot be changed or deleted whilst an archive is playing.\nStop archive playback and try again.";
-		return false;
-	}
-
-	//Check that user wants to unload simulation
-	if(Globals::isSimulationLoaded()){
-		int response = QMessageBox::warning(this, "Network Change or Delete?", "A simulation is currently loaded. Are you sure that you want to change or delete the current network?", QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel);
-		if(response != QMessageBox::Ok)
-			return false;
-	}
-
-	//Network change is ok if we have reached this point
-	return true;
 }
 
 
