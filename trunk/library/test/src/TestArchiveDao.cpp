@@ -166,25 +166,25 @@ void TestArchiveDao::testGetFiringNeuronIDs(){
     ArchiveDao archiveDao(archiveDBInfo);
 
     //Check that correct IDs are returned for each time step
-    QStringList firingNeuronIDs = archiveDao.getFiringNeuronIDs(testArchive1ID, 1);
+	QList<unsigned> firingNeuronIDs = archiveDao.getFiringNeuronIDs(testArchive1ID, 1);
     QCOMPARE(firingNeuronIDs.size(), (int)4);
-    QCOMPARE(Util::getUInt(firingNeuronIDs[0]), (unsigned int)256);
-    QCOMPARE(Util::getUInt(firingNeuronIDs[1]), (unsigned int)311);
-    QCOMPARE(Util::getUInt(firingNeuronIDs[2]), (unsigned int)21);
-    QCOMPARE(Util::getUInt(firingNeuronIDs[3]), (unsigned int)4);
+	QCOMPARE(firingNeuronIDs[0], (unsigned)256);
+	QCOMPARE(firingNeuronIDs[1], (unsigned)311);
+	QCOMPARE(firingNeuronIDs[2], (unsigned)21);
+	QCOMPARE(firingNeuronIDs[3], (unsigned)4);
 
     firingNeuronIDs = archiveDao.getFiringNeuronIDs(testArchive1ID, 2);
     QCOMPARE(firingNeuronIDs.size(), (int)3);
-    QCOMPARE(Util::getUInt(firingNeuronIDs[0]), (unsigned int)22);
-    QCOMPARE(Util::getUInt(firingNeuronIDs[1]), (unsigned int)31);
-    QCOMPARE(Util::getUInt(firingNeuronIDs[2]), (unsigned int)4888888);
+	QCOMPARE(firingNeuronIDs[0], (unsigned)22);
+	QCOMPARE(firingNeuronIDs[1], (unsigned)31);
+	QCOMPARE(firingNeuronIDs[2], (unsigned)4888888);
 
     firingNeuronIDs = archiveDao.getFiringNeuronIDs(testArchive1ID, 3);
     QCOMPARE(firingNeuronIDs.size(), (int)0);
 
     firingNeuronIDs = archiveDao.getFiringNeuronIDs(testArchive1ID, 5);
     QCOMPARE(firingNeuronIDs.size(), (int)1);
-    QCOMPARE(Util::getUInt(firingNeuronIDs[0]), (unsigned int)3);
+	QCOMPARE(firingNeuronIDs[0], (unsigned)3);
 
 }
 

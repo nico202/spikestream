@@ -312,10 +312,9 @@ void WeightlessLivelinessAnalyzer::loadFiringNeurons(){
 	}
 
 	firingNeuronMap.clear();
-	QStringList neurIDStrList = archiveDao->getFiringNeuronIDs(analysisInfo.getArchiveID(), timeStep);
-	QStringListIterator iter(neurIDStrList);
-	while (iter.hasNext()){
-		firingNeuronMap[ Util::getUInt(iter.next()) ] = true;
+	QList<unsigned> neurIDList = archiveDao->getFiringNeuronIDs(analysisInfo.getArchiveID(), timeStep);
+	foreach(unsigned tmpNeurID, neurIDList){
+		firingNeuronMap[ tmpNeurID ] = true;
 	}
 }
 

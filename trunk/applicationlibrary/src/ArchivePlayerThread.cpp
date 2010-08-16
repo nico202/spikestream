@@ -113,15 +113,15 @@ void ArchivePlayerThread::run(){
 		startTime = QTime::currentTime();
 
 		try{
-			//Get a map of the neurons firing at this time step with the appropriate highlight color
-			QHash<unsigned int, RGBColor*>* newHighlightMap = getNeuronColorMap(timeStep);
+			//Get string list of firing neuron ids
+			QList<unsigned> neuronIDList = archiveDao->getFiringNeuronIDs(archiveID, timeStep);
+			qDebug()<<"NEURON ID LENGTH: "<<neuronIDList.size();
 
-			//Pass map to network display, which will delete the old map
-			Globals::getNetworkDisplay()->setNeuronColorMap(newHighlightMap);
-			Globals::getArchive()->setTimeStep(timeStep);
+			//Set flag to true so that thread waits for graphics update before moving to next time step
+			waitForGraphics = true;
 
-			//Signal to other classes that time step has changed
-			emit archiveTimeStepChanged();
+			//Inform other classes that time step has changed
+			emit timeStepChanged(timeStep, neuronIDList);
 
 			//Increase time step and quit if we are at the maximum
 			++timeStep;
@@ -147,6 +147,10 @@ void ArchivePlayerThread::run(){
 
 				//Unlock mutex
 				mutex.unlock();
+
+				//Wait for graphics to update
+				while(!stopThread && waitForGraphics)
+					usleep(1000);
 			}
 		}
 		catch(SpikeStreamException &ex){
@@ -170,35 +174,6 @@ void ArchivePlayerThread::run(){
 void ArchivePlayerThread::clearError(){
     error = false;
     errorMessage = "";
-}
-
-
-/*! Builds a new map of highlighted neurons corresponding to the current firing pattern. */
-QHash<unsigned int, RGBColor*>* ArchivePlayerThread::getNeuronColorMap(int timeStep){
-    //Check archive dao has been initialized
-    if(archiveDao == NULL){
-		throw SpikeStreamException("ArchiveDao has not been set.");
-    }
-
-    //Get string list of firing neuron ids
-    QStringList neuronIDList = archiveDao->getFiringNeuronIDs(archiveID, timeStep);
-
-    //Build new highlight map from list of IDs
-    RGBColor* neuronColor = Globals::getNetworkDisplay()->getFiringNeuronColor();
-    QHash<unsigned int, RGBColor*>* newHighlightMap = new QHash<unsigned int, RGBColor*>();
-
-    //Return empty map if no neurons are firing at this time step
-    if(neuronIDList.isEmpty())
-		return newHighlightMap;
-
-    //Fill map with neuron ids
-    QStringListIterator iter(neuronIDList);
-    while (iter.hasNext()){
-		(*newHighlightMap)[Util::getUInt(iter.next())] = neuronColor;
-    }
-
-    //Return the pointer to the map that has been created
-    return newHighlightMap;
 }
 
 

@@ -38,12 +38,14 @@ HEADERS = include/GlobalVariables.h \
 			include/PerformanceTimer.h \
 			include/RGBColor.h \
 			include/Box.h \
-			include/Util.h
+			include/Util.h \
+			include/SpikeStreamThread.h
 
 SOURCES = src/PerformanceTimer.cpp \
 			src/Box.cpp \
 			src/RGBColor.cpp \
-			src/Util.cpp
+			src/Util.cpp \
+			src/SpikeStreamThread.cpp
 
 #----------------------------------------------#
 #---               database                 ---#

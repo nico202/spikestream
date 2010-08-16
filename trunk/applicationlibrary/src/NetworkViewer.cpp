@@ -36,7 +36,6 @@ GLfloat fBrightLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 NetworkViewer::NetworkViewer(QWidget* parent) : QGLWidget(parent) {
 	//Connect refresh to changes in the display of network or archive
 	connect(Globals::getEventRouter(), SIGNAL(networkDisplayChangedSignal()), this, SLOT(refresh()), Qt::QueuedConnection);
-	connect(Globals::getEventRouter(), SIGNAL(archiveTimeStepChangedSignal()), this, SLOT(refresh()), Qt::QueuedConnection);
 
 	//Connect reset to changes in the network
 	connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(reset()), Qt::QueuedConnection);

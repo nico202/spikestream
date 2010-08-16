@@ -3,8 +3,10 @@
 
 //SpikeStream includes
 #include "ConnectionGroupModel.h"
+#include "ConnectionManager.h"
 
 //Qt includes
+#include <QMutex>
 #include <QProgressDialog>
 #include <QPushButton>
 #include <QWidget>
@@ -23,9 +25,10 @@ namespace spikestream {
 
 		private slots:
 			void addConnections();
+			void connectionManagerFinished();
 			void deleteSelectedConnections();
 			void networkChanged();
-			void networkTaskFinished();
+			void updateProgress(int stepsCompleted, int totalSteps, QString message);
 
 		private:
 			//======================  VARIABLES  =========================
@@ -40,6 +43,12 @@ namespace spikestream {
 
 			/*! Provides feedback with progress deleting neurons */
 			QProgressDialog* progressDialog;
+
+			/*! Separate thread to delete connection groups */
+			ConnectionManager* connectionManager;
+
+			/*! Flag to prevent calls to progress dialog while it is redrawing. */
+			bool updatingProgress;
 
 	};
 

@@ -26,6 +26,7 @@ draw_axes = true
 maximize_gui = true
 sphere_radius = 0.1
 sphere_quality = 10
+connection_loading_threshold =  500000
 
 # DATABASE OPTIMIZATION PARAMETERS
 number_insert_connection_buffers = 100

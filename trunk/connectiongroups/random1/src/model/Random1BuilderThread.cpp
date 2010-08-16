@@ -78,12 +78,6 @@ void Random1BuilderThread::run(){
 }
 
 
-/*! Stops the thread running  */
-void Random1BuilderThread::stop(){
-	stopThread = true;
-}
-
-
 /*----------------------------------------------------------*/
 /*-----                PRIVATE METHODS                 -----*/
 /*----------------------------------------------------------*/
@@ -94,13 +88,6 @@ void Random1BuilderThread::addConnectionGroup(){
 	QList<ConnectionGroup*> conGrpList;
 	conGrpList.append(newConnectionGroup);
 	Globals::getNetwork()->addConnectionGroups(conGrpList);
-}
-
-
-/*! Clears error state and message */
-void Random1BuilderThread::clearError(){
-	error = false;
-	errorMessage = "";
 }
 
 
@@ -176,14 +163,6 @@ unsigned int Random1BuilderThread::getRandomUInt(unsigned int min, unsigned int 
 	if(min == max)
 		return min;
 	return min + rand() % (max-min);
-}
-
-
-/*! Puts the builder into the error state with the provided error message */
-void Random1BuilderThread::setError(const QString& errorMessage){
-	error = true;
-	this->errorMessage = errorMessage;
-	stopThread = true;
 }
 
 

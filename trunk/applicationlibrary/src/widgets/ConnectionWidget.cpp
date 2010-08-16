@@ -9,6 +9,7 @@ using namespace spikestream;
 //Qt includes
 #include <QLayout>
 #include <QMessageBox>
+#include <QMutexLocker>
 
 
 /*! Constructor */
@@ -35,6 +36,11 @@ ConnectionWidget::ConnectionWidget(QWidget* parent)  : QWidget(parent) {
 	connectionGroupModel = new ConnectionGroupModel();
 	QTableView* connGroupView = new ConnectionGroupTableView(this, connectionGroupModel);
 	verticalBox->addWidget(connGroupView);
+
+	//Connection manager to delete connections in a separate thread
+	connectionManager = new ConnectionManager();
+	connect(connectionManager, SIGNAL(progress(int,int,QString)), this, SLOT(updateProgress(int,int,QString)), Qt::QueuedConnection);
+	connect(connectionManager, SIGNAL(finished()), this, SLOT(connectionManagerFinished()));
 
 	//Enable or disable buttons depending on whether a network is loaded or not
 	connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(networkChanged()));
@@ -72,8 +78,8 @@ void ConnectionWidget::deleteSelectedConnections(){
 		return;
 
 	//Do nothing if no connection groups are selected
-	QList<unsigned int> deleteConIDList = connectionGroupModel->getSelectedConnectionGroupIDs();
-	if(deleteConIDList.isEmpty())
+	QList<unsigned> deleteConnectionIDList = connectionGroupModel->getSelectedConnectionGroupIDs();
+	if(deleteConnectionIDList.isEmpty())
 		return;
 
 	//Show warning
@@ -81,17 +87,55 @@ void ConnectionWidget::deleteSelectedConnections(){
 	if(msgBox.exec() != QMessageBox::Ok)
 		return;
 
+	//Calculate number of steps
+	int numProgressSteps = Globals::getNetworkDao()->getConnectionCount(deleteConnectionIDList);
+
 	//Delete connection groups
 	try{
-		connect(Globals::getNetwork(), SIGNAL(taskFinished()), this, SLOT(networkTaskFinished()),  Qt::UniqueConnection);
-		progressDialog = new QProgressDialog("Deleting connection group(s)", "Cancel", 0, 100, this);
+		progressDialog = new QProgressDialog("Deleting connection group(s)", "Cancel", 0, numProgressSteps, this, Qt::CustomizeWindowHint);
 		progressDialog->setWindowModality(Qt::WindowModal);
 		progressDialog->setMinimumDuration(2000);
-		Globals::getNetwork()->deleteConnectionGroups(deleteConIDList);
+		progressDialog->setCancelButton(0);//Too complicated to implement cancel sensibly
+		updatingProgress = false;
+		connectionManager->deleteConnectionGroups(deleteConnectionIDList);
 	}
 	catch(SpikeStreamException& ex){
 		qCritical()<<ex.getMessage();
 	}
+}
+
+
+/*! Updates user with feedback about progress with the operation */
+void ConnectionWidget::updateProgress(int stepsCompleted, int totalSteps, QString message){
+	//Set flag to avoid multiple calls to progress dialog while it is redrawing
+	if(updatingProgress)
+		return;
+	updatingProgress = true;
+
+	//Check for cancellation
+	if(progressDialog->wasCanceled()){
+		qCritical()<<"SpikeStream does not currently support cancellation of deleting connections.";
+	}
+
+	//Update progress
+	else if(stepsCompleted < totalSteps){
+		progressDialog->setValue(stepsCompleted);
+		progressDialog->setMaximum(totalSteps);
+		progressDialog->setLabelText(message);
+	}
+
+	//Progress has finished
+	else{
+		progressDialog->close();
+//		if(progressDialog != NULL){
+//			progressDialog->close();
+//			delete progressDialog;
+//			progressDialog = NULL;
+//		}
+	}
+
+	//Clear flag to indicate that update of progress is complete
+	updatingProgress = false;
 }
 
 
@@ -110,16 +154,20 @@ void ConnectionWidget::networkChanged(){
 
 /*! Called when the network has finished deleting neurons.
 	Informs other classes that network has changed. */
-void ConnectionWidget::networkTaskFinished(){
-	progressDialog->setValue(100);
-	progressDialog->close();
-	//delete progressDialog;
+void ConnectionWidget::connectionManagerFinished(){
+	//Check for errors
+	if(connectionManager->isError())
+		qCritical()<<connectionManager->getErrorMessage();
+
+	//Clean up progress dialog
+	if(progressDialog != NULL){
+		progressDialog->close();
+		delete progressDialog;
+		progressDialog = NULL;
+	}
 
 	//Clear selection on connection group model
 	connectionGroupModel->clearSelection();
-
-	//Prevent this method being called when network finishes other tasks
-	disconnect(Globals::getNetwork(), SIGNAL(taskFinished()), this, SLOT(networkTaskFinished()));
 
 	//Inform other classes that network has changed
 	Globals::getEventRouter()->networkChangedSlot();
