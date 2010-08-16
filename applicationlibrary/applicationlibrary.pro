@@ -62,6 +62,13 @@ SOURCES += src/database/DatabaseManager.cpp
 
 
 #----------------------------------------------#
+#---                Managers                ---#
+#----------------------------------------------#
+HEADERS += include/ConnectionManager.h
+SOURCES += src/managers/ConnectionManager.cpp
+
+
+#----------------------------------------------#
 #---                 NRM                    ---#
 #----------------------------------------------#
 HEADERS += include/NRMNetwork.h \

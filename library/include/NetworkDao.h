@@ -36,9 +36,10 @@ namespace spikestream{
 			void deleteAllNetworks();
 			void getAllFromConnections(unsigned int networkID, QHash<unsigned int, QHash<unsigned int, bool> >& connMap);
 			void getAllToConnections(unsigned int networkID, QHash<unsigned int, QHash<unsigned int, bool> >& connMap);
-			unsigned int getConnectionCount(unsigned int networkID);
-			unsigned int getConnectionCount(ConnectionGroup* conGrp);//UNTESTED
-			unsigned int getConnectionCount(const QList<ConnectionGroup*>& conGrpList);
+			unsigned getConnectionCount(unsigned int networkID);
+			unsigned getConnectionCount(ConnectionGroup* conGrp);//UNTESTED
+			unsigned getConnectionCount(const QList<ConnectionGroup*>& conGrpList);
+			unsigned getConnectionCount(const QList<unsigned>& conGrpIDList);//UNTESTED
 			QList<ConnectionGroupInfo> getConnectionGroupsInfo(unsigned int networkID);
 			unsigned int getConnectionGroupSize(unsigned int connGrpID);
 			QList<Connection> getConnections(unsigned int fromNeuronID, unsigned int toNeuronID);

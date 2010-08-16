@@ -76,10 +76,18 @@ void NetworkDisplay::networkChanged(){
 	zoomStatus = NO_ZOOM;
 	zoomNeuronGroupID = 0;
 
-	//Make the neuron groups visible by default
 	if(Globals::networkLoaded()){
+		//Make the neuron groups visible by default
 		setVisibleNeuronGroupIDs(Globals::getNetwork()->getNeuronGroupIDs());
-		setVisibleConnectionGroupIDs(Globals::getNetwork()->getConnectionGroupIDs());
+
+		//Show connection groups that are smaller than the loading threshold
+		QList<unsigned> visibleConGrpIDs;
+		QList<ConnectionGroup*> tmpConGrpList = Globals::getNetwork()->getConnectionGroups();
+		foreach(ConnectionGroup* tmpConGrp, tmpConGrpList){
+			if(tmpConGrp->size() <= connectionLoadingThreshold)
+				visibleConGrpIDs.append(tmpConGrp->getID());
+		}
+		setVisibleConnectionGroupIDs(visibleConGrpIDs);
 	}
 }
 
@@ -212,6 +220,7 @@ void NetworkDisplay::loadDisplaySettings(ConfigLoader* configLoader){
 	drawAxes = Util::getBool( configLoader->getParameter("draw_axes") );
 	sphereRadius = Util::getFloat( configLoader->getParameter("sphere_radius") );
 	sphereQuality = Util::getUInt( configLoader->getParameter("sphere_quality") );
+	connectionLoadingThreshold = Util::getInt( configLoader->getParameter("connection_loading_threshold") );
 }
 
 

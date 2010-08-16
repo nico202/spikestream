@@ -35,7 +35,7 @@ using namespace std;
 
 /*! Constructor. */
 SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow(){
-	setWindowTitle("SpikeStream - Analysis");
+	setWindowTitle("SpikeStream");
 
 	try{
 		//Get the working directory and store in global scope

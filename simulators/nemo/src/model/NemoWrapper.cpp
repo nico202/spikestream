@@ -307,7 +307,6 @@ void NemoWrapper::runNemo(){
 		//Advance simulation one step
 		stepNemo();
 
-
 		//Sleep if task was completed in less than the prescribed interval
 		elapsedTime_ms = startTime.msecsTo(QTime::currentTime());
 		if(elapsedTime_ms < updateInterval_ms){

@@ -48,15 +48,10 @@ ArchiveWidget::ArchiveWidget(QWidget* parent) : QWidget(parent){
     //Inform other classes when a different archive is loaded
     connect(this, SIGNAL(archiveChanged()), Globals::getEventRouter(), SLOT(archiveChangedSlot()));
 
-    //Listen for changes in the archive time step
-    connect(Globals::getEventRouter(), SIGNAL(archiveTimeStepChangedSignal()),this, SLOT(archiveTimeStepChanged()));
-
     //Create class to load archive data in a separate thread
     archivePlayer = new ArchivePlayerThread(Globals::getArchiveDao()->getDBInfo());
     connect(archivePlayer, SIGNAL(finished()), this, SLOT(archivePlayerStopped()));
-
-    //Inform other classes when the archive time step changes
-    connect(archivePlayer, SIGNAL(archiveTimeStepChanged()), Globals::getEventRouter(), SLOT(archiveTimeStepChangedSlot()));
+	connect(archivePlayer, SIGNAL(timeStepChanged(unsigned, const QList<unsigned>&)), this, SLOT(updateTimeStep(unsigned, const QList<unsigned>&)), Qt::QueuedConnection);
 
     //Initialise variables
     ignoreButton = false;
@@ -235,9 +230,23 @@ void ArchiveWidget::loadArchiveList(){
 
 
 /*! Called when the time step changes and updates the time step counter */
-void ArchiveWidget::archiveTimeStepChanged(){
-    //Update the time step counter
+void ArchiveWidget::updateTimeStep(unsigned timeStep, const QList<unsigned>& neuronIDList){
+	//Update the time step counter and the time step in the archive
     timeStepLabel->setText(QString::number(Globals::getArchive()->getTimeStep()));
+	Globals::getArchive()->setTimeStep(timeStep);
+
+	//Build new highlight map from list of IDs
+	QHash<unsigned int, RGBColor*>* newHighlightMap = new QHash<unsigned int, RGBColor*>();
+	RGBColor* neuronColor = Globals::getNetworkDisplay()->getFiringNeuronColor();
+	foreach(unsigned tmpNeurID, neuronIDList){
+		(*newHighlightMap)[tmpNeurID] = neuronColor;
+	}
+
+	//Set the colour map - this should automatically delete the old one.
+	Globals::getNetworkDisplay()->setNeuronColorMap(newHighlightMap);
+
+	//Instruct thread to continue with next time step
+	archivePlayer->clearWaitForGraphics();
 }
 
 
@@ -513,7 +522,6 @@ void ArchiveWidget::rewindArchive(){
     }
 
     Globals::getArchive()->setTimeStep(Globals::getArchiveDao()->getMinTimeStep(Globals::getArchive()->getID()));
-    Globals::getEventRouter()->archiveTimeStepChangedSlot();
     Globals::getNetworkDisplay()->clearNeuronColorMap();
     archiveOpen = false;
 }

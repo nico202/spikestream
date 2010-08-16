@@ -29,7 +29,6 @@ namespace spikestream{
 			void archiveChanged();
 
 		private slots:
-			void archiveTimeStepChanged();
 			void archivePlayerStopped();
 			void deleteArchive();
 			void loadArchive();
@@ -40,6 +39,7 @@ namespace spikestream{
 			void fastForwardButtonPressed();
 			void stopButtonPressed();
 			void frameRateComboChanged(int);
+			void updateTimeStep(unsigned timeStep, const QList<unsigned>& neuronIDList);
 
 
 		private:

@@ -71,6 +71,8 @@ namespace spikestream {
 			/*! To enter the type of synapse */
 			QComboBox* synapseTypeCombo;
 
+			/*! Flag to prevent calls to progress dialog while it is redrawing. */
+			bool updatingProgress;
 
 			//=====================  METHODS  =======================
 			void addNeuronGroups(QComboBox* combo);

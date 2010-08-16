@@ -142,7 +142,7 @@ Random1Widget::Random1Widget(QWidget* parent) : QWidget(parent) {
 	//Create builder thread class
 	builderThread = new Random1BuilderThread();
 	connect (builderThread, SIGNAL(finished()), this, SLOT(builderThreadFinished()));
-	connect(builderThread, SIGNAL( progress(int, int, QString) ), this, SLOT( updateProgress(int, int, QString) ) );
+	connect(builderThread, SIGNAL( progress(int, int, QString) ), this, SLOT( updateProgress(int, int, QString) ), Qt::QueuedConnection);
 }
 
 
@@ -210,6 +210,7 @@ void Random1Widget::addButtonClicked(){
 		progressDialog->setWindowModality(Qt::WindowModal);
 		progressDialog->setMinimumDuration(2000);
 		progressDialog->setCancelButton(0);//Too complicated to implement cancel sensibly
+		updatingProgress = false;
 		builderThread->start();
 	}
 	catch(SpikeStreamException& ex){
@@ -234,6 +235,11 @@ void Random1Widget::builderThreadFinished(){
 
 /*! Updates user with feedback about progress with the operation */
 void Random1Widget::updateProgress(int stepsCompleted, int totalSteps, QString message){
+	//Set flag to avoid multiple calls to progress dialog while it is redrawing
+	if(updatingProgress)
+		return;
+	updatingProgress = true;
+
 	//Check for cancellation
 	if(progressDialog->wasCanceled()){
 		qCritical()<<"Cuboid plugin does not currently support cancellation of adding connections.";
@@ -248,6 +254,9 @@ void Random1Widget::updateProgress(int stepsCompleted, int totalSteps, QString m
 	else{
 		progressDialog->close();
 	}
+
+	//Clear flag to indicate that update of progress is complete
+	updatingProgress = false;
 }
 
 

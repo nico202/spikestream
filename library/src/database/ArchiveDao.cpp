@@ -121,17 +121,22 @@ unsigned int ArchiveDao::getMinTimeStep(unsigned int archiveID){
 }
 
 
-/*! Returns a string containing the comma separated list of neuron IDs */
-QStringList ArchiveDao::getFiringNeuronIDs(unsigned int archiveID, unsigned int timeStep){
+/*! Returns a list of firing neuron IDs */
+QList<unsigned> ArchiveDao::getFiringNeuronIDs(unsigned int archiveID, unsigned int timeStep){
     QSqlQuery query = getQuery("SELECT FiringNeurons FROM ArchiveData WHERE TimeStep=" + QString::number(timeStep) + " AND ArchiveID=" + QString::number(archiveID));
     executeQuery(query);
-    //Return empty string if no entries for this time step
-    if(query.size() == 0)
-		return QStringList();
+	query.next();
 
-    //Return the list of firing neuron ids
-    query.next();
-    return query.value(0).toString().split(",", QString::SkipEmptyParts);
+	//Build list of firing neuron ids
+	QList<unsigned> newList;
+	QStringList strList = query.value(0).toString().split(",", QString::SkipEmptyParts);
+	QStringListIterator iter(strList);
+	while (iter.hasNext()){
+		newList.append(Util::getUInt(iter.next()));
+	}
+
+	//Return the list we have built
+	return newList;
 }
 
 

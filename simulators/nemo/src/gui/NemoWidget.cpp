@@ -298,6 +298,7 @@ void NemoWidget::setSynapseParameters(){
 void NemoWidget::simulationStopped(){
 	playAction->setEnabled(true);
 	stopAction->setEnabled(false);
+	unloadButton->setEnabled(true);
 }
 
 
@@ -343,6 +344,7 @@ void NemoWidget::startSimulation(){
 		nemoWrapper->playSimulation();
 		playAction->setEnabled(false);
 		stopAction->setEnabled(true);
+		unloadButton->setEnabled(false);
 	}
 	catch(SpikeStreamException& ex){
 		qCritical()<<ex.getMessage();

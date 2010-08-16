@@ -22,7 +22,7 @@ namespace spikestream {
 		public:
 			ArchivePlayerThread(DBInfo dbInfo);
 			~ArchivePlayerThread();
-
+			void clearWaitForGraphics() { waitForGraphics = false; }
 			QString getErrorMessage();
 			bool isError();
 			void play(unsigned int startTimeStep, unsigned int archiveID, unsigned int frameRate);
@@ -31,7 +31,7 @@ namespace spikestream {
 			void stop();
 
 		signals:
-			void archiveTimeStepChanged();
+			void timeStepChanged(unsigned timeStep, const QList<unsigned>& neuronIDList);
 
 		private slots:
 			void run();
@@ -68,10 +68,12 @@ namespace spikestream {
 			/*! In step mode the run method only advances by one step */
 			bool stepMode;
 
+			/*! Flag enabling thread to pause while graphics are updating display of time step. */
+			bool waitForGraphics;
+
 
 			//============================  METHODS  =============================
 			void clearError();
-			QHash<unsigned int, RGBColor*>* getNeuronColorMap(int timeStep);
 			void setError(const QString& errMsg);
     };
 

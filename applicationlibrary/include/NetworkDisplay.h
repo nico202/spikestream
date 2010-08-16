@@ -173,6 +173,9 @@ namespace spikestream {
 			/*! Transparency of the neuron. Should be between 0 and 1. */
 			float neuronTransparency;
 
+			/*! Connection groups with more connections than this threshold are not shown by default. */
+			int connectionLoadingThreshold;
+
 
 			//=========================  METHODS  =========================
 			void checkConnectionModeFlag(unsigned int flag);

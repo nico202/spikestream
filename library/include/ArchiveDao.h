@@ -21,7 +21,7 @@ namespace spikestream {
 			void deleteArchive(unsigned int archiveID);
 			QList<ArchiveInfo> getArchivesInfo(unsigned int networkID);
 			int getArchiveSize(unsigned int archiveID);
-			QStringList getFiringNeuronIDs(unsigned int archiveID, unsigned int timeStep);
+			QList<unsigned> getFiringNeuronIDs(unsigned int archiveID, unsigned int timeStep);
 			unsigned int getMaxTimeStep(unsigned int archiveID);
 			unsigned int getMinTimeStep(unsigned int archiveID);
 			bool networkIsLocked(unsigned int networkID);
