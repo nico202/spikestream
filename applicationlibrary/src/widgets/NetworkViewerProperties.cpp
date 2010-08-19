@@ -55,12 +55,13 @@ NetworkViewerProperties::NetworkViewerProperties(QWidget* parent) : QWidget(pare
 	mainVerticalBox->addWidget(allConsButt);
 
 	//Single neuron widgets
-	conSingleNeurButt = new QRadioButton("Connections to neuron");
+	conSingleNeurButt = new QRadioButton("Neuron");
 	conButGroup->addButton(conSingleNeurButt);
 	singleNeuronIDLabel = new QLabel("");
 	QHBoxLayout* singleNeuronBox = new QHBoxLayout();
 	singleNeuronBox->addWidget(conSingleNeurButt);
 	singleNeuronBox->addWidget(singleNeuronIDLabel);
+	singleNeuronBox->addWidget(new QLabel ("connections"));
 	singleNeuronBox->addStretch(5);
 	mainVerticalBox->addLayout(singleNeuronBox);
 

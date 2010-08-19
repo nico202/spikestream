@@ -194,6 +194,8 @@ void NemoWidget::checkLoadingProgress(){
 	synapseParametersButton->setEnabled(false);
 	nemoParametersButton->setEnabled(false);
 	controlsWidget->setEnabled(true);
+	playAction->setEnabled(true);
+	stopAction->setEnabled(false);
 	Globals::setSimulationLoaded(true);
 }
 

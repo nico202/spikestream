@@ -43,6 +43,7 @@ namespace spikestream {
 			void addExcitatoryNeuronGroup(NeuronGroup* neuronGroup, nemo_network_t nemoNetwork, urng_t& ranNumGen);
 			void addInhibitoryNeuronGroup(NeuronGroup* neuronGroup, nemo_network_t nemoNetwork, urng_t& ranNumGen);
 			void addConnectionGroup(ConnectionGroup* conGroup, nemo_network_t nemoNetwork);
+			void printConnection(unsigned source,unsigned targets[], unsigned delays[], float weights[], unsigned char is_plastic[], size_t length);
 	};
 }
 
