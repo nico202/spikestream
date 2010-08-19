@@ -139,7 +139,8 @@ HEADERS += include/AbstractParametersEditDialog.h \
 			include/NeuronParametersDialog.h \
 			include/NeuronParametersEditDialog.h \
 			include/SynapseParametersDialog.h \
-			include/SynapseParametersEditDialog.h
+			include/SynapseParametersEditDialog.h \
+			include/ViewParametersDialog.h
 SOURCES += src/dialogs/AbstractParametersEditDialog.cpp \
 			src/dialogs/NRMImportDialog.cpp \
 			src/dialogs/LoadAnalysisDialog.cpp \
@@ -149,7 +150,8 @@ SOURCES += src/dialogs/AbstractParametersEditDialog.cpp \
 			src/dialogs/NeuronParametersDialog.cpp \
 			src/dialogs/NeuronParametersEditDialog.cpp \
 			src/dialogs/SynapseParametersDialog.cpp \
-			src/dialogs/SynapseParametersEditDialog.cpp
+			src/dialogs/SynapseParametersEditDialog.cpp \
+			src/dialogs/ViewParametersDialog.cpp
 
 
 #----------------------------------------------#

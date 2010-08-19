@@ -1,6 +1,9 @@
 #ifndef NEURONGROUPTABLEVIEW_H
 #define NEURONGROUPTABLEVIEW_H
 
+//SpikeStream includes
+#include "NeuronGroupModel.h"
+
 //Qt includes
 #include <QTableView>
 #include <QAbstractTableModel>
@@ -13,12 +16,17 @@ namespace spikestream {
 		Q_OBJECT
 
 		public:
-			NeuronGroupTableView(QWidget* parent, QAbstractTableModel* model);
+			NeuronGroupTableView(QWidget* parent, NeuronGroupModel* model);
 			~NeuronGroupTableView();
 			void resizeHeaders();
 
 		private slots:
 			void tableClicked(QModelIndex index);
+
+		private:
+			//====================  VARIABLES  =====================
+			/*! Model associated with this view */
+			NeuronGroupModel* neuronGroupModel;
 
 	};
 

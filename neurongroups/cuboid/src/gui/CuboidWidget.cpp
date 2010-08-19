@@ -231,7 +231,7 @@ void CuboidWidget::addButtonClicked(){
 	for(QHash<unsigned int, QLineEdit*>::iterator iter = neuronTypeEditMap.begin(); iter != neuronTypeEditMap.end(); ++iter){
 		double tmpPercent = Util::getDouble(iter.value()->text());
 		if(tmpPercent > 0)
-			paramMap["neuron_type_id_" + QString::number(iter.key())] = tmpPercent;
+			paramMap["percent_neuron_type_id_" + QString::number(iter.key())] = tmpPercent;
 	}
 
 	/* Check that there are no conflicts with existing neurons
@@ -275,7 +275,6 @@ void CuboidWidget::builderThreadFinished(){
 
 /*! Updates user with feedback about progress with the operation */
 void CuboidWidget::updateProgress(int stepsCompleted, int totalSteps, QString message){
-	qDebug()<<"STEPS COMPLETED: "<<stepsCompleted<<" TOTAL STEPS: "<<totalSteps;
 	//Check for cancellation
 	if(progressDialog->wasCanceled()){
 		qCritical()<<"Cuboid plugin does not currently support cancellation of adding neurons.";
@@ -296,15 +295,6 @@ void CuboidWidget::updateProgress(int stepsCompleted, int totalSteps, QString me
 /*-----                 PRIVATE METHODS                -----*/
 /*----------------------------------------------------------*/
 
-/*! Adds neuron types to the specified combo */
-void CuboidWidget::addNeuronTypes(QComboBox* combo){
-	QList<NeuronType> neuronTypesList = Globals::getNetworkDao()->getNeuronTypes();
-	foreach(NeuronType neurType, neuronTypesList){
-		combo->addItem(neurType.getDescription() + "(" + QString::number(neurType.getID()) + ")");
-	}
-}
-
-
 /*! Checks that there is valid input in the specified combo box and throws an exception with the specified error if not. */
 void CuboidWidget::checkInput(QLineEdit* inputEdit, const QString& errMsg){
 	if(inputEdit->text().isEmpty()){
@@ -312,13 +302,4 @@ void CuboidWidget::checkInput(QLineEdit* inputEdit, const QString& errMsg){
 	}
 }
 
-
-/*! Extracts the neuron group ID from the text of a combo box */
-unsigned int CuboidWidget::getNeuronTypeID(const QString& comboText){
-	if(comboText.isEmpty())
-		throw SpikeStreamException("Cannot extract a neuron type ID from empty text.");
-
-	QRegExp regExp("[()]");
-	return Util::getUInt(comboText.section(regExp, 1, 1));
-}
 

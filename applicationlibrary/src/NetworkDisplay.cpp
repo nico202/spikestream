@@ -20,8 +20,10 @@ NetworkDisplay::NetworkDisplay(){
 
 	/* Set colours of neurons that are used multiple times and need to be stored in the default
 	map to prevent deletion */
-	firingNeuronColor.set(1.0f, 0.0f, 1.0f);
-	defaultColorMap[&firingNeuronColor] = true;
+	archiveFiringNeuronColor.set(1.0f, 0.0f, 1.0f);
+	defaultColorMap[&archiveFiringNeuronColor] = true;
+	simulationFiringNeuronColor.set(0.0f, 1.0f, 0.0f);
+	defaultColorMap[&simulationFiringNeuronColor] = true;
 	highlightNeuronColor.set(0.0f, 1.0f, 1.0f);
 	defaultColorMap[&highlightNeuronColor] = true;
 

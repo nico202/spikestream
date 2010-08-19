@@ -6,7 +6,7 @@
 
 //Qt includes
 #include <qgl.h>
-
+#include <QHash>
 
 namespace spikestream {
 
@@ -109,6 +109,10 @@ namespace spikestream {
 
 			/*! Object used to draw a sphere */
 			GLUquadricObj* gluSphereObj;
+
+			/*! Map holding IDs of all neurons with a connection to them.
+				Used when connection mode is enabled */
+			QHash<unsigned, bool> connectedNeuronMap;
 
 
 			//======================  METHODS  ===========================

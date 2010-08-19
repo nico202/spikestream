@@ -54,7 +54,8 @@ void DBConfigMainWindow::configureDatabases(const DBInfo& networkDBInfo, const D
 	//Show busy window
 	QProgressDialog progressDlg("Configuring databases...", "Abort", 0, 3, this);
 	progressDlg.setWindowModality(Qt::WindowModal);
-	progressDlg.setMinimumDuration(500);
+	progressDlg.setMinimumDuration(50);
+	progressDlg.show();
 
 	//Configure databases
 	bool netDBConfigured = false, archDBConfigured = false, anaDBConfigured = false;

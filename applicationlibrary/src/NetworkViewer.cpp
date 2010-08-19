@@ -147,8 +147,8 @@ void NetworkViewer::paintGL(){
 		else{
 			this->disableFullRender();
 			drawAxes();
-			drawNeurons();
 			drawConnections();
+			drawNeurons();
 		}
 
 		//Restore the original state of the matrix
@@ -510,6 +510,7 @@ void NetworkViewer::drawConnections(){
 	unsigned int singleNeuronID=0, toNeuronID=0;
 	unsigned int connectionMode = netDisplay->getConnectionMode();
 	if(connectionMode & CONNECTION_MODE_ENABLED){
+		connectedNeuronMap.clear();
 		singleNeuronID = netDisplay->getSingleNeuronID();
 		if(connectionMode & SHOW_BETWEEN_CONNECTIONS)
 			toNeuronID = netDisplay->getToNeuronID();
@@ -541,17 +542,47 @@ void NetworkViewer::drawConnections(){
 				if( !(connectionMode & SHOW_BETWEEN_CONNECTIONS) ){
 					//Show only connections from a single neuron
 					if(connectionMode & SHOW_FROM_CONNECTIONS){
-						if( (*conIter)->fromNeuronID != singleNeuronID)
+						if( (*conIter)->fromNeuronID != singleNeuronID){
 							drawConnection = false;
+						}
+						else{
+							if ( (*conIter)->weight >= 0 )
+								connectedNeuronMap[(*conIter)->toNeuronID] = true;//Positive connection
+							else
+								connectedNeuronMap[(*conIter)->toNeuronID] = false;//Negative connection
+						}
 					}
 					//Show only connections to a single neuron
 					else if(connectionMode & SHOW_TO_CONNECTIONS){
-						if( (*conIter)->toNeuronID != singleNeuronID)
+						if( (*conIter)->toNeuronID != singleNeuronID){
 							drawConnection = false;
+						}
+						else{
+							if ( (*conIter)->weight >= 0 )
+								connectedNeuronMap[(*conIter)->fromNeuronID] = true;//Positive connection
+							else
+								connectedNeuronMap[(*conIter)->fromNeuronID] = false;//Negative connection
+						}
 					}
 					//Show from and to connections to a single neuron
-					else if( ((*conIter)->fromNeuronID != singleNeuronID) && ((*conIter)->toNeuronID != singleNeuronID) ){
-						drawConnection = false;
+					else {
+						if( ((*conIter)->fromNeuronID != singleNeuronID) && ((*conIter)->toNeuronID != singleNeuronID) ){
+							drawConnection = false;
+						}
+						else {//Highlight connected neurons
+							if( (*conIter)->fromNeuronID == singleNeuronID){
+								if ( (*conIter)->weight >= 0 )
+									connectedNeuronMap[(*conIter)->toNeuronID] = true;//Positive connection
+								else
+									connectedNeuronMap[(*conIter)->toNeuronID] = false;//Negative connection
+							}
+							else if( (*conIter)->toNeuronID == singleNeuronID){
+								if ( (*conIter)->weight >= 0 )
+									connectedNeuronMap[(*conIter)->fromNeuronID] = true;//Positive connection
+								else
+									connectedNeuronMap[(*conIter)->fromNeuronID] = false;//Negative connection
+							}
+						}
 					}
 				}
 				//Between neuron mode
@@ -644,13 +675,19 @@ void NetworkViewer::drawNeurons(){
 
 			//Set the color of the neuron
 			if(connectionMode & CONNECTION_MODE_ENABLED){
-				if(netDisplay->getSingleNeuronID() == (*neurIter)->getID() ){
+				if(netDisplay->getSingleNeuronID() == (*neurIter)->getID() ){//Single selected neuron
 					tmpColor2 = netDisplay->getSingleNeuronColor();
 					glColor4f(tmpColor2.red, tmpColor2.green, tmpColor2.blue, neuronAlpha);
 				}
-				else if(netDisplay->getToNeuronID() == (*neurIter)->getID() ){
+				else if(netDisplay->getToNeuronID() == (*neurIter)->getID() ){//To neuron
 					tmpColor2 = netDisplay->getToNeuronColor();
 					glColor4f(tmpColor2.red, tmpColor2.green, tmpColor2.blue, neuronAlpha);
+				}
+				else if(connectedNeuronMap.contains((*neurIter)->getID())){//A connected neuron
+					if(connectedNeuronMap[(*neurIter)->getID()])//Positive connection
+						glColor4f(1.0f, 0.0f, 0.0f, neuronAlpha);
+					else
+						glColor4f(0.0f, 0.0f, 1.0f, neuronAlpha);
 				}
 				else{
 					glColor4f(defaultNeuronColor.red, defaultNeuronColor.green, defaultNeuronColor.blue, neuronAlpha);

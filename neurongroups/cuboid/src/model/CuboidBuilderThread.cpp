@@ -127,8 +127,8 @@ void CuboidBuilderThread::createNeuronGroups(const QString& name, const QString&
 	double total = 0.0;
 	foreach(NeuronType neurType, neurTypeList){
 		unsigned int neurTypeID = neurType.getID();
-		if(paramMap.contains("neuron_type_id_" + QString::number(neurTypeID))){
-			total += paramMap["neuron_type_id_" + QString::number(neurTypeID)];
+		if(paramMap.contains("percent_neuron_type_id_" + QString::number(neurTypeID))){
+			total += paramMap["percent_neuron_type_id_" + QString::number(neurTypeID)];
 			neuronTypePercentThreshMap[total] = neurTypeID;
 			newNeuronGroupMap[neurTypeID] = new NeuronGroup(NeuronGroupInfo(0, name, description, paramMap, neurTypeID));
 		}
