@@ -310,7 +310,7 @@ void NemoWrapper::clearError(){
 
 
 /*! Fills the supplied array with a selection of neurons to force to fire at the next time step. */
-void NemoWrapper::fillInjectNoiseArray(unsigned* array, int* arraySize){
+void NemoWrapper::fillInjectNoiseArray(unsigned*& array, int* arraySize){
 	//Calculate total number of firing neurons
 	*arraySize = 0;
 	for(QHash<unsigned, unsigned>::iterator iter = injectNoiseMap.begin(); iter != injectNoiseMap.end(); ++iter)
@@ -344,10 +344,6 @@ void NemoWrapper::fillInjectNoiseArray(unsigned* array, int* arraySize){
 			}
 		}
 	}
-
-	qDebug()<<"Inject noise array size: "<<*arraySize;
-	for(int i=0; i<*arraySize; ++i)
-		qDebug()<<"Inject noise array entry==================== "<<array[i];
 }
 
 
@@ -409,6 +405,10 @@ void NemoWrapper::stepNemo(){
 		unsigned* injectNoiseNeurIDArr = NULL;
 		int injectNoiseArrSize;
 		fillInjectNoiseArray(injectNoiseNeurIDArr, &injectNoiseArrSize);
+
+		qDebug()<<"Inject noise array size: "<<injectNoiseArrSize;
+		for(int i=0; i<injectNoiseArrSize; ++i)
+			qDebug()<<"Inject noise array entry==================== "<<injectNoiseNeurIDArr[i];
 
 		//Advance simulation
 		qDebug()<<"About to step nemo with injection of noise";
