@@ -412,7 +412,8 @@ void NemoWrapper::stepNemo(){
 
 		//Advance simulation
 		qDebug()<<"About to step nemo with injection of noise";
-		checkNemoOutput( nemo_step(nemoSimulation, injectNoiseNeurIDArr, injectNoiseArrSize), "Nemo error on step" );
+		//checkNemoOutput( nemo_step(nemoSimulation, injectNoiseNeurIDArr, injectNoiseArrSize), "Nemo error on step" );
+		nemo_step(nemoSimulation, injectNoiseNeurIDArr, injectNoiseArrSize);
 		qDebug()<<"Nemo successfully stepped with injection of noise.";
 
 		//Clean up noise array and empty inject noise map

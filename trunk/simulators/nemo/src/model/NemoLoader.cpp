@@ -14,7 +14,7 @@ using namespace spikestream;
 #include <iostream>
 using namespace std;
 
-//#define DEBUG
+#define DEBUG
 
 /*! Constructor */
 NemoLoader::NemoLoader(){
@@ -62,7 +62,7 @@ nemo_network_t NemoLoader::buildNemoNetwork(Network* network, const bool* stop){
 
 	//Add the connection groups that are not disabled */
 	for(int i=0; i<conGrpList.size() && !*stop; ++i){
-		if(conGrpList.at(i)->getParameter("Disable") != 0.0)
+		if(conGrpList.at(i)->getParameter("Disable") == 0.0)
 			addConnectionGroup(conGrpList.at(i), nemoNet);
 
 		//Update progress
@@ -107,6 +107,10 @@ void NemoLoader::addConnectionGroup(ConnectionGroup* conGroup, nemo_network_t ne
 
 		//Add the connections to the network
 		nemo_status_t result = nemo_add_synapses(nemoNetwork, fromMapIter.key(), targets, delays, weights, isPlastic, numTargets);
+		#ifdef DEBUG
+			printConnection(fromMapIter.key(), targets, delays, weights, isPlastic, numTargets);
+			//cout<<"nemo_add_synapses(nemoNetwork, "<<fromMapIter.key()<<", "<<targets<<", "<<delays<<", "<<weights<<", "<<isPlastic<<", "<<numTargets<<");"<<endl;
+		#endif//DEBUG
 		if(result != NEMO_OK)
 			throw SpikeStreamException("Error code returned from Nemo when adding synapse." + QString(nemo_strerror()));
 	}
@@ -173,6 +177,16 @@ void NemoLoader::addInhibitoryNeuronGroup(NeuronGroup* neuronGroup, nemo_network
 		nemo_status_t result = nemo_add_neuron(nemoNetwork, iter.value()->getID(), a, b, v, d, u, v, sigma);
 		if(result != NEMO_OK)
 			throw SpikeStreamException("Error code returned from Nemo when adding neuron." + QString(nemo_strerror()));
+	}
+}
+
+/*! Prints out information about a particular connection */
+void NemoLoader::printConnection(unsigned source, unsigned targets[], unsigned delays[], float weights[], unsigned char is_plastic[], size_t length){
+	for(size_t i=0; i<length; ++i){
+		if(is_plastic[i])
+			cout<<"Connection from: "<<source<<"; to: "<<targets[i]<<"; delay: "<<delays[i]<<"; weight: "<<weights[i]<<" is plastic: true"<<endl;
+		else
+			cout<<"Connection from: "<<source<<"; to: "<<targets[i]<<"; delay: "<<delays[i]<<"; weight: "<<weights[i]<<" is plastic: false"<<endl;
 	}
 }
 
