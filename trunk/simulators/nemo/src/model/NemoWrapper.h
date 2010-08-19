@@ -41,6 +41,7 @@ namespace spikestream {
 			void run();
 			void setArchiveMode(bool mode);
 			void setFrameRate(unsigned int frameRate);
+			void setInjectNoise(unsigned neuronGroupID, double percentage);
 			void setMonitorMode(bool mode);
 			void setNemoConfig(nemo_configuration_t nemoConfig) { this->nemoConfig = nemoConfig; }
 			void setSTDPFunctionID(unsigned stdpFunctionID) { this->stdpFunctionID = stdpFunctionID; }
@@ -126,12 +127,18 @@ namespace spikestream {
 			/*! ID of the STDP function */
 			unsigned stdpFunctionID;
 
+			/*! List of neurons that are firing at the current time step */
 			QList<unsigned int> firingNeuronList;
+
+			/*! Map of neuron groups to inject noise into at the next time step.
+				The key is the neuron group ID, the value is the number of neurons to fire. */
+			QHash<unsigned, unsigned> injectNoiseMap;
 
 
 			//======================  METHODS  ========================
 			void checkNemoOutput(nemo_status_t result, const QString& errorMessage);
 			void clearError();
+			void fillInjectNoiseArray(unsigned* array, int* arraySize);
 			void loadNemo();
 			void runNemo();
 			void setError(const QString& errorMessage);

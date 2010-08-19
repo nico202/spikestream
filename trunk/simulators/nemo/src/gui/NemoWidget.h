@@ -32,6 +32,7 @@ namespace spikestream {
 		private slots:
 			void archiveStateChanged(int state);
 			void checkLoadingProgress();
+			void injectNoiseButtonClicked();
 			void loadSimulation();
 			void monitorStateChanged(int state);
 			void nemoWrapperFinished();
@@ -117,11 +118,21 @@ namespace spikestream {
 			/*! Timer to check on loading progress */
 			QTimer* loadingTimer;
 
+			/*! Flag to prevent calls to progress dialog while it is redrawing. */
+			bool updatingProgress;
+
+			/*! Combo box controlling the percentage of injected noise */
+			QComboBox* injectNoisePercentCombo;
+
+			/*! Combo box controlling which neuron group noise is injected into */
+			QComboBox* injectNoiseNeuronGroupCombo;
 
 			//=======================  METHODS  =========================
 			bool checkForErrors();
 			void checkWidgetEnabled();
+			unsigned getNeuronGroupID(QString neurGrpStr);
 			QToolBar* getToolBar();
+			void loadNeuronGroups();
 	};
 
 }

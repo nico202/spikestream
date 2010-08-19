@@ -22,10 +22,13 @@ namespace spikestream {
 			void clearSelection();
 			int columnCount(const QModelIndex& parent = QModelIndex()) const;
 			QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
+			QHash<QString, double> getParameters(int row);
 			QList<unsigned int> getSelectedNeuronGroupIDs();
 			QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 			int rowCount(const QModelIndex& parent = QModelIndex()) const;
 			bool setData(const QModelIndex& index, const QVariant& value, int role=Qt::EditRole);
+
+			friend class NeuronGroupTableView;
 
 		private slots:
 			void networkChanged();
@@ -37,17 +40,22 @@ namespace spikestream {
 				This list is automatically refreshed when the network changes. */
 			QList<NeuronGroupInfo> neurGrpInfoList;
 
+			/*! List holding the sizes of each neuron group */
+			QList<unsigned> neurGrpSizeList;
+
 			/*! Map of indexes of selected rows in neuron group info list */
 			QHash<unsigned int, bool> selectionMap;
 
-			static const int numCols = 7;
-			static const int visCol = 0;
-			static const int zoomCol = 1;
-			static const int idCol = 2;
-			static const int nameCol = 3;
-			static const int descCol = 4;
-			static const int neurTypeCol = 5;
-			static const int selectCol = 6;
+			static const int NUM_COLS = 9;
+			static const int VIS_COL = 0;
+			static const int ZOOM_COL = 1;
+			static const int ID_COL = 2;
+			static const int NAME_COL = 3;
+			static const int DESC_COL = 4;
+			static const int SIZE_COL = 5;
+			static const int NEUR_TYPE_COL = 6;
+			static const int SELECT_COL = 7;
+			static const int PARAM_COL = 8;
 		};
 
 }

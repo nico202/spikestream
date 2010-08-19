@@ -84,6 +84,23 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	archiveLayout->addWidget(setArchiveDescriptionButton);
 	controlsVBox->addLayout(archiveLayout);
 
+	//Add widgets to inject noise into specified layers
+	QHBoxLayout* injectNoiseBox = new QHBoxLayout();
+	injectNoiseNeuronGroupCombo = new QComboBox();
+	injectNoiseNeuronGroupCombo->setMinimumSize(200, 20);
+	injectNoiseBox->addWidget(injectNoiseNeuronGroupCombo);
+	injectNoisePercentCombo = new QComboBox();
+	for(int i=10; i<=100; i += 10)
+		injectNoisePercentCombo->addItem(QString::number(i) + " %");
+	injectNoiseBox->addWidget(injectNoisePercentCombo);
+	QPushButton* injectNoiseButton = new QPushButton("Inject Noise");
+	injectNoiseButton->setMinimumSize(120, 20);
+	connect(injectNoiseButton, SIGNAL(clicked()), this, SLOT(injectNoiseButtonClicked()));
+	injectNoiseBox->addWidget(injectNoiseButton);
+	injectNoiseBox->addStretch(5);
+	controlsVBox->addSpacing(10);
+	controlsVBox->addLayout(injectNoiseBox);
+
 	//Put layout into enclosing box
 	mainVBox->addWidget(controlsWidget);
 	mainGroupBox->setLayout(mainVBox);
@@ -160,6 +177,10 @@ void NemoWidget::checkLoadingProgress(){
 		return;
 	}
 
+	else if (updatingProgress){
+		return;
+	}
+
 	//If we have reached this point, loading is complete
 	loadingTimer->stop();
 	progressDialog->setValue(progressDialog->maximum());
@@ -174,6 +195,20 @@ void NemoWidget::checkLoadingProgress(){
 	nemoParametersButton->setEnabled(false);
 	controlsWidget->setEnabled(true);
 	Globals::setSimulationLoaded(true);
+}
+
+
+/*! Called when the inject noise button is clicked. Sets the injection
+	of noise in the nemo wrapper */
+void NemoWidget::injectNoiseButtonClicked(){
+	unsigned percentage = Util::getUInt(injectNoisePercentCombo->currentText().section(" ", 0, 0));
+	unsigned neurGrpID = getNeuronGroupID(injectNoiseNeuronGroupCombo->currentText());
+	try{
+		nemoWrapper->setInjectNoise(neurGrpID, percentage);
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<ex.getMessage();
+	}
 }
 
 
@@ -193,15 +228,19 @@ void NemoWidget::loadSimulation(){
 		return;
 	}
 
+	//Load the current neuron groups into control widgets
+	loadNeuronGroups();
+
 	try{
 		//Store the current neuron colour for monitoring
-		neuronColor = Globals::getNetworkDisplay()->getFiringNeuronColor();
+		neuronColor = Globals::getNetworkDisplay()->getSimulationFiringNeuronColor();
 
 		//Start loading of simulation
 		taskCancelled = false;
 		progressDialog = new QProgressDialog("Loading simulation", "Cancel", 0, 100, this);
 		progressDialog->setWindowModality(Qt::WindowModal);
 		progressDialog->setMinimumDuration(1000);
+		updatingProgress = false;
 		nemoWrapper->start();//Load carried out by run method
 
 		//Wait for loading to finish and update progress dialog
@@ -403,8 +442,10 @@ void NemoWidget::unloadSimulation(bool confirmWithUser){
 
 /*! Updates progress with loading the simulation */
 void NemoWidget::updateProgress(int stepsCompleted, int totalSteps){
-	//Protect code against multiple access
-	QMutexLocker locker(&mutex);
+	//Set flag to avoid multiple calls to progress dialog while it is redrawing
+	if(updatingProgress)
+		return;
+	updatingProgress = true;
 
 	if(progressDialog == NULL)
 		return;
@@ -420,6 +461,9 @@ void NemoWidget::updateProgress(int stepsCompleted, int totalSteps){
 		progressDialog->setValue(stepsCompleted);
 		progressDialog->setMaximum(totalSteps);
 	}
+
+	//Clear updating progress flag
+	updatingProgress = false;
 }
 
 
@@ -443,6 +487,13 @@ void NemoWidget::checkWidgetEnabled(){
 		mainGroupBox->setEnabled(true);
 	else
 		mainGroupBox->setEnabled(false);
+}
+
+
+/*! Extracts the neuron group id from the supplied string. */
+unsigned NemoWidget::getNeuronGroupID(QString neurGrpStr){
+	QRegExp regExp("[()]");
+	return Util::getUInt(neurGrpStr.section(regExp, 1, 1));
 }
 
 
@@ -483,4 +534,15 @@ QToolBar* NemoWidget::getToolBar(){
 
 	return tmpToolBar;
 }
+
+/*! Loads the current neuron groups into the control widgets */
+void NemoWidget::loadNeuronGroups(){
+	injectNoiseNeuronGroupCombo->clear();
+
+	QList<NeuronGroupInfo> neurGrpInfoList = Globals::getNetwork()->getNeuronGroupsInfo();
+	foreach(NeuronGroupInfo info, neurGrpInfoList){
+		injectNoiseNeuronGroupCombo->addItem(info.getName() + "(" + QString::number(info.getID()) + ")");
+	}
+}
+
 

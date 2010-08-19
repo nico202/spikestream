@@ -32,7 +32,7 @@ void ConnectionGroupModel::clearSelection(){
 
 /*! Inherited from QAbstractTableModel. Returns the number of columns in the model */
 int ConnectionGroupModel::columnCount(const QModelIndex&) const{
-    return numCols;
+	return NUM_COLS;
 }
 
 
@@ -51,30 +51,41 @@ QVariant ConnectionGroupModel::data(const QModelIndex & index, int role) const{
 
     //Return appropriate data
     if (role == Qt::DisplayRole){
-		if(index.column() == idCol)
+		if(index.column() == ID_COL)
 			return conGrpInfoList[index.row()].getID();
-		if(index.column() == descCol)
+		if(index.column() == DESC_COL)
 			return conGrpInfoList[index.row()].getDescription();
-		if(index.column() == fromNeurIDCol)
+		if(index.column() == SIZE_COL)
+			return conGrpSizeList[index.row()];
+		if(index.column() == FROM_NEUR_ID_COL)
 			return conGrpInfoList[index.row()].getFromNeuronGroupID();
-		if(index.column() == toNeurIDCol)
+		if(index.column() == T0_NEUR_ID_COL)
 			return conGrpInfoList[index.row()].getToNeuronGroupID();
-		if(index.column() == synapseTypeCol)
+		if(index.column() == SYNAPSE_TYPE_COL)
 			return conGrpInfoList[index.row()].getSynapseTypeID();
     }
 
 	//Icons
     if (role == Qt::DecorationRole){
-		if(index.column() == visCol ){
+		if(index.column() == VIS_COL ){
 			if(Globals::getNetworkDisplay()->connectionGroupVisible(conGrpInfoList[index.row()].getID()))
 				return QIcon(Globals::getSpikeStreamRoot() + "/images/visible.xpm");
 			return QIcon(Globals::getSpikeStreamRoot() + "/images/hidden.xpm");
 		}
+		if(index.column() == PARAM_COL){
+			return QIcon(Globals::getSpikeStreamRoot() + "/images/parameters.xpm");
+		}
     }
+
+	if(role == Qt::SizeHintRole){
+		if(index.column() == PARAM_COL){
+			return QSize(50, 18);
+		}
+	}
 
 	//Check boxes
 	if(role == Qt::CheckStateRole){
-		if(index.column() == selectCol){
+		if(index.column() == SELECT_COL){
 			if(selectionMap.contains(index.row())){
 				return true;
 			}
@@ -86,6 +97,14 @@ QVariant ConnectionGroupModel::data(const QModelIndex & index, int role) const{
 
     //If we have reached this point ignore request
     return QVariant();
+}
+
+
+/*! Returns the parameters associated with a connection group */
+QHash<QString, double> ConnectionGroupModel::getParameters(int row){
+	if(row >= rowCount())
+		throw SpikeStreamException("Failed to get parameters: row out of range: " + QString::number(row));
+	return conGrpInfoList[row].getParameterMap();
 }
 
 
@@ -113,7 +132,7 @@ bool ConnectionGroupModel::setData(const QModelIndex& index, const QVariant&, in
 		return false;
 
     //Change visibility of neuron group
-    if(index.column() == visCol){
+	if(index.column() == VIS_COL){
 		unsigned int tmpConGrpID = conGrpInfoList[index.row()].getID();
 		if(Globals::getNetworkDisplay()->connectionGroupVisible(tmpConGrpID))
 			Globals::getNetworkDisplay()->setConnectionGroupVisibility(tmpConGrpID, false);
@@ -126,7 +145,7 @@ bool ConnectionGroupModel::setData(const QModelIndex& index, const QVariant&, in
     }
 
 	//Change selection status of connection group
-	if(index.column() == selectCol){
+	if(index.column() == SELECT_COL){
 		if(selectionMap.contains(index.row()))
 			selectionMap.remove(index.row());
 		else
@@ -146,20 +165,23 @@ QVariant ConnectionGroupModel::headerData(int section, Qt::Orientation orientati
 		return QVariant();
 
     if (orientation == Qt::Horizontal){
-		if(section == idCol)
+		if(section == ID_COL)
 			return "ID";
-		if(section == descCol)
+		if(section == DESC_COL)
 			return "Description";
-		if(section == fromNeurIDCol)
+		if(section == SIZE_COL)
+			return "Size";
+		if(section == FROM_NEUR_ID_COL)
 			return "From";
-		if(section == toNeurIDCol)
+		if(section == T0_NEUR_ID_COL)
 			return "To";
-		if(section == synapseTypeCol)
+		if(section == SYNAPSE_TYPE_COL)
 			return "Synapse Type";
+		if(section == PARAM_COL)
+			return "Parameters";
     }
 
     return QVariant();//QString("Roow %1").arg(section);
-
 }
 
 
@@ -173,10 +195,19 @@ int ConnectionGroupModel::rowCount(const QModelIndex&) const{
 void ConnectionGroupModel::networkChanged(){
     //Clear current list of neuron group information
     conGrpInfoList.clear();
+	conGrpSizeList.clear();
 
-    //Get list of current neuron group info
+	//Get list of current connection group info
     if(Globals::networkLoaded())
 		conGrpInfoList = Globals::getNetwork()->getConnectionGroupsInfo();
+
+	//Load up sizes of connection groups
+	for(int i=0; i<conGrpInfoList.size(); ++i)
+		conGrpSizeList.append( Globals::getNetworkDao()->getConnectionCount( conGrpInfoList.at(i) ) );
+
+	//Sanity check
+	if(conGrpInfoList.size() != conGrpSizeList.size())
+		qCritical()<<"Mismatch between list of connection group info and list of connection group size.";
 
     //Instruct listening classes to reload data
     this->reset();

@@ -30,7 +30,8 @@ namespace spikestream {
 			QHash<unsigned int, RGBColor*>& getNeuronColorMap() { return *neuronColorMap; }
 			RGBColor* getDefaultNeuronColor() { return &defaultNeuronColor; }
 			RGBColor* getDefaultNeuronColorFullRender() { return &defaultNeuronColorFullRender; }
-			RGBColor* getFiringNeuronColor() { return &firingNeuronColor; }
+			RGBColor* getArchiveFiringNeuronColor() { return &archiveFiringNeuronColor; }
+			RGBColor* getSimulationFiringNeuronColor() { return &simulationFiringNeuronColor; }
 			RGBColor* getHighlightNeuronColor() { return &highlightNeuronColor; }
 			RGBColor& getSingleNeuronColor() { return singleNeuronColor; }
 			RGBColor& getToNeuronColor() { return toNeuronColor; }
@@ -129,7 +130,10 @@ namespace spikestream {
 			RGBColor negativeConnectionColor;
 
 			/*! Color of a firing neuron during archive playback */
-			RGBColor firingNeuronColor;
+			RGBColor archiveFiringNeuronColor;
+
+			/*! Color of a firing neuron during simulation */
+			RGBColor simulationFiringNeuronColor;
 
 			/*! Default color for highlighting a neuron */
 			RGBColor highlightNeuronColor;

@@ -34,6 +34,7 @@ namespace spikestream {
 			void clearError();
 			bool connectionGroupIsLoaded(unsigned int connGrpID);
 			bool containsNeuron(unsigned int neurID);
+			bool containsNeuronGroup(unsigned int neuronGroupID);//UNTESTED
 			void deleteConnectionGroups(QList<unsigned int>& conGrpIDList);
 			void deleteNeuronGroups(QList<unsigned int>& neurGrpIDList);
 			Box getBoundingBox();

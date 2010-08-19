@@ -33,7 +33,7 @@ void NeuronGroupModel::clearSelection(){
 
 /*! Inherited from QAbstractTableModel. Returns the number of columns in the model */
 int NeuronGroupModel::columnCount(const QModelIndex&) const{
-    return numCols;
+	return NUM_COLS;
 }
 
 
@@ -52,24 +52,26 @@ QVariant NeuronGroupModel::data(const QModelIndex & index, int role) const{
 
     //Return appropriate data
     if (role == Qt::DisplayRole){
-		if(index.column() == idCol)
+		if(index.column() == ID_COL)
 			return neurGrpInfoList[index.row()].getID();
-		if(index.column() == nameCol)
+		if(index.column() == NAME_COL)
 			return neurGrpInfoList[index.row()].getName();
-		if(index.column() == descCol)
+		if(index.column() == DESC_COL)
 			return neurGrpInfoList[index.row()].getDescription();
-		if(index.column() == neurTypeCol)
+		if(index.column() == SIZE_COL)
+			return neurGrpSizeList[index.row()];
+		if(index.column() == NEUR_TYPE_COL)
 			return neurGrpInfoList[index.row()].getNeuronTypeID();
     }
 
 	//Icons
     if (role == Qt::DecorationRole){
-		if(index.column() == visCol ){
+		if(index.column() == VIS_COL ){
 			if(Globals::getNetworkDisplay()->neuronGroupVisible(neurGrpInfoList[index.row()].getID()))
 				return QIcon(Globals::getSpikeStreamRoot() + "/images/visible.xpm");
 			return QIcon(Globals::getSpikeStreamRoot() + "/images/hidden.xpm");
 		}
-		if(index.column() == zoomCol){
+		if(index.column() == ZOOM_COL){
 			unsigned int tmpNeurGrpID = neurGrpInfoList[index.row()].getID();
 			NetworkDisplay* netDisplay = Globals::getNetworkDisplay();
 			//Zoom enabled on this neuron group
@@ -82,11 +84,14 @@ QVariant NeuronGroupModel::data(const QModelIndex & index, int role) const{
 			//Zoom is disabled or enabled on a different neuron group
 			return QIcon(Globals::getSpikeStreamRoot() + "/images/zoom_to.xpm");
 		}
+		if(index.column() == PARAM_COL){
+			return QIcon(Globals::getSpikeStreamRoot() + "/images/parameters.xpm");
+		}
 	}
 
 	//Check boxes
 	if(role == Qt::CheckStateRole){
-		if(index.column() == selectCol){
+		if(index.column() == SELECT_COL){
 			if(selectionMap.contains(index.row())){
 				return true;
 			}
@@ -98,6 +103,14 @@ QVariant NeuronGroupModel::data(const QModelIndex & index, int role) const{
 
     //If we have reached this point ignore request
     return QVariant();
+}
+
+
+/*! Returns the parameters associated with a neuron group */
+QHash<QString, double> NeuronGroupModel::getParameters(int row){
+	if(row >= rowCount())
+		throw SpikeStreamException("Failed to get parameters: row out of range: " + QString::number(row));
+	return neurGrpInfoList[row].getParameterMap();
 }
 
 
@@ -125,7 +138,7 @@ bool NeuronGroupModel::setData(const QModelIndex& index, const QVariant&, int) {
 		return false;
 
     //Change visibility of neuron group
-    if(index.column() == visCol){
+	if(index.column() == VIS_COL){
 		unsigned int tmpNeurGrpID = neurGrpInfoList[index.row()].getID();
 		if(Globals::getNetworkDisplay()->neuronGroupVisible(tmpNeurGrpID))
 			Globals::getNetworkDisplay()->setNeuronGroupVisibility(tmpNeurGrpID, false);
@@ -138,7 +151,7 @@ bool NeuronGroupModel::setData(const QModelIndex& index, const QVariant&, int) {
     }
 
     //Change zoom of neuron group
-    if(index.column() == zoomCol){
+	if(index.column() == ZOOM_COL){
 		unsigned int tmpNeurGrpID = neurGrpInfoList[index.row()].getID();
 		NetworkDisplay* netDisplay = Globals::getNetworkDisplay();
 		//We are already zoomed on this neuron
@@ -160,7 +173,7 @@ bool NeuronGroupModel::setData(const QModelIndex& index, const QVariant&, int) {
     }
 
 	//Change selection status of neuron group
-	if(index.column() == selectCol){
+	if(index.column() == SELECT_COL){
 		if(selectionMap.contains(index.row()))
 			selectionMap.remove(index.row());
 		else
@@ -180,17 +193,21 @@ QVariant NeuronGroupModel::headerData(int section, Qt::Orientation orientation, 
 		return QVariant();
 
     if (orientation == Qt::Horizontal){
-		if(section == idCol)
+		if(section == ID_COL)
 			return "ID";
-		if(section == nameCol)
+		if(section == NAME_COL)
 			return "Name";
-		if(section == descCol)
+		if(section == DESC_COL)
 			return "Description";
-		if(section == neurTypeCol)
+		if(section == SIZE_COL)
+			return "Size";
+		if(section == NEUR_TYPE_COL)
 			return "Neuron Type";
+		if(section == PARAM_COL)
+			return "Parameters";
     }
 
-    return QVariant();//QString("Roow %1").arg(section);
+	return QVariant();
 
 }
 
@@ -205,10 +222,19 @@ int NeuronGroupModel::rowCount(const QModelIndex&) const{
 void NeuronGroupModel::networkChanged(){
     //Clear current list of neuron group information
     neurGrpInfoList.clear();
+	neurGrpSizeList.clear();
 
     //Get list of current neuron group info
     if(Globals::networkLoaded())
 		neurGrpInfoList = Globals::getNetwork()->getNeuronGroupsInfo();
+
+	//Load up sizes of connection groups
+	for(int i=0; i<neurGrpInfoList.size(); ++i)
+		neurGrpSizeList.append( Globals::getNetworkDao()->getNeuronCount( neurGrpInfoList.at(i) ) );
+
+	//Sanity check
+	if(neurGrpInfoList.size() != neurGrpSizeList.size())
+		qCritical()<<"Mismatch between list of neuron group info and list of neuron group size.";
 
     //Instruct listening classes to reload data
     this->reset();

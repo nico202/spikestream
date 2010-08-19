@@ -237,7 +237,7 @@ void ArchiveWidget::updateTimeStep(unsigned timeStep, const QList<unsigned>& neu
 
 	//Build new highlight map from list of IDs
 	QHash<unsigned int, RGBColor*>* newHighlightMap = new QHash<unsigned int, RGBColor*>();
-	RGBColor* neuronColor = Globals::getNetworkDisplay()->getFiringNeuronColor();
+	RGBColor* neuronColor = Globals::getNetworkDisplay()->getArchiveFiringNeuronColor();
 	foreach(unsigned tmpNeurID, neuronIDList){
 		(*newHighlightMap)[tmpNeurID] = neuronColor;
 	}

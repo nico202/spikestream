@@ -71,10 +71,7 @@ namespace spikestream {
 
 
 			//=====================  METHODS  =======================
-			void addNeuronTypes(QComboBox* combo);
 			void checkInput(QLineEdit* inputEdit, const QString& errorMessage);
-			unsigned int getNeuronTypeID(const QString& comboText);
-
 	};
 
 }

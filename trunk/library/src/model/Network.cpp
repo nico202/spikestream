@@ -145,6 +145,14 @@ bool Network::containsNeuron(unsigned int neurID){
 }
 
 
+/*! Returns true if the network contains the neuron group with the specified ID. */
+bool  Network::containsNeuronGroup(unsigned int neuronGroupID){
+	if(neurGrpMap.contains(neuronGroupID))
+		return true;
+	return false;
+}
+
+
 /*! Removes the specified connection groups from the network and database.
 	Throws an exception if the connection groups cannot be found */
 void Network::deleteConnectionGroups(QList<unsigned int>& conGrpIDList){

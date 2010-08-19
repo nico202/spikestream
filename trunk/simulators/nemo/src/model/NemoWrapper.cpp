@@ -5,6 +5,7 @@
 #include "SpikeStreamException.h"
 #include "SpikeStreamSimulationException.h"
 #include "STDPFunctions.h"
+#include "Util.h"
 using namespace spikestream;
 
 
@@ -116,6 +117,8 @@ void NemoWrapper::loadNemo(){
 		throw SpikeStreamSimulationException(QString("Failed to create Nemo simulation: ") + nemo_strerror());
 	}
 
+	qDebug()<<"Simulation created successfully";
+
 	if(!stopThread)
 		simulationLoaded = true;
 }
@@ -126,6 +129,26 @@ void NemoWrapper::playSimulation(){
 	if(!simulationLoaded)
 		throw SpikeStreamException("Cannot run simulation - no simulation loaded.");
 	currentTaskID = RUN_SIMULATION_TASK;
+}
+
+
+/*! Forces the specified percentage of neurons in the specified neuron group to fire at the
+	next time step. Throws an exception if the neuron group ID does not exist in the current
+	network or if the percentage is < 0 or > 100. */
+void  NemoWrapper::setInjectNoise(unsigned neuronGroupID, double percentage){
+	//Run checks
+	if(!simulationLoaded)
+		throw SpikeStreamException("Noise cannot be injected when a simulation is not loaded.");
+	if(percentage < 0.0 || percentage > 100.0)
+		throw SpikeStreamException("Injecting noise. Percentage is out of range");
+	if(!Globals::getNetwork()->containsNeuronGroup(neuronGroupID))
+		throw SpikeStreamException("Injecting noise. Neuron group ID cannot be found in current network: " + QString::number(neuronGroupID));
+
+	//Calculate number of neurons to fire and store it in the map
+	injectNoiseMap[neuronGroupID] = Util::rUInt( (percentage / 100.0) * (double)Globals::getNetwork()->getNeuronGroup(neuronGroupID)->size());
+	if(injectNoiseMap[neuronGroupID] > (unsigned)Globals::getNetwork()->getNeuronGroup(neuronGroupID)->size())
+		throw SpikeStreamException("Number of neurons to fire is greater than neuron group size: " + QString::number(injectNoiseMap[neuronGroupID]));
+	qDebug()<<"NETWORK SIZE: "<<Globals::getNetwork()->getNeuronGroup(neuronGroupID)->size()<<"; NUM NEUR TO FIRE: "<<injectNoiseMap[neuronGroupID];
 }
 
 
@@ -286,6 +309,47 @@ void NemoWrapper::clearError(){
 }
 
 
+/*! Fills the supplied array with a selection of neurons to force to fire at the next time step. */
+void NemoWrapper::fillInjectNoiseArray(unsigned* array, int* arraySize){
+	//Calculate total number of firing neurons
+	*arraySize = 0;
+	for(QHash<unsigned, unsigned>::iterator iter = injectNoiseMap.begin(); iter != injectNoiseMap.end(); ++iter)
+		*arraySize = *arraySize + iter.value();
+
+	//Create array
+	int arrayCounter = 0;
+	array = new unsigned[*arraySize];
+
+	//Fill array with a random selection of neuron ids from each group
+	unsigned randomIndex, neurGrpSize, numSelectedNeurons;
+	QHash<unsigned, bool> addedNeurIndxMap;//Prevent duplicates
+	for(QHash<unsigned, unsigned>::iterator iter = injectNoiseMap.begin(); iter != injectNoiseMap.end(); ++iter){
+		//Get list of neuron ids
+		QList<unsigned> neuronIDList = Globals::getNetwork()->getNeuronGroup(iter.key())->getNeuronIDs();
+		neurGrpSize = neuronIDList.size();
+		addedNeurIndxMap.clear();
+		numSelectedNeurons = iter.value();
+
+		qDebug()<<"START NEURON ID: "<<Globals::getNetwork()->getNeuronGroup(iter.key())->getStartNeuronID();
+
+		//Select indexes from the list of neuron ids
+		while((unsigned)addedNeurIndxMap.size() < numSelectedNeurons){
+			randomIndex = Util::getRandom(0, neurGrpSize);//Get random position in list of neuron ids
+			if(!addedNeurIndxMap.contains(randomIndex)){//New index
+				if(arrayCounter >= *arraySize)//Sanity check
+					throw SpikeStreamException("Error adding noise injection neuron ids - array counter out of range.");
+				array[arrayCounter] = neuronIDList.at(randomIndex);//Add neuron id to array
+				addedNeurIndxMap[randomIndex] = true;//Record the fact that we have selected this ID
+				++arrayCounter;
+			}
+		}
+	}
+
+	qDebug()<<"Inject noise array size: "<<*arraySize;
+	for(int i=0; i<*arraySize; ++i)
+		qDebug()<<"Inject noise array entry==================== "<<array[i];
+}
+
 
 /*! Plays the current simulation */
 void NemoWrapper::runNemo(){
@@ -339,8 +403,26 @@ void NemoWrapper::setError(const QString& errorMessage){
 void NemoWrapper::stepNemo(){
 	firingNeuronList.clear();
 
+	//Handle injection of noise into neuron groups
+	if(!injectNoiseMap.isEmpty()){
+		//Build array of neurons to inject noise into
+		unsigned* injectNoiseNeurIDArr = NULL;
+		int injectNoiseArrSize;
+		fillInjectNoiseArray(injectNoiseNeurIDArr, &injectNoiseArrSize);
+
+		//Advance simulation
+		qDebug()<<"About to step nemo with injection of noise";
+		checkNemoOutput( nemo_step(nemoSimulation, injectNoiseNeurIDArr, injectNoiseArrSize), "Nemo error on step" );
+		qDebug()<<"Nemo successfully stepped with injection of noise.";
+
+		//Clean up noise array and empty inject noise map
+		delete [] injectNoiseNeurIDArr;
+		injectNoiseMap.clear();
+	}
 	//Advance the simulation one time step
-	checkNemoOutput( nemo_step(nemoSimulation, 0, 0), "Nemo error on step" );
+	else{
+		checkNemoOutput( nemo_step(nemoSimulation, 0, 0), "Nemo error on step" );
+	}
 
 	//Retrieve list of firing neurons
 	if(archiveMode || monitorMode){

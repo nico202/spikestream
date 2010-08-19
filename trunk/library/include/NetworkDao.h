@@ -40,6 +40,7 @@ namespace spikestream{
 			unsigned getConnectionCount(ConnectionGroup* conGrp);//UNTESTED
 			unsigned getConnectionCount(const QList<ConnectionGroup*>& conGrpList);
 			unsigned getConnectionCount(const QList<unsigned>& conGrpIDList);//UNTESTED
+			unsigned getConnectionCount(const ConnectionGroupInfo& conGrpInfo);//UNTESTED
 			QList<ConnectionGroupInfo> getConnectionGroupsInfo(unsigned int networkID);
 			unsigned int getConnectionGroupSize(unsigned int connGrpID);
 			QList<Connection> getConnections(unsigned int fromNeuronID, unsigned int toNeuronID);
@@ -49,9 +50,10 @@ namespace spikestream{
 			QList<unsigned int> getFromConnections(unsigned int fromNeuronID);
 			QList<unsigned int> getToConnections(unsigned int toNeuronID);
 			QList<NetworkInfo> getNetworksInfo();
-			unsigned int getNeuronCount(unsigned int networkID);
-			unsigned int getNeuronCount(const QList<NeuronGroup*>& neurGrpList);
-			unsigned int getNeuronCount(unsigned int networkID, const Box& box);
+			unsigned getNeuronCount(unsigned int networkID);
+			unsigned getNeuronCount(const QList<NeuronGroup*>& neurGrpList);
+			unsigned getNeuronCount(const NeuronGroupInfo& neurGrpInfo);//UNTESTED
+			unsigned getNeuronCount(unsigned int networkID, const Box& box);
 			Box getNeuronGroupBoundingBox(unsigned int neurGrpID);
 			unsigned int getNeuronGroupID(unsigned int neuronID);
 			QList<NeuronGroupInfo> getNeuronGroupsInfo(unsigned int networkID);

@@ -140,6 +140,17 @@ unsigned int NetworkDao::getConnectionCount(const QList<unsigned>& conGrpIDList)
 }
 
 
+/*! Returns the total number of connections in the connection groups */
+unsigned int NetworkDao::getConnectionCount(const ConnectionGroupInfo& conGrpInfo){
+	//Build and execute query
+	QString queryStr = "SELECT COUNT(*) FROM Connections WHERE ConnectionGroupID=" + QString::number(conGrpInfo.getID());
+	QSqlQuery query = getQuery(queryStr);
+	executeQuery(query);
+	query.next();
+	return Util::getUInt(query.value(0).toString());
+}
+
+
 /*! Returns all of the connections from the specified neuron to the specified neuron. */
 QList<Connection> NetworkDao::getConnections(unsigned int fromNeuronID, unsigned int toNeuronID){
 	QSqlQuery query = getQuery("SELECT ConnectionID, ConnectionGroupID, Delay, Weight, TempWeight FROM Connections WHERE FromNeuronID=" + QString::number(fromNeuronID) + " AND ToNeuronID="+ QString::number(toNeuronID));
@@ -403,6 +414,15 @@ unsigned int NetworkDao::getNeuronCount(const QList<NeuronGroup*>& neurGrpList){
 /*! Returns the number of neurons in a network */
 unsigned int NetworkDao::getNeuronCount(unsigned int networkID){
 	QSqlQuery query = getQuery("SELECT COUNT(*) FROM Neurons WHERE NeuronGroupID IN (SELECT NeuronGroupID FROM NeuronGroups WHERE NetworkID=" + QString::number(networkID) + ")");
+	executeQuery(query);
+	query.next();
+	return Util::getUInt(query.value(0).toString());
+}
+
+
+/*! Returns the number of neurons in a neuron group */
+unsigned NetworkDao::getNeuronCount(const NeuronGroupInfo& neurGrpInfo){
+	QSqlQuery query = getQuery("SELECT COUNT(*) FROM Neurons WHERE NeuronGroupID=" + QString::number(neurGrpInfo.getID()) );
 	executeQuery(query);
 	query.next();
 	return Util::getUInt(query.value(0).toString());
