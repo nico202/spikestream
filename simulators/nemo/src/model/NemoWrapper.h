@@ -138,7 +138,7 @@ namespace spikestream {
 			//======================  METHODS  ========================
 			void checkNemoOutput(nemo_status_t result, const QString& errorMessage);
 			void clearError();
-			void fillInjectNoiseArray(unsigned* array, int* arraySize);
+			void fillInjectNoiseArray(unsigned*& array, int* arraySize);
 			void loadNemo();
 			void runNemo();
 			void setError(const QString& errorMessage);

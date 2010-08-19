@@ -13,7 +13,7 @@ using namespace spikestream;
 #include <iostream>
 #include <cassert>
 
-#define DEBUG false
+#define DEBUG true
 
 void addExcitatoryNeuron(nemo_network_t c_net, unsigned nidx){
 	float v = -65.0f;

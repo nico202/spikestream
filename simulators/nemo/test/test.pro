@@ -31,7 +31,8 @@ win32 {
 #---               LIBRARIES                ---#
 #----------------------------------------------#
 unix {
-	LIBS +=  -lnemowrapper -L$${SPIKESTREAM_ROOT_DIR}/plugins/simulation -lnemo -lspikestream
+	LIBS += -lnemowrapper -L$${SPIKESTREAM_ROOT_DIR}/plugins/simulation -lnemo
+	LIBS += -lspikestream -L$${SPIKESTREAM_ROOT_DIR}/lib
 }
 win32 {
 	LIBS += -lnemowrapper0 -L$${SPIKESTREAM_ROOT_DIR}/plugins/simulation
