@@ -454,15 +454,8 @@ void Network::load(){
     currentNeuronTask = LOAD_NEURONS_TASK;
     neuronNetworkDaoThread->start();
 
-    //Load all connection groups that are above a certain size
-    QList<ConnectionGroup*> loadList;
-    QList<ConnectionGroup*> connGrpMapList = connGrpMap.values();
-    for(QList<ConnectionGroup*>::iterator iter = connGrpMapList.begin(); iter != connGrpMapList.end(); ++iter){
-		unsigned int connGrpSize = networkDao->getConnectionGroupSize((*iter)->getID());
-		if(connGrpSize <= LAZY_LOADING_THRESHOLD)
-			loadList.append(*iter);
-    }
-    connectionNetworkDaoThread->prepareLoadConnections(loadList);
+	//Load all connection groups
+	connectionNetworkDaoThread->prepareLoadConnections(connGrpMap.values());
     currentConnectionTask = LOAD_CONNECTIONS_TASK;
     connectionNetworkDaoThread->start();
 }

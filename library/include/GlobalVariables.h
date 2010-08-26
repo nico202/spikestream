@@ -21,7 +21,7 @@
 /*! File extension for saving archive file of databases.*/
 #define NEURON_APPLICATION_FILE_EXTENSION ".sql.tar.gz"
 
-
+//Starting and invalid database IDs
 /*! First valid automatically generated ID in NeuralNetwork database */
 #define START_NEURALNETWORK_ID 1
 
@@ -50,10 +50,7 @@
 #define START_WEIGHTLESS_TRAINING_PATTERN_ID 1
 
 
-/*! Default threshold for lazy loading */
-#define LAZY_LOADING_THRESHOLD 1000000
-
-
+//Connection mode flags
 /*! Show connections to/from a single neuron */
 #define CONNECTION_MODE_ENABLED 1
 
@@ -73,6 +70,32 @@
 #define SHOW_TO_CONNECTIONS 64
 
 
+//Weight render flags
+/*! Render weights as polygons */
+#define WEIGHT_RENDER_ENABLED 1
+
+/*! Render temp weights */
+#define RENDER_TEMP_WEIGHTS 2
+
+/*! Render current weights */
+#define RENDER_CURRENT_WEIGHTS 4
+
+
+//Weight save flags
+/*! Save current weight for one time step. */
+#define SAVE_CURRENT_WEIGHTS 1
+
+/*! Save temp weight for one time step. */
+#define SAVE_TEMP_WEIGHTS 2
+
+/*! Save current weight on every time step */
+#define TRACK_CURRENT_WEIGHTS 4
+
+/*! Save temp weight on every time step */
+#define TRACK_TEMP_WEIGHTS 8
+
+
+//Heat colour map colours
 /*! Heat map colour 0 */
 #define HEAT_COLOR_0 0, 0.5, 0
 

@@ -27,24 +27,46 @@ NetworkViewerProperties::NetworkViewerProperties(QWidget* parent) : QWidget(pare
 	renderBox->addStretch(5);
 	mainVerticalBox->addLayout(renderBox);
 
+	//Widget for full render controls
+	fullRenderControlsWidget = new QWidget();
+	fullRenderControlsWidget->setEnabled(false);
+	QVBoxLayout* fullRenConVBox = new QVBoxLayout(fullRenderControlsWidget);
+
 	//Slider for neuron transparency
 	QHBoxLayout* transparencyBox = new QHBoxLayout();
-	transparencySlider = new QSlider(Qt::Horizontal);
+	QSlider* transparencySlider = new QSlider(Qt::Horizontal);
 	transparencySlider->setRange(0, 1000);
 	transparencySlider->setSliderPosition(1000);
 	connect(transparencySlider, SIGNAL(sliderMoved(int)), this, SLOT(neuronTransparencyChanged(int)));
-	transparencySlider->setEnabled(false);
-	transparencyBox->addSpacing(30);
-	transparencyLabel = new QLabel("Neuron opacity ");
-	transparencyLabel->setEnabled(false);
-	maxTransparencyLabel = new QLabel("max");
-	maxTransparencyLabel->setEnabled(false);
-	transparencyBox->addWidget(transparencyLabel);
+	transparencyBox->addWidget(new QLabel("Neuron opacity "));
 	transparencyBox->addWidget(transparencySlider);
-	transparencyBox->addWidget(maxTransparencyLabel);
+	transparencyBox->addWidget(new QLabel("max"));
 	transparencyBox->addStretch(5);
-	mainVerticalBox->addLayout(transparencyBox);
-	mainVerticalBox->addSpacing(10);
+	fullRenConVBox->addLayout(transparencyBox);
+
+	//Weight rendering mode
+	QHBoxLayout* weightRenderLayout = new QHBoxLayout();
+	QButtonGroup* weightButtonGroup = new QButtonGroup();
+	connect(weightButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(weightDisplayChanged(int)));
+	QRadioButton* noWeightsButton = new QRadioButton("Positive/negative weights");
+	noWeightsButton->setChecked(true);
+	weightButtonGroup->addButton(noWeightsButton, 0);
+	weightRenderLayout->addWidget(noWeightsButton);
+	QRadioButton* currentWeightsButton = new QRadioButton("Current weights");
+	weightButtonGroup->addButton(currentWeightsButton, 1);
+	weightRenderLayout->addWidget(currentWeightsButton);
+	QRadioButton* tempWeightsButton = new QRadioButton("Temp weights");
+	weightButtonGroup->addButton(tempWeightsButton, 2);
+	weightRenderLayout->addWidget(tempWeightsButton);
+	weightRenderLayout->addStretch(5);
+	fullRenConVBox->addLayout(weightRenderLayout);
+
+	//Add full render controls widget to main layout
+	QHBoxLayout* fullRenderHolderBox = new QHBoxLayout();
+	fullRenderHolderBox->addSpacing(30);
+	fullRenderHolderBox->addWidget(fullRenderControlsWidget);
+	fullRenderHolderBox->addStretch(5);
+	mainVerticalBox->addLayout(fullRenderHolderBox);
 
 	//Button group to set connection mode
 	QButtonGroup* conButGroup = new QButtonGroup();
@@ -189,15 +211,11 @@ void NetworkViewerProperties::posNegSelectionChanged(int index){
 void NetworkViewerProperties::setRenderMode(){
 	if(renderCheckBox->isChecked()){//Full render mode
 		Globals::getNetworkDisplay()->setFullRenderMode(true);
-		transparencyLabel->setEnabled(true);
-		maxTransparencyLabel->setEnabled(true);
-		transparencySlider->setEnabled(true);
+		fullRenderControlsWidget->setEnabled(true);
 	}
 	else{
 		Globals::getNetworkDisplay()->setFullRenderMode(false);
-		transparencyLabel->setEnabled(false);
-		maxTransparencyLabel->setEnabled(false);
-		transparencySlider->setEnabled(false);
+		fullRenderControlsWidget->setEnabled(false);
 	}
 }
 
@@ -211,6 +229,19 @@ void NetworkViewerProperties::showTruthTable(){
 
 	//Show non modal dialog
 	showTruthTableDialog(tmpNeurID);
+}
+
+
+/*! Called when the weight display mode is changed */
+void NetworkViewerProperties::weightDisplayChanged(int buttonID){
+	if(buttonID == 0)
+		Globals::getNetworkDisplay()->disableWeightRender();
+	else if(buttonID == 1)
+		Globals::getNetworkDisplay()->renderCurrentWeights();
+	else if(buttonID == 2)
+		Globals::getNetworkDisplay()->renderTempWeights();
+	else
+		qCritical()<<"Button ID not recognized: "<<buttonID;
 }
 
 

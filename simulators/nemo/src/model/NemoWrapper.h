@@ -44,6 +44,10 @@ namespace spikestream {
 			void setInjectNoise(unsigned neuronGroupID, double percentage);
 			void setMonitorMode(bool mode);
 			void setNemoConfig(nemo_configuration_t nemoConfig) { this->nemoConfig = nemoConfig; }
+			void saveCurrentWeights();
+			void saveTempWeights();
+			void setTrackCurrentWeights(bool enable);
+			void setTrackTempWeights(bool enable);
 			void setSTDPFunctionID(unsigned stdpFunctionID) { this->stdpFunctionID = stdpFunctionID; }
 			void setUpdateInterval_ms(unsigned int interval) { this->updateInterval_ms = interval; }
 			void playSimulation();
@@ -134,14 +138,22 @@ namespace spikestream {
 				The key is the neuron group ID, the value is the number of neurons to fire. */
 			QHash<unsigned, unsigned> injectNoiseMap;
 
+			/*! Holds flags controlling weight save operation at each time step */
+			unsigned weightSaveMode;
+
+			/*! List of presynaptic neuron ids used for saving weights. */
+			QList<unsigned> preSynapticNeuronIDs;
 
 			//======================  METHODS  ========================
 			void checkNemoOutput(nemo_status_t result, const QString& errorMessage);
+			void checkWeightSaveFlag(unsigned flag);
 			void clearError();
+			void clearWeightSaveFlag(unsigned flag);
 			void fillInjectNoiseArray(unsigned*& array, int* arraySize);
 			void loadNemo();
 			void runNemo();
 			void setError(const QString& errorMessage);
+			void setWeightSaveFlag(unsigned flag);
 			void stepNemo();
 			void unloadNemo();
 	};

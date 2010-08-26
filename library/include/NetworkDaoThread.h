@@ -31,7 +31,7 @@ namespace spikestream {
 			void prepareAddNeuronGroups(unsigned int networkID, QList<NeuronGroup*>& neurGrpList);
 			void prepareDeleteConnectionGroups(unsigned int networkID, QList<unsigned int>& conGrpList);
 			void prepareDeleteNeuronGroups(unsigned int networkID, QList<unsigned int>& neurGrpList);
-			void prepareLoadConnections(QList<ConnectionGroup*>& connGrpList);
+			void prepareLoadConnections(const QList<ConnectionGroup*>& connGrpList);
 			void prepareLoadConnections(ConnectionGroup* connGrp);
 			void prepareLoadNeurons(const QList<NeuronGroup*>& neurGrpList);
 			void prepareLoadNeurons(NeuronGroup* neurGrp);

@@ -114,7 +114,7 @@ void NetworkDaoThread::prepareDeleteNeuronGroups(unsigned int networkID, QList<u
 
 
 /*! Prepares to load connections for a list of connection groups. This task is executed when the thread runs.  */
-void NetworkDaoThread::prepareLoadConnections(QList<ConnectionGroup*>& connGrpList){
+void NetworkDaoThread::prepareLoadConnections(const QList<ConnectionGroup*>& connGrpList){
     //Store necessary variables
     this->connectionGroupList = connGrpList;
 

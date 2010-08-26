@@ -84,6 +84,23 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	archiveLayout->addWidget(setArchiveDescriptionButton);
 	controlsVBox->addLayout(archiveLayout);
 
+	//Add widgets to save and track the weights
+	QHBoxLayout* saveWeightsBox = new QHBoxLayout();
+	QPushButton* saveTempWeightsButton = new QPushButton("Save Temp Weights");
+	connect(saveTempWeightsButton, SIGNAL(clicked()), this, SLOT(saveTempWeights()));
+	saveWeightsBox->addWidget(saveTempWeightsButton);
+	QCheckBox* trackTempWeightsChkbx = new QCheckBox("Track temp weights");
+	connect(trackTempWeightsChkbx, SIGNAL(clicked(bool)), this, SLOT(setTrackTempWeights(bool)));
+	saveWeightsBox->addWidget(trackTempWeightsChkbx);
+	QPushButton* saveCurrentWeightsButton = new QPushButton("Save Current Weights");
+	connect(saveCurrentWeightsButton, SIGNAL(clicked()), this, SLOT(saveCurrentWeights()));
+	saveWeightsBox->addWidget(saveCurrentWeightsButton);
+	QCheckBox* trackCurrentWeightsChkbx = new QCheckBox("Track temp weights");
+	connect(trackCurrentWeightsChkbx, SIGNAL(clicked(bool)), this, SLOT(setTrackCurrentWeights(bool)));
+	saveWeightsBox->addWidget(trackCurrentWeightsChkbx);
+	saveWeightsBox->addStretch(5);
+	controlsVBox->addLayout(saveWeightsBox);
+
 	//Add widgets to inject noise into specified layers
 	QHBoxLayout* injectNoiseBox = new QHBoxLayout();
 	injectNoiseNeuronGroupCombo = new QComboBox();
@@ -290,6 +307,34 @@ void NemoWidget::networkChanged(){
 
 	//Fix enabled status of toolbar
 	checkWidgetEnabled();
+}
+
+
+/*! Instructs NeMo wrapper to save weights to
+	weight field in database at the next time step */
+void NemoWidget::saveCurrentWeights(){
+	nemoWrapper->saveCurrentWeights();
+}
+
+
+/*! Instructs NeMo wrapper to save weights to
+	temp weight field in database at the next time step */
+void NemoWidget::saveTempWeights(){
+	nemoWrapper->saveTempWeights();
+}
+
+
+/*! Instructs NeMo wrapper to track weights by saving them to
+	 weight field in database at each time step */
+void NemoWidget::setTrackCurrentWeights(bool enable){
+	nemoWrapper->setTrackCurrentWeights(enable);
+}
+
+
+/*! Instructs NeMo wrapper to track weights by saving them to
+	 temp weight field in database at each time step */
+void NemoWidget::setTrackTempWeights(bool enable){
+	nemoWrapper->setTrackTempWeights(enable);
 }
 
 

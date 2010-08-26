@@ -1,7 +1,9 @@
 //SpikeStream includes
 #include "Globals.h"
+#include "GlobalVariables.h"
 #include "NemoLoader.h"
 #include "NemoWrapper.h"
+#include "PerformanceTimer.h"
 #include "SpikeStreamException.h"
 #include "SpikeStreamSimulationException.h"
 #include "STDPFunctions.h"
@@ -18,6 +20,7 @@ NemoWrapper::NemoWrapper(){
 	archiveMode = false;
 	monitorMode = false;
 	updateInterval_ms = 500;
+	weightSaveMode = 0;
 
 	//Zero is the default STDP function
 	stdpFunctionID = 0;
@@ -75,6 +78,16 @@ void NemoWrapper::loadNemo(){
 	//Set up the archive info
 	archiveInfo.reset();
 	archiveInfo.setNetworkID(currentNetwork->getID());
+
+	//Store list of pre-synaptic neuron ids
+	preSynapticNeuronIDs.clear();
+	QList<ConnectionGroup*> conGrpList = currentNetwork->getConnectionGroups();
+	for(int i=0; i < conGrpList.size(); ++i){
+		QHash<unsigned int, ConnectionList>::const_iterator endFromMap = conGrpList.at(i)->fromMapEnd();
+		for(QHash<unsigned int, ConnectionList>::const_iterator iter = conGrpList.at(i)->fromMapBegin(); iter != endFromMap; ++iter){
+			preSynapticNeuronIDs.append(iter.key());
+		}
+	}
 
 	//Build the Nemo network
 	NemoLoader* nemoLoader = new NemoLoader();
@@ -268,6 +281,40 @@ void NemoWrapper::setMonitorMode(bool newMonitorMode){
 }
 
 
+/*! Sets wrapper to retrieve the weights from NeMo and save them to the current weight
+	field in the database. Only does this operation once at the next time step. */
+void  NemoWrapper::saveCurrentWeights(){
+	setWeightSaveFlag(SAVE_CURRENT_WEIGHTS);
+}
+
+
+/*! Sets wrapper to retrieve the weights from NeMo and save them to the temp weight
+	field in the database. Only does this operation once at the next time step. */
+void  NemoWrapper::saveTempWeights(){
+	setWeightSaveFlag(SAVE_TEMP_WEIGHTS);
+}
+
+
+/*! Sets wrapper to retrieve the weights from NeMo and save them to the current weight
+	field in the database. Does this operation every time step until it is turned off. */
+void  NemoWrapper::setTrackCurrentWeights(bool enable){
+	if(enable)
+		setWeightSaveFlag(TRACK_CURRENT_WEIGHTS);
+	else
+		clearWeightSaveFlag(TRACK_CURRENT_WEIGHTS);
+}
+
+
+/*! Sets wrapper to retrieve the weights from NeMo and save them to the temp weight
+	field in the database. Does this operation every time step until it is turned off. */
+void  NemoWrapper::setTrackTempWeights(bool enable){
+	if(enable)
+		setWeightSaveFlag(TRACK_TEMP_WEIGHTS);
+	else
+		clearWeightSaveFlag(TRACK_TEMP_WEIGHTS);
+}
+
+
 /*! Stops the simulation playing without exiting the thread. */
 void NemoWrapper::stopSimulation(){
 	currentTaskID = NO_TASK_DEFINED;
@@ -302,10 +349,32 @@ void NemoWrapper::checkNemoOutput(nemo_status_t result, const QString& errorMess
 }
 
 
+/*! Checks that a weight save flag is valid */
+void NemoWrapper::checkWeightSaveFlag(unsigned flag){
+	if(flag == SAVE_CURRENT_WEIGHTS)
+		return;
+	if(flag == SAVE_TEMP_WEIGHTS)
+		return;
+	if(flag == TRACK_CURRENT_WEIGHTS)
+		return;
+	if(flag == TRACK_TEMP_WEIGHTS)
+		return;
+	throw SpikeStreamException("Weight save mode flag not recognized: " + QString::number(flag));
+}
+
+
 /*! Clears the error state */
 void NemoWrapper::clearError(){
 	error = false;
 	errorMessage = "";
+}
+
+
+/*! Clears a weight save flag */
+void NemoWrapper::clearWeightSaveFlag(unsigned flag){
+	checkWeightSaveFlag(flag);
+	//Flip the bits in the flag and then AND it with the weight save mode
+	weightSaveMode &= ~flag;
 }
 
 
@@ -330,7 +399,7 @@ void NemoWrapper::fillInjectNoiseArray(unsigned*& array, int* arraySize){
 		addedNeurIndxMap.clear();
 		numSelectedNeurons = iter.value();
 
-		qDebug()<<"START NEURON ID: "<<Globals::getNetwork()->getNeuronGroup(iter.key())->getStartNeuronID();
+		//qDebug()<<"START NEURON ID: "<<Globals::getNetwork()->getNeuronGroup(iter.key())->getStartNeuronID();
 
 		//Select indexes from the list of neuron ids
 		while((unsigned)addedNeurIndxMap.size() < numSelectedNeurons){
@@ -395,6 +464,13 @@ void NemoWrapper::setError(const QString& errorMessage){
 }
 
 
+/*! Sets a flag in the weight save mode */
+void NemoWrapper::setWeightSaveFlag(unsigned flag){
+	checkWeightSaveFlag(flag);
+	weightSaveMode |= flag;
+}
+
+
 /*! Advances the simulation by one step */
 void NemoWrapper::stepNemo(){
 	firingNeuronList.clear();
@@ -406,14 +482,10 @@ void NemoWrapper::stepNemo(){
 		int injectNoiseArrSize;
 		fillInjectNoiseArray(injectNoiseNeurIDArr, &injectNoiseArrSize);
 
-		qDebug()<<"Inject noise array size: "<<injectNoiseArrSize;
-		for(int i=0; i<injectNoiseArrSize; ++i)
-			qDebug()<<"Inject noise array entry==================== "<<injectNoiseNeurIDArr[i];
-
 		//Advance simulation
 		qDebug()<<"About to step nemo with injection of noise";
-		//checkNemoOutput( nemo_step(nemoSimulation, injectNoiseNeurIDArr, injectNoiseArrSize), "Nemo error on step" );
-		nemo_step(nemoSimulation, injectNoiseNeurIDArr, injectNoiseArrSize);
+		checkNemoOutput( nemo_step(nemoSimulation, injectNoiseNeurIDArr, injectNoiseArrSize), "Nemo error on step" );
+		//nemo_step(nemoSimulation, injectNoiseNeurIDArr, injectNoiseArrSize);
 		qDebug()<<"Nemo successfully stepped with injection of noise.";
 
 		//Clean up noise array and empty inject noise map
@@ -445,6 +517,61 @@ void NemoWrapper::stepNemo(){
 	//Store firing neurons in database
 	if(archiveMode){
 		archiveDao->addArchiveData(archiveInfo.getID(), timeStepCounter, firingNeuronList);
+	}
+
+	//Retrieve weights
+	if(weightSaveMode){
+		//Variables for extracting the weights - NeMo is responsible for cleaning these up
+		unsigned* targetNeuronArray;
+		unsigned* delayArray;
+		float* weightArray;
+		unsigned char* isPlasticArray;
+		size_t numCons;
+
+		//Work through all connection groups in memory
+		QList<ConnectionGroup*> conGrpList = currentNetwork->getConnectionGroups();
+		for(int i=0; i < conGrpList.size(); ++i){
+			QHash<unsigned int, ConnectionList>::const_iterator endFromMap = conGrpList.at(i)->fromMapEnd();
+			for(QHash<unsigned int, ConnectionList>::const_iterator iter = conGrpList.at(i)->fromMapBegin(); iter != endFromMap; ++iter){
+
+				//Get the
+				checkNemoOutput(nemo_get_synapses(nemoSimulation, iter.key(), &targetNeuronArray, &delayArray, &weightArray, &isPlasticArray, &numCons), "Nemo error reading synapse weights");
+
+			}
+		}
+
+
+		//Extract weights from NeMo and store in database
+		qDebug()<<"Number of presynaptic neurons: "<<preSynapticNeuronIDs.size();
+		PerformanceTimer perfTimer1;
+		PerformanceTimer perfTimer2;
+		for(int i=0; i<preSynapticNeuronIDs.size(); ++i){
+			perfTimer1.start();
+			checkNemoOutput(nemo_get_synapses(nemoSimulation, preSynapticNeuronIDs.at(i), &targetNeuronArray, &delayArray, &weightArray, &isPlasticArray, &numCons), "Nemo error reading synapse weights");
+			perfTimer1.printTime("Extracting synapse weights");
+			qDebug()<<"Number of weights = "<<numCons;
+			perfTimer1.start();
+			if( (weightSaveMode & SAVE_TEMP_WEIGHTS) || (weightSaveMode & TRACK_TEMP_WEIGHTS) ){
+				for(size_t j=0; j<numCons; ++j)
+					networkDao->setTempWeight(preSynapticNeuronIDs.at(i), targetNeuronArray[j], weightArray[j]);
+			}
+			if( (weightSaveMode & SAVE_CURRENT_WEIGHTS) || (weightSaveMode & TRACK_CURRENT_WEIGHTS) ){
+				for(size_t j=0; j<numCons; ++j)
+					networkDao->setWeight(preSynapticNeuronIDs.at(i), targetNeuronArray[j], weightArray[j]);
+			}
+			perfTimer1.printTime("Database save");
+		}
+
+		perfTimer2.printTime("Total time saving weights");
+
+		//Clear save weight flags
+		if(weightSaveMode & SAVE_CURRENT_WEIGHTS)
+			clearWeightSaveFlag(SAVE_CURRENT_WEIGHTS);
+		if(weightSaveMode & SAVE_TEMP_WEIGHTS)
+			clearWeightSaveFlag(SAVE_TEMP_WEIGHTS);
+
+		//Inform other classes that weights have changed
+		Globals::getEventRouter()->weightsChangedSlot();
 	}
 
 	/* Set flag to cause thread to wait for graphics to update.

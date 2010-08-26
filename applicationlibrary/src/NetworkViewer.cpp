@@ -88,6 +88,7 @@ void NetworkViewer::initializeGL(){
 	mainDisplayList = glGenLists(1);
 
 	gluSphereObj = gluNewQuadric();
+	gluConeObj = gluNewQuadric();
 	gluQuadricDrawStyle(gluSphereObj, GLU_FILL);
 	gluQuadricNormals(gluSphereObj, GLU_SMOOTH);
 }
@@ -502,6 +503,10 @@ void NetworkViewer::drawConnections(){
 	Network* network = Globals::getNetwork();
 	NetworkDisplay* netDisplay = Globals::getNetworkDisplay();
 
+	//Get information about rendering connections
+	unsigned weightRenderMode = netDisplay->getWeightRenderMode();
+	float weight = 0.0f;//Declare here to save declaring it all the time.
+
 	//Default neuron colour
 	RGBColor positiveConnectionColor = *netDisplay->getPositiveConnectionColor();
 	RGBColor negativeConnectionColor = *netDisplay->getNegativeConnectionColor();
@@ -517,9 +522,6 @@ void NetworkViewer::drawConnections(){
 	}
 	bool drawConnection;
 
-	//Start drawing lines
-	glBegin(GL_LINES);
-
 	//Work through the connection groups listed in the network display
 	QList<unsigned int> conGrpIDs = Globals::getNetworkDisplay()->getVisibleConnectionGroupIDs();
 	for(QList<unsigned int>::iterator conGrpIter = conGrpIDs.begin(); conGrpIter != conGrpIDs.end(); ++conGrpIter){
@@ -534,6 +536,10 @@ void NetworkViewer::drawConnections(){
 		//Draw all the connections in the group
 		QList<Connection*>::const_iterator endConGrp = conGrp->end();
 		for(QList<Connection*>::const_iterator conIter = conGrp->begin(); conIter != endConGrp; ++ conIter){
+			//Get the weight
+			weight = (*conIter)->weight;
+			if( (weightRenderMode & WEIGHT_RENDER_ENABLED) && (weightRenderMode & RENDER_TEMP_WEIGHTS) )
+				weight = (*conIter)->tempWeight;
 
 			//Decide if connection should be drawn, depending on the connection mode and neuron id
 			drawConnection = true;
@@ -546,10 +552,7 @@ void NetworkViewer::drawConnections(){
 							drawConnection = false;
 						}
 						else{
-							if ( (*conIter)->weight >= 0 )
-								connectedNeuronMap[(*conIter)->toNeuronID] = true;//Positive connection
-							else
-								connectedNeuronMap[(*conIter)->toNeuronID] = false;//Negative connection
+							connectedNeuronMap[(*conIter)->toNeuronID] = weight;
 						}
 					}
 					//Show only connections to a single neuron
@@ -558,10 +561,7 @@ void NetworkViewer::drawConnections(){
 							drawConnection = false;
 						}
 						else{
-							if ( (*conIter)->weight >= 0 )
-								connectedNeuronMap[(*conIter)->fromNeuronID] = true;//Positive connection
-							else
-								connectedNeuronMap[(*conIter)->fromNeuronID] = false;//Negative connection
+							connectedNeuronMap[(*conIter)->fromNeuronID] = weight;//Positive connection
 						}
 					}
 					//Show from and to connections to a single neuron
@@ -571,16 +571,10 @@ void NetworkViewer::drawConnections(){
 						}
 						else {//Highlight connected neurons
 							if( (*conIter)->fromNeuronID == singleNeuronID){
-								if ( (*conIter)->weight >= 0 )
-									connectedNeuronMap[(*conIter)->toNeuronID] = true;//Positive connection
-								else
-									connectedNeuronMap[(*conIter)->toNeuronID] = false;//Negative connection
+								connectedNeuronMap[(*conIter)->toNeuronID] = weight;//Positive connection
 							}
 							else if( (*conIter)->toNeuronID == singleNeuronID){
-								if ( (*conIter)->weight >= 0 )
-									connectedNeuronMap[(*conIter)->fromNeuronID] = true;//Positive connection
-								else
-									connectedNeuronMap[(*conIter)->fromNeuronID] = false;//Negative connection
+								connectedNeuronMap[(*conIter)->fromNeuronID] = weight;//Positive connection
 							}
 						}
 					}
@@ -593,34 +587,50 @@ void NetworkViewer::drawConnections(){
 				}
 
 				//Decide whether to draw connection based on its weight
-				if( (*conIter)->weight < 0 && (connectionMode & SHOW_POSITIVE_CONNECTIONS) )
+				if( weight < 0 && (connectionMode & SHOW_POSITIVE_CONNECTIONS) )
 					drawConnection = false;
-				if( (*conIter)->weight >= 0 && (connectionMode & SHOW_NEGATIVE_CONNECTIONS))
+				if( weight >= 0 && (connectionMode & SHOW_NEGATIVE_CONNECTIONS))
 					drawConnection = false;
 			}
 
 			//Draw the connection
 			if(drawConnection){
 				//Get the position of the from and to neurons
-				//FIXME: THIS COULD BE SPEEDED UP BY STORING THE POSITION IN Connection AT THE COST OF SOME LOADING COMPLEXITY
 				fromNeuronPoint = &fromNeuronGroup->getNeuronLocation((*conIter)->fromNeuronID);
 				toNeuronPoint = &toNeuronGroup->getNeuronLocation((*conIter)->toNeuronID);
 
 				//Set the colour
-				if((*conIter)->weight >= 0)
+				if(weight > 0)
 					glColor3f(positiveConnectionColor.red, positiveConnectionColor.green, positiveConnectionColor.blue);
-				if((*conIter)->weight < 0)
+				else if(weight < 0)
 					glColor3f(negativeConnectionColor.red, negativeConnectionColor.green, negativeConnectionColor.blue);
+				else
+					glColor3f(0.0f, 0.0f, 0.0f);
 
 				//Draw the connection
-				glVertex3f(fromNeuronPoint->getXPos(), fromNeuronPoint->getYPos(), fromNeuronPoint->getZPos());
-				glVertex3f(toNeuronPoint->getXPos(), toNeuronPoint->getYPos(), toNeuronPoint->getZPos());
+				if(weightRenderMode & WEIGHT_RENDER_ENABLED){
+					drawWeightedConnection(
+							fromNeuronPoint->getXPos(),
+							fromNeuronPoint->getYPos(),
+							fromNeuronPoint->getZPos(),
+							toNeuronPoint->getXPos(),
+							toNeuronPoint->getYPos(),
+							toNeuronPoint->getZPos(),
+							weight
+					);
+				}
+				else{
+					//Start drawing lines
+					glBegin(GL_LINES);
+						glVertex3f(fromNeuronPoint->getXPos(), fromNeuronPoint->getYPos(), fromNeuronPoint->getZPos());
+						glVertex3f(toNeuronPoint->getXPos(), toNeuronPoint->getYPos(), toNeuronPoint->getZPos());
+					glEnd();//End of line drawing
+				}
 			}
 		}
 	}
 
-	//End of line drawing
-	glEnd();
+
 }
 
 
@@ -634,7 +644,7 @@ void NetworkViewer::drawNeurons(){
 	//Local variables
 	RGBColor *tmpColor, tmpColor2;
 	unsigned sphereQuality;
-	float sphereRadius;
+	float sphereRadius, weight;
 
 	//Get pointer to network that is to be drawn and its associated display
 	Network* network = Globals::getNetwork();
@@ -684,10 +694,13 @@ void NetworkViewer::drawNeurons(){
 					glColor4f(tmpColor2.red, tmpColor2.green, tmpColor2.blue, neuronAlpha);
 				}
 				else if(connectedNeuronMap.contains((*neurIter)->getID())){//A connected neuron
-					if(connectedNeuronMap[(*neurIter)->getID()])//Positive connection
+					weight = connectedNeuronMap[(*neurIter)->getID()];
+					if(weight > 0)//Positive connection
 						glColor4f(1.0f, 0.0f, 0.0f, neuronAlpha);
-					else
+					else if(weight < 0)
 						glColor4f(0.0f, 0.0f, 1.0f, neuronAlpha);
+					else
+						glColor4f(0.0f, 0.0f, 0.0f, neuronAlpha);
 				}
 				else{
 					glColor4f(defaultNeuronColor.red, defaultNeuronColor.green, defaultNeuronColor.blue, neuronAlpha);
@@ -722,6 +735,48 @@ void NetworkViewer::drawSphere(float xPos, float yPos, float zPos, float radius,
 	glPushMatrix();
 	glTranslatef(xPos, yPos, zPos);//Translate to sphere position
 	gluSphere(gluSphereObj, radius, quality*2, quality);
+	glPopMatrix();
+}
+
+
+/*! Draws a connection whose thickness varies with the weight */
+void NetworkViewer::drawWeightedConnection(float x1, float y1, float z1, float x2, float y2, float z2, float weight){
+	float maxConThickness = 0.25;
+	float minConThickness = 0.01;
+
+	//Make sure weight is positive
+	if(weight < 0.0f)
+		weight *= -1.0f;
+
+	//Draw line if we are less than minimum connection weight
+	if(maxConThickness * weight < minConThickness){
+		glBegin(GL_LINES);
+			glVertex3f(x1, y1, z1);
+			glVertex3f(x2, y2, z2);
+		glEnd();//End of line drawing
+		return;
+	}
+//	glEnable(GL_POLYGON_SMOOTH);
+//	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+//	glEnable(GL_LINE_SMOOTH);
+//	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+
+	//Calculate vector and angle with Z axis
+	float conVect [] = { x2-x1, y2-y1, z2-z1 };
+	float radianToDegrees = 180.0f / 3.14159265f;
+
+	//Some calculations
+	float length = sqrt(pow(conVect[0], 2) + pow(conVect[1], 2) + pow(conVect[2], 2));
+	float rotationAngle = radianToDegrees * -1.0f * acos((conVect[2]) / length);//Angle with vertical z axis
+	//qDebug()<<"Rotation angle: "<<rotationAngle<<"; Vector: "<<conVect[0]<<", "<<conVect[1]<<", "<<conVect[2]<<"; length is "<<length;
+
+	//Store matrix and move to first point
+	glPushMatrix();
+	glTranslatef(x1, y1, z1);
+	glRotatef(rotationAngle, conVect[1], -conVect[0], 0.0f);//Rotate z vertical
+	gluCylinder(gluConeObj, 0.0 , maxConThickness * weight, length/2.0, 8, 8);
+	glTranslatef(0.0, 0.0, length/2);//Half way up current Z axis
+	gluCylinder(gluConeObj, maxConThickness * weight, 0.0, length/2.0, 8, 8);
 	glPopMatrix();
 }
 

@@ -110,9 +110,12 @@ namespace spikestream {
 			/*! Object used to draw a sphere */
 			GLUquadricObj* gluSphereObj;
 
+			/*! Object used to draw a cone */
+			GLUquadricObj* gluConeObj;
+
 			/*! Map holding IDs of all neurons with a connection to them.
 				Used when connection mode is enabled */
-			QHash<unsigned, bool> connectedNeuronMap;
+			QHash<unsigned, float> connectedNeuronMap;
 
 
 			//======================  METHODS  ===========================
@@ -122,6 +125,7 @@ namespace spikestream {
 			void drawConnections();
 			void drawNeurons();
 			void drawSphere(float xPos, float yPos, float zPos, float radius, unsigned quality);
+			void drawWeightedConnection(float x1, float y1, float z1, float x2, float y2, float z2, float weight);
 			void fillRotationMatrix(float angle, float x, float y, float z);
 			unsigned int getSelectedNeuron(GLuint selectBuffer[], int hitCount, int bufferSize);
 			void initialiseCameraParameters();

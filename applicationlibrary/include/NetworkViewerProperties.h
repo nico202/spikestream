@@ -32,6 +32,7 @@ namespace spikestream {
 			void posNegSelectionChanged(int index);
 			void setRenderMode();
 			void showTruthTable();
+			void weightDisplayChanged(int buttonID);
 
 		private:
 			//=======================  VARIABLES  =======================
@@ -74,15 +75,8 @@ namespace spikestream {
 			/*! Check box to change to full render mode */
 			QCheckBox* renderCheckBox;
 
-			/*! Slider for setting the transparency */
-			QSlider* transparencySlider;
-
-			/*! Label for the transparency. Only enabled in full render mode. */
-			QLabel* transparencyLabel;
-
-			/*! Label for the maximum transparency. Only enabled in full render mode. */
-			QLabel* maxTransparencyLabel;
-
+			/*! Widget holding full render controls */
+			QWidget* fullRenderControlsWidget;
 
 			//=======================  METHODS  =========================
 			void hideTruthTableDialog();
