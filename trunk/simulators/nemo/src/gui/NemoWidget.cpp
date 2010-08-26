@@ -275,15 +275,20 @@ void NemoWidget::loadSimulation(){
 
 /*! Switches the monitoring of the simulation on or off */
 void NemoWidget::monitorStateChanged(int state){
-	if(state == Qt::Checked)
-		nemoWrapper->setMonitorMode(true);
-	else{
-		//Set the monitor mode
-		nemoWrapper->setMonitorMode(false);
+	try{
+		if(state == Qt::Checked)
+			nemoWrapper->setMonitorMode(true);
+		else{
+			//Set the monitor mode
+			nemoWrapper->setMonitorMode(false);
 
-		//Clear highlights
-		QHash<unsigned int, RGBColor*>* newHighlightMap = new QHash<unsigned int, RGBColor*>();
-		Globals::getNetworkDisplay()->setNeuronColorMap(newHighlightMap);
+			//Clear highlights
+			QHash<unsigned int, RGBColor*>* newHighlightMap = new QHash<unsigned int, RGBColor*>();
+			Globals::getNetworkDisplay()->setNeuronColorMap(newHighlightMap);
+		}
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<ex.getMessage();
 	}
 }
 

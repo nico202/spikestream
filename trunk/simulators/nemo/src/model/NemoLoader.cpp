@@ -14,7 +14,9 @@ using namespace spikestream;
 #include <iostream>
 using namespace std;
 
+// Outputs verbose debugging behaviour about the loading of the network.
 //#define DEBUG
+
 
 /*! Constructor */
 NemoLoader::NemoLoader(){

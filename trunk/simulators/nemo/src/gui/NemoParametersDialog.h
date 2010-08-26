@@ -31,6 +31,7 @@ namespace spikestream {
 			void backendChanged(int index);
 			void defaultButtonClicked();
 			void okButtonClicked();
+			void stdpParameterButtonClicked();
 
 
 		private:
