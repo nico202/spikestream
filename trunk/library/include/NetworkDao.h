@@ -70,6 +70,7 @@ namespace spikestream{
 			bool isWeightlessNeuron(unsigned int neuronID);
 			void setNeuronParameters(const NeuronGroupInfo& info, QHash<QString, double>& paramMap);
 			void setSynapseParameters(const ConnectionGroupInfo& info, QHash<QString, double>& paramMap);
+			void setWeight(unsigned int fromNeurID, unsigned int toNeurID, double tempWeight);//UNTESTED
 			void setTempWeight(unsigned int fromNeurID, unsigned int toNeurID, double tempWeight);
 
 		private:

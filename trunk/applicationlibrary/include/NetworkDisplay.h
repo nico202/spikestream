@@ -43,6 +43,7 @@ namespace spikestream {
 			float getVertexSize() { return vertexSize; }
 			QList<unsigned int> getVisibleConnectionGroupIDs() { return connGrpDisplayMap.keys(); }
 			QList<unsigned int> getVisibleNeuronGroupIDs() { return neurGrpDisplayMap.keys(); }
+			unsigned getWeightRenderMode() { return weightRenderMode; }
 			unsigned int getZoomNeuronGroupID() { return zoomNeuronGroupID; }
 			int getZoomStatus () { return zoomStatus; }
 			bool isFullRenderMode() { return fullRenderMode; }
@@ -51,6 +52,9 @@ namespace spikestream {
 			void loadDisplaySettings(ConfigLoader* configLoader);
 			void lockMutex();
 			bool neuronGroupVisible(unsigned int neurGrpID);
+			void disableWeightRender();
+			void renderTempWeights();
+			void renderCurrentWeights();
 			void setConnectionModeFlag(unsigned int flag);
 			void unsetConnectionModeFlag(unsigned int flag);
 			void setConnectionGroupVisibility(unsigned int conGrpID, bool visible);
@@ -153,6 +157,9 @@ namespace spikestream {
 			of the mode. Need to AND it with the different modes to see if they are set or not */
 			unsigned int connectionMode;
 
+			/*! Weight render mode. Each bit controls different aspects of the weight rendering */
+			unsigned weightRenderMode;
+
 			/*! Neuron id used in SHOW_SINGLE_NEURON_CONNECTIONS mode */
 			unsigned int singleNeuronID;
 
@@ -183,6 +190,9 @@ namespace spikestream {
 
 			//=========================  METHODS  =========================
 			void checkConnectionModeFlag(unsigned int flag);
+			void checkWeightRenderFlag(unsigned int flag);
+			void setWeightRenderFlag(unsigned flag);
+			void unsetWeightRenderFlag(unsigned flag);
 	};
 
 }

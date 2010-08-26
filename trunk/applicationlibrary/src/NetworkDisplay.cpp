@@ -42,6 +42,7 @@ NetworkDisplay::NetworkDisplay(){
 
 	//Default connection mode settings
 	connectionMode = 0;
+	weightRenderMode = 0;
 	singleNeuronID = 0;
 	toNeuronID = 0;
 
@@ -459,6 +460,31 @@ void NetworkDisplay::clearDirectionFiltering(){
 }
 
 
+/*! Weights are rendered as lines, not polygons */
+void  NetworkDisplay::disableWeightRender(){
+	unsetWeightRenderFlag(WEIGHT_RENDER_ENABLED);
+	emit networkDisplayChanged();
+}
+
+
+/*! Renders the temporary values of weights in the database using polygons. */
+void  NetworkDisplay::renderTempWeights(){
+	setWeightRenderFlag(WEIGHT_RENDER_ENABLED);
+	setWeightRenderFlag(RENDER_TEMP_WEIGHTS);
+	unsetWeightRenderFlag(RENDER_CURRENT_WEIGHTS);
+	emit networkDisplayChanged();
+}
+
+
+/*! Renders the current values of weights in the database using polygons. */
+void  NetworkDisplay::renderCurrentWeights(){
+	setWeightRenderFlag(WEIGHT_RENDER_ENABLED);
+	setWeightRenderFlag(RENDER_CURRENT_WEIGHTS);
+	unsetWeightRenderFlag(RENDER_TEMP_WEIGHTS);
+	emit networkDisplayChanged();
+}
+
+
 /*----------------------------------------------------------*/
 /*-----               PRIVATE METHODS                  -----*/
 /*----------------------------------------------------------*/
@@ -478,5 +504,32 @@ void NetworkDisplay::checkConnectionModeFlag(unsigned int flag){
 	if(flag == SHOW_TO_CONNECTIONS)
 		return;
 	throw SpikeStreamException("Connection mode flag not recognized: " + QString::number(flag));
+}
+
+
+/*! Checks that a particular weight render flag is valid and throws an exception if not */
+void NetworkDisplay::checkWeightRenderFlag(unsigned int flag){
+	if(flag == WEIGHT_RENDER_ENABLED)
+		return;
+	if(flag == RENDER_TEMP_WEIGHTS)
+		return;
+	if(flag == RENDER_CURRENT_WEIGHTS)
+		return;
+	throw SpikeStreamException("Weight render flag not recognized: " + QString::number(flag));
+}
+
+
+/*! Sets a flag controlling weight rendering */
+void NetworkDisplay::setWeightRenderFlag(unsigned flag){
+	checkWeightRenderFlag(flag);
+	weightRenderMode |= flag;
+}
+
+
+/*! Unsets a flag controlling weight rendering */
+void NetworkDisplay::unsetWeightRenderFlag(unsigned flag){
+	checkWeightRenderFlag(flag);
+	//Flip the bits in the flag and then AND it with the weight render mode
+	weightRenderMode &= ~flag;
 }
 
