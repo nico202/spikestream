@@ -486,46 +486,6 @@ void NetworkViewer::drawAxes(void){
 
 	//Reset line width to original value
 	glPopAttrib();
-
-//glColor3f(0.5f, 0.5f, 1.0f);
-//glPushMatrix();
-//glTranslatef(6.0f, 6.0f, 0.0f);//Translate to sphere position
-//	gluCylinder	(	gluSphereObj,0.0f, 2.0f, 5.0f, 8, 8);
-//	glPopMatrix();
-
-	drawWeightedConnection();
-}
-
-
-void NetworkViewer::drawWeightedConnection(float x1, float y1, float z1, float x2, float y2, float z2){
-	float size = 2.0f;
-	float length = sqrtf(exp2(x2-x1) + exp2(y2-y1) + exp2(z2-z1));
-	float theta1 = asin( (z2-z1) / length);//Check for negative
-	float theta2 = atan(size / (length/2) );
-
-
-	//Cone with 4 sides
-	glPushAttrib(GL_CW);
-	glFrontFace(GL_CCW);
-	glBegin(GL_TRIANGLE_FAN);
-		glVertex3f(6.0f, 6.0f, 0.0f);//Point 1
-		glVertex3f(4.0f, 4.0f, 5.0f);
-		glVertex3f(4.0f, 8.0f, 5.0f);
-		glVertex3f(8.0f, 8.0f, 5.0f);
-		glVertex3f(8.0f, 4.0f, 5.0f);
-		glVertex3f(4.0f, 4.0f, 5.0f);
-	glEnd();
-	glFrontFace(GL_CW);
-	glBegin(GL_TRIANGLE_FAN);
-		glVertex3f(6.0f, 6.0f, 10.0f);//Point 2
-		glVertex3f(4.0f, 4.0f, 5.0f);
-		glVertex3f(4.0f, 8.0f, 5.0f);
-		glVertex3f(8.0f, 8.0f, 5.0f);
-		glVertex3f(8.0f, 4.0f, 5.0f);
-		glVertex3f(4.0f, 4.0f, 5.0f);
-	glEnd();
-	glFrontFace(GL_CCW);
-	glPopAttrib();
 }
 
 
@@ -669,10 +629,7 @@ void NetworkViewer::drawConnections(){
 			}
 		}
 	}
-
-
 }
-
 
 
 /*! Draws the visible neurons in the network */
@@ -796,10 +753,6 @@ void NetworkViewer::drawWeightedConnection(float x1, float y1, float z1, float x
 		glEnd();//End of line drawing
 		return;
 	}
-//	glEnable(GL_POLYGON_SMOOTH);
-//	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-//	glEnable(GL_LINE_SMOOTH);
-//	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 
 	//Calculate vector and angle with Z axis
 	float conVect [] = { x2-x1, y2-y1, z2-z1 };
@@ -808,7 +761,6 @@ void NetworkViewer::drawWeightedConnection(float x1, float y1, float z1, float x
 	//Some calculations
 	float length = sqrt(pow(conVect[0], 2) + pow(conVect[1], 2) + pow(conVect[2], 2));
 	float rotationAngle = radianToDegrees * -1.0f * acos((conVect[2]) / length);//Angle with vertical z axis
-	//qDebug()<<"Rotation angle: "<<rotationAngle<<"; Vector: "<<conVect[0]<<", "<<conVect[1]<<", "<<conVect[2]<<"; length is "<<length;
 
 	//Store matrix and move to first point
 	glPushMatrix();

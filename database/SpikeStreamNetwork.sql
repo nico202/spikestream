@@ -118,10 +118,8 @@ CREATE TABLE Connections (
 	FromNeuronID MEDIUMINT UNSIGNED NOT NULL,
 	ToNeuronID MEDIUMINT UNSIGNED NOT NULL,
 	ConnectionGroupID SMALLINT UNSIGNED NOT NULL,
-	
 	Delay FLOAT UNSIGNED NOT NULL,
 	Weight FLOAT NOT NULL,
-	TempWeight FLOAT DEFAULT 0.0,/* To allow the user to view the connections without overwriting the current connections */
 
 	PRIMARY KEY(ConnectionID),
 	INDEX FromNeuronIndex (FromNeuronID, ToNeuronID),

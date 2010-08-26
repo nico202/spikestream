@@ -71,10 +71,6 @@ void NemoWrapper::loadNemo(){
 		throw SpikeStreamSimulationException("Cannot load simulation: no network loaded.");
 	Network* currentNetwork = Globals::getNetwork();
 
-	//Create network and archive daos and set them in the network
-	currentNetwork->setNetworkDao(networkDao);
-	currentNetwork->setArchiveDao(archiveDao);
-
 	//Set up the archive info
 	archiveInfo.reset();
 	archiveInfo.setNetworkID(currentNetwork->getID());
@@ -93,10 +89,6 @@ void NemoWrapper::loadNemo(){
 	NemoLoader* nemoLoader = new NemoLoader();
 	connect(nemoLoader, SIGNAL(progress(int, int)), this, SLOT(updateProgress(int, int)));
 	nemo_network_t nemoNet = nemoLoader->buildNemoNetwork(currentNetwork, &stopThread);
-
-	//Reset the daos in the SpikeStream network
-	currentNetwork->setNetworkDao(Globals::getNetworkDao());
-	currentNetwork->setArchiveDao(Globals::getArchiveDao());
 
 	//Clean up loader
 	delete nemoLoader;
@@ -458,6 +450,7 @@ void NemoWrapper::runNemo(){
 
 /*! Puts class into error state */
 void NemoWrapper::setError(const QString& errorMessage){
+	currentTaskID = NO_TASK_DEFINED;
 	error = true;
 	this->errorMessage = errorMessage;
 	stopThread = true;
@@ -528,41 +521,19 @@ void NemoWrapper::stepNemo(){
 		unsigned char* isPlasticArray;
 		size_t numCons;
 
-		//Work through all connection groups in memory
-		QList<ConnectionGroup*> conGrpList = currentNetwork->getConnectionGroups();
-		for(int i=0; i < conGrpList.size(); ++i){
-			QHash<unsigned int, ConnectionList>::const_iterator endFromMap = conGrpList.at(i)->fromMapEnd();
-			for(QHash<unsigned int, ConnectionList>::const_iterator iter = conGrpList.at(i)->fromMapBegin(); iter != endFromMap; ++iter){
-
-				//Get the
-				checkNemoOutput(nemo_get_synapses(nemoSimulation, iter.key(), &targetNeuronArray, &delayArray, &weightArray, &isPlasticArray, &numCons), "Nemo error reading synapse weights");
-
-			}
-		}
-
-
-		//Extract weights from NeMo and store in database
-		qDebug()<<"Number of presynaptic neurons: "<<preSynapticNeuronIDs.size();
-		PerformanceTimer perfTimer1;
-		PerformanceTimer perfTimer2;
+		//Extract weights from NeMo and store in memory
 		for(int i=0; i<preSynapticNeuronIDs.size(); ++i){
-			perfTimer1.start();
-			checkNemoOutput(nemo_get_synapses(nemoSimulation, preSynapticNeuronIDs.at(i), &targetNeuronArray, &delayArray, &weightArray, &isPlasticArray, &numCons), "Nemo error reading synapse weights");
-			perfTimer1.printTime("Extracting synapse weights");
-			qDebug()<<"Number of weights = "<<numCons;
-			perfTimer1.start();
-			if( (weightSaveMode & SAVE_TEMP_WEIGHTS) || (weightSaveMode & TRACK_TEMP_WEIGHTS) ){
-				for(size_t j=0; j<numCons; ++j)
-					networkDao->setTempWeight(preSynapticNeuronIDs.at(i), targetNeuronArray[j], weightArray[j]);
-			}
-			if( (weightSaveMode & SAVE_CURRENT_WEIGHTS) || (weightSaveMode & TRACK_CURRENT_WEIGHTS) ){
-				for(size_t j=0; j<numCons; ++j)
-					networkDao->setWeight(preSynapticNeuronIDs.at(i), targetNeuronArray[j], weightArray[j]);
-			}
-			perfTimer1.printTime("Database save");
+			;
+//			checkNemoOutput(nemo_get_synapses(nemoSimulation, preSynapticNeuronIDs.at(i), &targetNeuronArray, &delayArray, &weightArray, &isPlasticArray, &numCons), "Nemo error reading synapse weights");
+//			if( (weightSaveMode & SAVE_TEMP_WEIGHTS) || (weightSaveMode & TRACK_TEMP_WEIGHTS) ){
+//				for(size_t j=0; j<numCons; ++j)
+//					networkDao->setTempWeight(preSynapticNeuronIDs.at(i), targetNeuronArray[j], weightArray[j]);
+//			}
+//			if( (weightSaveMode & SAVE_CURRENT_WEIGHTS) || (weightSaveMode & TRACK_CURRENT_WEIGHTS) ){
+//				for(size_t j=0; j<numCons; ++j)
+//					networkDao->setWeight(preSynapticNeuronIDs.at(i), targetNeuronArray[j], weightArray[j]);
+//			}
 		}
-
-		perfTimer2.printTime("Total time saving weights");
 
 		//Clear save weight flags
 		if(weightSaveMode & SAVE_CURRENT_WEIGHTS)
@@ -588,6 +559,10 @@ void NemoWrapper::stepNemo(){
 
 /*! Unloads NeMo and sets the simulation loaded state to false. */
 void NemoWrapper::unloadNemo(){
+	/* Unlock mutex if it is still locked.
+		need to call try lock in case  mutex is unlocked, in which case calling
+		unlock again may cause a crash */
+	mutex.tryLock();
 	mutex.unlock();
 	simulationLoaded = false;
 	Globals::setSimulationLoaded(simulationLoaded);

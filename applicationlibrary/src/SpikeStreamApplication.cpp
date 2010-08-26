@@ -9,14 +9,6 @@ using namespace spikestream;
 #include <iostream>
 using namespace std;
 
-//Inform user about the build
-#ifdef LINUX32_SPIKESTREAM
-	#warning Linux 32 build of SpikeStreamApplication
-#endif
-#ifdef WIN32_SPIKESTREAM
-	#warning Windows 32 build of SpikeStreamApplication
-#endif
-
 
 /*! Constructor. */
 SpikeStreamApplication::SpikeStreamApplication(int & argc, char ** argv) : QApplication(argc, argv){

@@ -342,10 +342,10 @@ void WeightlessLivelinessAnalyzer::loadWeightlessNeurons(){
 
 /*! Stores the connection liveliness in the database if requested, or just adds it to a map. */
 void WeightlessLivelinessAnalyzer::setConnectionLiveliness(unsigned int fromNeurID, unsigned int toNeurID, double liveliness){
-	//Store in the database if requested
-	if(analysisInfo.getParameter("store_connection_liveliness_as_temporary_weights") == 1.0){
-		networkDao->setTempWeight(fromNeurID, toNeurID, liveliness);
-	}
+	//Store in the database if requested FIXME
+//	if(analysisInfo.getParameter("store_connection_liveliness_as_temporary_weights") == 1.0){
+//		networkDao->setTempWeight(fromNeurID, toNeurID, liveliness);
+//	}
 
 	//Store in maps for analysis of clusters and neurons
 	fromConnectionLivelinessMap[fromNeurID][toNeurID] = liveliness;

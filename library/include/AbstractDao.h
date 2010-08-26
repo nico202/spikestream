@@ -18,6 +18,7 @@ namespace spikestream {
 			AbstractDao();
 			virtual ~AbstractDao();
 			DBInfo getDBInfo();
+			QThread* getThread();
 
 		protected:
 			void checkDatabase();

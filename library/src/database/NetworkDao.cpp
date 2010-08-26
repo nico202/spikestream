@@ -153,7 +153,7 @@ unsigned int NetworkDao::getConnectionCount(const ConnectionGroupInfo& conGrpInf
 
 /*! Returns all of the connections from the specified neuron to the specified neuron. */
 QList<Connection> NetworkDao::getConnections(unsigned int fromNeuronID, unsigned int toNeuronID){
-	QSqlQuery query = getQuery("SELECT ConnectionID, ConnectionGroupID, Delay, Weight, TempWeight FROM Connections WHERE FromNeuronID=" + QString::number(fromNeuronID) + " AND ToNeuronID="+ QString::number(toNeuronID));
+	QSqlQuery query = getQuery("SELECT ConnectionID, ConnectionGroupID, Delay, Weight FROM Connections WHERE FromNeuronID=" + QString::number(fromNeuronID) + " AND ToNeuronID="+ QString::number(toNeuronID));
 	executeQuery(query);
 	QList<Connection> conList;
 	while ( query.next() ) {
@@ -163,9 +163,8 @@ QList<Connection> NetworkDao::getConnections(unsigned int fromNeuronID, unsigned
 				fromNeuronID,//FromNeuronID
 				toNeuronID,//ToNeuronID
 				query.value(2).toString().toFloat(),//Delay
-				query.value(3).toString().toFloat(),//Weight
-				query.value(4).toString().toFloat()//tempWeight
-				);
+				query.value(3).toString().toFloat()//Weight
+		);
 		conList.append(tmpCon);
 	}
 	return conList;
@@ -280,7 +279,7 @@ QList<Connection*> NetworkDao::getConnections(unsigned int connectionMode, unsig
 	if( !(connectionMode & CONNECTION_MODE_ENABLED) )
 		return conList;
 
-	QString queryStr = "SELECT ConnectionID, ConnectionGroupID, FromNeuronID, ToNeuronID, Delay, Weight, TempWeight FROM Connections WHERE ";
+	QString queryStr = "SELECT ConnectionID, ConnectionGroupID, FromNeuronID, ToNeuronID, Delay, Weight FROM Connections WHERE ";
 
 	//Filter by weight
 	if(connectionMode & SHOW_POSITIVE_CONNECTIONS)
@@ -317,9 +316,8 @@ QList<Connection*> NetworkDao::getConnections(unsigned int connectionMode, unsig
 				query.value(2).toUInt(),//FromNeuronID
 				query.value(3).toUInt(),//ToNeuronID
 				query.value(4).toString().toFloat(),//Delay
-				query.value(5).toString().toFloat(),//Weight
-				query.value(6).toString().toFloat()//tempWeight
-				);
+				query.value(5).toString().toFloat()//Weight
+		);
 		conList.append(tmpConn);
 	}
 
@@ -814,16 +812,8 @@ void NetworkDao::setSynapseParameters(const ConnectionGroupInfo& conGrpInfo, QHa
 
 /*! Sets the weight between two neurons. In the event of multiple connections between two neurons
 	all of the temporary weights will be updated */
-void NetworkDao::setWeight(unsigned int fromNeurID, unsigned int toNeurID, double newWeight){
-	QSqlQuery query = getQuery("UPDATE Connections SET Weight=" + QString::number(newWeight) + " WHERE FromNeuronID=" + QString::number(fromNeurID) + " AND ToNeuronID=" + QString::number(toNeurID));
-	executeQuery(query);
-}
-
-
-/*! Sets the temporary weight between two neurons. In the event of multiple connections between two neurons
-	all of the temporary weights will be updated */
-void NetworkDao::setTempWeight(unsigned int fromNeurID, unsigned int toNeurID, double tempWeight){
-	QSqlQuery query = getQuery("UPDATE Connections SET TempWeight=" + QString::number(tempWeight) + " WHERE FromNeuronID=" + QString::number(fromNeurID) + " AND ToNeuronID=" + QString::number(toNeurID));
+void NetworkDao::setWeight(unsigned connectionID, double newWeight){
+	QSqlQuery query = getQuery("UPDATE Connections SET Weight=" + QString::number(newWeight) + " WHERE ConnectionID=" + QString::number(connectionID));
 	executeQuery(query);
 }
 

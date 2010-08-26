@@ -54,8 +54,6 @@ void CuboidBuilderThread::run(){
 
 		//Need to set a new network and archive dao in the network because we are running as a separate thread
 		Network* currentNetwork = Globals::getNetwork();
-		currentNetwork->setNetworkDao(threadNetworkDao);
-		currentNetwork->setArchiveDao(threadArchiveDao);
 
 		//Add the neuron groups to the database
 		addNeuronGroupsToDatabase();
@@ -69,10 +67,6 @@ void CuboidBuilderThread::run(){
 		//Check for errors
 		if(currentNetwork->isError())
 			setError(currentNetwork->getErrorMessage());
-
-		//Reset network and archive daos in network
-		currentNetwork->setNetworkDao(Globals::getNetworkDao());
-		currentNetwork->setArchiveDao(Globals::getArchiveDao());
 
 		//Clean up network and archive dao
 		delete threadNetworkDao;

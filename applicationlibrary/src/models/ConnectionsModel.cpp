@@ -117,7 +117,7 @@ void ConnectionsModel::networkDisplayChanged(){
     if(connectionMode & CONNECTION_MODE_ENABLED){
 		unsigned int singleNeuronID = netDisplay->getSingleNeuronID();
 		unsigned int toNeuronID = netDisplay->getToNeuronID();
-		connectionsList = Globals::getNetworkDao()->getConnections(connectionMode, singleNeuronID, toNeuronID);
+		connectionsList = Globals::getNetwork()->getConnections(connectionMode, singleNeuronID, toNeuronID);
     }
     reset();
 }

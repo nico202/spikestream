@@ -151,11 +151,12 @@ void SpikeStreamMainWindow::clearDatabases(){
 		return;
 
 	//Instruct database manager to delete all networks
-	progressDialog = new QProgressDialog("Clearing databases, please wait", "", 0, 0, this);
-	progressDialog->setMinimumDuration(1000);
+	progressDialog = new QProgressDialog("Clearing databases, please wait", "", 0, 0, this, Qt::CustomizeWindowHint);
+	progressDialog->setWindowModality(Qt::WindowModal);
+	progressDialog->setCancelButton(0);//Cannot implement cancel sensibly
 	databaseManager->prepareClearDatabases();
-	connect(databaseManager, SIGNAL(finished()), this, SLOT(databaseManagerFinished()));
 	databaseManager->start();
+	progressDialog->show();
 }
 
 
@@ -266,6 +267,7 @@ void SpikeStreamMainWindow::initializeApplication(){
 
 	//Create Database manager
 	databaseManager = new DatabaseManager(Globals::getNetworkDao()->getDBInfo(), Globals::getArchiveDao()->getDBInfo(), Globals::getAnalysisDao()->getDBInfo());
+	connect(databaseManager, SIGNAL(finished()), this, SLOT(databaseManagerFinished()), Qt::UniqueConnection);
 	progressDialog = NULL;
 
 	//Get the default location for saving and loading databases

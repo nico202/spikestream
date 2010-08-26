@@ -44,6 +44,14 @@ ConnectionList::const_iterator ConnectionGroup::begin(){
 }
 
 
+/*! Returns true if the connection group contains the specified neuron ID */
+bool ConnectionGroup::contains(unsigned neuronID){
+	if(fromConnectionMap.contains(neuronID) || toConnectionMap.contains(neuronID))
+		return true;
+	return false;
+}
+
+
 /*! Returns iterator pointing to end of connection group */
 ConnectionList::const_iterator ConnectionGroup::end(){
     return connectionList.end();

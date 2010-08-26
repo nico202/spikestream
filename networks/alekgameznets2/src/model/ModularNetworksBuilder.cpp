@@ -164,30 +164,30 @@ void ModularNetworksBuilder::addConnections(){
 	for(unsigned int toNeurIndx = 1; toNeurIndx <=4; ++ toNeurIndx){
 		for(unsigned int fromNeurIndx = 1; fromNeurIndx <=4; ++fromNeurIndx)
 			if(fromNeurIndx != toNeurIndx)
-				conListArray[toNeurIndx-1].append( connGrp.addConnection( new Connection(neuronMap[fromNeurIndx], neuronMap[toNeurIndx],  0,  0,  0) ) );
+				conListArray[toNeurIndx-1].append( connGrp.addConnection( new Connection(neuronMap[fromNeurIndx], neuronMap[toNeurIndx],  0,  0) ) );
 	}
 	//Add single connection from other module
-	conListArray[3-1].append( connGrp.addConnection( new Connection(neuronMap[12], neuronMap[3],  0,  0,  0) ) );
+	conListArray[3-1].append( connGrp.addConnection( new Connection(neuronMap[12], neuronMap[3],  0,  0) ) );
 
 	//SECOND MODULE
 	//Add connections within the module
 	for(unsigned int toNeurIndx = 5; toNeurIndx <=8; ++ toNeurIndx){
 		for(unsigned int fromNeurIndx = 5; fromNeurIndx <=8; ++fromNeurIndx)
 			if(fromNeurIndx != toNeurIndx)
-				conListArray[toNeurIndx-1].append( connGrp.addConnection( new Connection(neuronMap[fromNeurIndx], neuronMap[toNeurIndx],  0,  0,  0) ) );
+				conListArray[toNeurIndx-1].append( connGrp.addConnection( new Connection(neuronMap[fromNeurIndx], neuronMap[toNeurIndx],  0,  0) ) );
 	}
 	//Add single connection from other module
-	conListArray[8-1].append( connGrp.addConnection( new Connection(neuronMap[1], neuronMap[8],  0,  0,  0) ) );
+	conListArray[8-1].append( connGrp.addConnection( new Connection(neuronMap[1], neuronMap[8],  0,  0) ) );
 
 	//THIRD MODULE
 	//Add connections within the module
 	for(unsigned int toNeurIndx = 9; toNeurIndx <=12; ++ toNeurIndx){
 		for(unsigned int fromNeurIndx = 9; fromNeurIndx <=12; ++fromNeurIndx)
 			if(fromNeurIndx != toNeurIndx)
-				conListArray[toNeurIndx-1].append( connGrp.addConnection( new Connection(neuronMap[fromNeurIndx], neuronMap[toNeurIndx],  0,  0,  0) ) );
+				conListArray[toNeurIndx-1].append( connGrp.addConnection( new Connection(neuronMap[fromNeurIndx], neuronMap[toNeurIndx],  0,  0) ) );
 	}
 	//Add single connection from other module
-	conListArray[10-1].append( connGrp.addConnection( new Connection(neuronMap[6], neuronMap[10],  0,  0,  0) ) );
+	conListArray[10-1].append( connGrp.addConnection( new Connection(neuronMap[6], neuronMap[10],  0,  0) ) );
 
 	//Add connection group to the database
 	addConnectionGroup(networkID, connGrp);

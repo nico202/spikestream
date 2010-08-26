@@ -577,7 +577,7 @@ void NetworkDaoThread::loadConnections(){
 
 		//Load connections into group
 		unsigned int tmpConGrpID = (*iter)->getID();
-		QSqlQuery query = getQuery("SELECT ConnectionID, FromNeuronID, ToNeuronID, Delay, Weight, TempWeight FROM Connections WHERE ConnectionGroupID = " + QString::number(tmpConGrpID));
+		QSqlQuery query = getQuery("SELECT ConnectionID, FromNeuronID, ToNeuronID, Delay, Weight FROM Connections WHERE ConnectionGroupID = " + QString::number(tmpConGrpID));
 		executeQuery(query);
 		while ( query.next() ) {
 			Connection* tmpConn = new Connection(
@@ -586,9 +586,8 @@ void NetworkDaoThread::loadConnections(){
 					query.value(1).toUInt(),//FromNeuronID
 					query.value(2).toUInt(),//ToNeuronID
 					query.value(3).toString().toFloat(),//Delay
-					query.value(4).toString().toFloat(),//Weight
-					query.value(5).toString().toFloat()//tempWeight
-					);
+					query.value(4).toString().toFloat()//Weight
+			);
 			(*iter)->addConnection(tmpConn);
 
 			//Track progress

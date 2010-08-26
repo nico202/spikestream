@@ -276,7 +276,7 @@ void NetworksWidget::loadNetwork(NetworkInfo& netInfo){
 			Network is set to null because if an exception is thrown during construction
 			then we need to know if the object was created */
 		newNetwork = NULL;
-		newNetwork = new Network(netInfo, Globals::getNetworkDao(), Globals::getArchiveDao());
+		newNetwork = new Network(netInfo, Globals::getNetworkDao()->getDBInfo(), Globals::getArchiveDao()->getDBInfo());
 
 		//Start network loading, all the heavy work is done by separate threads
 		newNetwork->load();

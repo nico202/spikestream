@@ -36,19 +36,14 @@ void ConnectionManager::run(){
 	stopThread = false;
 
 	try{
-		//Create network and archive dao for this thread
+		//Delete the connection group
 		Network* currentNetwork = Globals::getNetwork();
-		NetworkDao* threadNetworkDao = new NetworkDao(Globals::getNetworkDao()->getDBInfo());
-		ArchiveDao* threadArchiveDao = new ArchiveDao(Globals::getArchiveDao()->getDBInfo());
-		currentNetwork->setNetworkDao(threadNetworkDao);
-		currentNetwork->setArchiveDao(threadArchiveDao);
-
-		//Add the connection group
-		currentNetwork->deleteConnectionGroups(deleteConnectionGroupIDs);
+		NetworkDao threadNetworkDao(Globals::getNetworkDao()->getDBInfo());
+		Globals::getNetwork()->deleteConnectionGroups(deleteConnectionGroupIDs);
 
 		//Wait for network to finish adding connection groups
 		while(currentNetwork->isBusy()){
-			int connectionsDeleted = totalNumberOfConnections - threadNetworkDao->getConnectionCount(deleteConnectionGroupIDs);
+			int connectionsDeleted = totalNumberOfConnections - threadNetworkDao.getConnectionCount(deleteConnectionGroupIDs);
 			emit progress(connectionsDeleted, totalNumberOfConnections, "Deleting connections from database...");
 			msleep(250);
 		}
@@ -56,14 +51,6 @@ void ConnectionManager::run(){
 		//Check for errors
 		if(currentNetwork->isError())
 			setError(currentNetwork->getErrorMessage());
-
-		//Reset network and archive daos in network
-		currentNetwork->setNetworkDao(Globals::getNetworkDao());
-		currentNetwork->setArchiveDao(Globals::getArchiveDao());
-
-		//Clean up network and archive dao
-		delete threadNetworkDao;
-		delete threadArchiveDao;
 	}
 	catch (SpikeStreamException& ex){
 		setError(ex.getMessage());
