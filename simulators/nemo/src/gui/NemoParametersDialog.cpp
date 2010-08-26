@@ -1,5 +1,6 @@
 //SpikeStream includes
 #include "NemoParametersDialog.h"
+#include "ParametersDialog.h"
 #include "SpikeStreamException.h"
 #include "STDPFunctions.h"
 #include "Util.h"
@@ -64,11 +65,13 @@ NemoParametersDialog::NemoParametersDialog(nemo_configuration_t nemoConfig, unsi
 	gridLayout->addWidget(cudaDeviceCombo, rowCntr, 1);
 	++rowCntr;
 
-	//Add combo with STDP functions
+	//Add combo with STDP functions and button to edit parameters
 	stdpCombo = new QComboBox();
 	getStdpFunctions(stdpCombo);
-	gridLayout->addWidget(new QLabel("STDP function: "), rowCntr, 0);
-	gridLayout->addWidget(stdpCombo, rowCntr, 1);
+	gridLayout->addWidget(stdpCombo, rowCntr, 0);
+	QPushButton* stdpParamButton = new QPushButton("Parameters");
+	connect(stdpParamButton, SIGNAL(clicked()), this, SLOT(stdpParameterButtonClicked()));
+	gridLayout->addWidget(stdpParamButton, rowCntr, 1);
 	++rowCntr;
 
 	//Sets the fields to match the config
@@ -135,6 +138,9 @@ void NemoParametersDialog::okButtonClicked(){
 }
 
 
+/*! Sets the parameters for the STDP function */
+
+
 /*----------------------------------------------------------*/
 /*-----                 PRIVATE METHODS                -----*/
 /*----------------------------------------------------------*/
@@ -188,8 +194,10 @@ void NemoParametersDialog::getCudaDevices(QComboBox* combo){
 /*! Loads up all of the STDP functions */
 void NemoParametersDialog::getStdpFunctions(QComboBox *combo){
 	QList<unsigned> functionIDs = STDPFunctions::getFunctionIDs();
-	foreach(unsigned funID, functionIDs)
-		combo->addItem(STDPFunctions::getFunctionDescription(funID));
+	for(int i=0; i<functionIDs.size(); ++i){
+		combo->addItem(STDPFunctions::getFunctionDescription(functionIDs.at(i)));
+	}
+	combo->setCurrentIndex(stdpFunctionID);
 }
 
 
@@ -255,6 +263,26 @@ void NemoParametersDialog::storeParameterValues(){
 }
 
 
+/*! Shows a dialog that enables the user to edit the parameters of an STDP function. */
+void NemoParametersDialog::stdpParameterButtonClicked(){
+	try{
+		stdpFunctionID = stdpCombo->currentIndex();
+
+		ParametersDialog paramDialog(
+				STDPFunctions::getParameterInfoList(stdpFunctionID),
+				STDPFunctions::getDefaultParameters(stdpFunctionID),
+				STDPFunctions::getParameters(stdpFunctionID),
+				this
+		);
+		if(paramDialog.exec() == QDialog::Accepted){
+			QHash<QString, double> newParameters = paramDialog.getParameters();
+			STDPFunctions::setParameters(stdpFunctionID, newParameters);
+		}
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<ex.getMessage();
+	}
+}
 
 
 

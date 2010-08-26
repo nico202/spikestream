@@ -588,6 +588,7 @@ void NemoWrapper::stepNemo(){
 
 /*! Unloads NeMo and sets the simulation loaded state to false. */
 void NemoWrapper::unloadNemo(){
+	mutex.unlock();
 	simulationLoaded = false;
 	Globals::setSimulationLoaded(simulationLoaded);
 }

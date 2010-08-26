@@ -1,8 +1,13 @@
 #ifndef STDPFUNCTIONS_H
 #define STDPFUNCTIONS_H
 
+//SpikeStream includes
+#include "AbstractSTDPFunction.h"
+#include "ParameterInfo.h"
+
 //Qt includes
 #include <QHash>
+
 
 //Other includes
 #include <vector>
@@ -13,11 +18,16 @@ namespace spikestream {
 	class STDPFunctions {
 
 		public:
+			static void cleanup();
 			static QString getFunctionDescription(unsigned functionID);
 			static QList<unsigned> getFunctionIDs();
-			static float* getPre(unsigned functionID);
+			static QHash<QString, double> getParameters(unsigned functionID);
+			static void setParameters(unsigned functionID, QHash<QString, double>& newParameterMap);
+			static QHash<QString, double> getDefaultParameters(unsigned functionID);
+			static QList<ParameterInfo> getParameterInfoList(unsigned functionID);
+			static float* getPreArray(unsigned functionID);
 			static int getPreLength(unsigned functionID);
-			static float* getPost(unsigned functionID);
+			static float* getPostArray(unsigned functionID);
 			static int getPostLength(unsigned functionID);
 			static float getMinWeight(unsigned functionID);
 			static float getMaxWeight(unsigned functionID);
@@ -25,33 +35,17 @@ namespace spikestream {
 		private:
 			//=====================  VARIABLES  ====================
 			/*! Type ID for the standard STDP function.
-				NOTE: These should start at zero and increase continuously. */
+				NOTE: These should start at 0 and increase continuously. */
 			static unsigned STANDARD_STDP;
 
-			/*! Map linking IDs with pre arrays */
-			static QHash<unsigned, float* > preArrayMap;
+			/*! Map containing instances of classes implementing each of the functions */
+			static QHash<unsigned, AbstractSTDPFunction*> functionMap;
 
-			/*! Map linking IDs with the length of the pre arrays. */
-			static QHash<unsigned, int> preArrayLengthMap;
-
-			/*! Map linking IDs with post arrays */
-			static QHash<unsigned, float* > postArrayMap;
-
-			/*! Map linking IDs with the lenghts of the post arrays. */
-			static QHash<unsigned, int> postArrayLengthMap;
-
-			/*! Map linking IDs with min weights */
-			static QHash<unsigned, float> minWeightMap;
-
-			/*! Map linking IDs with max weights */
-			static QHash<unsigned, float> maxWeightMap;
-
-			/*! Records if the functions have been built. This is done on the first request. */
+			/*! Records when function map has been filled */
 			static bool initialized;
 
-
-			//===================  METHODS  =====================
-			static void buildStandardStdpFunction();
+			//=====================  METHODS  ======================
+			static void checkFunctionID(unsigned functionID);
 			static void checkInitialization();
 			static void initialize();
 	};

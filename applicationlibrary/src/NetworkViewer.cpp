@@ -25,11 +25,11 @@ using namespace std;
 #define gltRadToDeg(x)	((x)*GLT_INV_PI_DIV_180)
 
 /* Light and material Data. */
-GLfloat fLightPos[4]   = { -100.0f, 100.0f, 50.0f, 1.0f };  // Point source
 GLfloat fNoLight[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 GLfloat fLowLight[] = { 0.25f, 0.25f, 0.25f, 1.0f };
-GLfloat fogColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
+GLfloat fDiffuseLight[] = { 0.7f, 0.7f, 0.7f, 1.0f };
 GLfloat fBrightLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+GLfloat specref[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 
 /*! Constructor */
@@ -466,25 +466,65 @@ void NetworkViewer::drawAxes(void){
 	//Draw markings on X axis
 	for(float i=defaultClippingVol.x1 - extraLength; i < defaultClippingVol.x2 + extraLength; i += scaleMarkSpacing){
 		glBegin(GL_POINTS);
-		glVertex3f(i, 0.0f, 0.0f);
+			glVertex3f(i, 0.0f, 0.0f);
 		glEnd();
 	}
 
 	//Draw markings on Y axis
 	for(float i=defaultClippingVol.y1 - extraLength; i < defaultClippingVol.y2 + extraLength; i += scaleMarkSpacing){
 		glBegin(GL_POINTS);
-		glVertex3f(0.0f, i, 0.0f);
+			glVertex3f(0.0f, i, 0.0f);
 		glEnd();
 	}
 
 	//Draw markings on Z axis
 	for(float i=defaultClippingVol.z1 - extraLength; i < defaultClippingVol.z2 + extraLength; i += scaleMarkSpacing){
 		glBegin(GL_POINTS);
-		glVertex3f(0.0f, 0.0f, i);
+			glVertex3f(0.0f, 0.0f, i);
 		glEnd();
 	}
 
 	//Reset line width to original value
+	glPopAttrib();
+
+//glColor3f(0.5f, 0.5f, 1.0f);
+//glPushMatrix();
+//glTranslatef(6.0f, 6.0f, 0.0f);//Translate to sphere position
+//	gluCylinder	(	gluSphereObj,0.0f, 2.0f, 5.0f, 8, 8);
+//	glPopMatrix();
+
+	drawWeightedConnection();
+}
+
+
+void NetworkViewer::drawWeightedConnection(float x1, float y1, float z1, float x2, float y2, float z2){
+	float size = 2.0f;
+	float length = sqrtf(exp2(x2-x1) + exp2(y2-y1) + exp2(z2-z1));
+	float theta1 = asin( (z2-z1) / length);//Check for negative
+	float theta2 = atan(size / (length/2) );
+
+
+	//Cone with 4 sides
+	glPushAttrib(GL_CW);
+	glFrontFace(GL_CCW);
+	glBegin(GL_TRIANGLE_FAN);
+		glVertex3f(6.0f, 6.0f, 0.0f);//Point 1
+		glVertex3f(4.0f, 4.0f, 5.0f);
+		glVertex3f(4.0f, 8.0f, 5.0f);
+		glVertex3f(8.0f, 8.0f, 5.0f);
+		glVertex3f(8.0f, 4.0f, 5.0f);
+		glVertex3f(4.0f, 4.0f, 5.0f);
+	glEnd();
+	glFrontFace(GL_CW);
+	glBegin(GL_TRIANGLE_FAN);
+		glVertex3f(6.0f, 6.0f, 10.0f);//Point 2
+		glVertex3f(4.0f, 4.0f, 5.0f);
+		glVertex3f(4.0f, 8.0f, 5.0f);
+		glVertex3f(8.0f, 8.0f, 5.0f);
+		glVertex3f(8.0f, 4.0f, 5.0f);
+		glVertex3f(4.0f, 4.0f, 5.0f);
+	glEnd();
+	glFrontFace(GL_CCW);
 	glPopAttrib();
 }
 
@@ -790,7 +830,9 @@ void NetworkViewer::initialiseFullRender(){
 	glEnable(GL_DEPTH_TEST);
 
 	// Setup light parameters
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, fNoLight);
+	GLfloat fLightPos2[4]   = { defaultClippingVol.x1 + 0.5f * (defaultClippingVol.x2 - defaultClippingVol.x1), defaultClippingVol.y1, defaultClippingVol.z2, 1.0f };
+	glLightfv(GL_LIGHT0, GL_POSITION, fLightPos2);
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, fLowLight);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, fLowLight);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, fBrightLight);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, fBrightLight);
@@ -800,6 +842,7 @@ void NetworkViewer::initialiseFullRender(){
 	// Mostly use material tracking
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, specref);
 	glMateriali(GL_FRONT, GL_SHININESS, 128);
 
 	//Transparency settings
