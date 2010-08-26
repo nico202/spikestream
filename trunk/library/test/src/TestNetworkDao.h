@@ -51,7 +51,7 @@ class TestNetworkDao : public TestDao {
 		void testIsWeightlessNeuron();
 		void testSetNeuronParameters();
 		void testSetSynapseParameters();
-		void testSetTempWeight();
+		void testSetWeight();
 
 	private:
 		bool bitsEqual(const unsigned char* byteArr, const QString pattern, int output);

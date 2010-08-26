@@ -64,7 +64,7 @@ void TestNetworkDaoThread::testAddConnectionGroup(){
 
 		//Add connections
 		for(int i=0; i<4; ++i){
-			Connection* newConn = new Connection(fromNeuronIDs[i], toNeuronIDs[i],  30,  0.1,  0.4);
+			Connection* newConn = new Connection(fromNeuronIDs[i], toNeuronIDs[i],  30,  0.1);
 			connGrp.addConnection(newConn);
 		}
 

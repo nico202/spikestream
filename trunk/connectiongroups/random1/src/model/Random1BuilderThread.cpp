@@ -45,8 +45,6 @@ void Random1BuilderThread::run(){
 		Network* currentNetwork = Globals::getNetwork();
 		threadNetworkDao = new NetworkDao(Globals::getNetworkDao()->getDBInfo());
 		threadArchiveDao = new ArchiveDao(Globals::getArchiveDao()->getDBInfo());
-		currentNetwork->setNetworkDao(threadNetworkDao);
-		currentNetwork->setArchiveDao(threadArchiveDao);
 
 		//Add the connection group
 		addConnectionGroup();
@@ -60,10 +58,6 @@ void Random1BuilderThread::run(){
 		//Check for errors
 		if(currentNetwork->isError())
 			setError(currentNetwork->getErrorMessage());
-
-		//Reset network and archive daos in network
-		currentNetwork->setNetworkDao(Globals::getNetworkDao());
-		currentNetwork->setArchiveDao(Globals::getArchiveDao());
 
 		//Clean up network and archive dao
 		delete threadNetworkDao;
@@ -125,7 +119,7 @@ void Random1BuilderThread::buildConnectionGroup(){
 					weight = getRandomDouble(minWeightRange2, maxWeightRange2);
 
 				//Add the connection
-				newConnectionGroup->addConnection(new Connection(fromIter.key(), toIter.key(), getRandomUInt(minDelay, maxDelay), weight, 0));
+				newConnectionGroup->addConnection(new Connection(fromIter.key(), toIter.key(), getRandomUInt(minDelay, maxDelay), weight));
 			}
 		}
 

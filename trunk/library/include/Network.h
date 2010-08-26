@@ -17,15 +17,13 @@ using namespace spikestream;
 namespace spikestream {
 
     /*! Class holding information about a neural network in the database.
-		This class is linked to the database to enable lazy loading of connections and neurons.
-		NOTE: This class is not thread safe because of its database dependency.
-		The network dao needs to be set appropriately if using it from a different thread */
+		This class is linked to the database to enable lazy loading of connections and neurons. */
     class Network : public QObject {
 		Q_OBJECT
 
 		public:
-			Network(NetworkDao* networkDao, ArchiveDao* archiveDao, const QString& name, const QString& description);
-			Network(const NetworkInfo& networkInfo, NetworkDao* networkDao, ArchiveDao* archiveDao);
+			Network(const QString& name, const QString& description, const DBInfo& networkDBInfo, const DBInfo& archiveDBInfo);
+			Network(const NetworkInfo& networkInfo, const DBInfo& networkDBInfo, const DBInfo& archiveDBInfo);
 			~Network();
 
 			void addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList, bool checkNetworkLocked=true);
@@ -46,6 +44,7 @@ namespace spikestream {
 			ConnectionGroupInfo getConnectionGroupInfo(unsigned int id);
 			QList<ConnectionGroupInfo> getConnectionGroupsInfo(unsigned int synapseTypeID);
 			QList<ConnectionGroupInfo> getConnectionGroupsInfo();
+			QList<Connection*> getConnections(unsigned int connectionMode, unsigned int singleNeuronID, unsigned int toNeuronID);//UNTESTED
 			int getNeuronGroupCount() { return neurGrpMap.size(); }
 			Box getNeuronGroupBoundingBox(unsigned int neurGrpID);
 			QList<unsigned int> getNeuronGroupIDs();
@@ -63,9 +62,7 @@ namespace spikestream {
 			bool isLocked();
 			void load();
 			bool neuronGroupIsLoaded(unsigned int neurGrpID);
-			void setArchiveDao(ArchiveDao* archDao) { this->archiveDao = archDao; }
 			void setError(const QString& errorMsg);
-			void setNetworkDao(NetworkDao* netDao) { this->networkDao = netDao; }
 			int size();
 
 		signals:
@@ -80,18 +77,14 @@ namespace spikestream {
 			/*! Information about the network */
 			NetworkInfo info;
 
-			/*! Access to the database layer. Stored here to enable dynamic loading
-				of neurons and connections on request.
-				NOTE: This will have to be changed if the network is passed between threads. */
-			NetworkDao* networkDao;
-
-			/*! Access to the database layer. Stored here to enable network to prevent modifications
-				if it is associated with archives.
-				NOTE: This will have to be changed if the network is passed between threads. */
-			ArchiveDao* archiveDao;
-
 			/*! Hash map of the neuron groups in the network */
 			QHash<unsigned int, NeuronGroup*> neurGrpMap;
+
+			/*! Holds information about the network database */
+			DBInfo networkDBInfo;
+
+			/*! Holds information about the archive database */
+			DBInfo archiveDBInfo;
 
 			/*! Hash map of the connection groups in the network */
 			QHash<unsigned int, ConnectionGroup*> connGrpMap;
@@ -101,7 +94,7 @@ namespace spikestream {
 			QHash<unsigned int, RGBColor*> neuronColorMap;
 
 			/*! Records whether this class is carrying out operations with a separate thread. */
-			bool threadRunning;
+			bool threadRunning;	
 
 			/*! NetworkDaoThread to run in the background and handle neuron loading. */
 			NetworkDaoThread* neuronNetworkDaoThread;
@@ -141,12 +134,13 @@ namespace spikestream {
 			static const int LOAD_CONNECTIONS_TASK = 6;
 
 
-
 			//============================  METHODS  ==============================
-			void checkNeuronGroupID(unsigned int id);
 			void checkConnectionGroupID(unsigned int id);
+			void checkNeuronGroupID(unsigned int id);
+			void checkThread();
 			void deleteConnectionGroups();
 			void deleteNeuronGroups();
+			bool filterConnection(Connection* connection, unsigned connectionMode);
 			void loadConnectionGroupsInfo();
 			void loadNeuronGroupsInfo();
 

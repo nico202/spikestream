@@ -1132,22 +1132,22 @@ void TestNetworkDao::testSetSynapseParameters(){
 }
 
 
-void TestNetworkDao::testSetTempWeight(){
+void TestNetworkDao::testSetWeight(){
 	//Add test network
 	addTestNetwork1();
 
 	//Check the temp weight of a neuron
-	QSqlQuery query = getQuery("SELECT TempWeight FROM Connections WHERE FromNeuronID = " + QString::number(testNeurIDList[4]) + " AND ToNeuronID=" + QString::number(testNeurIDList[3]));
+	QSqlQuery query = getQuery("SELECT Weight FROM Connections WHERE ConnectionID = " + QString::number(testConnIDList[3]));
 	executeQuery(query);
 	query.next();
-	QCOMPARE(Util::getDouble(query.value(0).toString()), 0.0);
+	QCOMPARE(Util::getDouble(query.value(0).toString()), 0.4);
 
 	//Execute test method
 	NetworkDao networkDao(dbInfo);
-	networkDao.setTempWeight(testNeurIDList[4],testNeurIDList[3], 2.132);
+	networkDao.setWeight(testConnIDList[3], 2.132);
 
 	//Check weight has been updated
-	query = getQuery("SELECT TempWeight FROM Connections WHERE FromNeuronID = " + QString::number(testNeurIDList[4]) + " AND ToNeuronID=" + QString::number(testNeurIDList[3]));
+	query = getQuery("SELECT Weight FROM Connections WHERE ConnectionID = " + QString::number(testConnIDList[3]));
 	executeQuery(query);
 	query.next();
 	QCOMPARE(Util::getDouble(query.value(0).toString()), 2.132);

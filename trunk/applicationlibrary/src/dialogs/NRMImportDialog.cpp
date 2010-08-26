@@ -149,7 +149,7 @@ void NRMImportDialog::addNetwork(){
 		//FIXME: THIS IS MESSY: MOVE INTO DATA IMPORTER
 
 		//Create network
-		newNetwork = new Network(Globals::getNetworkDao(), Globals::getArchiveDao(), networkName->text(), networkDescription->text());
+		newNetwork = new Network(networkName->text(), networkDescription->text(), Globals::getNetworkDao()->getDBInfo(), Globals::getArchiveDao()->getDBInfo());
 		connect(newNetwork, SIGNAL(taskFinished()), this, SLOT(threadFinished()));
 		showBusyPage("Adding neurons to database...");
 

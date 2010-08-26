@@ -9,17 +9,17 @@ using namespace spikestream;
 using namespace std;
 
 /*! Constructor that creates a new network and adds it to the database */
-Network::Network(NetworkDao* networkDao, ArchiveDao* archiveDao, const QString& name, const QString& description){
+Network::Network(const QString& name, const QString& description, const DBInfo& networkDBInfo, const DBInfo& archiveDBInfo){
     //Store information
-    this->networkDao = networkDao;
-    this->archiveDao = archiveDao;
     this->info.setName(name);
     this->info.setDescription(description);
+	this->networkDBInfo = networkDBInfo;
+	this->archiveDBInfo = archiveDBInfo;
 
     //Create network dao threads for heavy operations
-    neuronNetworkDaoThread = new NetworkDaoThread(networkDao->getDBInfo());
+	neuronNetworkDaoThread = new NetworkDaoThread(networkDBInfo);
     connect (neuronNetworkDaoThread, SIGNAL(finished()), this, SLOT(neuronThreadFinished()));
-    connectionNetworkDaoThread = new NetworkDaoThread(networkDao->getDBInfo());
+	connectionNetworkDaoThread = new NetworkDaoThread(networkDBInfo);
     connect (connectionNetworkDaoThread, SIGNAL(finished()), this, SLOT(connectionThreadFinished()));
 
     //Initialize variables
@@ -28,16 +28,17 @@ Network::Network(NetworkDao* networkDao, ArchiveDao* archiveDao, const QString& 
     clearError();
 
     //Create new network in database. ID will be stored in the network info
-    networkDao->addNetwork(info);
+	NetworkDao networkDao(networkDBInfo);
+	networkDao.addNetwork(info);
 }
 
 
 /*! Constructor when using an existing network */
-Network::Network(const NetworkInfo& networkInfo, NetworkDao* networkDao, ArchiveDao* archiveDao){
+Network::Network(const NetworkInfo& networkInfo, const DBInfo& networkDBInfo, const DBInfo& archiveDBInfo){
     //Store information
     this->info = networkInfo;
-    this->networkDao = networkDao;
-    this->archiveDao = archiveDao;
+	this->networkDBInfo = networkDBInfo;
+	this->archiveDBInfo = archiveDBInfo;
 
     //Check that network ID is valid
     if(info.getID() == INVALID_NETWORK_ID){
@@ -45,9 +46,9 @@ Network::Network(const NetworkInfo& networkInfo, NetworkDao* networkDao, Archive
     }
 
     //Create network dao threads for heavy operations
-    neuronNetworkDaoThread = new NetworkDaoThread(networkDao->getDBInfo());
+	neuronNetworkDaoThread = new NetworkDaoThread(networkDBInfo);
     connect (neuronNetworkDaoThread, SIGNAL(finished()), this, SLOT(neuronThreadFinished()));
-    connectionNetworkDaoThread = new NetworkDaoThread(networkDao->getDBInfo());
+	connectionNetworkDaoThread = new NetworkDaoThread(networkDBInfo);
     connect (connectionNetworkDaoThread, SIGNAL(finished()), this, SLOT(connectionThreadFinished()));
 
     //Initialize variables
@@ -260,6 +261,82 @@ QList<ConnectionGroupInfo> Network::getConnectionGroupsInfo(unsigned int synapse
 }
 
 
+/*! Returns a list of pointers to connections that are appropriate for the connection mode */
+QList<Connection*> Network::getConnections(unsigned connectionMode, unsigned singleNeuronID, unsigned toNeuronID){
+	QList<Connection*> conList;//List of connections to return
+	QList<ConnectionGroup*> conGrpList;//List of connection groups that contain the single neuron
+
+	//Return empty list if connection mode is disabled
+	if( !(connectionMode & CONNECTION_MODE_ENABLED) )
+		return conList;
+
+	//Get connection groups that include the single neuron ID
+	for(QHash<unsigned int, ConnectionGroup*>::iterator iter = connGrpMap.begin(); iter != connGrpMap.end(); ++iter){
+		if(iter.value()->contains(singleNeuronID))
+			conGrpList.append(iter.value());
+	}
+
+	//Showing connections FROM singleNeuronID TO toNeuronID
+	if(connectionMode & SHOW_BETWEEN_CONNECTIONS){
+		foreach(ConnectionGroup* tmpConGrp, conGrpList){//Work through all connection groups including this neuron
+			QList<Connection*> tmpConList = tmpConGrp->getFromConnections(singleNeuronID);
+			for(int i=0; i<tmpConList.size(); ++i){
+				Connection* tmpCon = tmpConList.at(i);
+				if(!filterConnection(tmpCon, connectionMode)){
+					if(tmpCon->toNeuronID == toNeuronID)
+						conList.append(tmpCon);
+				}
+			}
+		}
+		//Return list of between connections
+		return conList;
+	}
+
+	//Filter by FROM or TO in single neuron connection mode
+	if(connectionMode & SHOW_FROM_CONNECTIONS){
+		//Collect connections FROM the single neuron ID
+		foreach(ConnectionGroup* tmpConGrp, conGrpList){//Work through all connection groups including this neuron
+			QList<Connection*> tmpConList = tmpConGrp->getFromConnections(singleNeuronID);
+			for(int i=0; i<tmpConList.size(); ++i){
+				Connection* tmpCon = tmpConList.at(i);
+				if(!filterConnection(tmpCon, connectionMode))
+					conList.append(tmpCon);
+			}
+		}
+	}
+	else if(connectionMode & SHOW_TO_CONNECTIONS){
+		//Collect connections TO the single neuron ID
+		foreach(ConnectionGroup* tmpConGrp, conGrpList){//Work through all connection groups including this neuron
+			QList<Connection*> tmpConList = tmpConGrp->getToConnections(singleNeuronID);
+			for(int i=0; i<tmpConList.size(); ++i){
+				Connection* tmpCon = tmpConList.at(i);
+				if(!filterConnection(tmpCon, connectionMode))
+					conList.append(tmpCon);
+			}
+		}
+	}
+	else {//Collect connections TO and FROM the single neuron ID
+		foreach(ConnectionGroup* tmpConGrp, conGrpList){//Work through all connection groups including this neuron
+			QList<Connection*> tmpConList = tmpConGrp->getFromConnections(singleNeuronID);
+			for(int i=0; i<tmpConList.size(); ++i){
+				Connection* tmpCon = tmpConList.at(i);
+				if(!filterConnection(tmpCon, connectionMode))
+					conList.append(tmpCon);
+			}
+			tmpConList = tmpConGrp->getToConnections(singleNeuronID);
+			for(int i=0; i<tmpConList.size(); ++i){
+				Connection* tmpCon = tmpConList.at(i);
+				if(!filterConnection(tmpCon, connectionMode))
+					conList.append(tmpCon);
+			}
+		}
+	}
+
+	//Return the list
+	return conList;
+}
+
+
 /*! Returns a list of the neuron groups in the network. */
 QList<NeuronGroup*> Network::getNeuronGroups(){
 	QList<NeuronGroup*> tmpList;
@@ -329,6 +406,8 @@ QList<unsigned int> Network::getConnectionGroupIDs(){
 
 /*! Returns a box that encloses the network */
 Box Network::getBoundingBox(){
+	NetworkDao networkDao(networkDBInfo);
+
     /* Neurons are not directly linked with a neuron id, so need to work through
        each neuron group and create a box that includes all the other boxes. */
     Box networkBox;
@@ -336,11 +415,11 @@ Box Network::getBoundingBox(){
     QList<NeuronGroup*> tmpNeurGrpList = neurGrpMap.values();
     for(QList<NeuronGroup*>::iterator iter = tmpNeurGrpList.begin(); iter != tmpNeurGrpList.end(); ++iter){
 		if(firstTime){//Take box enclosing first neuron group as a starting point
-			networkBox = networkDao->getNeuronGroupBoundingBox((*iter)->getID());
+			networkBox = networkDao.getNeuronGroupBoundingBox((*iter)->getID());
 			firstTime = false;
 		}
 		else{//Expand box to include subsequent neuron groups
-			Box neurGrpBox = networkDao->getNeuronGroupBoundingBox((*iter)->getID());
+			Box neurGrpBox = networkDao.getNeuronGroupBoundingBox((*iter)->getID());
 			if(neurGrpBox.x1 < networkBox.x1)
 				networkBox.x1 = neurGrpBox.x1;
 			if(neurGrpBox.y1 < networkBox.y1)
@@ -362,7 +441,8 @@ Box Network::getBoundingBox(){
 
 /*! Returns a box that encloses the specified neuron group */
 Box Network::getNeuronGroupBoundingBox(unsigned int neurGrpID){
-    Box box = networkDao->getNeuronGroupBoundingBox(neurGrpID);
+	NetworkDao networkDao(networkDBInfo);
+	Box box = networkDao.getNeuronGroupBoundingBox(neurGrpID);
     return box;
 }
 
@@ -441,7 +521,8 @@ int Network::getTotalNumberOfSteps(){
 
 /*! Returns true if the network is not editable because it is associated with archives */
 bool Network::isLocked(){
-    return archiveDao->networkIsLocked(getID());
+	ArchiveDao archiveDao(archiveDBInfo);
+	return archiveDao.networkIsLocked(getID());
 }
 
 
@@ -565,10 +646,16 @@ void Network::neuronThreadFinished(){
 }
 
 
-/*! Returns the size of the network.
-	An exception is thrown if not all neuron groups have been loaded. */
+/*! Returns the number of neurons in the network.
+	Throws exception if this is called when network is not loaded. */
 int Network::size(){
-	return networkDao->getNeuronCount(info.getID());
+	if(this->isBusy())
+		throw SpikeStreamException("Size of network cannot be determined while network is busy.");
+
+	int neurCnt = 0;
+	for(QHash<unsigned int, NeuronGroup*>::iterator iter = neurGrpMap.begin(); iter != neurGrpMap.end(); ++iter)
+		neurCnt += iter.value()->size();
+	return neurCnt;
 }
 
 
@@ -592,14 +679,30 @@ void Network::checkNeuronGroupID(unsigned int id){
 }
 
 
-/*! Uses network dao to obtain list of connection groups and load them into hash map.
-    Individual connections are loaded separately to enable lazy loading. */
+/*! Applies connection mode filters to the specified connection and returns
+	true if it should not be displayed. */
+bool Network::filterConnection(Connection *connection, unsigned connectionMode){
+	//Filter by weight
+	if(connectionMode & SHOW_POSITIVE_CONNECTIONS){
+		if(connection->weight < 0 || connection->tempWeight < 0)
+			return true;
+	}
+	else if(connectionMode & SHOW_NEGATIVE_CONNECTIONS){
+		if(connection->weight >= 0 || connection->tempWeight >= 0)
+			return true;
+	}
+	return false;
+}
+
+
+/*! Uses network dao to obtain list of connection groups and load them into hash map. */
 void Network::loadConnectionGroupsInfo(){
     //Clear hash map
     deleteConnectionGroups();
 
     //Get list of neuron groups from database
-    QList<ConnectionGroupInfo> connGrpInfoList = networkDao->getConnectionGroupsInfo(getID());
+	NetworkDao networkDao(networkDBInfo);
+	QList<ConnectionGroupInfo> connGrpInfoList = networkDao.getConnectionGroupsInfo(getID());
 
     //Copy list into hash map for faster access
     for(int i=0; i<connGrpInfoList.size(); ++i)
@@ -614,7 +717,8 @@ void Network::loadNeuronGroupsInfo(){
     deleteNeuronGroups();
 
     //Get list of neuron groups from database
-    QList<NeuronGroupInfo> neurGrpInfoList = networkDao->getNeuronGroupsInfo(getID());
+	NetworkDao networkDao(networkDBInfo);
+	QList<NeuronGroupInfo> neurGrpInfoList = networkDao.getNeuronGroupsInfo(getID());
 
     //Copy list into hash map for faster access
     for(int i=0; i<neurGrpInfoList.size(); ++i)

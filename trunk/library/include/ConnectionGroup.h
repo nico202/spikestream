@@ -16,10 +16,10 @@ namespace spikestream {
 		public:
 			ConnectionGroup(const ConnectionGroupInfo& connGrpInfo);
 			~ConnectionGroup();
-			void clearConnections();
-
 			Connection* addConnection(Connection* newConn);
 			ConnectionList::const_iterator begin();
+			void clearConnections();
+			bool contains(unsigned neuronID);
 			QHash<unsigned int, ConnectionList >::const_iterator fromMapBegin() { return fromConnectionMap.begin(); }
 			QHash<unsigned int, ConnectionList >::const_iterator fromMapEnd() { return fromConnectionMap.end(); }
 			ConnectionList::const_iterator end();
@@ -36,7 +36,6 @@ namespace spikestream {
 			void setID(unsigned int id) { info.setID(id); }
 			void setLoaded(bool loaded) { this->loaded = loaded; }
 			void setParameters(QHash<QString, double>& paramMap) { this->parameterMap = paramMap; }
-
 			int size() { return connectionList.size(); }
 
 		private:

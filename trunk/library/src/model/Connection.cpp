@@ -7,26 +7,26 @@ using namespace std;
 
 
 /*! Constructor */
-Connection::Connection (unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight, float tempWeight){
+Connection::Connection (unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight){
     id = 0;
     connectionGroupID = 0;
     this->fromNeuronID = fromNeuronID;
     this->toNeuronID = toNeuronID;
     this->delay = delay;
     this->weight = weight;
-    this->tempWeight = tempWeight;
+	this->tempWeight = 0.0f;
 }
 
 
 /*! Constructor */
-Connection::Connection (unsigned int id, unsigned int conGrpID, unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight, float tempWeight){
+Connection::Connection (unsigned int id, unsigned int conGrpID, unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight){
     this->id = id;
     this->connectionGroupID = conGrpID;
     this->fromNeuronID = fromNeuronID;
     this->toNeuronID = toNeuronID;
     this->delay = delay;
     this->weight = weight;
-    this->tempWeight = tempWeight;
+	this->tempWeight = 0.0f;
 }
 
 

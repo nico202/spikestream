@@ -7,8 +7,8 @@ namespace spikestream {
 		in the Connections table of the SpikeStreamNetwork database. */
     class Connection{
 		public:
-			Connection (unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight, float tempWeight);
-			Connection (unsigned int id, unsigned int conGrpID, unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight, float tempWeight);
+			Connection (unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight);
+			Connection (unsigned int id, unsigned int conGrpID, unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight);
 			Connection(const Connection& conn);
 			Connection& operator=(const Connection& rhs);
 			void print();
@@ -21,13 +21,28 @@ namespace spikestream {
 			unsigned int getID() { return id; }
 			unsigned int getConnectionGroupID() { return connectionGroupID; }
 			void setID(unsigned int id){ this->id = id; }
+			void setTempWeight(float newTempWeight) { this->tempWeight = newTempWeight; }
 
+			//=======================  VARIABLES  ========================
+			/*! ID of the connection in the database */
 			unsigned int id;
+
+			/*! ID of the connection group that this connection is part of */
 			unsigned int connectionGroupID;
+
+			/*! Connection is from neuron with this ID. */
 			unsigned int fromNeuronID;
+
+			/*! Connection is to neuron with this ID. */
 			unsigned int toNeuronID;
+
+			/*! Delay of connection */
 			float delay;
+
+			/*! Weight of connection */
 			float weight;
+
+			/*! Temporary weight of connection */
 			float tempWeight;
 
     };

@@ -17,6 +17,9 @@ AbstractDao::AbstractDao(const DBInfo& dbInfo){
     //Default name of database  - this changes when it is connected.
     dbName = "";
 
+	//Initialize dbThread to NULL
+	dbThread = NULL;
+
     //Connect to the database
     connectToDatabase();
 }
@@ -42,6 +45,13 @@ AbstractDao::~AbstractDao(){
 /*! Returns a copy of the information about the database */
 DBInfo AbstractDao::getDBInfo(){
     return dbInfo;
+}
+
+
+/*! Returns the thread that this class was created in.
+	Methods in this class must not be called from a different thread. */
+QThread* AbstractDao::getThread(){
+	return dbThread;
 }
 
 
