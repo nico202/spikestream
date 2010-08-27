@@ -22,6 +22,7 @@ namespace spikestream {
 			unsigned int getConnectionGroupID() { return connectionGroupID; }
 			void setID(unsigned int id){ this->id = id; }
 			void setTempWeight(float newTempWeight) { this->tempWeight = newTempWeight; }
+			void setWeight(float newWeight) { this->weight = newWeight; }
 
 			//=======================  VARIABLES  ========================
 			/*! ID of the connection in the database */

@@ -42,10 +42,8 @@ namespace spikestream {
 			void setNemoParameters();
 			void setSynapseParameters();
 			void updateTimeStep(unsigned int timeStep, const QList<unsigned>& neuronIDList);
-			void saveCurrentWeights();
-			void saveTempWeights();
-			void setTrackCurrentWeights(bool enable);
-			void setTrackTempWeights(bool enable);
+			void saveWeights();
+			void setTrackWeights(bool enable);
 			void simulationRateChanged(int comboIndex);
 			void simulationStopped();
 			void startSimulation();

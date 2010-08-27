@@ -44,7 +44,7 @@ namespace spikestream {
 			ConnectionGroupInfo getConnectionGroupInfo(unsigned int id);
 			QList<ConnectionGroupInfo> getConnectionGroupsInfo(unsigned int synapseTypeID);
 			QList<ConnectionGroupInfo> getConnectionGroupsInfo();
-			QList<Connection*> getConnections(unsigned int connectionMode, unsigned int singleNeuronID, unsigned int toNeuronID);//UNTESTED
+			QList<Connection*> getConnections(unsigned int connectionMode, unsigned int singleNeuronID, unsigned int toNeuronID);
 			int getNeuronGroupCount() { return neurGrpMap.size(); }
 			Box getNeuronGroupBoundingBox(unsigned int neurGrpID);
 			QList<unsigned int> getNeuronGroupIDs();
@@ -59,8 +59,9 @@ namespace spikestream {
 			int getTotalNumberOfSteps();
 			bool isBusy();
 			bool isError() { return error; }
-			bool isLocked();
+			bool hasArchives();
 			void load();
+			void loadWait();
 			bool neuronGroupIsLoaded(unsigned int neurGrpID);
 			void setError(const QString& errorMsg);
 			int size();

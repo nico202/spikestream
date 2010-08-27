@@ -293,9 +293,10 @@ void NetworkDaoThread::addConnectionGroups(){
 
 		//Add connections to database
 		int conCntr = 0, offset = 0, conAddedCntr = 0;
+		QHash<unsigned, Connection*>* newConMap = new QHash<unsigned, Connection*>();
 		QList<Connection*> tmpConList;
-		ConnectionList::const_iterator endConGrp = connectionGroup->end();
-		for(ConnectionList::const_iterator iter = connectionGroup->begin(); iter != endConGrp; ++iter){
+		QList<Connection*>::const_iterator endConGrp = connectionGroup->end();
+		for(QList<Connection*>::const_iterator iter = connectionGroup->begin(); iter != endConGrp; ++iter){
 			offset = 5 * (conCntr % numConBuffers);
 
 			//Bind values to query
@@ -320,6 +321,7 @@ void NetworkDaoThread::addConnectionGroups(){
 				//Set connection ID in connection groups
 				for(int i=0; i<tmpConList.size(); ++i){
 					tmpConList.at(i)->setID(lastInsertID + i);
+					(*newConMap)[lastInsertID + i] = tmpConList.at(i);
 				}
 
 				//Count number of connections that have been added
@@ -355,6 +357,7 @@ void NetworkDaoThread::addConnectionGroups(){
 				if(lastInsertID < START_CONNECTION_ID)
 					throw SpikeStreamException("Insert ID for Connection is invalid.");
 				(*iter)->setID(lastInsertID);
+				(*newConMap)[lastInsertID] = *iter;
 
 				//Count number of connections that have been added
 				++conAddedCntr;
@@ -368,6 +371,10 @@ void NetworkDaoThread::addConnectionGroups(){
 		#ifdef TIME_PERFORMANCE
 			timer.printTime("Number of buffers: " + QString::number(numConBuffers) + ". Number of connections remaining: " + QString::number(tmpConList.size()) + ". Adding " + QString::number(conCntr) + " connections");
 		#endif//TIME_PERFORMANCE
+
+
+		//Add the new map to the neuron group. This should also clean up the old map
+		connectionGroup->setConnectionMap(newConMap);
 
 		//ConnectionGroup should now match information in database
 		connectionGroup->setLoaded(true);

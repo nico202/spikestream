@@ -27,6 +27,10 @@ maximize_gui = true
 sphere_radius = 0.1
 sphere_quality = 10
 connection_loading_threshold =  500000
+connection_quality = 8
+minimum_connection_radius = 0.01
+weight_radius_factor = 0.25
+
 
 # DATABASE OPTIMIZATION PARAMETERS
 number_insert_connection_buffers = 100

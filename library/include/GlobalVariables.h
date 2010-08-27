@@ -81,20 +81,6 @@
 #define RENDER_CURRENT_WEIGHTS 4
 
 
-//Weight save flags
-/*! Save current weight for one time step. */
-#define SAVE_CURRENT_WEIGHTS 1
-
-/*! Save temp weight for one time step. */
-#define SAVE_TEMP_WEIGHTS 2
-
-/*! Save current weight on every time step */
-#define TRACK_CURRENT_WEIGHTS 4
-
-/*! Save temp weight on every time step */
-#define TRACK_TEMP_WEIGHTS 8
-
-
 //Heat colour map colours
 /*! Heat map colour 0 */
 #define HEAT_COLOR_0 0, 0.5, 0

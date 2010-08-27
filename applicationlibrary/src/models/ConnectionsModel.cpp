@@ -108,18 +108,19 @@ int ConnectionsModel::rowCount(const QModelIndex&) const{
 
 /*! Instructs viewers to reload model when network display has changed */
 void ConnectionsModel::networkDisplayChanged(){
-    //Empty connections list
-    clearConnectionsList();
+	//Empty connections list
+	//clearConnectionsList();
+	connectionsList.clear();
 
-    //Fill connections list if appropriate
-    NetworkDisplay* netDisplay = Globals::getNetworkDisplay();
-    unsigned int connectionMode = netDisplay->getConnectionMode();
-    if(connectionMode & CONNECTION_MODE_ENABLED){
+	//Fill connections list if appropriate
+	NetworkDisplay* netDisplay = Globals::getNetworkDisplay();
+	unsigned int connectionMode = netDisplay->getConnectionMode();
+	if(connectionMode & CONNECTION_MODE_ENABLED){
 		unsigned int singleNeuronID = netDisplay->getSingleNeuronID();
 		unsigned int toNeuronID = netDisplay->getToNeuronID();
 		connectionsList = Globals::getNetwork()->getConnections(connectionMode, singleNeuronID, toNeuronID);
-    }
-    reset();
+	}
+	reset();
 }
 
 

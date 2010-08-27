@@ -14,7 +14,7 @@ Connection::Connection (unsigned int fromNeuronID, unsigned int toNeuronID, floa
     this->toNeuronID = toNeuronID;
     this->delay = delay;
     this->weight = weight;
-	this->tempWeight = 0.0f;
+	this->tempWeight = weight;
 }
 
 
@@ -26,7 +26,7 @@ Connection::Connection (unsigned int id, unsigned int conGrpID, unsigned int fro
     this->toNeuronID = toNeuronID;
     this->delay = delay;
     this->weight = weight;
-	this->tempWeight = 0.0f;
+	this->tempWeight = weight;
 }
 
 

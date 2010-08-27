@@ -12,12 +12,17 @@ using namespace std;
 ConnectionGroup::ConnectionGroup(const ConnectionGroupInfo& connGrpInfo){
     this->info = connGrpInfo;
     loaded = false;
+	connectionMap = new QHash<unsigned, Connection*>();
 }
 
 
 /*! Destructor */
 ConnectionGroup::~ConnectionGroup(){
-    clearConnections();
+	//Deletes connection map and all its dynamically allocated objects
+	if(connectionMap != NULL){
+		clearConnections();
+		delete connectionMap;
+	}
 }
 
 
@@ -27,7 +32,12 @@ ConnectionGroup::~ConnectionGroup(){
 
 /*! Adds a connection to the group */
 Connection* ConnectionGroup::addConnection(Connection* newConn){
-    connectionList.append(newConn);
+	//Check that we do not already have this connection
+	if(connectionMap->contains(newConn->getID()))
+		throw SpikeStreamException("Connection with ID " + QString::number(newConn->getID()) + " already exists in this group.");
+
+	//Store connection
+	(*connectionMap)[newConn->getID()] = newConn;
 
     //Store connection data in easy to access format
     fromConnectionMap[newConn->fromNeuronID].append(newConn);
@@ -39,8 +49,8 @@ Connection* ConnectionGroup::addConnection(Connection* newConn){
 
 
 /*! Returns iterator pointing to beginning of connection group */
-ConnectionList::const_iterator ConnectionGroup::begin(){
-    return connectionList.begin();
+QList<Connection*>::const_iterator ConnectionGroup::begin(){
+	return connectionMap->values().begin();
 }
 
 
@@ -53,18 +63,25 @@ bool ConnectionGroup::contains(unsigned neuronID){
 
 
 /*! Returns iterator pointing to end of connection group */
-ConnectionList::const_iterator ConnectionGroup::end(){
-    return connectionList.end();
+QList<Connection*>::const_iterator ConnectionGroup::end(){
+	return connectionMap->values().end();
+}
+
+
+/*! Returns list of connections.
+	Not an efficient way to access connections - use iterators instead.*/
+QList<Connection*> ConnectionGroup::getConnections(){
+	return connectionMap->values();
 }
 
 
 /*! Removes all connections from this group */
 void ConnectionGroup::clearConnections(){
-    ConnectionList::iterator endConnList = connectionList.end();
-    for(ConnectionList::iterator iter = connectionList.begin(); iter != endConnList; ++iter){
+	QList<Connection*>::const_iterator endConnList = this->end();
+	for(QList<Connection*>::const_iterator iter = this->begin(); iter != endConnList; ++iter){
 		delete *iter;
     }
-    connectionList.clear();
+	connectionMap->clear();
     fromConnectionMap.clear();
     toConnectionMap.clear();
     loaded = false;
@@ -73,9 +90,9 @@ void ConnectionGroup::clearConnections(){
 
 /*! Returns a list of connections from the neuron with this ID.
     Empty list is returned if neuron id cannot be found. */
-ConnectionList ConnectionGroup::getFromConnections(unsigned int neurID){
+QList<Connection*> ConnectionGroup::getFromConnections(unsigned int neurID){
     if(!fromConnectionMap.contains(neurID))
-		return ConnectionList();//Returns an empty connection list without filling map with invalid from and to neurons
+		return QList<Connection*>();//Returns an empty connection list without filling map with invalid from and to neurons
     return fromConnectionMap[neurID];
 }
 
@@ -91,10 +108,33 @@ double ConnectionGroup::getParameter(const QString& paramName){
 
 /*! Returns a list of connections to the neuron with the specified id.
     Exception is thrown if the neuron cannot be found. */
-ConnectionList ConnectionGroup::getToConnections(unsigned int neurID){
+QList<Connection*> ConnectionGroup::getToConnections(unsigned int neurID){
 	if(!toConnectionMap.contains(neurID))
-		return ConnectionList();//Returns an empty connection list without filling map with invalid from and to neurons
+		return QList<Connection*>();//Returns an empty connection list without filling map with invalid from and to neurons
 	return toConnectionMap[neurID];
 }
 
+
+/*! Replaces the connection map with a new neuron map, most likely to fix connection IDs.
+	Connections are not cleaned up because they might be included in the new map. */
+void ConnectionGroup::setConnectionMap(QHash<unsigned, Connection *> *newConnectionMap){
+	delete connectionMap;
+	this->connectionMap = newConnectionMap;
+}
+
+
+/*! Sets the weight of a specific connection */
+void ConnectionGroup::setTempWeight(unsigned connectionID, float tempWeight){
+	if(!connectionMap->contains(connectionID))
+		throw SpikeStreamException("Failed to set temp weight. Connection with ID " + QString::number(connectionID) + " does not exist in this connection group.");
+	(*connectionMap)[connectionID]->setTempWeight(tempWeight);
+}
+
+
+/*! Sets the weight of a specific connection */
+void ConnectionGroup::setWeight(unsigned connectionID, float weight){
+	if(!connectionMap->contains(connectionID))
+		throw SpikeStreamException("Failed to set weight. Connection with ID " + QString::number(connectionID) + " does not exist in this connection group.");
+	(*connectionMap)[connectionID]->setWeight(weight);
+}
 

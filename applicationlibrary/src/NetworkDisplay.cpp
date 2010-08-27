@@ -224,6 +224,9 @@ void NetworkDisplay::loadDisplaySettings(ConfigLoader* configLoader){
 	sphereRadius = Util::getFloat( configLoader->getParameter("sphere_radius") );
 	sphereQuality = Util::getUInt( configLoader->getParameter("sphere_quality") );
 	connectionLoadingThreshold = Util::getInt( configLoader->getParameter("connection_loading_threshold") );
+	minimumConnectionRadius = Util::getFloat( configLoader->getParameter("minimum_connection_radius") );
+	weightRadiusFactor = Util::getFloat( configLoader->getParameter("weight_radius_factor") );
+	connectionQuality = Util::getUInt( configLoader->getParameter("connection_quality") );
 }
 
 

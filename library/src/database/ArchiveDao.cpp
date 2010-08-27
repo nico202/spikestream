@@ -142,7 +142,7 @@ QList<unsigned> ArchiveDao::getFiringNeuronIDs(unsigned int archiveID, unsigned 
 
 /*! Returns true if the network is associated with archives and is
     therefore uneditable */
-bool ArchiveDao::networkIsLocked(unsigned int networkID){
+bool ArchiveDao::networkHasArchives(unsigned int networkID){
     QSqlQuery query = getQuery("SELECT COUNT(*) FROM Archives WHERE NetworkID=" + QString::number(networkID));
     executeQuery(query);
     query.next();
