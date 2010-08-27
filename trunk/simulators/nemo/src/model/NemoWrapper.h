@@ -138,22 +138,22 @@ namespace spikestream {
 				The key is the neuron group ID, the value is the number of neurons to fire. */
 			QHash<unsigned, unsigned> injectNoiseMap;
 
-			/*! Holds flags controlling weight save operation at each time step */
-			unsigned weightSaveMode;
+			/*! Determines whether weights are saved to temp field in network at each time step */
+			unsigned trackWeights;
+
+			/*! List of the IDs of volatile connection groups */
+			QList<unsigned> volatileConGrpList;
 
 			/*! List of presynaptic neuron ids used for saving weights. */
 			QList<unsigned> preSynapticNeuronIDs;
 
 			//======================  METHODS  ========================
 			void checkNemoOutput(nemo_status_t result, const QString& errorMessage);
-			void checkWeightSaveFlag(unsigned flag);
 			void clearError();
-			void clearWeightSaveFlag(unsigned flag);
 			void fillInjectNoiseArray(unsigned*& array, int* arraySize);
 			void loadNemo();
 			void runNemo();
 			void setError(const QString& errorMessage);
-			void setWeightSaveFlag(unsigned flag);
 			void stepNemo();
 			void unloadNemo();
 	};

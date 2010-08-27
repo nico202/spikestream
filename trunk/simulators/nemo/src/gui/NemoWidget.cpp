@@ -86,18 +86,12 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 
 	//Add widgets to save and track the weights
 	QHBoxLayout* saveWeightsBox = new QHBoxLayout();
-	QPushButton* saveTempWeightsButton = new QPushButton("Save Temp Weights");
-	connect(saveTempWeightsButton, SIGNAL(clicked()), this, SLOT(saveTempWeights()));
-	saveWeightsBox->addWidget(saveTempWeightsButton);
-	QCheckBox* trackTempWeightsChkbx = new QCheckBox("Track temp weights");
-	connect(trackTempWeightsChkbx, SIGNAL(clicked(bool)), this, SLOT(setTrackTempWeights(bool)));
-	saveWeightsBox->addWidget(trackTempWeightsChkbx);
-	QPushButton* saveCurrentWeightsButton = new QPushButton("Save Current Weights");
-	connect(saveCurrentWeightsButton, SIGNAL(clicked()), this, SLOT(saveCurrentWeights()));
-	saveWeightsBox->addWidget(saveCurrentWeightsButton);
-	QCheckBox* trackCurrentWeightsChkbx = new QCheckBox("Track temp weights");
-	connect(trackCurrentWeightsChkbx, SIGNAL(clicked(bool)), this, SLOT(setTrackCurrentWeights(bool)));
-	saveWeightsBox->addWidget(trackCurrentWeightsChkbx);
+	QCheckBox* trackWeightsChkbx = new QCheckBox("Track weights");
+	connect(trackWeightsChkbx, SIGNAL(clicked(bool)), this, SLOT(setTrackWeights(bool)));
+	saveWeightsBox->addWidget(trackWeightsChkbx);
+	QPushButton* saveWeightsButton = new QPushButton("Save Weights");
+	connect(saveWeightsButton, SIGNAL(clicked()), this, SLOT(saveWeights()));
+	saveWeightsBox->addWidget(saveWeightsButton);
 	saveWeightsBox->addStretch(5);
 	controlsVBox->addLayout(saveWeightsBox);
 
@@ -317,29 +311,26 @@ void NemoWidget::networkChanged(){
 
 /*! Instructs NeMo wrapper to save weights to
 	weight field in database at the next time step */
-void NemoWidget::saveCurrentWeights(){
-	nemoWrapper->saveCurrentWeights();
-}
+void NemoWidget::saveWeights(){
+	//Check user wants to save weights.
+	int response = QMessageBox::warning(this, "Save Weights?", "Are you sure that you want to save weights.\nThis will overwrite the current weights in the database and cannot be undone.?", QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel);
+	if(response != QMessageBox::Ok)
+		return;
 
+	//Double check that network does not have analyses
+	if(Globals::getAnalysisDao()->networkHasAnalyses(Globals::getNetwork()->getID())){
+		qCritical()<<"Network is linked to analyses - weights cannot be saved until analyses are deleted.";
+		return;
+	}
 
-/*! Instructs NeMo wrapper to save weights to
-	temp weight field in database at the next time step */
-void NemoWidget::saveTempWeights(){
-	nemoWrapper->saveTempWeights();
+	nemoWrapper->saveWeights();
 }
 
 
 /*! Instructs NeMo wrapper to track weights by saving them to
-	 weight field in database at each time step */
-void NemoWidget::setTrackCurrentWeights(bool enable){
-	nemoWrapper->setTrackCurrentWeights(enable);
-}
-
-
-/*! Instructs NeMo wrapper to track weights by saving them to
-	 temp weight field in database at each time step */
-void NemoWidget::setTrackTempWeights(bool enable){
-	nemoWrapper->setTrackTempWeights(enable);
+	 temporary weight field in network at each time step */
+void NemoWidget::setTrackWeights(bool enable){
+	nemoWrapper->setTrackWeights(enable);
 }
 
 

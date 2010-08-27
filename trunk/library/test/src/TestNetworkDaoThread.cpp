@@ -87,7 +87,7 @@ void TestNetworkDaoThread::testAddConnectionGroup(){
 
 		//Check that connections were added correctly
 		QCOMPARE(connGrp.isLoaded(), true);
-		for(ConnectionList::const_iterator iter = connGrp.begin(); iter != connGrp.end(); ++iter){
+		for(QList<Connection*>::const_iterator iter = connGrp.begin(); iter != connGrp.end(); ++iter){
 			query = getQuery("SELECT ConnectionGroupID, FromNeuronID, ToNeuronID, Delay, Weight FROM Connections WHERE ConnectionID = " + QString::number((*iter)->id));
 			executeQuery(query);
 			query.next();

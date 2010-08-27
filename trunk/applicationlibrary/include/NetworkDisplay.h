@@ -27,12 +27,14 @@ namespace spikestream {
 			void clearNeuronColorMap();
 			bool connectionGroupVisible(unsigned int connGrpID);
 			unsigned int getConnectionMode() { return connectionMode; }
+			unsigned getConnectionQuality() { return connectionQuality; }
 			QHash<unsigned int, RGBColor*>& getNeuronColorMap() { return *neuronColorMap; }
 			RGBColor* getDefaultNeuronColor() { return &defaultNeuronColor; }
 			RGBColor* getDefaultNeuronColorFullRender() { return &defaultNeuronColorFullRender; }
 			RGBColor* getArchiveFiringNeuronColor() { return &archiveFiringNeuronColor; }
 			RGBColor* getSimulationFiringNeuronColor() { return &simulationFiringNeuronColor; }
 			RGBColor* getHighlightNeuronColor() { return &highlightNeuronColor; }
+			float getMinimumConnectionRadius() { return minimumConnectionRadius; }
 			RGBColor& getSingleNeuronColor() { return singleNeuronColor; }
 			RGBColor& getToNeuronColor() { return toNeuronColor; }
 			RGBColor* getNegativeConnectionColor(){ return &negativeConnectionColor; }
@@ -43,6 +45,7 @@ namespace spikestream {
 			float getVertexSize() { return vertexSize; }
 			QList<unsigned int> getVisibleConnectionGroupIDs() { return connGrpDisplayMap.keys(); }
 			QList<unsigned int> getVisibleNeuronGroupIDs() { return neurGrpDisplayMap.keys(); }
+			float getWeightRadiusFactor() { return weightRadiusFactor; }
 			unsigned getWeightRenderMode() { return weightRenderMode; }
 			unsigned int getZoomNeuronGroupID() { return zoomNeuronGroupID; }
 			int getZoomStatus () { return zoomStatus; }
@@ -186,6 +189,16 @@ namespace spikestream {
 
 			/*! Connection groups with more connections than this threshold are not shown by default. */
 			int connectionLoadingThreshold;
+
+			/*! Weight is multiplied by this this factor to get the radius of the connections
+				when drawn in full render mode with weights rendered as thickness of connections*/
+			float weightRadiusFactor;
+
+			/*! Minimum radius of a connection when in full render with weights */
+			float minimumConnectionRadius;
+
+			/*! Quality of cones used to render a weighted connection */
+			unsigned connectionQuality;
 
 
 			//=========================  METHODS  =========================

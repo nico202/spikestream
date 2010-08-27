@@ -506,6 +506,9 @@ void NetworkViewer::drawConnections(){
 	//Get information about rendering connections
 	unsigned weightRenderMode = netDisplay->getWeightRenderMode();
 	float weight = 0.0f;//Declare here to save declaring it all the time.
+	weightRadiusFactor = netDisplay->getWeightRadiusFactor();
+	minimumConnectionRadius = netDisplay->getMinimumConnectionRadius();
+	connectionQuality = netDisplay->getConnectionQuality();
 
 	//Default neuron colour
 	RGBColor positiveConnectionColor = *netDisplay->getPositiveConnectionColor();
@@ -520,9 +523,9 @@ void NetworkViewer::drawConnections(){
 		if(connectionMode & SHOW_BETWEEN_CONNECTIONS)
 			toNeuronID = netDisplay->getToNeuronID();
 	}
-	bool drawConnection;
 
 	//Work through the connection groups listed in the network display
+	bool drawConnection;
 	QList<unsigned int> conGrpIDs = Globals::getNetworkDisplay()->getVisibleConnectionGroupIDs();
 	for(QList<unsigned int>::iterator conGrpIter = conGrpIDs.begin(); conGrpIter != conGrpIDs.end(); ++conGrpIter){
 
@@ -738,15 +741,12 @@ void NetworkViewer::drawSphere(float xPos, float yPos, float zPos, float radius,
 
 /*! Draws a connection whose thickness varies with the weight */
 void NetworkViewer::drawWeightedConnection(float x1, float y1, float z1, float x2, float y2, float z2, float weight){
-	float maxConThickness = 0.25;
-	float minConThickness = 0.01;
-
 	//Make sure weight is positive
 	if(weight < 0.0f)
 		weight *= -1.0f;
 
 	//Draw line if we are less than minimum connection weight
-	if(maxConThickness * weight < minConThickness){
+	if(weightRadiusFactor * weight < minimumConnectionRadius){
 		glBegin(GL_LINES);
 			glVertex3f(x1, y1, z1);
 			glVertex3f(x2, y2, z2);
@@ -756,19 +756,18 @@ void NetworkViewer::drawWeightedConnection(float x1, float y1, float z1, float x
 
 	//Calculate vector and angle with Z axis
 	float conVect [] = { x2-x1, y2-y1, z2-z1 };
-	float radianToDegrees = 180.0f / 3.14159265f;
 
 	//Some calculations
 	float length = sqrt(pow(conVect[0], 2) + pow(conVect[1], 2) + pow(conVect[2], 2));
-	float rotationAngle = radianToDegrees * -1.0f * acos((conVect[2]) / length);//Angle with vertical z axis
+	float rotationAngle = GLT_INV_PI_DIV_180 * -1.0f * acos((conVect[2]) / length);//Angle with vertical z axis
 
 	//Store matrix and move to first point
 	glPushMatrix();
 	glTranslatef(x1, y1, z1);
 	glRotatef(rotationAngle, conVect[1], -conVect[0], 0.0f);//Rotate z vertical
-	gluCylinder(gluConeObj, 0.0 , maxConThickness * weight, length/2.0, 8, 8);
+	gluCylinder(gluConeObj, 0.0 , weightRadiusFactor * weight, length/2.0, 8, 8);
 	glTranslatef(0.0, 0.0, length/2);//Half way up current Z axis
-	gluCylinder(gluConeObj, maxConThickness * weight, 0.0, length/2.0, 8, 8);
+	gluCylinder(gluConeObj, weightRadiusFactor * weight, 0.0, length/2.0, 8, 8);
 	glPopMatrix();
 }
 

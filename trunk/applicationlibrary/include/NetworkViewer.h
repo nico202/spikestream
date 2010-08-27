@@ -113,6 +113,15 @@ namespace spikestream {
 			/*! Object used to draw a cone */
 			GLUquadricObj* gluConeObj;
 
+			/*! Factor by which weight is multiplied to obtain thickness */
+			float weightRadiusFactor;
+
+			/*! Minimum thickness of a connection */
+			float minimumConnectionRadius;
+
+			/*! Quality of the cones used to render a weighted connection */
+			unsigned connectionQuality;
+
 			/*! Map holding IDs of all neurons with a connection to them.
 				Used when connection mode is enabled */
 			QHash<unsigned, float> connectedNeuronMap;

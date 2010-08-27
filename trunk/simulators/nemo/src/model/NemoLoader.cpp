@@ -33,9 +33,12 @@ NemoLoader::~NemoLoader(){
 /*----------------------------------------------------------*/
 
 /*! Loads the simulation */
-nemo_network_t NemoLoader::buildNemoNetwork(Network* network, const bool* stop){
+nemo_network_t NemoLoader::buildNemoNetwork(Network* network, QList<unsigned>* volatileConGrpList, const bool* stop){
 	//Initialize the nemo network
 	nemo_network_t nemoNet = nemo_new_network();
+
+	//Clear list of volatile connections
+	volatileConGrpList->clear();
 
 	//Create the random number generator (from: nemo/examples/random1k.cpp)
 	rng_t rng;
@@ -65,7 +68,7 @@ nemo_network_t NemoLoader::buildNemoNetwork(Network* network, const bool* stop){
 	//Add the connection groups that are not disabled */
 	for(int i=0; i<conGrpList.size() && !*stop; ++i){
 		if(conGrpList.at(i)->getParameter("Disable") == 0.0)
-			addConnectionGroup(conGrpList.at(i), nemoNet);
+			addConnectionGroup(conGrpList.at(i), nemoNet, volatileConGrpList);
 
 		//Update progress
 		++stepsCompleted;
@@ -82,35 +85,24 @@ nemo_network_t NemoLoader::buildNemoNetwork(Network* network, const bool* stop){
 /*----------------------------------------------------------*/
 
 /*! Adds a connection group to the network. */
-void NemoLoader::addConnectionGroup(ConnectionGroup* conGroup, nemo_network_t nemoNetwork){
+void NemoLoader::addConnectionGroup(ConnectionGroup* conGroup, nemo_network_t nemoNetwork, QList<unsigned>* volatileConGrpList){
 	//Extract parameters
 	unsigned char learning = 0;
 	if(conGroup->getParameter("Learning") != 0.0)
 		learning = 1;
 
+	//Store connection group ID if weight is going to change
+	if(learning)
+		volatileConGrpList->append(conGroup->getID());
+
 	//Work through each connection
-	for(QHash<unsigned int, ConnectionList>::const_iterator fromMapIter = conGroup->fromMapBegin(); fromMapIter != conGroup->fromMapEnd(); ++fromMapIter){
-		unsigned int numTargets = fromMapIter.value().size();
-
-		//Declare arrays that we have to create for each connection
-		unsigned targets[numTargets];
-		unsigned delays[numTargets];
-		float weights[numTargets];
-		unsigned char isPlastic[numTargets];
-
-		//Fill connection vector with information about the connection
-		const ConnectionList* conListPtr = &fromMapIter.value();
-		for(unsigned int i=0; i<numTargets; ++i){
-			targets[i] = conListPtr->at(i)->getToNeuronID();
-			delays[i] = (unsigned)rint(conListPtr->at(i)->getDelay());
-			weights[i] = conListPtr->at(i)->getWeight();
-			isPlastic[i] = learning;
-		}
-
-		//Add the connections to the network
-		nemo_status_t result = nemo_add_synapses(nemoNetwork, fromMapIter.key(), targets, delays, weights, isPlastic, numTargets);
+	nemo_status_t result;
+	QList<Connection*>::const_iterator endConGrp = conGroup->end();
+	for(QList<Connection*>::const_iterator conIter = conGroup->begin(); conIter != endConGrp; ++conIter){
+		//Add synapse
+		result = nemo_add_synapse(nemoNetwork, (*conIter)->getFromNeuronID(), (*conIter)->getToNeuronID(), (*conIter)->getDelay(), (*conIter)->getWeight(), learning);
 		#ifdef DEBUG
-			printConnection(fromMapIter.key(), targets, delays, weights, isPlastic, numTargets);
+			//printConnection(fromMapIter.key(), targets, delays, weights, isPlastic, numTargets);
 			//cout<<"nemo_add_synapses(nemoNetwork, "<<fromMapIter.key()<<", "<<targets<<", "<<delays<<", "<<weights<<", "<<isPlastic<<", "<<numTargets<<");"<<endl;
 		#endif//DEBUG
 		if(result != NEMO_OK)

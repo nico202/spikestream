@@ -88,7 +88,7 @@ Network::~Network(){
 
 /*! Adds a connection group to the network without saving it to the database. */
 void Network::addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList, bool checkNetworkLocked){
-    if(checkNetworkLocked && isLocked())//Check if network is editable or not
+	if(checkNetworkLocked && hasArchives())//Check if network is editable or not
 		throw SpikeStreamException("Cannot add connection groups to a locked network.");
 
 	//Store the list of connection groups to be added
@@ -104,7 +104,7 @@ void Network::addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList, 
 
 /*! Adds neuron groups to the network */
 void Network::addNeuronGroups(QList<NeuronGroup*>& neuronGroupList){
-    if(isLocked())//Check if network is editable or not
+	if(hasArchives())//Check if network is editable or not
 		throw SpikeStreamException("Cannot add neuron groups to a locked network.");
 
     //Store the list of neuron groups to be added later when the thread has finished and we have the correct ID
@@ -158,7 +158,7 @@ bool  Network::containsNeuronGroup(unsigned int neuronGroupID){
 	Throws an exception if the connection groups cannot be found */
 void Network::deleteConnectionGroups(QList<unsigned int>& conGrpIDList){
 	//Check if network is editable or not
-	if(isLocked())
+	if(hasArchives())
 		throw SpikeStreamException("Cannot delete connection groups from a locked network.");
 
 	//Check that network is not currently busy with some other task
@@ -186,7 +186,7 @@ void Network::deleteConnectionGroups(QList<unsigned int>& conGrpIDList){
 	Throws an exception if the neuron groups cannot be found */
 void Network::deleteNeuronGroups(QList<unsigned int>& neurGrpIDList){
 	//Check if network is editable or not
-	if(isLocked())
+	if(hasArchives())
 		throw SpikeStreamException("Cannot delete neuron groups from a locked network.");
 
 	//Check that network is not currently busy with some other task
@@ -519,14 +519,15 @@ int Network::getTotalNumberOfSteps(){
 	return total;
 }
 
+
 /*! Returns true if the network is not editable because it is associated with archives */
-bool Network::isLocked(){
+bool Network::hasArchives(){
 	ArchiveDao archiveDao(archiveDBInfo);
-	return archiveDao.networkIsLocked(getID());
+	return archiveDao.networkHasArchives(getID());
 }
 
 
-/*! Loads up the network from the database */
+/*! Loads up the network from the database using separate threads */
 void Network::load(){
     clearError();
 
@@ -541,6 +542,27 @@ void Network::load(){
     connectionNetworkDaoThread->start();
 }
 
+
+
+/*! Loads up the network from the database without using separate threads.
+	Only returns when load is complete. Mainly used for testing */
+void Network::loadWait(){
+	clearError();
+
+	//Load up all neurons
+	neuronNetworkDaoThread->prepareLoadNeurons(neurGrpMap.values());
+	currentNeuronTask = LOAD_NEURONS_TASK;
+	neuronNetworkDaoThread->start();
+	neuronNetworkDaoThread->wait();
+	neuronThreadFinished();
+
+	//Load all connection groups
+	connectionNetworkDaoThread->prepareLoadConnections(connGrpMap.values());
+	currentConnectionTask = LOAD_CONNECTIONS_TASK;
+	connectionNetworkDaoThread->start();
+	connectionNetworkDaoThread->wait();
+	connectionThreadFinished();
+}
 
 
 /*--------------------------------------------------------- */

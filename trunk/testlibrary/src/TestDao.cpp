@@ -297,12 +297,12 @@ void TestDao::addTestNetwork1(){
     testNeurIDList.append(addTestNeuron(neurGrp2ID, -3, -7, 5));
 
     //Add test connections
-    testConnIDList.append(addTestConnection(connGrp1ID, testNeurIDList[0], testNeurIDList[1], 0.1, 1.1));
-    testConnIDList.append(addTestConnection(connGrp1ID, testNeurIDList[0], testNeurIDList[2], 0.2, 1.2));
-    testConnIDList.append(addTestConnection(connGrp1ID, testNeurIDList[0], testNeurIDList[3], 0.3, 1.3));
-    testConnIDList.append(addTestConnection(connGrp1ID, testNeurIDList[4], testNeurIDList[3], 0.4, 1.4));
-    testConnIDList.append(addTestConnection(connGrp1ID, testNeurIDList[4], testNeurIDList[1], 0.5, 1.5));
-    testConnIDList.append(addTestConnection(connGrp1ID, testNeurIDList[3], testNeurIDList[2], 0.6, 1.6));
+	testConnIDList.append(addTestConnection(connGrp1ID, testNeurIDList[0], testNeurIDList[1], 0.1, 1.1));//0
+	testConnIDList.append(addTestConnection(connGrp1ID, testNeurIDList[0], testNeurIDList[2], 0.2, 1.2));//1
+	testConnIDList.append(addTestConnection(connGrp1ID, testNeurIDList[0], testNeurIDList[3], 0.3, 1.3));//2
+	testConnIDList.append(addTestConnection(connGrp1ID, testNeurIDList[4], testNeurIDList[3], 0.4, 1.4));//3
+	testConnIDList.append(addTestConnection(connGrp1ID, testNeurIDList[4], testNeurIDList[1], 0.5, 1.5));//4
+	testConnIDList.append(addTestConnection(connGrp1ID, testNeurIDList[3], testNeurIDList[2], 0.6, 1.6));//5
 
 	executeQuery("INSERT INTO IzhikevichSynapseParameters (ConnectionGroupID) VALUES (" + QString::number(connGrp1ID) + ")");
 

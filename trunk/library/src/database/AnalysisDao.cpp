@@ -89,6 +89,20 @@ QList<AnalysisInfo> AnalysisDao::getAnalysesInfo(unsigned int networkID, unsigne
 }
 
 
+
+/*! Returns true if the network is associated with analyses and is
+	therefore uneditable */
+bool AnalysisDao::networkHasAnalyses(unsigned networkID){
+	QSqlQuery query = getQuery("SELECT COUNT(*) FROM Analyses WHERE NetworkID=" + QString::number(networkID));
+	executeQuery(query);
+	query.next();
+	if(query.value(0).toUInt() == 0)
+		return false;
+	return true;
+}
+
+
+
 /*! Updates the analysis description */
 void AnalysisDao::updateDescription(unsigned int analysisID, const QString& newDescription){
     executeQuery("UPDATE Analyses SET Description='" + newDescription + "' WHERE AnalysisID=" + QString::number(analysisID));
