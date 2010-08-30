@@ -15,7 +15,6 @@ using namespace std;
 /*-----                     TESTS                      -----*/
 /*----------------------------------------------------------*/
 
-/*! Tests the addition of a connection group to the network */
 void TestNetworkDaoThread::testAddConnectionGroup(){
     try{
 		/* Add network - slightly sloppy to use the network dao method, but it has been tested elsewhere
@@ -64,8 +63,7 @@ void TestNetworkDaoThread::testAddConnectionGroup(){
 
 		//Add connections
 		for(int i=0; i<4; ++i){
-			Connection* newConn = new Connection(fromNeuronIDs[i], toNeuronIDs[i],  30,  0.1);
-			connGrp.addConnection(newConn);
+			connGrp.addConnection(fromNeuronIDs[i], toNeuronIDs[i],  30,  0.1);
 		}
 
 		//Add the connection group to the database
@@ -87,15 +85,15 @@ void TestNetworkDaoThread::testAddConnectionGroup(){
 
 		//Check that connections were added correctly
 		QCOMPARE(connGrp.isLoaded(), true);
-		for(QList<Connection*>::const_iterator iter = connGrp.begin(); iter != connGrp.end(); ++iter){
+		for(QHash<unsigned, Connection*>::const_iterator iter = connGrp.begin(); iter != connGrp.end(); ++iter){
 			query = getQuery("SELECT ConnectionGroupID, FromNeuronID, ToNeuronID, Delay, Weight FROM Connections WHERE ConnectionID = " + QString::number((*iter)->id));
 			executeQuery(query);
 			query.next();
 			QCOMPARE( query.value(0).toUInt(), connGrp.getID() );//Check connection group id
-			QCOMPARE( query.value(1).toUInt(), (*iter)->fromNeuronID );
-			QCOMPARE( query.value(2).toUInt(), (*iter)->toNeuronID );
-			QCOMPARE( query.value(3).toString().toFloat(), (*iter)->delay );
-			QCOMPARE( query.value(4).toString().toFloat(), (*iter)->weight );
+			QCOMPARE( query.value(1).toUInt(), iter.value()->fromNeuronID );
+			QCOMPARE( query.value(2).toUInt(), iter.value()->toNeuronID );
+			QCOMPARE( query.value(3).toString().toFloat(), iter.value()->delay );
+			QCOMPARE( query.value(4).toString().toFloat(), iter.value()->weight );
 		}
     }
     catch(SpikeStreamException& ex){

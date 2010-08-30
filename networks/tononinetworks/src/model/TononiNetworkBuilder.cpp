@@ -84,50 +84,50 @@ void TononiNetworkBuilder::addBalduzziTononiFigure5(const QString& networkName, 
 
     //Add connections
     //2->1	3->2
-	Connection* con21 = connGrp.addConnection(new Connection(neur2->getID(), neur1->getID(),  0,  0));
-	Connection* con32 = connGrp.addConnection(new Connection(neur3->getID(), neur2->getID(),  0,  0));
+	Connection* con21 = connGrp.addConnection(neur2->getID(), neur1->getID(),  0,  0);
+	Connection* con32 = connGrp.addConnection(neur3->getID(), neur2->getID(),  0,  0);
 
     //3->4	3->5	3->6
-	Connection* con34 = connGrp.addConnection(new Connection(neur3->getID(), neur4->getID(),  0,  0));
-	Connection* con35 = connGrp.addConnection(new Connection(neur3->getID(), neur5->getID(),  0,  0));
-	Connection* con36 = connGrp.addConnection(new Connection(neur3->getID(), neur6->getID(),  0,  0));
+	Connection* con34 = connGrp.addConnection(neur3->getID(), neur4->getID(),  0,  0);
+	Connection* con35 = connGrp.addConnection(neur3->getID(), neur5->getID(),  0,  0);
+	Connection* con36 = connGrp.addConnection(neur3->getID(), neur6->getID(),  0,  0);
 
     //4->3	4->5	4->6
-	Connection* con43 = connGrp.addConnection(new Connection(neur4->getID(), neur3->getID(),  0,  0));
-	Connection* con45 = connGrp.addConnection(new Connection(neur4->getID(), neur5->getID(),  0,  0));
-	Connection* con46 = connGrp.addConnection(new Connection(neur4->getID(), neur6->getID(),  0,  0));
+	Connection* con43 = connGrp.addConnection(neur4->getID(), neur3->getID(),  0,  0);
+	Connection* con45 = connGrp.addConnection(neur4->getID(), neur5->getID(),  0,  0);
+	Connection* con46 = connGrp.addConnection(neur4->getID(), neur6->getID(),  0,  0);
 
     //5->3	5->4	5->6
-	Connection* con53 = connGrp.addConnection(new Connection(neur5->getID(), neur3->getID(),  0,  0));
-	Connection* con54 = connGrp.addConnection(new Connection(neur5->getID(), neur4->getID(),  0,  0));
-	Connection* con56 = connGrp.addConnection(new Connection(neur5->getID(), neur6->getID(),  0,  0));
+	Connection* con53 = connGrp.addConnection(neur5->getID(), neur3->getID(),  0,  0);
+	Connection* con54 = connGrp.addConnection(neur5->getID(), neur4->getID(),  0,  0);
+	Connection* con56 = connGrp.addConnection(neur5->getID(), neur6->getID(),  0,  0);
 
     //6->3	6->4	6->5	6->7	6->8	6->10
-	Connection* con63 = connGrp.addConnection(new Connection(neur6->getID(), neur3->getID(),  0,  0));
-	Connection* con64 = connGrp.addConnection(new Connection(neur6->getID(), neur4->getID(),  0,  0));
-	Connection* con65 = connGrp.addConnection(new Connection(neur6->getID(), neur5->getID(),  0,  0));
-	Connection* con67 = connGrp.addConnection(new Connection(neur6->getID(), neur7->getID(),  0,  0));
-	Connection* con68 = connGrp.addConnection(new Connection(neur6->getID(), neur8->getID(),  0,  0));
-	Connection* con610 = connGrp.addConnection(new Connection(neur6->getID(), neur10->getID(),  0,  0));
+	Connection* con63 = connGrp.addConnection(neur6->getID(), neur3->getID(),  0,  0);
+	Connection* con64 = connGrp.addConnection(neur6->getID(), neur4->getID(),  0,  0);
+	Connection* con65 = connGrp.addConnection(neur6->getID(), neur5->getID(),  0,  0);
+	Connection* con67 = connGrp.addConnection(neur6->getID(), neur7->getID(),  0,  0);
+	Connection* con68 = connGrp.addConnection(neur6->getID(), neur8->getID(),  0,  0);
+	Connection* con610 = connGrp.addConnection(neur6->getID(), neur10->getID(),  0,  0);
 
     //7->6	7->8	7->10
-	Connection* con76 = connGrp.addConnection(new Connection(neur7->getID(), neur6->getID(),  0,  0));
-	Connection* con78 = connGrp.addConnection(new Connection(neur7->getID(), neur8->getID(),  0,  0));
-	Connection* con710 = connGrp.addConnection(new Connection(neur7->getID(), neur10->getID(),  0,  0));
+	Connection* con76 = connGrp.addConnection(neur7->getID(), neur6->getID(),  0,  0);
+	Connection* con78 = connGrp.addConnection(neur7->getID(), neur8->getID(),  0,  0);
+	Connection* con710 = connGrp.addConnection(neur7->getID(), neur10->getID(),  0,  0);
 
     //8->6	8->7	8->10
-	Connection* con86 = connGrp.addConnection(new Connection(neur8->getID(), neur6->getID(),  0,  0));
-	Connection* con87 = connGrp.addConnection(new Connection(neur8->getID(), neur7->getID(),  0,  0));
-	Connection* con810 = connGrp.addConnection(new Connection(neur8->getID(), neur10->getID(),  0,  0));
+	Connection* con86 = connGrp.addConnection(neur8->getID(), neur6->getID(),  0,  0);
+	Connection* con87 = connGrp.addConnection(neur8->getID(), neur7->getID(),  0,  0);
+	Connection* con810 = connGrp.addConnection(neur8->getID(), neur10->getID(),  0,  0);
 
     //10->6	10->7	10->8
-	Connection* con106 = connGrp.addConnection(new Connection(neur10->getID(), neur6->getID(),  0,  0));
-	Connection* con107 = connGrp.addConnection(new Connection(neur10->getID(), neur7->getID(),  0,  0));
-	Connection* con108 = connGrp.addConnection(new Connection(neur10->getID(), neur8->getID(),  0,  0));
+	Connection* con106 = connGrp.addConnection(neur10->getID(), neur6->getID(),  0,  0);
+	Connection* con107 = connGrp.addConnection(neur10->getID(), neur7->getID(),  0,  0);
+	Connection* con108 = connGrp.addConnection(neur10->getID(), neur8->getID(),  0,  0);
 
     //9->7	11->9
-	Connection* con97 = connGrp.addConnection(new Connection(neur9->getID(), neur7->getID(),  0,  0));
-	Connection* con119 = connGrp.addConnection(new Connection(neur11->getID(), neur9->getID(),  0,  0));
+	Connection* con97 = connGrp.addConnection(neur9->getID(), neur7->getID(),  0,  0);
+	Connection* con119 = connGrp.addConnection(neur11->getID(), neur9->getID(),  0,  0);
 
     netDaoThread.prepareAddConnectionGroup(netInfo.getID(), &connGrp);
     runThread(netDaoThread);
@@ -236,15 +236,15 @@ void TononiNetworkBuilder::addBalduzziTononiFigure6(const QString& networkName, 
     ConnectionGroup connGrp(connGrpInfo);
 
     //Add connections
-	Connection* con12 = connGrp.addConnection(new Connection(neuronMap[1]->getID(), neuronMap[2]->getID(),  0,  0));
-	Connection* con13 = connGrp.addConnection(new Connection(neuronMap[1]->getID(), neuronMap[3]->getID(),  0,  0));
-	Connection* con14 = connGrp.addConnection(new Connection(neuronMap[1]->getID(), neuronMap[4]->getID(),  0,  0));
-	Connection* con21 = connGrp.addConnection(new Connection(neuronMap[2]->getID(), neuronMap[1]->getID(),  0,  0));
-	Connection* con23 = connGrp.addConnection(new Connection(neuronMap[2]->getID(), neuronMap[3]->getID(),  0,  0));
-	Connection* con25 = connGrp.addConnection(new Connection(neuronMap[2]->getID(), neuronMap[5]->getID(),  0,  0));
-	Connection* con31 = connGrp.addConnection(new Connection(neuronMap[3]->getID(), neuronMap[1]->getID(),  0,  0));
-	Connection* con32 = connGrp.addConnection(new Connection(neuronMap[3]->getID(), neuronMap[2]->getID(),  0,  0));
-	Connection* con36 = connGrp.addConnection(new Connection(neuronMap[3]->getID(), neuronMap[6]->getID(),  0,  0));
+	Connection* con12 = connGrp.addConnection(neuronMap[1]->getID(), neuronMap[2]->getID(),  0,  0);
+	Connection* con13 = connGrp.addConnection(neuronMap[1]->getID(), neuronMap[3]->getID(),  0,  0);
+	Connection* con14 = connGrp.addConnection(neuronMap[1]->getID(), neuronMap[4]->getID(),  0,  0);
+	Connection* con21 = connGrp.addConnection(neuronMap[2]->getID(), neuronMap[1]->getID(),  0,  0);
+	Connection* con23 = connGrp.addConnection(neuronMap[2]->getID(), neuronMap[3]->getID(),  0,  0);
+	Connection* con25 = connGrp.addConnection(neuronMap[2]->getID(), neuronMap[5]->getID(),  0,  0);
+	Connection* con31 = connGrp.addConnection(neuronMap[3]->getID(), neuronMap[1]->getID(),  0,  0);
+	Connection* con32 = connGrp.addConnection(neuronMap[3]->getID(), neuronMap[2]->getID(),  0,  0);
+	Connection* con36 = connGrp.addConnection(neuronMap[3]->getID(), neuronMap[6]->getID(),  0,  0);
 
     netDaoThread.prepareAddConnectionGroup(netInfo.getID(), &connGrp);
     runThread(netDaoThread);
@@ -344,20 +344,20 @@ void TononiNetworkBuilder::addBalduzziTononiFigure12(const QString& networkName,
     ConnectionGroup connGrp(connGrpInfo);
 
     //Add connections
-	Connection* con17 = connGrp.addConnection(new Connection(neur1->getID(), neur7->getID(),  0,  0));
-	Connection* con21 = connGrp.addConnection(new Connection(neur2->getID(), neur1->getID(),  0,  0));
-	Connection* con34 = connGrp.addConnection(new Connection(neur3->getID(), neur4->getID(),  0,  0));
-	Connection* con37 = connGrp.addConnection(new Connection(neur3->getID(), neur7->getID(),  0,  0));
+	Connection* con17 = connGrp.addConnection(neur1->getID(), neur7->getID(),  0,  0);
+	Connection* con21 = connGrp.addConnection(neur2->getID(), neur1->getID(),  0,  0);
+	Connection* con34 = connGrp.addConnection(neur3->getID(), neur4->getID(),  0,  0);
+	Connection* con37 = connGrp.addConnection(neur3->getID(), neur7->getID(),  0,  0);
 
-	Connection* con38 = connGrp.addConnection(new Connection(neur3->getID(), neur8->getID(),  0,  0));
-	Connection* con42 = connGrp.addConnection(new Connection(neur4->getID(), neur2->getID(),  0,  0));
-	Connection* con54 = connGrp.addConnection(new Connection(neur5->getID(), neur4->getID(),  0,  0));
-	Connection* con62 = connGrp.addConnection(new Connection(neur6->getID(), neur2->getID(),  0,  0));
+	Connection* con38 = connGrp.addConnection(neur3->getID(), neur8->getID(),  0,  0);
+	Connection* con42 = connGrp.addConnection(neur4->getID(), neur2->getID(),  0,  0);
+	Connection* con54 = connGrp.addConnection(neur5->getID(), neur4->getID(),  0,  0);
+	Connection* con62 = connGrp.addConnection(neur6->getID(), neur2->getID(),  0,  0);
 
-	Connection* con65 = connGrp.addConnection(new Connection(neur6->getID(), neur5->getID(),  0,  0));
-	Connection* con78 = connGrp.addConnection(new Connection(neur7->getID(), neur8->getID(),  0,  0));
-	Connection* con81 = connGrp.addConnection(new Connection(neur8->getID(), neur1->getID(),  0,  0));
-	Connection* con85 = connGrp.addConnection(new Connection(neur8->getID(), neur5->getID(),  0,  0));
+	Connection* con65 = connGrp.addConnection(neur6->getID(), neur5->getID(),  0,  0);
+	Connection* con78 = connGrp.addConnection(neur7->getID(), neur8->getID(),  0,  0);
+	Connection* con81 = connGrp.addConnection(neur8->getID(), neur1->getID(),  0,  0);
+	Connection* con85 = connGrp.addConnection(neur8->getID(), neur5->getID(),  0,  0);
 
     netDaoThread.prepareAddConnectionGroup(netInfo.getID(), &connGrp);
     runThread(netDaoThread);
@@ -484,60 +484,60 @@ void TononiNetworkBuilder::addBalduzziTononiFigure13(const QString& networkName,
     ConnectionGroup connGrp(connGrpInfo);
 
     //1->2	1->3
-	Connection* con12 = connGrp.addConnection(new Connection(neur1->getID(), neur2->getID(),  0,  0));
-	Connection* con13 = connGrp.addConnection(new Connection(neur1->getID(), neur3->getID(),  0,  0));
+	Connection* con12 = connGrp.addConnection(neur1->getID(), neur2->getID(),  0,  0);
+	Connection* con13 = connGrp.addConnection(neur1->getID(), neur3->getID(),  0,  0);
 
     //2->1	2->3
-	Connection* con21 = connGrp.addConnection(new Connection(neur2->getID(), neur1->getID(),  0,  0));
-	Connection* con23 = connGrp.addConnection(new Connection(neur2->getID(), neur3->getID(),  0,  0));
+	Connection* con21 = connGrp.addConnection(neur2->getID(), neur1->getID(),  0,  0);
+	Connection* con23 = connGrp.addConnection(neur2->getID(), neur3->getID(),  0,  0);
 
     //3->1	3->2	3->6	3->7
-	Connection* con31 = connGrp.addConnection(new Connection(neur3->getID(), neur1->getID(),  0,  0));
-	Connection* con32 = connGrp.addConnection(new Connection(neur3->getID(), neur2->getID(),  0,  0));
-	Connection* con36 = connGrp.addConnection(new Connection(neur3->getID(), neur6->getID(),  0,  0));
-	Connection* con37 = connGrp.addConnection(new Connection(neur3->getID(), neur7->getID(),  0,  0));
+	Connection* con31 = connGrp.addConnection(neur3->getID(), neur1->getID(),  0,  0);
+	Connection* con32 = connGrp.addConnection(neur3->getID(), neur2->getID(),  0,  0);
+	Connection* con36 = connGrp.addConnection(neur3->getID(), neur6->getID(),  0,  0);
+	Connection* con37 = connGrp.addConnection(neur3->getID(), neur7->getID(),  0,  0);
 
     //4->5	4->6
-	Connection* con45 = connGrp.addConnection(new Connection(neur4->getID(), neur5->getID(),  0,  0));
-	Connection* con46 = connGrp.addConnection(new Connection(neur4->getID(), neur6->getID(),  0,  0));
+	Connection* con45 = connGrp.addConnection(neur4->getID(), neur5->getID(),  0,  0);
+	Connection* con46 = connGrp.addConnection(neur4->getID(), neur6->getID(),  0,  0);
 
     //5->4	5->6
-	Connection* con54 = connGrp.addConnection(new Connection(neur5->getID(), neur4->getID(),  0,  0));
-	Connection* con56 = connGrp.addConnection(new Connection(neur5->getID(), neur6->getID(),  0,  0));
+	Connection* con54 = connGrp.addConnection(neur5->getID(), neur4->getID(),  0,  0);
+	Connection* con56 = connGrp.addConnection(neur5->getID(), neur6->getID(),  0,  0);
 
     //6->3	6->4	6->5	6->10
-	Connection* con63 = connGrp.addConnection(new Connection(neur6->getID(), neur3->getID(),  0,  0));
-	Connection* con64 = connGrp.addConnection(new Connection(neur6->getID(), neur4->getID(),  0,  0));
-	Connection* con65 = connGrp.addConnection(new Connection(neur6->getID(), neur5->getID(),  0,  0));
-	Connection* con610 = connGrp.addConnection(new Connection(neur6->getID(), neur10->getID(),  0,  0));
+	Connection* con63 = connGrp.addConnection(neur6->getID(), neur3->getID(),  0,  0);
+	Connection* con64 = connGrp.addConnection(neur6->getID(), neur4->getID(),  0,  0);
+	Connection* con65 = connGrp.addConnection(neur6->getID(), neur5->getID(),  0,  0);
+	Connection* con610 = connGrp.addConnection(neur6->getID(), neur10->getID(),  0,  0);
 
     //7->3	7->8	7->9	7->10
-	Connection* con73 = connGrp.addConnection(new Connection(neur7->getID(), neur3->getID(),  0,  0));
-	Connection* con78 = connGrp.addConnection(new Connection(neur7->getID(), neur8->getID(),  0,  0));
-	Connection* con79 = connGrp.addConnection(new Connection(neur7->getID(), neur9->getID(),  0,  0));
-	Connection* con710 = connGrp.addConnection(new Connection(neur7->getID(), neur10->getID(),  0,  0));
+	Connection* con73 = connGrp.addConnection(neur7->getID(), neur3->getID(),  0,  0);
+	Connection* con78 = connGrp.addConnection(neur7->getID(), neur8->getID(),  0,  0);
+	Connection* con79 = connGrp.addConnection(neur7->getID(), neur9->getID(),  0,  0);
+	Connection* con710 = connGrp.addConnection(neur7->getID(), neur10->getID(),  0,  0);
 
     //8->7	8->9
-	Connection* con87 = connGrp.addConnection(new Connection(neur8->getID(), neur7->getID(),  0,  0));
-	Connection* con89 = connGrp.addConnection(new Connection(neur8->getID(), neur9->getID(),  0,  0));
+	Connection* con87 = connGrp.addConnection(neur8->getID(), neur7->getID(),  0,  0);
+	Connection* con89 = connGrp.addConnection(neur8->getID(), neur9->getID(),  0,  0);
 
     //9->7	9->8
-	Connection* con97 = connGrp.addConnection(new Connection(neur9->getID(), neur7->getID(),  0,  0));
-	Connection* con98 = connGrp.addConnection(new Connection(neur9->getID(), neur8->getID(),  0,  0));
+	Connection* con97 = connGrp.addConnection(neur9->getID(), neur7->getID(),  0,  0);
+	Connection* con98 = connGrp.addConnection(neur9->getID(), neur8->getID(),  0,  0);
 
     //10->6	10->7	10->11	10->12
-	Connection* con106 = connGrp.addConnection(new Connection(neur10->getID(), neur6->getID(),  0,  0));
-	Connection* con107 = connGrp.addConnection(new Connection(neur10->getID(), neur7->getID(),  0,  0));
-	Connection* con1011 = connGrp.addConnection(new Connection(neur10->getID(), neur11->getID(),  0,  0));
-	Connection* con1012 = connGrp.addConnection(new Connection(neur10->getID(), neur12->getID(),  0,  0));
+	Connection* con106 = connGrp.addConnection(neur10->getID(), neur6->getID(),  0,  0);
+	Connection* con107 = connGrp.addConnection(neur10->getID(), neur7->getID(),  0,  0);
+	Connection* con1011 = connGrp.addConnection(neur10->getID(), neur11->getID(),  0,  0);
+	Connection* con1012 = connGrp.addConnection(neur10->getID(), neur12->getID(),  0,  0);
 
     //11->10	11->12
-	Connection* con1110 = connGrp.addConnection(new Connection(neur11->getID(), neur10->getID(),  0,  0));
-	Connection* con1112 = connGrp.addConnection(new Connection(neur11->getID(), neur12->getID(),  0,  0));
+	Connection* con1110 = connGrp.addConnection(neur11->getID(), neur10->getID(),  0,  0);
+	Connection* con1112 = connGrp.addConnection(neur11->getID(), neur12->getID(),  0,  0);
 
     //12->10	12->11
-	Connection* con1210 = connGrp.addConnection(new Connection(neur12->getID(), neur10->getID(),  0,  0));
-	Connection* con1211 = connGrp.addConnection(new Connection(neur12->getID(), neur11->getID(),  0,  0));
+	Connection* con1210 = connGrp.addConnection(neur12->getID(), neur10->getID(),  0,  0);
+	Connection* con1211 = connGrp.addConnection(neur12->getID(), neur11->getID(),  0,  0);
 
     netDaoThread.prepareAddConnectionGroup(netInfo.getID(), &connGrp);
     runThread(netDaoThread);

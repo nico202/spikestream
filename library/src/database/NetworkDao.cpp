@@ -810,8 +810,7 @@ void NetworkDao::setSynapseParameters(const ConnectionGroupInfo& conGrpInfo, QHa
 }
 
 
-/*! Sets the weight between two neurons. In the event of multiple connections between two neurons
-	all of the temporary weights will be updated */
+/*! Sets the weight between two neurons.  */
 void NetworkDao::setWeight(unsigned connectionID, double newWeight){
 	QSqlQuery query = getQuery("UPDATE Connections SET Weight=" + QString::number(newWeight) + " WHERE ConnectionID=" + QString::number(connectionID));
 	executeQuery(query);

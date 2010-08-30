@@ -13,7 +13,8 @@ using namespace spikestream;
 
 /*! Constructor */
 ConnectionsModel::ConnectionsModel() : QAbstractTableModel(){
-    connect(Globals::getEventRouter(), SIGNAL(networkDisplayChangedSignal()), this, SLOT(networkDisplayChanged()));
+	connect(Globals::getEventRouter(), SIGNAL(networkDisplayChangedSignal()), this, SLOT(networkDisplayChanged()), Qt::QueuedConnection);
+	connect(Globals::getEventRouter(), SIGNAL(weightsChangedSignal()), this, SLOT(networkDisplayChanged()), Qt::QueuedConnection);
 }
 
 

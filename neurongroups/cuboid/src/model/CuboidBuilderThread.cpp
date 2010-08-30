@@ -29,7 +29,7 @@ void CuboidBuilderThread::prepareAddNeuronGroups(const QString& name, const QStr
 	//Run some checks
 	if(!Globals::networkLoaded())
 		throw SpikeStreamException("Cannot add neuron group - no network loaded.");
-	if(Globals::getNetwork()->isLocked())
+	if(Globals::getNetwork()->hasArchives())
 		throw SpikeStreamException("Cannot add neuron group to a locked network.\nDelete archives linked with this network and try again");
 
 	//Create the neuron groups to be added. A separate neuron group is added for each neuron type

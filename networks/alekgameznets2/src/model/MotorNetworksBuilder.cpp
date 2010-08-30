@@ -164,16 +164,16 @@ void MotorNetworksBuilder::addConnections(){
 	for(unsigned int toNeurIndx = 7; toNeurIndx <=12; ++ toNeurIndx){
 		for(unsigned int fromNeurIndx = 7; fromNeurIndx <=12; ++fromNeurIndx)
 			if(fromNeurIndx != toNeurIndx)
-				conListArray[toNeurIndx-1].append( connGrp.addConnection( new Connection(neuronMap[fromNeurIndx], neuronMap[toNeurIndx],  0,  0) ) );
+				conListArray[toNeurIndx-1].append( connGrp.addConnection(neuronMap[fromNeurIndx], neuronMap[toNeurIndx],  0,  0) );
 	}
 
 	//Add connections from center to periphery
-	conListArray[1-1].append( connGrp.addConnection( new Connection(neuronMap[7], neuronMap[1],  0,  0) ) );
-	conListArray[2-1].append( connGrp.addConnection( new Connection(neuronMap[8], neuronMap[2],  0,  0) ) );
-	conListArray[3-1].append( connGrp.addConnection( new Connection(neuronMap[9], neuronMap[3],  0,  0) ) );
-	conListArray[4-1].append( connGrp.addConnection( new Connection(neuronMap[10], neuronMap[4],  0,  0) ) );
-	conListArray[5-1].append( connGrp.addConnection( new Connection(neuronMap[11], neuronMap[5],  0,  0) ) );
-	conListArray[6-1].append( connGrp.addConnection( new Connection(neuronMap[12], neuronMap[6],  0,  0) ) );
+	conListArray[1-1].append( connGrp.addConnection(neuronMap[7], neuronMap[1],  0,  0) );
+	conListArray[2-1].append( connGrp.addConnection(neuronMap[8], neuronMap[2],  0,  0) );
+	conListArray[3-1].append( connGrp.addConnection(neuronMap[9], neuronMap[3],  0,  0) );
+	conListArray[4-1].append( connGrp.addConnection(neuronMap[10], neuronMap[4],  0,  0) );
+	conListArray[5-1].append( connGrp.addConnection(neuronMap[11], neuronMap[5],  0,  0) );
+	conListArray[6-1].append( connGrp.addConnection(neuronMap[12], neuronMap[6],  0,  0) );
 
 	//Add connection group to the database
 	addConnectionGroup(networkID, connGrp);

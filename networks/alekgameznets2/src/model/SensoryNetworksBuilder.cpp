@@ -164,16 +164,16 @@ void SensoryNetworksBuilder::addConnections(){
 	for(unsigned int toNeurIndx = 7; toNeurIndx <=12; ++ toNeurIndx){
 		for(unsigned int fromNeurIndx = 7; fromNeurIndx <=12; ++fromNeurIndx)
 			if(fromNeurIndx != toNeurIndx)
-				conListArray[toNeurIndx-1].append( connGrp.addConnection( new Connection(neuronMap[fromNeurIndx], neuronMap[toNeurIndx],  0,  0) ) );
+				conListArray[toNeurIndx-1].append( connGrp.addConnection(neuronMap[fromNeurIndx], neuronMap[toNeurIndx],  0,  0) );
 	}
 
 	//Add connections from periphery to center
-	conListArray[7-1].append( connGrp.addConnection( new Connection(neuronMap[1], neuronMap[7],  0,  0) ) );
-	conListArray[8-1].append( connGrp.addConnection( new Connection(neuronMap[2], neuronMap[8],  0,  0) ) );
-	conListArray[9-1].append( connGrp.addConnection( new Connection(neuronMap[3], neuronMap[9],  0,  0) ) );
-	conListArray[10-1].append( connGrp.addConnection( new Connection(neuronMap[4], neuronMap[10],  0,  0) ) );
-	conListArray[11-1].append( connGrp.addConnection( new Connection(neuronMap[5], neuronMap[11],  0,  0) ) );
-	conListArray[12-1].append( connGrp.addConnection( new Connection(neuronMap[6], neuronMap[12],  0,  0) ) );
+	conListArray[7-1].append( connGrp.addConnection(neuronMap[1], neuronMap[7],  0,  0) );
+	conListArray[8-1].append( connGrp.addConnection(neuronMap[2], neuronMap[8],  0,  0) );
+	conListArray[9-1].append( connGrp.addConnection(neuronMap[3], neuronMap[9],  0,  0) );
+	conListArray[10-1].append( connGrp.addConnection(neuronMap[4], neuronMap[10],  0,  0) );
+	conListArray[11-1].append( connGrp.addConnection(neuronMap[5], neuronMap[11],  0,  0) );
+	conListArray[12-1].append( connGrp.addConnection(neuronMap[6], neuronMap[12],  0,  0) );
 
 	//Add connection group to the database
 	addConnectionGroup(networkID, connGrp);

@@ -97,10 +97,10 @@ void NemoLoader::addConnectionGroup(ConnectionGroup* conGroup, nemo_network_t ne
 
 	//Work through each connection
 	nemo_status_t result;
-	QList<Connection*>::const_iterator endConGrp = conGroup->end();
-	for(QList<Connection*>::const_iterator conIter = conGroup->begin(); conIter != endConGrp; ++conIter){
+	QHash<unsigned, Connection*>::const_iterator endConGrp = conGroup->end();
+	for(QHash<unsigned, Connection*>::const_iterator conIter = conGroup->begin(); conIter != endConGrp; ++conIter){
 		//Add synapse
-		result = nemo_add_synapse(nemoNetwork, (*conIter)->getFromNeuronID(), (*conIter)->getToNeuronID(), (*conIter)->getDelay(), (*conIter)->getWeight(), learning);
+		result = nemo_add_synapse(nemoNetwork, conIter.value()->getFromNeuronID(), conIter.value()->getToNeuronID(), conIter.value()->getDelay(), conIter.value()->getWeight(), learning);
 		#ifdef DEBUG
 			//printConnection(fromMapIter.key(), targets, delays, weights, isPlastic, numTargets);
 			//cout<<"nemo_add_synapses(nemoNetwork, "<<fromMapIter.key()<<", "<<targets<<", "<<delays<<", "<<weights<<", "<<isPlastic<<", "<<numTargets<<");"<<endl;

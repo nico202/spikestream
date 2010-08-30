@@ -36,6 +36,7 @@ GLfloat specref[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 NetworkViewer::NetworkViewer(QWidget* parent) : QGLWidget(parent) {
 	//Connect refresh to changes in the display of network or archive
 	connect(Globals::getEventRouter(), SIGNAL(networkDisplayChangedSignal()), this, SLOT(refresh()), Qt::QueuedConnection);
+	connect(Globals::getEventRouter(), SIGNAL(weightsChangedSignal()), this, SLOT(refresh()), Qt::QueuedConnection);
 
 	//Connect reset to changes in the network
 	connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(reset()), Qt::QueuedConnection);
@@ -502,6 +503,7 @@ void NetworkViewer::drawConnections(){
 	//Get pointer to network that is to be drawn and its associated display
 	Network* network = Globals::getNetwork();
 	NetworkDisplay* netDisplay = Globals::getNetworkDisplay();
+	bool fullRender = netDisplay->isFullRenderMode();
 
 	//Get information about rendering connections
 	unsigned weightRenderMode = netDisplay->getWeightRenderMode();
@@ -526,6 +528,7 @@ void NetworkViewer::drawConnections(){
 
 	//Work through the connection groups listed in the network display
 	bool drawConnection;
+	Connection* tmpCon;
 	QList<unsigned int> conGrpIDs = Globals::getNetworkDisplay()->getVisibleConnectionGroupIDs();
 	for(QList<unsigned int>::iterator conGrpIter = conGrpIDs.begin(); conGrpIter != conGrpIDs.end(); ++conGrpIter){
 
@@ -537,12 +540,14 @@ void NetworkViewer::drawConnections(){
 		NeuronGroup* toNeuronGroup = network->getNeuronGroup(conGrp->getToNeuronGroupID());
 
 		//Draw all the connections in the group
-		QList<Connection*>::const_iterator endConGrp = conGrp->end();
-		for(QList<Connection*>::const_iterator conIter = conGrp->begin(); conIter != endConGrp; ++ conIter){
+		QHash<unsigned, Connection*>::const_iterator endConGrp = conGrp->end();
+		for(QHash<unsigned, Connection*>::const_iterator conIter = conGrp->begin(); conIter != endConGrp; ++ conIter){
+			tmpCon = conIter.value();
+
 			//Get the weight
-			weight = (*conIter)->weight;
+			weight = tmpCon->weight;
 			if( (weightRenderMode & WEIGHT_RENDER_ENABLED) && (weightRenderMode & RENDER_TEMP_WEIGHTS) )
-				weight = (*conIter)->tempWeight;
+				weight = tmpCon->tempWeight;
 
 			//Decide if connection should be drawn, depending on the connection mode and neuron id
 			drawConnection = true;
@@ -551,33 +556,33 @@ void NetworkViewer::drawConnections(){
 				if( !(connectionMode & SHOW_BETWEEN_CONNECTIONS) ){
 					//Show only connections from a single neuron
 					if(connectionMode & SHOW_FROM_CONNECTIONS){
-						if( (*conIter)->fromNeuronID != singleNeuronID){
+						if( tmpCon->fromNeuronID != singleNeuronID){
 							drawConnection = false;
 						}
 						else{
-							connectedNeuronMap[(*conIter)->toNeuronID] = weight;
+							connectedNeuronMap[tmpCon->toNeuronID] = weight;
 						}
 					}
 					//Show only connections to a single neuron
 					else if(connectionMode & SHOW_TO_CONNECTIONS){
-						if( (*conIter)->toNeuronID != singleNeuronID){
+						if( tmpCon->toNeuronID != singleNeuronID){
 							drawConnection = false;
 						}
 						else{
-							connectedNeuronMap[(*conIter)->fromNeuronID] = weight;//Positive connection
+							connectedNeuronMap[tmpCon->fromNeuronID] = weight;//Positive connection
 						}
 					}
 					//Show from and to connections to a single neuron
 					else {
-						if( ((*conIter)->fromNeuronID != singleNeuronID) && ((*conIter)->toNeuronID != singleNeuronID) ){
+						if( (tmpCon->fromNeuronID != singleNeuronID) && (tmpCon->toNeuronID != singleNeuronID) ){
 							drawConnection = false;
 						}
 						else {//Highlight connected neurons
-							if( (*conIter)->fromNeuronID == singleNeuronID){
-								connectedNeuronMap[(*conIter)->toNeuronID] = weight;//Positive connection
+							if( tmpCon->fromNeuronID == singleNeuronID){
+								connectedNeuronMap[tmpCon->toNeuronID] = weight;//Positive connection
 							}
-							else if( (*conIter)->toNeuronID == singleNeuronID){
-								connectedNeuronMap[(*conIter)->fromNeuronID] = weight;//Positive connection
+							else if( tmpCon->toNeuronID == singleNeuronID){
+								connectedNeuronMap[tmpCon->fromNeuronID] = weight;//Positive connection
 							}
 						}
 					}
@@ -585,7 +590,7 @@ void NetworkViewer::drawConnections(){
 				//Between neuron mode
 				else{
 					//Only show connections from first neuron to second
-					if( (*conIter)->fromNeuronID != singleNeuronID || (*conIter)->toNeuronID != toNeuronID)
+					if( tmpCon->fromNeuronID != singleNeuronID || tmpCon->toNeuronID != toNeuronID)
 						drawConnection = false;
 				}
 
@@ -599,8 +604,8 @@ void NetworkViewer::drawConnections(){
 			//Draw the connection
 			if(drawConnection){
 				//Get the position of the from and to neurons
-				fromNeuronPoint = &fromNeuronGroup->getNeuronLocation((*conIter)->fromNeuronID);
-				toNeuronPoint = &toNeuronGroup->getNeuronLocation((*conIter)->toNeuronID);
+				fromNeuronPoint = &fromNeuronGroup->getNeuronLocation(tmpCon->fromNeuronID);
+				toNeuronPoint = &toNeuronGroup->getNeuronLocation(tmpCon->toNeuronID);
 
 				//Set the colour
 				if(weight > 0)
@@ -611,7 +616,7 @@ void NetworkViewer::drawConnections(){
 					glColor3f(0.0f, 0.0f, 0.0f);
 
 				//Draw the connection
-				if(weightRenderMode & WEIGHT_RENDER_ENABLED){
+				if(fullRender && (weightRenderMode & WEIGHT_RENDER_ENABLED) ){
 					drawWeightedConnection(
 							fromNeuronPoint->getXPos(),
 							fromNeuronPoint->getYPos(),

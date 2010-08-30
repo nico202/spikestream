@@ -89,7 +89,7 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	QCheckBox* trackWeightsChkbx = new QCheckBox("Track weights");
 	connect(trackWeightsChkbx, SIGNAL(clicked(bool)), this, SLOT(setTrackWeights(bool)));
 	saveWeightsBox->addWidget(trackWeightsChkbx);
-	QPushButton* saveWeightsButton = new QPushButton("Save Weights");
+	saveWeightsButton = new QPushButton("Save Weights");
 	connect(saveWeightsButton, SIGNAL(clicked()), this, SLOT(saveWeights()));
 	saveWeightsBox->addWidget(saveWeightsButton);
 	saveWeightsBox->addStretch(5);
@@ -98,14 +98,15 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	//Add widgets to inject noise into specified layers
 	QHBoxLayout* injectNoiseBox = new QHBoxLayout();
 	injectNoiseNeuronGroupCombo = new QComboBox();
-	injectNoiseNeuronGroupCombo->setMinimumSize(200, 20);
+	injectNoiseNeuronGroupCombo->setMinimumSize(200, 27);
 	injectNoiseBox->addWidget(injectNoiseNeuronGroupCombo);
 	injectNoisePercentCombo = new QComboBox();
 	for(int i=10; i<=100; i += 10)
 		injectNoisePercentCombo->addItem(QString::number(i) + " %");
+	injectNoisePercentCombo->setMinimumSize(60, 27);
 	injectNoiseBox->addWidget(injectNoisePercentCombo);
 	QPushButton* injectNoiseButton = new QPushButton("Inject Noise");
-	injectNoiseButton->setMinimumSize(120, 20);
+	injectNoiseButton->setMinimumSize(120, 27);
 	connect(injectNoiseButton, SIGNAL(clicked()), this, SLOT(injectNoiseButtonClicked()));
 	injectNoiseBox->addWidget(injectNoiseButton);
 	injectNoiseBox->addStretch(5);
@@ -211,6 +212,44 @@ void NemoWidget::checkLoadingProgress(){
 }
 
 
+/*! Checks for progress with the saving of weights*/
+void NemoWidget::checkSaveWeightsProgress(){
+	//Check for errors during loading
+	if(nemoWrapper->isError()){
+		saveWeightsTimer->stop();
+		progressDialog->setValue(progressDialog->maximum());
+		delete progressDialog;
+		progressDialog = NULL;
+		qCritical()<<"Error occurred saving of weights: '"<<nemoWrapper->getErrorMessage()<<"'.";
+		return;
+	}
+
+	//Check for cancelation - stop timer and abort operation
+	else if(progressDialog->wasCanceled()){
+		saveWeightsTimer->stop();
+		nemoWrapper->cancelSaveWeights();
+		delete progressDialog;
+		progressDialog = NULL;
+		return;
+	}
+
+	//If simulation has not been loaded return with loading timer still running
+	else if(!nemoWrapper->isWeightsSaved()){
+		return;
+	}
+
+	else if (updatingProgress){
+		return;
+	}
+
+	//If we have reached this point, loading is complete
+	saveWeightsTimer->stop();
+	progressDialog->setValue(progressDialog->maximum());
+	delete progressDialog;
+	progressDialog = NULL;
+}
+
+
 /*! Called when the inject noise button is clicked. Sets the injection
 	of noise in the nemo wrapper */
 void NemoWidget::injectNoiseButtonClicked(){
@@ -313,7 +352,7 @@ void NemoWidget::networkChanged(){
 	weight field in database at the next time step */
 void NemoWidget::saveWeights(){
 	//Check user wants to save weights.
-	int response = QMessageBox::warning(this, "Save Weights?", "Are you sure that you want to save weights.\nThis will overwrite the current weights in the database and cannot be undone.?", QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel);
+	int response = QMessageBox::warning(this, "Save Weights?", "Are you sure that you want to save weights.\nThis will overwrite the current weights in the database and cannot be undone.", QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel);
 	if(response != QMessageBox::Ok)
 		return;
 
@@ -322,8 +361,26 @@ void NemoWidget::saveWeights(){
 		qCritical()<<"Network is linked to analyses - weights cannot be saved until analyses are deleted.";
 		return;
 	}
+	try{
 
-	nemoWrapper->saveWeights();
+		//Start saving of weights
+		updatingProgress = false;
+		taskCancelled = false;
+		progressDialog = new QProgressDialog("Saving weights", "Cancel", 0, 100, this);
+		progressDialog->setWindowModality(Qt::WindowModal);
+		progressDialog->setMinimumDuration(1000);
+
+		//Instruct wrapper thread to start saving weights
+		nemoWrapper->saveWeights();
+
+		//Wait for loading to finish and update progress dialog
+		saveWeightsTimer  = new QTimer(this);
+		connect(saveWeightsTimer, SIGNAL(timeout()), this, SLOT(checkSaveWeightsProgress()));
+		saveWeightsTimer->start(200);
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<ex.getMessage();
+	}
 }
 
 
@@ -378,6 +435,7 @@ void NemoWidget::setSynapseParameters(){
 
 /*! Called when NeMo stops playing */
 void NemoWidget::simulationStopped(){
+	saveWeightsButton->setEnabled(true);
 	playAction->setEnabled(true);
 	stopAction->setEnabled(false);
 	unloadButton->setEnabled(true);
@@ -427,6 +485,7 @@ void NemoWidget::startSimulation(){
 		playAction->setEnabled(false);
 		stopAction->setEnabled(true);
 		unloadButton->setEnabled(false);
+		saveWeightsButton->setEnabled(false);
 	}
 	catch(SpikeStreamException& ex){
 		qCritical()<<ex.getMessage();

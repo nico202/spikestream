@@ -47,10 +47,10 @@ void AleksanderNetworksBuilder::add4NeuronNetwork1(const QString& networkName, c
 	ConnectionGroup connGrp(connGrpInfo);
 
 	//Add connections
-	Connection* abCon = connGrp.addConnection( new Connection(neuronMap[1]->getID(), neuronMap[2]->getID(),  0,  0) );//A->B
-	Connection* baCon = connGrp.addConnection( new Connection(neuronMap[2]->getID(), neuronMap[1]->getID(),  0,  0) );//B->A
-	Connection* cdCon = connGrp.addConnection( new Connection(neuronMap[3]->getID(), neuronMap[4]->getID(),  0,  0) );//C->D
-	Connection* dcCon = connGrp.addConnection( new Connection(neuronMap[4]->getID(), neuronMap[3]->getID(),  0,  0) );//D->C
+	Connection* abCon = connGrp.addConnection(neuronMap[1]->getID(), neuronMap[2]->getID(),  0,  0);//A->B
+	Connection* baCon = connGrp.addConnection(neuronMap[2]->getID(), neuronMap[1]->getID(),  0,  0);//B->A
+	Connection* cdCon = connGrp.addConnection(neuronMap[3]->getID(), neuronMap[4]->getID(),  0,  0);//C->D
+	Connection* dcCon = connGrp.addConnection(neuronMap[4]->getID(), neuronMap[3]->getID(),  0,  0);//D->C
 	addConnectionGroup(networkID, connGrp);
 
 	//Add weightless connections. Only 1 connection per neuron, so pattern index is zero in all cases
@@ -83,11 +83,11 @@ void AleksanderNetworksBuilder::add4NeuronNetwork2_AND(const QString& networkNam
 	ConnectionGroup connGrp(connGrpInfo);
 
 	//Add connections
-	Connection* abCon = connGrp.addConnection( new Connection(neuronMap[1]->getID(), neuronMap[2]->getID(),  0,  0) );//A->B
-	Connection* acCon = connGrp.addConnection( new Connection(neuronMap[1]->getID(), neuronMap[3]->getID(),  0,  0) );//A->C
-	Connection* baCon = connGrp.addConnection( new Connection(neuronMap[2]->getID(), neuronMap[1]->getID(),  0,  0) );//B->A
-	Connection* cdCon = connGrp.addConnection( new Connection(neuronMap[3]->getID(), neuronMap[4]->getID(),  0,  0) );//C->D
-	Connection* dcCon = connGrp.addConnection( new Connection(neuronMap[4]->getID(), neuronMap[3]->getID(),  0,  0) );//D->C
+	Connection* abCon = connGrp.addConnection(neuronMap[1]->getID(), neuronMap[2]->getID(),  0,  0);//A->B
+	Connection* acCon = connGrp.addConnection(neuronMap[1]->getID(), neuronMap[3]->getID(),  0,  0);//A->C
+	Connection* baCon = connGrp.addConnection(neuronMap[2]->getID(), neuronMap[1]->getID(),  0,  0);//B->A
+	Connection* cdCon = connGrp.addConnection(neuronMap[3]->getID(), neuronMap[4]->getID(),  0,  0);//C->D
+	Connection* dcCon = connGrp.addConnection(neuronMap[4]->getID(), neuronMap[3]->getID(),  0,  0);//D->C
 	addConnectionGroup(networkID, connGrp);
 
 	//Add weightless connections.1 connection to A, B and D
@@ -125,11 +125,11 @@ void AleksanderNetworksBuilder::add4NeuronNetwork2_XOR(const QString& networkNam
 	ConnectionGroup connGrp(connGrpInfo);
 
 	//Add connections
-	Connection* abCon = connGrp.addConnection( new Connection(neuronMap[1]->getID(), neuronMap[2]->getID(),  0,  0) );//A->B
-	Connection* acCon = connGrp.addConnection( new Connection(neuronMap[1]->getID(), neuronMap[3]->getID(),  0,  0) );//A->C
-	Connection* baCon = connGrp.addConnection( new Connection(neuronMap[2]->getID(), neuronMap[1]->getID(),  0,  0) );//B->A
-	Connection* cdCon = connGrp.addConnection( new Connection(neuronMap[3]->getID(), neuronMap[4]->getID(),  0,  0) );//C->D
-	Connection* dcCon = connGrp.addConnection( new Connection(neuronMap[4]->getID(), neuronMap[3]->getID(),  0,  0) );//D->C
+	Connection* abCon = connGrp.addConnection(neuronMap[1]->getID(), neuronMap[2]->getID(),  0,  0);//A->B
+	Connection* acCon = connGrp.addConnection(neuronMap[1]->getID(), neuronMap[3]->getID(),  0,  0);//A->C
+	Connection* baCon = connGrp.addConnection(neuronMap[2]->getID(), neuronMap[1]->getID(),  0,  0);//B->A
+	Connection* cdCon = connGrp.addConnection(neuronMap[3]->getID(), neuronMap[4]->getID(),  0,  0);//C->D
+	Connection* dcCon = connGrp.addConnection(neuronMap[4]->getID(), neuronMap[3]->getID(),  0,  0);//D->C
 	addConnectionGroup(networkID, connGrp);
 
 	//Add weightless connections.1 connection to A, B and D
@@ -167,12 +167,12 @@ void AleksanderNetworksBuilder::add4NeuronNetwork3_AND(const QString& networkNam
 	ConnectionGroup connGrp(connGrpInfo);
 
 	//Add connections
-	Connection* abCon = connGrp.addConnection( new Connection(neuronMap[1]->getID(), neuronMap[2]->getID(),  0,  0) );//A->B
-	Connection* acCon = connGrp.addConnection( new Connection(neuronMap[1]->getID(), neuronMap[3]->getID(),  0,  0) );//A->C
-	Connection* baCon = connGrp.addConnection( new Connection(neuronMap[2]->getID(), neuronMap[1]->getID(),  0,  0) );//B->A
-	Connection* caCon = connGrp.addConnection( new Connection(neuronMap[3]->getID(), neuronMap[1]->getID(),  0,  0) );//C->A
-	Connection* cdCon = connGrp.addConnection( new Connection(neuronMap[3]->getID(), neuronMap[4]->getID(),  0,  0) );//C->D
-	Connection* dcCon = connGrp.addConnection( new Connection(neuronMap[4]->getID(), neuronMap[3]->getID(),  0,  0) );//D->C
+	Connection* abCon = connGrp.addConnection(neuronMap[1]->getID(), neuronMap[2]->getID(),  0,  0);//A->B
+	Connection* acCon = connGrp.addConnection(neuronMap[1]->getID(), neuronMap[3]->getID(),  0,  0);//A->C
+	Connection* baCon = connGrp.addConnection(neuronMap[2]->getID(), neuronMap[1]->getID(),  0,  0);//B->A
+	Connection* caCon = connGrp.addConnection(neuronMap[3]->getID(), neuronMap[1]->getID(),  0,  0);//C->A
+	Connection* cdCon = connGrp.addConnection(neuronMap[3]->getID(), neuronMap[4]->getID(),  0,  0);//C->D
+	Connection* dcCon = connGrp.addConnection(neuronMap[4]->getID(), neuronMap[3]->getID(),  0,  0);//D->C
 	addConnectionGroup(networkID, connGrp);
 
 	//Add weightless connections.1 connection to B and D
@@ -213,12 +213,12 @@ void AleksanderNetworksBuilder::add4NeuronNetwork3_XOR(const QString& networkNam
 	ConnectionGroup connGrp(connGrpInfo);
 
 	//Add connections
-	Connection* abCon = connGrp.addConnection( new Connection(neuronMap[1]->getID(), neuronMap[2]->getID(),  0,  0) );//A->B
-	Connection* acCon = connGrp.addConnection( new Connection(neuronMap[1]->getID(), neuronMap[3]->getID(),  0,  0) );//A->C
-	Connection* baCon = connGrp.addConnection( new Connection(neuronMap[2]->getID(), neuronMap[1]->getID(),  0,  0) );//B->A
-	Connection* caCon = connGrp.addConnection( new Connection(neuronMap[3]->getID(), neuronMap[1]->getID(),  0,  0) );//C->A
-	Connection* cdCon = connGrp.addConnection( new Connection(neuronMap[3]->getID(), neuronMap[4]->getID(),  0,  0) );//C->D
-	Connection* dcCon = connGrp.addConnection( new Connection(neuronMap[4]->getID(), neuronMap[3]->getID(),  0,  0) );//D->C
+	Connection* abCon = connGrp.addConnection(neuronMap[1]->getID(), neuronMap[2]->getID(),  0,  0);//A->B
+	Connection* acCon = connGrp.addConnection(neuronMap[1]->getID(), neuronMap[3]->getID(),  0,  0);//A->C
+	Connection* baCon = connGrp.addConnection(neuronMap[2]->getID(), neuronMap[1]->getID(),  0,  0);//B->A
+	Connection* caCon = connGrp.addConnection(neuronMap[3]->getID(), neuronMap[1]->getID(),  0,  0);//C->A
+	Connection* cdCon = connGrp.addConnection(neuronMap[3]->getID(), neuronMap[4]->getID(),  0,  0);//C->D
+	Connection* dcCon = connGrp.addConnection(neuronMap[4]->getID(), neuronMap[3]->getID(),  0,  0);//D->C
 	addConnectionGroup(networkID, connGrp);
 
 	//Add weightless connections.1 connection to B and D
@@ -260,14 +260,14 @@ void AleksanderNetworksBuilder::add4NeuronNetwork4_AND(const QString& networkNam
 	ConnectionGroup connGrp(connGrpInfo);
 
 	//Add connections
-	Connection* abCon = connGrp.addConnection( new Connection(neuronMap[1]->getID(), neuronMap[2]->getID(),  0,  0) );//A->B
-	Connection* acCon = connGrp.addConnection( new Connection(neuronMap[1]->getID(), neuronMap[3]->getID(),  0,  0) );//A->C
-	Connection* baCon = connGrp.addConnection( new Connection(neuronMap[2]->getID(), neuronMap[1]->getID(),  0,  0) );//B->A
-	Connection* bdCon = connGrp.addConnection( new Connection(neuronMap[2]->getID(), neuronMap[4]->getID(),  0,  0) );//B->D
-	Connection* caCon = connGrp.addConnection( new Connection(neuronMap[3]->getID(), neuronMap[1]->getID(),  0,  0) );//C->A
-	Connection* cdCon = connGrp.addConnection( new Connection(neuronMap[3]->getID(), neuronMap[4]->getID(),  0,  0) );//C->D
-	Connection* dbCon = connGrp.addConnection( new Connection(neuronMap[4]->getID(), neuronMap[2]->getID(),  0,  0) );//D->B
-	Connection* dcCon = connGrp.addConnection( new Connection(neuronMap[4]->getID(), neuronMap[3]->getID(),  0,  0) );//D->C
+	Connection* abCon = connGrp.addConnection(neuronMap[1]->getID(), neuronMap[2]->getID(),  0,  0);//A->B
+	Connection* acCon = connGrp.addConnection(neuronMap[1]->getID(), neuronMap[3]->getID(),  0,  0);//A->C
+	Connection* baCon = connGrp.addConnection(neuronMap[2]->getID(), neuronMap[1]->getID(),  0,  0);//B->A
+	Connection* bdCon = connGrp.addConnection(neuronMap[2]->getID(), neuronMap[4]->getID(),  0,  0);//B->D
+	Connection* caCon = connGrp.addConnection(neuronMap[3]->getID(), neuronMap[1]->getID(),  0,  0);//C->A
+	Connection* cdCon = connGrp.addConnection(neuronMap[3]->getID(), neuronMap[4]->getID(),  0,  0);//C->D
+	Connection* dbCon = connGrp.addConnection(neuronMap[4]->getID(), neuronMap[2]->getID(),  0,  0);//D->B
+	Connection* dcCon = connGrp.addConnection(neuronMap[4]->getID(), neuronMap[3]->getID(),  0,  0);//D->C
 	addConnectionGroup(networkID, connGrp);
 
 	//Add weightless connections. All neurons have two connections
@@ -312,14 +312,14 @@ void AleksanderNetworksBuilder::add4NeuronNetwork4_XOR(const QString& networkNam
 	ConnectionGroup connGrp(connGrpInfo);
 
 	//Add connections
-	Connection* abCon = connGrp.addConnection( new Connection(neuronMap[1]->getID(), neuronMap[2]->getID(),  0,  0) );//A->B
-	Connection* acCon = connGrp.addConnection( new Connection(neuronMap[1]->getID(), neuronMap[3]->getID(),  0,  0) );//A->C
-	Connection* baCon = connGrp.addConnection( new Connection(neuronMap[2]->getID(), neuronMap[1]->getID(),  0,  0) );//B->A
-	Connection* bdCon = connGrp.addConnection( new Connection(neuronMap[2]->getID(), neuronMap[4]->getID(),  0,  0) );//B->D
-	Connection* caCon = connGrp.addConnection( new Connection(neuronMap[3]->getID(), neuronMap[1]->getID(),  0,  0) );//C->A
-	Connection* cdCon = connGrp.addConnection( new Connection(neuronMap[3]->getID(), neuronMap[4]->getID(),  0,  0) );//C->D
-	Connection* dbCon = connGrp.addConnection( new Connection(neuronMap[4]->getID(), neuronMap[2]->getID(),  0,  0) );//D->B
-	Connection* dcCon = connGrp.addConnection( new Connection(neuronMap[4]->getID(), neuronMap[3]->getID(),  0,  0) );//D->C
+	Connection* abCon = connGrp.addConnection(neuronMap[1]->getID(), neuronMap[2]->getID(),  0,  0);//A->B
+	Connection* acCon = connGrp.addConnection(neuronMap[1]->getID(), neuronMap[3]->getID(),  0,  0);//A->C
+	Connection* baCon = connGrp.addConnection(neuronMap[2]->getID(), neuronMap[1]->getID(),  0,  0);//B->A
+	Connection* bdCon = connGrp.addConnection(neuronMap[2]->getID(), neuronMap[4]->getID(),  0,  0);//B->D
+	Connection* caCon = connGrp.addConnection(neuronMap[3]->getID(), neuronMap[1]->getID(),  0,  0);//C->A
+	Connection* cdCon = connGrp.addConnection(neuronMap[3]->getID(), neuronMap[4]->getID(),  0,  0);//C->D
+	Connection* dbCon = connGrp.addConnection(neuronMap[4]->getID(), neuronMap[2]->getID(),  0,  0);//D->B
+	Connection* dcCon = connGrp.addConnection(neuronMap[4]->getID(), neuronMap[3]->getID(),  0,  0);//D->C
 	addConnectionGroup(networkID, connGrp);
 
 	//Add weightless connections. All neurons have two connections
@@ -364,18 +364,18 @@ void AleksanderNetworksBuilder::add4NeuronNetwork5_AND(const QString& networkNam
 	ConnectionGroup connGrp(connGrpInfo);
 
 	//Add connections. Each neuron has three connections to it
-	Connection* abCon = connGrp.addConnection( new Connection(neuronMap[1]->getID(), neuronMap[2]->getID(),  0,  0) );//A->B
-	Connection* acCon = connGrp.addConnection( new Connection(neuronMap[1]->getID(), neuronMap[3]->getID(),  0,  0) );//A->C
-	Connection* adCon = connGrp.addConnection( new Connection(neuronMap[1]->getID(), neuronMap[4]->getID(),  0,  0) );//A->D
-	Connection* baCon = connGrp.addConnection( new Connection(neuronMap[2]->getID(), neuronMap[1]->getID(),  0,  0) );//B->A
-	Connection* bcCon = connGrp.addConnection( new Connection(neuronMap[2]->getID(), neuronMap[3]->getID(),  0,  0) );//B->C
-	Connection* bdCon = connGrp.addConnection( new Connection(neuronMap[2]->getID(), neuronMap[4]->getID(),  0,  0) );//B->D
-	Connection* caCon = connGrp.addConnection( new Connection(neuronMap[3]->getID(), neuronMap[1]->getID(),  0,  0) );//C->A
-	Connection* cbCon = connGrp.addConnection( new Connection(neuronMap[3]->getID(), neuronMap[2]->getID(),  0,  0) );//C->B
-	Connection* cdCon = connGrp.addConnection( new Connection(neuronMap[3]->getID(), neuronMap[4]->getID(),  0,  0) );//C->D
-	Connection* daCon = connGrp.addConnection( new Connection(neuronMap[4]->getID(), neuronMap[1]->getID(),  0,  0) );//D->A
-	Connection* dbCon = connGrp.addConnection( new Connection(neuronMap[4]->getID(), neuronMap[2]->getID(),  0,  0) );//D->B
-	Connection* dcCon = connGrp.addConnection( new Connection(neuronMap[4]->getID(), neuronMap[3]->getID(),  0,  0) );//D->C
+	Connection* abCon = connGrp.addConnection(neuronMap[1]->getID(), neuronMap[2]->getID(),  0,  0);//A->B
+	Connection* acCon = connGrp.addConnection(neuronMap[1]->getID(), neuronMap[3]->getID(),  0,  0);//A->C
+	Connection* adCon = connGrp.addConnection(neuronMap[1]->getID(), neuronMap[4]->getID(),  0,  0);//A->D
+	Connection* baCon = connGrp.addConnection(neuronMap[2]->getID(), neuronMap[1]->getID(),  0,  0);//B->A
+	Connection* bcCon = connGrp.addConnection(neuronMap[2]->getID(), neuronMap[3]->getID(),  0,  0);//B->C
+	Connection* bdCon = connGrp.addConnection(neuronMap[2]->getID(), neuronMap[4]->getID(),  0,  0);//B->D
+	Connection* caCon = connGrp.addConnection(neuronMap[3]->getID(), neuronMap[1]->getID(),  0,  0);//C->A
+	Connection* cbCon = connGrp.addConnection(neuronMap[3]->getID(), neuronMap[2]->getID(),  0,  0);//C->B
+	Connection* cdCon = connGrp.addConnection(neuronMap[3]->getID(), neuronMap[4]->getID(),  0,  0);//C->D
+	Connection* daCon = connGrp.addConnection(neuronMap[4]->getID(), neuronMap[1]->getID(),  0,  0);//D->A
+	Connection* dbCon = connGrp.addConnection(neuronMap[4]->getID(), neuronMap[2]->getID(),  0,  0);//D->B
+	Connection* dcCon = connGrp.addConnection(neuronMap[4]->getID(), neuronMap[3]->getID(),  0,  0);//D->C
 	addConnectionGroup(networkID, connGrp);
 
 	//Add weightless connections. All neurons have three connections
@@ -443,18 +443,18 @@ void AleksanderNetworksBuilder::add4NeuronNetwork5_XOR(const QString& networkNam
 	ConnectionGroup connGrp(connGrpInfo);
 
 	//Add connections. Each neuron has three connections to it
-	Connection* abCon = connGrp.addConnection( new Connection(neuronMap[1]->getID(), neuronMap[2]->getID(),  0,  0) );//A->B
-	Connection* acCon = connGrp.addConnection( new Connection(neuronMap[1]->getID(), neuronMap[3]->getID(),  0,  0) );//A->C
-	Connection* adCon = connGrp.addConnection( new Connection(neuronMap[1]->getID(), neuronMap[4]->getID(),  0,  0) );//A->D
-	Connection* baCon = connGrp.addConnection( new Connection(neuronMap[2]->getID(), neuronMap[1]->getID(),  0,  0) );//B->A
-	Connection* bcCon = connGrp.addConnection( new Connection(neuronMap[2]->getID(), neuronMap[3]->getID(),  0,  0) );//B->C
-	Connection* bdCon = connGrp.addConnection( new Connection(neuronMap[2]->getID(), neuronMap[4]->getID(),  0,  0) );//B->D
-	Connection* caCon = connGrp.addConnection( new Connection(neuronMap[3]->getID(), neuronMap[1]->getID(),  0,  0) );//C->A
-	Connection* cbCon = connGrp.addConnection( new Connection(neuronMap[3]->getID(), neuronMap[2]->getID(),  0,  0) );//C->B
-	Connection* cdCon = connGrp.addConnection( new Connection(neuronMap[3]->getID(), neuronMap[4]->getID(),  0,  0) );//C->D
-	Connection* daCon = connGrp.addConnection( new Connection(neuronMap[4]->getID(), neuronMap[1]->getID(),  0,  0) );//D->A
-	Connection* dbCon = connGrp.addConnection( new Connection(neuronMap[4]->getID(), neuronMap[2]->getID(),  0,  0) );//D->B
-	Connection* dcCon = connGrp.addConnection( new Connection(neuronMap[4]->getID(), neuronMap[3]->getID(),  0,  0) );//D->C
+	Connection* abCon = connGrp.addConnection(neuronMap[1]->getID(), neuronMap[2]->getID(),  0,  0);//A->B
+	Connection* acCon = connGrp.addConnection(neuronMap[1]->getID(), neuronMap[3]->getID(),  0,  0);//A->C
+	Connection* adCon = connGrp.addConnection(neuronMap[1]->getID(), neuronMap[4]->getID(),  0,  0);//A->D
+	Connection* baCon = connGrp.addConnection(neuronMap[2]->getID(), neuronMap[1]->getID(),  0,  0);//B->A
+	Connection* bcCon = connGrp.addConnection(neuronMap[2]->getID(), neuronMap[3]->getID(),  0,  0);//B->C
+	Connection* bdCon = connGrp.addConnection(neuronMap[2]->getID(), neuronMap[4]->getID(),  0,  0);//B->D
+	Connection* caCon = connGrp.addConnection(neuronMap[3]->getID(), neuronMap[1]->getID(),  0,  0);//C->A
+	Connection* cbCon = connGrp.addConnection(neuronMap[3]->getID(), neuronMap[2]->getID(),  0,  0);//C->B
+	Connection* cdCon = connGrp.addConnection(neuronMap[3]->getID(), neuronMap[4]->getID(),  0,  0);//C->D
+	Connection* daCon = connGrp.addConnection(neuronMap[4]->getID(), neuronMap[1]->getID(),  0,  0);//D->A
+	Connection* dbCon = connGrp.addConnection(neuronMap[4]->getID(), neuronMap[2]->getID(),  0,  0);//D->B
+	Connection* dcCon = connGrp.addConnection(neuronMap[4]->getID(), neuronMap[3]->getID(),  0,  0);//D->C
 	addConnectionGroup(networkID, connGrp);
 
 	//Add weightless connections. All neurons have three connections

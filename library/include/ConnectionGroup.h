@@ -14,12 +14,13 @@ namespace spikestream {
 			ConnectionGroup(const ConnectionGroupInfo& connGrpInfo);
 			~ConnectionGroup();
 			Connection* addConnection(Connection* newConn);
-			QList<Connection*>::const_iterator begin();
+			Connection* addConnection(unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight);//UNTESTED
+			QHash<unsigned, Connection*>::const_iterator begin();
 			void clearConnections();
 			bool contains(unsigned neuronID);
 			QHash<unsigned int, QList<Connection*> >::const_iterator fromMapBegin() { return fromConnectionMap.begin(); }
 			QHash<unsigned int, QList<Connection*> >::const_iterator fromMapEnd() { return fromConnectionMap.end(); }
-			QList<Connection*>::const_iterator end();
+			QHash<unsigned, Connection*>::const_iterator end();
 			QList<Connection*> getConnections();
 			unsigned int getID() { return info.getID(); }
 			QList<Connection*> getFromConnections(unsigned int neurID);
@@ -61,6 +62,7 @@ namespace spikestream {
 		   QHash<QString, double> parameterMap;
 
 		   //====================  METHODS  ==========================
+		   unsigned getTemporaryID();
 		   ConnectionGroup(const ConnectionGroup& connGrp);
 		   ConnectionGroup& operator=(const ConnectionGroup& rhs);
 		};

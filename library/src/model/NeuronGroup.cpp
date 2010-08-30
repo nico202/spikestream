@@ -32,9 +32,7 @@ NeuronGroup::~NeuronGroup(){
 	by the actual ID when the group is added to the network and database. */
 Neuron* NeuronGroup::addNeuron(float xPos, float yPos, float zPos){
 	Neuron* tmpNeuron = new Neuron(xPos, yPos, zPos);
-	if(neuronMap->contains((unsigned int)neuronMap->size()))
-		throw SpikeStreamException("Temporary neuron ID conflicts with neuron ID already in group.");
-	(*neuronMap)[(unsigned int) neuronMap->size()] = tmpNeuron;
+	(*neuronMap)[getTemporaryID()] = tmpNeuron;
 	return tmpNeuron;
 }
 
@@ -119,5 +117,12 @@ int NeuronGroup::size(){
 	return neuronMap->size();
 }
 
+/*! Returns a temporary ID that does not exist in the current hash map */
+unsigned NeuronGroup::getTemporaryID(){
+	unsigned tmpID = (unsigned int)neuronMap->size();
+	while(neuronMap->contains(tmpID))
+		++tmpID;
+	return tmpID;
+}
 
 

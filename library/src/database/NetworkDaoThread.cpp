@@ -295,17 +295,17 @@ void NetworkDaoThread::addConnectionGroups(){
 		int conCntr = 0, offset = 0, conAddedCntr = 0;
 		QHash<unsigned, Connection*>* newConMap = new QHash<unsigned, Connection*>();
 		QList<Connection*> tmpConList;
-		QList<Connection*>::const_iterator endConGrp = connectionGroup->end();
-		for(QList<Connection*>::const_iterator iter = connectionGroup->begin(); iter != endConGrp; ++iter){
+		QHash<unsigned, Connection*>::const_iterator endConGrp = connectionGroup->end();
+		for(QHash<unsigned, Connection*>::const_iterator iter = connectionGroup->begin(); iter != endConGrp; ++iter){
 			offset = 5 * (conCntr % numConBuffers);
 
 			//Bind values to query
-			tmpConList.append(*iter);
+			tmpConList.append(iter.value());
 			query.bindValue(0 + offset, connectionGroup->getID());
-			query.bindValue(1 + offset, (*iter)->fromNeuronID);
-			query.bindValue(2 + offset, (*iter)->toNeuronID);
-			query.bindValue(3 + offset, (*iter)->delay);
-			query.bindValue(4 + offset, (*iter)->weight);
+			query.bindValue(1 + offset, iter.value()->fromNeuronID);
+			query.bindValue(2 + offset, iter.value()->toNeuronID);
+			query.bindValue(3 + offset, iter.value()->delay);
+			query.bindValue(4 + offset, iter.value()->weight);
 
 			//Execute query
 			if(conCntr % numConBuffers == numConBuffers-1){
