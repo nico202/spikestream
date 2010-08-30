@@ -167,7 +167,7 @@ void FullyConnectedNetworksBuilder::addConnections(){
 		//Create connections
 		foreach(unsigned int fromNeurID, fromNeurIDList){
 			//Add the connection to the neuron
-			conListArray[toNeurID-1].append( connGrp.addConnection( new Connection(neuronMap[fromNeurID], neuronMap[toNeurID],  0,  0) ) );
+			conListArray[toNeurID-1].append( connGrp.addConnection(neuronMap[fromNeurID], neuronMap[toNeurID],  0,  0) );
 		}
 	}
 

@@ -6,11 +6,11 @@ SUBDIRS =   library applicationlibrary application
 
 
 #================  ANALYSIS PLUGINS  =================
-SUBDIRS += analysis/statebasedphi analysis/liveliness
+#SUBDIRS += analysis/statebasedphi analysis/liveliness
 
 
 #================  NETWORKS PLUGINS  =================
-SUBDIRS += networks/tononinetworks networks/aleksandernetworks networks/alekgameznets2
+#SUBDIRS += networks/tononinetworks networks/aleksandernetworks networks/alekgameznets2
 
 
 #================  NEURON GROUP PLUGINS  =================
@@ -33,8 +33,8 @@ SUBDIRS += installation/dbconfigtool
 SUBDIRS += testlibrary
 SUBDIRS += library/test
 SUBDIRS += applicationlibrary/test
-SUBDIRS += analysis/statebasedphi/test
-SUBDIRS += analysis/liveliness/test
-SUBDIRS += simulators/nemo/test
+#SUBDIRS += analysis/statebasedphi/test
+#SUBDIRS += analysis/liveliness/test
+#SUBDIRS += simulators/nemo/test
 
 

@@ -39,18 +39,27 @@ Connection* ConnectionGroup::addConnection(Connection* newConn){
 	//Store connection
 	(*connectionMap)[newConn->getID()] = newConn;
 
-    //Store connection data in easy to access format
-    fromConnectionMap[newConn->fromNeuronID].append(newConn);
-    toConnectionMap[newConn->toNeuronID].append(newConn);
+	//Store connection data in easy to access format
+	fromConnectionMap[newConn->fromNeuronID].append(newConn);
+	toConnectionMap[newConn->toNeuronID].append(newConn);
 
-    //Return pointer to connection
-    return newConn;
+	//Return pointer to connection
+	return newConn;
+}
+
+
+/*! Creates a new connection and adds it to the group.*/
+Connection* ConnectionGroup::addConnection(unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight){
+	Connection* tmpCon = new Connection(getTemporaryID(), getID(), fromNeuronID, toNeuronID, delay, weight);
+
+	//Store connection
+	return addConnection(tmpCon);
 }
 
 
 /*! Returns iterator pointing to beginning of connection group */
-QList<Connection*>::const_iterator ConnectionGroup::begin(){
-	return connectionMap->values().begin();
+QHash<unsigned, Connection*>::const_iterator ConnectionGroup::begin(){
+	return connectionMap->begin();
 }
 
 
@@ -63,8 +72,8 @@ bool ConnectionGroup::contains(unsigned neuronID){
 
 
 /*! Returns iterator pointing to end of connection group */
-QList<Connection*>::const_iterator ConnectionGroup::end(){
-	return connectionMap->values().end();
+QHash<unsigned, Connection*>::const_iterator ConnectionGroup::end(){
+	return connectionMap->end();
 }
 
 
@@ -77,9 +86,9 @@ QList<Connection*> ConnectionGroup::getConnections(){
 
 /*! Removes all connections from this group */
 void ConnectionGroup::clearConnections(){
-	QList<Connection*>::const_iterator endConnList = this->end();
-	for(QList<Connection*>::const_iterator iter = this->begin(); iter != endConnList; ++iter){
-		delete *iter;
+	QHash<unsigned, Connection*>::const_iterator endConnList = this->end();
+	for(QHash<unsigned, Connection*>::const_iterator iter = this->begin(); iter != endConnList; ++iter){
+		delete iter.value();
     }
 	connectionMap->clear();
     fromConnectionMap.clear();
@@ -136,5 +145,14 @@ void ConnectionGroup::setWeight(unsigned connectionID, float weight){
 	if(!connectionMap->contains(connectionID))
 		throw SpikeStreamException("Failed to set weight. Connection with ID " + QString::number(connectionID) + " does not exist in this connection group.");
 	(*connectionMap)[connectionID]->setWeight(weight);
+}
+
+
+/*! Returns a temporary ID for adding connections */
+unsigned ConnectionGroup::getTemporaryID(){
+	unsigned tmpID = (unsigned int)connectionMap->size();
+	while(connectionMap->contains(tmpID))
+		++tmpID;
+	return tmpID;
 }
 

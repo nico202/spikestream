@@ -41,7 +41,6 @@ void TestNetwork::testGetConnections(){
 	QList<Connection*> conList = network.getConnections(conMode, testNeurIDList[4], testNeurIDList[3]);
 	QCOMPARE(conList.size(), (int)1);
 	QCOMPARE(conList.at(0)->getID(), testConnIDList[3]);
-	QCOMPARE(conList.at(0)->getTempWeight(), 0.0f);
 	QCOMPARE(conList.at(0)->getFromNeuronID(), testNeurIDList[4]);
 	QCOMPARE(conList.at(0)->getToNeuronID(), testNeurIDList[3]);
 
@@ -51,7 +50,6 @@ void TestNetwork::testGetConnections(){
 	conMode |= SHOW_FROM_CONNECTIONS;
 	conList = network.getConnections(conMode, testNeurIDList[0], 0);
 	QCOMPARE(conList.size(), (int)3);
-	QCOMPARE(conList.at(0)->getTempWeight(), 0.0f);
 	QCOMPARE(conList.at(0)->getFromNeuronID(), testNeurIDList[0]);
 	QCOMPARE(conList.at(1)->getFromNeuronID(), testNeurIDList[0]);
 	QCOMPARE(conList.at(2)->getFromNeuronID(), testNeurIDList[0]);
@@ -62,7 +60,6 @@ void TestNetwork::testGetConnections(){
 	conMode |= SHOW_TO_CONNECTIONS;
 	conList = network.getConnections(conMode, testNeurIDList[1], 0);
 	QCOMPARE(conList.size(), (int)2);
-	QCOMPARE(conList.at(0)->getTempWeight(), 0.0f);
 	QCOMPARE(conList.at(0)->getToNeuronID(), testNeurIDList[1]);
 	QCOMPARE(conList.at(1)->getToNeuronID(), testNeurIDList[1]);
 	QCOMPARE(conList.at(0)->getFromNeuronID(), testNeurIDList[0]);
@@ -73,7 +70,6 @@ void TestNetwork::testGetConnections(){
 	conMode |= CONNECTION_MODE_ENABLED;
 	conList = network.getConnections(conMode, testNeurIDList[3], 0);
 	QCOMPARE(conList.size(), (int)3);
-	QCOMPARE(conList.at(0)->getTempWeight(), 0.0f);
 	QVERIFY( (conList.at(0)->getToNeuronID() == testNeurIDList[3]) || (conList.at(0)->getFromNeuronID() == testNeurIDList[3]) );
 	QVERIFY( (conList.at(1)->getToNeuronID() == testNeurIDList[3]) || (conList.at(1)->getFromNeuronID() == testNeurIDList[3]) );
 	QVERIFY( (conList.at(2)->getToNeuronID() == testNeurIDList[3]) || (conList.at(2)->getFromNeuronID() == testNeurIDList[3]) );

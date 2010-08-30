@@ -27,6 +27,7 @@ namespace spikestream {
 			NemoWrapper();
 			~NemoWrapper();
 			void cancelLoading();
+			void cancelSaveWeights();
 			void clearWaitForGraphics() { waitForGraphics = false; }
 			unsigned getArchiveID() { return archiveInfo.getID(); }
 			int getCurrentTask() { return currentTaskID; }
@@ -36,25 +37,23 @@ namespace spikestream {
 			unsigned getUpdateInterval_ms() { return this->updateInterval_ms; }
 			bool isError() { return error; }
 			bool isMonitorMode() { return monitorMode; }
+			bool isWeightsSaved() { return weightsSaved; }
 			bool isSimulationLoaded() { return simulationLoaded; }
 			bool isSimulationRunning();
 			void run();
+			void saveWeights();
 			void setArchiveMode(bool mode);
 			void setFrameRate(unsigned int frameRate);
 			void setInjectNoise(unsigned neuronGroupID, double percentage);
 			void setMonitorMode(bool mode);
 			void setNemoConfig(nemo_configuration_t nemoConfig) { this->nemoConfig = nemoConfig; }
-			void saveCurrentWeights();
-			void saveTempWeights();
-			void setTrackCurrentWeights(bool enable);
-			void setTrackTempWeights(bool enable);
+			void setTrackWeights(bool enable);
 			void setSTDPFunctionID(unsigned stdpFunctionID) { this->stdpFunctionID = stdpFunctionID; }
 			void setUpdateInterval_ms(unsigned int interval) { this->updateInterval_ms = interval; }
 			void playSimulation();
 			void stepSimulation();
 			void stopSimulation();
 			void unloadSimulation();
-
 
 			///====================  VARIABLES  ==========================
 			/*! No task defined */
@@ -65,6 +64,9 @@ namespace spikestream {
 
 			/*! Task of advancing one time step of the simulation. */
 			static const int STEP_SIMULATION_TASK = 2;
+
+			/*! Task of saving weights from simulation into database. */
+			static const int SAVE_WEIGHTS_TASK = 3;
 
 
 		signals:
@@ -147,6 +149,12 @@ namespace spikestream {
 			/*! List of presynaptic neuron ids used for saving weights. */
 			QList<unsigned> preSynapticNeuronIDs;
 
+			/*! Flag set to true when weights have been saved. */
+			bool weightsSaved;
+
+			/*! Flag used to cancel weight save */
+			bool weightSaveCancelled;
+
 			//======================  METHODS  ========================
 			void checkNemoOutput(nemo_status_t result, const QString& errorMessage);
 			void clearError();
@@ -156,6 +164,8 @@ namespace spikestream {
 			void setError(const QString& errorMessage);
 			void stepNemo();
 			void unloadNemo();
+			void updateNetworkWeights();
+			void saveNemoWeights();
 	};
 
 }

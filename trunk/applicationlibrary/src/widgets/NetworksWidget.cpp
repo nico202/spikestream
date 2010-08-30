@@ -223,7 +223,7 @@ void NetworksWidget::loadNetworkList(){
 
 		//Set labels and buttons depending on whether it is the current network
 		if(currentNetworkID == networkInfoList[i].getID()){
-			if(Globals::getArchiveDao()->networkIsLocked(currentNetworkID)){
+			if(Globals::getArchiveDao()->networkHasArchives(currentNetworkID)){
 				idLabel->setStyleSheet( "QLabel { color: #F08080; font-weight: bold; font-style: italic; }");
 				nameLabel->setStyleSheet( "QLabel { color: #F08080; font-weight: bold; font-style: italic; }");
 				descriptionLabel->setStyleSheet( "QLabel { color: #F08080; font-weight: bold; font-style: italic; }");
@@ -235,7 +235,7 @@ void NetworksWidget::loadNetworkList(){
 			}
 			loadButton->setEnabled(false);
 		}
-		else if (Globals::getArchiveDao()->networkIsLocked(currentNetworkID)) {
+		else if (Globals::getArchiveDao()->networkHasArchives(currentNetworkID)) {
 			idLabel->setStyleSheet( "QLabel { color: #777777; font-style: italic; }");
 			nameLabel->setStyleSheet( "QLabel { color: #777777; font-style: italic; }");
 			descriptionLabel->setStyleSheet( "QLabel { color: #777777; font-style: italic; }");

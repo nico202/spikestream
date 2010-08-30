@@ -13,7 +13,7 @@ class TestNetworkDaoThread : public TestDao {
 	Q_OBJECT
 
 	private slots:
-	    void testAddConnectionGroup();
+		void testAddConnectionGroup();
 	    void testAddNeuronGroup();
 		void testDeleteConnectionGroups();
 		void testDeleteNeuronGroups();

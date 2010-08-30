@@ -251,8 +251,7 @@ void NRMDataImporter::addConnections(){
 						throw SpikeStreamException("Invalid from and/or to neuron IDs.");
 
 					//Add the connection to the connection group
-					Connection* newConn = new Connection(fromNeuronID, toNeuronID, 0, 0);
-					newConGrp->addConnection(newConn);
+					newConGrp->addConnection(fromNeuronID, toNeuronID, 0, 0);
 				}
 			}
 

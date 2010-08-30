@@ -69,6 +69,7 @@ namespace spikestream {
 
 
 			//====================  METHODS  ==========================
+			unsigned getTemporaryID();
 			NeuronGroup(const NeuronGroup& connGrp);
 			NeuronGroup& operator=(const NeuronGroup& rhs);
     };

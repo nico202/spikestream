@@ -19,7 +19,6 @@ NemoWrapper::NemoWrapper(){
 	archiveMode = false;
 	monitorMode = false;
 	updateInterval_ms = 500;
-	weightSaveMode = 0;
 
 	//Zero is the default STDP function
 	stdpFunctionID = 0;
@@ -46,6 +45,12 @@ void NemoWrapper::cancelLoading(){
 }
 
 
+/*! Cancels the saving of weights */
+void NemoWrapper::cancelSaveWeights(){
+	weightSaveCancelled = true;
+}
+
+
 /*! Returns true if simulation is currently being played */
 bool NemoWrapper::isSimulationRunning(){
 	if(currentTaskID == RUN_SIMULATION_TASK || currentTaskID == STEP_SIMULATION_TASK)
@@ -64,6 +69,7 @@ void NemoWrapper::loadNemo(){
 	waitForGraphics = false;
 	archiveMode = false;
 	monitorMode = false;
+	trackWeights = false;
 
 	//Get the network
 	if(!Globals::networkLoaded())
@@ -77,7 +83,7 @@ void NemoWrapper::loadNemo(){
 	//Build the Nemo network
 	NemoLoader* nemoLoader = new NemoLoader();
 	connect(nemoLoader, SIGNAL(progress(int, int)), this, SLOT(updateProgress(int, int)));
-	nemo_network_t nemoNet = nemoLoader->buildNemoNetwork(currentNetwork, &stopThread, &volatileConGrpList);
+	nemo_network_t nemoNet = nemoLoader->buildNemoNetwork(currentNetwork, &volatileConGrpList, &stopThread);
 
 	//Clean up loader
 	delete nemoLoader;
@@ -108,6 +114,16 @@ void NemoWrapper::playSimulation(){
 	if(!simulationLoaded)
 		throw SpikeStreamException("Cannot run simulation - no simulation loaded.");
 	currentTaskID = RUN_SIMULATION_TASK;
+}
+
+
+/*! Saves the volatile weights to the database */
+void NemoWrapper::saveWeights(){
+	if(!simulationLoaded)
+		throw SpikeStreamException("Cannot save weights - no simulation loaded.");
+	weightsSaved = false;
+	weightSaveCancelled = false;
+	currentTaskID = SAVE_WEIGHTS_TASK;
 }
 
 
@@ -162,7 +178,10 @@ void NemoWrapper::run(){
 			//Step simulation
 			else if(currentTaskID == STEP_SIMULATION_TASK){
 				stepNemo();
-				currentTaskID = NO_TASK_DEFINED;//Don't want it to continue stepping.
+			}
+			//Save weights
+			else if(currentTaskID == SAVE_WEIGHTS_TASK){
+				saveNemoWeights();
 			}
 			//Do nothing
 			else if(currentTaskID == NO_TASK_DEFINED){
@@ -172,6 +191,9 @@ void NemoWrapper::run(){
 			else{
 				throw SpikeStreamException("Task ID not recognized.");
 			}
+
+			//Reset task ID
+			currentTaskID = NO_TASK_DEFINED;//Don't want it to continue stepping.
 
 			//Short sleep waiting for the next command
 			msleep(200);
@@ -247,10 +269,6 @@ void NemoWrapper::setMonitorMode(bool newMonitorMode){
 }
 
 
-/*! Saves current weights into the database. */
-void  NemoWrapper::saveWeights(){
-}
-
 
 /*! Sets wrapper to retrieve the weights from NeMo and save them to the current weight
 	field in the database. Does this operation every time step until it is turned off. */
@@ -269,6 +287,7 @@ void NemoWrapper::stopSimulation(){
 void NemoWrapper::unloadSimulation(){
 	stopThread = true;
 }
+
 
 
 /*----------------------------------------------------------*/
@@ -379,6 +398,48 @@ void NemoWrapper::runNemo(){
 }
 
 
+/*! Saves the weights from the network into the database */
+void NemoWrapper::saveNemoWeights(){
+	//Return immediately if there is nothing to save
+	if(volatileConGrpList.size() == 0){
+		weightsSaved = true;
+		return;
+	}
+
+	//Update temporary weights in network to match weights in NeMo
+	updateNetworkWeights();
+
+	//NetworkDao specific to the calling thread
+	NetworkDao networkDao(Globals::getNetworkDao()->getDBInfo());
+
+	//Work through all connection groups
+	Network* currentNetwork = Globals::getNetwork();
+	foreach(unsigned tmpConGrpID, volatileConGrpList){
+		ConnectionGroup* tmpConGrp = currentNetwork->getConnectionGroup(tmpConGrpID);
+		QHash<unsigned, Connection*>::const_iterator endConList = tmpConGrp->end();
+		for(QHash<unsigned, Connection*>::const_iterator conIter = tmpConGrp->begin(); conIter != endConList; ++conIter){
+			//Save in database
+			networkDao.setWeight(conIter.value()->getID(), conIter.value()->getTempWeight());
+
+			//Update weight field
+			conIter.value()->setWeight(conIter.value()->getTempWeight());
+
+			//Check for cancellation
+			if(weightSaveCancelled){
+				Globals::getEventRouter()->weightsChangedSlot();
+				return;
+			}
+		}
+	}
+
+	//Inform other classes about weight change
+	Globals::getEventRouter()->weightsChangedSlot();
+
+	//Weight saving is complete
+	weightsSaved = true;
+}
+
+
 /*! Puts class into error state */
 void NemoWrapper::setError(const QString& errorMessage){
 	currentTaskID = NO_TASK_DEFINED;
@@ -392,7 +453,9 @@ void NemoWrapper::setError(const QString& errorMessage){
 void NemoWrapper::stepNemo(){
 	firingNeuronList.clear();
 
-	//Handle injection of noise into neuron groups
+	//------------------------------------------------
+	//     Inject noise into neuron groups
+	//------------------------------------------------
 	if(!injectNoiseMap.isEmpty()){
 		//Build array of neurons to inject noise into
 		unsigned* injectNoiseNeurIDArr = NULL;
@@ -414,7 +477,10 @@ void NemoWrapper::stepNemo(){
 		checkNemoOutput( nemo_step(nemoSimulation, 0, 0), "Nemo error on step" );
 	}
 
-	//Retrieve list of firing neurons
+
+	//-----------------------------------------------
+	//         Retrieve list of firing neurons
+	//-----------------------------------------------
 	if(archiveMode || monitorMode){
 		unsigned *cycles, *nidx;
 		unsigned nfired, ncycles;
@@ -434,24 +500,17 @@ void NemoWrapper::stepNemo(){
 		archiveDao->addArchiveData(archiveInfo.getID(), timeStepCounter, firingNeuronList);
 	}
 
-	//Retrieve weights
+
+	//--------------------------------------------
+	//             Retrieve weights
+	//--------------------------------------------
 	if(trackWeights){
-		Network* currentNetwork = Globals::getNetwork();
-		foreach(unsigned tmpConGrpID, volatileConGrpList){
-			ConnectionGroup* tmpConGrp = currentNetwork->getConnectionGroup(tmpConGrpID);
-			QList<Connection*>::const_iterator endConList = tmpConGrp->end();
-			for(QList<Connection*>::const_iterator conIter = tmpConGrp.begin(); conIter != endConList; ++conIter){
-				//Get current value of weight from Nemo
-				//ID IS conIter->getID();
-				float tmpWeight = Util::getRandom(0, 1);
-FIXME HERE
-				//Save to temp field
-				(*conIter)->setTempWeight(tmpWeight);
-			}
+		updateNetworkWeights();
 
 		//Inform other classes that weights have changed
 		Globals::getEventRouter()->weightsChangedSlot();
 	}
+
 
 	/* Set flag to cause thread to wait for graphics to update.
 		This is needed even if we are just running a time step counter */
@@ -475,4 +534,27 @@ void NemoWrapper::unloadNemo(){
 	simulationLoaded = false;
 	Globals::setSimulationLoaded(simulationLoaded);
 }
+
+
+/*! Updates the weights in the network with weights from NeMo.
+	NOTE: Must be called from within the NeMo thread. */
+void NemoWrapper::updateNetworkWeights(){
+	if(!simulationLoaded){
+		throw SpikeStreamException("Failed to update network weights. Simulation not loaded.");
+	}
+
+	Network* currentNetwork = Globals::getNetwork();
+	foreach(unsigned tmpConGrpID, volatileConGrpList){
+		ConnectionGroup* tmpConGrp = currentNetwork->getConnectionGroup(tmpConGrpID);
+		QHash<unsigned, Connection*>::const_iterator endConList = tmpConGrp->end();
+		for(QHash<unsigned, Connection*>::const_iterator conIter = tmpConGrp->begin(); conIter != endConList; ++conIter){
+			//Get current value of weight from Nemo
+			float tmpWeight = Util::getRandom(0, 1000)/1000.0f;
+
+			//Save to temp field
+			conIter.value()->setTempWeight(tmpWeight);
+		}
+	}
+}
+
 

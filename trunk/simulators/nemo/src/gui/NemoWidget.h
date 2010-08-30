@@ -32,6 +32,7 @@ namespace spikestream {
 		private slots:
 			void archiveStateChanged(int state);
 			void checkLoadingProgress();
+			void checkSaveWeightsProgress();
 			void injectNoiseButtonClicked();
 			void loadSimulation();
 			void monitorStateChanged(int state);
@@ -105,6 +106,9 @@ namespace spikestream {
 			/*! Time step of the simulation */
 			QLabel* timeStepLabel;
 
+			/*! Button for saving volatile weights */
+			QPushButton* saveWeightsButton;
+
 			/*! Dialog for giving feedback about progress */
 			QProgressDialog* progressDialog;
 
@@ -119,6 +123,9 @@ namespace spikestream {
 
 			/*! Timer to check on loading progress */
 			QTimer* loadingTimer;
+
+			/*! Timer to check on progress with saving weights*/
+			QTimer* saveWeightsTimer;
 
 			/*! Flag to prevent calls to progress dialog while it is redrawing. */
 			bool updatingProgress;

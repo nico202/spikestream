@@ -119,7 +119,7 @@ void Random1BuilderThread::buildConnectionGroup(){
 					weight = getRandomDouble(minWeightRange2, maxWeightRange2);
 
 				//Add the connection
-				newConnectionGroup->addConnection(new Connection(fromIter.key(), toIter.key(), getRandomUInt(minDelay, maxDelay), weight));
+				newConnectionGroup->addConnection(fromIter.key(), toIter.key(), getRandomUInt(minDelay, maxDelay), weight);
 			}
 		}
 
