@@ -177,7 +177,7 @@ void CuboidBuilderThread::addNeurons(){
 /*! Returns a parameter from the neuron group info parameter map checking that it actually exists */
 double CuboidBuilderThread::getParameter(const QString& paramName, const QHash<QString, double>& paramMap){
 	if(!paramMap.contains(paramName))
-		throw SpikeStreamException("Parameter with " + paramName + " does not exist in parameter map.");
+		throw SpikeStreamException("Parameter with name '" + paramName + "' does not exist in parameter map.");
 	return paramMap[paramName];
 }
 

@@ -26,7 +26,7 @@ namespace spikestream {
 			Network(const NetworkInfo& networkInfo, const DBInfo& networkDBInfo, const DBInfo& archiveDBInfo);
 			~Network();
 
-			void addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList, bool checkNetworkLocked=true);
+			void addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList);
 			void addNeuronGroups(QList<NeuronGroup*>& neuronGroupList);
 			void cancel();
 			void clearError();

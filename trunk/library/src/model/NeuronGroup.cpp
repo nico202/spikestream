@@ -11,6 +11,7 @@ NeuronGroup::NeuronGroup(const NeuronGroupInfo& info){
 	neuronMap = new NeuronMap();
 	loaded = false;
 	startNeuronID = 0;
+	calculateBoundingBox = false;
 }
 
 
@@ -33,6 +34,7 @@ NeuronGroup::~NeuronGroup(){
 Neuron* NeuronGroup::addNeuron(float xPos, float yPos, float zPos){
 	Neuron* tmpNeuron = new Neuron(xPos, yPos, zPos);
 	(*neuronMap)[getTemporaryID()] = tmpNeuron;
+	neuronGroupChanged();
 	return tmpNeuron;
 }
 
@@ -45,6 +47,7 @@ void NeuronGroup::addLayer(int width, int height, int xPos, int yPos, int zPos){
 			addNeuron(x, y, zPos);
 		}
 	}
+	neuronGroupChanged();
 }
 
 
@@ -55,6 +58,7 @@ void NeuronGroup::clearNeurons(){
 		delete iter.value();
 	}
 	neuronMap->clear();
+	neuronGroupChanged();
 }
 
 
@@ -73,6 +77,47 @@ bool NeuronGroup::contains(unsigned int neurID, float x, float y, float z){
 	if((*neuronMap)[neurID]->getXPos() != x || (*neuronMap)[neurID]->getYPos() != y || (*neuronMap)[neurID]->getZPos() != z)
 		return false;
 	return true;
+}
+
+/*! Returns the bounding box of the neuron group.
+	Only calculates bounding box if neuron group has changed. */
+Box NeuronGroup::getBoundingBox(){
+	//Return current box if nothing has changed about the neuron group
+	if(!calculateBoundingBox)
+		return boundingBox;
+
+	//Calculate the bounding box
+	Neuron* tmpNeuron;
+	bool firstTime = true;
+	NeuronMap::iterator mapEnd = neuronMap->end();//Saves accessing this function multiple times
+	for(NeuronMap::iterator iter=neuronMap->begin(); iter != mapEnd; ++iter){
+		tmpNeuron = iter.value();
+		if(firstTime){//Take first neuron as starting point
+			boundingBox = Box(tmpNeuron->getXPos(), tmpNeuron->getYPos(), tmpNeuron->getZPos(),
+								tmpNeuron->getXPos(), tmpNeuron->getYPos(), tmpNeuron->getZPos()
+							);
+			firstTime = false;
+		}
+		else{//Expand box to include subsequent neurons
+			if(tmpNeuron->getXPos() < boundingBox.x1)
+				boundingBox.x1 = tmpNeuron->getXPos();
+			if(tmpNeuron->getYPos() < boundingBox.y1)
+				boundingBox.y1 = tmpNeuron->getYPos();
+			if(tmpNeuron->getZPos() < boundingBox.z1)
+				boundingBox.z1 = tmpNeuron->getZPos();
+
+			if(tmpNeuron->getXPos() > boundingBox.x2)
+				boundingBox.x2 = tmpNeuron->getXPos();
+			if(tmpNeuron->getYPos() > boundingBox.y2)
+				boundingBox.y2 = tmpNeuron->getYPos();
+			if(tmpNeuron->getZPos() > boundingBox.z2)
+				boundingBox.z2 = tmpNeuron->getZPos();
+		}
+	}
+
+	//Return calculated box
+	calculateBoundingBox = false;
+	return boundingBox;
 }
 
 
@@ -109,6 +154,7 @@ double NeuronGroup::getParameter(const QString &key){
 void NeuronGroup::setNeuronMap(NeuronMap* newMap){
 	delete neuronMap;
 	this->neuronMap = newMap;
+	neuronGroupChanged();
 }
 
 
@@ -116,6 +162,11 @@ void NeuronGroup::setNeuronMap(NeuronMap* newMap){
 int NeuronGroup::size(){
 	return neuronMap->size();
 }
+
+
+/*--------------------------------------------------------- */
+/*-----                PRIVATE METHODS                ----- */
+/*--------------------------------------------------------- */
 
 /*! Returns a temporary ID that does not exist in the current hash map */
 unsigned NeuronGroup::getTemporaryID(){
@@ -126,3 +177,7 @@ unsigned NeuronGroup::getTemporaryID(){
 }
 
 
+/*! Records that neuron group has changed to trigger bounding box recalculation. */
+void NeuronGroup::neuronGroupChanged(){
+	calculateBoundingBox = true;
+}

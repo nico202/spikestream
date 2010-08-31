@@ -263,7 +263,7 @@ void NRMDataImporter::addConnections(){
 	}//Finished working through all of the NRM neural layers
 
 	//Add connections to network - this also adds connections to database
-	network->addConnectionGroups(newConnectionGrpsList, false);
+	network->addConnectionGroups(newConnectionGrpsList);
 
 	//Wait for network to finish task
 	while(network->isBusy())
