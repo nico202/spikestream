@@ -25,6 +25,7 @@ Network::Network(const QString& name, const QString& description, const DBInfo& 
     //Initialize variables
     currentNeuronTask = -1;
     currentConnectionTask = -1;
+	saved = false;
     clearError();
 
     //Create new network in database. ID will be stored in the network info
@@ -54,6 +55,7 @@ Network::Network(const NetworkInfo& networkInfo, const DBInfo& networkDBInfo, co
     //Initialize variables
     currentNeuronTask = -1;
     currentConnectionTask = -1;
+	saved = true;
     clearError();
 
     //Load up basic information about the neuron and connection groups
@@ -88,33 +90,57 @@ Network::~Network(){
 
 /*! Adds connection groups to the network. */
 void Network::addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList){
-	if(hasArchives())//Check if network is editable or not
+	if(!prototypeMode && hasArchives())//Check if network is editable or not
 		throw SpikeStreamException("Cannot add connection groups to a locked network.");
 
-	//Store the list of connection groups to be added
-	newConnectionGroups = connectionGroupList;
+	//In prototype mode, we add connection groups to network and store them in a list for later
+	if(prototypeMode){
+		foreach(ConnectionGroup* conGrp, connectionGroupList){
+			unsigned tmpID = getTemporaryConGrpID();//Get an ID for the connection groups
+			connGrpMap[tmpID] = conGrp;//Add connection group to network
+			newConnectionGroups.append(conGrp);//Store connection group in list for adding to database later
+		}
+		savedStateChanged(false);
+	}
+	//In normal mode, connection groups are saved to the database
+	else{
+		//Store the list of connection groups to be added
+		newConnectionGroups = connectionGroupList;
 
-	//Start thread that adds connection groups to database
-	clearError();
-	connectionNetworkDaoThread->prepareAddConnectionGroups(getID(), connectionGroupList);
-	currentConnectionTask = ADD_CONNECTIONS_TASK;
-	connectionNetworkDaoThread->start();
+		//Start thread that adds connection groups to database
+		clearError();
+		connectionNetworkDaoThread->prepareAddConnectionGroups(getID(), connectionGroupList);
+		currentConnectionTask = ADD_CONNECTIONS_TASK;
+		connectionNetworkDaoThread->start();
+	}
 }
 
 
 /*! Adds neuron groups to the network */
 void Network::addNeuronGroups(QList<NeuronGroup*>& neuronGroupList){
-	if(hasArchives())//Check if network is editable or not
+	if(!prototypeMode && hasArchives())//Check if network is editable or not
 		throw SpikeStreamException("Cannot add neuron groups to a locked network.");
 
-    //Store the list of neuron groups to be added later when the thread has finished and we have the correct ID
-    newNeuronGroups = neuronGroupList;
+	//In prototype mode, we add connection groups to network and store them in a list for later
+	if(prototypeMode){
+		foreach(NeuronGroup* neurGrp, neuronGroupList){
+			unsigned tmpID = getTemporaryNeurGrpID();//Get an ID for the connection groups
+			neurGrpMap[tmpID] = neurGrp;//Add connection group to network
+			newNeuronGroups.append(neurGrp);//Store connection group in list for adding to database later
+		}
+		savedStateChanged(false);
+	}
+	//In normal mode, connection groups are saved to the database
+	else{
+		//Store the list of neuron groups to be added later when the thread has finished and we have the correct ID
+		newNeuronGroups = neuronGroupList;
 
-    //Start thread that adds neuron groups to database
-    clearError();
-    neuronNetworkDaoThread->prepareAddNeuronGroups(getID(), neuronGroupList);
-    currentNeuronTask = ADD_NEURONS_TASK;
-    neuronNetworkDaoThread->start();
+		//Start thread that adds neuron groups to database
+		clearError();
+		neuronNetworkDaoThread->prepareAddNeuronGroups(getID(), neuronGroupList);
+		currentNeuronTask = ADD_NEURONS_TASK;
+		neuronNetworkDaoThread->start();
+	}
 }
 
 
@@ -402,8 +428,6 @@ QList<unsigned int> Network::getConnectionGroupIDs(){
 
 /*! Returns a box that encloses the network */
 Box Network::getBoundingBox(){
-	NetworkDao networkDao(networkDBInfo);
-
     /* Neurons are not directly linked with a neuron id, so need to work through
        each neuron group and create a box that includes all the other boxes. */
     Box networkBox;
@@ -521,6 +545,14 @@ bool Network::hasArchives(){
 }
 
 
+/*! Returns true if the network matches the database */
+bool Network::isSaved(){
+	if(prototypeMode && !saved)
+		return false;
+	return true;
+}
+
+
 /*! Loads up the network from the database using separate threads */
 void Network::load(){
     clearError();
@@ -559,6 +591,45 @@ void Network::loadWait(){
 }
 
 
+/*! Saves the network.
+	Throws an exception if network is not in prototyping mode. */
+void Network::save(){
+	if(!prototypeMode)
+		throw SpikeStreamException("Network should not be saved unless it is in prototype mode.");
+
+	//--------------------------------------------------
+	//     HANDLE ADDED NEURON AND CONNECTION GROUPS
+	//--------------------------------------------------
+	//Remove connection and neuron groups from network - they will be added later with the correct IDs.
+	foreach(ConnectionGroup* tmpConGrp, newConnectionGroups)
+		connGrpMap.remove(tmpConGrp->getID());
+	foreach(NeuronGroup* tmpNeurGrp, newNeuronGroups)
+		neurGrpMap.remove(tmpNeurGrp->getID());
+
+	//Start thread that adds connection groups to database
+	clearError();
+	connectionNetworkDaoThread->prepareAddConnectionGroups(getID(), newConnectionGroups);
+	currentConnectionTask = ADD_CONNECTIONS_TASK;
+	connectionNetworkDaoThread->start();
+
+	//Start thread that adds connection groups to database
+	neuronNetworkDaoThread->prepareAddNeuronGroups(getID(), newNeuronGroups);
+	currentNeuronTask = ADD_NEURONS_TASK;
+	neuronNetworkDaoThread->start();
+
+
+	//--------------------------------------------------
+	//   HANDLE DELETED NEURON AND CONNECTION GROUPS
+	//--------------------------------------------------
+}
+
+
+/*! Puts the network into prototype mode */
+void Network::setPrototypeMode(bool mode){
+	prototypeMode = mode;
+}
+
+
 /*--------------------------------------------------------- */
 /*-----                  PRIVATE SLOTS                ----- */
 /*--------------------------------------------------------- */
@@ -585,8 +656,8 @@ void Network::connectionThreadFinished(){
 					for(QList<ConnectionGroup*>::iterator iter = newConnectionGroups.begin(); iter != newConnectionGroups.end(); ++iter){
 						if(connGrpMap.contains((*iter)->getID()))
 							throw SpikeStreamException("Connection group with ID " + QString::number((*iter)->getID()) + " is already present in the network.");
-
 						connGrpMap[(*iter)->getID()] = *iter;
+						newConnectionGroups.clear();
 					}
 				break;
 				case LOAD_CONNECTIONS_TASK:
@@ -630,6 +701,7 @@ void Network::neuronThreadFinished(){
 
 						//Store neuron group
 						neurGrpMap[ (*iter)->getID() ] = *iter;
+						newNeuronGroups.clear();
 					}
 				break;
 				case DELETE_NEURONS_TASK:
@@ -711,6 +783,32 @@ bool Network::filterConnection(Connection *connection, unsigned connectionMode){
 }
 
 
+/*! Returns an ID that is highly unlikey to conflict with database IDs
+	for use as a temporary connection group ID. */
+unsigned Network::getTemporaryConGrpID(){
+	unsigned tmpID = 0xffffffff;
+	while (connGrpMap.contains(tmpID)){
+		--tmpID;
+		if(tmpID == 0)
+			throw SpikeStreamException("Cannot find a temporary connection ID");
+	}
+	return tmpID;
+}
+
+
+/*! Returns an ID that is highly unlikey to conflict with database IDs
+	for use as a temporary neuron group ID. */
+unsigned Network::getTemporaryNeurGrpID(){
+	unsigned tmpID = 0xffffffff;
+	while (neurGrpMap.contains(tmpID)){
+		--tmpID;
+		if(tmpID == 0)
+			throw SpikeStreamException("Cannot find a temporary neuron group ID");
+	}
+	return tmpID;
+}
+
+
 /*! Uses network dao to obtain list of connection groups and load them into hash map. */
 void Network::loadConnectionGroupsInfo(){
     //Clear hash map
@@ -756,6 +854,14 @@ void Network::deleteNeuronGroups(){
     for(QHash<unsigned int, NeuronGroup*>::iterator iter = neurGrpMap.begin(); iter != neurGrpMap.end(); ++iter)
 		delete iter.value();
     neurGrpMap.clear();
+}
+
+
+/*! Called when the network is changed in memory when editing in prototype mode. */
+void Network::savedStateChanged(bool newSavedState){
+	if(!prototypeMode)
+		throw SpikeStreamException("Saved state should only change in prototype mode.");
+	saved = newSavedState;
 }
 
 

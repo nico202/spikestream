@@ -32,6 +32,8 @@ namespace spikestream {
 			void deleteNetwork();
 			void loadNetwork();
 			void loadNetworkList();
+			void prototypeNetwork();
+			void saveNetwork();
 
 		private:
 			//======================  VARIABLES  =====================
@@ -55,7 +57,7 @@ namespace spikestream {
 			QList<QWidget*> cleanUpList;
 
 			//=======================  METHODS  ======================
-			void loadNetwork(NetworkInfo& netInfo);
+			void loadNetwork(NetworkInfo& netInfo, bool prototypeMode = false);
 			void reset();
     };
 

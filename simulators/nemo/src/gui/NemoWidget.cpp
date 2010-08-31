@@ -66,9 +66,20 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	controlsVBox->addWidget(toolBar);
 
 	//Add widget to control live monitoring of simulation
-	monitorCheckBox = new QCheckBox("Monitor");
+	monitorCheckBox = new QCheckBox("Monitor firing neurons");
 	connect(monitorCheckBox, SIGNAL(stateChanged(int)), this, SLOT(monitorStateChanged(int)));
 	controlsVBox->addWidget(monitorCheckBox);
+
+	//Add widgets to monitor and save the weights
+	QHBoxLayout* saveWeightsBox = new QHBoxLayout();
+	QCheckBox* trackWeightsChkbx = new QCheckBox("Monitor weights");
+	connect(trackWeightsChkbx, SIGNAL(clicked(bool)), this, SLOT(setTrackWeights(bool)));
+	saveWeightsBox->addWidget(trackWeightsChkbx);
+	saveWeightsButton = new QPushButton("Save Weights");
+	connect(saveWeightsButton, SIGNAL(clicked()), this, SLOT(saveWeights()));
+	saveWeightsBox->addWidget(saveWeightsButton);
+	saveWeightsBox->addStretch(5);
+	controlsVBox->addLayout(saveWeightsBox);
 
 	//Add widgets to control archiving
 	archiveCheckBox = new QCheckBox("Archive.");
@@ -83,17 +94,6 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	archiveLayout->addWidget(archiveDescriptionEdit);
 	archiveLayout->addWidget(setArchiveDescriptionButton);
 	controlsVBox->addLayout(archiveLayout);
-
-	//Add widgets to save and track the weights
-	QHBoxLayout* saveWeightsBox = new QHBoxLayout();
-	QCheckBox* trackWeightsChkbx = new QCheckBox("Track weights");
-	connect(trackWeightsChkbx, SIGNAL(clicked(bool)), this, SLOT(setTrackWeights(bool)));
-	saveWeightsBox->addWidget(trackWeightsChkbx);
-	saveWeightsButton = new QPushButton("Save Weights");
-	connect(saveWeightsButton, SIGNAL(clicked()), this, SLOT(saveWeights()));
-	saveWeightsBox->addWidget(saveWeightsButton);
-	saveWeightsBox->addStretch(5);
-	controlsVBox->addLayout(saveWeightsBox);
 
 	//Add widgets to inject noise into specified layers
 	QHBoxLayout* injectNoiseBox = new QHBoxLayout();

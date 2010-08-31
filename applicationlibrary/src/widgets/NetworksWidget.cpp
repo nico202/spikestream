@@ -63,8 +63,8 @@ NetworksWidget::NetworksWidget(QWidget* parent) : QWidget(parent){
 
 	//Connect to global reload signal
 	connect(Globals::getEventRouter(), SIGNAL(reloadSignal()), this, SLOT(loadNetworkList()), Qt::QueuedConnection);
-	//connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(loadNetworkList()), Qt::QueuedConnection);
-	connect(Globals::getEventRouter(), SIGNAL(networkListChangedSignal()), this, SLOT(loadNetworkList()), Qt::QueuedConnection);
+	connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(loadNetworkList()), Qt::QueuedConnection);
+	//connect(Globals::getEventRouter(), SIGNAL(networkListChangedSignal()), this, SLOT(loadNetworkList()), Qt::QueuedConnection);
 	connect(this, SIGNAL(networkChanged()), Globals::getEventRouter(), SLOT(networkChangedSlot()), Qt::QueuedConnection);
 }
 
@@ -160,7 +160,11 @@ void NetworksWidget::loadNetwork(){
 	//Run checks to make sure that we want to change network
 	if(!Globals::networkChangeOk())
 		return;
-
+	if(Globals::networkLoaded() && !Globals::getNetwork()->isSaved()){
+		QMessageBox msgBox(QMessageBox::Warning, "Changing network", "Network is loaded in prototype mode and has not been saved.\nThis will discard all of your changes to the network.\nDo you want to continue?", QMessageBox::Ok | QMessageBox::Cancel, this);
+		if(msgBox.exec() != QMessageBox::Ok)
+			return;
+	}
 
 	//load the network
 	loadNetwork(networkInfoMap[networkID]);
@@ -208,21 +212,39 @@ void NetworksWidget::loadNetworkList(){
 	for(int i=0; i<networkInfoList.size(); ++i){
 		//Create labels
 		QLabel* idLabel = new QLabel(QString::number(networkInfoList[i].getID()));
+		gridLayout->addWidget(idLabel, i, 0);
 		QLabel* nameLabel = new QLabel(networkInfoList[i].getName());
+		gridLayout->addWidget(nameLabel, i, 1);
 		QLabel* descriptionLabel = new QLabel(networkInfoList[i].getDescription());
+		gridLayout->addWidget(descriptionLabel, i, 3);
 
 		//Create the load button and name it with the object id so we can tell which button was invoked
 		QPushButton* loadButton = new QPushButton("Load");
 		loadButton->setObjectName(QString::number(networkInfoList[i].getID()));
 		connect ( loadButton, SIGNAL(clicked()), this, SLOT( loadNetwork() ) );
+		gridLayout->addWidget(loadButton, i, 4);
+
+		//Create the prototype button and name it with the object id so we can tell which button was invoked
+		QPushButton* prototypeButton = new QPushButton("Prototype");
+		prototypeButton->setObjectName(QString::number(networkInfoList[i].getID()));
+		connect ( prototypeButton, SIGNAL(clicked()), this, SLOT( prototypeNetwork() ) );
+		gridLayout->addWidget(prototypeButton, i, 5);
 
 		//Create the delete button and name it with the object id so we can tell which button was invoked
 		QPushButton* deleteButton = new QPushButton("Delete");
 		deleteButton->setObjectName(QString::number(networkInfoList[i].getID()));
 		connect ( deleteButton, SIGNAL(clicked()), this, SLOT( deleteNetwork() ) );
+		gridLayout->addWidget(deleteButton, i, 6);
 
 		//Set labels and buttons depending on whether it is the current network
 		if(currentNetworkID == networkInfoList[i].getID()){
+			if(Globals::getNetwork()->isPrototypeMode() && !Globals::getNetwork()->isSaved()){
+				QPushButton* saveButton = new QPushButton("Save");
+				saveButton->setObjectName(QString::number(networkInfoList[i].getID()));
+				connect ( saveButton, SIGNAL(clicked()), this, SLOT( saveNetwork() ) );
+				gridLayout->addWidget(saveButton, i, 7);
+			}
+
 			if(Globals::getArchiveDao()->networkHasArchives(currentNetworkID)){
 				idLabel->setStyleSheet( "QLabel { color: #F08080; font-weight: bold; font-style: italic; }");
 				nameLabel->setStyleSheet( "QLabel { color: #F08080; font-weight: bold; font-style: italic; }");
@@ -233,7 +255,12 @@ void NetworksWidget::loadNetworkList(){
 				nameLabel->setStyleSheet( "QLabel { color: #008000; font-weight: bold; }");
 				descriptionLabel->setStyleSheet( "QLabel { color: #008000; font-weight: bold; }");
 			}
-			loadButton->setEnabled(false);
+
+			//Disable load or prototype button
+			if(Globals::getNetwork()->isPrototypeMode())
+				prototypeButton->setEnabled(false);
+			else
+				loadButton->setEnabled(false);
 		}
 		else if (Globals::getArchiveDao()->networkHasArchives(currentNetworkID)) {
 			idLabel->setStyleSheet( "QLabel { color: #777777; font-style: italic; }");
@@ -245,13 +272,6 @@ void NetworksWidget::loadNetworkList(){
 			nameLabel->setStyleSheet( "QLabel { color: #777777; }");
 			descriptionLabel->setStyleSheet( "QLabel { color: #777777; }");
 		}
-
-		//Add the widgets to the layout
-		gridLayout->addWidget(idLabel, i, 0);
-		gridLayout->addWidget(nameLabel, i, 1);
-		gridLayout->addWidget(descriptionLabel, i, 3);
-		gridLayout->addWidget(loadButton, i, 4);
-		gridLayout->addWidget(deleteButton, i, 5);
 	}
 
 	//FIXME: HACK TO GET IT TO DISPLAY PROPERLY
@@ -259,13 +279,59 @@ void NetworksWidget::loadNetworkList(){
 }
 
 
+/*! Loads up the network in prototyping mode. */
+void NetworksWidget::prototypeNetwork(){
+	unsigned int networkID = sender()->objectName().toUInt();
+	if(!networkInfoMap.contains(networkID)){
+		qCritical()<<"Network with ID "<<networkID<<" cannot be found.";
+		return;
+	}
+
+	//Run checks to make sure that we want to change network
+	if(!Globals::networkChangeOk())
+		return;
+	if(Globals::networkLoaded() && !Globals::getNetwork()->isSaved()){
+		QMessageBox msgBox(QMessageBox::Warning, "Changing network", "Network is loaded in prototype mode and has not been saved.\nThis will discard all of your changes to the network.\nDo you want to continue?", QMessageBox::Ok | QMessageBox::Cancel, this);
+		if(msgBox.exec() != QMessageBox::Ok)
+			return;
+	}
+	//Set prototype mode and load the network
+	loadNetwork(networkInfoMap[networkID], true);
+}
+
+
+/*! Saves a network that has been loaded in prototyping mode. */
+void NetworksWidget::saveNetwork(){
+	//Run some internal checks
+	if(!Globals::networkLoaded()){
+		qCritical()<<"SpikeStream internal error. Should not be able to save network when no network is loaded";
+		return;
+	}
+	unsigned int networkID = sender()->objectName().toUInt();
+	if(!networkInfoMap.contains(networkID)){
+		qCritical()<<"Network with ID "<<networkID<<" cannot be found.";
+		return;
+	}
+	if(!Globals::getNetwork()->isPrototypeMode())
+		qCritical()<<"SpikeStream internal error. Should not be able to save a network that is not in prototype mode.";
+
+	//Save network
+	try{
+		Globals::getNetwork()->save();
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<ex.getMessage();
+		//FIXME NEED PROGRESS DIALOG HERE
+	}
+}
+
 
 /*----------------------------------------------------------*/
 /*-----                PRIVATE METHODS                 -----*/
 /*----------------------------------------------------------*/
 
 /*! Loads up the specified network into memory. */
-void NetworksWidget::loadNetwork(NetworkInfo& netInfo){
+void NetworksWidget::loadNetwork(NetworkInfo& netInfo, bool prototypeMode){
 	if(!networkInfoMap.contains(netInfo.getID())){
 		qCritical()<<"Network with ID "<<netInfo.getID()<<" cannot be found.";
 		return;
@@ -278,7 +344,8 @@ void NetworksWidget::loadNetwork(NetworkInfo& netInfo){
 		newNetwork = NULL;
 		newNetwork = new Network(netInfo, Globals::getNetworkDao()->getDBInfo(), Globals::getArchiveDao()->getDBInfo());
 
-		//Start network loading, all the heavy work is done by separate threads
+		//Set prototype mode and start network loading, all the heavy work is done by separate threads
+		newNetwork->setPrototypeMode(prototypeMode);
 		newNetwork->load();
 	}
 	catch (SpikeStreamException& ex){
@@ -367,41 +434,15 @@ void NetworksWidget::reset(){
 	}
 
 	//Remove list of networks
-	for(int i=0; i<networkInfoMap.size(); ++i){
-		QLayoutItem* item = gridLayout->itemAtPosition(i, 0);
-		if(item != 0){
-			QWidget* tmpWidget = item->widget();
-			gridLayout->removeWidget(tmpWidget);
-			tmpWidget->setVisible(false);
-			cleanUpList.append(tmpWidget);
-		}
-		item = gridLayout->itemAtPosition(i, 1);
-		if(item != 0){
-			QWidget* tmpWidget = item->widget();
-			gridLayout->removeWidget(tmpWidget);
-			tmpWidget->setVisible(false);
-			cleanUpList.append(tmpWidget);
-		}
-		item = gridLayout->itemAtPosition(i, 3);
-		if(item != 0){
-			QWidget* tmpWidget = item->widget();
-			gridLayout->removeWidget(tmpWidget);
-			tmpWidget->setVisible(false);
-			cleanUpList.append(tmpWidget);
-		}
-		item = gridLayout->itemAtPosition(i, 4);
-		if(item != 0){
-			QWidget* tmpWidget = item->widget();
-			gridLayout->removeWidget(tmpWidget);
-			tmpWidget->setVisible(false);
-			cleanUpList.append(tmpWidget);
-		}
-		item = gridLayout->itemAtPosition(i, 5);
-		if(item != 0){
-			QWidget* tmpWidget = item->widget();
-			gridLayout->removeWidget(tmpWidget);
-			tmpWidget->setVisible(false);
-			cleanUpList.append(tmpWidget);
+	for(int rowIndx=0; rowIndx<networkInfoMap.size(); ++rowIndx){
+		for(int colIndx = 0; colIndx<=7; ++colIndx){
+			QLayoutItem* item = gridLayout->itemAtPosition(rowIndx, colIndx);
+			if(item != 0){
+				QWidget* tmpWidget = item->widget();
+				tmpWidget->setVisible(false);
+				gridLayout->removeWidget(tmpWidget);
+				cleanUpList.append(tmpWidget);
+			}
 		}
 	}
 	networkInfoMap.clear();
