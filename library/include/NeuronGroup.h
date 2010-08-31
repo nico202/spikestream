@@ -2,6 +2,7 @@
 #define NEURONGROUP_H
 
 //SpikeStream includes
+#include "Box.h"
 #include "NeuronGroupInfo.h"
 #include "Neuron.h"
 using namespace spikestream;
@@ -26,6 +27,7 @@ namespace spikestream {
 			void clearNeurons();
 			bool contains(unsigned int neurID);
 			bool contains(unsigned int neurID, float x, float y, float z);
+			Box getBoundingBox();
 			unsigned int getID() { return info.getID(); }
 			unsigned int getNeuronAtLocation(const Point3D& location);
 			QHash<QString, double> getParameters() { return parameterMap; }
@@ -67,9 +69,16 @@ namespace spikestream {
 			/*! Map of parameters for the neuron group */
 			QHash<QString, double> parameterMap;
 
+			/*! Box enclosing the neuron group */
+			Box boundingBox;
+
+			/*! Flag to record when bounding box needs to be recalculated. */
+			bool calculateBoundingBox;
+
 
 			//====================  METHODS  ==========================
 			unsigned getTemporaryID();
+			void neuronGroupChanged();
 			NeuronGroup(const NeuronGroup& connGrp);
 			NeuronGroup& operator=(const NeuronGroup& rhs);
     };

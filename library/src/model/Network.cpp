@@ -86,9 +86,9 @@ Network::~Network(){
 /*-----                PUBLIC METHODS                 ----- */
 /*--------------------------------------------------------- */
 
-/*! Adds a connection group to the network without saving it to the database. */
-void Network::addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList, bool checkNetworkLocked){
-	if(checkNetworkLocked && hasArchives())//Check if network is editable or not
+/*! Adds connection groups to the network. */
+void Network::addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList){
+	if(hasArchives())//Check if network is editable or not
 		throw SpikeStreamException("Cannot add connection groups to a locked network.");
 
 	//Store the list of connection groups to be added
@@ -225,10 +225,6 @@ void Network::deleteNeuronGroups(QList<unsigned int>& neurGrpIDList){
 		delete connGrpMap[tmpConGrpID];
 		connGrpMap.remove(tmpConGrpID);
 	}
-
-
-	//Delete any connection groups to or from the deleted neuron groups
-	//deleteConnectionGroups(deleteConGrpIDs);
 }
 
 
@@ -415,11 +411,11 @@ Box Network::getBoundingBox(){
     QList<NeuronGroup*> tmpNeurGrpList = neurGrpMap.values();
     for(QList<NeuronGroup*>::iterator iter = tmpNeurGrpList.begin(); iter != tmpNeurGrpList.end(); ++iter){
 		if(firstTime){//Take box enclosing first neuron group as a starting point
-			networkBox = networkDao.getNeuronGroupBoundingBox((*iter)->getID());
+			networkBox = (*iter)->getBoundingBox();
 			firstTime = false;
 		}
 		else{//Expand box to include subsequent neuron groups
-			Box neurGrpBox = networkDao.getNeuronGroupBoundingBox((*iter)->getID());
+			Box neurGrpBox = (*iter)->getBoundingBox();
 			if(neurGrpBox.x1 < networkBox.x1)
 				networkBox.x1 = neurGrpBox.x1;
 			if(neurGrpBox.y1 < networkBox.y1)
@@ -441,9 +437,7 @@ Box Network::getBoundingBox(){
 
 /*! Returns a box that encloses the specified neuron group */
 Box Network::getNeuronGroupBoundingBox(unsigned int neurGrpID){
-	NetworkDao networkDao(networkDBInfo);
-	Box box = networkDao.getNeuronGroupBoundingBox(neurGrpID);
-    return box;
+	return getNeuronGroup(neurGrpID)->getBoundingBox();
 }
 
 
