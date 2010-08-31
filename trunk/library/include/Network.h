@@ -59,11 +59,15 @@ namespace spikestream {
 			int getTotalNumberOfSteps();
 			bool isBusy();
 			bool isError() { return error; }
+			bool isPrototypeMode() { return prototypeMode; }
+			bool isSaved();
 			bool hasArchives();
 			void load();
 			void loadWait();
 			bool neuronGroupIsLoaded(unsigned int neurGrpID);
+			void save();
 			void setError(const QString& errorMsg);
+			void setPrototypeMode(bool mode);
 			int size();
 
 		signals:
@@ -127,6 +131,15 @@ namespace spikestream {
 			/*! Current task being undertaken by the connection thread.*/
 			int currentConnectionTask;
 
+			/*! Records whether the network is saved when it is loaded in prototype mode. */
+			bool saved;
+
+			/*! Records whether network is in prototype mode.
+				In prototype mode the network is loaded into memory and changes are not immediately
+				saved to the database. The network has to be saved before archives or analyses
+				can be carried out or the weights saved. */
+			bool prototypeMode;
+
 			static const int ADD_NEURONS_TASK = 1;
 			static const int DELETE_CONNECTIONS_TASK = 2;
 			static const int DELETE_NEURONS_TASK = 3;
@@ -142,8 +155,11 @@ namespace spikestream {
 			void deleteConnectionGroups();
 			void deleteNeuronGroups();
 			bool filterConnection(Connection* connection, unsigned connectionMode);
+			unsigned getTemporaryConGrpID();
+			unsigned getTemporaryNeurGrpID();
 			void loadConnectionGroupsInfo();
 			void loadNeuronGroupsInfo();
+			void savedStateChanged(bool newSavedState);
 
     };
 
