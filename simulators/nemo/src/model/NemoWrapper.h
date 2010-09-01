@@ -36,7 +36,8 @@ namespace spikestream {
 			unsigned getSTDPFunctionID() { return stdpFunctionID; }
 			unsigned getUpdateInterval_ms() { return this->updateInterval_ms; }
 			bool isError() { return error; }
-			bool isMonitorMode() { return monitorMode; }
+			bool isMonitorFiringNeurons() { return monitorFiringNeurons; }
+			bool isMonitorWeights() { return monitorWeights; }
 			bool isWeightsSaved() { return weightsSaved; }
 			bool isSimulationLoaded() { return simulationLoaded; }
 			bool isSimulationRunning();
@@ -45,9 +46,9 @@ namespace spikestream {
 			void setArchiveMode(bool mode);
 			void setFrameRate(unsigned int frameRate);
 			void setInjectNoise(unsigned neuronGroupID, double percentage);
-			void setMonitorMode(bool mode);
+			void setMonitorFiringNeurons(bool mode);
 			void setNemoConfig(nemo_configuration_t nemoConfig) { this->nemoConfig = nemoConfig; }
-			void setTrackWeights(bool enable);
+			void setMonitorWeights(bool enable);
 			void setSTDPFunctionID(unsigned stdpFunctionID) { this->stdpFunctionID = stdpFunctionID; }
 			void setUpdateInterval_ms(unsigned int interval) { this->updateInterval_ms = interval; }
 			void playSimulation();
@@ -99,8 +100,11 @@ namespace spikestream {
 			/*! In archive mode the current firing neurons are written to disk */
 			bool archiveMode;
 
-			/*! In monitor mode a signal is emitted containing a list of the firing neurons */
-			bool monitorMode;
+			/*! In monitor firing neurons mode a signal is emitted containing a list of the firing neurons */
+			bool monitorFiringNeurons;
+
+			/*! In monitor weights mode the volatile weights are updated at each time step */
+			bool monitorWeights;
 
 			/*! The time step of the simulation */
 			unsigned int timeStepCounter;
@@ -139,9 +143,6 @@ namespace spikestream {
 			/*! Map of neuron groups to inject noise into at the next time step.
 				The key is the neuron group ID, the value is the number of neurons to fire. */
 			QHash<unsigned, unsigned> injectNoiseMap;
-
-			/*! Determines whether weights are saved to temp field in network at each time step */
-			unsigned trackWeights;
 
 			/*! List of the IDs of volatile connection groups */
 			QList<unsigned> volatileConGrpList;

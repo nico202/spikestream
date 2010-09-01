@@ -203,6 +203,13 @@ void NetworkDaoThread::run(){
 			case LOAD_NEURONS_TASK:
 				loadNeurons();
 			break;
+			case DELETE_NETWORK_TASK:
+				deleteNetwork(deleteNetworkID);
+				deleteNetworkID = 0;
+			break;
+			case SAVE_NETWORK_TASK:
+				saveNetwork();
+			break;
 			default:
 				setError("NetworkDaoThread started without defined task.");
 		}
@@ -218,8 +225,35 @@ void NetworkDaoThread::run(){
     }
 
     //Current task is complete
+	neuronGroupIDList.clear();
+	neuronGroupList.clear();
+	connectionGroupIDList.clear();
+	connectionGroupList.clear();
+	networkID = 0;
     currentTask = NO_TASK_DEFINED;
     stopThread = true;
+}
+
+/*! Starts a thread to delete the specified network */
+void NetworkDaoThread::startDeleteNetwork(unsigned networkID){
+	deleteNetworkID = networkID;
+	currentTask = DELETE_NETWORK_TASK;
+	start();
+}
+
+
+/*! Saves network using supplied lists of neuron and connection groups to add and delete */
+void NetworkDaoThread::startSaveNetwork(unsigned networkID, QList<NeuronGroup*> newNeuronGroups, QList<ConnectionGroup*> newConnectionGroups, QList<unsigned> deleteNeuronGroupIDs, QList<unsigned> deleteConnectionGroupIDs){
+	//Store data
+	this->networkID = networkID;
+	this->neuronGroupList = newNeuronGroups;
+	this->connectionGroupList = newConnectionGroups;
+	this->neuronGroupIDList = deleteNeuronGroupIDs;
+	this->connectionGroupIDList = deleteConnectionGroupIDs;
+
+	//Start thread running
+	currentTask = SAVE_NETWORK_TASK;
+	start();
 }
 
 
@@ -313,6 +347,8 @@ void NetworkDaoThread::addConnectionGroups(){
 
 				//Add connection id to connection - last insert id is the id of the first connection in the list of value entries
 				int lastInsertID = query.lastInsertId().toInt();
+				if( (lastInsertID + tmpConList.size()) > LAST_CONNECTION_ID )
+					throw SpikeStreamException("Database generated connection ID is out of range: " + QString::number(lastInsertID + tmpConList.size()) + ". It must be less than or equal to " + QString::number(LAST_CONNECTION_ID));
 				if(lastInsertID < START_CONNECTION_ID)
 					throw SpikeStreamException("Insert ID for Connection is invalid.");
 				if(tmpConList.size() != numConBuffers)
@@ -354,6 +390,8 @@ void NetworkDaoThread::addConnectionGroups(){
 
 				//Add connection id to connection
 				int lastInsertID = query.lastInsertId().toInt();
+				if( lastInsertID > LAST_CONNECTION_ID )
+					throw SpikeStreamException("Database generated connection ID is out of range: " + QString::number(lastInsertID) + ". It must be less than or equal to " + QString::number(LAST_CONNECTION_ID));
 				if(lastInsertID < START_CONNECTION_ID)
 					throw SpikeStreamException("Insert ID for Connection is invalid.");
 				(*iter)->setID(lastInsertID);
@@ -463,6 +501,8 @@ void NetworkDaoThread::addNeuronGroups(){
 
 				//Add neuron id to neuron - last insert id is the id of the first neuron in the list of value entries
 				int lastInsertID = query.lastInsertId().toInt();
+				if( (lastInsertID + tmpNeurList.size()) > LAST_NEURON_ID )
+					throw SpikeStreamException("Database generated neuron ID is out of range: " + QString::number(lastInsertID + tmpNeurList.size()) + ". It must be less than or equal to " + QString::number(LAST_NEURON_ID));
 				if(lastInsertID < START_NEURON_ID)
 					throw SpikeStreamException("Insert ID for Neuron is invalid.");
 				if(tmpNeurList.size() != numNeurBuffers)
@@ -503,6 +543,8 @@ void NetworkDaoThread::addNeuronGroups(){
 
 				//Add neuron id to neuron
 				int lastInsertID = query.lastInsertId().toInt();
+				if( (lastInsertID) > LAST_NEURON_ID )
+					throw SpikeStreamException("Database generated neuron ID is out of range: " + QString::number(lastInsertID) + ". It must be less than or equal to " + QString::number(LAST_NEURON_ID));
 				if(lastInsertID < START_NEURON_ID)
 					throw SpikeStreamException("Insert ID for Neuron is invalid.");
 				(*neurListIter)->setID(lastInsertID);
@@ -666,7 +708,6 @@ void NetworkDaoThread::loadNeurons(){
 }
 
 
-
 /*! Exceptions do not work across threads, so errors are flagged by calling this method.
     The invoking method is responsible for checking whether an error occurred and throwing
     an exeption if necessary.*/
@@ -676,4 +717,52 @@ void NetworkDaoThread::setError(const QString& msg){
     stopThread = true;
 }
 
+
+/*! Saves a network that has been created or edited in prototype mode to the database. */
+void NetworkDaoThread::saveNetwork(){
+	//Delete neuron and connection groups
+	deleteNeuronGroups();
+	deleteConnectionGroups();
+
+
+	/* Store link between old IDs and neurons in the groups that we are going to add.
+	   Also store link between old neuron group IDs and neuron group IDs */
+	QHash<unsigned, Neuron*> oldIDNeurMap;
+	QHash<unsigned, NeuronGroup*> oldIDNeurGrpMap;
+	foreach(NeuronGroup* tmpNeurGrp, neuronGroupList){
+		//Store old neuron group ID
+		oldIDNeurGrpMap[tmpNeurGrp->getID()] = tmpNeurGrp;
+
+		//Store old neuron IDS
+		QHash<unsigned, Neuron*>::iterator endNeurGrp = tmpNeurGrp->end();
+		for(QHash<unsigned, Neuron*>::iterator neurIter = tmpNeurGrp->begin(); neurIter != endNeurGrp; ++neurIter){
+			oldIDNeurMap[neurIter.key()] = neurIter.value();
+		}
+	}
+
+	//Add neuron groups to database, the new IDs wil be stored in the neurons and neuron groups
+	addNeuronGroups();
+
+	//Update connections with the new IDs
+	foreach(ConnectionGroup* tmpConGrp, connectionGroupList){
+		//Update FROM and TO connection group IDs
+		if(oldIDNeurGrpMap.contains(tmpConGrp->getFromNeuronGroupID()))
+			tmpConGrp->setFromNeuronGroupID(oldIDNeurGrpMap[tmpConGrp->getFromNeuronGroupID()]->getID());
+		if(oldIDNeurGrpMap.contains(tmpConGrp->getToNeuronGroupID()))
+			tmpConGrp->setToNeuronGroupID(oldIDNeurGrpMap[tmpConGrp->getToNeuronGroupID()]->getID());
+
+		//Update FROM and TO IDs in connections.
+		QHash<unsigned, Connection*>::const_iterator endConGrp = tmpConGrp->end();
+		for(QHash<unsigned, Connection*>::const_iterator conIter = tmpConGrp->begin(); conIter!= endConGrp; ++conIter){
+			//Only update neurons that we are handling, the rest should stay the same.
+			if(oldIDNeurMap.contains(conIter.value()->getFromNeuronID()))
+				conIter.value()->setFromNeuronID(oldIDNeurMap[conIter.value()->getFromNeuronID()]->getID());
+			if(!oldIDNeurMap.contains(conIter.value()->getToNeuronID()))
+				conIter.value()->setToNeuronID(oldIDNeurMap[conIter.value()->getToNeuronID()]->getID());
+		}
+	}
+
+	//Add connection groups to the database, the new IDs will be stored in the connection groups
+	addConnectionGroups();
+}
 

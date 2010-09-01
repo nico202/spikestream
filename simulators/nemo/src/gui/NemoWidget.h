@@ -35,7 +35,7 @@ namespace spikestream {
 			void checkSaveWeightsProgress();
 			void injectNoiseButtonClicked();
 			void loadSimulation();
-			void monitorStateChanged(int state);
+			void monitorFiringNeuronsStateChanged(int state);
 			void nemoWrapperFinished();
 			void networkChanged();
 			void setArchiveDescription();
@@ -44,7 +44,7 @@ namespace spikestream {
 			void setSynapseParameters();
 			void updateTimeStep(unsigned int timeStep, const QList<unsigned>& neuronIDList);
 			void saveWeights();
-			void setTrackWeights(bool enable);
+			void setMonitorWeights(bool enable);
 			void simulationRateChanged(int comboIndex);
 			void simulationStopped();
 			void startSimulation();
@@ -88,8 +88,11 @@ namespace spikestream {
 			/*! Stop action */
 			QAction* stopAction;
 
-			/*! Sets the simulation into monitor mode */
-			QCheckBox* monitorCheckBox;
+			/*! Controls the monitoring of firing neurons*/
+			QCheckBox* monitorFiringNeuronsCheckBox;
+
+			/*! Controls the monitoring of weights */
+			QCheckBox* monitorWeightsCheckBox;
 
 			/*! Sets the simulation into archive mode */
 			QCheckBox* archiveCheckBox;

@@ -36,6 +36,8 @@ namespace spikestream {
 			void prepareLoadNeurons(const QList<NeuronGroup*>& neurGrpList);
 			void prepareLoadNeurons(NeuronGroup* neurGrp);
 			void run();
+			void startDeleteNetwork(unsigned networkID);
+			void startSaveNetwork(unsigned networkID, QList<NeuronGroup*> newNeuronGroups, QList<ConnectionGroup*> newConnectionGroups, QList<unsigned> deleteNeuronGroupIDs, QList<unsigned> deleteConnectionGroupIDs);
 			void stop();
 
 
@@ -82,13 +84,18 @@ namespace spikestream {
 			/*! The number of values statement used when adding neurons */
 			int numNeurBuffers;
 
+			/*! The ID of the network to be deleted */
+			unsigned deleteNetworkID;
+
 			const static unsigned int NO_TASK_DEFINED = 1;
 			const static unsigned int ADD_CONNECTION_GROUPS_TASK = 2;
 			const static unsigned int ADD_NEURON_GROUPS_TASK = 3;
 			const static unsigned int DELETE_CONNECTION_GROUPS_TASK = 4;
-			const static unsigned int DELETE_NEURON_GROUPS_TASK = 5;
-			const static unsigned int LOAD_NEURONS_TASK = 6;
-			const static unsigned int LOAD_CONNECTIONS_TASK = 7;
+			const static unsigned int DELETE_NETWORK_TASK = 5;
+			const static unsigned int DELETE_NEURON_GROUPS_TASK = 6;
+			const static unsigned int LOAD_NEURONS_TASK = 7;
+			const static unsigned int LOAD_CONNECTIONS_TASK = 8;
+			const static unsigned int SAVE_NETWORK_TASK = 9;
 
 			//========================  METHODS  ===========================
 			void addNeuronGroups();
@@ -97,6 +104,7 @@ namespace spikestream {
 			void deleteNeuronGroups();
 			void loadConnections();
 			void loadNeurons();
+			void saveNetwork();
 			void setError(const QString& msg);
     };
 

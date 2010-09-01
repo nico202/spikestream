@@ -17,7 +17,8 @@ NemoWrapper::NemoWrapper(){
 	simulationLoaded = false;
 	stopThread = true;
 	archiveMode = false;
-	monitorMode = false;
+	monitorFiringNeurons = false;
+	monitorWeights = false;
 	updateInterval_ms = 500;
 
 	//Zero is the default STDP function
@@ -68,8 +69,6 @@ void NemoWrapper::loadNemo(){
 	timeStepCounter = 0;
 	waitForGraphics = false;
 	archiveMode = false;
-	monitorMode = false;
-	trackWeights = false;
 
 	//Get the network
 	if(!Globals::networkLoaded())
@@ -242,7 +241,7 @@ void NemoWrapper::setArchiveMode(bool newArchiveMode){
 	}
 
 	//Flush buffer if archiving is being turned on when monitoring is off
-	if(simulationLoaded && newArchiveMode && !archiveMode && !monitorMode){
+	if(simulationLoaded && newArchiveMode && !archiveMode && !monitorFiringNeurons){
 		mutex.lock();//Prevent interference with step
 		checkNemoOutput( nemo_flush_firing_buffer(nemoSimulation), "Nemo error flushing firing buffer" );
 		mutex.unlock();
@@ -252,28 +251,29 @@ void NemoWrapper::setArchiveMode(bool newArchiveMode){
 }
 
 
-/*! Sets the monitor mode, which controls whether data is extracted from the simulation at each time step */
-void NemoWrapper::setMonitorMode(bool newMonitorMode){
+/*! Sets the monitor mode, which controls whether firing neuron data is extracted
+	from the simulation at each time step */
+void NemoWrapper::setMonitorFiringNeurons(bool newMonitorMode){
 	if(newMonitorMode && !simulationLoaded)
 		throw SpikeStreamSimulationException("Cannot switch monitor mode on unless simulation is loaded.");
 
 	//Flush buffer if monitoring is being turned on when archiving is off
-	if(simulationLoaded && newMonitorMode && !monitorMode && !archiveMode){
+	if(simulationLoaded && newMonitorMode && !monitorFiringNeurons && !archiveMode){
 		mutex.lock();//Prevent interference with step
 		checkNemoOutput( nemo_flush_firing_buffer(nemoSimulation), "Nemo error flushing firing buffer" );
 		mutex.unlock();
 	}
 
 	//Store new monitoring mode
-	this->monitorMode = newMonitorMode;
+	this->monitorFiringNeurons = newMonitorMode;
 }
 
 
 
 /*! Sets wrapper to retrieve the weights from NeMo and save them to the current weight
 	field in the database. Does this operation every time step until it is turned off. */
-void  NemoWrapper::setTrackWeights(bool enable){
-	trackWeights = enable;
+void  NemoWrapper::setMonitorWeights(bool enable){
+	monitorWeights = enable;
 }
 
 
@@ -481,7 +481,7 @@ void NemoWrapper::stepNemo(){
 	//-----------------------------------------------
 	//         Retrieve list of firing neurons
 	//-----------------------------------------------
-	if(archiveMode || monitorMode){
+	if(archiveMode || monitorFiringNeurons){
 		unsigned *cycles, *nidx;
 		unsigned nfired, ncycles;
 		checkNemoOutput( nemo_read_firing(nemoSimulation, &cycles, &nidx, &nfired, &ncycles), "Nemo error reading firing neurons" );
@@ -504,7 +504,7 @@ void NemoWrapper::stepNemo(){
 	//--------------------------------------------
 	//             Retrieve weights
 	//--------------------------------------------
-	if(trackWeights){
+	if(monitorWeights){
 		updateNetworkWeights();
 
 		//Inform other classes that weights have changed

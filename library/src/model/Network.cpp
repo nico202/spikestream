@@ -25,7 +25,7 @@ Network::Network(const QString& name, const QString& description, const DBInfo& 
     //Initialize variables
     currentNeuronTask = -1;
     currentConnectionTask = -1;
-	saved = false;
+	prototypeMode = false;
     clearError();
 
     //Create new network in database. ID will be stored in the network info
@@ -55,7 +55,7 @@ Network::Network(const NetworkInfo& networkInfo, const DBInfo& networkDBInfo, co
     //Initialize variables
     currentNeuronTask = -1;
     currentConnectionTask = -1;
-	saved = true;
+	prototypeMode = false;
     clearError();
 
     //Load up basic information about the neuron and connection groups
@@ -78,8 +78,8 @@ Network::~Network(){
     }
 
     //Empties all data stored in the class
-    deleteConnectionGroups();
-    deleteNeuronGroups();
+	clearConnectionGroups();
+	clearNeuronGroups();
 }
 
 
@@ -97,21 +97,20 @@ void Network::addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList){
 	if(prototypeMode){
 		foreach(ConnectionGroup* conGrp, connectionGroupList){
 			unsigned tmpID = getTemporaryConGrpID();//Get an ID for the connection groups
+			conGrp->setID(tmpID);//Set ID in connection group
 			connGrpMap[tmpID] = conGrp;//Add connection group to network
-			newConnectionGroups.append(conGrp);//Store connection group in list for adding to database later
+			newConnectionGroupMap[tmpID] = conGrp;//Store connection group in map for adding to database later
 		}
-		savedStateChanged(false);
 	}
-	//In normal mode, connection groups are saved to the database
+	//In normal mode, connection groups are saved immediately to the database
 	else{
-		//Store the list of connection groups to be added
-		newConnectionGroups = connectionGroupList;
+		//Store the connection groups to be added in the map with ids increasing from 1
+		newConnectionGroupMap.clear();
+		for(int i=0; i<connectionGroupList.size(); ++i)
+			newConnectionGroupMap[i+1] = connectionGroupList.at(i);
 
 		//Start thread that adds connection groups to database
-		clearError();
-		connectionNetworkDaoThread->prepareAddConnectionGroups(getID(), connectionGroupList);
-		currentConnectionTask = ADD_CONNECTIONS_TASK;
-		connectionNetworkDaoThread->start();
+		startAddConnectionGroups();
 	}
 }
 
@@ -124,22 +123,21 @@ void Network::addNeuronGroups(QList<NeuronGroup*>& neuronGroupList){
 	//In prototype mode, we add connection groups to network and store them in a list for later
 	if(prototypeMode){
 		foreach(NeuronGroup* neurGrp, neuronGroupList){
-			unsigned tmpID = getTemporaryNeurGrpID();//Get an ID for the connection groups
-			neurGrpMap[tmpID] = neurGrp;//Add connection group to network
-			newNeuronGroups.append(neurGrp);//Store connection group in list for adding to database later
+			unsigned tmpID = getTemporaryNeurGrpID();//Get an ID for the neuron group
+			neurGrp->setID(tmpID);//Set ID in neuron group
+			neurGrpMap[tmpID] = neurGrp;//Add neuron group to network
+			newNeuronGroupMap[tmpID] = neurGrp;//Store neuron group in map for adding to database later
 		}
-		savedStateChanged(false);
 	}
-	//In normal mode, connection groups are saved to the database
+	//In normal mode, neuron groups are saved immediately to the database
 	else{
-		//Store the list of neuron groups to be added later when the thread has finished and we have the correct ID
-		newNeuronGroups = neuronGroupList;
+		//Store the neuron groups to be added in the map with ids increasing from 1
+		newNeuronGroupMap.clear();
+		for(int i=0; i<neuronGroupList.size(); ++i)
+			newNeuronGroupMap[i+1] = neuronGroupList.at(i);
 
-		//Start thread that adds neuron groups to database
-		clearError();
-		neuronNetworkDaoThread->prepareAddNeuronGroups(getID(), neuronGroupList);
-		currentNeuronTask = ADD_NEURONS_TASK;
-		neuronNetworkDaoThread->start();
+		//Start thread to add neuron groups to database
+		startAddNeuronGroups();
 	}
 }
 
@@ -182,9 +180,9 @@ bool  Network::containsNeuronGroup(unsigned int neuronGroupID){
 
 /*! Removes the specified connection groups from the network and database.
 	Throws an exception if the connection groups cannot be found */
-void Network::deleteConnectionGroups(QList<unsigned int>& conGrpIDList){
+void Network::deleteConnectionGroups(QList<unsigned>& deleteConGrpIDList){
 	//Check if network is editable or not
-	if(hasArchives())
+	if(!prototypeMode && hasArchives())
 		throw SpikeStreamException("Cannot delete connection groups from a locked network.");
 
 	//Check that network is not currently busy with some other task
@@ -192,25 +190,26 @@ void Network::deleteConnectionGroups(QList<unsigned int>& conGrpIDList){
 		throw SpikeStreamException("Network is busy with another connection-related task.");
 
 	//Check that connection group ids exist in network
-	foreach(unsigned int conGrpID, conGrpIDList){
+	foreach(unsigned int conGrpID, deleteConGrpIDList){
 		if(!connGrpMap.contains(conGrpID))
 			throw SpikeStreamException("Connection group ID " + QString::number(conGrpID) + " cannot be found in the current network.");
 	}
 
-	//Store the list of neuron groups to be added later when the thread has finished and we have the correct ID
-	deleteConnectionGroupIDs = conGrpIDList;
+	//Remove connection groups from memory
+	foreach(unsigned conGrpID, deleteConGrpIDList){
+		deleteConnectionGroupFromMemory(conGrpID);
+	}
 
-	//Start thread that deletes connection groups from database
-	clearError();
-	connectionNetworkDaoThread->prepareDeleteConnectionGroups(getID(), conGrpIDList);
-	currentConnectionTask = DELETE_CONNECTIONS_TASK;
-	connectionNetworkDaoThread->start();
+	//In normal mode, connection groups are deleted from the database
+	if(!prototypeMode){
+		startDeleteConnectionGroups();
+	}
 }
 
 
 /*! Removes the specified neuron groups from the network and database.
 	Throws an exception if the neuron groups cannot be found */
-void Network::deleteNeuronGroups(QList<unsigned int>& neurGrpIDList){
+void Network::deleteNeuronGroups(QList<unsigned int>& deleteNeurGrpIDList){
 	//Check if network is editable or not
 	if(hasArchives())
 		throw SpikeStreamException("Cannot delete neuron groups from a locked network.");
@@ -220,36 +219,18 @@ void Network::deleteNeuronGroups(QList<unsigned int>& neurGrpIDList){
 		throw SpikeStreamException("Network is busy with another neuron-related task.");
 
 	//Check that neuron group ids exist in network
-	foreach(unsigned int neurGrpID, neurGrpIDList){
+	foreach(unsigned int neurGrpID, deleteNeurGrpIDList){
 		if(!neurGrpMap.contains(neurGrpID))
 			throw SpikeStreamException("Neuron group ID " + QString::number(neurGrpID) + " cannot be found in the current network.");
 	}
 
-	//Store the list of neuron groups to be added later when the thread has finished and we have the correct ID
-	deleteNeuronGroupIDs = neurGrpIDList;
-
-	//Start thread that deletes neuron groups from database
-	clearError();
-	neuronNetworkDaoThread->prepareDeleteNeuronGroups(getID(), neurGrpIDList);
-	currentNeuronTask = DELETE_NEURONS_TASK;
-	neuronNetworkDaoThread->start();
-
-	/* Delete connections to or from the neuron groups being deleted from memory
-		The database deletion will be done automatically by the database */
-	QList<unsigned int> deleteConGrpIDs;
-	for(QHash<unsigned int, ConnectionGroup*>::iterator iter = connGrpMap.begin(); iter != connGrpMap.end(); ++iter){
-		foreach(unsigned int neurGrpID, neurGrpIDList){
-			if(iter.value()->getFromNeuronGroupID() == neurGrpID || iter.value()->getToNeuronGroupID() == neurGrpID){
-				deleteConGrpIDs.append(iter.key());
-			}
-		}
+	foreach(unsigned neurGrpID, deleteNeurGrpIDList){
+		//Remove neuron groups from memory along with their associated connections
+		deleteNeuronGroupFromMemory(neurGrpID);
 	}
-	//Do the deletion outside of the map iteration
-	foreach(unsigned tmpConGrpID, deleteConGrpIDs){
-		if(!connGrpMap.contains(tmpConGrpID))
-			throw SpikeStreamException("Connection group ID " + QString::number(tmpConGrpID) + " cannot be found in network.");
-		delete connGrpMap[tmpConGrpID];
-		connGrpMap.remove(tmpConGrpID);
+
+	if(!prototypeMode){
+		startDeleteNeuronGroups();
 	}
 }
 
@@ -547,8 +528,16 @@ bool Network::hasArchives(){
 
 /*! Returns true if the network matches the database */
 bool Network::isSaved(){
-	if(prototypeMode && !saved)
-		return false;
+	if(prototypeMode){
+		if(!newConnectionGroupMap.isEmpty())
+			return false;
+		if(!newNeuronGroupMap.isEmpty())
+			return false;
+		if(!deleteNeuronGroupIDs.isEmpty())
+			return false;
+		if(!deleteConnectionGroupIDs.isEmpty())
+			return false;
+	}
 	return true;
 }
 
@@ -597,30 +586,18 @@ void Network::save(){
 	if(!prototypeMode)
 		throw SpikeStreamException("Network should not be saved unless it is in prototype mode.");
 
-	//--------------------------------------------------
-	//     HANDLE ADDED NEURON AND CONNECTION GROUPS
-	//--------------------------------------------------
 	//Remove connection and neuron groups from network - they will be added later with the correct IDs.
-	foreach(ConnectionGroup* tmpConGrp, newConnectionGroups)
-		connGrpMap.remove(tmpConGrp->getID());
-	foreach(NeuronGroup* tmpNeurGrp, newNeuronGroups)
-		neurGrpMap.remove(tmpNeurGrp->getID());
+	for(QHash<unsigned, ConnectionGroup*>::iterator iter = newConnectionGroupMap.begin(); iter != newConnectionGroupMap.end(); ++iter)
+		connGrpMap.remove(iter.value()->getID());
+	for(QHash<unsigned, NeuronGroup*>::iterator iter = newNeuronGroupMap.begin(); iter != newNeuronGroupMap.end(); ++iter)
+		neurGrpMap.remove(iter.value()->getID());
 
-	//Start thread that adds connection groups to database
-	clearError();
-	connectionNetworkDaoThread->prepareAddConnectionGroups(getID(), newConnectionGroups);
-	currentConnectionTask = ADD_CONNECTIONS_TASK;
-	connectionNetworkDaoThread->start();
-
-	//Start thread that adds connection groups to database
-	neuronNetworkDaoThread->prepareAddNeuronGroups(getID(), newNeuronGroups);
-	currentNeuronTask = ADD_NEURONS_TASK;
-	neuronNetworkDaoThread->start();
-
-
-	//--------------------------------------------------
-	//   HANDLE DELETED NEURON AND CONNECTION GROUPS
-	//--------------------------------------------------
+	//Start thread to add/delete from database and get appropriate IDs inside the classes.
+	currentNeuronTask = SAVE_NETWORK_TASK;
+	neuronNetworkDaoThread->startSaveNetwork(getID(),
+			newNeuronGroupMap.values(), newConnectionGroupMap.values(),
+			deleteNeuronGroupIDs, deleteConnectionGroupIDs
+	);
 }
 
 
@@ -642,23 +619,11 @@ void Network::connectionThreadFinished(){
 	if(!error){
 		try{
 			switch(currentConnectionTask){
-				case DELETE_CONNECTIONS_TASK:
-					//Remove deleted connection groups from memory
-					foreach(unsigned int conGrpID,  deleteConnectionGroupIDs){
-						if(!connGrpMap.contains(conGrpID))
-							throw SpikeStreamException("Connection group ID " + QString::number(conGrpID) + " cannot be found in network.");
-						delete connGrpMap[conGrpID];
-						connGrpMap.remove(conGrpID);
-					}
-				break;
 				case ADD_CONNECTIONS_TASK:
-					//Add connection groups to network
-					for(QList<ConnectionGroup*>::iterator iter = newConnectionGroups.begin(); iter != newConnectionGroups.end(); ++iter){
-						if(connGrpMap.contains((*iter)->getID()))
-							throw SpikeStreamException("Connection group with ID " + QString::number((*iter)->getID()) + " is already present in the network.");
-						connGrpMap[(*iter)->getID()] = *iter;
-						newConnectionGroups.clear();
-					}
+					updateConnectionGroupsAfterSave();
+				break;
+				case DELETE_CONNECTIONS_TASK:
+					;
 				break;
 				case LOAD_CONNECTIONS_TASK:
 					;//Nothing to do at present
@@ -692,29 +657,17 @@ void Network::neuronThreadFinished(){
 		try{
 			switch(currentNeuronTask){
 				case ADD_NEURONS_TASK:
-					//Add neuron groups to the network now that they have the correct ID
-					for(QList<NeuronGroup*>::iterator iter = newNeuronGroups.begin(); iter != newNeuronGroups.end(); ++iter){
-						//Check to see if ID already exists - error in this case
-						if( neurGrpMap.contains( (*iter)->getID() ) ){
-							throw SpikeStreamException("Adding neurons task - trying to add a neuron group with ID " + QString::number((*iter)->getID()) + " that already exists in the network.");
-						}
-
-						//Store neuron group
-						neurGrpMap[ (*iter)->getID() ] = *iter;
-						newNeuronGroups.clear();
-					}
+					updateNeuronGroupsAfterSave();
 				break;
 				case DELETE_NEURONS_TASK:
-					//Remove deleted neuron groups from memory
-					foreach(unsigned int neurGrpID,  deleteNeuronGroupIDs){
-						if(!neurGrpMap.contains(neurGrpID))
-							throw SpikeStreamException("Neuron group ID " + QString::number(neurGrpID) + " cannot be found in network.");
-						delete neurGrpMap[neurGrpID];
-						neurGrpMap.remove(neurGrpID);
-					}
+					;
 				break;
 				case LOAD_NEURONS_TASK:
 					;//Nothing to do at present
+				break;
+				case SAVE_NETWORK_TASK:
+					updateNeuronGroupsAfterSave();
+					updateConnectionGroupsAfterSave();
 				break;
 				default:
 					throw SpikeStreamException("The current task ID has not been recognized.");
@@ -767,6 +720,52 @@ void Network::checkNeuronGroupID(unsigned int id){
 }
 
 
+/*! Removes the specified connection group from memory */
+void Network::deleteConnectionGroupFromMemory(unsigned conGrpID){
+	//Remove connection group from map of new groups that only exist in memory
+	if(prototypeMode){
+		if(newConnectionGroupMap.contains(conGrpID)){//Deleting a new connection group
+			newConnectionGroupMap.remove(conGrpID);
+		}
+		else{//Schedule connection group for deletion when network is saved
+			deleteConnectionGroupIDs.append(conGrpID);
+		}
+	}
+	//Remove connection group from memory
+	delete connGrpMap[conGrpID];
+	connGrpMap.remove(conGrpID);
+}
+
+
+/*! Removes the specified neuron group from memory along with all of its associated connections */
+void Network::deleteNeuronGroupFromMemory(unsigned neurGrpID){
+	QHash<unsigned, bool> tmpDeleteConMap;
+
+	//Remove neuron group from map of new groups that only exist in memory
+	if(prototypeMode){
+		if(newNeuronGroupMap.contains(neurGrpID)){//Deleting a new neuron group
+			newNeuronGroupMap.remove(neurGrpID);
+		}
+		else{//Schedule neuron group for deletion when network is saved
+			deleteNeuronGroupIDs.append(neurGrpID);
+		}
+
+		//Identify connection groups involving this neuron group
+		for(QHash<unsigned int, ConnectionGroup*>::iterator iter = connGrpMap.begin(); iter != connGrpMap.end(); ++iter){
+			if(iter.value()->getFromNeuronGroupID() == neurGrpID || iter.value()->getToNeuronGroupID() == neurGrpID){
+				tmpDeleteConMap[iter.value()->getID()] = true;
+			}
+		}
+	}
+	//Remove neuron group from memory
+	delete neurGrpMap[neurGrpID];
+	neurGrpMap.remove(neurGrpID);
+
+	//Delete connection groups from memory and schedule their later deletion from the database
+	for(QHash<unsigned, bool>::iterator iter = tmpDeleteConMap.begin(); iter != tmpDeleteConMap.end(); ++iter)
+		deleteConnectionGroupFromMemory(iter.key());
+}
+
 /*! Applies connection mode filters to the specified connection and returns
 	true if it should not be displayed. */
 bool Network::filterConnection(Connection *connection, unsigned connectionMode){
@@ -812,7 +811,7 @@ unsigned Network::getTemporaryNeurGrpID(){
 /*! Uses network dao to obtain list of connection groups and load them into hash map. */
 void Network::loadConnectionGroupsInfo(){
     //Clear hash map
-    deleteConnectionGroups();
+	clearConnectionGroups();
 
     //Get list of neuron groups from database
 	NetworkDao networkDao(networkDBInfo);
@@ -828,7 +827,7 @@ void Network::loadConnectionGroupsInfo(){
     Individual neurons are loaded separately to enable lazy loading if required.  */
 void Network::loadNeuronGroupsInfo(){
     //Clear hash map
-    deleteNeuronGroups();
+	clearNeuronGroups();
 
     //Get list of neuron groups from database
 	NetworkDao networkDao(networkDBInfo);
@@ -841,7 +840,7 @@ void Network::loadNeuronGroupsInfo(){
 
 
 /*! Deletes all connection groups */
-void Network::deleteConnectionGroups(){
+void Network::clearConnectionGroups(){
     for(QHash<unsigned int, ConnectionGroup*>::iterator iter = connGrpMap.begin(); iter != connGrpMap.end(); ++iter)
 		delete iter.value();
     connGrpMap.clear();
@@ -849,19 +848,11 @@ void Network::deleteConnectionGroups(){
 
 
 /*! Deletes all neuron groups */
-void Network::deleteNeuronGroups(){
+void Network::clearNeuronGroups(){
     //Delete all neuron groups
     for(QHash<unsigned int, NeuronGroup*>::iterator iter = neurGrpMap.begin(); iter != neurGrpMap.end(); ++iter)
 		delete iter.value();
     neurGrpMap.clear();
-}
-
-
-/*! Called when the network is changed in memory when editing in prototype mode. */
-void Network::savedStateChanged(bool newSavedState){
-	if(!prototypeMode)
-		throw SpikeStreamException("Saved state should only change in prototype mode.");
-	saved = newSavedState;
 }
 
 
@@ -870,3 +861,73 @@ void Network::setError(const QString& errorMsg){
 	this->errorMessage += " " + errorMsg;
 	error = true;
 }
+
+
+/*! Starts thread that adds the new connection groups to the database. */
+void Network::startAddConnectionGroups(){
+	clearError();
+	QList<ConnectionGroup*> tmpConGrpList = newConnectionGroupMap.values();
+	connectionNetworkDaoThread->prepareAddConnectionGroups(getID(), tmpConGrpList);
+	currentConnectionTask = ADD_CONNECTIONS_TASK;
+	connectionNetworkDaoThread->start();
+}
+
+
+/*! Starts thread that adds the new neuron groups to the database. */
+void Network::startAddNeuronGroups(){
+	clearError();
+	QList<NeuronGroup*> tmpNeurGrpList = newNeuronGroupMap.values();
+	neuronNetworkDaoThread->prepareAddNeuronGroups(getID(), tmpNeurGrpList);
+	currentNeuronTask = ADD_NEURONS_TASK;
+	neuronNetworkDaoThread->start();
+}
+
+
+/*! Starts the thread that deletes connection groups from the database. */
+void Network::startDeleteConnectionGroups(){
+	clearError();
+	connectionNetworkDaoThread->prepareDeleteConnectionGroups(getID(), deleteConnectionGroupIDs);
+	currentConnectionTask = DELETE_CONNECTIONS_TASK;
+	connectionNetworkDaoThread->start();
+}
+
+
+/*! Starts the thread that deletes connection groups from the database. */
+void Network::startDeleteNeuronGroups(){
+	clearError();
+	neuronNetworkDaoThread->prepareDeleteNeuronGroups(getID(), deleteNeuronGroupIDs);
+	currentNeuronTask = DELETE_NEURONS_TASK;
+	neuronNetworkDaoThread->start();
+}
+
+
+/*! When neuron groups have been added to the database their internal ID reflects the database state
+	but the ID in the map held in network does not. This method fixes this and clears the map of
+	new neuron groups. */
+void Network::updateConnectionGroupsAfterSave(){
+	//Add connection groups to network now that they have the correct ID
+	for(QHash<unsigned, ConnectionGroup*>::iterator iter = newConnectionGroupMap.begin(); iter != newConnectionGroupMap.end(); ++iter){
+		if(connGrpMap.contains(iter.value()->getID()))
+			throw SpikeStreamException("Connection group with ID " + QString::number(iter.value()->getID()) + " is already present in the network.");
+		connGrpMap[iter.value()->getID()] = iter.value();
+	}
+	newConnectionGroupMap.clear();
+}
+
+
+/*! When neuron groups have been added to the database their internal ID reflects the database state
+	but the ID in the map held in network does not. This method fixes this and clears the map of
+	new neuron groups. */
+void Network::updateNeuronGroupsAfterSave(){
+	//Add neuron groups to the network now that they have the correct ID
+	for(QHash<unsigned, NeuronGroup*>::iterator iter = newNeuronGroupMap.begin(); iter != newNeuronGroupMap.end(); ++iter){
+		//Check to see if ID already exists - error in this case
+		if( neurGrpMap.contains( iter.value()->getID() ) ){
+			throw SpikeStreamException("Adding neurons task - trying to add a neuron group with ID " + QString::number(iter.value()->getID()) + " that already exists in the network.");
+		}
+		neurGrpMap[ iter.value()->getID() ] = iter.value();
+	}
+	newNeuronGroupMap.clear();
+}
+
+

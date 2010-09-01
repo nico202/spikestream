@@ -28,7 +28,7 @@ namespace spikestream {
 			bool contains(unsigned int neurID);
 			bool contains(unsigned int neurID, float x, float y, float z);
 			Box getBoundingBox();
-			unsigned int getID() { return info.getID(); }
+			unsigned int getID();
 			unsigned int getNeuronAtLocation(const Point3D& location);
 			QHash<QString, double> getParameters() { return parameterMap; }
 			double getParameter(const QString& key);
@@ -39,7 +39,7 @@ namespace spikestream {
 			Point3D& getNeuronLocation(unsigned int neuronID);
 			bool isLoaded() { return loaded; }
 			void setLoaded(bool loaded) { this->loaded = loaded; }
-			void setID(unsigned int id){ info.setID(id); }
+			void setID(unsigned int id);
 			void setNeuronMap(NeuronMap* newMap);
 			void setParameters(QHash<QString, double>& paramMap){ this->parameterMap = paramMap; }
 			void setStartNeuronID(unsigned int id) { this->startNeuronID = id; }
@@ -74,6 +74,10 @@ namespace spikestream {
 
 			/*! Flag to record when bounding box needs to be recalculated. */
 			bool calculateBoundingBox;
+
+			/*! Static counter used to generate neuron IDs that are unique for an instance of the application.
+				 Used for prototyping networks. */
+			static unsigned neuronIDCounter;
 
 
 			//====================  METHODS  ==========================

@@ -66,15 +66,15 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	controlsVBox->addWidget(toolBar);
 
 	//Add widget to control live monitoring of simulation
-	monitorCheckBox = new QCheckBox("Monitor firing neurons");
-	connect(monitorCheckBox, SIGNAL(stateChanged(int)), this, SLOT(monitorStateChanged(int)));
-	controlsVBox->addWidget(monitorCheckBox);
+	monitorFiringNeuronsCheckBox = new QCheckBox("Monitor firing neurons");
+	connect(monitorFiringNeuronsCheckBox, SIGNAL(stateChanged(int)), this, SLOT(monitorFiringNeuronsStateChanged(int)));
+	controlsVBox->addWidget(monitorFiringNeuronsCheckBox);
 
 	//Add widgets to monitor and save the weights
 	QHBoxLayout* saveWeightsBox = new QHBoxLayout();
-	QCheckBox* trackWeightsChkbx = new QCheckBox("Monitor weights");
-	connect(trackWeightsChkbx, SIGNAL(clicked(bool)), this, SLOT(setTrackWeights(bool)));
-	saveWeightsBox->addWidget(trackWeightsChkbx);
+	monitorWeightsCheckBox = new QCheckBox("Monitor weights");
+	connect(monitorWeightsCheckBox, SIGNAL(clicked(bool)), this, SLOT(setMonitorWeights(bool)));
+	saveWeightsBox->addWidget(monitorWeightsCheckBox);
 	saveWeightsButton = new QPushButton("Save Weights");
 	connect(saveWeightsButton, SIGNAL(clicked()), this, SLOT(saveWeights()));
 	saveWeightsBox->addWidget(saveWeightsButton);
@@ -208,6 +208,8 @@ void NemoWidget::checkLoadingProgress(){
 	controlsWidget->setEnabled(true);
 	playAction->setEnabled(true);
 	stopAction->setEnabled(false);
+	monitorFiringNeuronsCheckBox->setChecked(nemoWrapper->isMonitorFiringNeurons());
+	monitorWeightsCheckBox->setChecked(nemoWrapper->isMonitorWeights());
 	Globals::setSimulationLoaded(true);
 }
 
@@ -307,13 +309,13 @@ void NemoWidget::loadSimulation(){
 
 
 /*! Switches the monitoring of the simulation on or off */
-void NemoWidget::monitorStateChanged(int state){
+void NemoWidget::monitorFiringNeuronsStateChanged(int state){
 	try{
 		if(state == Qt::Checked)
-			nemoWrapper->setMonitorMode(true);
+			nemoWrapper->setMonitorFiringNeurons(true);
 		else{
 			//Set the monitor mode
-			nemoWrapper->setMonitorMode(false);
+			nemoWrapper->setMonitorFiringNeurons(false);
 
 			//Clear highlights
 			QHash<unsigned int, RGBColor*>* newHighlightMap = new QHash<unsigned int, RGBColor*>();
@@ -384,10 +386,10 @@ void NemoWidget::saveWeights(){
 }
 
 
-/*! Instructs NeMo wrapper to track weights by saving them to
+/*! Instructs NeMo wrapper to monitor weights by saving them to
 	 temporary weight field in network at each time step */
-void NemoWidget::setTrackWeights(bool enable){
-	nemoWrapper->setTrackWeights(enable);
+void NemoWidget::setMonitorWeights(bool enable){
+	nemoWrapper->setMonitorWeights(enable);
 }
 
 
@@ -446,7 +448,7 @@ void NemoWidget::simulationStopped(){
 void NemoWidget::updateTimeStep(unsigned int timeStep, const QList<unsigned>& neuronIDList){
 	timeStepLabel->setText(QString::number(timeStep));
 
-	if(nemoWrapper->isMonitorMode()){
+	if(nemoWrapper->isMonitorFiringNeurons()){
 		//Fill map with neuron ids
 		QHash<unsigned int, RGBColor*>* newHighlightMap = new QHash<unsigned int, RGBColor*>();
 		QList<unsigned>::const_iterator endList = neuronIDList.end();
@@ -536,8 +538,6 @@ void NemoWidget::unloadSimulation(bool confirmWithUser){
 	nemoParametersButton->setEnabled(true);
 	controlsWidget->setEnabled(false);
 	archiveDescriptionEdit->setText("Undescribed");
-	archiveCheckBox->setChecked(false);
-	monitorCheckBox->setChecked(false);
 	timeStepLabel->setText("0");
 }
 

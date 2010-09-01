@@ -25,6 +25,8 @@ namespace spikestream {
 			QHash<QString, double> getParameterMap() { return parameterMap; }
 			QString getParameterXML();
 
+			void setFromNeuronGroupID(unsigned id) { this->fromNeuronGroupID = id; }
+			void setToNeuronGroupID(unsigned id) { this->toNeuronGroupID = id; }
 			void setID(unsigned int id) { this->id = id; }
 
 		private:

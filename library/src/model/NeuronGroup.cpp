@@ -1,9 +1,14 @@
+//SpikeStream includes
+#include "GlobalVariables.h"
 #include "NeuronGroup.h"
 #include "SpikeStreamException.h"
 using namespace spikestream;
 
+//Qt includes
 #include <QDebug>
 
+//Initialize static variables
+unsigned NeuronGroup::neuronIDCounter = LAST_NEURON_ID + 1;
 
 /*! Constructor */
 NeuronGroup::NeuronGroup(const NeuronGroupInfo& info){
@@ -33,7 +38,10 @@ NeuronGroup::~NeuronGroup(){
 	by the actual ID when the group is added to the network and database. */
 Neuron* NeuronGroup::addNeuron(float xPos, float yPos, float zPos){
 	Neuron* tmpNeuron = new Neuron(xPos, yPos, zPos);
-	(*neuronMap)[getTemporaryID()] = tmpNeuron;
+	unsigned tmpID = getTemporaryID();
+	if(neuronMap->contains(tmpID))
+		throw SpikeStreamException("Automatically generated temporary neuron ID clashes with one in the network. New ID=" + QString::number(tmpID));
+	(*neuronMap)[tmpID] = tmpNeuron;
 	neuronGroupChanged();
 	return tmpNeuron;
 }
@@ -121,6 +129,12 @@ Box NeuronGroup::getBoundingBox(){
 }
 
 
+/*! Returns the ID of the neuron group */
+unsigned NeuronGroup::getID(){
+	return info.getID();
+}
+
+
 /*! Returns the ID of the neuron at a specified location */
 unsigned int NeuronGroup::getNeuronAtLocation(const Point3D& point){
 	NeuronMap::iterator mapEnd = neuronMap->end();//Saves accessing this function multiple times
@@ -149,6 +163,12 @@ double NeuronGroup::getParameter(const QString &key){
 }
 
 
+/*! Sets the ID of the neuron group */
+void NeuronGroup::setID(unsigned int id){
+	info.setID(id);
+}
+
+
 /*! Replaces the neuron map with a new neuron map.
 	Neurons are not cleaned up because they might be included in the new map. */
 void NeuronGroup::setNeuronMap(NeuronMap* newMap){
@@ -168,12 +188,9 @@ int NeuronGroup::size(){
 /*-----                PRIVATE METHODS                ----- */
 /*--------------------------------------------------------- */
 
-/*! Returns a temporary ID that does not exist in the current hash map */
+/*! Returns a temporary ID for adding connections */
 unsigned NeuronGroup::getTemporaryID(){
-	unsigned tmpID = (unsigned int)neuronMap->size();
-	while(neuronMap->contains(tmpID))
-		++tmpID;
-	return tmpID;
+	return ++neuronIDCounter;
 }
 
 
