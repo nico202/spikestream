@@ -32,10 +32,12 @@ namespace spikestream {
 			unsigned int getToNeuronGroupID() { return info.getToNeuronGroupID(); }
 			bool isLoaded() { return loaded; }
 			void setConnectionMap(QHash<unsigned, Connection*>* newConnectionMap);
+			void setFromNeuronGroupID(unsigned id);
 			void setID(unsigned int id) { info.setID(id); }
 			void setLoaded(bool loaded) { this->loaded = loaded; }
 			void setParameters(QHash<QString, double>& paramMap) { this->parameterMap = paramMap; }
 			void setTempWeight(unsigned connectionID, float tempWeight);
+			void setToNeuronGroupID(unsigned id);
 			void setWeight(unsigned connectionID, float weight);
 			int size() { return connectionMap->size(); }
 
@@ -61,8 +63,13 @@ namespace spikestream {
 		   /*! Map of parameters for the synapses in the connection group */
 		   QHash<QString, double> parameterMap;
 
+		   /*! Static counter used to generate connection IDs that are unique for an instance of the application.
+				Used for prototyping networks. */
+		   static unsigned connectionIDCounter;
+
+
 		   //====================  METHODS  ==========================
-		   unsigned getTemporaryID();
+		   static unsigned getTemporaryID();
 		   ConnectionGroup(const ConnectionGroup& connGrp);
 		   ConnectionGroup& operator=(const ConnectionGroup& rhs);
 		};

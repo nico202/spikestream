@@ -21,6 +21,8 @@ namespace spikestream {
 			unsigned int getID() { return id; }
 			unsigned int getConnectionGroupID() { return connectionGroupID; }
 			void setID(unsigned int id){ this->id = id; }
+			void setFromNeuronID(unsigned fromNeurID) { this->fromNeuronID = fromNeurID; }
+			void setToNeuronID(unsigned toNeurID) { this->toNeuronID = toNeurID; }
 			void setTempWeight(float newTempWeight) { this->tempWeight = newTempWeight; }
 			void setWeight(float newWeight) { this->weight = newWeight; }
 

@@ -1,11 +1,15 @@
 //SpikeStream includes
 #include "ConnectionGroup.h"
+#include "GlobalVariables.h"
 #include "SpikeStreamException.h"
 using namespace spikestream;
 
 //Other includes
 #include <iostream>
 using namespace std;
+
+//Initialize static variables
+unsigned ConnectionGroup::connectionIDCounter = LAST_CONNECTION_ID + 1;
 
 
 /*! Constructor */
@@ -50,7 +54,10 @@ Connection* ConnectionGroup::addConnection(Connection* newConn){
 
 /*! Creates a new connection and adds it to the group.*/
 Connection* ConnectionGroup::addConnection(unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight){
-	Connection* tmpCon = new Connection(getTemporaryID(), getID(), fromNeuronID, toNeuronID, delay, weight);
+	unsigned tmpID = getTemporaryID();
+	if(connectionMap->contains(tmpID))
+		throw SpikeStreamException("Automatically generated temporary connection ID clashes with one in the network. New ID=" + QString::number(tmpID));
+	Connection* tmpCon = new Connection(tmpID, getID(), fromNeuronID, toNeuronID, delay, weight);
 
 	//Store connection
 	return addConnection(tmpCon);
@@ -132,6 +139,18 @@ void ConnectionGroup::setConnectionMap(QHash<unsigned, Connection *> *newConnect
 }
 
 
+/*! Sets the FROM neuron group ID */
+void ConnectionGroup::setFromNeuronGroupID(unsigned id){
+	info.setFromNeuronGroupID(id);
+}
+
+
+/*! Sets the TO neuron group ID */
+void ConnectionGroup::setToNeuronGroupID(unsigned id){
+	info.setToNeuronGroupID(id);
+}
+
+
 /*! Sets the weight of a specific connection */
 void ConnectionGroup::setTempWeight(unsigned connectionID, float tempWeight){
 	if(!connectionMap->contains(connectionID))
@@ -148,11 +167,12 @@ void ConnectionGroup::setWeight(unsigned connectionID, float weight){
 }
 
 
+/*--------------------------------------------------------*/
+/*-------             PRIVATE METHODS              -------*/
+/*--------------------------------------------------------*/
+
 /*! Returns a temporary ID for adding connections */
 unsigned ConnectionGroup::getTemporaryID(){
-	unsigned tmpID = (unsigned int)connectionMap->size();
-	while(connectionMap->contains(tmpID))
-		++tmpID;
-	return tmpID;
+	return ++connectionIDCounter;
 }
 

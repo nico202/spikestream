@@ -22,20 +22,28 @@
 #define NEURON_APPLICATION_FILE_EXTENSION ".sql.tar.gz"
 
 //Starting and invalid database IDs
-/*! First valid automatically generated ID in NeuralNetwork database */
+/*! First valid automatically generated network ID in NeuralNetwork database */
 #define START_NEURALNETWORK_ID 1
 
 /*! A neural network ID that is not valid */
 #define INVALID_NETWORK_ID 0
 
-/*! First valid automatically generated ID in NeuralNetwork database */
+/*! First valid automatically generated neuron group ID in NeuralNetwork database */
 #define START_NEURONGROUP_ID 1
 
-/*! First valid automatically generated ID in NeuralNetwork database */
+/*! First valid automatically generated neuron ID in NeuralNetwork database */
 #define START_NEURON_ID 1
+
+/*! Last valid automatically generated neuron ID in NeuralNetwork database.
+	Neuron IDs greater than this will be declared invalid */
+#define LAST_NEURON_ID 0x7ffffffe
 
 /*! First valid automatically generated ID in NeuralNetwork database */
 #define START_CONNECTION_ID 1
+
+/*! Last valid automatically generated connection ID in NeuralNetwork database.
+	connection IDs greater than this will be declared invalid */
+#define LAST_CONNECTION_ID 0x6ffffffe
 
 /*! First valid automatically generated ID in NeuralNetwork database */
 #define START_CONNECTIONGROUP_ID 1

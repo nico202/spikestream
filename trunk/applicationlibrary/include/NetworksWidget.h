@@ -2,6 +2,7 @@
 #define NETWORKSWIDGET_H
 
 //SpikeStream includes
+#include "NetworkDaoThread.h"
 #include "Network.h"
 using namespace spikestream;
 
@@ -32,6 +33,7 @@ namespace spikestream {
 			void deleteNetwork();
 			void loadNetwork();
 			void loadNetworkList();
+			void networkDaoThreadFinished();
 			void prototypeNetwork();
 			void saveNetwork();
 
@@ -55,6 +57,12 @@ namespace spikestream {
 
 			/** Holds widgets that were set to be deleted during earlier event cycle */
 			QList<QWidget*> cleanUpList;
+
+			/*! Database Dao thread for heavy operations */
+			NetworkDaoThread* networkDaoThread;
+
+			/*! ID of network being deleted */
+			unsigned deleteNetworkID;
 
 			//=======================  METHODS  ======================
 			void loadNetwork(NetworkInfo& netInfo, bool prototypeMode = false);

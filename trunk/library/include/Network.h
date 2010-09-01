@@ -33,8 +33,8 @@ namespace spikestream {
 			bool connectionGroupIsLoaded(unsigned int connGrpID);
 			bool containsNeuron(unsigned int neurID);
 			bool containsNeuronGroup(unsigned int neuronGroupID);//UNTESTED
-			void deleteConnectionGroups(QList<unsigned int>& conGrpIDList);
-			void deleteNeuronGroups(QList<unsigned int>& neurGrpIDList);
+			void deleteConnectionGroups(QList<unsigned int>& deleteConGrpIDList);
+			void deleteNeuronGroups(QList<unsigned int>& deleteNeurGrpIDList);
 			Box getBoundingBox();
 			unsigned int getID() { return info.getID(); }
 			QString getErrorMessage();
@@ -114,25 +114,22 @@ namespace spikestream {
 			QString errorMessage;
 
 			/*! List of neuron groups that are being added to the network */
-			QList<NeuronGroup*> newNeuronGroups;
+			QHash<unsigned, NeuronGroup*> newNeuronGroupMap;
 
 			/*! List of connection groups that are being added to the network */
-			QList<ConnectionGroup*> newConnectionGroups;
+			QHash<unsigned, ConnectionGroup*> newConnectionGroupMap;
 
 			/*! List of ids of neuron groups to delete */
-			QList<unsigned int> deleteNeuronGroupIDs;
+			QList<unsigned> deleteNeuronGroupIDs;
 
 			/*! List of ids of connection groups to delete */
-			QList<unsigned int> deleteConnectionGroupIDs;
+			QList<unsigned> deleteConnectionGroupIDs;
 
 			/*! Current task being undertaken by the neuron thread.*/
 			int currentNeuronTask;
 
 			/*! Current task being undertaken by the connection thread.*/
 			int currentConnectionTask;
-
-			/*! Records whether the network is saved when it is loaded in prototype mode. */
-			bool saved;
 
 			/*! Records whether network is in prototype mode.
 				In prototype mode the network is loaded into memory and changes are not immediately
@@ -146,20 +143,28 @@ namespace spikestream {
 			static const int LOAD_NEURONS_TASK = 4;
 			static const int ADD_CONNECTIONS_TASK = 5;
 			static const int LOAD_CONNECTIONS_TASK = 6;
+			static const int SAVE_NETWORK_TASK = 7;
 
 
 			//============================  METHODS  ==============================
 			void checkConnectionGroupID(unsigned int id);
 			void checkNeuronGroupID(unsigned int id);
 			void checkThread();
-			void deleteConnectionGroups();
-			void deleteNeuronGroups();
+			void clearConnectionGroups();
+			void clearNeuronGroups();
+			void deleteConnectionGroupFromMemory(unsigned conGrpID);
+			void deleteNeuronGroupFromMemory(unsigned neurGrpID);
 			bool filterConnection(Connection* connection, unsigned connectionMode);
 			unsigned getTemporaryConGrpID();
 			unsigned getTemporaryNeurGrpID();
 			void loadConnectionGroupsInfo();
 			void loadNeuronGroupsInfo();
-			void savedStateChanged(bool newSavedState);
+			void startAddConnectionGroups();
+			void startAddNeuronGroups();
+			void startDeleteConnectionGroups();
+			void startDeleteNeuronGroups();
+			void updateConnectionGroupsAfterSave();
+			void updateNeuronGroupsAfterSave();
 
     };
 

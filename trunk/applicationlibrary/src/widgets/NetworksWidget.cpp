@@ -58,8 +58,11 @@ NetworksWidget::NetworksWidget(QWidget* parent) : QWidget(parent){
 
 	//Load the network into the grid layout
 	loadNetworkList();
-
 	verticalBox->addStretch(10);
+
+	//Create thread for heavy operations
+	networkDaoThread = new NetworkDaoThread(Globals::getNetworkDao()->getDBInfo());
+	connect(networkDaoThread, SIGNAL(finished()), this, SLOT(networkDaoThreadFinished()));
 
 	//Connect to global reload signal
 	connect(Globals::getEventRouter(), SIGNAL(reloadSignal()), this, SLOT(loadNetworkList()), Qt::QueuedConnection);
@@ -107,14 +110,14 @@ void NetworksWidget::addNewNetwork(){
 /*! Deletes a network */
 void NetworksWidget::deleteNetwork(){
 	//Get the ID of the network to be deleted
-	unsigned int networkID = Util::getUInt(sender()->objectName());
-	if(!networkInfoMap.contains(networkID)){
-		qCritical()<<"Network with ID "<<networkID<<" cannot be found.";
+	deleteNetworkID = Util::getUInt(sender()->objectName());
+	if(!networkInfoMap.contains(deleteNetworkID)){
+		qCritical()<<"Network with ID "<<deleteNetworkID<<" cannot be found.";
 		return;
 	}
 
 	//Run checks if we are deleting the current network
-	if(Globals::networkLoaded() && Globals::getNetwork()->getID() == networkID){
+	if(Globals::networkLoaded() && Globals::getNetwork()->getID() == deleteNetworkID){
 		if(!Globals::networkChangeOk())
 			return;
 	}
@@ -122,7 +125,7 @@ void NetworksWidget::deleteNetwork(){
 	//Confirm that user wants to take this action.
 	QMessageBox msgBox;
 	msgBox.setText("Deleting Network");
-	msgBox.setInformativeText("Are you sure that you want to delete network with ID " + QString::number(networkID) + "? This step cannot be undone.");
+	msgBox.setInformativeText("Are you sure that you want to delete network with ID " + QString::number(deleteNetworkID) + "? This step cannot be undone.");
 	msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
 	msgBox.setDefaultButton(QMessageBox::Cancel);
 	int ret = msgBox.exec();
@@ -131,21 +134,15 @@ void NetworksWidget::deleteNetwork(){
 
 	//Delete the network from the database
 	try{
-		Globals::getNetworkDao()->deleteNetwork(networkID);
+		progressDialog = new QProgressDialog("Deleting network", "", 0, 0, this, Qt::CustomizeWindowHint);
+		progressDialog->setCancelButton(0);//Cancel not implemented at this stage
+		progressDialog->setWindowModality(Qt::WindowModal);
+		progressDialog->setMinimumDuration(1000);
+		networkDaoThread->startDeleteNetwork(deleteNetworkID);
 	}
 	catch(SpikeStreamException& ex){
 		qCritical()<<"Exception thrown when deleting network.";
 	}
-
-	/* If we have deleted the current network, use event router to inform other classes that the network has changed.
-	   This will automatically reload the network list. */
-	if(Globals::networkLoaded() && Globals::getNetwork()->getID() == networkID){
-		Globals::setNetwork(NULL);
-		emit networkChanged();
-	}
-
-	//Reload the network list
-	loadNetworkList();
 }
 
 
@@ -279,6 +276,27 @@ void NetworksWidget::loadNetworkList(){
 }
 
 
+/*! Called when the network dao thread finishes a heavy task.
+	NOTE: This is currently only used for deleting networks - will need to be adapted
+	if used for other tasks. */
+void NetworksWidget::networkDaoThreadFinished(){
+	//Clean up progress dialog
+	progressDialog->close();
+	delete progressDialog;
+	progressDialog = NULL;
+
+	/* If we have deleted the current network, use event router to inform other classes that the network has changed.
+	   This will automatically reload the network list. */
+	if(Globals::networkLoaded() && Globals::getNetwork()->getID() == deleteNetworkID){
+		Globals::setNetwork(NULL);
+		emit networkChanged();
+	}
+
+	//Reload the network list
+	loadNetworkList();
+}
+
+
 /*! Loads up the network in prototyping mode. */
 void NetworksWidget::prototypeNetwork(){
 	unsigned int networkID = sender()->objectName().toUInt();
@@ -337,6 +355,25 @@ void NetworksWidget::loadNetwork(NetworkInfo& netInfo, bool prototypeMode){
 		return;
 	}
 
+	//Check to see if the network is already loaded and matches the database
+	if(Globals::networkLoaded() && Globals::getNetwork()->getID() == netInfo.getID()){
+		//Change from saved prototype to loaded mode
+		if(Globals::getNetwork()->isPrototypeMode() && Globals::getNetwork()->isSaved()){
+			//Change status of network and refresh list
+			newNetwork->setPrototypeMode(false);
+			loadNetworkList();
+			return;
+		}
+		//Change from loaded to prototype
+		else if(!Globals::getNetwork()->isPrototypeMode() && prototypeMode){
+			//Change status of network and refresh list
+			newNetwork->setPrototypeMode(true);
+			loadNetworkList();
+			return;
+		}
+	}
+
+	//Load the network
 	try{
 		/* Create new network and store it in global scope.
 			Network is set to null because if an exception is thrown during construction
