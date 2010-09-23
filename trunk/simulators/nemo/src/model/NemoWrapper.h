@@ -144,8 +144,11 @@ namespace spikestream {
 				The key is the neuron group ID, the value is the number of neurons to fire. */
 			QHash<unsigned, unsigned> injectNoiseMap;
 
-			/*! List of the IDs of volatile connection groups */
-			QList<unsigned> volatileConGrpList;
+			/*! Map of the volatile connection groups.
+				The key in the outer map is the volatile connection group ID.
+				The key in the inner map is the Nemo ID of the connection.
+				The value in the inner map is the SpikeStream ID of the connection. */
+			QHash<unsigned, QHash<unsigned, unsigned> > volatileConGrpMap;
 
 			/*! List of presynaptic neuron ids used for saving weights. */
 			QList<unsigned> preSynapticNeuronIDs;
