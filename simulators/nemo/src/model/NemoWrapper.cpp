@@ -82,20 +82,20 @@ void NemoWrapper::loadNemo(){
 	//Build the Nemo network
 	NemoLoader* nemoLoader = new NemoLoader();
 	connect(nemoLoader, SIGNAL(progress(int, int)), this, SLOT(updateProgress(int, int)));
-	nemo_network_t nemoNet = nemoLoader->buildNemoNetwork(currentNetwork, &volatileConGrpList, &stopThread);
+	nemo_network_t nemoNet = nemoLoader->buildNemoNetwork(currentNetwork, &volatileConGrpMap, &stopThread);
 
 	//Clean up loader
 	delete nemoLoader;
 
 	//Set the STDP functionn in the configuration - FIXME
-//	nemo_set_stdp_function(nemoConfig,
-//					   STDPFunctions::getPre(stdpFunctionID),
-//					   STDPFunctions::getPreLength(stdpFunctionID),
-//					   STDPFunctions::getPost(stdpFunctionID),
-//					   STDPFunctions::getPostLength(stdpFunctionID),
-//					   STDPFunctions::getMinWeight(stdpFunctionID),
-//					   STDPFunctions::getMaxWeight(stdpFunctionID)
-//	);
+	nemo_set_stdp_function(nemoConfig,
+					   STDPFunctions::getPreArray(stdpFunctionID),
+					   STDPFunctions::getPreLength(stdpFunctionID),
+					   STDPFunctions::getPostArray(stdpFunctionID),
+					   STDPFunctions::getPostLength(stdpFunctionID),
+					   STDPFunctions::getMinWeight(stdpFunctionID),
+					   STDPFunctions::getMaxWeight(stdpFunctionID)
+	);
 
 	//Load the network into the simulator
 	nemoSimulation = nemo_new_simulation(nemoNet, nemoConfig);
@@ -240,13 +240,6 @@ void NemoWrapper::setArchiveMode(bool newArchiveMode){
 		Globals::getEventRouter()->archiveListChangedSlot();
 	}
 
-	//Flush buffer if archiving is being turned on when monitoring is off
-	if(simulationLoaded && newArchiveMode && !archiveMode && !monitorFiringNeurons){
-		mutex.lock();//Prevent interference with step
-		checkNemoOutput( nemo_flush_firing_buffer(nemoSimulation), "Nemo error flushing firing buffer" );
-		mutex.unlock();
-	}
-
 	this->archiveMode = newArchiveMode;
 }
 
@@ -256,13 +249,6 @@ void NemoWrapper::setArchiveMode(bool newArchiveMode){
 void NemoWrapper::setMonitorFiringNeurons(bool newMonitorMode){
 	if(newMonitorMode && !simulationLoaded)
 		throw SpikeStreamSimulationException("Cannot switch monitor mode on unless simulation is loaded.");
-
-	//Flush buffer if monitoring is being turned on when archiving is off
-	if(simulationLoaded && newMonitorMode && !monitorFiringNeurons && !archiveMode){
-		mutex.lock();//Prevent interference with step
-		checkNemoOutput( nemo_flush_firing_buffer(nemoSimulation), "Nemo error flushing firing buffer" );
-		mutex.unlock();
-	}
 
 	//Store new monitoring mode
 	this->monitorFiringNeurons = newMonitorMode;
@@ -401,7 +387,7 @@ void NemoWrapper::runNemo(){
 /*! Saves the weights from the network into the database */
 void NemoWrapper::saveNemoWeights(){
 	//Return immediately if there is nothing to save
-	if(volatileConGrpList.size() == 0){
+	if(volatileConGrpMap.size() == 0){
 		weightsSaved = true;
 		return;
 	}
@@ -414,8 +400,8 @@ void NemoWrapper::saveNemoWeights(){
 
 	//Work through all connection groups
 	Network* currentNetwork = Globals::getNetwork();
-	foreach(unsigned tmpConGrpID, volatileConGrpList){
-		ConnectionGroup* tmpConGrp = currentNetwork->getConnectionGroup(tmpConGrpID);
+	for(QHash<unsigned, QHash<unsigned, unsigned> >::iterator volIter = volatileConGrpMap.begin(); volIter != volatileConGrpMap.end(); ++volIter){
+		ConnectionGroup* tmpConGrp = currentNetwork->getConnectionGroup(volIter.key());
 		QHash<unsigned, Connection*>::const_iterator endConList = tmpConGrp->end();
 		for(QHash<unsigned, Connection*>::const_iterator conIter = tmpConGrp->begin(); conIter != endConList; ++conIter){
 			//Save in database
@@ -451,11 +437,12 @@ void NemoWrapper::setError(const QString& errorMessage){
 
 /*! Advances the simulation by one step */
 void NemoWrapper::stepNemo(){
+	unsigned *firedArray, firedCount;
 	firingNeuronList.clear();
 
-	//------------------------------------------------
-	//     Inject noise into neuron groups
-	//------------------------------------------------
+	//------------------------------------------------------------
+	//     Inject noise into neuron groups and step simulation
+	//------------------------------------------------------------
 	if(!injectNoiseMap.isEmpty()){
 		//Build array of neurons to inject noise into
 		unsigned* injectNoiseNeurIDArr = NULL;
@@ -464,8 +451,7 @@ void NemoWrapper::stepNemo(){
 
 		//Advance simulation
 		qDebug()<<"About to step nemo with injection of noise";
-		checkNemoOutput( nemo_step(nemoSimulation, injectNoiseNeurIDArr, injectNoiseArrSize), "Nemo error on step" );
-		//nemo_step(nemoSimulation, injectNoiseNeurIDArr, injectNoiseArrSize);
+		checkNemoOutput( nemo_step(nemoSimulation, injectNoiseNeurIDArr, injectNoiseArrSize, &firedArray, &firedCount), "Nemo error on step" );
 		qDebug()<<"Nemo successfully stepped with injection of noise.";
 
 		//Clean up noise array and empty inject noise map
@@ -474,30 +460,22 @@ void NemoWrapper::stepNemo(){
 	}
 	//Advance the simulation one time step
 	else{
-		checkNemoOutput( nemo_step(nemoSimulation, 0, 0), "Nemo error on step" );
+		checkNemoOutput( nemo_step(nemoSimulation, 0, 0, &firedArray, &firedCount), "Nemo error on step" );
 	}
 
 
 	//-----------------------------------------------
-	//         Retrieve list of firing neurons
+	//         Process list of firing neurons
 	//-----------------------------------------------
 	if(archiveMode || monitorFiringNeurons){
-		unsigned *cycles, *nidx;
-		unsigned nfired, ncycles;
-		checkNemoOutput( nemo_read_firing(nemoSimulation, &cycles, &nidx, &nfired, &ncycles), "Nemo error reading firing neurons" );
-
 		//Add firing neuron ids to list
-		for(unsigned i=0; i<nfired; ++i)
-			firingNeuronList.append(nidx[i]);
-	}
-	//Not monitoring, just flush buffer
-	else{
-		checkNemoOutput( nemo_flush_firing_buffer(nemoSimulation), "Nemo error flushing firing buffer" );
-	}
+		for(unsigned i=0; i<firedCount; ++i)
+			firingNeuronList.append(firedArray[i]);
 
-	//Store firing neurons in database
-	if(archiveMode){
-		archiveDao->addArchiveData(archiveInfo.getID(), timeStepCounter, firingNeuronList);
+		//Store firing neurons in database
+		if(archiveMode){
+			archiveDao->addArchiveData(archiveInfo.getID(), timeStepCounter, firingNeuronList);
+		}
 	}
 
 
@@ -543,16 +521,21 @@ void NemoWrapper::updateNetworkWeights(){
 		throw SpikeStreamException("Failed to update network weights. Simulation not loaded.");
 	}
 
-	Network* currentNetwork = Globals::getNetwork();
-	foreach(unsigned tmpConGrpID, volatileConGrpList){
-		ConnectionGroup* tmpConGrp = currentNetwork->getConnectionGroup(tmpConGrpID);
-		QHash<unsigned, Connection*>::const_iterator endConList = tmpConGrp->end();
-		for(QHash<unsigned, Connection*>::const_iterator conIter = tmpConGrp->begin(); conIter != endConList; ++conIter){
-			//Get current value of weight from Nemo
-			float tmpWeight = Util::getRandom(0, 1000)/1000.0f;
+	//Work through all of the volatile connection groups
+	for(QHash<unsigned, QHash<unsigned, unsigned> >::iterator outerIter = volatileConGrpMap.begin(); outerIter != volatileConGrpMap.end(); ++outerIter){
+		//Get the volatile connection group
+		ConnectionGroup* tmpConGrp = Globals::getNetwork()->getConnectionGroup(outerIter.key());
 
-			//Save to temp field
-			conIter.value()->setTempWeight(tmpWeight);
+		//Query the volatile connections in NeMo
+		synapse_id synapseIDArray[1];
+		float* weightArray;//Will point to array of returned weights
+		QHash<unsigned, unsigned>::iterator endInnerHashMap = outerIter.value().end();
+		for(QHash<unsigned, unsigned>::iterator innerIter = outerIter.value().begin(); innerIter != endInnerHashMap; ++innerIter){
+			synapseIDArray[0] = innerIter.key();
+			qDebug()<<"About to query weights: nemo synapseID="<<synapseIDArray[0]<<" spikestream synapse id="<<innerIter.value();
+			checkNemoOutput( nemo_get_weights(nemoSimulation, synapseIDArray, 1, &weightArray), "Error getting weights." );
+			qDebug()<<"Weight query complete: weight="<<weightArray[0];
+			tmpConGrp->setWeight(innerIter.value(), weightArray[0]);
 		}
 	}
 }

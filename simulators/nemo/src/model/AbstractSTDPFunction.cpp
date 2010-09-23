@@ -34,6 +34,9 @@ void AbstractSTDPFunction::setParameters(QHash<QString, double>& newParamMap){
 			throw SpikeStreamException("Parameter " + iter.key() + " is not valid for this STDP function.");
 		parameterMap[iter.key()] = iter.value();
 	}
+
+	//Need to rebuild function
+	functionUpToDate = false;
 }
 
 

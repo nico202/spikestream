@@ -17,6 +17,10 @@ using namespace std;
 // Outputs verbose debugging behaviour about the loading of the network.
 //#define DEBUG
 
+//Neuron type IDs in database. FIXME: WOULD BE BETTER TO USE THE NAME
+#define IZHIKEVICH_EXCITATORY_NEURON_ID 1
+#define IZHIKEVICH_INHIBITORY_NEURON_ID 2
+
 
 /*! Constructor */
 NemoLoader::NemoLoader(){
@@ -33,12 +37,12 @@ NemoLoader::~NemoLoader(){
 /*----------------------------------------------------------*/
 
 /*! Loads the simulation */
-nemo_network_t NemoLoader::buildNemoNetwork(Network* network, QList<unsigned>* volatileConGrpList, const bool* stop){
+nemo_network_t NemoLoader::buildNemoNetwork(Network* network, QHash<unsigned, QHash<unsigned, unsigned> >* volatileConGrpMap, const bool* stop){
 	//Initialize the nemo network
 	nemo_network_t nemoNet = nemo_new_network();
 
 	//Clear list of volatile connections
-	volatileConGrpList->clear();
+	volatileConGrpMap->clear();
 
 	//Create the random number generator (from: nemo/examples/random1k.cpp)
 	rng_t rng;
@@ -53,9 +57,9 @@ nemo_network_t NemoLoader::buildNemoNetwork(Network* network, QList<unsigned>* v
 	//Add the neuron groups
 	for(int i=0; i<neurGrpList.size() && !*stop; ++i){
 		unsigned int neurTypeID = neurGrpList.at(i)->getInfo().getNeuronTypeID();
-		if(neurTypeID == 1)//FIXME: DO THIS PROPERLY USING THE NAME
+		if(neurTypeID == IZHIKEVICH_EXCITATORY_NEURON_ID)
 			addExcitatoryNeuronGroup(neurGrpList.at(i), nemoNet, ranNumGen);
-		else if(neurTypeID == 2)//FIXME: DO THIS PROPERLY USING THE NAME
+		else if(neurTypeID == IZHIKEVICH_INHIBITORY_NEURON_ID)
 			addInhibitoryNeuronGroup(neurGrpList.at(i), nemoNet, ranNumGen);
 		else
 			throw SpikeStreamSimulationException("Neuron group type " + QString::number(neurTypeID) + " is not supported by Nemo");
@@ -68,7 +72,7 @@ nemo_network_t NemoLoader::buildNemoNetwork(Network* network, QList<unsigned>* v
 	//Add the connection groups that are not disabled */
 	for(int i=0; i<conGrpList.size() && !*stop; ++i){
 		if(conGrpList.at(i)->getParameter("Disable") == 0.0)
-			addConnectionGroup(conGrpList.at(i), nemoNet, volatileConGrpList);
+			addConnectionGroup(conGrpList.at(i), nemoNet, volatileConGrpMap);
 
 		//Update progress
 		++stepsCompleted;
@@ -85,28 +89,32 @@ nemo_network_t NemoLoader::buildNemoNetwork(Network* network, QList<unsigned>* v
 /*----------------------------------------------------------*/
 
 /*! Adds a connection group to the network. */
-void NemoLoader::addConnectionGroup(ConnectionGroup* conGroup, nemo_network_t nemoNetwork, QList<unsigned>* volatileConGrpList){
+void NemoLoader::addConnectionGroup(ConnectionGroup* conGroup, nemo_network_t nemoNetwork, QHash<unsigned, QHash<unsigned, unsigned> >* volatileConGrpMap){
 	//Extract parameters
 	unsigned char learning = 0;
 	if(conGroup->getParameter("Learning") != 0.0)
 		learning = 1;
 
-	//Store connection group ID if weight is going to change
-	if(learning)
-		volatileConGrpList->append(conGroup->getID());
+	//ID of connection group for learning
+	unsigned conGrpID = conGroup->getID();
 
 	//Work through each connection
 	nemo_status_t result;
+	synapse_id newNemoSynapseID;
 	QHash<unsigned, Connection*>::const_iterator endConGrp = conGroup->end();
 	for(QHash<unsigned, Connection*>::const_iterator conIter = conGroup->begin(); conIter != endConGrp; ++conIter){
 		//Add synapse
-		result = nemo_add_synapse(nemoNetwork, conIter.value()->getFromNeuronID(), conIter.value()->getToNeuronID(), conIter.value()->getDelay(), conIter.value()->getWeight(), learning);
+		result = nemo_add_synapse(nemoNetwork, conIter.value()->getFromNeuronID(), conIter.value()->getToNeuronID(), conIter.value()->getDelay(), conIter.value()->getWeight(), learning, &newNemoSynapseID);
 		#ifdef DEBUG
 			//printConnection(fromMapIter.key(), targets, delays, weights, isPlastic, numTargets);
 			//cout<<"nemo_add_synapses(nemoNetwork, "<<fromMapIter.key()<<", "<<targets<<", "<<delays<<", "<<weights<<", "<<isPlastic<<", "<<numTargets<<");"<<endl;
 		#endif//DEBUG
 		if(result != NEMO_OK)
 			throw SpikeStreamException("Error code returned from Nemo when adding synapse." + QString(nemo_strerror()));
+
+		//Store link between connection group ID and map linking nemo connection IDs and SpikeStream connection IDs
+		if(learning)
+			(*volatileConGrpMap)[conGrpID][newNemoSynapseID] = conIter.value()->getID();
 	}
 }
 

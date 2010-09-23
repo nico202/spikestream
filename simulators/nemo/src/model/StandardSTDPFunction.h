@@ -32,6 +32,7 @@ namespace spikestream {
 			//=====================  METHODS  ======================
 			void buildStandardSTDPFunction();
 			void checkFunctionUpToDate();
+			void print();
 	};
 
 }

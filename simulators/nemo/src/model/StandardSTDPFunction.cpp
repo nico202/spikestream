@@ -5,6 +5,12 @@ using namespace spikestream;
 
 //Other includes
 #include <cmath>
+#include <iostream>
+using namespace std;
+
+//Prints out the arrays when enabled
+#define DEBUG
+
 
 /*! Constructor */
 StandardSTDPFunction::StandardSTDPFunction() : AbstractSTDPFunction() {
@@ -17,10 +23,10 @@ StandardSTDPFunction::StandardSTDPFunction() : AbstractSTDPFunction() {
 	parameterInfoList.append(ParameterInfo("max_weight", "Maximum weight that synapse can reach with learning.", ParameterInfo::DOUBLE));
 
 	//Default values of parameters
-	defaultParameterMap["A+"] = 20.0;
-	defaultParameterMap["A-"] = 20.0;
-	defaultParameterMap["T+"] = 1.0;
-	defaultParameterMap["T-"] = -0.8;
+	defaultParameterMap["A+"] = 0.005;
+	defaultParameterMap["A-"] = 0.00525;
+	defaultParameterMap["T+"] = 20.0;
+	defaultParameterMap["T-"] = 20.0;
 	defaultParameterMap["min_weight"] = -1.0;
 	defaultParameterMap["max_weight"] = 1.0;
 
@@ -99,9 +105,13 @@ void StandardSTDPFunction::buildStandardSTDPFunction(){
 	//Build the arrays specifying the function
 	for(int i = 0; i < ARRAY_LENGTH; ++i) {
 		float dt = float(i + 1);
-		preArray[i] = aPlus * expf(-dt / tPlus);
-		postArray[i] = aMinus * expf(-dt / tMinus);
+		preArray[i] = aPlus * expf( (-1.0 * dt) / tPlus);
+		postArray[i] = -1.0 * aMinus * expf( (-1.0 * dt) / tMinus);
 	}
+
+	#ifdef DEBUG
+		print();
+	#endif//DEBUG
 }
 
 
@@ -114,7 +124,22 @@ void StandardSTDPFunction::checkFunctionUpToDate(){
 }
 
 
+/*! Prints out the function */
+void StandardSTDPFunction::print(){
+	//Extract parameters
+	double aPlus = getParameter("A+");
+	double aMinus = getParameter("A-");
+	double tPlus = getParameter("T+");
+	double tMinus = getParameter("T-");
 
+	cout<<"Standard STDP Function"<<endl;
+	cout<<"Parameters. Array length: "<<ARRAY_LENGTH<<"; A+: "<<aPlus<<"; A-: "<<aMinus<<"; T+: "<<tPlus<<"; T-: "<<tMinus<<endl;
+	for(int i=0; i<ARRAY_LENGTH; ++i)
+		cout<<"Pre array ["<<i<<"]: "<<preArray[i]<<endl;
+	cout<<endl;
+	for(int i=0; i<ARRAY_LENGTH; ++i)
+		cout<<"Post array ["<<i<<"]: "<<postArray[i]<<endl;
+}
 
 
 
