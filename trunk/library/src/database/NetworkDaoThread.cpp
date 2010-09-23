@@ -724,7 +724,6 @@ void NetworkDaoThread::saveNetwork(){
 	deleteNeuronGroups();
 	deleteConnectionGroups();
 
-
 	/* Store link between old IDs and neurons in the groups that we are going to add.
 	   Also store link between old neuron group IDs and neuron group IDs */
 	QHash<unsigned, Neuron*> oldIDNeurMap;
@@ -745,20 +744,29 @@ void NetworkDaoThread::saveNetwork(){
 
 	//Update connections with the new IDs
 	foreach(ConnectionGroup* tmpConGrp, connectionGroupList){
-		//Update FROM and TO connection group IDs
-		if(oldIDNeurGrpMap.contains(tmpConGrp->getFromNeuronGroupID()))
+		//Update FROM neuron group ID and FROM neuron IDs
+		if(oldIDNeurGrpMap.contains(tmpConGrp->getFromNeuronGroupID())){
 			tmpConGrp->setFromNeuronGroupID(oldIDNeurGrpMap[tmpConGrp->getFromNeuronGroupID()]->getID());
-		if(oldIDNeurGrpMap.contains(tmpConGrp->getToNeuronGroupID()))
+			QHash<unsigned, Connection*>::const_iterator endConGrp = tmpConGrp->end();
+			for(QHash<unsigned, Connection*>::const_iterator conIter = tmpConGrp->begin(); conIter!= endConGrp; ++conIter){
+				//Check FROM neuron ID exists
+				if(oldIDNeurMap.contains(conIter.value()->getFromNeuronID()))
+					conIter.value()->setFromNeuronID(oldIDNeurMap[conIter.value()->getFromNeuronID()]->getID());
+				else
+					throw SpikeStreamException("FROM neuron ID missing from old ID neuron map: " + QString::number(conIter.value()->getFromNeuronID()));
+			}
+		}
+		//Update TO neuron group ID and TO neuron IDs
+		if(oldIDNeurGrpMap.contains(tmpConGrp->getToNeuronGroupID())){
 			tmpConGrp->setToNeuronGroupID(oldIDNeurGrpMap[tmpConGrp->getToNeuronGroupID()]->getID());
-
-		//Update FROM and TO IDs in connections.
-		QHash<unsigned, Connection*>::const_iterator endConGrp = tmpConGrp->end();
-		for(QHash<unsigned, Connection*>::const_iterator conIter = tmpConGrp->begin(); conIter!= endConGrp; ++conIter){
-			//Only update neurons that we are handling, the rest should stay the same.
-			if(oldIDNeurMap.contains(conIter.value()->getFromNeuronID()))
-				conIter.value()->setFromNeuronID(oldIDNeurMap[conIter.value()->getFromNeuronID()]->getID());
-			if(!oldIDNeurMap.contains(conIter.value()->getToNeuronID()))
-				conIter.value()->setToNeuronID(oldIDNeurMap[conIter.value()->getToNeuronID()]->getID());
+			QHash<unsigned, Connection*>::const_iterator endConGrp = tmpConGrp->end();
+			for(QHash<unsigned, Connection*>::const_iterator conIter = tmpConGrp->begin(); conIter!= endConGrp; ++conIter){
+				//Check TO neuron ID exists
+				if(!oldIDNeurMap.contains(conIter.value()->getToNeuronID()))
+					conIter.value()->setToNeuronID(oldIDNeurMap[conIter.value()->getToNeuronID()]->getID());
+				else
+					throw SpikeStreamException("TO neuron ID missing from old ID neuron map: " + QString::number(conIter.value()->getToNeuronID()));
+			}
 		}
 	}
 

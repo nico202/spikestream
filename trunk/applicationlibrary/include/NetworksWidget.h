@@ -34,6 +34,7 @@ namespace spikestream {
 			void loadNetwork();
 			void loadNetworkList();
 			void networkDaoThreadFinished();
+			void networkSaveFinished();
 			void prototypeNetwork();
 			void saveNetwork();
 

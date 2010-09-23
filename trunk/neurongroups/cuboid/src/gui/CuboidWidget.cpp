@@ -237,8 +237,7 @@ void CuboidWidget::addButtonClicked(){
 	/* Check that there are no conflicts with existing neurons
 	   Neurons are added starting at (x,y,z) and finishing when x<x+width, y<y+length and z<z+height */
 	Box neurGrpBox(xPos, yPos, zPos, xPos+width-1, yPos+length-1, zPos+height-1);
-	unsigned int numOverlappingNeurons = Globals::getNetworkDao()->getNeuronCount(Globals::getNetwork()->getID(), neurGrpBox);
-	if(numOverlappingNeurons != 0){
+	if(Globals::getNetwork()->overlaps(neurGrpBox)){
 		QMessageBox::critical(this, "Cuboid Neuron Group Builder Error", "Proposed neuron group overlaps with a neuron group that is already in the database.\nPlease change the position and/or the width, length and height.", QMessageBox::Ok);
 		return;
 	}

@@ -297,6 +297,20 @@ void NetworksWidget::networkDaoThreadFinished(){
 }
 
 
+/*! Called when network save has finished */
+void NetworksWidget::networkSaveFinished(){
+	//Clean up progress dialog
+	progressDialog->close();
+	delete progressDialog;
+
+	//Prevent this method being called when network finishes other tasks
+	disconnect(Globals::getNetwork(), SIGNAL(taskFinished()), this, SLOT(networkSaveFinished()));
+
+	//Refresh network list
+	emit networkChanged();
+}
+
+
 /*! Loads up the network in prototyping mode. */
 void NetworksWidget::prototypeNetwork(){
 	unsigned int networkID = sender()->objectName().toUInt();
@@ -335,11 +349,15 @@ void NetworksWidget::saveNetwork(){
 
 	//Save network
 	try{
+		connect(Globals::getNetwork(), SIGNAL(taskFinished()), this, SLOT(networkSaveFinished()),  Qt::UniqueConnection);
+		progressDialog = new QProgressDialog("Saving network", "Cancel", 0, 0, this, Qt::CustomizeWindowHint);
+		progressDialog->setWindowModality(Qt::WindowModal);
+		progressDialog->setCancelButton(0);//Too complicated to implement cancel sensibly
+		progressDialog->show();
 		Globals::getNetwork()->save();
 	}
 	catch(SpikeStreamException& ex){
 		qCritical()<<ex.getMessage();
-		//FIXME NEED PROGRESS DIALOG HERE
 	}
 }
 
@@ -365,7 +383,7 @@ void NetworksWidget::loadNetwork(NetworkInfo& netInfo, bool prototypeMode){
 			return;
 		}
 		//Change from loaded to prototype
-		else if(!Globals::getNetwork()->isPrototypeMode() && prototypeMode){
+		if(!Globals::getNetwork()->isPrototypeMode() && prototypeMode){
 			//Change status of network and refresh list
 			newNetwork->setPrototypeMode(true);
 			loadNetworkList();

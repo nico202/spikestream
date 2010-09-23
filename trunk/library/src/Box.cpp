@@ -82,6 +82,18 @@ void Box::expand_percent(float percent){
     z2 += zExpansion / 2.0f;
 }
 
+/*! Returns true if there is an overlap between this box and the box in the argument. */
+bool Box::intersects(const Box &box){
+	if((box.x1 >= x1 && box.x1 <= x2) || (box.x2 >= x1 && box.x2 <= x2)){//Overlap on X axis
+		if((box.y1 >= y1 && box.y1 <= y2) || (box.y2 >= y1 && box.y2 <= y2)){//Overlap on Y axis
+			if((box.z1 >= z1 && box.z1 <= z2) || (box.z2 >= z1 && box.z2 <= z2)){//Overlap on Z axis
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 
 /*! Moves box by the specified distance */
 void Box::translate(float dx, float dy, float dz){

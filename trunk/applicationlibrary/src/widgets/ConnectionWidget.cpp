@@ -87,15 +87,12 @@ void ConnectionWidget::deleteSelectedConnections(){
 	if(msgBox.exec() != QMessageBox::Ok)
 		return;
 
-	//Calculate number of steps
-	int numProgressSteps = Globals::getNetworkDao()->getConnectionCount(deleteConnectionIDList);
-
 	//Delete connection groups
 	try{
-		progressDialog = new QProgressDialog("Deleting connection group(s)", "Cancel", 0, numProgressSteps, this, Qt::CustomizeWindowHint);
+		progressDialog = new QProgressDialog("Deleting connection group(s)", "Cancel", 0, 0, this, Qt::CustomizeWindowHint);
 		progressDialog->setWindowModality(Qt::WindowModal);
-		progressDialog->setMinimumDuration(2000);
 		progressDialog->setCancelButton(0);//Too complicated to implement cancel sensibly
+		progressDialog->show();
 		updatingProgress = false;
 		connectionManager->deleteConnectionGroups(deleteConnectionIDList);
 	}

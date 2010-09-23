@@ -200,9 +200,14 @@ void Network::deleteConnectionGroups(QList<unsigned>& deleteConGrpIDList){
 		deleteConnectionGroupFromMemory(conGrpID);
 	}
 
-	//In normal mode, connection groups are deleted from the database
-	if(!prototypeMode){
-		startDeleteConnectionGroups();
+	if(prototypeMode){
+		if(!isBusy())
+			emit taskFinished();//Inform listening classes that deletion is complete
+		else
+			throw SpikeStreamException("Network is busy when deleting connection groups - it should not be engaged in other tasks.");
+	}
+	else{
+		startDeleteConnectionGroups(deleteConGrpIDList);
 	}
 }
 
@@ -229,9 +234,24 @@ void Network::deleteNeuronGroups(QList<unsigned int>& deleteNeurGrpIDList){
 		deleteNeuronGroupFromMemory(neurGrpID);
 	}
 
-	if(!prototypeMode){
-		startDeleteNeuronGroups();
+	if(prototypeMode){
+		if(!isBusy())
+			emit taskFinished();//Inform listening classes that deletion is complete
+		else
+			throw SpikeStreamException("Network is busy when deleting neuron groups - it should not be engaged in other tasks.");
 	}
+	else{
+		startDeleteNeuronGroups(deleteNeurGrpIDList);
+	}
+}
+
+
+/*! Returns the number of connections in the group with the specified ID.
+	Throws an exception if a connection group with the specified ID is not present in the network. */
+int Network::getConnectionCount(unsigned conGrpID){
+	if(!connGrpMap.contains(conGrpID))
+		throw SpikeStreamException("Error getting connection count. Connection group with the specified ID does not exist in this network.");
+	return connGrpMap[conGrpID]->size();
 }
 
 
@@ -437,6 +457,17 @@ Box Network::getBoundingBox(){
 		}
     }
     return networkBox;
+}
+
+
+/*! Returns true if a neuron group in the network overlaps with the specified box. */
+bool Network::overlaps(const Box& box){
+	QList<NeuronGroup*> tmpNeurGrpList = neurGrpMap.values();
+	for(QList<NeuronGroup*>::iterator iter = tmpNeurGrpList.begin(); iter != tmpNeurGrpList.end(); ++iter){
+		if( (*iter)->getBoundingBox().intersects(box) )
+			return true;
+	}
+	return false;
 }
 
 
@@ -666,8 +697,14 @@ void Network::neuronThreadFinished(){
 					;//Nothing to do at present
 				break;
 				case SAVE_NETWORK_TASK:
+					//Make IDs in memory match IDs in database
 					updateNeuronGroupsAfterSave();
 					updateConnectionGroupsAfterSave();
+
+					//Remove IDs of neuron and connetion groups scheduled for deletion
+					deleteNeuronGroupIDs.clear();
+					deleteConnectionGroupIDs.clear();
+
 				break;
 				default:
 					throw SpikeStreamException("The current task ID has not been recognized.");
@@ -731,6 +768,7 @@ void Network::deleteConnectionGroupFromMemory(unsigned conGrpID){
 			deleteConnectionGroupIDs.append(conGrpID);
 		}
 	}
+
 	//Remove connection group from memory
 	delete connGrpMap[conGrpID];
 	connGrpMap.remove(conGrpID);
@@ -757,6 +795,7 @@ void Network::deleteNeuronGroupFromMemory(unsigned neurGrpID){
 			}
 		}
 	}
+
 	//Remove neuron group from memory
 	delete neurGrpMap[neurGrpID];
 	neurGrpMap.remove(neurGrpID);
@@ -765,6 +804,7 @@ void Network::deleteNeuronGroupFromMemory(unsigned neurGrpID){
 	for(QHash<unsigned, bool>::iterator iter = tmpDeleteConMap.begin(); iter != tmpDeleteConMap.end(); ++iter)
 		deleteConnectionGroupFromMemory(iter.key());
 }
+
 
 /*! Applies connection mode filters to the specified connection and returns
 	true if it should not be displayed. */
@@ -884,18 +924,18 @@ void Network::startAddNeuronGroups(){
 
 
 /*! Starts the thread that deletes connection groups from the database. */
-void Network::startDeleteConnectionGroups(){
+void Network::startDeleteConnectionGroups(QList<unsigned>& deleteConGrpIDList){
 	clearError();
-	connectionNetworkDaoThread->prepareDeleteConnectionGroups(getID(), deleteConnectionGroupIDs);
+	connectionNetworkDaoThread->prepareDeleteConnectionGroups(getID(), deleteConGrpIDList);
 	currentConnectionTask = DELETE_CONNECTIONS_TASK;
 	connectionNetworkDaoThread->start();
 }
 
 
 /*! Starts the thread that deletes connection groups from the database. */
-void Network::startDeleteNeuronGroups(){
+void Network::startDeleteNeuronGroups(QList<unsigned>& deleteNeurGrpIDList){
 	clearError();
-	neuronNetworkDaoThread->prepareDeleteNeuronGroups(getID(), deleteNeuronGroupIDs);
+	neuronNetworkDaoThread->prepareDeleteNeuronGroups(getID(), deleteNeurGrpIDList);
 	currentNeuronTask = DELETE_NEURONS_TASK;
 	neuronNetworkDaoThread->start();
 }

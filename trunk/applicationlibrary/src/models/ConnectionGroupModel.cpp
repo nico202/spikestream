@@ -203,7 +203,7 @@ void ConnectionGroupModel::networkChanged(){
 
 	//Load up sizes of connection groups
 	for(int i=0; i<conGrpInfoList.size(); ++i)
-		conGrpSizeList.append( Globals::getNetworkDao()->getConnectionCount( conGrpInfoList.at(i) ) );
+		conGrpSizeList.append( Globals::getNetwork()->getConnectionCount( conGrpInfoList.at(i).getID() ) );
 
 	//Sanity check
 	if(conGrpInfoList.size() != conGrpSizeList.size())
