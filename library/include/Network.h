@@ -38,6 +38,7 @@ namespace spikestream {
 			Box getBoundingBox();
 			unsigned int getID() { return info.getID(); }
 			QString getErrorMessage();
+			int getConnectionCount(unsigned conGrpID);
 			int getConnectionGroupCount() { return connGrpMap.size(); }
 			QList<ConnectionGroup*> getConnectionGroups();
 			ConnectionGroup* getConnectionGroup(unsigned int id);
@@ -65,6 +66,7 @@ namespace spikestream {
 			void load();
 			void loadWait();
 			bool neuronGroupIsLoaded(unsigned int neurGrpID);
+			bool overlaps(const Box& box);
 			void save();
 			void setError(const QString& errorMsg);
 			void setPrototypeMode(bool mode);
@@ -161,8 +163,8 @@ namespace spikestream {
 			void loadNeuronGroupsInfo();
 			void startAddConnectionGroups();
 			void startAddNeuronGroups();
-			void startDeleteConnectionGroups();
-			void startDeleteNeuronGroups();
+			void startDeleteConnectionGroups(QList<unsigned>& deleteConGrpIDList);
+			void startDeleteNeuronGroups(QList<unsigned>& deleteNeurGrpIDList);
 			void updateConnectionGroupsAfterSave();
 			void updateNeuronGroupsAfterSave();
 

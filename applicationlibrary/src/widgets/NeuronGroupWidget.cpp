@@ -85,9 +85,9 @@ void NeuronGroupWidget::deleteSelectedNeurons(){
 	//Delete neuron groups
 	try{
 		connect(Globals::getNetwork(), SIGNAL(taskFinished()), this, SLOT(networkTaskFinished()),  Qt::UniqueConnection);
-		progressDialog = new QProgressDialog("Deleting neuron group(s)", "Cancel", 0, 100, this);
+		progressDialog = new QProgressDialog("Deleting neuron group(s)", "Cancel", 0, 0, this);
 		progressDialog->setWindowModality(Qt::WindowModal);
-		progressDialog->setMinimumDuration(2000);
+		progressDialog->show();
 		Globals::getNetwork()->deleteNeuronGroups(deleteNeurIDList);
 	}
 	catch(SpikeStreamException& ex){
