@@ -16,6 +16,9 @@ using namespace std;
 /*! Controls whether performance measurements are made for this class */
 #define TIME_PERFORMANCE
 
+/*! Switches on output of more debugging information */
+#define DEBUG
+
 
 /*! Constructor  */
 NetworkDaoThread::NetworkDaoThread(const DBInfo& dbInfo) : NetworkDao(dbInfo) {
@@ -720,7 +723,39 @@ void NetworkDaoThread::setError(const QString& msg){
 
 /*! Saves a network that has been created or edited in prototype mode to the database. */
 void NetworkDaoThread::saveNetwork(){
-	//Delete neuron and connection groups
+	#ifdef DEBUG
+		cout<<"Saving network."<<endl;
+		if(!neuronGroupIDList.isEmpty()){
+			cout<<"Deleting neuron groups with IDs: ";
+			foreach(unsigned int neuronGroupID, neuronGroupIDList){
+				cout<<neuronGroupID<<" ";
+			}
+			cout<<endl;
+		}
+		if(!connectionGroupIDList.isEmpty()){
+			cout<<"Deleting connection groups with IDs: ";
+			foreach(unsigned int neuronGroupID, connectionGroupIDList){
+				cout<<neuronGroupID<<" ";
+			}
+			cout<<endl;
+		}
+		if(!neuronGroupList.isEmpty()){
+			cout<<"Adding neuron groups with temporary IDs: ";
+			foreach(NeuronGroup* neuronGroup, neuronGroupList){
+				cout<<neuronGroup->getID()<<" ";
+			}
+			cout<<endl;
+		}
+		if(!connectionGroupList.isEmpty()){
+			cout<<"Adding connection groups with temporary IDs: ";
+			foreach(ConnectionGroup* conGroup, connectionGroupList){
+				cout<<conGroup->getID()<<" ";
+			}
+			cout<<endl;
+		}
+	#endif//DEBUG
+
+	//Delete neuron and connection groups that have been deleted from the prototype
 	deleteNeuronGroups();
 	deleteConnectionGroups();
 
@@ -762,7 +797,7 @@ void NetworkDaoThread::saveNetwork(){
 			QHash<unsigned, Connection*>::const_iterator endConGrp = tmpConGrp->end();
 			for(QHash<unsigned, Connection*>::const_iterator conIter = tmpConGrp->begin(); conIter!= endConGrp; ++conIter){
 				//Check TO neuron ID exists
-				if(!oldIDNeurMap.contains(conIter.value()->getToNeuronID()))
+				if(oldIDNeurMap.contains(conIter.value()->getToNeuronID()))
 					conIter.value()->setToNeuronID(oldIDNeurMap[conIter.value()->getToNeuronID()]->getID());
 				else
 					throw SpikeStreamException("TO neuron ID missing from old ID neuron map: " + QString::number(conIter.value()->getToNeuronID()));

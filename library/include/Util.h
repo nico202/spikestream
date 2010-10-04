@@ -30,6 +30,8 @@ namespace spikestream {
 			static QList<unsigned int> getUIntList(const QString& str);
 			static double getDouble(const QString& str);
 			static int getRandom(int min, int max);
+			static double getRandomDouble(double min, double max);
+			static unsigned getRandomUInt(unsigned min, unsigned max);
 			static mpf_class factorial(unsigned int num);
 			static void printByteArray(byte* byteArr, int arrLen);
 			static void printByteArray(const QByteArray& byteArr);

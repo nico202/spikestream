@@ -205,7 +205,7 @@ void Random1Widget::addButtonClicked(){
 
 		//Start thread to add neuron group
 		ConnectionGroupInfo info(0, descriptionEdit->text(), fromNeurGrpID, toNeurGrpID, paramMap, synapseType);
-		builderThread->prepareAddConnectionGroup(info);
+		builderThread->startBuildConnectionGroup(info);
 		progressDialog = new QProgressDialog("Adding connection group", "Cancel", 0, 100, this, Qt::CustomizeWindowHint);
 		progressDialog->setWindowModality(Qt::WindowModal);
 		progressDialog->setMinimumDuration(2000);

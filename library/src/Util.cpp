@@ -112,7 +112,7 @@ void Util::printParameterMap(const QHash<QString, double>& paramMap){
 }
 
 
-/*! Returns a random number in the range specified */
+/*! Returns a random integer in the range specified */
 int Util::getRandom(int min, int max){
 	if(max <= min)
 		throw SpikeStreamException("Incorrect range for random number: maximum <= minimum.");
@@ -120,6 +120,27 @@ int Util::getRandom(int min, int max){
 	int randomNum = min;
 	randomNum += qrand() % (max - min);
 	return randomNum;
+}
+
+
+/*! Returns a random double in the specified range */
+double Util::getRandomDouble(double min, double max){
+	if(min > max)
+		throw SpikeStreamException("Minimum cannot be greater than maximum");
+	if(min == max)
+		return min;
+	double ranNum = (double)rand() / (double) RAND_MAX;
+	return min + (max-min)*ranNum;
+}
+
+
+/*! Returns a random unsigned integer in the specified range */
+unsigned int Util::getRandomUInt(unsigned min, unsigned max){
+	if(min > max)
+		throw SpikeStreamException("Minimum cannot be greater than maximum");
+	if(min == max)
+		return min;
+	return min + rand() % (max-min);
 }
 
 

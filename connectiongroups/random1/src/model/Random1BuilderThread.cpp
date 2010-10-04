@@ -2,10 +2,11 @@
 #include "NeuronGroup.h"
 #include "Random1BuilderThread.h"
 #include "SpikeStreamException.h"
+#include "Util.h"
 using namespace spikestream;
 
 /*! Constructor */
-Random1BuilderThread::Random1BuilderThread(){
+Random1BuilderThread::Random1BuilderThread() : AbstractConnectionBuilder() {
 }
 
 
@@ -15,75 +16,8 @@ Random1BuilderThread::~Random1BuilderThread(){
 
 
 /*----------------------------------------------------------*/
-/*-----                 PUBLIC METHODS                 -----*/
+/*-----                PROTECTED METHODS               -----*/
 /*----------------------------------------------------------*/
-
-/*! Prepares class before it runs as a separate thread to add a neuron group */
-void Random1BuilderThread::prepareAddConnectionGroup(const ConnectionGroupInfo& conGrpInfo){
-	//Store information about the neuron group to be added
-	this->connectionGroupInfo = conGrpInfo;
-
-	//Check that the required parameters exist in the connection group and are in the appropriate range
-	checkParameters();
-
-	if(!Globals::networkLoaded())
-		throw SpikeStreamException("Cannot add connection group - no network loaded.");
-}
-
-
-/*! Thread run method */
-void Random1BuilderThread::run(){
-	clearError();
-	stopThread = false;
-	newConnectionGroup = NULL;
-
-	try{
-		//Seed the random number generator
-		srand(12345678);
-
-		//Create network and archive dao for this thread
-		Network* currentNetwork = Globals::getNetwork();
-		threadNetworkDao = new NetworkDao(Globals::getNetworkDao()->getDBInfo());
-		threadArchiveDao = new ArchiveDao(Globals::getArchiveDao()->getDBInfo());
-
-		//Add the connection group
-		addConnectionGroup();
-
-		//Wait for network to finish adding connection groups
-		while(currentNetwork->isBusy()){
-			emit progress(threadNetworkDao->getConnectionCount(newConnectionGroup), newConnectionGroup->size(), "Adding connections to database...");
-			msleep(250);
-		}
-
-		//Check for errors
-		if(currentNetwork->isError())
-			setError(currentNetwork->getErrorMessage());
-
-		//Clean up network and archive dao
-		delete threadNetworkDao;
-		delete threadArchiveDao;
-	}
-	catch (SpikeStreamException& ex){
-		setError(ex.getMessage());
-	}
-	catch(...){
-		setError("An unknown error occurred.");
-	}
-}
-
-
-/*----------------------------------------------------------*/
-/*-----                PRIVATE METHODS                 -----*/
-/*----------------------------------------------------------*/
-
-/*! Adds a neuron group with the specified parameters to the database */
-void Random1BuilderThread::addConnectionGroup(){
-	buildConnectionGroup();
-	QList<ConnectionGroup*> conGrpList;
-	conGrpList.append(newConnectionGroup);
-	Globals::getNetwork()->addConnectionGroups(conGrpList);
-}
-
 
 /*! Returns a neuron group whose neurons are constructed according to the
 	parameters in the neuron group info. */
@@ -114,12 +48,12 @@ void Random1BuilderThread::buildConnectionGroup(){
 			if(ranNum <= connectionProbability){
 				//Calculate weight of connection
 				if(rand() % 100 <= percentWeightRange1)
-					weight = getRandomDouble(minWeightRange1, maxWeightRange1);
+					weight = Util::getRandomDouble(minWeightRange1, maxWeightRange1);
 				else
-					weight = getRandomDouble(minWeightRange2, maxWeightRange2);
+					weight = Util::getRandomDouble(minWeightRange2, maxWeightRange2);
 
 				//Add the connection
-				newConnectionGroup->addConnection(fromIter.key(), toIter.key(), getRandomUInt(minDelay, maxDelay), weight);
+				newConnectionGroup->addConnection(fromIter.key(), toIter.key(), Util::getRandomUInt(minDelay, maxDelay), weight);
 			}
 		}
 
@@ -130,35 +64,9 @@ void Random1BuilderThread::buildConnectionGroup(){
 }
 
 
-/*! Returns a parameter from the neuron group info parameter map checking that it actually exists */
-double Random1BuilderThread::getParameter(const QString& paramName){
-	QHash<QString, double> paramMap = connectionGroupInfo.getParameterMap();
-	if(!paramMap.contains(paramName))
-		throw SpikeStreamException("Parameter with " + paramName + " does not exist in parameter map.");
-	return paramMap[paramName];
-}
-
-
-/*! Returns a random number in the specified range */
-double Random1BuilderThread::getRandomDouble(double min, double max){
-	if(min > max)
-		throw SpikeStreamException("Minimum cannot be greater than maximum");
-	if(min == max)
-		return min;
-	double ranNum = (double)rand() / (double) RAND_MAX;
-	return min + (max-min)*ranNum;
-}
-
-
-/*! Returns a random integer in the specified range */
-unsigned int Random1BuilderThread::getRandomUInt(unsigned int min, unsigned int max){
-	if(min > max)
-		throw SpikeStreamException("Minimum cannot be greater than maximum");
-	if(min == max)
-		return min;
-	return min + rand() % (max-min);
-}
-
+/*----------------------------------------------------------*/
+/*-----                 PRIVATE METHODS                -----*/
+/*----------------------------------------------------------*/
 
 /*! Extracts parameters from neuron group info and checks that they are in range. */
 void Random1BuilderThread::checkParameters(){
