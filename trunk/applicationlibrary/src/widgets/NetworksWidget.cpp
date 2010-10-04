@@ -187,8 +187,10 @@ void NetworksWidget::loadNetworkList(){
 	//Show "no network" message if list is empty
 	if(networkInfoList.size() == 0){
 		gridLayout->addWidget(new QLabel("No networks in database"), 0, 0);
-		Globals::setNetwork(0);
-		emit networkChanged();
+		if(Globals::networkLoaded()){
+			Globals::setNetwork(0);
+			emit networkChanged();
+		}
 		return;
 	}
 
@@ -299,6 +301,10 @@ void NetworksWidget::networkDaoThreadFinished(){
 
 /*! Called when network save has finished */
 void NetworksWidget::networkSaveFinished(){
+	//Check for errors
+	if(Globals::getNetwork()->isError())
+		qCritical()<<Globals::getNetwork()->getErrorMessage();
+
 	//Clean up progress dialog
 	progressDialog->close();
 	delete progressDialog;
@@ -327,6 +333,11 @@ void NetworksWidget::prototypeNetwork(){
 		if(msgBox.exec() != QMessageBox::Ok)
 			return;
 	}
+	if(Globals::getArchiveDao()->networkHasArchives(networkID)){
+		QMessageBox msgBox(QMessageBox::Warning, "Prototype Mode", "This network has archives associated with it.\nIf you change this network in prototype mode, your changes cannot be saved until the archives have been deleted.\nWould you like to continue?", QMessageBox::Ok | QMessageBox::Cancel, this);
+		if(msgBox.exec() != QMessageBox::Ok)
+			return;
+	}
 	//Set prototype mode and load the network
 	loadNetwork(networkInfoMap[networkID], true);
 }
@@ -344,8 +355,13 @@ void NetworksWidget::saveNetwork(){
 		qCritical()<<"Network with ID "<<networkID<<" cannot be found.";
 		return;
 	}
-	if(!Globals::getNetwork()->isPrototypeMode())
+	if(!Globals::getNetwork()->isPrototypeMode()){
 		qCritical()<<"SpikeStream internal error. Should not be able to save a network that is not in prototype mode.";
+	}
+	if(Globals::getArchiveDao()->networkHasArchives(networkID)){
+		qCritical()<<"Network has archives.\nYour prototype mode changes cannot be saved until these archives have been deleted.";
+		return;
+	}
 
 	//Save network
 	try{

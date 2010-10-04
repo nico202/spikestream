@@ -680,7 +680,7 @@ void Network::connectionThreadFinished(){
 void Network::neuronThreadFinished(){
     //Check for errors
     if(neuronNetworkDaoThread->isError()){
-		setError("Neuron Loading Error: '" + neuronNetworkDaoThread->getErrorMessage() + "'. ");
+		setError(neuronNetworkDaoThread->getErrorMessage() + "'. ");
     }
 
     //Handle any task-specific stuff

@@ -210,6 +210,20 @@ void NemoWidget::checkLoadingProgress(){
 	stopAction->setEnabled(false);
 	monitorFiringNeuronsCheckBox->setChecked(nemoWrapper->isMonitorFiringNeurons());
 	monitorWeightsCheckBox->setChecked(nemoWrapper->isMonitorWeights());
+
+	//Cannot save weights or archive if the network is not fully saved in the database
+	if(!Globals::getNetwork()->isSaved()){
+		saveWeightsButton->setEnabled(false);
+		archiveCheckBox->setEnabled(false);
+		setArchiveDescriptionButton->setEnabled(false);
+		archiveDescriptionEdit->setEnabled(false);
+	}
+	else{
+		saveWeightsButton->setEnabled(true);
+		archiveCheckBox->setEnabled(true);
+		setArchiveDescriptionButton->setEnabled(true);
+		archiveDescriptionEdit->setEnabled(true);
+	}
 	Globals::setSimulationLoaded(true);
 }
 

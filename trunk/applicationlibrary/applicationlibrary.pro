@@ -126,6 +126,13 @@ SOURCES += src/analysis/AnalysisLoaderWidget.cpp \
 			src/analysis/AbstractSpectrogramData.cpp \
 			src/analysis/AnalysisSpectrogram.cpp
 
+#----------------------------------------------#
+#---                 Builders               ---#
+#----------------------------------------------#
+HEADERS += include/AbstractConnectionBuilder.h \
+			include/AbstractNeuronBuilder.h
+SOURCES += src/builders/AbstractConnectionBuilder.cpp \
+			src/builders/AbstractNeuronBuilder.cpp
 
 #----------------------------------------------#
 #---                Dialogs                 ---#
