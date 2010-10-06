@@ -32,17 +32,18 @@ namespace spikestream {
 		private slots:
 			void archiveStateChanged(int state);
 			void checkLoadingProgress();
+			void checkResetWeightsProgress();
 			void checkSaveWeightsProgress();
 			void injectNoiseButtonClicked();
 			void loadSimulation();
 			void monitorFiringNeuronsStateChanged(int state);
 			void nemoWrapperFinished();
 			void networkChanged();
+			void resetWeights();
 			void setArchiveDescription();
 			void setNeuronParameters();
 			void setNemoParameters();
 			void setSynapseParameters();
-			void updateTimeStep(unsigned int timeStep, const QList<unsigned>& neuronIDList);
 			void saveWeights();
 			void setMonitorWeights(bool enable);
 			void simulationRateChanged(int comboIndex);
@@ -52,6 +53,7 @@ namespace spikestream {
 			void stopSimulation();
 			void unloadSimulation(bool confirmWithUser=true);
 			void updateProgress(int stepsCompleted, int totalSteps);
+			void updateTimeStep(unsigned int timeStep, const QList<unsigned>& neuronIDList);
 
 		private:
 			//========================  VARIABLES  ========================
@@ -112,6 +114,9 @@ namespace spikestream {
 			/*! Button for saving volatile weights */
 			QPushButton* saveWeightsButton;
 
+			/*! Button for resetting volatile weights */
+			QPushButton* resetWeightsButton;
+
 			/*! Dialog for giving feedback about progress */
 			QProgressDialog* progressDialog;
 
@@ -127,8 +132,8 @@ namespace spikestream {
 			/*! Timer to check on loading progress */
 			QTimer* loadingTimer;
 
-			/*! Timer to check on progress with saving weights*/
-			QTimer* saveWeightsTimer;
+			/*! Timer to check on progress with heavy tasks with progress bar */
+			QTimer* heavyTaskTimer;
 
 			/*! Flag to prevent calls to progress dialog while it is redrawing. */
 			bool updatingProgress;

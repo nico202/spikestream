@@ -9,6 +9,10 @@
 #include "Util.h"
 using namespace spikestream;
 
+//Outputs debugging information for NeMo calls
+//#define DEBUG_STEP
+//#define DEBUG_WEIGHTS
+
 
 /*! Constructor */
 NemoWrapper::NemoWrapper(){
@@ -43,6 +47,12 @@ NemoWrapper::~NemoWrapper(){
 /*! Cancels the loading of a simulation */
 void NemoWrapper::cancelLoading(){
 	stopThread = true;
+}
+
+
+/*! Cancels the resetting of weights */
+void NemoWrapper::cancelResetWeights(){
+	weightResetCancelled = true;
 }
 
 
@@ -87,7 +97,7 @@ void NemoWrapper::loadNemo(){
 	//Clean up loader
 	delete nemoLoader;
 
-	//Set the STDP functionn in the configuration - FIXME
+	//Set the STDP functionn in the configuration
 	nemo_set_stdp_function(nemoConfig,
 					   STDPFunctions::getPreArray(stdpFunctionID),
 					   STDPFunctions::getPreLength(stdpFunctionID),
@@ -96,6 +106,7 @@ void NemoWrapper::loadNemo(){
 					   STDPFunctions::getMinWeight(stdpFunctionID),
 					   STDPFunctions::getMaxWeight(stdpFunctionID)
 	);
+	stdpReward = STDPFunctions::getReward(stdpFunctionID);
 
 	//Load the network into the simulator
 	nemoSimulation = nemo_new_simulation(nemoNet, nemoConfig);
@@ -113,6 +124,16 @@ void NemoWrapper::playSimulation(){
 	if(!simulationLoaded)
 		throw SpikeStreamException("Cannot run simulation - no simulation loaded.");
 	currentTaskID = RUN_SIMULATION_TASK;
+}
+
+
+/*! Resets the temporary weights to the stored values. */
+void NemoWrapper::resetWeights(){
+	if(!simulationLoaded)
+		throw SpikeStreamException("Cannot reset weights - no simulation loaded.");
+	weightsReset = false;
+	weightResetCancelled = false;
+	currentTaskID = RESET_WEIGHTS_TASK;
 }
 
 
@@ -177,6 +198,10 @@ void NemoWrapper::run(){
 			//Step simulation
 			else if(currentTaskID == STEP_SIMULATION_TASK){
 				stepNemo();
+			}
+			//Reset weights
+			else if(currentTaskID == RESET_WEIGHTS_TASK){
+				resetNemoWeights();
 			}
 			//Save weights
 			else if(currentTaskID == SAVE_WEIGHTS_TASK){
@@ -384,6 +409,41 @@ void NemoWrapper::runNemo(){
 }
 
 
+/*! Resets the temporary weights to the saved weights */
+void NemoWrapper::resetNemoWeights(){
+	//Return immediately if there is nothing to save
+	if(volatileConGrpMap.size() == 0){
+		weightsReset = true;
+		weightsSaved = true;
+		return;
+	}
+
+	//Work through all connection groups
+	Network* currentNetwork = Globals::getNetwork();
+	for(QHash<unsigned, QHash<synapse_id, unsigned> >::iterator volIter = volatileConGrpMap.begin(); volIter != volatileConGrpMap.end(); ++volIter){
+		ConnectionGroup* tmpConGrp = currentNetwork->getConnectionGroup(volIter.key());
+		QHash<unsigned, Connection*>::const_iterator endConList = tmpConGrp->end();
+		for(QHash<unsigned, Connection*>::const_iterator conIter = tmpConGrp->begin(); conIter != endConList; ++conIter){
+			//Copy current weights to temporary weights
+			conIter.value()->setTempWeight(conIter.value()->getWeight());
+
+			//Check for cancellation
+			if(weightResetCancelled){
+				Globals::getEventRouter()->weightsChangedSlot();
+				return;
+			}
+		}
+	}
+
+	//Inform other classes about weight change
+	Globals::getEventRouter()->weightsChangedSlot();
+
+	//Weight are saved and reset
+	weightsReset = true;
+	weightsSaved = true;
+}
+
+
 /*! Saves the weights from the network into the database */
 void NemoWrapper::saveNemoWeights(){
 	//Return immediately if there is nothing to save
@@ -400,7 +460,7 @@ void NemoWrapper::saveNemoWeights(){
 
 	//Work through all connection groups
 	Network* currentNetwork = Globals::getNetwork();
-	for(QHash<unsigned, QHash<unsigned, unsigned> >::iterator volIter = volatileConGrpMap.begin(); volIter != volatileConGrpMap.end(); ++volIter){
+	for(QHash<unsigned, QHash<synapse_id, unsigned> >::iterator volIter = volatileConGrpMap.begin(); volIter != volatileConGrpMap.end(); ++volIter){
 		ConnectionGroup* tmpConGrp = currentNetwork->getConnectionGroup(volIter.key());
 		QHash<unsigned, Connection*>::const_iterator endConList = tmpConGrp->end();
 		for(QHash<unsigned, Connection*>::const_iterator conIter = tmpConGrp->begin(); conIter != endConList; ++conIter){
@@ -450,9 +510,13 @@ void NemoWrapper::stepNemo(){
 		fillInjectNoiseArray(injectNoiseNeurIDArr, &injectNoiseArrSize);
 
 		//Advance simulation
-		qDebug()<<"About to step nemo with injection of noise";
+		#ifdef DEBUG_STEP
+			qDebug()<<"About to step nemo with injection of noise";
+		#endif//DEBUG_STEP
 		checkNemoOutput( nemo_step(nemoSimulation, injectNoiseNeurIDArr, injectNoiseArrSize, &firedArray, &firedCount), "Nemo error on step" );
-		qDebug()<<"Nemo successfully stepped with injection of noise.";
+		#ifdef DEBUG_STEP
+			qDebug()<<"Nemo successfully stepped with injection of noise.";
+		#endif//DEBUG_STEP
 
 		//Clean up noise array and empty inject noise map
 		delete [] injectNoiseNeurIDArr;
@@ -476,6 +540,14 @@ void NemoWrapper::stepNemo(){
 		if(archiveMode){
 			archiveDao->addArchiveData(archiveInfo.getID(), timeStepCounter, firingNeuronList);
 		}
+	}
+
+
+	//--------------------------------------------
+	//               Apply STDP
+	//--------------------------------------------
+	if(!volatileConGrpMap.isEmpty()){
+		nemo_apply_stdp(nemoSimulation, stdpReward);
 	}
 
 
@@ -522,20 +594,24 @@ void NemoWrapper::updateNetworkWeights(){
 	}
 
 	//Work through all of the volatile connection groups
-	for(QHash<unsigned, QHash<unsigned, unsigned> >::iterator outerIter = volatileConGrpMap.begin(); outerIter != volatileConGrpMap.end(); ++outerIter){
+	for(QHash<unsigned, QHash<synapse_id, unsigned> >::iterator outerIter = volatileConGrpMap.begin(); outerIter != volatileConGrpMap.end(); ++outerIter){
 		//Get the volatile connection group
 		ConnectionGroup* tmpConGrp = Globals::getNetwork()->getConnectionGroup(outerIter.key());
 
 		//Query the volatile connections in NeMo
 		synapse_id synapseIDArray[1];
 		float* weightArray;//Will point to array of returned weights
-		QHash<unsigned, unsigned>::iterator endInnerHashMap = outerIter.value().end();
-		for(QHash<unsigned, unsigned>::iterator innerIter = outerIter.value().begin(); innerIter != endInnerHashMap; ++innerIter){
+		QHash<synapse_id, unsigned>::iterator endInnerHashMap = outerIter.value().end();
+		for(QHash<synapse_id, unsigned>::iterator innerIter = outerIter.value().begin(); innerIter != endInnerHashMap; ++innerIter){
 			synapseIDArray[0] = innerIter.key();
-			qDebug()<<"About to query weights: nemo synapseID="<<synapseIDArray[0]<<" spikestream synapse id="<<innerIter.value();
+			#ifdef DEBUG_WEIGHTS
+				qDebug()<<"About to query weights: nemo synapseID="<<synapseIDArray[0]<<" spikestream synapse id="<<innerIter.value();
+			#endif//DEBUG_WEIGHTS
 			checkNemoOutput( nemo_get_weights(nemoSimulation, synapseIDArray, 1, &weightArray), "Error getting weights." );
-			qDebug()<<"Weight query complete: weight="<<weightArray[0];
-			tmpConGrp->setWeight(innerIter.value(), weightArray[0]);
+			#ifdef DEBUG_WEIGHTS
+				qDebug()<<"Weight query complete: weight="<<weightArray[0];
+			#endif//DEBUG_WEIGHTS
+			tmpConGrp->setTempWeight(innerIter.value(), weightArray[0]);
 		}
 	}
 }

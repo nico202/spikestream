@@ -132,6 +132,14 @@ float STDPFunctions::getMaxWeight(unsigned functionID){
 }
 
 
+/*! Returns the reward associated with the application of STDP learning. */
+float STDPFunctions::getReward(unsigned functionID){
+	checkInitialization();
+	checkFunctionID(functionID);
+	return functionMap[functionID]->getReward();
+}
+
+
 /*----------------------------------------------------------*/
 /*-----                PRIVATE METHODS                 -----*/
 /*----------------------------------------------------------*/

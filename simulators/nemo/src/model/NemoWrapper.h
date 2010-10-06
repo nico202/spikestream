@@ -27,6 +27,7 @@ namespace spikestream {
 			NemoWrapper();
 			~NemoWrapper();
 			void cancelLoading();
+			void cancelResetWeights();
 			void cancelSaveWeights();
 			void clearWaitForGraphics() { waitForGraphics = false; }
 			unsigned getArchiveID() { return archiveInfo.getID(); }
@@ -38,9 +39,11 @@ namespace spikestream {
 			bool isError() { return error; }
 			bool isMonitorFiringNeurons() { return monitorFiringNeurons; }
 			bool isMonitorWeights() { return monitorWeights; }
+			bool isWeightsReset() { return weightsReset; }
 			bool isWeightsSaved() { return weightsSaved; }
 			bool isSimulationLoaded() { return simulationLoaded; }
 			bool isSimulationRunning();
+			void resetWeights();
 			void run();
 			void saveWeights();
 			void setArchiveMode(bool mode);
@@ -60,14 +63,17 @@ namespace spikestream {
 			/*! No task defined */
 			static const int NO_TASK_DEFINED = 0;
 
-			/*! Task of playing simulation */
-			static const int RUN_SIMULATION_TASK = 1;
+			/*! Task of resetting temporary weight values to stored values. */
+			static const int RESET_WEIGHTS_TASK = 1;
 
-			/*! Task of advancing one time step of the simulation. */
-			static const int STEP_SIMULATION_TASK = 2;
+			/*! Task of playing simulation */
+			static const int RUN_SIMULATION_TASK = 2;
 
 			/*! Task of saving weights from simulation into database. */
 			static const int SAVE_WEIGHTS_TASK = 3;
+
+			/*! Task of advancing one time step of the simulation. */
+			static const int STEP_SIMULATION_TASK = 4;
 
 
 		signals:
@@ -148,7 +154,7 @@ namespace spikestream {
 				The key in the outer map is the volatile connection group ID.
 				The key in the inner map is the Nemo ID of the connection.
 				The value in the inner map is the SpikeStream ID of the connection. */
-			QHash<unsigned, QHash<unsigned, unsigned> > volatileConGrpMap;
+			QHash<unsigned, QHash<synapse_id, unsigned> > volatileConGrpMap;
 
 			/*! List of presynaptic neuron ids used for saving weights. */
 			QList<unsigned> preSynapticNeuronIDs;
@@ -156,20 +162,31 @@ namespace spikestream {
 			/*! Flag set to true when weights have been saved. */
 			bool weightsSaved;
 
+			/*! Flag set to true when weights are reset */
+			bool weightsReset;
+
 			/*! Flag used to cancel weight save */
 			bool weightSaveCancelled;
+
+			/*! Flag used to cancel weight reset */
+			bool weightResetCancelled;
+
+			/*! Reward used for STDP learning */
+			float stdpReward;
+
 
 			//======================  METHODS  ========================
 			void checkNemoOutput(nemo_status_t result, const QString& errorMessage);
 			void clearError();
 			void fillInjectNoiseArray(unsigned*& array, int* arraySize);
 			void loadNemo();
+			void resetNemoWeights();
 			void runNemo();
+			void saveNemoWeights();
 			void setError(const QString& errorMessage);
 			void stepNemo();
 			void unloadNemo();
 			void updateNetworkWeights();
-			void saveNemoWeights();
 	};
 
 }

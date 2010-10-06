@@ -7,6 +7,10 @@ using namespace spikestream;
 /*! Constructor */
 AbstractSTDPFunction::AbstractSTDPFunction(){
 	functionUpToDate = false;
+
+	//Reward is common to all parameters
+	defaultParameterMap["reward"] = 1.0;
+	parameterInfoList.append(ParameterInfo("reward", "Reward applied for each iteration of STDP learning.", ParameterInfo::DOUBLE));
 }
 
 
@@ -49,6 +53,12 @@ QHash<QString, double> AbstractSTDPFunction::getDefaultParameters(){
 /*! Returns information about the parameters for this STDP function. */
 QList<ParameterInfo> AbstractSTDPFunction::getParameterInfoList(){
 	return parameterInfoList;
+}
+
+
+/*! Returns reward parameter, which is common to all STDP functions. */
+float AbstractSTDPFunction::getReward(){
+	return getParameter("reward");
 }
 
 

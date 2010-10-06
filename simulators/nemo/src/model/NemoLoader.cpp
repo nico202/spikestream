@@ -37,7 +37,7 @@ NemoLoader::~NemoLoader(){
 /*----------------------------------------------------------*/
 
 /*! Loads the simulation */
-nemo_network_t NemoLoader::buildNemoNetwork(Network* network, QHash<unsigned, QHash<unsigned, unsigned> >* volatileConGrpMap, const bool* stop){
+nemo_network_t NemoLoader::buildNemoNetwork(Network* network, QHash<unsigned, QHash<synapse_id, unsigned> >* volatileConGrpMap, const bool* stop){
 	//Initialize the nemo network
 	nemo_network_t nemoNet = nemo_new_network();
 
@@ -89,7 +89,7 @@ nemo_network_t NemoLoader::buildNemoNetwork(Network* network, QHash<unsigned, QH
 /*----------------------------------------------------------*/
 
 /*! Adds a connection group to the network. */
-void NemoLoader::addConnectionGroup(ConnectionGroup* conGroup, nemo_network_t nemoNetwork, QHash<unsigned, QHash<unsigned, unsigned> >* volatileConGrpMap){
+void NemoLoader::addConnectionGroup(ConnectionGroup* conGroup, nemo_network_t nemoNetwork, QHash<unsigned, QHash<synapse_id, unsigned> >* volatileConGrpMap){
 	//Extract parameters
 	unsigned char learning = 0;
 	if(conGroup->getParameter("Learning") != 0.0)
@@ -99,22 +99,25 @@ void NemoLoader::addConnectionGroup(ConnectionGroup* conGroup, nemo_network_t ne
 	unsigned conGrpID = conGroup->getID();
 
 	//Work through each connection
+	Connection* tmpCon;
 	nemo_status_t result;
 	synapse_id newNemoSynapseID;
 	QHash<unsigned, Connection*>::const_iterator endConGrp = conGroup->end();
 	for(QHash<unsigned, Connection*>::const_iterator conIter = conGroup->begin(); conIter != endConGrp; ++conIter){
 		//Add synapse
-		result = nemo_add_synapse(nemoNetwork, conIter.value()->getFromNeuronID(), conIter.value()->getToNeuronID(), conIter.value()->getDelay(), conIter.value()->getWeight(), learning, &newNemoSynapseID);
+		tmpCon = conIter.value();
+		result = nemo_add_synapse(nemoNetwork, tmpCon->getFromNeuronID(), tmpCon->getToNeuronID(), tmpCon->getDelay(), tmpCon->getWeight(), learning, &newNemoSynapseID);
 		#ifdef DEBUG
 			//printConnection(fromMapIter.key(), targets, delays, weights, isPlastic, numTargets);
-			//cout<<"nemo_add_synapses(nemoNetwork, "<<fromMapIter.key()<<", "<<targets<<", "<<delays<<", "<<weights<<", "<<isPlastic<<", "<<numTargets<<");"<<endl;
+			cout<<"nemo_add_synapses(nemoNetwork, "<<tmpCon->getFromNeuronID()<<", "<<tmpCon->getToNeuronID()<<", "<<tmpCon->getDelay()<<", "<<tmpCon->getWeight()<<", "<<learning<<", "<<newNemoSynapseID<<");"<<endl;
 		#endif//DEBUG
 		if(result != NEMO_OK)
 			throw SpikeStreamException("Error code returned from Nemo when adding synapse." + QString(nemo_strerror()));
 
 		//Store link between connection group ID and map linking nemo connection IDs and SpikeStream connection IDs
-		if(learning)
+		if(learning){
 			(*volatileConGrpMap)[conGrpID][newNemoSynapseID] = conIter.value()->getID();
+		}
 	}
 }
 
