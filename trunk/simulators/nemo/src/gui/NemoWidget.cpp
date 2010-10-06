@@ -70,11 +70,14 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	connect(monitorFiringNeuronsCheckBox, SIGNAL(stateChanged(int)), this, SLOT(monitorFiringNeuronsStateChanged(int)));
 	controlsVBox->addWidget(monitorFiringNeuronsCheckBox);
 
-	//Add widgets to monitor and save the weights
+	//Add widgets to monitor, save and reset the weights
 	QHBoxLayout* saveWeightsBox = new QHBoxLayout();
 	monitorWeightsCheckBox = new QCheckBox("Monitor weights");
 	connect(monitorWeightsCheckBox, SIGNAL(clicked(bool)), this, SLOT(setMonitorWeights(bool)));
 	saveWeightsBox->addWidget(monitorWeightsCheckBox);
+/*	resetWeightsButton = new QPushButton("Reset Weights");
+	connect(resetWeightsButton, SIGNAL(clicked()), this, SLOT(resetWeights()));
+	saveWeightsBox->addWidget(resetWeightsButton);*/
 	saveWeightsButton = new QPushButton("Save Weights");
 	connect(saveWeightsButton, SIGNAL(clicked()), this, SLOT(saveWeights()));
 	saveWeightsBox->addWidget(saveWeightsButton);
@@ -228,11 +231,49 @@ void NemoWidget::checkLoadingProgress(){
 }
 
 
+/*! Checks for progress with the resetting of weights*/
+void NemoWidget::checkResetWeightsProgress(){
+	//Check for errors during resetting weights
+	if(nemoWrapper->isError()){
+		heavyTaskTimer->stop();
+		progressDialog->setValue(progressDialog->maximum());
+		delete progressDialog;
+		progressDialog = NULL;
+		qCritical()<<"Error occurred resetting of weights: '"<<nemoWrapper->getErrorMessage()<<"'.";
+		return;
+	}
+
+	//Check for cancelation - stop timer and abort operation
+	else if(progressDialog->wasCanceled()){
+		heavyTaskTimer->stop();
+		nemoWrapper->cancelResetWeights();
+		delete progressDialog;
+		progressDialog = NULL;
+		return;
+	}
+
+	//If save weights is not complete return with timer running
+	else if(!nemoWrapper->isWeightsReset()){
+		return;
+	}
+
+	else if (updatingProgress){
+		return;
+	}
+
+	//If we have reached this point, loading is complete
+	heavyTaskTimer->stop();
+	progressDialog->setValue(progressDialog->maximum());
+	delete progressDialog;
+	progressDialog = NULL;
+}
+
+
 /*! Checks for progress with the saving of weights*/
 void NemoWidget::checkSaveWeightsProgress(){
 	//Check for errors during loading
 	if(nemoWrapper->isError()){
-		saveWeightsTimer->stop();
+		heavyTaskTimer->stop();
 		progressDialog->setValue(progressDialog->maximum());
 		delete progressDialog;
 		progressDialog = NULL;
@@ -242,7 +283,7 @@ void NemoWidget::checkSaveWeightsProgress(){
 
 	//Check for cancelation - stop timer and abort operation
 	else if(progressDialog->wasCanceled()){
-		saveWeightsTimer->stop();
+		heavyTaskTimer->stop();
 		nemoWrapper->cancelSaveWeights();
 		delete progressDialog;
 		progressDialog = NULL;
@@ -259,7 +300,7 @@ void NemoWidget::checkSaveWeightsProgress(){
 	}
 
 	//If we have reached this point, loading is complete
-	saveWeightsTimer->stop();
+	heavyTaskTimer->stop();
 	progressDialog->setValue(progressDialog->maximum());
 	delete progressDialog;
 	progressDialog = NULL;
@@ -364,6 +405,36 @@ void NemoWidget::networkChanged(){
 }
 
 
+/*! Instructs NeMo wrapper to reset weights to
+	stored values at the next time step */
+void NemoWidget::resetWeights(){
+	//Check user wants to save weights.
+	int response = QMessageBox::warning(this, "Reset Weights?", "Are you sure that you want to reset the weights.\nThis will overwrite the trained weights and cannot be undone.", QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel);
+	if(response != QMessageBox::Ok)
+		return;
+
+	try{
+
+		//Start resetting of weights
+		updatingProgress = false;
+		taskCancelled = false;
+		progressDialog = new QProgressDialog("Resetting weights", "Cancel", 0, 100, this);
+		progressDialog->setWindowModality(Qt::WindowModal);
+		progressDialog->setMinimumDuration(1000);
+
+		//Instruct wrapper thread to start saving weights
+		nemoWrapper->resetWeights();
+
+		//Wait for loading to finish and update progress dialog
+		heavyTaskTimer  = new QTimer(this);
+		connect(heavyTaskTimer, SIGNAL(timeout()), this, SLOT(checkResetWeightsProgress()));
+		heavyTaskTimer->start(200);
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<ex.getMessage();
+	}
+}
+
 /*! Instructs NeMo wrapper to save weights to
 	weight field in database at the next time step */
 void NemoWidget::saveWeights(){
@@ -390,9 +461,9 @@ void NemoWidget::saveWeights(){
 		nemoWrapper->saveWeights();
 
 		//Wait for loading to finish and update progress dialog
-		saveWeightsTimer  = new QTimer(this);
-		connect(saveWeightsTimer, SIGNAL(timeout()), this, SLOT(checkSaveWeightsProgress()));
-		saveWeightsTimer->start(200);
+		heavyTaskTimer  = new QTimer(this);
+		connect(heavyTaskTimer, SIGNAL(timeout()), this, SLOT(checkSaveWeightsProgress()));
+		heavyTaskTimer->start(200);
 	}
 	catch(SpikeStreamException& ex){
 		qCritical()<<ex.getMessage();

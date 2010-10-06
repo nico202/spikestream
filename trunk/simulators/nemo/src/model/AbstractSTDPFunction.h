@@ -24,6 +24,7 @@ namespace spikestream {
 			virtual int getPostLength() = 0;
 			virtual float getMinWeight() = 0;
 			virtual float getMaxWeight() = 0;
+			virtual float getReward();
 
 		protected:
 			//======================  VARIABLES  ========================
