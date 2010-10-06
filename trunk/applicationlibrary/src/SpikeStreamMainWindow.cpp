@@ -79,6 +79,54 @@ SpikeStreamMainWindow::~SpikeStreamMainWindow(){
 
 
 /*----------------------------------------------------------*/
+/*-----                PROTECTED METHODS               -----*/
+/*----------------------------------------------------------*/
+
+/*! Overridden close to check that network is saved and simulation or analysis is not running. */
+void SpikeStreamMainWindow::closeEvent (QCloseEvent* event){
+	if(databaseManager->isRunning()){
+		qWarning()<<"Database manager is still running, it is recommended that you wait for it to complete";
+		event->ignore();
+		return;
+	}
+
+	//Nothing will be running or unsaved if no network is loaded
+	if(!Globals::networkLoaded()) {
+		event->accept();
+		return;
+	}
+
+	//Check for simulation loaded
+	if(Globals::isSimulationLoaded()){
+		qWarning()<<"SpikeStream should not be quit with a simulation loaded.\nUnload the simulation and try again.";
+		event->ignore();
+		return;
+	}
+
+	//Check for analysis running
+	if(Globals::isAnalysisRunning()){
+		int response = QMessageBox::warning(this, "Quit SpikeStream?", "Analysis is running.\nAre you sure that you want to quit SpikeStream?", QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel);
+		if(response != QMessageBox::Ok){
+			event->ignore();
+			return;
+		}
+	}
+
+	//Check for network save
+	if(!Globals::getNetwork()->isSaved()){
+		int response = QMessageBox::warning(this, "Quit SpikeStream?", "Network has not been saved.\nAre you sure that you want to quit SpikeStream?", QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel);
+		if(response != QMessageBox::Ok){
+			event->ignore();
+			return;
+		}
+	}
+
+	//Accept event if checks have been passed.
+	event->accept();
+}
+
+
+/*----------------------------------------------------------*/
 /*-----                PRIVATE SLOTS                   -----*/
 /*----------------------------------------------------------*/
 
@@ -157,20 +205,6 @@ void SpikeStreamMainWindow::clearDatabases(){
 	databaseManager->prepareClearDatabases();
 	databaseManager->start();
 	progressDialog->show();
-}
-
-
-/*! Called when window is closed.
-	This is needed to invoke destructor of neuronapplication
-	Could run a check on whether the user really wants to quit.
-	However, this is not needed at present since everthing is stored in the database. */
-void SpikeStreamMainWindow::closeEvent( QCloseEvent* ce ){
-	if(databaseManager->isRunning()){
-		qCritical()<<"Database manager is still running, it is recommended that you wait for it to complete";
-		return;
-	}
-
-	ce->accept();
 }
 
 

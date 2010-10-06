@@ -1,9 +1,9 @@
 //SpikeStream includes
-#include "Random1Widget.h"
+#include "Topographic1Widget.h"
 #include "Globals.h"
 #include "ConnectionGroup.h"
 #include "ConnectionGroupInfo.h"
-#include "Random1BuilderThread.h"
+#include "Topographic1BuilderThread.h"
 #include "SpikeStreamException.h"
 #include "Util.h"
 using namespace spikestream;
@@ -22,7 +22,7 @@ using namespace spikestream;
 extern "C" {
 	/*! Creates a Random1Widget class when library is dynamically loaded. */
 	QWidget* getClass(){
-		return new Random1Widget();
+		return new Topographic1Widget();
 	}
 
 	/*! Returns a descriptive name for this widget */
@@ -33,7 +33,7 @@ extern "C" {
 
 
 /*! Constructor */
-Random1Widget::Random1Widget(QWidget* parent) : AbstractConnectionWidget(parent) {
+Topographic1Widget::Topographic1Widget(QWidget* parent) : AbstractConnectionWidget(parent) {
 	//Construct GUI
 	QVBoxLayout* mainVBox = new QVBoxLayout();
 	buildGUI(mainVBox);
@@ -48,14 +48,14 @@ Random1Widget::Random1Widget(QWidget* parent) : AbstractConnectionWidget(parent)
 	mainVBox->addLayout(addButtonBox);
 
 	//Create connection builder
-	connectionBuilder = new Random1BuilderThread();
+	connectionBuilder = new Topographic1BuilderThread();
 	connect (connectionBuilder, SIGNAL(finished()), this, SLOT(builderThreadFinished()));
 	connect(connectionBuilder, SIGNAL( progress(int, int, QString) ), this, SLOT( updateProgress(int, int, QString) ), Qt::QueuedConnection);
 }
 
 
 /*! Destructor */
-Random1Widget::~Random1Widget(){
+Topographic1Widget::~Topographic1Widget(){
 }
 
 
@@ -64,7 +64,7 @@ Random1Widget::~Random1Widget(){
 /*----------------------------------------------------------*/
 
 //Overridden
-bool Random1Widget::checkInputs(){
+bool Topographic1Widget::checkInputs(){
 	//Fix description
 	if(descriptionEdit->text().isEmpty())
 		descriptionEdit->setText("Undescribed");
@@ -93,7 +93,7 @@ bool Random1Widget::checkInputs(){
 
 
 //Override
-ConnectionGroupInfo Random1Widget::getConnectionGroupInfo(){
+ConnectionGroupInfo Topographic1Widget::getConnectionGroupInfo(){
 	//Extract variables
 	unsigned int fromNeurGrpID = getNeuronGroupID(fromCombo->currentText());
 	unsigned int toNeurGrpID = getNeuronGroupID(toCombo->currentText());
@@ -121,7 +121,7 @@ ConnectionGroupInfo Random1Widget::getConnectionGroupInfo(){
 /*----------------------------------------------------------*/
 
 /*! Builds the graphical components */
-void Random1Widget::buildGUI(QVBoxLayout* mainVBox){
+void Topographic1Widget::buildGUI(QVBoxLayout* mainVBox){
 	QGroupBox* mainGroupBox = new QGroupBox("Random1 Connection Group Builder", this);
 
 	//Validators for double and integer parameters

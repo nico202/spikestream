@@ -1,5 +1,5 @@
 #ifndef RANDOM1BUILDERTHREAD_H
-#define RANDOM1BUILDERTHREAD_H
+#define TOPOGRAPHIC1BUILDERTHREAD_H
 
 //SpikeStream includes
 #include "ArchiveDao.h"
@@ -11,13 +11,14 @@
 
 namespace spikestream {
 
-	/*! Adds a connection group to the current network, which automatically adds it to the database */
-	class Random1BuilderThread : public AbstractConnectionBuilder {
+	/*! Adds a connection group with topographic connections to the current network,
+		which automatically adds it to the database if this is appropriate. */
+	class Topographic1BuilderThread : public AbstractConnectionBuilder {
 		Q_OBJECT
 
 		public:
-			Random1BuilderThread();
-			~Random1BuilderThread();
+			Topographic1BuilderThread();
+			~Topographic1BuilderThread();
 
 		protected:
 			void buildConnectionGroup();
@@ -31,4 +32,4 @@ namespace spikestream {
 	};
 }
 
-#endif//RANDOM1BUILDERTHREAD_H
+#endif//TOPOGRAPHIC1BUILDERTHREAD_H

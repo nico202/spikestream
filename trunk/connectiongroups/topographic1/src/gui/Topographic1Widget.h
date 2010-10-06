@@ -1,5 +1,5 @@
-#ifndef RANDOM1WIDGET_H
-#define RANDOM1WIDGET_H
+#ifndef TOPOGRAPHIC1WIDGET_H
+#define TOPOGRAPHIC1WIDGET_H
 
 //SpikeStream includes
 #include "AbstractConnectionWidget.h"
@@ -12,13 +12,13 @@
 
 namespace spikestream {
 
-	/*! Gathers information for creating a random connection pattern between two neuron groups. */
-	class Random1Widget : public AbstractConnectionWidget {
+	/*! Gathers information for creating a topographic connection pattern between two neuron groups. */
+	class Topographic1Widget : public AbstractConnectionWidget {
 		Q_OBJECT
 
 		public:
-			Random1Widget(QWidget* parent = 0);
-			~Random1Widget();
+			Topographic1Widget(QWidget* parent = 0);
+			~Topographic1Widget();
 
 		protected:
 			bool checkInputs();
@@ -62,6 +62,7 @@ namespace spikestream {
 			/*! To enter the type of synapse */
 			QComboBox* synapseTypeCombo;
 
+
 			//=====================  METHODS  ======================
 			void buildGUI(QVBoxLayout* mainVBox);
 
@@ -69,4 +70,4 @@ namespace spikestream {
 
 }
 
-#endif//RANDOM1WIDGET_H
+#endif//TOPOGRAPHIC1WIDGET_H

@@ -12,6 +12,8 @@
 
 namespace spikestream {
 
+	/*! Abstract class with functionality common to all classes that build
+		connections in a separate thread and potentially add them to the database. */
 	class AbstractConnectionBuilder : public SpikeStreamThread {
 		Q_OBJECT
 
