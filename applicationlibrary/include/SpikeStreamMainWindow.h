@@ -23,11 +23,12 @@ namespace spikestream {
 			SpikeStreamMainWindow();
 			~SpikeStreamMainWindow();
 
+		protected:
+			void closeEvent (QCloseEvent* event);
 
 		private slots:
 			void about();
 			void clearDatabases();
-			void closeEvent( QCloseEvent* );
 			void importConnectionMatrix();
 			void importNRMNetwork();
 			void loadDatabases();

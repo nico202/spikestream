@@ -216,13 +216,15 @@ HEADERS += include/NetworksWidget.h \
 			include/NeuronGroupWidget.h \
 			include/ConnectionWidget.h \
 			include/NetworkViewerProperties.h \
-			include/SimulationLoaderWidget.h
+			include/SimulationLoaderWidget.h \
+			include/AbstractConnectionWidget.h
 SOURCES += src/widgets/NetworksWidget.cpp \
 			src/widgets/ArchiveWidget.cpp \
 			src/widgets/NeuronGroupWidget.cpp \
 			src/widgets/ConnectionWidget.cpp \
 			src/widgets/NetworkViewerProperties.cpp \
-			src/widgets/SimulationLoaderWidget.cpp
+			src/widgets/SimulationLoaderWidget.cpp \
+			src/widgets/AbstractConnectionWidget.cpp
 
 
 #----------------------------------------------#
