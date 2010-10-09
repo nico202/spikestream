@@ -24,47 +24,82 @@ namespace spikestream {
 			bool checkInputs();
 			ConnectionGroupInfo getConnectionGroupInfo();
 
+		private slots:
+			void delayTypeChanged(int indx);
+
 		private:
 			//=====================  VARIABLES  =====================
 			/*! To enter a description of the neuron group */
 			QLineEdit* descriptionEdit;
 
-			/*! Combo to select neuron group that connection is from */
-			QComboBox* fromCombo;
+			/*! Combo to select FROM neuron group */
+			QComboBox* fromNeuronGrpCombo;
 
-			/*! Combo to select neuron group that connection is to */
-			QComboBox* toCombo;
+			/*! Combo to select TO neuron group  */
+			QComboBox* toNeuronGrpCombo;
 
-			/*! The min value of weight range 1 */
-			QLineEdit* minWeightRange1Edit;
+			/*! Width of each projection on the X axis */
+			QLineEdit* projectionWidthEdit;
 
-			/*! The max value of weight range 1 */
-			QLineEdit* maxWeightRange1Edit;
+			/*! Width of each projection on the Y axis */
+			QLineEdit* projectionLengthEdit;
 
-			/*! The proportion of weights falling within weight range 1 */
-			QLineEdit* weightRange1PercentEdit;
+			/*! Width of each projection on the Z axis */
+			QLineEdit* projectionHeightEdit;
 
-			/*! The min value of weight range 1 */
-			QLineEdit* minWeightRange2Edit;
+			/*! Overlap on X axis */
+			QLineEdit* overlapWidthEdit;
 
-			/*! The max value of weight range 1 */
-			QLineEdit* maxWeightRange2Edit;
+			/*! Overlap on Y axis */
+			QLineEdit* overlapLengthEdit;
 
-			/*! The min value of delay */
+			/*! Overlap on Z axis */
+			QLineEdit* overlapHeightEdit;
+
+			/*! Position of projections relative to destination layer */
+			QComboBox* positionCombo;
+
+			/*! Direction of the connection */
+			QComboBox* forRevCombo;
+
+			/*! Connection pattern - Gaussian, uniform sphere, uniform cube. */
+			QComboBox* connectionPatternCombo;
+
+			/*! Probability that connection is created */
+			QLineEdit* densityEdit;
+
+			/*! Minimum weight */
+			QLineEdit* minWeightEdit;
+
+			/*! Maximum weight */
+			QLineEdit* maxWeightEdit;
+
+			/*! Controls whether delay matches distances or falls within a range.*/
+			QComboBox* delayTypeCombo;\
+
+			/*! When delay matches distance, this is the factor by which the delay is multiplied. */
+			QLineEdit* delayDistanceFactorEdit;
+
+			/*! When the delay is in a range, this is the minimum of the range */
 			QLineEdit* minDelayEdit;
 
-			/*! The max value of delay */
+			/*! When the delay is in a range, this is the maximum of the range. */
 			QLineEdit* maxDelayEdit;
 
-			/*! The probability of making a connection between two neurons */
-			QLineEdit* connectionProbabilityEdit;
-
-			/*! To enter the type of synapse */
+			/*! Type of synapse */
 			QComboBox* synapseTypeCombo;
 
+			/*! Vertical spacing between lines */
+			static const int vSpacing = 5;
+
+			/*! Main vertical box of widget */
+			QVBoxLayout* mainVBox;
 
 			//=====================  METHODS  ======================
+			void addInputWidget(QWidget* widget, QHBoxLayout* layout, QString label, bool lastWidget = false, bool addToVLayout = false);
 			void buildGUI(QVBoxLayout* mainVBox);
+			void fillConnectionPatternCombo();
+			void fillPositionCombo();
 
 	};
 

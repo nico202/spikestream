@@ -27,7 +27,7 @@ extern "C" {
 
 	/*! Returns a descriptive name for this widget */
 	QString getName(){
-		return QString("Random1 connection group builder");
+		return QString("Topographic1 connection group builder");
 	}
 }
 
@@ -35,7 +35,7 @@ extern "C" {
 /*! Constructor */
 Topographic1Widget::Topographic1Widget(QWidget* parent) : AbstractConnectionWidget(parent) {
 	//Construct GUI
-	QVBoxLayout* mainVBox = new QVBoxLayout();
+	mainVBox = new QVBoxLayout();
 	buildGUI(mainVBox);
 
 	//Add button
@@ -71,16 +71,27 @@ bool Topographic1Widget::checkInputs(){
 
 	//Check inputs are not empty
 	try{
-		checkInput(fromCombo, "From neuron group has not been set.");
-		checkInput(toCombo, "To neuron group has not been set.");
-		checkInput(minWeightRange1Edit, "Min weight range 1 has not been set.");
-		checkInput(maxWeightRange1Edit, "Max weight range 1 has not been set.");
-		checkInput(weightRange1PercentEdit, "Max weight range 2 has not been set.");
-		checkInput(minWeightRange2Edit, "Min weight range 2 has not been set.");
-		checkInput(maxWeightRange2Edit, "Max weight range 2 has not been set.");
-		checkInput(minDelayEdit, "Min delay has not been set.");
-		checkInput(maxDelayEdit, "Max delay has not been set.");
-		checkInput(connectionProbabilityEdit, "Density has not been set.");
+		checkInput(fromNeuronGrpCombo, "From neuron group has not been set.");
+		checkInput(toNeuronGrpCombo, "To neuron group has not been set.");
+		checkInput(projectionWidthEdit, "Projection width has not been set.");
+		checkInput(projectionLengthEdit, "Projection length has not been set.");
+		checkInput(projectionHeightEdit, "Projection height has not been set.");
+		checkInput(overlapWidthEdit, "Overlap width has not been set.");
+		checkInput(overlapLengthEdit, "Overlap length has not been set.");
+		checkInput(overlapHeightEdit, "Overlap height has not been set.");
+		checkInput(positionCombo, "Projection position has not been set");
+		checkInput(forRevCombo, "Forward or reverse direction has not been set");
+		checkInput(connectionPatternCombo, "Connection pattern has not been set");
+		checkInput(minWeightEdit, "Minimum weight has not been set.");
+		checkInput(maxWeightEdit, "Maximum weight has not been set.");
+		checkInput(delayTypeCombo, "Connection pattern has not been set");
+		if(delayTypeCombo->currentIndex() == 0)
+			checkInput(delayDistanceFactorEdit, "Delay distance factor has not been set.");
+		else{
+			checkInput(minDelayEdit, "Minimum delay has not been set.");
+			checkInput(maxDelayEdit, "Maximum delay has not been set.");
+		}
+		checkInput(densityEdit, "Density has not been set.");
 	}
 	catch(SpikeStreamException& ex){
 		QMessageBox::warning(this, "Random1 Connection Group Builder", ex.getMessage(), QMessageBox::Ok);
@@ -95,20 +106,28 @@ bool Topographic1Widget::checkInputs(){
 //Override
 ConnectionGroupInfo Topographic1Widget::getConnectionGroupInfo(){
 	//Extract variables
-	unsigned int fromNeurGrpID = getNeuronGroupID(fromCombo->currentText());
-	unsigned int toNeurGrpID = getNeuronGroupID(toCombo->currentText());
+	unsigned int fromNeurGrpID = getNeuronGroupID(fromNeuronGrpCombo->currentText());
+	unsigned int toNeurGrpID = getNeuronGroupID(toNeuronGrpCombo->currentText());
 	unsigned int synapseType = getSynapseTypeID(synapseTypeCombo->currentText());
 
 	//Store parameters in parameter map
 	QHash<QString, double> paramMap;
-	paramMap["min_weight_range_1"] = Util::getDouble(minWeightRange1Edit->text());
-	paramMap["max_weight_range_1"] = Util::getDouble(maxWeightRange1Edit->text());
-	paramMap["percent_weight_range_1"] = Util::getDouble(weightRange1PercentEdit->text());
-	paramMap["min_weight_range_2"] = Util::getDouble(minWeightRange2Edit->text());
-	paramMap["max_weight_range_2"] = Util::getDouble(maxWeightRange2Edit->text());
+	paramMap["projection_width"] = Util::getDouble(projectionWidthEdit->text());
+	paramMap["projection_length"] = Util::getDouble(projectionLengthEdit->text());
+	paramMap["projection_height"] = Util::getDouble(projectionHeightEdit->text());
+	paramMap["overlap_width"] = Util::getDouble(overlapWidthEdit->text());
+	paramMap["overlap_length"] = Util::getDouble(overlapLengthEdit->text());
+	paramMap["overlap_height"] = Util::getDouble(overlapHeightEdit->text());
+	paramMap["projection_position"] = positionCombo->currentIndex();
+	paramMap["forward_reverse"] = forRevCombo->currentIndex();
+	paramMap["connection_pattern"] = connectionPatternCombo->currentIndex();
+	paramMap["min_weight"] = Util::getDouble(minWeightEdit->text());
+	paramMap["max_weight"] = Util::getDouble(maxWeightEdit->text());
+	paramMap["delay_type"] = delayTypeCombo->currentIndex();
+	paramMap["delay_distance_factor"] = Util::getDouble(delayDistanceFactorEdit->text());
 	paramMap["min_delay"] = Util::getDouble(minDelayEdit->text());
 	paramMap["max_delay"] = Util::getDouble(maxDelayEdit->text());
-	paramMap["connection_probability"] = Util::getDouble(connectionProbabilityEdit->text());
+	paramMap["density"] = Util::getDouble(densityEdit->text());
 
 	//Use extracted praameters to construct connection group info
 	ConnectionGroupInfo info(0, descriptionEdit->text(), fromNeurGrpID, toNeurGrpID, paramMap, synapseType);
@@ -117,104 +136,161 @@ ConnectionGroupInfo Topographic1Widget::getConnectionGroupInfo(){
 
 
 /*----------------------------------------------------------*/
+/*-----                 PRIVATE SLOTS                  -----*/
+/*----------------------------------------------------------*/
+
+/*! Switches between delay based on distance and range of delays */
+void Topographic1Widget::delayTypeChanged(int indx){
+	if(indx == 0){
+		delayDistanceFactorEdit->setEnabled(true);
+		minDelayEdit->setEnabled(false);
+		maxDelayEdit->setEnabled(false);
+	}
+	else if(indx ==1){
+		delayDistanceFactorEdit->setEnabled(false);
+		minDelayEdit->setEnabled(true);
+		maxDelayEdit->setEnabled(true);
+	}
+	else
+		qCritical()<<"Delay type not recognized: "<<indx;
+}
+
+/*----------------------------------------------------------*/
 /*-----                PRIVATE METHODS                 -----*/
 /*----------------------------------------------------------*/
 
+/*! Adds a widget to the supplied layout with a label */
+void Topographic1Widget::addInputWidget(QWidget* widget, QHBoxLayout* layout, QString label, bool lastWidget, bool addToVLayout){
+	layout->addWidget(new QLabel(label));
+	layout->addWidget(widget);
+	if(lastWidget)
+		layout->addStretch(5);
+	if(addToVLayout){
+		mainVBox->addLayout(layout);
+		mainVBox->addSpacing(vSpacing);
+	}
+}
+
+
 /*! Builds the graphical components */
 void Topographic1Widget::buildGUI(QVBoxLayout* mainVBox){
-	QGroupBox* mainGroupBox = new QGroupBox("Random1 Connection Group Builder", this);
+	QGroupBox* mainGroupBox = new QGroupBox("Topographic1 Connection Group Builder", this);
 
 	//Validators for double and integer parameters
-	QDoubleValidator* doubleValidator = new QDoubleValidator(-1.0, 1000000.0, 2, this);
+	QDoubleValidator* doubleValidator = new QDoubleValidator(-1000000.0, 1000000.0, 2, this);
+	QDoubleValidator* double01Validator = new QDoubleValidator(0.0, 1.0, 2, this);
+	QDoubleValidator* posDoubleValidator = new QDoubleValidator(0.0, 1000000.0, 2, this);
 	QDoubleValidator* weightValidator = new QDoubleValidator(-1.0, 1.0, 3, this);
 	QIntValidator* delayValidator = new QIntValidator(0, 10000, this);
-	QIntValidator* percentValidator = new QIntValidator(0, 100, this);
 
 	//Add description widget
-	descriptionEdit = new QLineEdit("Undescribed");
 	QHBoxLayout* descLayout = new QHBoxLayout();
-	descLayout->addWidget(new QLabel("Description: "));
-	descLayout->addWidget(descriptionEdit);
-	mainVBox->addLayout(descLayout);
-	mainVBox->addSpacing(10);
+	addInputWidget((QWidget*)(descriptionEdit = new QLineEdit("Undescribed")), descLayout, "Description: ", true, true);
 
 	//Add from and to combos
-	fromCombo = new QComboBox();
-	addNeuronGroups(fromCombo);
-	toCombo = new QComboBox();
-	addNeuronGroups(toCombo);
 	QHBoxLayout* fromToLayout = new QHBoxLayout();
-	fromToLayout->addWidget(new QLabel("From: "));
-	fromToLayout->addWidget(fromCombo);
-	fromToLayout->addWidget(new QLabel(" To: "));
-	fromToLayout->addWidget(toCombo);
-	fromToLayout->addStretch(10);
-	mainVBox->addLayout(fromToLayout);
-	mainVBox->addSpacing(10);
+	fromNeuronGrpCombo = new QComboBox();
+	addNeuronGroups(fromNeuronGrpCombo);
+	toNeuronGrpCombo = new QComboBox();
+	addNeuronGroups(toNeuronGrpCombo);
+	addInputWidget(fromNeuronGrpCombo, fromToLayout, "From: ");
+	addInputWidget(toNeuronGrpCombo, fromToLayout, "To: ", true, true);
 
-	//Weight range 1
-	minWeightRange1Edit = new QLineEdit("-1.0");
-	minWeightRange1Edit->setValidator(weightValidator);
-	maxWeightRange1Edit = new QLineEdit("0.0");
-	maxWeightRange1Edit->setValidator(weightValidator);
-	weightRange1PercentEdit = new QLineEdit("20");
-	weightRange1PercentEdit->setValidator(percentValidator);
-	QHBoxLayout* weightRange1Box = new QHBoxLayout();
-	weightRange1Box->addWidget(new QLabel("Weight range 1 from: "));
-	weightRange1Box->addWidget(minWeightRange1Edit);
-	weightRange1Box->addWidget(new QLabel(" to: "));
-	weightRange1Box->addWidget(maxWeightRange1Edit);
-	weightRange1Box->addWidget(new QLabel(" Proportion weight range 1: "));
-	weightRange1Box->addWidget(weightRange1PercentEdit);
-	weightRange1Box->addWidget(new QLabel(" %"));
-	weightRange1Box->addStretch(10);
-	mainVBox->addLayout(weightRange1Box);
-	mainVBox->addSpacing(10);
+	//Projection settings
+	QHBoxLayout* projLayout1 = new QHBoxLayout();
+	projectionWidthEdit = new QLineEdit("2.0");
+	projectionWidthEdit->setValidator(posDoubleValidator);
+	addInputWidget(projectionWidthEdit, projLayout1, "Projection width:");
+	projectionLengthEdit = new QLineEdit("2.0");
+	projectionLengthEdit->setValidator(posDoubleValidator);
+	addInputWidget(projectionLengthEdit, projLayout1, "Projection length:");
+	projectionHeightEdit = new QLineEdit("2.0");
+	projectionHeightEdit->setValidator(posDoubleValidator);
+	addInputWidget(projectionHeightEdit, projLayout1, "Projection height:", true, true);
 
-	//Weight range 2
-	minWeightRange2Edit = new QLineEdit("0");
-	minWeightRange2Edit->setValidator(weightValidator);
-	maxWeightRange2Edit = new QLineEdit("1.0");
-	maxWeightRange2Edit->setValidator(weightValidator);
-	QHBoxLayout* weightRange2Box = new QHBoxLayout();
-	weightRange2Box->addWidget(new QLabel("Weight range 2 from: "));
-	weightRange2Box->addWidget(minWeightRange2Edit);
-	weightRange2Box->addWidget(new QLabel(" to: "));
-	weightRange2Box->addWidget(maxWeightRange2Edit);
-	weightRange2Box->addStretch(10);
-	mainVBox->addLayout(weightRange2Box);
-	mainVBox->addSpacing(10);
+	//Overlap
+	QHBoxLayout* overlapLayout = new QHBoxLayout();
+	overlapWidthEdit = new QLineEdit("0.0");
+	overlapWidthEdit->setValidator(doubleValidator);
+	addInputWidget(overlapWidthEdit, overlapLayout, "Overlap width:");
+	overlapLengthEdit = new QLineEdit("0.0");
+	overlapLengthEdit->setValidator(doubleValidator);
+	addInputWidget(overlapLengthEdit, overlapLayout, "Overlap length:");
+	overlapHeightEdit = new QLineEdit("0.0");
+	overlapHeightEdit->setValidator(doubleValidator);
+	addInputWidget(overlapHeightEdit, overlapLayout, "Overlap height:", true, true);
+
+	//Other stuff
+	QHBoxLayout* projLayout2 = new QHBoxLayout();
+	positionCombo = new QComboBox();
+	fillPositionCombo();
+	addInputWidget(positionCombo, projLayout2, "Position:");
+	forRevCombo = new QComboBox();
+	forRevCombo->addItem("Forward");
+	forRevCombo->addItem("Reverse");
+	addInputWidget(forRevCombo, projLayout2, "Direction:");
+	connectionPatternCombo = new QComboBox();
+	fillConnectionPatternCombo();
+	addInputWidget(connectionPatternCombo, projLayout2, "Pattern");
+	densityEdit = new QLineEdit("1.0");
+	densityEdit->setValidator(double01Validator);
+	addInputWidget(densityEdit, projLayout2, "Density:", true, true);
+
+	//Weight
+	QHBoxLayout* weiLayout = new QHBoxLayout();
+	minWeightEdit = new QLineEdit("0.0");
+	minWeightEdit->setValidator(weightValidator);
+	addInputWidget(minWeightEdit, weiLayout, "Minimum weight:");
+	maxWeightEdit = new QLineEdit("0.0");
+	maxWeightEdit->setValidator(weightValidator);
+	addInputWidget(maxWeightEdit, weiLayout, "Maximum weight:", true, true);
 
 	//Delay
+	QHBoxLayout* delayLayout = new QHBoxLayout();
+	delayTypeCombo = new QComboBox();
+	delayTypeCombo->addItem("Distance");
+	delayTypeCombo->addItem("Range");
+	connect(delayTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(delayTypeChanged(int)));
+	addInputWidget(delayTypeCombo, delayLayout, "Delay type:");
+	delayDistanceFactorEdit = new QLineEdit("1.0");
+	delayDistanceFactorEdit->setValidator(posDoubleValidator);
+	addInputWidget(delayDistanceFactorEdit, delayLayout, "Delay distance factor:");
 	minDelayEdit = new QLineEdit("1");
+	minDelayEdit->setEnabled(false);
 	minDelayEdit->setValidator(delayValidator);
+	addInputWidget(minDelayEdit, delayLayout, "Min delay:");
 	maxDelayEdit = new QLineEdit("1");
+	maxDelayEdit->setEnabled(false);
 	maxDelayEdit->setValidator(delayValidator);
-	QHBoxLayout* delayBox = new QHBoxLayout();
-	delayBox->addWidget(new QLabel("Delay (ms) from: "));
-	delayBox->addWidget(minDelayEdit);
-	delayBox->addWidget(new QLabel(" to: "));
-	delayBox->addWidget(maxDelayEdit);
-	delayBox->addStretch(10);
-	mainVBox->addLayout(delayBox);
-	mainVBox->addSpacing(10);
+	addInputWidget(maxDelayEdit, delayLayout, "Max delay:", true, true);
 
 	//Add connection probability and synapse type
-	connectionProbabilityEdit = new QLineEdit("1.0");
-	connectionProbabilityEdit->setMaximumSize(100, 30);
-	connectionProbabilityEdit->setValidator(doubleValidator);
+	QHBoxLayout* miscLayout = new QHBoxLayout();
 	synapseTypeCombo = new QComboBox();
 	addSynapseTypes(synapseTypeCombo);
-	QHBoxLayout* miscLayout = new QHBoxLayout();
-	miscLayout->addWidget(new QLabel(" Connection probability (0-1): "));
-	miscLayout->addWidget(connectionProbabilityEdit);
-	miscLayout->addWidget(new QLabel(" Synapse type: "));
-	miscLayout->addWidget(synapseTypeCombo);
-	miscLayout->addStretch(5);
-	mainVBox->addLayout(miscLayout);
-	mainVBox->addSpacing(10);
+	addInputWidget(synapseTypeCombo, miscLayout, "Synapse type:", true, true);
 
 	mainGroupBox->setLayout(mainVBox);
-	this->setMinimumSize(800, 300);
+	this->setMinimumSize(800, 400);
 }
+
+
+/*! Fills connection pattern combo with available connection patterns. */
+void Topographic1Widget::fillConnectionPatternCombo(){
+	connectionPatternCombo->addItem("Gaussian");
+	connectionPatternCombo->addItem("Uniform sphere");
+	connectionPatternCombo->addItem("Uniform cube");
+}
+
+
+/*! Fills the position combo with top left etc. */
+void Topographic1Widget::fillPositionCombo(){
+	positionCombo->addItem("Centre");
+	positionCombo->addItem("Top left");
+	positionCombo->addItem("Top right");
+	positionCombo->addItem("Bottom left");
+	positionCombo->addItem("Bottom right");
+}
+
+
 
