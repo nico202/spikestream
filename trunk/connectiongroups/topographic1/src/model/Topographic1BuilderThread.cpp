@@ -70,15 +70,24 @@ void Topographic1BuilderThread::buildConnectionGroup(){
 
 /*! Extracts parameters from neuron group info and checks that they are in range. */
 void Topographic1BuilderThread::checkParameters(){
-	double minWeightRange1 = getParameter("min_weight_range_1");
-	double maxWeightRange1 = getParameter("max_weight_range_1");
-	int percentWeightRange1 = (int)getParameter("percent_weight_range_1");
-	double minWeightRange2 = getParameter("min_weight_range_2");
-	double maxWeightRange2 = getParameter("max_weight_range_2");
-	unsigned int minDelay = (unsigned int)getParameter("min_delay");
-	unsigned int maxDelay = (unsigned int)getParameter("max_delay");
-	double connectionProbability = getParameter("connection_probability");
+	double projectionWidth = getParameter(paramMap["projection_width"]);
+	double projectionLength = getParameter(paramMap["projection_length"]);
+	double projectionHeight = getParameter(paramMap["projection_height"]);
+	double overlapWidth = getParameter(paramMap["overlap_width"]);
+	double overlapLength = getParameter(paramMap["overlap_length"]);
+	double overlapHeight = getParameter(paramMap["overlap_height"]);
+	int projectionPosition = (int)getParameter(paramMap["projection_position"]);
+	bool forward = (bool)getParameter(paramMap["forward_reverse"]);
+	int connectionPattern = getParameter(paramMap["connection_pattern"]);
+	double minWeight = getParameter(paramMap["min_weight"]);
+	double maxWeight = getParameter(paramMap["max_weight"]);
+	int delayType = getParameter(paramMap["delay_type"]);
+	double delayDistanceFactor = getParameter(paramMap["delay_distance_factor"]);
+	int minDelay = (int)getParameter(paramMap["min_delay"]);
+	int maxDelay = (int)getParameter(paramMap["max_delay"]);
+	double density = getParameter(paramMap["density"]);
 
+	FIXME: HERE
 	if(minWeightRange1 > maxWeightRange1)
 		throw SpikeStreamException("Min weight 1 range cannot be greater than max weight 1 range.");
 	if(minWeightRange2 > maxWeightRange2)
