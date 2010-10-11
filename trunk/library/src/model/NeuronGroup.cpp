@@ -2,6 +2,7 @@
 #include "GlobalVariables.h"
 #include "NeuronGroup.h"
 #include "SpikeStreamException.h"
+#include "Util.h"
 using namespace spikestream;
 
 //Qt includes
@@ -132,6 +133,33 @@ Box NeuronGroup::getBoundingBox(){
 /*! Returns the ID of the neuron group */
 unsigned NeuronGroup::getID(){
 	return info.getID();
+}
+
+
+/*! Returns the nearest neuron to the specified point.
+	When more than one neurons are found, only the first is returned.
+	FIXME: CURRENTLY A COMPLETE SEARCH - OPTIMIZE! */
+Neuron* NeuronGroup::getNearestNeuron(const Point3D& point){
+	double minDist = 0, tmpDist;
+	bool firstTime;
+	Neuron* closestNeuron, *tmpNeuron;
+	NeuronMap::iterator mapEnd = neuronMap->end();//Saves accessing this function multiple times
+	for(NeuronMap::iterator iter=neuronMap->begin(); iter != mapEnd; ++iter){
+		tmpNeuron = iter.value();
+		if(firstTime){
+			minDist = tmpNeuron.getLocation().distance(point);
+			closestNeuron = tmpNeuron;
+			firstTime = false;
+		}
+		else{
+			tmpDist = tmpNeuron.getLocation().distance(point);
+			if(tmpDist < minDist){
+				minDist = tmpDist;
+				closestNeuron = tmpNeuron;
+			}
+		}
+	}
+	return closestNeuron;
 }
 
 

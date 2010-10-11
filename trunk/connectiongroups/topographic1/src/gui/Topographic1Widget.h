@@ -96,7 +96,7 @@ namespace spikestream {
 			QVBoxLayout* mainVBox;
 
 			//=====================  METHODS  ======================
-			void addInputWidget(QWidget* widget, QHBoxLayout* layout, QString label, bool lastWidget = false, bool addToVLayout = false);
+			void addInputWidget(QWidget* widget, QHBoxLayout* layout, QString label, bool limitWidth = false, bool lastWidget = false);
 			void buildGUI(QVBoxLayout* mainVBox);
 			void fillConnectionPatternCombo();
 			void fillPositionCombo();

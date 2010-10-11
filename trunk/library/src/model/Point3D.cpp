@@ -39,7 +39,7 @@ Point3D::~Point3D(){
 /*! Assignment operator */
 Point3D& Point3D::operator =(const Point3D& point){
     if(&point == this)
-	return *this;
+		return *this;
 
     this->xPos = point.xPos;
     this->yPos = point.yPos;
@@ -51,7 +51,7 @@ Point3D& Point3D::operator =(const Point3D& point){
 /*! Comparison equality operator */
 bool Point3D::operator ==(const Point3D& point){
     if(this->xPos == point.xPos && this->yPos == point.yPos && this->zPos == point.zPos)
-	return true;
+		return true;
     return false;
 }
 
@@ -59,11 +59,21 @@ bool Point3D::operator ==(const Point3D& point){
 /*! Comparison non equality operator */
 bool Point3D::operator !=(const Point3D& point){
     if(this->xPos == point.xPos && this->yPos == point.yPos && this->zPos == point.zPos)
-	return false;
+		return false;
     return true;
 }
 
 
+/*! Returns the distance between this point and the specified point. */
+float Point3D::distance(const Point3D& point){
+	float result = (xPos + point.xPos) * (xPos + point.xPos);
+	result += (yPos + point.yPos) * (yPos + point.yPos);
+	result += (zPos + point.zPos) * (zPos + point.zPos);
+	return sqrt(result);
+}
+
+
+/*! Returns a string representation of the point. */
 QString Point3D::toString() const{
     QString tmpStr = "(";
     tmpStr += QString::number(xPos) + ", ";

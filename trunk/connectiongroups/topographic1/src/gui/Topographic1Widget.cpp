@@ -160,12 +160,13 @@ void Topographic1Widget::delayTypeChanged(int indx){
 /*----------------------------------------------------------*/
 
 /*! Adds a widget to the supplied layout with a label */
-void Topographic1Widget::addInputWidget(QWidget* widget, QHBoxLayout* layout, QString label, bool lastWidget, bool addToVLayout){
+void Topographic1Widget::addInputWidget(QWidget* widget, QHBoxLayout* layout, QString label, bool limitWidth, bool lastWidget){
+	if(limitWidth)
+		widget->setMaximumWidth(80);
 	layout->addWidget(new QLabel(label));
 	layout->addWidget(widget);
-	if(lastWidget)
+	if(lastWidget){
 		layout->addStretch(5);
-	if(addToVLayout){
 		mainVBox->addLayout(layout);
 		mainVBox->addSpacing(vSpacing);
 	}
@@ -177,9 +178,10 @@ void Topographic1Widget::buildGUI(QVBoxLayout* mainVBox){
 	QGroupBox* mainGroupBox = new QGroupBox("Topographic1 Connection Group Builder", this);
 
 	//Validators for double and integer parameters
-	QDoubleValidator* doubleValidator = new QDoubleValidator(-1000000.0, 1000000.0, 2, this);
-	QDoubleValidator* double01Validator = new QDoubleValidator(0.0, 1.0, 2, this);
 	QDoubleValidator* posDoubleValidator = new QDoubleValidator(0.0, 1000000.0, 2, this);
+	QDoubleValidator* double01Validator = new QDoubleValidator(0.0, 1.0, 2, this);
+	QDoubleValidator* projectionValidator = new QDoubleValidator(0.1, 1000000.0, 2, this);
+	QDoubleValidator* overlapValidator = new QDoubleValidator(0.0, 1000000.0, 2, this);
 	QDoubleValidator* weightValidator = new QDoubleValidator(-1.0, 1.0, 3, this);
 	QIntValidator* delayValidator = new QIntValidator(0, 10000, this);
 
@@ -194,30 +196,30 @@ void Topographic1Widget::buildGUI(QVBoxLayout* mainVBox){
 	toNeuronGrpCombo = new QComboBox();
 	addNeuronGroups(toNeuronGrpCombo);
 	addInputWidget(fromNeuronGrpCombo, fromToLayout, "From: ");
-	addInputWidget(toNeuronGrpCombo, fromToLayout, "To: ", true, true);
+	addInputWidget(toNeuronGrpCombo, fromToLayout, "To: ", false, true);
 
 	//Projection settings
 	QHBoxLayout* projLayout1 = new QHBoxLayout();
 	projectionWidthEdit = new QLineEdit("2.0");
-	projectionWidthEdit->setValidator(posDoubleValidator);
-	addInputWidget(projectionWidthEdit, projLayout1, "Projection width:");
+	projectionWidthEdit->setValidator(projectionValidator);
+	addInputWidget(projectionWidthEdit, projLayout1, "Projection width:", true);
 	projectionLengthEdit = new QLineEdit("2.0");
-	projectionLengthEdit->setValidator(posDoubleValidator);
-	addInputWidget(projectionLengthEdit, projLayout1, "Projection length:");
+	projectionLengthEdit->setValidator(projectionValidator);
+	addInputWidget(projectionLengthEdit, projLayout1, "Projection length:", true);
 	projectionHeightEdit = new QLineEdit("2.0");
-	projectionHeightEdit->setValidator(posDoubleValidator);
+	projectionHeightEdit->setValidator(projectionValidator);
 	addInputWidget(projectionHeightEdit, projLayout1, "Projection height:", true, true);
 
 	//Overlap
 	QHBoxLayout* overlapLayout = new QHBoxLayout();
 	overlapWidthEdit = new QLineEdit("0.0");
-	overlapWidthEdit->setValidator(doubleValidator);
-	addInputWidget(overlapWidthEdit, overlapLayout, "Overlap width:");
+	overlapWidthEdit->setValidator(overlapValidator);
+	addInputWidget(overlapWidthEdit, overlapLayout, "Overlap width:", true);
 	overlapLengthEdit = new QLineEdit("0.0");
-	overlapLengthEdit->setValidator(doubleValidator);
-	addInputWidget(overlapLengthEdit, overlapLayout, "Overlap length:");
+	overlapLengthEdit->setValidator(overlapValidator);
+	addInputWidget(overlapLengthEdit, overlapLayout, "Overlap length:", true);
 	overlapHeightEdit = new QLineEdit("0.0");
-	overlapHeightEdit->setValidator(doubleValidator);
+	overlapHeightEdit->setValidator(overlapValidator);
 	addInputWidget(overlapHeightEdit, overlapLayout, "Overlap height:", true, true);
 
 	//Other stuff
@@ -240,7 +242,7 @@ void Topographic1Widget::buildGUI(QVBoxLayout* mainVBox){
 	QHBoxLayout* weiLayout = new QHBoxLayout();
 	minWeightEdit = new QLineEdit("0.0");
 	minWeightEdit->setValidator(weightValidator);
-	addInputWidget(minWeightEdit, weiLayout, "Minimum weight:");
+	addInputWidget(minWeightEdit, weiLayout, "Minimum weight:", true);
 	maxWeightEdit = new QLineEdit("0.0");
 	maxWeightEdit->setValidator(weightValidator);
 	addInputWidget(maxWeightEdit, weiLayout, "Maximum weight:", true, true);
@@ -254,11 +256,11 @@ void Topographic1Widget::buildGUI(QVBoxLayout* mainVBox){
 	addInputWidget(delayTypeCombo, delayLayout, "Delay type:");
 	delayDistanceFactorEdit = new QLineEdit("1.0");
 	delayDistanceFactorEdit->setValidator(posDoubleValidator);
-	addInputWidget(delayDistanceFactorEdit, delayLayout, "Delay distance factor:");
+	addInputWidget(delayDistanceFactorEdit, delayLayout, "Delay distance factor:", true);
 	minDelayEdit = new QLineEdit("1");
 	minDelayEdit->setEnabled(false);
 	minDelayEdit->setValidator(delayValidator);
-	addInputWidget(minDelayEdit, delayLayout, "Min delay:");
+	addInputWidget(minDelayEdit, delayLayout, "Min delay:", true);
 	maxDelayEdit = new QLineEdit("1");
 	maxDelayEdit->setEnabled(false);
 	maxDelayEdit->setValidator(delayValidator);
@@ -268,7 +270,7 @@ void Topographic1Widget::buildGUI(QVBoxLayout* mainVBox){
 	QHBoxLayout* miscLayout = new QHBoxLayout();
 	synapseTypeCombo = new QComboBox();
 	addSynapseTypes(synapseTypeCombo);
-	addInputWidget(synapseTypeCombo, miscLayout, "Synapse type:", true, true);
+	addInputWidget(synapseTypeCombo, miscLayout, "Synapse type:", true);
 
 	mainGroupBox->setLayout(mainVBox);
 	this->setMinimumSize(800, 400);
@@ -277,7 +279,7 @@ void Topographic1Widget::buildGUI(QVBoxLayout* mainVBox){
 
 /*! Fills connection pattern combo with available connection patterns. */
 void Topographic1Widget::fillConnectionPatternCombo(){
-	connectionPatternCombo->addItem("Gaussian");
+	connectionPatternCombo->addItem("Gaussian sphere");
 	connectionPatternCombo->addItem("Uniform sphere");
 	connectionPatternCombo->addItem("Uniform cube");
 }

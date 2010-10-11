@@ -82,9 +82,8 @@ void AbstractConnectionBuilder::startBuildConnectionGroup(const ConnectionGroupI
 
 /*! Returns a parameter from the connection group info parameter map checking that it actually exists */
 double AbstractConnectionBuilder::getParameter(const QString& paramName){
-	QHash<QString, double> paramMap = connectionGroupInfo.getParameterMap();
-	if(!paramMap.contains(paramName))
-		throw SpikeStreamException("Parameter with " + paramName + " does not exist in parameter map.");
-	return paramMap[paramName];
+	if(!connectionGroupInfo.hasParameter(paramName))
+		throw SpikeStreamException("Parameter with " + paramName + " does not exist in connection group's parameter map.");
+	return connectionGroupInfo.getParameter(paramName);
 }
 

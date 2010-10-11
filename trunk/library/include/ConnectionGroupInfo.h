@@ -22,8 +22,10 @@ namespace spikestream {
 			unsigned int getFromNeuronGroupID() const { return fromNeuronGroupID; }
 			unsigned int getToNeuronGroupID() const { return toNeuronGroupID; }
 			unsigned int getSynapseTypeID() const { return synapseTypeID; }
+			double getParameter(const QString& parameterName);
 			QHash<QString, double> getParameterMap() { return parameterMap; }
 			QString getParameterXML();
+			bool hasParameter(const QString& parameterName);
 
 			void setFromNeuronGroupID(unsigned id) { this->fromNeuronGroupID = id; }
 			void setToNeuronGroupID(unsigned id) { this->toNeuronGroupID = id; }

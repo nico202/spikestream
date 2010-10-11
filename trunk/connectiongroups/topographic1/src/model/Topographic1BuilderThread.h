@@ -29,6 +29,30 @@ namespace spikestream {
 			/*! Total number of progress steps */
 			int numberOfProgressSteps;
 
+			double projWidth;
+			double projLength;
+			double projHeight;
+			double ovWidth;
+			double ovLength;
+			double ovHeight;
+			int projectionPosition;
+			bool forwardReverse;
+			int conPattern;
+			double minWeight;
+			double maxWeight;
+			int delayType;
+			double delayDistanceFactor;
+			unsigned minDelay;
+			unsigned maxDelay;
+			double density;
+
+			static const int GAUSSIAN_SPHERE = 0;
+			static const int UNIFORM_SPHERE = 1;
+			static const int UNIFORM_CUBE = 2;
+
+			//=======================  METHODS  ==========================
+			void addProjectiveConnections(Neuron* centreNeuron, NeuronGroup* toNeurGrp, Box& projBox);
+
 	};
 }
 
