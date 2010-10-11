@@ -29,6 +29,7 @@ namespace spikestream {
 			bool contains(unsigned int neurID, float x, float y, float z);
 			Box getBoundingBox();
 			unsigned int getID();
+			Neuron* getNearestNeuron(const Point3D& point);
 			unsigned int getNeuronAtLocation(const Point3D& location);
 			QHash<QString, double> getParameters() { return parameterMap; }
 			double getParameter(const QString& key);

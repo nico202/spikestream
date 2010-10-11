@@ -28,39 +28,52 @@ void Topographic1BuilderThread::buildConnectionGroup(){
 	NeuronGroup* toNeurGrp = Globals::getNetwork()->getNeuronGroup(connectionGroupInfo.getToNeuronGroupID());
 
 	//Extract parameters
-	double minWeightRange1 = getParameter("min_weight_range_1");
-	double maxWeightRange1 = getParameter("max_weight_range_1");
-	int percentWeightRange1 = (int)getParameter("percent_weight_range_1");
-	double minWeightRange2 = getParameter("min_weight_range_2");
-	double maxWeightRange2 = getParameter("max_weight_range_2");
-	unsigned int minDelay = (unsigned int)getParameter("min_delay");
-	unsigned int maxDelay = (unsigned int)getParameter("max_delay");
-	double connectionProbability = getParameter("connection_probability");
-
-	//Work through each pair of neurons
-	numberOfProgressSteps = fromNeurGrp->size() + 1;
-	int cntr = 0;
-	double weight = 0;
-	for(NeuronMap::iterator fromIter = fromNeurGrp->begin(); fromIter != fromNeurGrp->end(); ++fromIter){
-		for(NeuronMap::iterator toIter = toNeurGrp->begin(); toIter != toNeurGrp->end(); ++toIter){
-			//Decide if connection is made
-			double ranNum = (double)rand() / (double)RAND_MAX;
-			if(ranNum <= connectionProbability){
-				//Calculate weight of connection
-				if(rand() % 100 <= percentWeightRange1)
-					weight = Util::getRandomDouble(minWeightRange1, maxWeightRange1);
-				else
-					weight = Util::getRandomDouble(minWeightRange2, maxWeightRange2);
-
-				//Add the connection
-				newConnectionGroup->addConnection(fromIter.key(), toIter.key(), Util::getRandomUInt(minDelay, maxDelay), weight);
-			}
-		}
-
-		//Update progress
-		++cntr;
-		emit progress(cntr, numberOfProgressSteps, "Building connections...");
+	projWidth = getParameter("projection_width");
+	projLength = getParameter("projection_length");
+	projHeight = getParameter("projection_height");
+	ovWidth = getParameter("overlap_width");
+	ovLength = getParameter("overlap_length");
+	ovHeight = getParameter("overlap_height");
+	projectionPosition = (int)getParameter("projection_position");
+	forwardReverse = (bool)getParameter("forward_reverse");
+	conPattern = getParameter("connection_pattern");
+	minWeight = getParameter("min_weight");
+	maxWeight = getParameter("max_weight");
+	delayType = getParameter("delay_type");
+	delayDistanceFactor = 0;
+	minDelay = 0, maxDelay = 0;
+	if(delayType == 0){
+		delayDistanceFactor = getParameter("delay_distance_factor");
 	}
+	else{
+		minDelay = (unsigned)getParameter("min_delay");
+		maxDelay = (unsigned)getParameter("max_delay");
+	}
+	density = getParameter("density");
+
+//	numberOfProgressSteps = fromNeurGrp->size();
+
+	//Get the neuron in the FROM group that projects to the centre of the TO group
+	Neuron* centreNeuron = fromNeurGrp->getNearestNeuron(fromNeurGrp->getBoundingBox().centre());
+
+	//Get the centre of the TO neuron group
+	Point3D toCent = toNeurGrp->getBoundingBox().centre();
+	Box projBox(
+			toCent.getXPos() - projWidth/2.0f, toCent.getYPos() - projLength/2.0f, toCent.getZPos() - projHeight/2.0f,
+			toCent.getXPos() + projWidth/2.0f, toCent.getYPos() + projLength/2.0f, toCent.getZPos() + projHeight/2.0f
+	);
+
+	//Add connections to group
+	addProjectiveConnections(centreNeuron, toNeurGrp, projBox);
+
+
+	emit progress(1, 2, "Building connections...");
+
+
+
+	//		//Update progress
+	//		++cntr;
+	//		emit progress(cntr, numberOfProgressSteps, "Building connections...");
 }
 
 
@@ -68,36 +81,82 @@ void Topographic1BuilderThread::buildConnectionGroup(){
 /*-----                 PRIVATE METHODS                -----*/
 /*----------------------------------------------------------*/
 
+/*! Adds projective connections from the neuron to all neurons in the box
+	 using parameters supplied. */
+void Topographic1BuilderThread::addProjectiveConnections(Neuron* centreNeuron, NeuronGroup* toNeurGrp, Box& projBox){
+	QList<Neuron*> neurList = toNeurGrp->getNeurons(projBox);
+	for(int i=0; i<neurList.size(); ++i){
+		if(conPattern == GAUSSIAN_SPHERE){
+
+		}
+		else if(conPattern == UNIFORM_SPHERE){
+
+		}
+		else if(conPattern == UNIFORM_CUBE){
+			newConnectionGroup->addConnection( new Connection(centreNeuron->getID(), neurList.at(i), getDelay(), getWeight() ) );
+		}
+		else
+			throw SpikeStreamException("Connection pattern not recognized: " + conPattern);
+	}
+}
+
+
 /*! Extracts parameters from neuron group info and checks that they are in range. */
 void Topographic1BuilderThread::checkParameters(){
-	double projectionWidth = getParameter(paramMap["projection_width"]);
-	double projectionLength = getParameter(paramMap["projection_length"]);
-	double projectionHeight = getParameter(paramMap["projection_height"]);
-	double overlapWidth = getParameter(paramMap["overlap_width"]);
-	double overlapLength = getParameter(paramMap["overlap_length"]);
-	double overlapHeight = getParameter(paramMap["overlap_height"]);
-	int projectionPosition = (int)getParameter(paramMap["projection_position"]);
-	bool forward = (bool)getParameter(paramMap["forward_reverse"]);
-	int connectionPattern = getParameter(paramMap["connection_pattern"]);
-	double minWeight = getParameter(paramMap["min_weight"]);
-	double maxWeight = getParameter(paramMap["max_weight"]);
-	int delayType = getParameter(paramMap["delay_type"]);
-	double delayDistanceFactor = getParameter(paramMap["delay_distance_factor"]);
-	int minDelay = (int)getParameter(paramMap["min_delay"]);
-	int maxDelay = (int)getParameter(paramMap["max_delay"]);
-	double density = getParameter(paramMap["density"]);
+	double projectionWidth = getParameter("projection_width");
+	double projectionLength = getParameter("projection_length");
+	double projectionHeight = getParameter("projection_height");
+	double overlapWidth = getParameter("overlap_width");
+	double overlapLength = getParameter("overlap_length");
+	double overlapHeight = getParameter("overlap_height");
+	int projectionPosition = (int)getParameter("projection_position");
+	getParameter("forward_reverse");
+	int connectionPattern = getParameter("connection_pattern");
+	double minWeight = getParameter("min_weight");
+	double maxWeight = getParameter("max_weight");
+	int delayType = getParameter("delay_type");
+	double density = getParameter("density");
 
-	FIXME: HERE
-	if(minWeightRange1 > maxWeightRange1)
-		throw SpikeStreamException("Min weight 1 range cannot be greater than max weight 1 range.");
-	if(minWeightRange2 > maxWeightRange2)
-		throw SpikeStreamException("Min weight 2 range cannot be greater than max weight 2 range.");
-	if(percentWeightRange1 < 0 || percentWeightRange1 > 100)
-		throw SpikeStreamException("Percent weight range 1 is out of range: " + QString::number(percentWeightRange1));
-	if(minDelay > maxDelay)
-		throw SpikeStreamException("Min delay cannot be greater than max delay.");
-	if(connectionProbability < 0.0 || connectionProbability > 1.0)
-		throw SpikeStreamException("Connection probability is out of range: " + QString::number(connectionProbability));
+	if(projectionWidth <= 0.0)
+		throw SpikeStreamException("Projection width must be greater than 0: " + QString::number(projectionWidth));
+	if(projectionLength <= 0.0)
+		throw SpikeStreamException("Projection length must be greater than 0: " + QString::number(projectionLength));
+	if(projectionHeight <= 0.0)
+		throw SpikeStreamException("Projection height must be greater than 0: " + QString::number(projectionHeight));
+
+	if(overlapWidth < 0.0)
+		throw SpikeStreamException("Overlap width cannot be less than 0: " + QString::number(overlapWidth));
+	if(overlapLength < 0.0)
+		throw SpikeStreamException("Overlap length cannot be less than 0: " + QString::number(overlapLength));
+	if(overlapHeight < 0.0)
+		throw SpikeStreamException("Overlap height cannot be less than 0: " + QString::number(overlapHeight));
+
+	if(projectionPosition < 0 || projectionPosition > 4)
+		throw SpikeStreamException("Projection position not recognized: " + QString::number(projectionPosition));
+
+	if(!(connectionPattern == GAUSSIAN_SPHERE || connectionPattern == UNIFORM_SPHERE || connectionPattern != UNIFORM_CUBE))
+		throw SpikeStreamException("Connection pattern not recognized: " + QString::number(connectionPattern));
+
+	if(minWeight > maxWeight)
+		throw SpikeStreamException("Min weight cannot be greater than max weight.");
+
+	if(delayType < 0 || delayType > 1)
+		throw SpikeStreamException("Delay type not recognized: " + QString::number(delayType));
+
+	if(delayType == 0){
+		double delayDistanceFactor = getParameter("delay_distance_factor");
+		if(delayDistanceFactor <= 0.0)
+			throw SpikeStreamException("Delay distance factor cannot be less than or equal to 0: " + QString::number(delayDistanceFactor));
+	}
+	else if (delayType ==1){
+		unsigned minDelay = (unsigned)getParameter("min_delay");
+		unsigned maxDelay = (unsigned)getParameter("max_delay");
+		if(minDelay > maxDelay)
+			throw SpikeStreamException("Min delay cannot be greater than max delay.");
+	}
+
+	if(density < 0.0 || density > 1.0)
+		throw SpikeStreamException("Density must be between 0.0 and 1.0: " + QString::number(density));
 }
 
 

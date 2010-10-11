@@ -67,6 +67,14 @@ ConnectionGroupInfo& ConnectionGroupInfo::operator=(const ConnectionGroupInfo& r
 }
 
 
+/*! Returns the parameter requested or throws an exception if it does not exist */
+double ConnectionGroupInfo::getParameter(const QString &parameterName){
+	if(parameterMap.contains(parameterName))
+		return parameterMap[parameterName];
+	throw SpikeStreamException("Parameter '" + parameterName + "' not found in parameter map.");
+}
+
+
 /*! Returns the parameters as an XML string */
 QString ConnectionGroupInfo::getParameterXML(){
     QString tmpStr = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>";
@@ -80,3 +88,11 @@ QString ConnectionGroupInfo::getParameterXML(){
     tmpStr += "</connection_group_parameters>";
     return tmpStr;
 }
+
+
+/*! Returns true if the connection group has this parameter. */
+bool ConnectionGroupInfo::hasParameter(const QString &parameterName){
+	return parameterMap.contains(parameterName);
+}
+
+

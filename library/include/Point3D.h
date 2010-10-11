@@ -16,6 +16,7 @@ namespace spikestream{
 			Point3D& operator=(const Point3D& point);
 			bool operator==(const Point3D& point);
 			bool operator!=(const Point3D& point);
+			float distance(const Point3D& point);
 			float getXPos() { return xPos; }
 			float getYPos() { return yPos; }
 			float getZPos() { return zPos; }

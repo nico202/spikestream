@@ -63,6 +63,17 @@ Box& Box::operator=(const Box& rhs){
 }
 
 
+/*! Returns the point at the centre of the box . */
+Point3D Box::centre(){
+	Point3D point(
+			0.5*(x1 + x2),
+			0.5*(y1 + y2),
+			0.5*(z1 + z2)
+	);
+	return point;
+}
+
+
 /*! Expands the box by the specified percentage */
 void Box::expand_percent(float percent){
     //Check input

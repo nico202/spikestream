@@ -2,6 +2,7 @@
 #define UTIL_H
 
 //SpikeStream includes
+#include "Point3D.h"
 #include "WeightlessNeuron.h"
 
 //Qt includes
