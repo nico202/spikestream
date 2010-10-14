@@ -5,6 +5,9 @@
 #include "Util.h"
 using namespace spikestream;
 
+//Enables output of debugging information.
+//#define DEBUG
+
 /*! Constructor */
 Topographic1BuilderThread::Topographic1BuilderThread() : AbstractConnectionBuilder() {
 }
@@ -51,7 +54,11 @@ void Topographic1BuilderThread::buildConnectionGroup(){
 	}
 	density = getParameter("density");
 
+
 //	numberOfProgressSteps = fromNeurGrp->size();
+
+	//Work through all of the from neurons to build the projection space
+
 
 	//Get the neuron in the FROM group that projects to the centre of the TO group
 	Neuron* centreNeuron = fromNeurGrp->getNearestNeuron(fromNeurGrp->getBoundingBox().centre());
@@ -66,6 +73,7 @@ void Topographic1BuilderThread::buildConnectionGroup(){
 	//Add connections to group
 	addProjectiveConnections(centreNeuron, toNeurGrp, projBox);
 
+	//
 
 	emit progress(1, 2, "Building connections...");
 
@@ -83,20 +91,32 @@ void Topographic1BuilderThread::buildConnectionGroup(){
 
 /*! Adds projective connections from the neuron to all neurons in the box
 	 using parameters supplied. */
-void Topographic1BuilderThread::addProjectiveConnections(Neuron* centreNeuron, NeuronGroup* toNeurGrp, Box& projBox){
+void Topographic1BuilderThread::addProjectiveConnections(Neuron* fromNeuron, NeuronGroup* toNeurGrp, Box& projBox){
 	QList<Neuron*> neurList = toNeurGrp->getNeurons(projBox);
+	Neuron* tmpNeur;
 	for(int i=0; i<neurList.size(); ++i){
+		tmpNeur = neurList.at(i);
 		if(conPattern == GAUSSIAN_SPHERE){
-
+			if(makeGaussianConnection(projBox, tmpNeur->getLocation())){
+				newConnectionGroup->addConnection(fromNeuron->getID(), tmpNeur->getID(), getDelay(fromNeuron, tmpNeur), getWeight());
+			}
 		}
 		else if(conPattern == UNIFORM_SPHERE){
-
+			double ranNum = (double)rand() / (double)RAND_MAX;
+			if(ranNum <= density){//Decide if connection is made
+				;
+			}
 		}
 		else if(conPattern == UNIFORM_CUBE){
-			newConnectionGroup->addConnection( new Connection(centreNeuron->getID(), neurList.at(i), getDelay(), getWeight() ) );
+			double ranNum = (double)rand() / (double)RAND_MAX;
+			if(ranNum <= density){//Decide if connection is made
+				newConnectionGroup->addConnection(fromNeuron->getID(), tmpNeur->getID(), getDelay(fromNeuron, tmpNeur), getWeight());
+			}
 		}
-		else
+		else{
 			throw SpikeStreamException("Connection pattern not recognized: " + conPattern);
+		}
+
 	}
 }
 
@@ -134,29 +154,132 @@ void Topographic1BuilderThread::checkParameters(){
 	if(projectionPosition < 0 || projectionPosition > 4)
 		throw SpikeStreamException("Projection position not recognized: " + QString::number(projectionPosition));
 
-	if(!(connectionPattern == GAUSSIAN_SPHERE || connectionPattern == UNIFORM_SPHERE || connectionPattern != UNIFORM_CUBE))
+	if(!(connectionPattern == GAUSSIAN_SPHERE || connectionPattern == UNIFORM_SPHERE || connectionPattern == UNIFORM_CUBE))
 		throw SpikeStreamException("Connection pattern not recognized: " + QString::number(connectionPattern));
 
 	if(minWeight > maxWeight)
 		throw SpikeStreamException("Min weight cannot be greater than max weight.");
 
-	if(delayType < 0 || delayType > 1)
+	if(!(delayType == DELAY_WITH_DISTANCE || delayType == RANDOM_DELAY))
 		throw SpikeStreamException("Delay type not recognized: " + QString::number(delayType));
 
-	if(delayType == 0){
+	if(delayType == DELAY_WITH_DISTANCE){
 		double delayDistanceFactor = getParameter("delay_distance_factor");
 		if(delayDistanceFactor <= 0.0)
 			throw SpikeStreamException("Delay distance factor cannot be less than or equal to 0: " + QString::number(delayDistanceFactor));
 	}
-	else if (delayType ==1){
+	else if (delayType == RANDOM_DELAY){
 		unsigned minDelay = (unsigned)getParameter("min_delay");
 		unsigned maxDelay = (unsigned)getParameter("max_delay");
 		if(minDelay > maxDelay)
 			throw SpikeStreamException("Min delay cannot be greater than max delay.");
 	}
 
-	if(density < 0.0 || density > 1.0)
-		throw SpikeStreamException("Density must be between 0.0 and 1.0: " + QString::number(density));
+	if(density <= 0.0)
+		throw SpikeStreamException("Density must be greater than 0: " + QString::number(density));
 }
 
 
+/*! Returns delay that will vary with the distance of the two neurons or randomly selected from a range */
+float Topographic1BuilderThread::getDelay(Neuron *fromNeuron, Neuron *toNeuron){
+	if(delayType == DELAY_WITH_DISTANCE){
+		return delayDistanceFactor * fromNeuron->getLocation().distance(toNeuron->getLocation());
+	}
+	else if (delayType == RANDOM_DELAY){
+		return Util::getRandomUInt(minDelay, maxDelay);
+	}
+	else
+		throw SpikeStreamException("Delay type not recognized: " + QString::number(delayType));
+}
+
+
+/*! Returns weight that is randomly selected from the specified range */
+float Topographic1BuilderThread::getWeight(){
+	return Util::getRandomDouble(minWeight, maxWeight);
+}
+
+
+/*! Returns normally distributed true and false depending on the relationshiop between
+	the point and the box. The closer the point is to the centre of the box the more likely
+	that the respose will be true. */
+bool Topographic1BuilderThread::makeGaussianConnection(const Box& projectionBox, const Point3D neuronLocation){
+	//Get the connection probability on each axis
+	float radius = projectionBox.getWidth()/2.0;
+	float distance = Util::toPositive(neuronLocation.getXPos() - (projectionBox.getX1() + radius) );
+	if(!makeGaussianConnection(radius, distance))
+		return false;
+
+	radius = projectionBox.getLength()/2.0;
+	distance = Util::toPositive(neuronLocation.getYPos() - (projectionBox.getY1() + radius) );
+	if(!makeGaussianConnection(radius, distance))
+		return false;
+
+	radius = projectionBox.getHeight()/2.0;
+	distance = Util::toPositive(neuronLocation.getZPos() - (projectionBox.getZ1() + radius) );
+	if(!makeGaussianConnection(radius, distance))
+		return false;
+
+	return true;
+}
+
+
+/*! Returns normally distributed true and false depending on the relationshiop between
+	the distance and the radius. The closer the distance is to zero, the more likely
+	that the respose will be true. */
+bool Topographic1BuilderThread::makeGaussianConnection(float radius, float distance){
+	//Get normally distributed random number
+	double normRan = Util::toPositive(getNormalRandom());
+
+	//Limit it to + 3
+	if(normRan > 3.0)
+		normRan = 3.0;
+
+	//Normal random number now varies between -3 and +3 so need to make it fit into the radius range
+	normRan *= (radius / 3.0);
+
+	/* 68% of values will be between 0 and 1. Adding 1 makes little difference to large networks and
+		creates a better connection pattern on small networks. */
+	++normRan;
+
+	#ifdef DEBUG
+		qDebug()<<"NormRan="<<normRan<<"; Radius="<<radius<<"; distance="<<distance<<"; density factor="<<(1.0f/density);
+	#endif//DEBUG
+
+	/* Should now have a number that is between 1 and radius and
+		much more likely to be closer to 0 than to radius
+		Accept connection if normRan is greater than the distance.
+		The shorter the distance, the more likely this is to occur.
+		Higher values of density will reduce the distance and make the connection more likely. */
+	if(normRan >= (1.0f/density)* distance)
+		return true;
+	return false;
+}
+
+
+/*! Returns a normally distributed random number with standar deviation = 1
+	Uses Box-Muller method to generate values
+	Code adapted from http://www.csit.fsu.edu/~burkardt/cpp_src/random_data/random_data.html. */
+double Topographic1BuilderThread::getNormalRandom(){
+	double PI = 3.141592653589793;
+	double rand1, rand2;
+	static int used = 0;
+	double x;
+	static double y = 0.0;
+	//  If we've used an even number of values so far, generate two more, return one and save one.
+	if (( used % 2 ) == 0 ){
+		for ( ; ; ){
+			rand1 = (double)rand()/(double)RAND_MAX;
+			if ( rand1 != 0.0 )
+				break;
+		}
+		rand2 = (double)rand()/(double)RAND_MAX;
+		x = sqrt ( -2.0 * log ( rand1 ) ) * cos ( 2.0 * PI * rand2 );
+		y = sqrt ( -2.0 * log ( rand1 ) ) * sin ( 2.0 * PI * rand2 );
+	}
+	//  Otherwise, return the second, saved, value.
+	else{
+		x = y;
+	}
+	++used;
+	return x;
+}

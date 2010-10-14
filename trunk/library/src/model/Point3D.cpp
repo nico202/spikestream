@@ -2,6 +2,9 @@
 #include "Point3D.h"
 using namespace spikestream;
 
+//Other includes
+#include <math.h>
+
 
 /*! Empty constructor, creates a point at the origin */
 Point3D::Point3D(){
@@ -49,7 +52,7 @@ Point3D& Point3D::operator =(const Point3D& point){
 
 
 /*! Comparison equality operator */
-bool Point3D::operator ==(const Point3D& point){
+bool Point3D::operator ==(const Point3D& point) const{
     if(this->xPos == point.xPos && this->yPos == point.yPos && this->zPos == point.zPos)
 		return true;
     return false;
@@ -57,7 +60,7 @@ bool Point3D::operator ==(const Point3D& point){
 
 
 /*! Comparison non equality operator */
-bool Point3D::operator !=(const Point3D& point){
+bool Point3D::operator !=(const Point3D& point) const{
     if(this->xPos == point.xPos && this->yPos == point.yPos && this->zPos == point.zPos)
 		return false;
     return true;
@@ -65,10 +68,10 @@ bool Point3D::operator !=(const Point3D& point){
 
 
 /*! Returns the distance between this point and the specified point. */
-float Point3D::distance(const Point3D& point){
-	float result = (xPos + point.xPos) * (xPos + point.xPos);
-	result += (yPos + point.yPos) * (yPos + point.yPos);
-	result += (zPos + point.zPos) * (zPos + point.zPos);
+float Point3D::distance(const Point3D& point) const{
+	float result = (xPos - point.xPos) * (xPos - point.xPos);
+	result += (yPos - point.yPos) * (yPos - point.yPos);
+	result += (zPos - point.zPos) * (zPos - point.zPos);
 	return sqrt(result);
 }
 

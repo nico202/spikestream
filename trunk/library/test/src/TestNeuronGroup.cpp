@@ -70,6 +70,16 @@ void TestNeuronGroup::testAddNeuron(){
 }
 
 
+void testGetPointFromPositionKey(){
+
+}
+
+
+void testGetPositionKey(){
+	uint64_t key = getPositionKey(2,7,11);
+	uint64t expectedResult = 0b0000000000000000000010000000000000000000111000000000000000001011;
+	QCOMPARE(key, expectedResult);
+}
 
 
 

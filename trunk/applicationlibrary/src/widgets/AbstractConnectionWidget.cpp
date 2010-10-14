@@ -108,6 +108,7 @@ void AbstractConnectionWidget::addButtonClicked(){
 		progressDialog->setWindowModality(Qt::WindowModal);
 		progressDialog->setMinimumDuration(2000);
 		progressDialog->setCancelButton(0);//Too complicated to implement cancel sensibly
+		progressDialog->show();
 		updatingProgress = false;
 	}
 	catch(SpikeStreamException& ex){

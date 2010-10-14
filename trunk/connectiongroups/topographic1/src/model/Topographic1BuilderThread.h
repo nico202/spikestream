@@ -46,12 +46,30 @@ namespace spikestream {
 			unsigned maxDelay;
 			double density;
 
+			/*! Connection projects to a Gaussian sphere of neurons */
 			static const int GAUSSIAN_SPHERE = 0;
+
+			/*! Connection projects to a uniform sphere of neurons  */
 			static const int UNIFORM_SPHERE = 1;
+
+			/*! Connection projects to a uniform cube of neurons */
 			static const int UNIFORM_CUBE = 2;
 
+
+			/*! Delay varies with distance */
+			static const int DELAY_WITH_DISTANCE = 0;
+
+			/*! Delays are randomly selected from a range of values */
+			static const int RANDOM_DELAY = 1;
+
+
 			//=======================  METHODS  ==========================
-			void addProjectiveConnections(Neuron* centreNeuron, NeuronGroup* toNeurGrp, Box& projBox);
+			void addProjectiveConnections(Neuron* fromNeuron, NeuronGroup* toNeurGrp, Box& projBox);
+			float getDelay(Neuron* fromNeuron, Neuron* toNeuron);
+			double getNormalRandom();
+			float getWeight();
+			bool makeGaussianConnection(const Box& projectionBox, const Point3D neuronLocation);
+			bool makeGaussianConnection(float radius, float distance);
 
 	};
 }

@@ -7,6 +7,9 @@
 #include "Neuron.h"
 using namespace spikestream;
 
+//Qt includes
+#include <QMap>
+
 /*! Structure holding pointers to neurons. */
 typedef QHash<unsigned int, Neuron*> NeuronMap;
 
@@ -24,23 +27,27 @@ namespace spikestream {
 			Neuron* addNeuron(float xPos, float yPos, float zPos);
 			NeuronMap::iterator begin() { return neuronMap->begin(); }
 			NeuronMap::iterator end() { return neuronMap->end(); }
+			void buildPositionMap();
 			void clearNeurons();
 			bool contains(unsigned int neurID);
 			bool contains(unsigned int neurID, float x, float y, float z);
 			Box getBoundingBox();
 			unsigned int getID();
+			NeuronGroupInfo getInfo() {return info;}
 			Neuron* getNearestNeuron(const Point3D& point);
 			unsigned int getNeuronAtLocation(const Point3D& location);
-			QHash<QString, double> getParameters() { return parameterMap; }
-			double getParameter(const QString& key);
-			unsigned int getStartNeuronID() { return startNeuronID; }
-			NeuronGroupInfo getInfo() {return info;}
 			QList<unsigned int> getNeuronIDs() { return neuronMap->keys(); }
-			NeuronMap* getNeuronMap() { return neuronMap; }
 			Point3D& getNeuronLocation(unsigned int neuronID);
+			NeuronMap* getNeuronMap() { return neuronMap; }
+			QList<Neuron*> getNeurons(const Box& box);
+			double getParameter(const QString& key);
+			QHash<QString, double> getParameters() { return parameterMap; }
+			Point3D getPointFromPositionKey(uint64_t positionKey);
+			uint64_t getPositionKey(int xPos, int yPos, int zPos);
+			unsigned int getStartNeuronID() { return startNeuronID; }
 			bool isLoaded() { return loaded; }
-			void setLoaded(bool loaded) { this->loaded = loaded; }
 			void setID(unsigned int id);
+			void setLoaded(bool loaded) { this->loaded = loaded; }
 			void setNeuronMap(NeuronMap* newMap);
 			void setParameters(QHash<QString, double>& paramMap){ this->parameterMap = paramMap; }
 			void setStartNeuronID(unsigned int id) { this->startNeuronID = id; }
@@ -53,10 +60,20 @@ namespace spikestream {
 				table in SpikeStreamNetwork database */
 			NeuronGroupInfo info;
 
-			/*! Map linking neuron Ids to a position in the array.
+			/*! Map linking neuron Ids to Neuron classes.
 				This map can be used to get a list of all the neuron ids in the
 				group and also to get the position of an individual neuron. */
 			NeuronMap* neuronMap;
+
+			/*! Map linking a 64 bit number describing neuron position
+				with pointer to neuron class. This map enables iteration through
+				neuron group in a geometrically ordered way. */
+			QMap<uint64_t, Neuron*> neuronPositionMap;
+
+			/*! Flag recording whether position map has been built.
+				Position map takes processor power and memory and is rarely used,
+				so it is generated on demand when an iterator to it is requested. */
+			bool positionMapBuilt;
 
 			/*! Returns true if the state of the neuron map matches the database.
 				This should be false if no neurons have been loaded and false
