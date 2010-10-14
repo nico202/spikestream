@@ -18,6 +18,7 @@ NeuronGroup::NeuronGroup(const NeuronGroupInfo& info){
 	loaded = false;
 	startNeuronID = 0;
 	calculateBoundingBox = false;
+	neuronPositionMapBuilt = false;
 }
 
 
@@ -39,10 +40,14 @@ NeuronGroup::~NeuronGroup(){
 	by the actual ID when the group is added to the network and database. */
 Neuron* NeuronGroup::addNeuron(float xPos, float yPos, float zPos){
 	Neuron* tmpNeuron = new Neuron(xPos, yPos, zPos);
+
+	//Store neuron class in ID map
 	unsigned tmpID = getTemporaryID();
 	if(neuronMap->contains(tmpID))
 		throw SpikeStreamException("Automatically generated temporary neuron ID clashes with one in the network. New ID=" + QString::number(tmpID));
 	(*neuronMap)[tmpID] = tmpNeuron;
+
+	//Finish off
 	neuronGroupChanged();
 	return tmpNeuron;
 }
@@ -57,6 +62,25 @@ void NeuronGroup::addLayer(int width, int height, int xPos, int yPos, int zPos){
 		}
 	}
 	neuronGroupChanged();
+}
+
+
+/*! Builds map that allows iteration by geometrically close neurons. */
+void NeuronGroup::buildPositionMap(){
+	neuronPositionMap.clear();
+
+	//Work through all neurons
+	NeuronMap::iterator mapEnd = neuronMap->end();
+	for(NeuronMap::iterator iter=neuronMap->begin(); iter != mapEnd; ++iter){
+		//Store link between neuron position and neuron class
+		uint64_t tmpKey = getPositionKey(iter.value()->getXPos(), iter.value()->getYPos(), iter.value()->getZPos());
+		if(neuronPositionMap->contains(tmpKey))
+			throw SpikeStreamException("Position key clashes with one in the position map. Key=" + QString::number(tmpKey));
+		neuronPositionMap[tmpKey] = tmpNeuron;
+	}
+
+	//Set flag to record that we have built position map
+	positionMapBuilt = true;
 }
 
 
@@ -142,20 +166,19 @@ unsigned NeuronGroup::getID(){
 Neuron* NeuronGroup::getNearestNeuron(const Point3D& point){
 	double minDist = 0, tmpDist;
 	bool firstTime;
-	Neuron* closestNeuron, *tmpNeuron;
+	Neuron* closestNeuron;
 	NeuronMap::iterator mapEnd = neuronMap->end();//Saves accessing this function multiple times
 	for(NeuronMap::iterator iter=neuronMap->begin(); iter != mapEnd; ++iter){
-		tmpNeuron = iter.value();
+		tmpDist = iter.value()->getLocation().distance(point);
 		if(firstTime){
-			minDist = tmpNeuron.getLocation().distance(point);
-			closestNeuron = tmpNeuron;
+			minDist = tmpDist;
+			closestNeuron = iter.value();
 			firstTime = false;
 		}
 		else{
-			tmpDist = tmpNeuron.getLocation().distance(point);
 			if(tmpDist < minDist){
 				minDist = tmpDist;
-				closestNeuron = tmpNeuron;
+				closestNeuron = iter.value();
 			}
 		}
 	}
@@ -182,12 +205,58 @@ Point3D& NeuronGroup::getNeuronLocation(unsigned int neuronID){
 }
 
 
+/*! Returns neurons contained within the specified box */
+QList<Neuron*> NeuronGroup::getNeurons(const Box& box){
+	QList<Neuron*> tmpList;
+	NeuronMap::iterator mapEnd = neuronMap->end();
+	for(NeuronMap::iterator iter=neuronMap->begin(); iter != mapEnd; ++iter){
+		if( box.contains(iter.value()->getLocation()) )
+			tmpList.append(iter.value());
+	}
+	return tmpList;
+}
+
+
 /*! Returns a parameter with the specified key.
 	Throws an exception if the parameter cannot be found */
 double NeuronGroup::getParameter(const QString &key){
 	if(!parameterMap.contains(key))
 		throw SpikeStreamException("Cannot find parameter with key: " + key + " in neuron group with ID " + QString::number(info.getID()));
 	return  parameterMap[key];
+}
+
+
+/*! Returns a 64 bit key that encodes the position of the neuron in 3D.
+	Enables topographic iteration through the neuron group.
+	Can't use two's complement because want an ordered sequence
+	starting  */
+uint64_t NeuronGroup::getPositionKey(int xPos, int yPos, int zPos){
+	if(xPos < 0 || yPos < 0 || zPos < 0)
+		throw SpikeStreamException("This method currently only works with positive positions.");
+
+	//Check positions are in range for this type of encoding
+	if(xPos > 2097151 || yPos > 2097151 || zPos)
+		throw SpikeStreamException("X, Y or Z position out of range. Must be less than or equal to 2097151.");
+
+	//Create key
+	uint64_t newKey = xPos;
+	newKey <<=21;
+	newKey |= yPos;
+	newKey <<21;
+	newKey |= zPos;
+	return newKey;
+}
+
+
+/*! Converts a position key into a point */
+Point3D NeuronGroup::getPointFromPositionKey(uint64_t positionKey){
+	uint64_t keyExtractor = 2097151;
+	float tmpZPos = (float) (positionKey && keyExtractor);
+	keyExtractor <<= 21;
+	float tmpYPos = (float) (positionKey && keyExtractor);
+	keyExtractor <<= 21;
+	float tmpXPos = (float) (positionKey && keyExtractor);
+	return Point(tmpXPos, tmpYPos, tmpZPos);
 }
 
 
@@ -225,4 +294,5 @@ unsigned NeuronGroup::getTemporaryID(){
 /*! Records that neuron group has changed to trigger bounding box recalculation. */
 void NeuronGroup::neuronGroupChanged(){
 	calculateBoundingBox = true;
+	positionMapBuilt = false;
 }

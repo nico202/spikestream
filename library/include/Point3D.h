@@ -14,12 +14,12 @@ namespace spikestream{
 			Point3D(const Point3D& point);
 			virtual ~Point3D();
 			Point3D& operator=(const Point3D& point);
-			bool operator==(const Point3D& point);
-			bool operator!=(const Point3D& point);
-			float distance(const Point3D& point);
-			float getXPos() { return xPos; }
-			float getYPos() { return yPos; }
-			float getZPos() { return zPos; }
+			bool operator==(const Point3D& point) const;
+			bool operator!=(const Point3D& point) const;
+			float distance(const Point3D& point) const;
+			float getXPos() const { return xPos; }
+			float getYPos() const { return yPos; }
+			float getZPos() const { return zPos; }
 			void setXPos(float xPos) { this->xPos = xPos; }
 			void setYPos(float yPos) { this->yPos = yPos; }
 			void setZPos(float zPos) { this->zPos = zPos; }

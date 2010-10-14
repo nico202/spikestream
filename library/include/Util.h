@@ -43,6 +43,7 @@ namespace spikestream {
 			static void safeCStringCopy(char target[], const char source[], int targetSize);
 			static void seedRandom(int seed = 0);
 			static void setGeneralization(QHash<unsigned int, WeightlessNeuron*>& weiNeurMap, double gen);
+			static float toPositive(float num);
 
 	};
 

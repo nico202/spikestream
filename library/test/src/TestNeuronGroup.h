@@ -10,7 +10,8 @@ class TestNeuronGroup : public QObject {
 	private slots:
 	    void testAddLayer();
 	    void testAddNeuron();
-
+		void testGetPointFromPositionKey();
+		void testGetPositionKey();
 
 	private:
 

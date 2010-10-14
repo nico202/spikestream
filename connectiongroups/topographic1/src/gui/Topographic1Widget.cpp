@@ -177,9 +177,11 @@ void Topographic1Widget::addInputWidget(QWidget* widget, QHBoxLayout* layout, QS
 void Topographic1Widget::buildGUI(QVBoxLayout* mainVBox){
 	QGroupBox* mainGroupBox = new QGroupBox("Topographic1 Connection Group Builder", this);
 
+	uint64_t testLong = 0xffffffffffffffff;
+	qDebug()<<"Size: "<<sizeof(testLong)<<"; value="<<testLong;
+
 	//Validators for double and integer parameters
 	QDoubleValidator* posDoubleValidator = new QDoubleValidator(0.0, 1000000.0, 2, this);
-	QDoubleValidator* double01Validator = new QDoubleValidator(0.0, 1.0, 2, this);
 	QDoubleValidator* projectionValidator = new QDoubleValidator(0.1, 1000000.0, 2, this);
 	QDoubleValidator* overlapValidator = new QDoubleValidator(0.0, 1000000.0, 2, this);
 	QDoubleValidator* weightValidator = new QDoubleValidator(-1.0, 1.0, 3, this);
@@ -200,13 +202,13 @@ void Topographic1Widget::buildGUI(QVBoxLayout* mainVBox){
 
 	//Projection settings
 	QHBoxLayout* projLayout1 = new QHBoxLayout();
-	projectionWidthEdit = new QLineEdit("2.0");
+	projectionWidthEdit = new QLineEdit("10.0");
 	projectionWidthEdit->setValidator(projectionValidator);
 	addInputWidget(projectionWidthEdit, projLayout1, "Projection width:", true);
-	projectionLengthEdit = new QLineEdit("2.0");
+	projectionLengthEdit = new QLineEdit("10.0");
 	projectionLengthEdit->setValidator(projectionValidator);
 	addInputWidget(projectionLengthEdit, projLayout1, "Projection length:", true);
-	projectionHeightEdit = new QLineEdit("2.0");
+	projectionHeightEdit = new QLineEdit("10.0");
 	projectionHeightEdit->setValidator(projectionValidator);
 	addInputWidget(projectionHeightEdit, projLayout1, "Projection height:", true, true);
 
@@ -235,7 +237,7 @@ void Topographic1Widget::buildGUI(QVBoxLayout* mainVBox){
 	fillConnectionPatternCombo();
 	addInputWidget(connectionPatternCombo, projLayout2, "Pattern");
 	densityEdit = new QLineEdit("1.0");
-	densityEdit->setValidator(double01Validator);
+	densityEdit->setValidator(posDoubleValidator);
 	addInputWidget(densityEdit, projLayout2, "Density:", true, true);
 
 	//Weight
@@ -243,7 +245,7 @@ void Topographic1Widget::buildGUI(QVBoxLayout* mainVBox){
 	minWeightEdit = new QLineEdit("0.0");
 	minWeightEdit->setValidator(weightValidator);
 	addInputWidget(minWeightEdit, weiLayout, "Minimum weight:", true);
-	maxWeightEdit = new QLineEdit("0.0");
+	maxWeightEdit = new QLineEdit("1.0");
 	maxWeightEdit->setValidator(weightValidator);
 	addInputWidget(maxWeightEdit, weiLayout, "Maximum weight:", true, true);
 
