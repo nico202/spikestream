@@ -202,13 +202,13 @@ void Topographic1Widget::buildGUI(QVBoxLayout* mainVBox){
 
 	//Projection settings
 	QHBoxLayout* projLayout1 = new QHBoxLayout();
-	projectionWidthEdit = new QLineEdit("10.0");
+	projectionWidthEdit = new QLineEdit("1.0");
 	projectionWidthEdit->setValidator(projectionValidator);
 	addInputWidget(projectionWidthEdit, projLayout1, "Projection width:", true);
-	projectionLengthEdit = new QLineEdit("10.0");
+	projectionLengthEdit = new QLineEdit("1.0");
 	projectionLengthEdit->setValidator(projectionValidator);
 	addInputWidget(projectionLengthEdit, projLayout1, "Projection length:", true);
-	projectionHeightEdit = new QLineEdit("10.0");
+	projectionHeightEdit = new QLineEdit("1.0");
 	projectionHeightEdit->setValidator(projectionValidator);
 	addInputWidget(projectionHeightEdit, projLayout1, "Projection height:", true, true);
 
@@ -228,7 +228,7 @@ void Topographic1Widget::buildGUI(QVBoxLayout* mainVBox){
 	QHBoxLayout* projLayout2 = new QHBoxLayout();
 	positionCombo = new QComboBox();
 	fillPositionCombo();
-	addInputWidget(positionCombo, projLayout2, "Position:");
+	//addInputWidget(positionCombo, projLayout2, "Position:");
 	forRevCombo = new QComboBox();
 	forRevCombo->addItem("Forward");
 	forRevCombo->addItem("Reverse");

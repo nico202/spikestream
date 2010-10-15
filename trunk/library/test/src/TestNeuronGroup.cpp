@@ -1,6 +1,8 @@
 #include "TestNeuronGroup.h"
 #include "NeuronGroup.h"
 #include "Neuron.h"
+#include "SpikeStreamException.h"
+#include "Util.h"
 using namespace spikestream;
 
 
@@ -20,22 +22,11 @@ void TestNeuronGroup::testAddLayer(){
     NeuronMap* neuronMap = neurGrp.getNeuronMap();
     QCOMPARE(neuronMap->size(), (int)197);
 
-    //Neurons in layer should have been added with temporary ids starting from 2 because the map started with a neuron already in it
+	//Group should have a neuron at location (2, 3, 4);
+	QVERIFY(neurGrp.getNeuronIDAtLocation(Point3D(2.0f, 3.0f, 4.0f)) != 0);
 
-    //First neuron should be at the layer location (2, 3, 4);
-    QVERIFY(neuronMap->contains(2));
-    Neuron* tmpNeuron = (*neuronMap)[2];
-    QCOMPARE(tmpNeuron->getXPos(), 2.0f);
-    QCOMPARE(tmpNeuron->getYPos(), 3.0f);
-    QCOMPARE(tmpNeuron->getZPos(), 4.0f);
-
-    //Twelfth neuron should be at (2, 13, 4)
-    QVERIFY(neuronMap->contains(12));
-    tmpNeuron = (*neuronMap)[12];
-    QCOMPARE(tmpNeuron->getXPos(), 2.0f);
-    QCOMPARE(tmpNeuron->getYPos(), 13.0f);
-    QCOMPARE(tmpNeuron->getZPos(), 4.0f);
-
+	//Group should have a neuron at location (2, 13, 4)
+	QVERIFY(neurGrp.getNeuronIDAtLocation(Point3D(2.0f, 13.0f, 4.0f)) != 0);
 }
 
 
@@ -49,37 +40,66 @@ void TestNeuronGroup::testAddNeuron(){
     NeuronMap* neuronMap = neurGrp.getNeuronMap();
     QCOMPARE(neuronMap->size(), (int)3);
 
-    //Neurons should have been added with temporary ids starting from zero
-    QVERIFY(neuronMap->contains(0));
-    Neuron* tmpNeuron = (*neuronMap)[0];
-    QCOMPARE(tmpNeuron->getXPos(), 23.0f);
-    QCOMPARE(tmpNeuron->getYPos(), 27.0f);
-    QCOMPARE(tmpNeuron->getZPos(), 12.0f);
-
-    QVERIFY(neuronMap->contains(1));
-    tmpNeuron = (*neuronMap)[1];
-    QCOMPARE(tmpNeuron->getXPos(), 230.0f);
-    QCOMPARE(tmpNeuron->getYPos(), 270.0f);
-    QCOMPARE(tmpNeuron->getZPos(), 120.0f);
-
-    QVERIFY(neuronMap->contains(2));
-    tmpNeuron = (*neuronMap)[2];
-    QCOMPARE(tmpNeuron->getXPos(), 2334.0f);
-    QCOMPARE(tmpNeuron->getYPos(), 2745.0f);
-    QCOMPARE(tmpNeuron->getZPos(), 1245.0f);
+	//Check neurons exist at correct locations
+	QVERIFY(neurGrp.getNeuronIDAtLocation(Point3D(23.0f, 27.0f, 12.0f)) != 0);
+	QVERIFY(neurGrp.getNeuronIDAtLocation(Point3D(230.0f, 270.0f, 120.0f)) != 0);
+	QVERIFY(neurGrp.getNeuronIDAtLocation(Point3D(2334.0f, 2745.0f, 1245.0f)) != 0);
 }
 
 
-void testGetPointFromPositionKey(){
-
+void TestNeuronGroup::testGetPointFromPositionKey(){
+	uint64_t key = 0b000000000000000000010000000000000000000111000000000000000001011;
+	Point3D point = NeuronGroup::getPointFromPositionKey(key);
+	Point3D expectedPoint(2,7,11);
+	QCOMPARE(point, expectedPoint);
 }
 
 
-void testGetPositionKey(){
-	uint64_t key = getPositionKey(2,7,11);
-	uint64t expectedResult = 0b0000000000000000000010000000000000000000111000000000000000001011;
-	QCOMPARE(key, expectedResult);
+void TestNeuronGroup::testGetPositionKey(){
+	try{
+		uint64_t key = NeuronGroup::getPositionKey(2,7,11);
+		uint64_t expectedResult = 0b000000000000000000010000000000000000000111000000000000000001011;
+		QCOMPARE(key, expectedResult);
+	}
+	catch(SpikeStreamException& ex){
+		QFAIL(ex.getMessage().toAscii());
+	}
+	catch(...){
+		QFAIL("NeuronGroup test failure. An unknown exception occurred.");
+	}
 }
 
+
+void TestNeuronGroup::testPositionIterator(){
+	NeuronGroup neurGrp( NeuronGroupInfo(0, "no name", "no description", QHash<QString, double>(), 2) );
+	Neuron* neur5 = neurGrp.addNeuron(23, 27, 14);//Should be 5th
+	Neuron* neur3 = neurGrp.addNeuron(23, 27, 12);//Should be 3rd
+	Neuron* neur2 = neurGrp.addNeuron(23, 26, 13);//Should be 2nd
+	Neuron* neur4 = neurGrp.addNeuron(23, 27, 13);//Should be 4th
+	Neuron* neur1 = neurGrp.addNeuron(22, 26, 14);//Should be 1st
+
+	int counter = 1;
+	for(NeuronPositionIterator iter = neurGrp.positionBegin(); iter != neurGrp.positionEnd(); ++iter){
+		switch(counter){
+			case 1:
+				QCOMPARE(iter.value()->getID(), neur1->getID());
+			break;
+			case 2:
+				QCOMPARE(iter.value()->getID(), neur2->getID());
+			break;
+			case 3:
+				QCOMPARE(iter.value()->getID(), neur3->getID());
+			break;
+			case 4:
+				QCOMPARE(iter.value()->getID(), neur4->getID());
+			break;
+			case 5:
+				QCOMPARE(iter.value()->getID(), neur5->getID());
+			break;
+			default: QFAIL("Iterator out of range");
+		}
+		++counter;
+	}
+}
 
 

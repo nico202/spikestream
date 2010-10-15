@@ -18,7 +18,7 @@ SUBDIRS += neurongroups/cuboid
 
 
 #================  CONNECTION GROUP PLUGINS  =================
-SUBDIRS += connectiongroups/random1
+SUBDIRS += connectiongroups/random1 connectiongroups/topographic1
 
 
 #================  SIMULATION PLUGINS  =================
@@ -26,7 +26,7 @@ SUBDIRS += simulators/nemo
 	
 	
 #================  INSTALLATION  =====================
-SUBDIRS += installation/dbconfigtool
+#SUBDIRS += installation/dbconfigtool
 
 
 #=================  TESTS  ===================

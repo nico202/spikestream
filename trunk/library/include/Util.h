@@ -34,6 +34,8 @@ namespace spikestream {
 			static double getRandomDouble(double min, double max);
 			static unsigned getRandomUInt(unsigned min, unsigned max);
 			static mpf_class factorial(unsigned int num);
+			static float min(float n1, float n2, float n3);
+			static void printBinary(uint64_t number);
 			static void printByteArray(byte* byteArr, int arrLen);
 			static void printByteArray(const QByteArray& byteArr);
 			static void printBoolArray(bool arr[], int arrLen);

@@ -18,7 +18,7 @@ NeuronGroup::NeuronGroup(const NeuronGroupInfo& info){
 	loaded = false;
 	startNeuronID = 0;
 	calculateBoundingBox = false;
-	neuronPositionMapBuilt = false;
+	positionMapBuilt = false;
 }
 
 
@@ -39,10 +39,13 @@ NeuronGroup::~NeuronGroup(){
 /*! Adds a neuron to the group using a temporary ID. This ID is replaced
 	by the actual ID when the group is added to the network and database. */
 Neuron* NeuronGroup::addNeuron(float xPos, float yPos, float zPos){
-	Neuron* tmpNeuron = new Neuron(xPos, yPos, zPos);
+	//Get temporary ID for the neuron - this must be unique and not exist in the current map
+	unsigned tmpID = getTemporaryID();
+
+	//Create neuron class
+	Neuron* tmpNeuron = new Neuron(tmpID, xPos, yPos, zPos);
 
 	//Store neuron class in ID map
-	unsigned tmpID = getTemporaryID();
 	if(neuronMap->contains(tmpID))
 		throw SpikeStreamException("Automatically generated temporary neuron ID clashes with one in the network. New ID=" + QString::number(tmpID));
 	(*neuronMap)[tmpID] = tmpNeuron;
@@ -74,9 +77,9 @@ void NeuronGroup::buildPositionMap(){
 	for(NeuronMap::iterator iter=neuronMap->begin(); iter != mapEnd; ++iter){
 		//Store link between neuron position and neuron class
 		uint64_t tmpKey = getPositionKey(iter.value()->getXPos(), iter.value()->getYPos(), iter.value()->getZPos());
-		if(neuronPositionMap->contains(tmpKey))
+		if(neuronPositionMap.contains(tmpKey))
 			throw SpikeStreamException("Position key clashes with one in the position map. Key=" + QString::number(tmpKey));
-		neuronPositionMap[tmpKey] = tmpNeuron;
+		neuronPositionMap[tmpKey] = iter.value();
 	}
 
 	//Set flag to record that we have built position map
@@ -111,6 +114,7 @@ bool NeuronGroup::contains(unsigned int neurID, float x, float y, float z){
 		return false;
 	return true;
 }
+
 
 /*! Returns the bounding box of the neuron group.
 	Only calculates bounding box if neuron group has changed. */
@@ -187,7 +191,7 @@ Neuron* NeuronGroup::getNearestNeuron(const Point3D& point){
 
 
 /*! Returns the ID of the neuron at a specified location */
-unsigned int NeuronGroup::getNeuronAtLocation(const Point3D& point){
+unsigned int NeuronGroup::getNeuronIDAtLocation(const Point3D& point){
 	NeuronMap::iterator mapEnd = neuronMap->end();//Saves accessing this function multiple times
 	for(NeuronMap::iterator iter=neuronMap->begin(); iter != mapEnd; ++iter){
 		if(iter.value()->getLocation() == point)
@@ -235,14 +239,14 @@ uint64_t NeuronGroup::getPositionKey(int xPos, int yPos, int zPos){
 		throw SpikeStreamException("This method currently only works with positive positions.");
 
 	//Check positions are in range for this type of encoding
-	if(xPos > 2097151 || yPos > 2097151 || zPos)
+	if(xPos > 2097151 || yPos > 2097151 || zPos > 2097151)
 		throw SpikeStreamException("X, Y or Z position out of range. Must be less than or equal to 2097151.");
 
 	//Create key
 	uint64_t newKey = xPos;
-	newKey <<=21;
+	newKey <<= 21;
 	newKey |= yPos;
-	newKey <<21;
+	newKey <<= 21;
 	newKey |= zPos;
 	return newKey;
 }
@@ -251,12 +255,32 @@ uint64_t NeuronGroup::getPositionKey(int xPos, int yPos, int zPos){
 /*! Converts a position key into a point */
 Point3D NeuronGroup::getPointFromPositionKey(uint64_t positionKey){
 	uint64_t keyExtractor = 2097151;
-	float tmpZPos = (float) (positionKey && keyExtractor);
-	keyExtractor <<= 21;
-	float tmpYPos = (float) (positionKey && keyExtractor);
-	keyExtractor <<= 21;
-	float tmpXPos = (float) (positionKey && keyExtractor);
-	return Point(tmpXPos, tmpYPos, tmpZPos);
+	float tmpZPos = (float) (positionKey & keyExtractor);
+	positionKey >>= 21;
+	float tmpYPos = (float) (positionKey & keyExtractor);
+	positionKey >>= 21;
+	float tmpXPos = (float) (positionKey & keyExtractor);
+	return Point3D(tmpXPos, tmpYPos, tmpZPos);
+}
+
+
+/*! Returns an iterator to the beginning of the position map, enabling topological
+	iteration through the group, starting with the z axis, then y, then x.
+	Position map is built after first call to this or end method. */
+NeuronPositionIterator NeuronGroup::positionBegin(){
+	if(!positionMapBuilt)
+		buildPositionMap();
+	return neuronPositionMap.begin();
+}
+
+
+/*! Returns an iterator to the end of the position map, enabling topological
+	iteration through the group, starting with the z axis, then y, then x.
+	Position map is built after first call to this or end method. */
+NeuronPositionIterator NeuronGroup::positionEnd(){
+	if(!positionMapBuilt)
+		buildPositionMap();
+	return neuronPositionMap.end();
 }
 
 
