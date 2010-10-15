@@ -54,34 +54,86 @@ void Topographic1BuilderThread::buildConnectionGroup(){
 	}
 	density = getParameter("density");
 
-
-//	numberOfProgressSteps = fromNeurGrp->size();
+	//Keep track of progress
+	numberOfProgressSteps = fromNeurGrp->size() + 1;
 
 	//Work through all of the from neurons to build the projection space
+	QHash<unsigned, Box> projBoxMap;
+	Point3D tmpPnt;
+	int xCount=0, yCount=0, zCount=0;
+	float tmpX, tmpY, tmpZ, prevX, prevY, prevZ, boxXPos, boxYPos, boxZPos;
+	bool firstTime = true;
+	for(NeuronPositionIterator posIter = fromNeurGrp->positionBegin(); posIter != fromNeurGrp->positionEnd(); ++posIter){
+		tmpPnt = posIter.value()->getLocation();
+		tmpX = tmpPnt.getXPos();
+		tmpY = tmpPnt.getYPos();
+		tmpZ = tmpPnt.getZPos();
 
+		//Initialize previous values on first call
+		if(firstTime){
+			prevX = tmpX;
+			prevY = tmpY;
+			prevZ = tmpZ;
+			firstTime = false;
+		}
 
-	//Get the neuron in the FROM group that projects to the centre of the TO group
-	Neuron* centreNeuron = fromNeurGrp->getNearestNeuron(fromNeurGrp->getBoundingBox().centre());
+		//Sanity check
+		if(tmpX < prevX)
+			throw SpikeStreamException("Count along X axis should always increase. tmpX=" + QString::number(tmpX));
 
-	//Get the centre of the TO neuron group
-	Point3D toCent = toNeurGrp->getBoundingBox().centre();
-	Box projBox(
-			toCent.getXPos() - projWidth/2.0f, toCent.getYPos() - projLength/2.0f, toCent.getZPos() - projHeight/2.0f,
-			toCent.getXPos() + projWidth/2.0f, toCent.getYPos() + projLength/2.0f, toCent.getZPos() + projHeight/2.0f
-	);
+		//Increase counts of neurons along x, y and z axes
+		if(tmpX > prevX){
+			++xCount;
+			yCount = 0;
+			zCount = 0;
+		}
+		else if(tmpY > prevY){
+			++yCount;
+			zCount =0;
+		}
+		else if(tmpZ > prevZ){
+			++zCount;
+		}
 
-	//Add connections to group
-	addProjectiveConnections(centreNeuron, toNeurGrp, projBox);
+		//Create new box
+		boxXPos = xCount * (projWidth - ovWidth);
+		boxYPos = yCount * (projLength - ovLength);
+		boxZPos = zCount * (projHeight - ovHeight);
+		Box newBox(boxXPos, boxYPos, boxZPos, boxXPos + projWidth, boxYPos + projLength, boxZPos + projHeight);
+		if(projBoxMap.contains(posIter.value()->getID()))
+			throw SpikeStreamException("Duplicate neuron ID: " + QString::number(posIter.value()->getID()));
+		projBoxMap[posIter.value()->getID()] = newBox;
 
-	//
+		//Store location for next iteration
+		prevX = tmpX;
+		prevY = tmpY;
+		prevZ = tmpZ;
+	}
 
-	emit progress(1, 2, "Building connections...");
+	//Get a single box enclosing all of the boxes that have been created
+	Box totalBox = Box::getEnclosingBox(projBoxMap.values());
 
+	/* Now have a projection volume with its origin at (0,0,0)
+		Need to translate this volume so that its centre is aligned with the centre of the to neuron group. */
+	Point3D fromCentre = totalBox.centre();
+	Point3D toCentre = toNeurGrp->getBoundingBox().centre();
+	float dx = toCentre.getXPos() - fromCentre.getXPos();
+	float dy = toCentre.getYPos() - fromCentre.getYPos();
+	float dz = toCentre.getZPos() - fromCentre.getZPos();
 
+	//Translate boxes and create connections
+	int neuronCntr = 0;
+	NeuronIterator fromNeurGrpEnd = fromNeurGrp->end();
+	for(NeuronIterator iter = fromNeurGrp->begin(); iter != fromNeurGrpEnd; ++iter){
+		if(!projBoxMap.contains(iter.key()))
+			throw SpikeStreamException("Neuron ID missing from projection box map: " + QString::number(iter.key()));
+		projBoxMap[iter.key()].translate(dx, dy, dz);
+		addProjectiveConnections(iter.value(), toNeurGrp, projBoxMap[iter.key()]);
 
-	//		//Update progress
-	//		++cntr;
-	//		emit progress(cntr, numberOfProgressSteps, "Building connections...");
+		//Inform user about progress
+		emit progress(neuronCntr, numberOfProgressSteps, "Building connections...");
+		++neuronCntr;
+	}
 }
 
 
@@ -92,6 +144,9 @@ void Topographic1BuilderThread::buildConnectionGroup(){
 /*! Adds projective connections from the neuron to all neurons in the box
 	 using parameters supplied. */
 void Topographic1BuilderThread::addProjectiveConnections(Neuron* fromNeuron, NeuronGroup* toNeurGrp, Box& projBox){
+	float radius = 0.5 * Util::min(projBox.getWidth(), projBox.getLength(), projBox.getHeight());
+	Point3D projBoxCentre = projBox.centre();
+
 	QList<Neuron*> neurList = toNeurGrp->getNeurons(projBox);
 	Neuron* tmpNeur;
 	for(int i=0; i<neurList.size(); ++i){
@@ -104,7 +159,9 @@ void Topographic1BuilderThread::addProjectiveConnections(Neuron* fromNeuron, Neu
 		else if(conPattern == UNIFORM_SPHERE){
 			double ranNum = (double)rand() / (double)RAND_MAX;
 			if(ranNum <= density){//Decide if connection is made
-				;
+				if(tmpNeur->getLocation().distance(projBoxCentre) < radius){
+					newConnectionGroup->addConnection(fromNeuron->getID(), tmpNeur->getID(), getDelay(fromNeuron, tmpNeur), getWeight());
+				}
 			}
 		}
 		else if(conPattern == UNIFORM_CUBE){

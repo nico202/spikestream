@@ -12,6 +12,7 @@ class TestNeuronGroup : public QObject {
 	    void testAddNeuron();
 		void testGetPointFromPositionKey();
 		void testGetPositionKey();
+		void testPositionIterator();
 
 	private:
 

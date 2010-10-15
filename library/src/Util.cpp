@@ -144,6 +144,32 @@ unsigned int Util::getRandomUInt(unsigned min, unsigned max){
 }
 
 
+/*! Returns the minimum of three numbers */
+float Util::min(float n1, float n2, float n3){
+	if(n1 < n2 && n1 < n3)//Is n1 the minimum?
+		return n1;
+	if(n2 < n3)//n1 is not the minimum, is n2 the minimum?
+		return n2;
+	return n3;
+
+}
+
+
+/*! Prints out a binary number */
+void Util::printBinary(uint64_t number){
+	int numBits = sizeof(number) * 8;
+	uint64_t probe = 0x8000000000000000;
+	for(int i=0; i<numBits; ++i){
+		if(probe & number)
+			cout<<"1";
+		else
+			cout<<"0";
+		probe >>=1;
+	}
+	cout<<endl;
+}
+
+
 /*! Prints out a bool array  */
 void Util::printBoolArray(bool arr[], int arrLen){
 	cout<<"Bool Array: ";

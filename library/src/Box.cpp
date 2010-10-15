@@ -103,6 +103,36 @@ void Box::expand_percent(float percent){
 }
 
 
+/*! Returns a box enclosing the boxes in the list */
+Box Box::getEnclosingBox(const QList<Box>& boxList){
+	Box newBox;
+	bool firstTime = true;
+	for(int i=0; i<boxList.size(); ++i){
+		const Box& tmpBox = boxList.at(i);
+		if(firstTime){
+			newBox = tmpBox;
+			firstTime = false;
+		}
+		else{
+			if(tmpBox.x1 < newBox.x1)
+				newBox.x1 = tmpBox.x1;
+			if(tmpBox.y1 < newBox.y1)
+				newBox.y1 = tmpBox.y1;
+			if(tmpBox.z1 < newBox.z1)
+				newBox.z1 = tmpBox.z1;
+
+			if(tmpBox.x2 > newBox.x2)
+				newBox.x2 = tmpBox.x2;
+			if(tmpBox.y2 > newBox.y2)
+				newBox.y2 = tmpBox.y2;
+			if(tmpBox.z2 > newBox.z2)
+				newBox.z2 = tmpBox.z2;
+		}
+	}
+	return newBox;
+}
+
+
 /*! Returns the width of the box */
 float Box::getWidth() const{
 	if( (x2-x1) >= 0.0f )

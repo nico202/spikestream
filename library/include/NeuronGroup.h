@@ -13,6 +13,9 @@ using namespace spikestream;
 /*! Structure holding pointers to neurons. */
 typedef QHash<unsigned int, Neuron*> NeuronMap;
 
+/*! Iterator over positions in the group */
+typedef QMap<uint64_t, Neuron*>::iterator NeuronPositionIterator;
+
 /*! An iterator for working through all of the neurons in the group. */
 typedef NeuronMap::iterator NeuronIterator;
 
@@ -27,6 +30,8 @@ namespace spikestream {
 			Neuron* addNeuron(float xPos, float yPos, float zPos);
 			NeuronMap::iterator begin() { return neuronMap->begin(); }
 			NeuronMap::iterator end() { return neuronMap->end(); }
+			NeuronPositionIterator positionBegin();
+			NeuronPositionIterator positionEnd();
 			void buildPositionMap();
 			void clearNeurons();
 			bool contains(unsigned int neurID);
@@ -35,15 +40,15 @@ namespace spikestream {
 			unsigned int getID();
 			NeuronGroupInfo getInfo() {return info;}
 			Neuron* getNearestNeuron(const Point3D& point);
-			unsigned int getNeuronAtLocation(const Point3D& location);
+			unsigned int getNeuronIDAtLocation(const Point3D& location);
 			QList<unsigned int> getNeuronIDs() { return neuronMap->keys(); }
 			Point3D& getNeuronLocation(unsigned int neuronID);
 			NeuronMap* getNeuronMap() { return neuronMap; }
 			QList<Neuron*> getNeurons(const Box& box);
 			double getParameter(const QString& key);
 			QHash<QString, double> getParameters() { return parameterMap; }
-			Point3D getPointFromPositionKey(uint64_t positionKey);
-			uint64_t getPositionKey(int xPos, int yPos, int zPos);
+			static Point3D getPointFromPositionKey(uint64_t positionKey);
+			static uint64_t getPositionKey(int xPos, int yPos, int zPos);
 			unsigned int getStartNeuronID() { return startNeuronID; }
 			bool isLoaded() { return loaded; }
 			void setID(unsigned int id);

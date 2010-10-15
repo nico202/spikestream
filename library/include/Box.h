@@ -5,6 +5,7 @@
 #include "Point3D.h"
 
 //Qt includes
+#include <QList>
 #include <QString>
 
 namespace spikestream {
@@ -19,6 +20,7 @@ namespace spikestream {
 			~Box();
 			Point3D centre() const;
 			bool contains(const Point3D& point) const;
+			static Box getEnclosingBox(const QList<Box>& boxList);
 			float getX1() const { return x1; }
 			float getX2() const { return x2; }
 			float getY1() const { return y1; }
