@@ -13,7 +13,10 @@ namespace spikestream {
 
 		public:
 			NewNetworkDialog(QWidget* parent=0);
+			NewNetworkDialog(const QString& name, const QString& description, QWidget* parent=0);
 			~NewNetworkDialog();
+			QString getName();
+			QString getDescription();
 
 
 		private slots:
@@ -28,6 +31,13 @@ namespace spikestream {
 
 			/*! Where user enters a description of the network */
 			QLineEdit* descLineEdit;
+
+			/*! Controls whether network is added to database. */
+			bool addNetworkToDatabase;
+
+
+			//====================  METHODS  ====================
+			void buildGUI(const QString& name, const QString& description);
 	};
 }
 

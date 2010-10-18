@@ -770,6 +770,18 @@ bool NetworkDao::isWeightlessNetwork(unsigned int networkID){
 }
 
 
+/*! Sets the name and description of the specified network.
+	Throws an exception if no rows were changed. */
+void NetworkDao::setNetworkProperties(unsigned networkID, const QString& name, const QString& description){
+	QString queryStr = "UPDATE Networks SET Name='" + name + "', Description='" + description + "' ";
+	queryStr += "WHERE networkID=" + QString::number(networkID);
+	QSqlQuery query = getQuery(queryStr);
+	executeQuery(query);
+	if(query.numRowsAffected() != 1)
+		throw SpikeStreamDBException("Error in network update. Exactly one row should be affected.");
+}
+
+
 /*! Sets the neuron group's parameters */
 void NetworkDao::setNeuronParameters(const NeuronGroupInfo& neurGrpInfo, QHash<QString, double>& paramMap){
 	/* Get class describing the type of neuron in this group - this contains the parameter
