@@ -142,25 +142,29 @@ HEADERS += include/AbstractParametersEditDialog.h \
 			include/LoadAnalysisDialog.h \
 			include/PluginsDialog.h \
 			include/TruthTableDialog.h \
-			include/NewNetworkDialog.h \
+			include/NetworkDialog.h \
 			include/NeuronParametersDialog.h \
 			include/NeuronParametersEditDialog.h \
 			include/SynapseParametersDialog.h \
 			include/SynapseParametersEditDialog.h \
 			include/ViewParametersDialog.h \
-			include/ParametersDialog.h
+			include/ParametersDialog.h \
+			include/NeuronGroupDialog.h \
+			include/ConnectionGroupDialog.h
 SOURCES += src/dialogs/AbstractParametersEditDialog.cpp \
 			src/dialogs/NRMImportDialog.cpp \
 			src/dialogs/LoadAnalysisDialog.cpp \
 			src/dialogs/PluginsDialog.cpp \
 			src/dialogs/TruthTableDialog.cpp \
-			src/dialogs/NewNetworkDialog.cpp \
+			src/dialogs/NetworkDialog.cpp \
 			src/dialogs/NeuronParametersDialog.cpp \
 			src/dialogs/NeuronParametersEditDialog.cpp \
 			src/dialogs/SynapseParametersDialog.cpp \
 			src/dialogs/SynapseParametersEditDialog.cpp \
 			src/dialogs/ViewParametersDialog.cpp \
-			src/dialogs/ParametersDialog.cpp
+			src/dialogs/ParametersDialog.cpp \
+			src/dialogs/NeuronGroupDialog.cpp \
+			src/dialogs/ConnectionGroupDialog.cpp
 
 
 #----------------------------------------------#

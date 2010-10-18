@@ -632,6 +632,37 @@ void Network::save(){
 }
 
 
+/*! Sets the description of a connection group.
+	Throws an exception if the connection group cannot be found. */
+void Network::setConnectionGroupProperties(unsigned conGrpID, const QString& description){
+	if(!connGrpMap.contains(conGrpID))
+		throw SpikeStreamException("Connection group cannot be found: " + QString::number(conGrpID));
+	connGrpMap[conGrpID]->setDescription(description);
+
+	//Store in database if connection group is in database
+	if(!newConnectionGroupMap.contains(conGrpID)){
+		NetworkDao netDao(networkDBInfo);
+		netDao.setConnectionGroupProperties(conGrpID, description);
+	}
+}
+
+
+/*! Sets the name and description of a neuron group.
+	Throws an exception of the neuron group cannot be found. */
+void Network::setNeuronGroupProperties(unsigned neurGrpID, const QString& name, const QString& description){
+	if(!neurGrpMap.contains(neurGrpID))
+		throw SpikeStreamException("Neuron group cannot be found: " + QString::number(neurGrpID));
+	neurGrpMap[neurGrpID]->setDescription(description);
+	neurGrpMap[neurGrpID]->setName(name);
+
+	//Store in database if we are not in prototype mode
+	if(!newNeuronGroupMap.contains(neurGrpID)){
+		NetworkDao netDao(networkDBInfo);
+		netDao.setNeuronGroupProperties(neurGrpID, name, description);
+	}
+}
+
+
 /*! Puts the network into prototype mode */
 void Network::setPrototypeMode(bool mode){
 	prototypeMode = mode;

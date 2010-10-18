@@ -1,6 +1,6 @@
 #include "Globals.h"
 #include "NetworkInfo.h"
-#include "NewNetworkDialog.h"
+#include "NetworkDialog.h"
 #include "SpikeStreamException.h"
 using namespace spikestream;
 
@@ -12,7 +12,7 @@ using namespace spikestream;
 
 
 /*! Constructor called when creating a new network */
-NewNetworkDialog::NewNetworkDialog(QWidget* parent) : QDialog(parent){
+NetworkDialog::NetworkDialog(QWidget* parent) : QDialog(parent){
 	addNetworkToDatabase = true;
 
 	buildGUI("Unnamed", "Undescribed");
@@ -20,7 +20,7 @@ NewNetworkDialog::NewNetworkDialog(QWidget* parent) : QDialog(parent){
 
 
 /*! Constructor called when altering name or description of a network. */
-NewNetworkDialog::NewNetworkDialog(const QString& name, const QString& description, QWidget* parent) : QDialog(parent){
+NetworkDialog::NetworkDialog(const QString& name, const QString& description, QWidget* parent) : QDialog(parent){
 	addNetworkToDatabase = false;
 
 	buildGUI(name, description);
@@ -28,12 +28,12 @@ NewNetworkDialog::NewNetworkDialog(const QString& name, const QString& descripti
 
 
 /*! Destructor */
-NewNetworkDialog::~NewNetworkDialog(){
+NetworkDialog::~NetworkDialog(){
 }
 
 
 /*! Returns the name of the network. */
-QString NewNetworkDialog::getName(){
+QString NetworkDialog::getName(){
 	QString nameStr = nameLineEdit->text();
 	if(nameStr.isEmpty())
 		nameStr = "Unnamed";
@@ -42,7 +42,7 @@ QString NewNetworkDialog::getName(){
 
 
 /*! Returns the description of the network. */
-QString NewNetworkDialog::getDescription(){
+QString NetworkDialog::getDescription(){
 	QString descStr = descLineEdit->text();
 	if(descStr.isEmpty())
 		descStr = "Undescribed";
@@ -55,13 +55,13 @@ QString NewNetworkDialog::getDescription(){
 /*----------------------------------------------------------*/
 
 /*! Rejects the dialog */
-void NewNetworkDialog::cancelButtonPressed(){
+void NetworkDialog::cancelButtonPressed(){
 	this->reject();
 }
 
 
 /*! Adds new network to the database, triggers reload and hides dialog */
-void NewNetworkDialog::okButtonPressed(){
+void NetworkDialog::okButtonPressed(){
 	if(addNetworkToDatabase){
 		//Add the network
 		NetworkInfo netInfo(0, getName(), getDescription());
@@ -84,7 +84,7 @@ void NewNetworkDialog::okButtonPressed(){
 /*----------------------------------------------------------*/
 
 /*! Constructs the graphical interface */
-void NewNetworkDialog::buildGUI(const QString& name, const QString& description){
+void NetworkDialog::buildGUI(const QString& name, const QString& description){
 	//Create layout managers
 	QVBoxLayout* mainVBox = new QVBoxLayout(this);
 	QGridLayout* gridLayout = new QGridLayout();

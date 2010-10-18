@@ -40,6 +40,7 @@ NetworkViewer::NetworkViewer(QWidget* parent) : QGLWidget(parent) {
 
 	//Connect reset to changes in the network
 	connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(reset()), Qt::QueuedConnection);
+	connect(Globals::getEventRouter(), SIGNAL(reloadSignal()), this, SLOT(reset()), Qt::QueuedConnection);
 
 	//Initialize variables
 	paintGLSkipped = false;

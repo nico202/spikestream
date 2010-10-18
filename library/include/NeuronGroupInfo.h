@@ -22,8 +22,9 @@ namespace spikestream {
 			QHash<QString, double> getParameterMap() { return parameterMap; }
 			QString getParameterXML();
 			unsigned int getNeuronTypeID() const { return neuronTypeID; }
-
+			void setDescription(const QString& description){ this->description = description; }
 			void setID(unsigned int id) { this->id = id; }
+			void setName(const QString& name){ this->name = name; }
 
 		private:
 			//==========================  VARIABLES  ===========================

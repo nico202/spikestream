@@ -139,6 +139,14 @@ void ConnectionGroup::setConnectionMap(QHash<unsigned, Connection *> *newConnect
 }
 
 
+
+/*! Sets the description of the connection group */
+void ConnectionGroup::setDescription(const QString& description){
+	info.setDescription(description);
+}
+
+
+
 /*! Sets the FROM neuron group ID */
 void ConnectionGroup::setFromNeuronGroupID(unsigned id){
 	info.setFromNeuronGroupID(id);

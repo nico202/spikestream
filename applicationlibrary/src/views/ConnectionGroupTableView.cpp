@@ -1,4 +1,5 @@
 //SpikeStream includes
+#include "ConnectionGroupDialog.h"
 #include "ConnectionGroupTableView.h"
 #include "SpikeStreamException.h"
 #include "ViewParametersDialog.h"
@@ -14,6 +15,7 @@ ConnectionGroupTableView::ConnectionGroupTableView(QWidget* parent, ConnectionGr
 	setShowGrid(false);
 	setSelectionMode(QAbstractItemView::NoSelection);
 	connect(this, SIGNAL(clicked(QModelIndex)), this, SLOT(tableClicked(QModelIndex)));
+	connect(this, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(tableDoubleClicked(QModelIndex)));
 
 	//Set the model for this view and show it
 	this->connectionGroupModel = model;
@@ -68,6 +70,25 @@ void ConnectionGroupTableView::tableClicked(QModelIndex index){
 	}
 	else{
 		model()->setData(index, 0);
+	}
+}
+
+
+
+/*! Called when the table is double clicked.
+	Displays a dialog to change name and description. */
+void ConnectionGroupTableView::tableDoubleClicked(QModelIndex index){
+	if(index.column() == ConnectionGroupModel::DESC_COL){
+		try{
+			ConnectionGroupDialog* dialog = new ConnectionGroupDialog(connectionGroupModel->getInfo(index), this);
+			if(dialog->exec() == QDialog::Accepted){
+				connectionGroupModel->reload();
+			}
+			delete dialog;
+		}
+		catch(SpikeStreamException& ex){
+			qCritical()<<ex.getMessage();
+		}
 	}
 }
 

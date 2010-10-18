@@ -1,7 +1,7 @@
 //SpikeStream includes
 #include "Globals.h"
 #include "NetworkDao.h"
-#include "NewNetworkDialog.h"
+#include "NetworkDialog.h"
 #include "NetworksWidget.h"
 #include "PluginsDialog.h"
 #include "SpikeStreamException.h"
@@ -43,13 +43,10 @@ NetworksWidget::NetworksWidget(QWidget* parent) : QWidget(parent){
 
 	//Add grid holding networks
 	gridLayout = new QGridLayout();
-	gridLayout->setMargin(10);
 	gridLayout->setColumnMinimumWidth(idCol, 50);//ID
-	gridLayout->setColumnMinimumWidth(nameCol, 100);//Name
+	gridLayout->setColumnMinimumWidth(nameCol, 120);//Name
 	gridLayout->setColumnMinimumWidth(spacer1Col, 50);//Spacer
 	gridLayout->setColumnMinimumWidth(descCol, 250);//Description
-	gridLayout->setColumnMinimumWidth(loadCol, 100);//Load button
-	gridLayout->setColumnMinimumWidth(delCol, 100);//Delete button
 
 	QHBoxLayout* gridLayoutHolder = new QHBoxLayout();
 	gridLayoutHolder->addLayout(gridLayout);
@@ -97,9 +94,10 @@ void NetworksWidget::addNetworks(){
 /*! Shows a plugins dialog to enable the user to add a network */
 void NetworksWidget::addNewNetwork(){
 	try{
-		NewNetworkDialog* newNetworkDialog = new NewNetworkDialog(this);
-		newNetworkDialog->exec();
-		delete newNetworkDialog;
+		NetworkDialog* networkDialog = new NetworkDialog(this);
+		if(networkDialog->exec() == QDialog::Accepted)
+			loadNetworkList();
+		delete networkDialog;
 	}
 	catch(SpikeStreamException& ex){
 		qCritical()<<ex.getMessage();
@@ -211,6 +209,7 @@ void NetworksWidget::loadNetworkList(){
 	for(int i=0; i<networkInfoList.size(); ++i){
 		//Property button
 		QPushButton* propButton = new QPushButton("P");
+		propButton->setMaximumWidth(20);
 		propButton->setObjectName(QString::number(networkInfoList[i].getID()));
 		connect ( propButton, SIGNAL(clicked()), this, SLOT( setNetworkProperties() ) );
 		gridLayout->addWidget(propButton, i, propCol);
@@ -236,7 +235,7 @@ void NetworksWidget::loadNetworkList(){
 		gridLayout->addWidget(prototypeButton, i, protoCol);
 
 		//Create the delete button and name it with the object id so we can tell which button was invoked
-		QPushButton* deleteButton = new QPushButton("Delete");
+		QPushButton* deleteButton = new QPushButton(QIcon(Globals::getSpikeStreamRoot() + "/images/trash_can.jpg"), "");
 		deleteButton->setObjectName(QString::number(networkInfoList[i].getID()));
 		connect ( deleteButton, SIGNAL(clicked()), this, SLOT( deleteNetwork() ) );
 		gridLayout->addWidget(deleteButton, i, delCol);
@@ -244,7 +243,7 @@ void NetworksWidget::loadNetworkList(){
 		//Set labels and buttons depending on whether it is the current network
 		if(currentNetworkID == networkInfoList[i].getID()){
 			if(Globals::getNetwork()->isPrototypeMode() && !Globals::getNetwork()->isSaved()){
-				QPushButton* saveButton = new QPushButton("Save");
+				QPushButton* saveButton = new QPushButton(QIcon(Globals::getSpikeStreamRoot() + "/images/save.png"), "");
 				saveButton->setObjectName(QString::number(networkInfoList[i].getID()));
 				connect ( saveButton, SIGNAL(clicked()), this, SLOT( saveNetwork() ) );
 				gridLayout->addWidget(saveButton, i, saveCol);
@@ -392,12 +391,12 @@ void NetworksWidget::setNetworkProperties(){
 		return;
 	}
 	try{
-		NewNetworkDialog* newNetworkDialog = new NewNetworkDialog(networkInfoMap[networkID].getName(), networkInfoMap[networkID].getDescription(), this);
-		if(newNetworkDialog->exec() == QDialog::Accepted){
-			Globals::getNetworkDao()->setNetworkProperties(networkID, newNetworkDialog->getName(), newNetworkDialog->getDescription());
+		NetworkDialog* networkDialog = new NetworkDialog(networkInfoMap[networkID].getName(), networkInfoMap[networkID].getDescription(), this);
+		if(networkDialog->exec() == QDialog::Accepted){
+			Globals::getNetworkDao()->setNetworkProperties(networkID, networkDialog->getName(), networkDialog->getDescription());
 			loadNetworkList();
 		}
-		delete newNetworkDialog;
+		delete networkDialog;
 	}
 	catch(SpikeStreamException& ex){
 		qCritical()<<ex.getMessage();

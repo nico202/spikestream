@@ -22,16 +22,18 @@ namespace spikestream {
 			void clearSelection();
 			int columnCount(const QModelIndex& parent = QModelIndex()) const;
 			QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
+			NeuronGroupInfo getInfo(const QModelIndex& index) const;
 			QHash<QString, double> getParameters(int row);
 			QList<unsigned int> getSelectedNeuronGroupIDs();
 			QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+			void reload();
 			int rowCount(const QModelIndex& parent = QModelIndex()) const;
 			bool setData(const QModelIndex& index, const QVariant& value, int role=Qt::EditRole);
 
 			friend class NeuronGroupTableView;
 
 		private slots:
-			void networkChanged();
+			void loadNeuronGroups();
 			void networkDisplayChanged();
 
 		private:

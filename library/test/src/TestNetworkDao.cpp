@@ -1022,6 +1022,34 @@ void TestNetworkDao::testIsWeightlessNeuron(){
 }
 
 
+void TestNetworkDao::testSetConnectionGroupProperties(){
+	addTestNetwork1();
+
+	try{
+		//Check description before update
+		QSqlQuery query = getQuery("SELECT Description FROM ConnectionGroups WHERE ConnectionGroupID=" + QString::number(connGrp1ID));
+		executeQuery(query);
+		query.next();
+		QCOMPARE(query.value(0).toString(), QString("conngrpdesc1"));
+
+		NetworkDao netDao(dbInfo);
+		netDao.setConnectionGroupProperties(connGrp1ID, "newConnectionGroup1Description");
+
+		//Check description after update
+		query = getQuery("SELECT Description FROM ConnectionGroups WHERE ConnectionGroupID=" + QString::number(connGrp1ID));
+		executeQuery(query);
+		query.next();
+		QCOMPARE(query.value(0).toString(), QString("newConnectionGroup1Description"));
+	}
+	catch(SpikeStreamException ex){
+		QFAIL(ex.getMessage().toAscii());
+	}
+	catch(...){
+		QFAIL("Unrecognized exception thrown.");
+	}
+}
+
+
 void TestNetworkDao::testSetNetworkProperties(){
 	addTestNetwork1();
 
@@ -1042,6 +1070,36 @@ void TestNetworkDao::testSetNetworkProperties(){
 		query.next();
 		QCOMPARE(query.value(0).toString(), QString("newNetwork1Name"));
 		QCOMPARE(query.value(1).toString(), QString("newNetwork1Description"));
+	}
+	catch(SpikeStreamException ex){
+		QFAIL(ex.getMessage().toAscii());
+	}
+	catch(...){
+		QFAIL("Unrecognized exception thrown.");
+	}
+}
+
+
+void TestNetworkDao::testSetNeuronGroupProperties(){
+	addTestNetwork1();
+
+	try{
+		//Check name and description before update
+		QSqlQuery query = getQuery("SELECT Name, Description FROM NeuronGroups WHERE NeuronGroupID=" + QString::number(neurGrp1ID));
+		executeQuery(query);
+		query.next();
+		QCOMPARE(query.value(0).toString(), QString("name1"));
+		QCOMPARE(query.value(1).toString(), QString("desc1"));
+
+		NetworkDao netDao(dbInfo);
+		netDao.setNeuronGroupProperties(neurGrp1ID, "newNeuronGrp1Name", "newNeuronGrp1Description");
+
+		//Check name and description after update
+		query = getQuery("SELECT Name, Description FROM NeuronGroups WHERE NeuronGroupID=" + QString::number(neurGrp1ID));
+		executeQuery(query);
+		query.next();
+		QCOMPARE(query.value(0).toString(), QString("newNeuronGrp1Name"));
+		QCOMPARE(query.value(1).toString(), QString("newNeuronGrp1Description"));
 	}
 	catch(SpikeStreamException ex){
 		QFAIL(ex.getMessage().toAscii());

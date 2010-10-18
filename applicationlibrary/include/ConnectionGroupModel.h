@@ -22,16 +22,18 @@ namespace spikestream {
 			void clearSelection();
 			int columnCount(const QModelIndex& parent = QModelIndex()) const;
 			QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
+			ConnectionGroupInfo getInfo(const QModelIndex & index);
 			QList<unsigned int> getSelectedConnectionGroupIDs();
 			QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 			QHash<QString, double> getParameters(int row);
+			void reload();
 			int rowCount(const QModelIndex& parent = QModelIndex()) const;
 			bool setData(const QModelIndex& index, const QVariant& value, int role=Qt::EditRole);
 
 			friend class ConnectionGroupTableView;
 
 		private slots:
-			void networkChanged();
+			void loadConnectionGroups();
 
 		private:
 			//====================  VARIABLES  ====================
