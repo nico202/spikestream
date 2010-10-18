@@ -53,12 +53,15 @@ namespace spikestream {
 		private:
 			//=======================  VARIABLES  ========================
 			/*! Reference to the display list for the graphics. This stores OpenGL
-			commands, which can then be played back as a block. */
+				commands, which can then be played back as a block. */
 			GLuint mainDisplayList;
 
 			/*! Determines whether the stored display list should be used or a new one generated.
 			A new one should be generated if the network or the network display is changed */
-			bool useDisplayList;
+			bool useMainDisplayList;
+
+			/*! Reference to the display list for drawing spheres. */
+			GLuint sphereDisplayList;
 
 			/*! Cancels render.*/
 			bool cancelRender;

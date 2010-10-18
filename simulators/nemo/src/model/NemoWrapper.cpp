@@ -22,6 +22,7 @@ NemoWrapper::NemoWrapper(){
 	stopThread = true;
 	archiveMode = false;
 	monitorFiringNeurons = false;
+	monitorTimeStep = true;
 	monitorWeights = false;
 	updateInterval_ms = 500;
 
@@ -280,6 +281,11 @@ void NemoWrapper::setMonitorFiringNeurons(bool newMonitorMode){
 }
 
 
+/*! Controls whether the time step is updated at each time step. */
+void NemoWrapper::setMonitorTimeStep(bool mode){
+	this->monitorTimeStep = mode;
+}
+
 
 /*! Sets wrapper to retrieve the weights from NeMo and save them to the current weight
 	field in the database. Does this operation every time step until it is turned off. */
@@ -513,7 +519,7 @@ void NemoWrapper::stepNemo(){
 		#ifdef DEBUG_STEP
 			qDebug()<<"About to step nemo with injection of noise";
 		#endif//DEBUG_STEP
-		checkNemoOutput( nemo_step(nemoSimulation, injectNoiseNeurIDArr, injectNoiseArrSize, &firedArray, &firedCount), "Nemo error on step" );
+		checkNemoOutput( nemo_step(nemoSimulation, injectNoiseNeurIDArr, injectNoiseArrSize, NULL, NULL, 0, &firedArray, &firedCount), "Nemo error on step" );
 		#ifdef DEBUG_STEP
 			qDebug()<<"Nemo successfully stepped with injection of noise.";
 		#endif//DEBUG_STEP
@@ -524,7 +530,7 @@ void NemoWrapper::stepNemo(){
 	}
 	//Advance the simulation one time step
 	else{
-		checkNemoOutput( nemo_step(nemoSimulation, 0, 0, &firedArray, &firedCount), "Nemo error on step" );
+		checkNemoOutput( nemo_step(nemoSimulation, 0, 0, NULL, NULL, 0, &firedArray, &firedCount), "Nemo error on step" );
 	}
 
 
@@ -561,13 +567,14 @@ void NemoWrapper::stepNemo(){
 		Globals::getEventRouter()->weightsChangedSlot();
 	}
 
+	if(monitorTimeStep){
+		/* Set flag to cause thread to wait for graphics to update.
+			This is needed even if we are just running a time step counter */
+		waitForGraphics = true;
 
-	/* Set flag to cause thread to wait for graphics to update.
-		This is needed even if we are just running a time step counter */
-	waitForGraphics = true;
-
-	//Inform listening classes that this time step has been processed
-	emit timeStepChanged(timeStepCounter, firingNeuronList);
+		//Inform listening classes that this time step has been processed
+		emit timeStepChanged(timeStepCounter, firingNeuronList);
+	}
 
 	//Update time step counter
 	++timeStepCounter;

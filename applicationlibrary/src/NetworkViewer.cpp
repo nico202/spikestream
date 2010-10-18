@@ -45,7 +45,7 @@ NetworkViewer::NetworkViewer(QWidget* parent) : QGLWidget(parent) {
 	//Initialize variables
 	paintGLSkipped = false;
 	resizeGLSkipped = false;
-	useDisplayList = false;
+	useMainDisplayList = false;
 	perspective_angle = 46.0f;
 	perspective_near = 1.0f;
 	perspective_far = 100000.0f;//Set this to a large number so everything will be visible
@@ -88,11 +88,18 @@ void NetworkViewer::initializeGL(){
 
 	//Create a unique id for the main display list
 	mainDisplayList = glGenLists(1);
+	sphereDisplayList =  glGenLists(1);
 
+	//Create objects
 	gluSphereObj = gluNewQuadric();
 	gluConeObj = gluNewQuadric();
 	gluQuadricDrawStyle(gluSphereObj, GLU_FILL);
 	gluQuadricNormals(gluSphereObj, GLU_SMOOTH);
+
+	//Build sphere display list
+	glNewList(sphereDisplayList, GL_COMPILE);
+		gluSphere(gluSphereObj, 0.1, 10*2, 10);
+	glEndList();
 }
 
 
@@ -125,7 +132,7 @@ void NetworkViewer::paintGL(){
 	/* Use an existing display list if one has already been created
 	Only use display lists when not in full render mode. They speed up
 	the graphics considerably, but crash when they are too big. */
-	if(useDisplayList){
+	if(useMainDisplayList){
 		//Call the display list
 		glCallList(mainDisplayList);
 	}
@@ -161,7 +168,7 @@ void NetworkViewer::paintGL(){
 		glEndList();
 
 		//Have now created the display list so record this fact for next render
-		useDisplayList = true;
+		useMainDisplayList = true;
 
 		//Unlock network display
 		Globals::getNetworkDisplay()->unlockMutex();
@@ -382,7 +389,7 @@ void NetworkViewer::rotateRight(){
 
 /*! Re-draws the network */
 void NetworkViewer::refresh(){
-	useDisplayList = false;
+	useMainDisplayList = false;
 	updateGL();
 }
 
@@ -396,7 +403,7 @@ void NetworkViewer::reset(){
 	viewClippingVolume_Horizontal(defaultClippingVol);
 
 	//Network has changed so need to re-render the display list
-	useDisplayList = false;
+	useMainDisplayList = false;
 
 	//Re-draw
 	updateGL();
@@ -740,7 +747,10 @@ void NetworkViewer::drawNeurons(){
 void NetworkViewer::drawSphere(float xPos, float yPos, float zPos, float radius, unsigned quality) {
 	glPushMatrix();
 	glTranslatef(xPos, yPos, zPos);//Translate to sphere position
-	gluSphere(gluSphereObj, radius, quality*2, quality);
+
+	//Call display list to draw a sphere
+	glCallList(sphereDisplayList);
+
 	glPopMatrix();
 }
 
