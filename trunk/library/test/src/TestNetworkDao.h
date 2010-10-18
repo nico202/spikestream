@@ -49,6 +49,7 @@ class TestNetworkDao : public TestDao {
 		void testGetWeightlessNeuron();
 		void testIsWeightlessNetwork();
 		void testIsWeightlessNeuron();
+		void testSetNetworkProperties();
 		void testSetNeuronParameters();
 		void testSetSynapseParameters();
 		void testSetWeight();

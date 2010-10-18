@@ -1022,6 +1022,36 @@ void TestNetworkDao::testIsWeightlessNeuron(){
 }
 
 
+void TestNetworkDao::testSetNetworkProperties(){
+	addTestNetwork1();
+
+	try{
+		//Check name and description before update
+		QSqlQuery query = getQuery("SELECT Name, Description FROM Networks WHERE NetworkID=" + QString::number(testNetID));
+		executeQuery(query);
+		query.next();
+		QCOMPARE(query.value(0).toString(), QString("testNetwork1Name"));
+		QCOMPARE(query.value(1).toString(), QString("testNetwork1Description"));
+
+		NetworkDao netDao(dbInfo);
+		netDao.setNetworkProperties(testNetID, "newNetwork1Name", "newNetwork1Description");
+
+		//Check name and description after update
+		query = getQuery("SELECT Name, Description FROM Networks WHERE NetworkID=" + QString::number(testNetID));
+		executeQuery(query);
+		query.next();
+		QCOMPARE(query.value(0).toString(), QString("newNetwork1Name"));
+		QCOMPARE(query.value(1).toString(), QString("newNetwork1Description"));
+	}
+	catch(SpikeStreamException ex){
+		QFAIL(ex.getMessage().toAscii());
+	}
+	catch(...){
+		QFAIL("Unrecognized exception thrown.");
+	}
+}
+
+
 void TestNetworkDao::testSetNeuronParameters(){
 	//Add test network
 	addTestNetwork1();

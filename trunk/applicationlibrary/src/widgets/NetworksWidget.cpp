@@ -44,12 +44,12 @@ NetworksWidget::NetworksWidget(QWidget* parent) : QWidget(parent){
 	//Add grid holding networks
 	gridLayout = new QGridLayout();
 	gridLayout->setMargin(10);
-	gridLayout->setColumnMinimumWidth(0, 50);//ID
-	gridLayout->setColumnMinimumWidth(1, 100);//Name
-	gridLayout->setColumnMinimumWidth(2, 50);//Spacer
-	gridLayout->setColumnMinimumWidth(3, 250);//Description
-	gridLayout->setColumnMinimumWidth(4, 100);//Load button
-	gridLayout->setColumnMinimumWidth(5, 100);//Delete button
+	gridLayout->setColumnMinimumWidth(idCol, 50);//ID
+	gridLayout->setColumnMinimumWidth(nameCol, 100);//Name
+	gridLayout->setColumnMinimumWidth(spacer1Col, 50);//Spacer
+	gridLayout->setColumnMinimumWidth(descCol, 250);//Description
+	gridLayout->setColumnMinimumWidth(loadCol, 100);//Load button
+	gridLayout->setColumnMinimumWidth(delCol, 100);//Delete button
 
 	QHBoxLayout* gridLayoutHolder = new QHBoxLayout();
 	gridLayoutHolder->addLayout(gridLayout);
@@ -209,31 +209,37 @@ void NetworksWidget::loadNetworkList(){
 
 	//Display the list in the widget
 	for(int i=0; i<networkInfoList.size(); ++i){
+		//Property button
+		QPushButton* propButton = new QPushButton("P");
+		propButton->setObjectName(QString::number(networkInfoList[i].getID()));
+		connect ( propButton, SIGNAL(clicked()), this, SLOT( setNetworkProperties() ) );
+		gridLayout->addWidget(propButton, i, propCol);
+
 		//Create labels
 		QLabel* idLabel = new QLabel(QString::number(networkInfoList[i].getID()));
-		gridLayout->addWidget(idLabel, i, 0);
+		gridLayout->addWidget(idLabel, i, idCol);
 		QLabel* nameLabel = new QLabel(networkInfoList[i].getName());
-		gridLayout->addWidget(nameLabel, i, 1);
+		gridLayout->addWidget(nameLabel, i, nameCol);
 		QLabel* descriptionLabel = new QLabel(networkInfoList[i].getDescription());
-		gridLayout->addWidget(descriptionLabel, i, 3);
+		gridLayout->addWidget(descriptionLabel, i, descCol);
 
 		//Create the load button and name it with the object id so we can tell which button was invoked
 		QPushButton* loadButton = new QPushButton("Load");
 		loadButton->setObjectName(QString::number(networkInfoList[i].getID()));
 		connect ( loadButton, SIGNAL(clicked()), this, SLOT( loadNetwork() ) );
-		gridLayout->addWidget(loadButton, i, 4);
+		gridLayout->addWidget(loadButton, i, loadCol);
 
 		//Create the prototype button and name it with the object id so we can tell which button was invoked
 		QPushButton* prototypeButton = new QPushButton("Prototype");
 		prototypeButton->setObjectName(QString::number(networkInfoList[i].getID()));
 		connect ( prototypeButton, SIGNAL(clicked()), this, SLOT( prototypeNetwork() ) );
-		gridLayout->addWidget(prototypeButton, i, 5);
+		gridLayout->addWidget(prototypeButton, i, protoCol);
 
 		//Create the delete button and name it with the object id so we can tell which button was invoked
 		QPushButton* deleteButton = new QPushButton("Delete");
 		deleteButton->setObjectName(QString::number(networkInfoList[i].getID()));
 		connect ( deleteButton, SIGNAL(clicked()), this, SLOT( deleteNetwork() ) );
-		gridLayout->addWidget(deleteButton, i, 6);
+		gridLayout->addWidget(deleteButton, i, delCol);
 
 		//Set labels and buttons depending on whether it is the current network
 		if(currentNetworkID == networkInfoList[i].getID()){
@@ -241,7 +247,7 @@ void NetworksWidget::loadNetworkList(){
 				QPushButton* saveButton = new QPushButton("Save");
 				saveButton->setObjectName(QString::number(networkInfoList[i].getID()));
 				connect ( saveButton, SIGNAL(clicked()), this, SLOT( saveNetwork() ) );
-				gridLayout->addWidget(saveButton, i, 7);
+				gridLayout->addWidget(saveButton, i, saveCol);
 			}
 
 			if(Globals::getArchiveDao()->networkHasArchives(currentNetworkID)){
@@ -378,6 +384,27 @@ void NetworksWidget::saveNetwork(){
 }
 
 
+/*! Allows user to set name and description of network. */
+void NetworksWidget::setNetworkProperties(){
+	unsigned int networkID = sender()->objectName().toUInt();
+	if(!networkInfoMap.contains(networkID)){
+		qCritical()<<"Network with ID "<<networkID<<" cannot be found.";
+		return;
+	}
+	try{
+		NewNetworkDialog* newNetworkDialog = new NewNetworkDialog(networkInfoMap[networkID].getName(), networkInfoMap[networkID].getDescription(), this);
+		if(newNetworkDialog->exec() == QDialog::Accepted){
+			Globals::getNetworkDao()->setNetworkProperties(networkID, newNetworkDialog->getName(), newNetworkDialog->getDescription());
+			loadNetworkList();
+		}
+		delete newNetworkDialog;
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<ex.getMessage();
+	}
+}
+
+
 /*----------------------------------------------------------*/
 /*-----                PRIVATE METHODS                 -----*/
 /*----------------------------------------------------------*/
@@ -506,7 +533,7 @@ void NetworksWidget::reset(){
 
 	//Remove list of networks
 	for(int rowIndx=0; rowIndx<networkInfoMap.size(); ++rowIndx){
-		for(int colIndx = 0; colIndx<=7; ++colIndx){
+		for(int colIndx = 0; colIndx < numCols; ++colIndx){
 			QLayoutItem* item = gridLayout->itemAtPosition(rowIndx, colIndx);
 			if(item != 0){
 				QWidget* tmpWidget = item->widget();

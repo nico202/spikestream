@@ -37,6 +37,7 @@ namespace spikestream {
 			void networkSaveFinished();
 			void prototypeNetwork();
 			void saveNetwork();
+			void setNetworkProperties();
 
 		private:
 			//======================  VARIABLES  =====================
@@ -64,6 +65,19 @@ namespace spikestream {
 
 			/*! ID of network being deleted */
 			unsigned deleteNetworkID;
+
+			/*! Columns for each type of data. */
+			static const int propCol = 0;
+			static const int idCol = 1;
+			static const int nameCol = 2;
+			static const int descCol = 3;
+			static const int spacer1Col = 4;
+			static const int loadCol = 5;
+			static const int protoCol = 6;
+			static const int delCol = 7;
+			static const int saveCol = 8;
+
+			static const int numCols = 9;
 
 			//=======================  METHODS  ======================
 			void loadNetwork(NetworkInfo& netInfo, bool prototypeMode = false);
