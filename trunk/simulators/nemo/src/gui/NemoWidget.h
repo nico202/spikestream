@@ -37,6 +37,7 @@ namespace spikestream {
 			void injectNoiseButtonClicked();
 			void loadSimulation();
 			void monitorFiringNeuronsStateChanged(int state);
+			void monitorTimeStepChanged(int state);
 			void nemoWrapperFinished();
 			void networkChanged();
 			void resetWeights();

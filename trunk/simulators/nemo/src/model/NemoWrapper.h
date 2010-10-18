@@ -35,6 +35,7 @@ namespace spikestream {
 			QString getErrorMessage() { return errorMessage; }
 			nemo_configuration_t getNemoConfig(){ return nemoConfig; }
 			unsigned getSTDPFunctionID() { return stdpFunctionID; }
+			unsigned getTimeStep() { return timeStepCounter; }
 			unsigned getUpdateInterval_ms() { return this->updateInterval_ms; }
 			bool isError() { return error; }
 			bool isMonitorFiringNeurons() { return monitorFiringNeurons; }
@@ -50,6 +51,7 @@ namespace spikestream {
 			void setFrameRate(unsigned int frameRate);
 			void setInjectNoise(unsigned neuronGroupID, double percentage);
 			void setMonitorFiringNeurons(bool mode);
+			void setMonitorTimeStep(bool mode);
 			void setNemoConfig(nemo_configuration_t nemoConfig) { this->nemoConfig = nemoConfig; }
 			void setMonitorWeights(bool enable);
 			void setSTDPFunctionID(unsigned stdpFunctionID) { this->stdpFunctionID = stdpFunctionID; }
@@ -111,6 +113,9 @@ namespace spikestream {
 
 			/*! In monitor weights mode the volatile weights are updated at each time step */
 			bool monitorWeights;
+
+			/*! Informs the GUI about each time step */
+			bool monitorTimeStep;
 
 			/*! The time step of the simulation */
 			unsigned int timeStepCounter;

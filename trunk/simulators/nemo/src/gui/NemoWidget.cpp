@@ -363,6 +363,25 @@ void NemoWidget::loadSimulation(){
 }
 
 
+/*! Controls whether the time step is updated each time step. */
+void NemoWidget::monitorTimeStepChanged(int state){
+	try{
+		if(state == Qt::Checked){
+			nemoWrapper->setMonitorTimeStep(true);
+			if(nemoWrapper->isSimulationLoaded()){
+				timeStepLabel->setText(QString::number(nemoWrapper->getTimeStep()));
+			}
+		}
+		else{
+			nemoWrapper->setMonitorTimeStep(false);
+		}
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<ex.getMessage();
+	}
+}
+
+
 /*! Switches the monitoring of the simulation on or off */
 void NemoWidget::monitorFiringNeuronsStateChanged(int state){
 	try{
@@ -714,10 +733,16 @@ QToolBar* NemoWidget::getToolBar(){
 
 	timeStepLabel = new QLabel ("0");
 	timeStepLabel->setStyleSheet( "QLabel { margin-left: 5px; background-color: #ffffff; border-color: #555555; border-width: 2px; border-style: outset; font-weight: bold;}");
-	timeStepLabel->setMinimumSize(50, 20);
-	timeStepLabel->setMaximumSize(50, 20);
+	timeStepLabel->setMinimumSize(100, 20);
+	timeStepLabel->setMaximumSize(100, 20);
 	timeStepLabel->setAlignment(Qt::AlignCenter);
 	tmpToolBar->addWidget(timeStepLabel);
+
+	QCheckBox* monitorTimeStepChkBox = new QCheckBox("Monitor");
+	monitorTimeStepChkBox->setChecked(true);
+	connect(monitorTimeStepChkBox, SIGNAL(stateChanged(int)), this, SLOT(monitorTimeStepChanged(int)));
+	tmpToolBar->addSeparator();
+	tmpToolBar->addWidget(monitorTimeStepChkBox);
 
 	return tmpToolBar;
 }
