@@ -32,6 +32,7 @@ namespace spikestream {
 			unsigned int getToNeuronGroupID() { return info.getToNeuronGroupID(); }
 			bool isLoaded() { return loaded; }
 			void setConnectionMap(QHash<unsigned, Connection*>* newConnectionMap);
+			void setDescription(const QString& description);
 			void setFromNeuronGroupID(unsigned id);
 			void setID(unsigned int id) { info.setID(id); }
 			void setLoaded(bool loaded) { this->loaded = loaded; }

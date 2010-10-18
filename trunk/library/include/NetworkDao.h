@@ -68,7 +68,9 @@ namespace spikestream{
 			WeightlessNeuron* getWeightlessNeuron(unsigned int neuronID);
 			bool isWeightlessNetwork(unsigned int networkID);
 			bool isWeightlessNeuron(unsigned int neuronID);
+			void setConnectionGroupProperties(unsigned connectionGroupID, const QString& description);
 			void setNetworkProperties(unsigned networkID, const QString& name, const QString& description);
+			void setNeuronGroupProperties(unsigned neuronGroupID, const QString& name, const QString& description);
 			void setNeuronParameters(const NeuronGroupInfo& info, QHash<QString, double>& paramMap);
 			void setSynapseParameters(const ConnectionGroupInfo& info, QHash<QString, double>& paramMap);
 			void setWeight(unsigned connectionID, double weight);

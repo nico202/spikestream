@@ -1,4 +1,5 @@
 //SpikeStream includes
+#include "NeuronGroupDialog.h"
 #include "NeuronGroupTableView.h"
 #include "SpikeStreamException.h"
 #include "ViewParametersDialog.h"
@@ -14,6 +15,7 @@ NeuronGroupTableView::NeuronGroupTableView(QWidget* parent, NeuronGroupModel* mo
 	setShowGrid(false);
 	setSelectionMode(QAbstractItemView::NoSelection);
 	connect(this, SIGNAL(clicked(QModelIndex)), this, SLOT(tableClicked(QModelIndex)));
+	connect(this, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(tableDoubleClicked(QModelIndex)));
 
 	//Set the model for this view and show it
 	this->neuronGroupModel = model;
@@ -60,6 +62,24 @@ void NeuronGroupTableView::tableClicked(QModelIndex index){
 	}
 	else{
 		model()->setData(index, 0);
+	}
+}
+
+
+/*! Called when the table is double clicked.
+	Displays a dialog to change name and description. */
+void NeuronGroupTableView::tableDoubleClicked(QModelIndex index){
+	if(index.column() == NeuronGroupModel::DESC_COL || index.column() == NeuronGroupModel::NAME_COL){
+		try{
+			NeuronGroupDialog* dialog = new NeuronGroupDialog(neuronGroupModel->getInfo(index), this);
+			if(dialog->exec() == QDialog::Accepted){
+				neuronGroupModel->reload();
+			}
+			delete dialog;
+		}
+		catch(SpikeStreamException& ex){
+			qCritical()<<ex.getMessage();
+		}
 	}
 }
 

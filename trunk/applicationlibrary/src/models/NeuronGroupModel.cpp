@@ -11,7 +11,7 @@ using namespace spikestream;
 
 /*! Constructor */
 NeuronGroupModel::NeuronGroupModel() : QAbstractTableModel(){
-    connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(networkChanged()));
+	connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(loadNeuronGroups()));
     connect(Globals::getEventRouter(), SIGNAL(networkDisplayChangedSignal()), this, SLOT(networkDisplayChanged()));
 }
 
@@ -106,6 +106,15 @@ QVariant NeuronGroupModel::data(const QModelIndex & index, int role) const{
 }
 
 
+/*! Returns the neuron group info associated with the specified index.
+	Throws an exception if the index cannot be found. */
+NeuronGroupInfo NeuronGroupModel::getInfo(const QModelIndex& index) const{
+	if(index.row() >= neurGrpInfoList.size())
+		throw SpikeStreamException("Index out of range: " + QString::number(index.row()));
+	return neurGrpInfoList[index.row()];
+}
+
+
 /*! Returns the parameters associated with a neuron group */
 QHash<QString, double> NeuronGroupModel::getParameters(int row){
 	if(row >= rowCount())
@@ -127,6 +136,12 @@ QList<unsigned int> NeuronGroupModel::getSelectedNeuronGroupIDs(){
 
 	//Return list
 	return neurGrpIDList;
+}
+
+
+/*! Reloads the list of neuron groups */
+void NeuronGroupModel::reload(){
+	loadNeuronGroups();
 }
 
 
@@ -218,8 +233,8 @@ int NeuronGroupModel::rowCount(const QModelIndex&) const{
 }
 
 
-/*! Reloads the current list of neuron groups if a network is present */
-void NeuronGroupModel::networkChanged(){
+/*! Loads the current list of neuron groups if a network is present */
+void NeuronGroupModel::loadNeuronGroups(){
     //Clear current list of neuron group information
     neurGrpInfoList.clear();
 	neurGrpSizeList.clear();

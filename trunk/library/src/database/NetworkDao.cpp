@@ -770,15 +770,38 @@ bool NetworkDao::isWeightlessNetwork(unsigned int networkID){
 }
 
 
+/*! Sets the description of a connection group */
+void NetworkDao::setConnectionGroupProperties(unsigned connectionGroupID, const QString& description){
+	QString queryStr = "UPDATE ConnectionGroups SET Description='" + description + "' ";
+	queryStr += "WHERE ConnectionGroupID=" + QString::number(connectionGroupID);
+	QSqlQuery query = getQuery(queryStr);
+	executeQuery(query);
+	if(query.numRowsAffected() != 1)
+		throw SpikeStreamDBException("Error in connection group update. Exactly one row should be affected: " + QString::number(query.numRowsAffected()) + ", ID: " + QString::number(connectionGroupID));
+}
+
+
 /*! Sets the name and description of the specified network.
 	Throws an exception if no rows were changed. */
 void NetworkDao::setNetworkProperties(unsigned networkID, const QString& name, const QString& description){
 	QString queryStr = "UPDATE Networks SET Name='" + name + "', Description='" + description + "' ";
-	queryStr += "WHERE networkID=" + QString::number(networkID);
+	queryStr += "WHERE NetworkID=" + QString::number(networkID);
 	QSqlQuery query = getQuery(queryStr);
 	executeQuery(query);
 	if(query.numRowsAffected() != 1)
-		throw SpikeStreamDBException("Error in network update. Exactly one row should be affected.");
+		throw SpikeStreamDBException("Error in network update. Exactly one row should be affected: " + QString::number(query.numRowsAffected()));
+}
+
+
+/*! Sets the name and description of a neuron group */
+void NetworkDao::setNeuronGroupProperties(unsigned neuronGroupID, const QString& name, const QString& description){
+	QString queryStr = "UPDATE NeuronGroups SET Name='" + name + "', Description='" + description + "' ";
+	queryStr += "WHERE NeuronGroupID=" + QString::number(neuronGroupID);
+	qDebug()<<queryStr;
+	QSqlQuery query = getQuery(queryStr);
+	executeQuery(query);
+	if(query.numRowsAffected() != 1)
+		throw SpikeStreamDBException("Error in neuron group update. Exactly one row should be affected: " + QString::number(query.numRowsAffected()) + ", ID: " + QString::number(neuronGroupID));
 }
 
 

@@ -11,7 +11,7 @@ using namespace spikestream;
 
 /*! Constructor */
 ConnectionGroupModel::ConnectionGroupModel() : QAbstractTableModel(){
-    connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(networkChanged()));
+	connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(loadConnectionGroups()));
 }
 
 
@@ -100,6 +100,15 @@ QVariant ConnectionGroupModel::data(const QModelIndex & index, int role) const{
 }
 
 
+/*! Returns the connection group info corresponding to a particular row or throws
+	an exception if this cannot be found. */
+ConnectionGroupInfo ConnectionGroupModel::getInfo(const QModelIndex & index){
+	if(index.row() >= conGrpInfoList.size())
+		throw SpikeStreamException("Index out of range: " + QString::number(index.row()));
+	return conGrpInfoList[index.row()];
+}
+
+
 /*! Returns the parameters associated with a connection group */
 QHash<QString, double> ConnectionGroupModel::getParameters(int row){
 	if(row >= rowCount())
@@ -121,6 +130,12 @@ QList<unsigned int> ConnectionGroupModel::getSelectedConnectionGroupIDs(){
 
 	//Return list
 	return conGrpIDList;
+}
+
+
+/*! Reloads the list of connection groups */
+void ConnectionGroupModel::reload(){
+	loadConnectionGroups();
 }
 
 
@@ -191,8 +206,8 @@ int ConnectionGroupModel::rowCount(const QModelIndex&) const{
 }
 
 
-/*! Reloads the current list of neuron groups if a network is present */
-void ConnectionGroupModel::networkChanged(){
+/*! Reloads the current list of connection groups if a network is present */
+void ConnectionGroupModel::loadConnectionGroups(){
     //Clear current list of neuron group information
     conGrpInfoList.clear();
 	conGrpSizeList.clear();

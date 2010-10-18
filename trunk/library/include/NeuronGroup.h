@@ -53,6 +53,8 @@ namespace spikestream {
 			bool isLoaded() { return loaded; }
 			void setID(unsigned int id);
 			void setLoaded(bool loaded) { this->loaded = loaded; }
+			void setDescription(const QString& description);
+			void setName(const QString& name);
 			void setNeuronMap(NeuronMap* newMap);
 			void setParameters(QHash<QString, double>& paramMap){ this->parameterMap = paramMap; }
 			void setStartNeuronID(unsigned int id) { this->startNeuronID = id; }

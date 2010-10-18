@@ -290,6 +290,18 @@ void NeuronGroup::setID(unsigned int id){
 }
 
 
+/*! Sets the description of the neuron group */
+void NeuronGroup::setDescription(const QString& description){
+	info.setDescription(description);
+}
+
+
+/*! Sets the name of the neuron group */
+void NeuronGroup::setName(const QString& name){
+	info.setName(name);
+}
+
+
 /*! Replaces the neuron map with a new neuron map.
 	Neurons are not cleaned up because they might be included in the new map. */
 void NeuronGroup::setNeuronMap(NeuronMap* newMap){

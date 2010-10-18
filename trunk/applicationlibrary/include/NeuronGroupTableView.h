@@ -22,6 +22,7 @@ namespace spikestream {
 
 		private slots:
 			void tableClicked(QModelIndex index);
+			void tableDoubleClicked(QModelIndex index);
 
 		private:
 			//====================  VARIABLES  =====================

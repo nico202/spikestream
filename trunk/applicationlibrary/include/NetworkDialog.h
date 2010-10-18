@@ -1,5 +1,5 @@
-#ifndef NEWNETWORKDIALOG_H
-#define NEWNETWORKDIALOG_H
+#ifndef NETWORKDIALOG_H
+#define NETWORKDIALOG_H
 
 //Qt includes
 #include <QDialog>
@@ -8,13 +8,13 @@
 namespace spikestream {
 
 	/*! Dialog for adding a new network to the database. */
-	class NewNetworkDialog : public QDialog {
+	class NetworkDialog : public QDialog {
 		Q_OBJECT
 
 		public:
-			NewNetworkDialog(QWidget* parent=0);
-			NewNetworkDialog(const QString& name, const QString& description, QWidget* parent=0);
-			~NewNetworkDialog();
+			NetworkDialog(QWidget* parent=0);
+			NetworkDialog(const QString& name, const QString& description, QWidget* parent=0);
+			~NetworkDialog();
 			QString getName();
 			QString getDescription();
 
@@ -41,5 +41,5 @@ namespace spikestream {
 	};
 }
 
-#endif//NEWNETWORKDIALOG_H
+#endif//NETWORKDIALOG_H
 

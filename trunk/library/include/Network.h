@@ -69,6 +69,8 @@ namespace spikestream {
 			bool overlaps(const Box& box);
 			void save();
 			void setError(const QString& errorMsg);
+			void setConnectionGroupProperties(unsigned conGrpID, const QString& description);
+			void setNeuronGroupProperties(unsigned neurGrpID, const QString& name, const QString& description);
 			void setPrototypeMode(bool mode);
 			int size();
 
