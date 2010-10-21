@@ -1,6 +1,11 @@
 #ifndef NEURONGROUPINFO_H
 #define NEURONGROUPINFO_H
 
+//SpikeStream includes
+#include "NeuronType.h"
+
+
+//Qt includes
 #include <QString>
 #include <QHash>
 
@@ -11,7 +16,7 @@ namespace spikestream {
     class NeuronGroupInfo {
 		public:
 			NeuronGroupInfo();
-			NeuronGroupInfo(unsigned int id, const QString& name, const QString& desc, const QHash<QString, double>& paramMap, unsigned int neurTypeID);
+			NeuronGroupInfo(unsigned int id, const QString& name, const QString& desc, const QHash<QString, double>& paramMap, const NeuronType& neuronType);
 			NeuronGroupInfo(const NeuronGroupInfo& neurGrpInfo);
 			NeuronGroupInfo& operator=(const NeuronGroupInfo& rhs);
 			~NeuronGroupInfo();
@@ -21,7 +26,8 @@ namespace spikestream {
 			QString getDescription() const { return description; }
 			QHash<QString, double> getParameterMap() { return parameterMap; }
 			QString getParameterXML();
-			unsigned int getNeuronTypeID() const { return neuronTypeID; }
+			NeuronType getNeuronType() const { return neuronType; }
+			unsigned int getNeuronTypeID() const { return neuronType.getID(); }
 			void setDescription(const QString& description){ this->description = description; }
 			void setID(unsigned int id) { this->id = id; }
 			void setName(const QString& name){ this->name = name; }
@@ -42,7 +48,7 @@ namespace spikestream {
 
 			/*! The ID of the type of neuron in the group. Should correspond to an id
 				in the NeuronTypes table in the SpikeStreamNetwork database */
-			unsigned int neuronTypeID;
+			NeuronType neuronType;
 
 
 			//===========================  METHODS  ============================

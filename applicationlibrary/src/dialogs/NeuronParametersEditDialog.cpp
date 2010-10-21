@@ -52,11 +52,16 @@ void NeuronParametersEditDialog::okButtonClicked(){
 	try{
 		QHash<QString, double> paramMap = getParameterValues();
 
-		//Set parameters in the database
-		Globals::getNetworkDao()->setNeuronParameters(neurGrpInfo, paramMap);
-
 		//Set parameters in the network object stored in memory
-		Globals::getNetwork()->getNeuronGroup(neurGrpInfo.getID())->setParameters(paramMap);
+		Globals::getNetwork()->setNeuronGroupParameters(neurGrpInfo.getID(), paramMap);
+
+		/* Parameter change may affect the saved state of the network, so reload list */
+		Globals::getEventRouter()->networkListChangedSlot();
+
+		/* Set parameters in simulation if it is loaded */
+		if(Globals::isSimulationLoaded()){
+			Globals::getSimulation()->setNeuronParameters(neurGrpInfo.getID(), paramMap);
+		}
 
 		//Close dialog
 		this->accept();

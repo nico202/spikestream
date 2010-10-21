@@ -24,7 +24,6 @@ namespace spikestream {
 			void addHighlightNeurons(const QList<unsigned int>& neuronIDs, RGBColor* color);
 			void addHighlightNeurons(const QHash< unsigned int, RGBColor*>& colorMap);
 			void removeHighlightNeurons(const QList<unsigned int>& neuronIDs);
-			void clearNeuronColorMap();
 			bool connectionGroupVisible(unsigned int connGrpID);
 			unsigned int getConnectionMode() { return connectionMode; }
 			unsigned getConnectionQuality() { return connectionQuality; }
@@ -66,8 +65,8 @@ namespace spikestream {
 			void setNeuronColorMap(QHash<unsigned int, RGBColor*>* newMap);
 			void setNeuronGroupVisibility(unsigned int neurGrpID, bool visible);
 			void setNeuronTransparency(float neuronTransparency);
-			void setVisibleConnectionGroupIDs(const QList<unsigned int>& connGrpIDs);
-			void setVisibleNeuronGroupIDs(const QList<unsigned int>& neurGrpIDs);
+			void setVisibleConnectionGroupIDs(const QList<unsigned int>& connGrpIDs, bool emitDisplayChangedSignal = true);
+			void setVisibleNeuronGroupIDs(const QList<unsigned int>& neurGrpIDs, bool emitDisplayChangedSignal = true);
 			void setZoom(unsigned int neurGrpID, int status);
 			void unlockMutex();
 
@@ -97,6 +96,7 @@ namespace spikestream {
 
 		signals:
 			void networkDisplayChanged();
+			void neuronGroupDisplayChanged();
 
 		public slots:
 			void networkChanged();
@@ -204,6 +204,7 @@ namespace spikestream {
 			//=========================  METHODS  =========================
 			void checkConnectionModeFlag(unsigned int flag);
 			void checkWeightRenderFlag(unsigned int flag);
+			void clearNeuronColorMap();
 			void setWeightRenderFlag(unsigned flag);
 			void unsetWeightRenderFlag(unsigned flag);
 	};

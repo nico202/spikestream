@@ -13,9 +13,6 @@ using namespace spikestream;
 PluginManager::PluginManager(QString& pluginFolder) throw(SpikeStreamException){
 	//Store widget and plugin folder
 	this->pluginFolder = pluginFolder;
-
-	//Load plugins from the folder
-	loadPlugins();
 }
 
 
@@ -46,10 +43,6 @@ QWidget* PluginManager::getPlugin(QString pluginName) throw(SpikeStreamException
 }
 
 
-/*-------------------------------------------------------------------*/
-/*--------                  PRIVATE METHODS                   -------*/
-/*-------------------------------------------------------------------*/
-
 /*! Loads up all of the plugins in the plugin directory */
 void PluginManager::loadPlugins(){
 	//Get a list of files in the plugins directory
@@ -70,6 +63,7 @@ void PluginManager::loadPlugins(){
 	qDebug()<<"Path: "<<pluginFolder<<". Available plugins: "<<fileList;
 
 	//Load functions pointing to each plugin
+	QString failureMsg;
 	for(QList<QString>::iterator fileIter = fileList.begin(); fileIter != fileList.end(); ++fileIter){
 		QString filePath = pluginDirectory.absolutePath() + "/" + *fileIter;
 		qDebug()<<"Loading: "<<filePath;
@@ -93,8 +87,13 @@ void PluginManager::loadPlugins(){
 			pluginFunctionMap[tmpPluginName] = createPluginFunction;
 		}
 		else{
-			throw SpikeStreamException("Failed to obtain required functions from library " + *fileIter);
+			failureMsg += *fileIter + " ";
 		}
+	}
+
+	//Throw exception if we have failed to load some or all of the plugins.
+	if(!failureMsg.isEmpty()){
+		throw SpikeStreamException("Failed to obtain required functions from librarie(s): " + failureMsg);
 	}
 }
 

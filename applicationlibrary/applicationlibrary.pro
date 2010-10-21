@@ -194,6 +194,13 @@ SOURCES += src/models/NeuronGroupModel.cpp \
 
 
 #----------------------------------------------#
+#---               Simulation               ---#
+#----------------------------------------------#
+HEADERS += include/AbstractSimulation.h
+SOURCES += src/simulation/AbstractSimulation.cpp
+
+
+#----------------------------------------------#
 #---                   Views                ---#
 #----------------------------------------------#
 HEADERS += include/NeuronGroupTableView.h \

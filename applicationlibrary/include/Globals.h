@@ -2,6 +2,7 @@
 #define GLOBALS_H
 
 //SpikeStream includes
+#include "AbstractSimulation.h"
 #include "AnalysisDao.h"
 #include "Archive.h"
 #include "ArchiveWidget.h"
@@ -33,6 +34,7 @@ namespace spikestream {
 			static Network* getNetwork();
 			static NetworkDao* getNetworkDao();
 			static NetworkDisplay* getNetworkDisplay();
+			static AbstractSimulation* getSimulation();
 			static QString getSpikeStreamRoot();
 			static QString getWorkingDirectory();
 			static bool isAnalysisRunning();
@@ -46,7 +48,7 @@ namespace spikestream {
 			static void setAnalysisID(const QString& analysisName, unsigned int id);
 			static void setAnalysisRunning(const QString& analysisName);
 			static void setArchivePlaying(bool archivePlaying);
-			static void setSimulationLoaded(bool simulationLoaded);
+			static void setSimulation(AbstractSimulation* simulation);
 			static void setSimulationLoading(bool simulationLoading);
 			static void setSimulationRunning(bool simulationRunning);
 
@@ -81,15 +83,15 @@ namespace spikestream {
 			/*! The current loaded archive */
 			static Archive* archive;
 
+			/*! The current simulation */
+			static AbstractSimulation* simulation;
+
 			/*! Stores the id for each analysis type.
 				An ID of 0 indicates that no analysis is loaded for that type. */
 			static QHash<QString, unsigned int> analysisMap;
 
 			/*! Records whether a particular analysis is running. */
 			static QHash<QString, bool> analysisRunningMap;
-
-			/*! Records if a simulation is loaded */
-			static bool simulationLoaded;
 
 			/*! Records if a simulation is in the process of being loaded */
 			static bool simulationLoading;

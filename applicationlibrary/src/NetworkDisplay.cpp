@@ -14,6 +14,7 @@ NetworkDisplay::NetworkDisplay(){
 
 	//Inform other classes when the display has changed
 	connect(this, SIGNAL(networkDisplayChanged()), Globals::getEventRouter(), SLOT(networkDisplayChangedSlot()), Qt:: QueuedConnection);
+	connect(this, SIGNAL(neuronGroupDisplayChanged()), Globals::getEventRouter(), SLOT(neuronGroupDisplayChangedSlot()), Qt:: QueuedConnection);
 
 	//Listen for changes to network viewer
 	connect(Globals::getEventRouter(), SIGNAL(networkViewChangedSignal()), this, SLOT(clearZoom()));
@@ -81,7 +82,7 @@ void NetworkDisplay::networkChanged(){
 
 	if(Globals::networkLoaded()){
 		//Make the neuron groups visible by default
-		setVisibleNeuronGroupIDs(Globals::getNetwork()->getNeuronGroupIDs());
+		setVisibleNeuronGroupIDs(Globals::getNetwork()->getNeuronGroupIDs(), false);
 
 		//Show connection groups that are smaller than the loading threshold
 		QList<unsigned> visibleConGrpIDs;
@@ -90,7 +91,7 @@ void NetworkDisplay::networkChanged(){
 			if(tmpConGrp->size() <= connectionLoadingThreshold)
 				visibleConGrpIDs.append(tmpConGrp->getID());
 		}
-		setVisibleConnectionGroupIDs(visibleConGrpIDs);
+		setVisibleConnectionGroupIDs(visibleConGrpIDs, false);
 	}
 }
 
@@ -185,21 +186,6 @@ void NetworkDisplay::removeHighlightNeurons(const QList<unsigned int>& neuronIDs
 }
 
 
-/*! Clears all of the entries in the neuron color map */
-void NetworkDisplay::clearNeuronColorMap(){
-	QHash<unsigned int, RGBColor*>::iterator colorMapEnd = neuronColorMap->end();
-	for(QHash<unsigned int, RGBColor*>::iterator iter = neuronColorMap->begin(); iter != colorMapEnd; ++iter){
-		//Don't delete one of the default colours - several neuron ids can point to the same default color for efficiency
-		if(!defaultColorMap.contains(iter.value()))
-			delete iter.value();
-	}
-	neuronColorMap->clear();
-
-	//Inform other classes that the display has changed
-	emit networkDisplayChanged();
-}
-
-
 /*! Returns true if the specified connection group is currently visible */
 bool NetworkDisplay::connectionGroupVisible(unsigned int conGrpID){
 	if(connGrpDisplayMap.contains(conGrpID))
@@ -270,7 +256,7 @@ void NetworkDisplay::setNeuronColorMap(QHash<unsigned int, RGBColor*>* newMap){
 	neuronColorMap = newMap;
 
 	//Inform other classes that the display has changed
-	emit networkDisplayChanged();
+	emit neuronGroupDisplayChanged();
 }
 
 
@@ -283,7 +269,7 @@ void NetworkDisplay::setNeuronGroupVisibility(unsigned int neurGrpID, bool visib
 		neurGrpDisplayMap.remove(neurGrpID);
 	}
 	//Inform other classes that the display has changed
-	emit networkDisplayChanged();
+	emit neuronGroupDisplayChanged();
 }
 
 
@@ -295,7 +281,7 @@ void NetworkDisplay::setNeuronTransparency(float neuronTransparency){
 
 
 /*! Sets the list of connection groups that are displayed */
-void NetworkDisplay::setVisibleConnectionGroupIDs(const QList<unsigned int>& connGrpIDs){
+void NetworkDisplay::setVisibleConnectionGroupIDs(const QList<unsigned int>& connGrpIDs, bool emitDisplayChangedSignal){
 	//Obtain and lock the mutex
 	QMutexLocker locker(&mutex);
 
@@ -305,12 +291,13 @@ void NetworkDisplay::setVisibleConnectionGroupIDs(const QList<unsigned int>& con
 		connGrpDisplayMap[*iter] = true;
 
 	//Inform other classes that the display has changed
-	emit networkDisplayChanged();
+	if(emitDisplayChangedSignal)
+		emit networkDisplayChanged();
 }
 
 
 /*! Sets the list of neuron groups that are displayed */
-void NetworkDisplay::setVisibleNeuronGroupIDs(const QList<unsigned int>& neurGrpIDs){
+void NetworkDisplay::setVisibleNeuronGroupIDs(const QList<unsigned int>& neurGrpIDs, bool emitDisplayChangedSignal){
 	//Obtain and lock the mutex
 	QMutexLocker locker(&mutex);
 
@@ -319,7 +306,8 @@ void NetworkDisplay::setVisibleNeuronGroupIDs(const QList<unsigned int>& neurGrp
 		neurGrpDisplayMap[*iter] = true;
 
 	//Inform other classes that the display has changed
-	emit networkDisplayChanged();
+	if(emitDisplayChangedSignal)
+		emit neuronGroupDisplayChanged();
 }
 
 
@@ -491,6 +479,18 @@ void  NetworkDisplay::renderCurrentWeights(){
 /*----------------------------------------------------------*/
 /*-----               PRIVATE METHODS                  -----*/
 /*----------------------------------------------------------*/
+
+/*! Clears all of the entries in the neuron color map */
+void NetworkDisplay::clearNeuronColorMap(){
+	QHash<unsigned int, RGBColor*>::iterator colorMapEnd = neuronColorMap->end();
+	for(QHash<unsigned int, RGBColor*>::iterator iter = neuronColorMap->begin(); iter != colorMapEnd; ++iter){
+		//Don't delete one of the default colours - several neuron ids can point to the same default color for efficiency
+		if(!defaultColorMap.contains(iter.value()))
+			delete iter.value();
+	}
+	neuronColorMap->clear();
+}
+
 
 /*! Checks that a particular connection mode flag is valid and throws an exception if not */
 void NetworkDisplay::checkConnectionModeFlag(unsigned int flag){

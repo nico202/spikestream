@@ -122,12 +122,25 @@ double ConnectionGroup::getParameter(const QString& paramName){
 }
 
 
+/*! Returns the ID of the synapse type of this connection group */
+unsigned ConnectionGroup::getSynapseTypeID(){
+	return info.getSynapseTypeID();
+}
+
 /*! Returns a list of connections to the neuron with the specified id.
     Exception is thrown if the neuron cannot be found. */
 QList<Connection*> ConnectionGroup::getToConnections(unsigned int neurID){
 	if(!toConnectionMap.contains(neurID))
 		return QList<Connection*>();//Returns an empty connection list without filling map with invalid from and to neurons
 	return toConnectionMap[neurID];
+}
+
+
+/*! Returns true if the parameters have been set. */
+bool ConnectionGroup::parametersSet(){
+	if(getInfo().getSynapseType().getParameterCount() == parameterMap.size())
+		return true;
+	return false;
 }
 
 
@@ -146,10 +159,27 @@ void ConnectionGroup::setDescription(const QString& description){
 }
 
 
-
 /*! Sets the FROM neuron group ID */
 void ConnectionGroup::setFromNeuronGroupID(unsigned id){
 	info.setFromNeuronGroupID(id);
+}
+
+
+/*! Sets the parameters of the connection group.
+	Throws an exception if the parameters do not match those in the synapse type. */
+void ConnectionGroup::setParameters(QHash<QString, double> &paramMap){
+	//Get the neuron type associated with this neuron group
+	SynapseType synType = getInfo().getSynapseType();
+	QList<ParameterInfo> paramInfoList = synType.getParameterInfoList();
+	if(paramInfoList.size() != paramMap.size())
+		throw SpikeStreamException("ConnectionGroup: failed to set parameters. Mismatch between number of parameters.");
+	foreach(ParameterInfo paramInfo, paramInfoList){
+		if(!paramMap.contains(paramInfo.getName()))
+			throw SpikeStreamException("ConnectionGroup: failed to set parameters. Missing parameter: " + paramInfo.getName());
+	}
+
+	//Parameters are ok - store map.
+	this->parameterMap = paramMap;
 }
 
 

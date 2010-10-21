@@ -9,20 +9,23 @@
 #include "Util.h"
 using namespace spikestream;
 
+//Other includes
+#include "boost/random.hpp"
+
 //Outputs debugging information for NeMo calls
 //#define DEBUG_STEP
 //#define DEBUG_WEIGHTS
 
 
 /*! Constructor */
-NemoWrapper::NemoWrapper(){
+NemoWrapper::NemoWrapper() : AbstractSimulation() {
 	//Initialise variables
 	currentTaskID = NO_TASK_DEFINED;
 	simulationLoaded = false;
 	stopThread = true;
 	archiveMode = false;
 	monitorFiringNeurons = false;
-	monitorTimeStep = true;
+	monitor = true;
 	monitorWeights = false;
 	updateInterval_ms = 500;
 
@@ -164,7 +167,6 @@ void  NemoWrapper::setInjectNoise(unsigned neuronGroupID, double percentage){
 	injectNoiseMap[neuronGroupID] = Util::rUInt( (percentage / 100.0) * (double)Globals::getNetwork()->getNeuronGroup(neuronGroupID)->size());
 	if(injectNoiseMap[neuronGroupID] > (unsigned)Globals::getNetwork()->getNeuronGroup(neuronGroupID)->size())
 		throw SpikeStreamException("Number of neurons to fire is greater than neuron group size: " + QString::number(injectNoiseMap[neuronGroupID]));
-	qDebug()<<"NETWORK SIZE: "<<Globals::getNetwork()->getNeuronGroup(neuronGroupID)->size()<<"; NUM NEUR TO FIRE: "<<injectNoiseMap[neuronGroupID];
 }
 
 
@@ -207,6 +209,10 @@ void NemoWrapper::run(){
 			//Save weights
 			else if(currentTaskID == SAVE_WEIGHTS_TASK){
 				saveNemoWeights();
+			}
+			//Set neuron parameters
+			else if(currentTaskID == SET_NEURON_PARAMETERS_TASK){
+				setNeuronParametersInNemo();
 			}
 			//Do nothing
 			else if(currentTaskID == NO_TASK_DEFINED){
@@ -282,8 +288,8 @@ void NemoWrapper::setMonitorFiringNeurons(bool newMonitorMode){
 
 
 /*! Controls whether the time step is updated at each time step. */
-void NemoWrapper::setMonitorTimeStep(bool mode){
-	this->monitorTimeStep = mode;
+void NemoWrapper::setMonitor(bool mode){
+	this->monitor = mode;
 }
 
 
@@ -291,6 +297,23 @@ void NemoWrapper::setMonitorTimeStep(bool mode){
 	field in the database. Does this operation every time step until it is turned off. */
 void  NemoWrapper::setMonitorWeights(bool enable){
 	monitorWeights = enable;
+}
+
+
+/*! Sets the parameters of the neurons within NeMo */
+void NemoWrapper::setNeuronParameters(unsigned neuronGroupID, QHash<QString, double> parameterMap){
+	if(!simulationLoaded)
+		throw SpikeStreamException("Cannot set neuron parameters - no simulation loaded.");
+	this->neuronGroupID = neuronGroupID;
+	neuronParameterMap = parameterMap;
+}
+
+
+/*! Sets the parameters of the synapses within NeMo */
+void NemoWrapper::setSynapseParameters(unsigned connectionGroupID, QHash<QString, double> parameterMap){
+	if(!simulationLoaded)
+		throw SpikeStreamException("Cannot set synapse parameters - no simulation loaded.");
+	throw SpikeStreamException("This method should not be called because it is not implemented.");
 }
 
 
@@ -501,6 +524,108 @@ void NemoWrapper::setError(const QString& errorMessage){
 }
 
 
+/*! Sets the neuron parameters in the NeMo simulation.
+	FIXME: CODE COPIED FROM NEMO LOADER; PUT SOMEWHERE GENERIC. */
+void NemoWrapper::setNeuronParametersInNemo(){
+	if(neuronGroupID == 0){
+		throw SpikeStreamException("Failed to set neuron parameters. NeuronGroupID has not been set.");
+	}
+
+	//Get the neuron group
+	NeuronGroup* tmpNeurGrp = Globals::getNetwork()->getNeuronGroup(neuronGroupID);
+
+	//Set the parameters depending on the type of neuron.
+	if(tmpNeurGrp->getInfo().getNeuronType().getDescription() == "Izhikevich Excitatory Neuron"){
+		setExcitatoryNeuronParameters(tmpNeurGrp);
+	}
+	else{
+		setInhibitoryNeuronParameters(tmpNeurGrp);
+	}
+}
+
+
+/*! Sets the parameters in an excitatory neuron group */
+void NemoWrapper::setExcitatoryNeuronParameters(NeuronGroup* neuronGroup){
+//	//Get the parameters
+//	float a = neuronGroup->getParameter("a");
+//	float b = neuronGroup->getParameter("b");
+//	float c_1 = neuronGroup->getParameter("c_1");
+//	float d_1 = neuronGroup->getParameter("d_1");
+//	float d_2 = neuronGroup->getParameter("d_2");
+//	float v = neuronGroup->getParameter("v");
+//	float sigma = neuronGroup->getParameter("sigma");
+
+//	//Create the random number generator (from: nemo/examples/random1k.cpp)
+//	rng_t rng;
+//	urng_t ranNumGen( rng, boost::uniform_real<double>(0, 1) );
+
+//	//Set parameters in the neurons
+//	float c, d, u, rand1, rand2;
+//	NeuronMap::iterator neurGrpEnd = neuronGroup->end();
+//	for(NeuronMap::iterator iter = neuronGroup->begin(); iter != neurGrpEnd; ++iter){
+//		//Get random numbers
+//		rand1 = ranNumGen();
+//		rand2 = ranNumGen();
+
+//		//Calculate excitatory neuron parameters
+//		c = v + c_1 * rand1 * rand2;
+//		d = d_1 - d_2 * rand1 * rand2;
+//		u = b * v;
+
+//		//Set parameters in neuron
+//		checkNemoOutput(
+//			nemo_set_neuron(
+//					nemoSimulation,
+//					iter.key(),
+//					a, b, c, d, u, v, sigma
+//			),
+//			"Failed to set Izhikevich excitatory neuron parameters."
+//		);
+//	}
+}
+
+
+/*! Sets the parameters in an inhibitory neuron group */
+void NemoWrapper::setInhibitoryNeuronParameters(NeuronGroup* neuronGroup){
+//	//Extract inhibitory neuron parameters
+//	float a_1 = neuronGroup->getParameter("a_1");
+//	float a_2 = neuronGroup->getParameter("a_2");
+//	float b_1 = neuronGroup->getParameter("b_1");
+//	float b_2 = neuronGroup->getParameter("b_2");
+//	float d = neuronGroup->getParameter("d");
+//	float v = neuronGroup->getParameter("v");
+//	float sigma = neuronGroup->getParameter("sigma");
+
+//	//Create the random number generator (from: nemo/examples/random1k.cpp)
+//	rng_t rng;
+//	urng_t ranNumGen( rng, boost::uniform_real<double>(0, 1) );
+
+//	//Set parameters in the neurons
+//	float a, b, u, rand1, rand2;
+//	NeuronMap::iterator neurGrpEnd = neuronGroup->end();
+//	for(NeuronMap::iterator iter = neuronGroup->begin(); iter != neurGrpEnd; ++iter){
+//		//Get random numbers
+//		rand1 = ranNumGen();
+//		rand2 = ranNumGen();
+
+//		//Calculate inhibitory neuron parameters
+//		a = a_1 + a_2 * rand1;
+//		b = b_1 - b_2 * rand2;
+//		u = b * v;
+
+//		//Set parameters in neuron FIXME
+//		checkNemoOutput(
+//			nemo_set_neuron(
+//					nemoSimulation,
+//					iter.key(),
+//					a, b, v, d, u, v, sigma
+//			),
+//			"Failed to set Izhikevich inhibitory neuron parameters."
+//		);
+//	}
+}
+
+
 /*! Advances the simulation by one step */
 void NemoWrapper::stepNemo(){
 	unsigned *firedArray, firedCount;
@@ -537,7 +662,7 @@ void NemoWrapper::stepNemo(){
 	//-----------------------------------------------
 	//         Process list of firing neurons
 	//-----------------------------------------------
-	if(archiveMode || monitorFiringNeurons){
+	if(archiveMode || (monitorFiringNeurons && monitor)){
 		//Add firing neuron ids to list
 		for(unsigned i=0; i<firedCount; ++i)
 			firingNeuronList.append(firedArray[i]);
@@ -560,14 +685,14 @@ void NemoWrapper::stepNemo(){
 	//--------------------------------------------
 	//             Retrieve weights
 	//--------------------------------------------
-	if(monitorWeights){
+	if(monitorWeights && monitor){
 		updateNetworkWeights();
 
 		//Inform other classes that weights have changed
 		Globals::getEventRouter()->weightsChangedSlot();
 	}
 
-	if(monitorTimeStep){
+	if(monitor){
 		/* Set flag to cause thread to wait for graphics to update.
 			This is needed even if we are just running a time step counter */
 		waitForGraphics = true;
@@ -589,7 +714,6 @@ void NemoWrapper::unloadNemo(){
 	mutex.tryLock();
 	mutex.unlock();
 	simulationLoaded = false;
-	Globals::setSimulationLoaded(simulationLoaded);
 }
 
 

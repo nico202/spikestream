@@ -116,6 +116,13 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	controlsVBox->addSpacing(10);
 	controlsVBox->addLayout(injectNoiseBox);
 
+	//Add widgets to enable injection of patterns
+	QHBoxLayout* injectPatternBox = new QHBoxLayout();
+	injectPatternNeurGrpCombo = new QComboBox();
+	injectPatternNeurGrpCombo->setMinimumSize(200, 27);
+	injectPatternBox->addWidget(injectPatternNeurGrpCombo);
+
+
 	//Put layout into enclosing box
 	mainVBox->addWidget(controlsWidget);
 	mainGroupBox->setLayout(mainVBox);
@@ -141,7 +148,7 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 
 /*! Destructor */
 NemoWidget::~NemoWidget(){
-
+	delete nemoWrapper;
 }
 
 
@@ -205,7 +212,6 @@ void NemoWidget::checkLoadingProgress(){
 	//Adjust buttons
 	loadButton->setEnabled(false);
 	unloadButton->setEnabled(true);
-	neuronParametersButton->setEnabled(false);
 	synapseParametersButton->setEnabled(false);
 	nemoParametersButton->setEnabled(false);
 	controlsWidget->setEnabled(true);
@@ -227,7 +233,9 @@ void NemoWidget::checkLoadingProgress(){
 		setArchiveDescriptionButton->setEnabled(true);
 		archiveDescriptionEdit->setEnabled(true);
 	}
-	Globals::setSimulationLoaded(true);
+
+	//Set nemo wrapper as the simulation in global scope
+	Globals::setSimulation(nemoWrapper);
 }
 
 
@@ -364,16 +372,20 @@ void NemoWidget::loadSimulation(){
 
 
 /*! Controls whether the time step is updated each time step. */
-void NemoWidget::monitorTimeStepChanged(int state){
+void NemoWidget::monitorChanged(int state){
 	try{
 		if(state == Qt::Checked){
-			nemoWrapper->setMonitorTimeStep(true);
+			nemoWrapper->setMonitor(true);
 			if(nemoWrapper->isSimulationLoaded()){
 				timeStepLabel->setText(QString::number(nemoWrapper->getTimeStep()));
 			}
+			monitorFiringNeuronsCheckBox->setEnabled(true);
+			monitorWeightsCheckBox->setEnabled(true);
 		}
 		else{
-			nemoWrapper->setMonitorTimeStep(false);
+			nemoWrapper->setMonitor(false);
+			monitorFiringNeuronsCheckBox->setEnabled(false);
+			monitorWeightsCheckBox->setEnabled(false);
 		}
 	}
 	catch(SpikeStreamException& ex){
@@ -510,6 +522,11 @@ void NemoWidget::setArchiveDescription(){
 
 /*! Sets the parameters of the neurons in the network */
 void  NemoWidget::setNeuronParameters(){
+	if(Globals::isSimulationLoaded()){
+		qWarning()<<"Method not yet implemented when simulation is loaded - wait 2 weeks!";
+		return;
+	}
+
 	NeuronParametersDialog* dialog = new NeuronParametersDialog(this);
 	dialog->exec();
 	delete dialog;
@@ -545,6 +562,7 @@ void NemoWidget::simulationStopped(){
 	playAction->setEnabled(true);
 	stopAction->setEnabled(false);
 	unloadButton->setEnabled(true);
+	neuronParametersButton->setEnabled(true);
 }
 
 
@@ -591,6 +609,7 @@ void NemoWidget::startSimulation(){
 		playAction->setEnabled(false);
 		stopAction->setEnabled(true);
 		unloadButton->setEnabled(false);
+		neuronParametersButton->setEnabled(false);
 		saveWeightsButton->setEnabled(false);
 	}
 	catch(SpikeStreamException& ex){
@@ -633,11 +652,11 @@ void NemoWidget::unloadSimulation(bool confirmWithUser){
 
 	//Unload the simulation
 	nemoWrapper->unloadSimulation();
+	Globals::setSimulation(NULL);
 
 	//Set buttons appropriately
 	loadButton->setEnabled(true);
 	unloadButton->setEnabled(false);
-	neuronParametersButton->setEnabled(true);
 	synapseParametersButton->setEnabled(true);
 	nemoParametersButton->setEnabled(true);
 	controlsWidget->setEnabled(false);
@@ -738,11 +757,11 @@ QToolBar* NemoWidget::getToolBar(){
 	timeStepLabel->setAlignment(Qt::AlignCenter);
 	tmpToolBar->addWidget(timeStepLabel);
 
-	QCheckBox* monitorTimeStepChkBox = new QCheckBox("Monitor");
-	monitorTimeStepChkBox->setChecked(true);
-	connect(monitorTimeStepChkBox, SIGNAL(stateChanged(int)), this, SLOT(monitorTimeStepChanged(int)));
+	QCheckBox* monitorChkBox = new QCheckBox("Monitor");
+	monitorChkBox->setChecked(true);
+	connect(monitorChkBox, SIGNAL(stateChanged(int)), this, SLOT(monitorChanged(int)));
 	tmpToolBar->addSeparator();
-	tmpToolBar->addWidget(monitorTimeStepChkBox);
+	tmpToolBar->addWidget(monitorChkBox);
 
 	return tmpToolBar;
 }

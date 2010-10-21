@@ -308,9 +308,9 @@ void NetworkDaoThread::addConnectionGroups(){
 		//Add parameter table entry for this connection group
 		executeQuery( "INSERT INTO " + synapseType.getParameterTableName() + "(ConnectionGroupID) VALUES (" + QString::number(connectionGroup->getID()) + ")" );
 
-		//Set parameters in connection group
-		QHash<QString, double> tmpParamMap = getSynapseParameters(connectionGroup->getInfo());
-		connectionGroup->setParameters(tmpParamMap);
+		//Copy parameters from connection group into parameter table
+		QHash<QString, double> tmpParamMap = connectionGroup->getParameters();
+		setSynapseParameters(connGrpInfo, tmpParamMap);
 
 		//Check for cancellation of task
 		if(stopThread)
@@ -463,9 +463,9 @@ void NetworkDaoThread::addNeuronGroups(){
 		//Add parameter table entry for this neuron group
 		executeQuery( "INSERT INTO " + neurType.getParameterTableName() + "(NeuronGroupID) VALUES (" + QString::number(neuronGroup->getID()) + ")" );
 
-		//Set parameters in neuron group
-		QHash<QString, double> tmpParamMap = getNeuronParameters(neuronGroup->getInfo());
-		neuronGroup->setParameters(tmpParamMap);
+		//Copy parameters from neuron group into parameter table
+		QHash<QString, double> tmpParamMap = neuronGroup->getParameters();
+		setNeuronParameters(neurGrpInfo, tmpParamMap);
 
 		//Check for cancellation of task
 		if(stopThread)

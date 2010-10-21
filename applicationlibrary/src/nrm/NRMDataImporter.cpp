@@ -11,6 +11,9 @@ using namespace spikestream;
 #include <iostream>
 using namespace std;
 
+/*! Should match hard-coded ID in database! */
+#define WEIGHTLESS_SYNAPSE_TYPE_ID 2
+
 
 /*! Constructor */
 NRMDataImporter::NRMDataImporter(const DBInfo& networkDBInfo, const DBInfo& archiveDBInfo){
@@ -229,7 +232,7 @@ void NRMDataImporter::addConnections(){
 				throw SpikeStreamException("From and/or To neuron group sizes do not match.");
 
 			//Create a SpikeStream connection group
-			ConnectionGroup* newConGrp = new ConnectionGroup( ConnectionGroupInfo(0, "Untitled", nrmFromLayer->spikeStreamID, nrmToLayer->spikeStreamID, QHash<QString, double>(),2) );
+			ConnectionGroup* newConGrp = new ConnectionGroup( ConnectionGroupInfo(0, "Untitled", nrmFromLayer->spikeStreamID, nrmToLayer->spikeStreamID, QHash<QString, double>(), Globals::getNetworkDao()->getSynapseType(WEIGHTLESS_SYNAPSE_TYPE_ID)) );
 
 			//Work through the neurons in the to layer and add their connections to the new SpikeStream group
 			unsigned int fromNeuronID = 0, toNeuronID = 0;

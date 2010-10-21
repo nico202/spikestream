@@ -103,7 +103,7 @@ void NRMImportDialog::addNetwork(){
 		}
 
 		//Create a neuron info describing group and use it to create a new group
-		NeuronGroupInfo tmpGrpInfo(0, inputList[i]->frameName.data(), inputList[i]->frameName.data(), QHash<QString, double>(), WEIGHTLESS_NEURON_TYPE_ID);
+		NeuronGroupInfo tmpGrpInfo(0, inputList[i]->frameName.data(), inputList[i]->frameName.data(), QHash<QString, double>(), Globals::getNetworkDao()->getNeuronType(WEIGHTLESS_NEURON_TYPE_ID));
 		NeuronGroup* tmpNeurGrp = new NeuronGroup(tmpGrpInfo);
 
 		//Add layer with width, height and position to group
@@ -133,7 +133,7 @@ void NRMImportDialog::addNetwork(){
 		}
 
 		//Create a neuron info describing group and use it to create a new group
-		NeuronGroupInfo tmpGrpInfo(0, neuralList[i]->frameName.data(), neuralList[i]->frameName.data(), QHash<QString, double>(), WEIGHTLESS_NEURON_TYPE_ID);
+		NeuronGroupInfo tmpGrpInfo(0, neuralList[i]->frameName.data(), neuralList[i]->frameName.data(), QHash<QString, double>(), Globals::getNetworkDao()->getNeuronType(WEIGHTLESS_NEURON_TYPE_ID));
 		NeuronGroup* tmpNeurGrp = new NeuronGroup(tmpGrpInfo);
 
 		//Add layer with width, height and position to group

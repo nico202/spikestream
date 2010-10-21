@@ -70,6 +70,7 @@ namespace spikestream {
 			void save();
 			void setError(const QString& errorMsg);
 			void setConnectionGroupProperties(unsigned conGrpID, const QString& description);
+			void setNeuronGroupParameters(unsigned neurGrpID, QHash<QString, double> paramMap);
 			void setNeuronGroupProperties(unsigned neurGrpID, const QString& name, const QString& description);
 			void setPrototypeMode(bool mode);
 			int size();
@@ -141,6 +142,12 @@ namespace spikestream {
 				can be carried out or the weights saved. */
 			bool prototypeMode;
 
+			/*! Set to true when the parameters of a neuron group that is already stored are changed. */
+			bool neuronGroupParametersChanged;
+
+			/*! Set to true when the parameters of a connection group that is already stored are changed. */
+			bool connectionGroupParametersChanged;
+
 			static const int ADD_NEURONS_TASK = 1;
 			static const int DELETE_CONNECTIONS_TASK = 2;
 			static const int DELETE_NEURONS_TASK = 3;
@@ -161,6 +168,7 @@ namespace spikestream {
 			bool filterConnection(Connection* connection, unsigned connectionMode);
 			unsigned getTemporaryConGrpID();
 			unsigned getTemporaryNeurGrpID();
+			void initializeVariables();
 			void loadConnectionGroupsInfo();
 			void loadNeuronGroupsInfo();
 			void startAddConnectionGroups();
