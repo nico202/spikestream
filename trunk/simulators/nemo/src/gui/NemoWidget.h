@@ -35,6 +35,8 @@ namespace spikestream {
 			void checkResetWeightsProgress();
 			void checkSaveWeightsProgress();
 			void injectNoiseButtonClicked();
+			void injectPatternButtonClicked();
+			void loadPattern(QString comboStr);
 			void loadSimulation();
 			void monitorChanged(int state);
 			void monitorFiringNeuronsStateChanged(int state);
@@ -52,6 +54,7 @@ namespace spikestream {
 			void startSimulation();
 			void stepSimulation();
 			void stopSimulation();
+			void sustainPatternChanged(bool enabled);
 			void unloadSimulation(bool confirmWithUser=true);
 			void updateProgress(int stepsCompleted, int totalSteps);
 			void updateTimeStep(unsigned int timeStep, const QList<unsigned>& neuronIDList);
@@ -145,9 +148,19 @@ namespace spikestream {
 			/*! Combo box controlling which neuron group noise is injected into */
 			QComboBox* injectNoiseNeuronGroupCombo;
 
+			/*! Combo to select which neuron group gets patterns injected into it. */
+			QComboBox* injectPatternNeurGrpCombo;
+
+			/*! Combo to select the pattern to be injected or to add a new pattern. */
+			QComboBox* patternCombo;
+
+			/*! Button for injecting patterns into network. */
+			QPushButton* injectPatternButton;
+
 			//=======================  METHODS  =========================
 			bool checkForErrors();
 			void checkWidgetEnabled();
+			QString getFilePath(QString fileFilter);
 			unsigned getNeuronGroupID(QString neurGrpStr);
 			QToolBar* getToolBar();
 			void loadNeuronGroups();

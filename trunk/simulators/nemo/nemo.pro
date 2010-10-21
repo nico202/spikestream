@@ -14,7 +14,7 @@ QT += xml opengl sql
 #----------------------------------------------#
 #---              INCLUDE PATH              ---#
 #----------------------------------------------#
-INCLUDEPATH += src src/model src/gui \
+INCLUDEPATH += src src/model src/gui src/managers \
 				$${SPIKESTREAM_ROOT_DIR}/library/include \
 				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/include
 unix {
@@ -47,17 +47,26 @@ SOURCES += src/gui/NemoWidget.cpp \
 
 
 #----------------------------------------------#
+#-----              Managers              -----#
+#----------------------------------------------#
+HEADERS += src/managers/PatternManager.h
+SOURCES += src/managers/PatternManager.cpp
+
+
+#----------------------------------------------#
 #-----              Model                 -----#
 #----------------------------------------------#
 HEADERS += src/model/NemoWrapper.h \
 			src/model/NemoLoader.h \
 			src/model/STDPFunctions.h \
 			src/model/StandardSTDPFunction.h \
-			src/model/AbstractSTDPFunction.h
+			src/model/AbstractSTDPFunction.h \
+			src/model/Pattern.h
 SOURCES += src/model/NemoWrapper.cpp \
 			src/model/NemoLoader.cpp \
 			src/model/STDPFunctions.cpp \
 			src/model/StandardSTDPFunction.cpp \
-			src/model/AbstractSTDPFunction.cpp
+			src/model/AbstractSTDPFunction.cpp \
+			src/model/Pattern.cpp
 
 

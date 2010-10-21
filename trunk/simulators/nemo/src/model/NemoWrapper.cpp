@@ -28,6 +28,9 @@ NemoWrapper::NemoWrapper() : AbstractSimulation() {
 	monitor = true;
 	monitorWeights = false;
 	updateInterval_ms = 500;
+	injectionPattern = NULL;
+	patternNeuronGroupID = 0;
+
 
 	//Zero is the default STDP function
 	stdpFunctionID = 0;
@@ -276,6 +279,13 @@ void NemoWrapper::setArchiveMode(bool newArchiveMode){
 }
 
 
+/*! Sets the pattern to be injected along with the neuron group.
+	The pattern can be injected for one time step or continuously. */
+void NemoWrapper::setInjectionPattern(Pattern* pattern, unsigned neuronGroupID, bool sustain){
+
+}
+
+
 /*! Sets the monitor mode, which controls whether firing neuron data is extracted
 	from the simulation at each time step */
 void NemoWrapper::setMonitorFiringNeurons(bool newMonitorMode){
@@ -306,6 +316,7 @@ void NemoWrapper::setNeuronParameters(unsigned neuronGroupID, QHash<QString, dou
 		throw SpikeStreamException("Cannot set neuron parameters - no simulation loaded.");
 	this->neuronGroupID = neuronGroupID;
 	neuronParameterMap = parameterMap;
+	currentTaskID = SET_NEURON_PARAMETERS_TASK;
 }
 
 
@@ -546,83 +557,83 @@ void NemoWrapper::setNeuronParametersInNemo(){
 
 /*! Sets the parameters in an excitatory neuron group */
 void NemoWrapper::setExcitatoryNeuronParameters(NeuronGroup* neuronGroup){
-//	//Get the parameters
-//	float a = neuronGroup->getParameter("a");
-//	float b = neuronGroup->getParameter("b");
-//	float c_1 = neuronGroup->getParameter("c_1");
-//	float d_1 = neuronGroup->getParameter("d_1");
-//	float d_2 = neuronGroup->getParameter("d_2");
-//	float v = neuronGroup->getParameter("v");
-//	float sigma = neuronGroup->getParameter("sigma");
+	//Get the parameters
+	float a = neuronGroup->getParameter("a");
+	float b = neuronGroup->getParameter("b");
+	float c_1 = neuronGroup->getParameter("c_1");
+	float d_1 = neuronGroup->getParameter("d_1");
+	float d_2 = neuronGroup->getParameter("d_2");
+	float v = neuronGroup->getParameter("v");
+	float sigma = neuronGroup->getParameter("sigma");
 
-//	//Create the random number generator (from: nemo/examples/random1k.cpp)
-//	rng_t rng;
-//	urng_t ranNumGen( rng, boost::uniform_real<double>(0, 1) );
+	//Create the random number generator (from: nemo/examples/random1k.cpp)
+	rng_t rng;
+	urng_t ranNumGen( rng, boost::uniform_real<double>(0, 1) );
 
-//	//Set parameters in the neurons
-//	float c, d, u, rand1, rand2;
-//	NeuronMap::iterator neurGrpEnd = neuronGroup->end();
-//	for(NeuronMap::iterator iter = neuronGroup->begin(); iter != neurGrpEnd; ++iter){
-//		//Get random numbers
-//		rand1 = ranNumGen();
-//		rand2 = ranNumGen();
+	//Set parameters in the neurons
+	float c, d, u, rand1, rand2;
+	NeuronMap::iterator neurGrpEnd = neuronGroup->end();
+	for(NeuronMap::iterator iter = neuronGroup->begin(); iter != neurGrpEnd; ++iter){
+		//Get random numbers
+		rand1 = ranNumGen();
+		rand2 = ranNumGen();
 
-//		//Calculate excitatory neuron parameters
-//		c = v + c_1 * rand1 * rand2;
-//		d = d_1 - d_2 * rand1 * rand2;
-//		u = b * v;
+		//Calculate excitatory neuron parameters
+		c = v + c_1 * rand1 * rand2;
+		d = d_1 - d_2 * rand1 * rand2;
+		u = b * v;
 
-//		//Set parameters in neuron
-//		checkNemoOutput(
-//			nemo_set_neuron(
-//					nemoSimulation,
-//					iter.key(),
-//					a, b, c, d, u, v, sigma
-//			),
-//			"Failed to set Izhikevich excitatory neuron parameters."
-//		);
-//	}
+		//Set parameters in neuron
+		checkNemoOutput(
+			nemo_set_neuron(
+					nemoSimulation,
+					iter.key(),
+					a, b, c, d, u, v, sigma
+			),
+			"Failed to set Izhikevich excitatory neuron parameters."
+		);
+	}
 }
 
 
 /*! Sets the parameters in an inhibitory neuron group */
 void NemoWrapper::setInhibitoryNeuronParameters(NeuronGroup* neuronGroup){
-//	//Extract inhibitory neuron parameters
-//	float a_1 = neuronGroup->getParameter("a_1");
-//	float a_2 = neuronGroup->getParameter("a_2");
-//	float b_1 = neuronGroup->getParameter("b_1");
-//	float b_2 = neuronGroup->getParameter("b_2");
-//	float d = neuronGroup->getParameter("d");
-//	float v = neuronGroup->getParameter("v");
-//	float sigma = neuronGroup->getParameter("sigma");
+	//Extract inhibitory neuron parameters
+	float a_1 = neuronGroup->getParameter("a_1");
+	float a_2 = neuronGroup->getParameter("a_2");
+	float b_1 = neuronGroup->getParameter("b_1");
+	float b_2 = neuronGroup->getParameter("b_2");
+	float d = neuronGroup->getParameter("d");
+	float v = neuronGroup->getParameter("v");
+	float sigma = neuronGroup->getParameter("sigma");
 
-//	//Create the random number generator (from: nemo/examples/random1k.cpp)
-//	rng_t rng;
-//	urng_t ranNumGen( rng, boost::uniform_real<double>(0, 1) );
+	//Create the random number generator (from: nemo/examples/random1k.cpp)
+	rng_t rng;
+	urng_t ranNumGen( rng, boost::uniform_real<double>(0, 1) );
 
-//	//Set parameters in the neurons
-//	float a, b, u, rand1, rand2;
-//	NeuronMap::iterator neurGrpEnd = neuronGroup->end();
-//	for(NeuronMap::iterator iter = neuronGroup->begin(); iter != neurGrpEnd; ++iter){
-//		//Get random numbers
-//		rand1 = ranNumGen();
-//		rand2 = ranNumGen();
+	//Set parameters in the neurons
+	float a, b, u, rand1, rand2;
+	NeuronMap::iterator neurGrpEnd = neuronGroup->end();
+	for(NeuronMap::iterator iter = neuronGroup->begin(); iter != neurGrpEnd; ++iter){
+		//Get random numbers
+		rand1 = ranNumGen();
+		rand2 = ranNumGen();
 
-//		//Calculate inhibitory neuron parameters
-//		a = a_1 + a_2 * rand1;
-//		b = b_1 - b_2 * rand2;
-//		u = b * v;
+		//Calculate inhibitory neuron parameters
+		a = a_1 + a_2 * rand1;
+		b = b_1 - b_2 * rand2;
+		u = b * v;
 
-//		//Set parameters in neuron FIXME
-//		checkNemoOutput(
-//			nemo_set_neuron(
-//					nemoSimulation,
-//					iter.key(),
-//					a, b, v, d, u, v, sigma
-//			),
-//			"Failed to set Izhikevich inhibitory neuron parameters."
-//		);
-//	}
+		//Set parameters in neuron FIXME
+		checkNemoOutput(
+			nemo_set_neuron(
+					nemoSimulation,
+					iter.key(),
+					a, b, v, d, u, v, sigma
+			),
+			"Failed to set Izhikevich inhibitory neuron parameters."
+		);
+	}
 }
 
 
