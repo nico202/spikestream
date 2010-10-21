@@ -1,6 +1,9 @@
 #ifndef CONNECTIONGROUPINFO_H
 #define CONNECTIONGROUPINFO_H
 
+//SpikeStream includes
+#include "SynapseType.h"
+
 //Qt includes
 #include <QString>
 #include <QHash>
@@ -12,7 +15,7 @@ namespace spikestream {
     class ConnectionGroupInfo {
 		public:
 			ConnectionGroupInfo();
-			ConnectionGroupInfo(unsigned int id, const QString& desc, unsigned int fromID, unsigned int toID, QHash<QString, double> paramMap, unsigned int synTypeID);
+			ConnectionGroupInfo(unsigned int id, const QString& desc, unsigned int fromID, unsigned int toID, QHash<QString, double> paramMap, const SynapseType& synapseType);
 			ConnectionGroupInfo(const ConnectionGroupInfo& conGrpInfo);
 			~ConnectionGroupInfo();
 			ConnectionGroupInfo& operator=(const ConnectionGroupInfo& rhs);
@@ -21,7 +24,8 @@ namespace spikestream {
 			QString getDescription() const { return description; }
 			unsigned int getFromNeuronGroupID() const { return fromNeuronGroupID; }
 			unsigned int getToNeuronGroupID() const { return toNeuronGroupID; }
-			unsigned int getSynapseTypeID() const { return synapseTypeID; }
+			SynapseType getSynapseType() { return synapseType; }
+			unsigned int getSynapseTypeID() const { return synapseType.getID(); }
 			double getParameter(const QString& parameterName);
 			QHash<QString, double> getParameterMap() { return parameterMap; }
 			QString getParameterXML();
@@ -46,7 +50,7 @@ namespace spikestream {
 			unsigned int toNeuronGroupID;
 
 			/*! Type of synapses on the connection */
-			unsigned int synapseTypeID;
+			SynapseType synapseType;
 
 			/*! Parameters used to create the connection group - these are different from the synapse parameters. */
 			QHash<QString, double> parameterMap;

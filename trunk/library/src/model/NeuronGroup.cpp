@@ -221,6 +221,12 @@ QList<Neuron*> NeuronGroup::getNeurons(const Box& box){
 }
 
 
+/*! Returns the ID of the neuron group's type */
+unsigned NeuronGroup::getNeuronTypeID(){
+	return getInfo().getNeuronTypeID();
+}
+
+
 /*! Returns a parameter with the specified key.
 	Throws an exception if the parameter cannot be found */
 double NeuronGroup::getParameter(const QString &key){
@@ -261,6 +267,14 @@ Point3D NeuronGroup::getPointFromPositionKey(uint64_t positionKey){
 	positionKey >>= 21;
 	float tmpXPos = (float) (positionKey & keyExtractor);
 	return Point3D(tmpXPos, tmpYPos, tmpZPos);
+}
+
+
+/*! Returns true if the parameters have been set. */
+bool NeuronGroup::parametersSet(){
+	if(getInfo().getNeuronType().getParameterCount() == parameterMap.size())
+		return true;
+	return false;
 }
 
 
@@ -308,6 +322,25 @@ void NeuronGroup::setNeuronMap(NeuronMap* newMap){
 	delete neuronMap;
 	this->neuronMap = newMap;
 	neuronGroupChanged();
+}
+
+
+/*! Sets the parameters in the neuron group.
+	Throws an exception if these parameters are not appropriate
+	for the type of neuron in this group. */
+void NeuronGroup::setParameters(QHash<QString, double>& paramMap){
+	//Get the neuron type associated with this neuron group
+	NeuronType neurType = getInfo().getNeuronType();
+	QList<ParameterInfo> paramInfoList = neurType.getParameterInfoList();
+	if(paramInfoList.size() != paramMap.size())
+		throw SpikeStreamException("NeuronGroup: failed to set parameters. Mismatch between number of parameters.");
+	foreach(ParameterInfo paramInfo, paramInfoList){
+		if(!paramMap.contains(paramInfo.getName()))
+			throw SpikeStreamException("NeuronGroup: failed to set parameters. Missing parameter: " + paramInfo.getName());
+	}
+
+	//Parameters are ok - store map.
+	this->parameterMap = paramMap;
 }
 
 

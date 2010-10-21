@@ -18,10 +18,18 @@ PluginsDialog::PluginsDialog(QWidget* parent, const QString pluginFolder, const 
 	//Create vertical box to organize layout
 	QVBoxLayout* mainVerticalBox = new QVBoxLayout(this);
 
+	//Get list of available plugins - some plugins may fail to load and throw an exception
+	QString pluginPath = Globals::getSpikeStreamRoot() + pluginFolder;
+	PluginManager* pluginManager = new PluginManager(pluginPath);
 	try{
-		//Get list of available plugins
-		QString pluginPath = Globals::getSpikeStreamRoot() + pluginFolder;
-		PluginManager* pluginManager = new PluginManager(pluginPath);
+		pluginManager->loadPlugins();
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<ex.getMessage();
+	}
+
+	//Load up plugins that worked.
+	try{
 		QStringList pluginList = pluginManager->getPluginNames();
 
 		//Add list to combo box
@@ -46,8 +54,6 @@ PluginsDialog::PluginsDialog(QWidget* parent, const QString pluginFolder, const 
 
 		//Connect combo changed signal to slot loading appropriate analysis widget
 		connect(pluginsCombo, SIGNAL(currentIndexChanged(int)), stackedWidget, SLOT(setCurrentIndex(int)) );
-
-
 	}
 	catch(SpikeStreamException& ex){
 		qCritical()<<ex.getMessage();

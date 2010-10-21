@@ -28,15 +28,17 @@ namespace spikestream {
 			ConnectionGroupInfo getInfo() { return info; }
 			double getParameter(const QString& paramName);
 			QHash<QString, double> getParameters() { return parameterMap; }
+			unsigned getSynapseTypeID();
 			QList<Connection*> getToConnections(unsigned int neurID);
 			unsigned int getToNeuronGroupID() { return info.getToNeuronGroupID(); }
 			bool isLoaded() { return loaded; }
+			bool parametersSet();
 			void setConnectionMap(QHash<unsigned, Connection*>* newConnectionMap);
 			void setDescription(const QString& description);
 			void setFromNeuronGroupID(unsigned id);
 			void setID(unsigned int id) { info.setID(id); }
 			void setLoaded(bool loaded) { this->loaded = loaded; }
-			void setParameters(QHash<QString, double>& paramMap) { this->parameterMap = paramMap; }
+			void setParameters(QHash<QString, double>& paramMap);
 			void setTempWeight(unsigned connectionID, float tempWeight);
 			void setToNeuronGroupID(unsigned id);
 			void setWeight(unsigned connectionID, float weight);

@@ -23,7 +23,7 @@ NetworkDisplay* Globals::networkDisplay = new NetworkDisplay();
 bool Globals::rendering = false;
 QString Globals::spikeStreamRoot = "";
 QString Globals::workingDirectory = "";
-bool Globals::simulationLoaded = false;
+AbstractSimulation* Globals::simulation = NULL;
 bool Globals::simulationRunning = false;
 
 
@@ -144,6 +144,12 @@ NetworkDisplay* Globals::getNetworkDisplay(){
 }
 
 
+/*! Returns the simulation */
+AbstractSimulation* Globals::getSimulation(){
+	return Globals::simulation;
+}
+
+
 /*! Returns the root directory where SpikeStream is installed.*/
 QString Globals::getSpikeStreamRoot(){
 	return spikeStreamRoot;
@@ -178,7 +184,9 @@ bool Globals::isArchivePlaying() {
 
 /*! Returns true if a simulation is being loaded */
 bool  Globals::isSimulationLoaded(){
-	return Globals::simulationLoaded;
+	if(simulation == NULL)
+		return false;
+	return true;
 }
 
 
@@ -234,12 +242,6 @@ void Globals::setAnalysisID(const QString& analysisName, unsigned int id){
 /*! Records that a particular analysis is running */
 void Globals::setAnalysisRunning(const QString &analysisName){
 	analysisRunningMap[analysisName] = true;
-}
-
-
-/*! Sets the simulation loaded state */
-void Globals::setSimulationLoaded(bool simulationLoaded){
-	Globals::simulationLoaded = simulationLoaded;
 }
 
 
@@ -335,6 +337,13 @@ void Globals::setNetworkDao(NetworkDao* networkDao){
 /*! Sets whether the OpenGL rendering is taking place or is complete */
 void Globals::setRendering(bool rendering){
 	Globals::rendering = rendering;
+}
+
+
+/*! Sets the simulation.
+	It is the caller's responsibilty to delete the simulation. */
+void Globals::setSimulation(AbstractSimulation* simulation){
+	Globals::simulation = simulation;
 }
 
 

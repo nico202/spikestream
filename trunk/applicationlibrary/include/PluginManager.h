@@ -25,6 +25,7 @@ namespace spikestream {
 			~PluginManager();
 			QStringList getPluginNames() throw(SpikeStreamException);
 			QWidget* getPlugin(QString pluginName) throw(SpikeStreamException);
+			void loadPlugins();
 
 
 		private:
@@ -37,8 +38,6 @@ namespace spikestream {
 
 
 			//=============================== METHODS =============================
-			void loadPlugins();
-
     };
 
 }

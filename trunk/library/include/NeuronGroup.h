@@ -45,18 +45,20 @@ namespace spikestream {
 			Point3D& getNeuronLocation(unsigned int neuronID);
 			NeuronMap* getNeuronMap() { return neuronMap; }
 			QList<Neuron*> getNeurons(const Box& box);
+			unsigned getNeuronTypeID();
 			double getParameter(const QString& key);
 			QHash<QString, double> getParameters() { return parameterMap; }
 			static Point3D getPointFromPositionKey(uint64_t positionKey);
 			static uint64_t getPositionKey(int xPos, int yPos, int zPos);
 			unsigned int getStartNeuronID() { return startNeuronID; }
 			bool isLoaded() { return loaded; }
+			bool parametersSet();
 			void setID(unsigned int id);
 			void setLoaded(bool loaded) { this->loaded = loaded; }
 			void setDescription(const QString& description);
 			void setName(const QString& name);
 			void setNeuronMap(NeuronMap* newMap);
-			void setParameters(QHash<QString, double>& paramMap){ this->parameterMap = paramMap; }
+			void setParameters(QHash<QString, double>& paramMap);
 			void setStartNeuronID(unsigned int id) { this->startNeuronID = id; }
 			int size();
 
@@ -107,6 +109,7 @@ namespace spikestream {
 
 			//====================  METHODS  ==========================
 			unsigned getTemporaryID();
+			void loadDefaultParameters();
 			void neuronGroupChanged();
 			NeuronGroup(const NeuronGroup& connGrp);
 			NeuronGroup& operator=(const NeuronGroup& rhs);

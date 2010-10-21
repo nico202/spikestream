@@ -522,7 +522,7 @@ void ArchiveWidget::rewindArchive(){
     }
 
     Globals::getArchive()->setTimeStep(Globals::getArchiveDao()->getMinTimeStep(Globals::getArchive()->getID()));
-    Globals::getNetworkDisplay()->clearNeuronColorMap();
+	Globals::getNetworkDisplay()->setNeuronColorMap(new QHash<unsigned int, RGBColor*>());
     archiveOpen = false;
 }
 

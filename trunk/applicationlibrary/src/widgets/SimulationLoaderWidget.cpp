@@ -18,6 +18,7 @@ SimulationLoaderWidget::SimulationLoaderWidget(QWidget* parent) : QWidget(parent
 		//Get list of available analysis plugins
 		QString pluginPath = Globals::getSpikeStreamRoot() + "/plugins/simulation";
 		PluginManager* pluginManager = new PluginManager(pluginPath);
+		pluginManager->loadPlugins();
 		QStringList pluginList = pluginManager->getPluginNames();
 
 		//Add list to combo box

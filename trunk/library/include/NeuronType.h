@@ -13,6 +13,7 @@ namespace spikestream {
 	/*! Holds information about a particular neuron type in the NeuronTypes table. */
 	class NeuronType {
 		public:
+			NeuronType();
 			NeuronType(unsigned int neuronTypeID, const QString& description, const QString& paramTableName, const QString& classLibraryName);
 			NeuronType(const NeuronType& neurType);
 			NeuronType& operator=(const NeuronType& rhs);
@@ -20,6 +21,7 @@ namespace spikestream {
 
 			unsigned int getID() const;
 			QString getDescription() const;
+			int getParameterCount() { return parameterInfoList.size(); }
 			QString getParameterTableName() const;
 			QList<ParameterInfo> getParameterInfoList() const;
 			QString getClassLibaryName() const;

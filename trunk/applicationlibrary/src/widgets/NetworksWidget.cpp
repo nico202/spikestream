@@ -64,7 +64,7 @@ NetworksWidget::NetworksWidget(QWidget* parent) : QWidget(parent){
 	//Connect to global reload signal
 	connect(Globals::getEventRouter(), SIGNAL(reloadSignal()), this, SLOT(loadNetworkList()), Qt::QueuedConnection);
 	connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(loadNetworkList()), Qt::QueuedConnection);
-	//connect(Globals::getEventRouter(), SIGNAL(networkListChangedSignal()), this, SLOT(loadNetworkList()), Qt::QueuedConnection);
+	connect(Globals::getEventRouter(), SIGNAL(networkListChangedSignal()), this, SLOT(loadNetworkList()), Qt::QueuedConnection);
 	connect(this, SIGNAL(networkChanged()), Globals::getEventRouter(), SLOT(networkChangedSlot()), Qt::QueuedConnection);
 }
 
@@ -203,7 +203,6 @@ void NetworksWidget::loadNetworkList(){
 	if(Globals::networkLoaded() && networkInfoMap.contains(Globals::getNetwork()->getID())){
 		currentNetworkID = Globals::getNetwork()->getID();
 	}
-
 
 	//Display the list in the widget
 	for(int i=0; i<networkInfoList.size(); ++i){
@@ -505,11 +504,6 @@ void NetworksWidget::checkLoadingProgress(){
 
 	//Use event router to inform other classes that the network has changed.
 	emit networkChanged();
-
-	/* Reload network list to reflect color changes and buttons enabled
-		Should not lead to an infinite loop because network in Globals
-		should match one in the list returned from the database */
-	loadNetworkList();
 }
 
 

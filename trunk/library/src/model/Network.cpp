@@ -23,10 +23,7 @@ Network::Network(const QString& name, const QString& description, const DBInfo& 
     connect (connectionNetworkDaoThread, SIGNAL(finished()), this, SLOT(connectionThreadFinished()));
 
     //Initialize variables
-    currentNeuronTask = -1;
-    currentConnectionTask = -1;
-	prototypeMode = false;
-    clearError();
+	initializeVariables();
 
     //Create new network in database. ID will be stored in the network info
 	NetworkDao networkDao(networkDBInfo);
@@ -53,10 +50,7 @@ Network::Network(const NetworkInfo& networkInfo, const DBInfo& networkDBInfo, co
     connect (connectionNetworkDaoThread, SIGNAL(finished()), this, SLOT(connectionThreadFinished()));
 
     //Initialize variables
-    currentNeuronTask = -1;
-    currentConnectionTask = -1;
-	prototypeMode = false;
-    clearError();
+	initializeVariables();
 
     //Load up basic information about the neuron and connection groups
     loadNeuronGroupsInfo();
@@ -93,6 +87,15 @@ void Network::addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList){
 	if(!prototypeMode && hasArchives())//Check if network is editable or not
 		throw SpikeStreamException("Cannot add connection groups to a locked network.");
 
+	//Set default parameters
+	NetworkDao netDao(networkDBInfo);
+	foreach(ConnectionGroup* conGrp, connectionGroupList){
+		if(!conGrp->parametersSet()){
+			QHash<QString, double> tmpParamMap = netDao.getDefaultSynapseParameters(conGrp->getSynapseTypeID());
+			conGrp->setParameters(tmpParamMap);
+		}
+	}
+
 	//In prototype mode, we add connection groups to network and store them in a list for later
 	if(prototypeMode){
 		foreach(ConnectionGroup* conGrp, connectionGroupList){
@@ -119,6 +122,15 @@ void Network::addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList){
 void Network::addNeuronGroups(QList<NeuronGroup*>& neuronGroupList){
 	if(!prototypeMode && hasArchives())//Check if network is editable or not
 		throw SpikeStreamException("Cannot add neuron groups to a locked network.");
+
+	//Set default parameters
+	NetworkDao netDao(networkDBInfo);
+	foreach(NeuronGroup* neurGrp, neuronGroupList){
+		if(!neurGrp->parametersSet()){
+			QHash<QString, double> tmpParamMap = netDao.getDefaultNeuronParameters(neurGrp->getNeuronTypeID());
+			neurGrp->setParameters(tmpParamMap);
+		}
+	}
 
 	//In prototype mode, we add connection groups to network and store them in a list for later
 	if(prototypeMode){
@@ -568,6 +580,8 @@ bool Network::isSaved(){
 			return false;
 		if(!deleteConnectionGroupIDs.isEmpty())
 			return false;
+		if(neuronGroupParametersChanged || connectionGroupParametersChanged)
+			return false;
 	}
 	return true;
 }
@@ -629,6 +643,26 @@ void Network::save(){
 			newNeuronGroupMap.values(), newConnectionGroupMap.values(),
 			deleteNeuronGroupIDs, deleteConnectionGroupIDs
 	);
+
+	//Store parameters in already saved neuron groups
+	if(neuronGroupParametersChanged){
+		NetworkDao netDao(networkDBInfo);
+		for(QHash<unsigned int, NeuronGroup*>::iterator iter = neurGrpMap.begin(); iter != neurGrpMap.end(); ++iter){
+			QHash<QString, double> tmpParamMap = iter.value()->getParameters();
+			netDao.setNeuronParameters(iter.value()->getInfo(), tmpParamMap);
+		}
+		neuronGroupParametersChanged = false;
+	}
+
+	//Store parameters in already saved connection groups
+	if(connectionGroupParametersChanged){
+		NetworkDao netDao(networkDBInfo);
+		for(QHash<unsigned int, ConnectionGroup*>::iterator iter = connGrpMap.begin(); iter != connGrpMap.end(); ++iter){
+			QHash<QString, double> tmpParamMap = iter.value()->getParameters();
+			netDao.setSynapseParameters(iter.value()->getInfo(), tmpParamMap);
+		}
+		connectionGroupParametersChanged = false;
+	}
 }
 
 
@@ -643,6 +677,25 @@ void Network::setConnectionGroupProperties(unsigned conGrpID, const QString& des
 	if(!newConnectionGroupMap.contains(conGrpID)){
 		NetworkDao netDao(networkDBInfo);
 		netDao.setConnectionGroupProperties(conGrpID, description);
+	}
+}
+
+
+/*! Sets the parameters of a particular neuron group */
+void Network::setNeuronGroupParameters(unsigned neurGrpID, QHash<QString, double> paramMap){
+	//Set the parameters in memory
+	NeuronGroup* tmpNeurGrp = getNeuronGroup(neurGrpID);
+	tmpNeurGrp->setParameters(paramMap);
+
+	//Store parameters in the database if we are not in prototype mode
+	if(!prototypeMode){
+		NetworkDao netDao(networkDBInfo);
+		netDao.setNeuronParameters(tmpNeurGrp->getInfo(), paramMap);
+	}
+	else{
+		//Record fact that parameters have been changed if the neuron group is on disk
+		if(!newNeuronGroupMap.contains(neurGrpID))
+			neuronGroupParametersChanged = true;
 	}
 }
 
@@ -876,6 +929,17 @@ unsigned Network::getTemporaryNeurGrpID(){
 			throw SpikeStreamException("Cannot find a temporary neuron group ID");
 	}
 	return tmpID;
+}
+
+
+/*! Initializes variables with default values */
+void Network::initializeVariables(){
+	currentNeuronTask = -1;
+	currentConnectionTask = -1;
+	prototypeMode = false;
+	clearError();
+	neuronGroupParametersChanged = false;
+	connectionGroupParametersChanged = false;
 }
 
 

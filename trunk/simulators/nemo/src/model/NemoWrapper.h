@@ -2,6 +2,7 @@
 #define NEMOWRAPPER_H
 
 //SpikeStream includes
+#include "AbstractSimulation.h"
 #include "ArchiveDao.h"
 #include "ArchiveInfo.h"
 #include "NetworkDao.h"
@@ -20,7 +21,7 @@ namespace spikestream {
 
 	/*! Wraps the Nemo CUDA simulation library launching separate threads for heavy functions
 		such as play and load */
-	class NemoWrapper : public QThread {
+	class NemoWrapper : public QThread, public AbstractSimulation {
 		Q_OBJECT
 
 		public:
@@ -50,10 +51,12 @@ namespace spikestream {
 			void setArchiveMode(bool mode);
 			void setFrameRate(unsigned int frameRate);
 			void setInjectNoise(unsigned neuronGroupID, double percentage);
+			void setMonitor(bool mode);
 			void setMonitorFiringNeurons(bool mode);
-			void setMonitorTimeStep(bool mode);
 			void setNemoConfig(nemo_configuration_t nemoConfig) { this->nemoConfig = nemoConfig; }
 			void setMonitorWeights(bool enable);
+			void setNeuronParameters(unsigned neuronGroupID, QHash<QString, double> parameterMap);
+			void setSynapseParameters(unsigned connectionGroupID, QHash<QString, double> parameterMap);
 			void setSTDPFunctionID(unsigned stdpFunctionID) { this->stdpFunctionID = stdpFunctionID; }
 			void setUpdateInterval_ms(unsigned int interval) { this->updateInterval_ms = interval; }
 			void playSimulation();
@@ -74,8 +77,11 @@ namespace spikestream {
 			/*! Task of saving weights from simulation into database. */
 			static const int SAVE_WEIGHTS_TASK = 3;
 
+			/*! Task of setting neuron parameters in NeMo */
+			static const int SET_NEURON_PARAMETERS_TASK = 4;
+
 			/*! Task of advancing one time step of the simulation. */
-			static const int STEP_SIMULATION_TASK = 4;
+			static const int STEP_SIMULATION_TASK = 5;
 
 
 		signals:
@@ -114,8 +120,8 @@ namespace spikestream {
 			/*! In monitor weights mode the volatile weights are updated at each time step */
 			bool monitorWeights;
 
-			/*! Informs the GUI about each time step */
-			bool monitorTimeStep;
+			/*! Global control to switch monitoring on or off */
+			bool monitor;
 
 			/*! The time step of the simulation */
 			unsigned int timeStepCounter;
@@ -179,6 +185,12 @@ namespace spikestream {
 			/*! Reward used for STDP learning */
 			float stdpReward;
 
+			/*! ID of neuron group within which parameters will be set. */
+			unsigned neuronGroupID;
+
+			/*! Map containing neuron parameters. */
+			QHash<QString, double> neuronParameterMap;
+
 
 			//======================  METHODS  ========================
 			void checkNemoOutput(nemo_status_t result, const QString& errorMessage);
@@ -189,6 +201,9 @@ namespace spikestream {
 			void runNemo();
 			void saveNemoWeights();
 			void setError(const QString& errorMessage);
+			void setExcitatoryNeuronParameters(NeuronGroup* neuronGroup);
+			void setInhibitoryNeuronParameters(NeuronGroup* neuronGroup);
+			void setNeuronParametersInNemo();
 			void stepNemo();
 			void unloadNemo();
 			void updateNetworkWeights();

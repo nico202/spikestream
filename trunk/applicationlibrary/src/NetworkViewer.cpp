@@ -36,7 +36,8 @@ GLfloat specref[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 NetworkViewer::NetworkViewer(QWidget* parent) : QGLWidget(parent) {
 	//Connect refresh to changes in the display of network or archive
 	connect(Globals::getEventRouter(), SIGNAL(networkDisplayChangedSignal()), this, SLOT(refresh()), Qt::QueuedConnection);
-	connect(Globals::getEventRouter(), SIGNAL(weightsChangedSignal()), this, SLOT(refresh()), Qt::QueuedConnection);
+	connect(Globals::getEventRouter(), SIGNAL(neuronGroupDisplayChangedSignal()), this, SLOT(refreshNeurons()), Qt::QueuedConnection);
+	connect(Globals::getEventRouter(), SIGNAL(weightsChangedSignal()), this, SLOT(refreshConnections()), Qt::QueuedConnection);
 
 	//Connect reset to changes in the network
 	connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(reset()), Qt::QueuedConnection);
@@ -45,7 +46,9 @@ NetworkViewer::NetworkViewer(QWidget* parent) : QGLWidget(parent) {
 	//Initialize variables
 	paintGLSkipped = false;
 	resizeGLSkipped = false;
-	useMainDisplayList = false;
+	useAxesDisplayList = false;
+	useNeuronsDisplayList = false;
+	useConnectionsDisplayList = false;
 	perspective_angle = 46.0f;
 	perspective_near = 1.0f;
 	perspective_far = 100000.0f;//Set this to a large number so everything will be visible
@@ -86,9 +89,11 @@ void NetworkViewer::initializeGL(){
 	//White background
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-	//Create a unique id for the main display list
-	mainDisplayList = glGenLists(1);
+	//Create IDs for display lists
+	axesDisplayList = glGenLists(1);
 	sphereDisplayList =  glGenLists(1);
+	neuronsDisplayList =  glGenLists(1);
+	connectionsDisplayList =  glGenLists(1);
 
 	//Create objects
 	gluSphereObj = gluNewQuadric();
@@ -98,7 +103,12 @@ void NetworkViewer::initializeGL(){
 
 	//Build sphere display list
 	glNewList(sphereDisplayList, GL_COMPILE);
-		gluSphere(gluSphereObj, 0.1, 10*2, 10);
+		gluSphere(
+			gluSphereObj,
+			Globals::getNetworkDisplay()->getSphereRadius(),
+			Globals::getNetworkDisplay()->getSphereQuality()*2,
+			Globals::getNetworkDisplay()->getSphereQuality()
+		);
 	glEndList();
 }
 
@@ -129,50 +139,26 @@ void NetworkViewer::paintGL(){
 	//Position the camera appropriately
 	positionCamera();
 
-	/* Use an existing display list if one has already been created
-	Only use display lists when not in full render mode. They speed up
-	the graphics considerably, but crash when they are too big. */
-	if(useMainDisplayList){
-		//Call the display list
-		glCallList(mainDisplayList);
-	}
+	//Lock network display whilst rendering is taking place
+	//FIXME: MIGHT WANT TO LOCK NETWORK AS WELL
+	Globals::getNetworkDisplay()->lockMutex();
 
-	//Record a new display list
-	else{
-		//Lock network display whilst rendering is taking place
-		//FIXME: MIGHT WANT TO LOCK NETWORK AS WELL
-		Globals::getNetworkDisplay()->lockMutex();
+	//Draw the connections before the neurons in full render mode
+	if(Globals::getNetworkDisplay()->isFullRenderMode())
+		this->initialiseFullRender();
+	else
+		this->disableFullRender();
 
-		//Start recording new display list
-		glNewList(mainDisplayList, GL_COMPILE_AND_EXECUTE);
+	//Draw axes, connections and neurons
+	drawAxes();
+	drawConnections();
+	drawNeurons();
 
-		//Draw the connections before the neurons in full render mode
-		if(Globals::getNetworkDisplay()->isFullRenderMode()){
-			this->initialiseFullRender();
-			drawAxes();
-			drawConnections();
-			drawNeurons();
-		}
-		//Draw neurons first in fast render mode
-		else{
-			this->disableFullRender();
-			drawAxes();
-			drawConnections();
-			drawNeurons();
-		}
+	//Restore the original state of the matrix
+	glPopMatrix();
 
-		//Restore the original state of the matrix
-		glPopMatrix();
-
-		//Finished recording display list
-		glEndList();
-
-		//Have now created the display list so record this fact for next render
-		useMainDisplayList = true;
-
-		//Unlock network display
-		Globals::getNetworkDisplay()->unlockMutex();
-	}
+	//Unlock network display
+	Globals::getNetworkDisplay()->unlockMutex();
 
 	//Check for OpenGL errors
 	checkOpenGLErrors();
@@ -387,9 +373,24 @@ void NetworkViewer::rotateRight(){
 }
 
 
-/*! Re-draws the network */
+/*! Re-draws everything in the network */
 void NetworkViewer::refresh(){
-	useMainDisplayList = false;
+	useNeuronsDisplayList = false;
+	useConnectionsDisplayList = false;
+	updateGL();
+}
+
+
+/*! Redraws the neurons */
+void NetworkViewer::refreshNeurons(){
+	useNeuronsDisplayList = false;
+	updateGL();
+}
+
+
+/*! Redraws the weights */
+void NetworkViewer::refreshConnections(){
+	useConnectionsDisplayList = false;
 	updateGL();
 }
 
@@ -403,7 +404,8 @@ void NetworkViewer::reset(){
 	viewClippingVolume_Horizontal(defaultClippingVol);
 
 	//Network has changed so need to re-render the display list
-	useMainDisplayList = false;
+	useNeuronsDisplayList = false;
+	useConnectionsDisplayList = false;
 
 	//Re-draw
 	updateGL();
@@ -440,61 +442,74 @@ void NetworkViewer::drawAxes(void){
 	if(!Globals::getNetworkDisplay()->isDrawAxes())
 		return;
 
-	//Set the drawing colour to red
-	glColor3f(1.0f, 0.0f, 0.0f);
-
-	//Store current line width
-	glPushAttrib(GL_LINE_BIT);
-
-	//Set wide line
-	glLineWidth(2.0f);
-
-	//Draw the axes, extending extraLength beyond clipping volume
-	GLfloat extraLength = 20.0f;
-
-	//Draw the main axes
-	glBegin(GL_LINES);
-	//X Axis
-	glVertex3f(defaultClippingVol.x1 - extraLength, 0.0f, 0.0f);
-	glVertex3f(defaultClippingVol.x2 + extraLength, 0.0f, 0.0f);
-	//Y Axis
-	glVertex3f(0.0f, defaultClippingVol.y1 - extraLength, 0.0f);
-	glVertex3f(0.0f, defaultClippingVol.y2 + extraLength, 0.0f);
-	//Z Axis
-	glVertex3f(0.0f, 0.0f, defaultClippingVol.z1 - extraLength);
-	glVertex3f(0.0f, 0.0f, defaultClippingVol.z2 + extraLength);
-	glEnd();
-
-	//Work along axes, marking every point with a point
-	GLfloat scaleMarkSpacing = 5.0f;
-
-	//Set colour and point size
-	glColor3f(0.0f, 0.0f, 1.0f);
-	glPointSize(3.0f);
-
-	//Draw markings on X axis
-	for(float i=defaultClippingVol.x1 - extraLength; i < defaultClippingVol.x2 + extraLength; i += scaleMarkSpacing){
-		glBegin(GL_POINTS);
-			glVertex3f(i, 0.0f, 0.0f);
-		glEnd();
+	//Use existing axes display list
+	if(useAxesDisplayList){
+		glCallList(axesDisplayList);
 	}
+	//Create new display list with axes
+	else{
+		glNewList(axesDisplayList, GL_COMPILE_AND_EXECUTE);
 
-	//Draw markings on Y axis
-	for(float i=defaultClippingVol.y1 - extraLength; i < defaultClippingVol.y2 + extraLength; i += scaleMarkSpacing){
-		glBegin(GL_POINTS);
-			glVertex3f(0.0f, i, 0.0f);
+		//Set the drawing colour to red
+		glColor3f(1.0f, 0.0f, 0.0f);
+
+		//Store current line width
+		glPushAttrib(GL_LINE_BIT);
+
+		//Set wide line
+		glLineWidth(2.0f);
+
+		//Draw the axes, extending extraLength beyond clipping volume
+		GLfloat extraLength = 20.0f;
+
+		//Draw the main axes
+		glBegin(GL_LINES);
+		//X Axis
+		glVertex3f(defaultClippingVol.x1 - extraLength, 0.0f, 0.0f);
+		glVertex3f(defaultClippingVol.x2 + extraLength, 0.0f, 0.0f);
+		//Y Axis
+		glVertex3f(0.0f, defaultClippingVol.y1 - extraLength, 0.0f);
+		glVertex3f(0.0f, defaultClippingVol.y2 + extraLength, 0.0f);
+		//Z Axis
+		glVertex3f(0.0f, 0.0f, defaultClippingVol.z1 - extraLength);
+		glVertex3f(0.0f, 0.0f, defaultClippingVol.z2 + extraLength);
 		glEnd();
-	}
 
-	//Draw markings on Z axis
-	for(float i=defaultClippingVol.z1 - extraLength; i < defaultClippingVol.z2 + extraLength; i += scaleMarkSpacing){
-		glBegin(GL_POINTS);
-			glVertex3f(0.0f, 0.0f, i);
-		glEnd();
-	}
+		//Work along axes, marking every point with a point
+		GLfloat scaleMarkSpacing = 5.0f;
 
-	//Reset line width to original value
-	glPopAttrib();
+		//Set colour and point size
+		glColor3f(0.0f, 0.0f, 1.0f);
+		glPointSize(3.0f);
+
+		//Draw markings on X axis
+		for(float i=defaultClippingVol.x1 - extraLength; i < defaultClippingVol.x2 + extraLength; i += scaleMarkSpacing){
+			glBegin(GL_POINTS);
+				glVertex3f(i, 0.0f, 0.0f);
+			glEnd();
+		}
+
+		//Draw markings on Y axis
+		for(float i=defaultClippingVol.y1 - extraLength; i < defaultClippingVol.y2 + extraLength; i += scaleMarkSpacing){
+			glBegin(GL_POINTS);
+				glVertex3f(0.0f, i, 0.0f);
+			glEnd();
+		}
+
+		//Draw markings on Z axis
+		for(float i=defaultClippingVol.z1 - extraLength; i < defaultClippingVol.z2 + extraLength; i += scaleMarkSpacing){
+			glBegin(GL_POINTS);
+				glVertex3f(0.0f, 0.0f, i);
+			glEnd();
+		}
+
+		//Reset line width to original value
+		glPopAttrib();
+
+		//Finish recording display list with axes
+		glEndList();
+		useAxesDisplayList = true;
+	}
 }
 
 
@@ -504,146 +519,159 @@ void NetworkViewer::drawConnections(){
 	if(!Globals::networkLoaded())
 		return;
 
-	//Local variables declared once here to save processing. These point to the points stored in the neurons
-	Point3D* fromNeuronPoint;
-	Point3D* toNeuronPoint;
-
-	//Get pointer to network that is to be drawn and its associated display
-	Network* network = Globals::getNetwork();
-	NetworkDisplay* netDisplay = Globals::getNetworkDisplay();
-	bool fullRender = netDisplay->isFullRenderMode();
-
-	//Get information about rendering connections
-	unsigned weightRenderMode = netDisplay->getWeightRenderMode();
-	float weight = 0.0f;//Declare here to save declaring it all the time.
-	weightRadiusFactor = netDisplay->getWeightRadiusFactor();
-	minimumConnectionRadius = netDisplay->getMinimumConnectionRadius();
-	connectionQuality = netDisplay->getConnectionQuality();
-
-	//Default neuron colour
-	RGBColor positiveConnectionColor = *netDisplay->getPositiveConnectionColor();
-	RGBColor negativeConnectionColor = *netDisplay->getNegativeConnectionColor();
-
-	//Sort out the connection mode
-	unsigned int singleNeuronID=0, toNeuronID=0;
-	unsigned int connectionMode = netDisplay->getConnectionMode();
-	if(connectionMode & CONNECTION_MODE_ENABLED){
-		connectedNeuronMap.clear();
-		singleNeuronID = netDisplay->getSingleNeuronID();
-		if(connectionMode & SHOW_BETWEEN_CONNECTIONS)
-			toNeuronID = netDisplay->getToNeuronID();
+	//Use existing display list
+	if(useConnectionsDisplayList){
+		glCallList(connectionsDisplayList);
 	}
+	//Create new display list with connections
+	else{
+		glNewList(connectionsDisplayList, GL_COMPILE_AND_EXECUTE);
 
-	//Work through the connection groups listed in the network display
-	bool drawConnection;
-	Connection* tmpCon;
-	QList<unsigned int> conGrpIDs = Globals::getNetworkDisplay()->getVisibleConnectionGroupIDs();
-	for(QList<unsigned int>::iterator conGrpIter = conGrpIDs.begin(); conGrpIter != conGrpIDs.end(); ++conGrpIter){
+		//Local variables declared once here to save processing. These point to the points stored in the neurons
+		Point3D* fromNeuronPoint;
+		Point3D* toNeuronPoint;
 
-		//Pointer to connection group
-		ConnectionGroup* conGrp = network->getConnectionGroup(*conGrpIter);
+		//Get pointer to network that is to be drawn and its associated display
+		Network* network = Globals::getNetwork();
+		NetworkDisplay* netDisplay = Globals::getNetworkDisplay();
+		bool fullRender = netDisplay->isFullRenderMode();
 
-		//Get neuron groups for extracting the position information
-		NeuronGroup* fromNeuronGroup = network->getNeuronGroup(conGrp->getFromNeuronGroupID());
-		NeuronGroup* toNeuronGroup = network->getNeuronGroup(conGrp->getToNeuronGroupID());
+		//Get information about rendering connections
+		unsigned weightRenderMode = netDisplay->getWeightRenderMode();
+		float weight = 0.0f;//Declare here to save declaring it all the time.
+		weightRadiusFactor = netDisplay->getWeightRadiusFactor();
+		minimumConnectionRadius = netDisplay->getMinimumConnectionRadius();
+		connectionQuality = netDisplay->getConnectionQuality();
 
-		//Draw all the connections in the group
-		QHash<unsigned, Connection*>::const_iterator endConGrp = conGrp->end();
-		for(QHash<unsigned, Connection*>::const_iterator conIter = conGrp->begin(); conIter != endConGrp; ++ conIter){
-			tmpCon = conIter.value();
+		//Default neuron colour
+		RGBColor positiveConnectionColor = *netDisplay->getPositiveConnectionColor();
+		RGBColor negativeConnectionColor = *netDisplay->getNegativeConnectionColor();
 
-			//Get the weight
-			weight = tmpCon->weight;
-			if( (weightRenderMode & WEIGHT_RENDER_ENABLED) && (weightRenderMode & RENDER_TEMP_WEIGHTS) )
-				weight = tmpCon->tempWeight;
+		//Sort out the connection mode
+		unsigned int singleNeuronID=0, toNeuronID=0;
+		unsigned int connectionMode = netDisplay->getConnectionMode();
+		if(connectionMode & CONNECTION_MODE_ENABLED){
+			connectedNeuronMap.clear();
+			singleNeuronID = netDisplay->getSingleNeuronID();
+			if(connectionMode & SHOW_BETWEEN_CONNECTIONS)
+				toNeuronID = netDisplay->getToNeuronID();
+		}
 
-			//Decide if connection should be drawn, depending on the connection mode and neuron id
-			drawConnection = true;
-			if(connectionMode & CONNECTION_MODE_ENABLED){
-				//Single neuron mode
-				if( !(connectionMode & SHOW_BETWEEN_CONNECTIONS) ){
-					//Show only connections from a single neuron
-					if(connectionMode & SHOW_FROM_CONNECTIONS){
-						if( tmpCon->fromNeuronID != singleNeuronID){
-							drawConnection = false;
-						}
-						else{
-							connectedNeuronMap[tmpCon->toNeuronID] = weight;
-						}
-					}
-					//Show only connections to a single neuron
-					else if(connectionMode & SHOW_TO_CONNECTIONS){
-						if( tmpCon->toNeuronID != singleNeuronID){
-							drawConnection = false;
-						}
-						else{
-							connectedNeuronMap[tmpCon->fromNeuronID] = weight;//Positive connection
-						}
-					}
-					//Show from and to connections to a single neuron
-					else {
-						if( (tmpCon->fromNeuronID != singleNeuronID) && (tmpCon->toNeuronID != singleNeuronID) ){
-							drawConnection = false;
-						}
-						else {//Highlight connected neurons
-							if( tmpCon->fromNeuronID == singleNeuronID){
-								connectedNeuronMap[tmpCon->toNeuronID] = weight;//Positive connection
+		//Work through the connection groups listed in the network display
+		bool drawConnection;
+		Connection* tmpCon;
+		QList<unsigned int> conGrpIDs = Globals::getNetworkDisplay()->getVisibleConnectionGroupIDs();
+		for(QList<unsigned int>::iterator conGrpIter = conGrpIDs.begin(); conGrpIter != conGrpIDs.end(); ++conGrpIter){
+
+			//Pointer to connection group
+			ConnectionGroup* conGrp = network->getConnectionGroup(*conGrpIter);
+
+			//Get neuron groups for extracting the position information
+			NeuronGroup* fromNeuronGroup = network->getNeuronGroup(conGrp->getFromNeuronGroupID());
+			NeuronGroup* toNeuronGroup = network->getNeuronGroup(conGrp->getToNeuronGroupID());
+
+			//Draw all the connections in the group
+			QHash<unsigned, Connection*>::const_iterator endConGrp = conGrp->end();
+			for(QHash<unsigned, Connection*>::const_iterator conIter = conGrp->begin(); conIter != endConGrp; ++ conIter){
+				tmpCon = conIter.value();
+
+				//Get the weight
+				weight = tmpCon->weight;
+				if( (weightRenderMode & WEIGHT_RENDER_ENABLED) && (weightRenderMode & RENDER_TEMP_WEIGHTS) )
+					weight = tmpCon->tempWeight;
+
+				//Decide if connection should be drawn, depending on the connection mode and neuron id
+				drawConnection = true;
+				if(connectionMode & CONNECTION_MODE_ENABLED){
+					//Single neuron mode
+					if( !(connectionMode & SHOW_BETWEEN_CONNECTIONS) ){
+						//Show only connections from a single neuron
+						if(connectionMode & SHOW_FROM_CONNECTIONS){
+							if( tmpCon->fromNeuronID != singleNeuronID){
+								drawConnection = false;
 							}
-							else if( tmpCon->toNeuronID == singleNeuronID){
+							else{
+								connectedNeuronMap[tmpCon->toNeuronID] = weight;
+							}
+						}
+						//Show only connections to a single neuron
+						else if(connectionMode & SHOW_TO_CONNECTIONS){
+							if( tmpCon->toNeuronID != singleNeuronID){
+								drawConnection = false;
+							}
+							else{
 								connectedNeuronMap[tmpCon->fromNeuronID] = weight;//Positive connection
 							}
 						}
+						//Show from and to connections to a single neuron
+						else {
+							if( (tmpCon->fromNeuronID != singleNeuronID) && (tmpCon->toNeuronID != singleNeuronID) ){
+								drawConnection = false;
+							}
+							else {//Highlight connected neurons
+								if( tmpCon->fromNeuronID == singleNeuronID){
+									connectedNeuronMap[tmpCon->toNeuronID] = weight;//Positive connection
+								}
+								else if( tmpCon->toNeuronID == singleNeuronID){
+									connectedNeuronMap[tmpCon->fromNeuronID] = weight;//Positive connection
+								}
+							}
+						}
 					}
-				}
-				//Between neuron mode
-				else{
-					//Only show connections from first neuron to second
-					if( tmpCon->fromNeuronID != singleNeuronID || tmpCon->toNeuronID != toNeuronID)
+					//Between neuron mode
+					else{
+						//Only show connections from first neuron to second
+						if( tmpCon->fromNeuronID != singleNeuronID || tmpCon->toNeuronID != toNeuronID)
+							drawConnection = false;
+					}
+
+					//Decide whether to draw connection based on its weight
+					if( weight < 0 && (connectionMode & SHOW_POSITIVE_CONNECTIONS) )
+						drawConnection = false;
+					if( weight >= 0 && (connectionMode & SHOW_NEGATIVE_CONNECTIONS))
 						drawConnection = false;
 				}
 
-				//Decide whether to draw connection based on its weight
-				if( weight < 0 && (connectionMode & SHOW_POSITIVE_CONNECTIONS) )
-					drawConnection = false;
-				if( weight >= 0 && (connectionMode & SHOW_NEGATIVE_CONNECTIONS))
-					drawConnection = false;
-			}
-
-			//Draw the connection
-			if(drawConnection){
-				//Get the position of the from and to neurons
-				fromNeuronPoint = &fromNeuronGroup->getNeuronLocation(tmpCon->fromNeuronID);
-				toNeuronPoint = &toNeuronGroup->getNeuronLocation(tmpCon->toNeuronID);
-
-				//Set the colour
-				if(weight > 0)
-					glColor3f(positiveConnectionColor.red, positiveConnectionColor.green, positiveConnectionColor.blue);
-				else if(weight < 0)
-					glColor3f(negativeConnectionColor.red, negativeConnectionColor.green, negativeConnectionColor.blue);
-				else
-					glColor3f(0.0f, 0.0f, 0.0f);
-
 				//Draw the connection
-				if(fullRender && (weightRenderMode & WEIGHT_RENDER_ENABLED) ){
-					drawWeightedConnection(
-							fromNeuronPoint->getXPos(),
-							fromNeuronPoint->getYPos(),
-							fromNeuronPoint->getZPos(),
-							toNeuronPoint->getXPos(),
-							toNeuronPoint->getYPos(),
-							toNeuronPoint->getZPos(),
-							weight
-					);
-				}
-				else{
-					//Start drawing lines
-					glBegin(GL_LINES);
-						glVertex3f(fromNeuronPoint->getXPos(), fromNeuronPoint->getYPos(), fromNeuronPoint->getZPos());
-						glVertex3f(toNeuronPoint->getXPos(), toNeuronPoint->getYPos(), toNeuronPoint->getZPos());
-					glEnd();//End of line drawing
+				if(drawConnection){
+					//Get the position of the from and to neurons
+					fromNeuronPoint = &fromNeuronGroup->getNeuronLocation(tmpCon->fromNeuronID);
+					toNeuronPoint = &toNeuronGroup->getNeuronLocation(tmpCon->toNeuronID);
+
+					//Set the colour
+					if(weight > 0)
+						glColor3f(positiveConnectionColor.red, positiveConnectionColor.green, positiveConnectionColor.blue);
+					else if(weight < 0)
+						glColor3f(negativeConnectionColor.red, negativeConnectionColor.green, negativeConnectionColor.blue);
+					else
+						glColor3f(0.0f, 0.0f, 0.0f);
+
+					//Draw the connection
+					if(fullRender && (weightRenderMode & WEIGHT_RENDER_ENABLED) ){
+						drawWeightedConnection(
+								fromNeuronPoint->getXPos(),
+								fromNeuronPoint->getYPos(),
+								fromNeuronPoint->getZPos(),
+								toNeuronPoint->getXPos(),
+								toNeuronPoint->getYPos(),
+								toNeuronPoint->getZPos(),
+								weight
+						);
+					}
+					else{
+						//Start drawing lines
+						glBegin(GL_LINES);
+							glVertex3f(fromNeuronPoint->getXPos(), fromNeuronPoint->getYPos(), fromNeuronPoint->getZPos());
+							glVertex3f(toNeuronPoint->getXPos(), toNeuronPoint->getYPos(), toNeuronPoint->getZPos());
+						glEnd();//End of line drawing
+					}
 				}
 			}
 		}
+
+		//Finished creating connection display list
+		glEndList();
+		useConnectionsDisplayList = true;
 	}
 }
 
@@ -654,91 +682,104 @@ void NetworkViewer::drawNeurons(){
 	if(!Globals::networkLoaded())
 		return;
 
-	//Local variables
-	RGBColor *tmpColor, tmpColor2;
-	unsigned sphereQuality;
-	float sphereRadius, weight;
-
-	//Get pointer to network that is to be drawn and its associated display
-	Network* network = Globals::getNetwork();
-	NetworkDisplay* netDisplay = Globals::getNetworkDisplay();
-
-	//Connection mode
-	unsigned int connectionMode = netDisplay->getConnectionMode();
-
-	//Default neuron colour
-	RGBColor defaultNeuronColor;
-	bool fullRenderMode = netDisplay->isFullRenderMode();//Local copy for speed
-	if(fullRenderMode){
-		defaultNeuronColor = *netDisplay->getDefaultNeuronColorFullRender();
-		sphereQuality = Globals::getNetworkDisplay()->getSphereQuality();
-		sphereRadius = Globals::getNetworkDisplay()->getSphereRadius();
+	//Use existing display list
+	if(useNeuronsDisplayList){
+		glCallList(neuronsDisplayList);
 	}
+	//Create new display list with connections
 	else{
-		defaultNeuronColor = *netDisplay->getDefaultNeuronColor();
-		glPointSize(netDisplay->getVertexSize());//Set the size of points in OpenGL
-	}
-	float neuronAlpha = netDisplay->getNeuronTransparency();
+		glNewList(neuronsDisplayList, GL_COMPILE_AND_EXECUTE);
 
-	//Get map with colours of neurons
-	QHash<unsigned int, RGBColor*> neuronColorMap = netDisplay->getNeuronColorMap();
+		//Local variables
+		RGBColor *tmpColor, tmpColor2;
+		unsigned sphereQuality;
+		float sphereRadius, weight;
 
-	//Initialize list of names for clicking on neurons
-	glInitNames();
+		//Get pointer to network that is to be drawn and its associated display
+		Network* network = Globals::getNetwork();
+		NetworkDisplay* netDisplay = Globals::getNetworkDisplay();
 
-	//Work through the neuron groups listed in the view vector
-	QList<unsigned int> neuronGrpIDs = Globals::getNetworkDisplay()->getVisibleNeuronGroupIDs();
-	for(QList<unsigned int>::iterator neurGrpIter = neuronGrpIDs.begin(); neurGrpIter != neuronGrpIDs.end(); ++neurGrpIter){
-		//Get the map of neurons associated with this group
-		NeuronMap* neuronMap = network->getNeuronGroup(*neurGrpIter)->getNeuronMap();
+		//Connection mode
+		unsigned int connectionMode = netDisplay->getConnectionMode();
 
-		//Draw the neurons in the map
-		NeuronMap::iterator neurMapEnd = neuronMap->end();
-		for(NeuronMap::iterator neurIter = neuronMap->begin(); neurIter != neurMapEnd; ++neurIter){
+		//Default neuron colour
+		RGBColor defaultNeuronColor;
+		bool fullRenderMode = netDisplay->isFullRenderMode();//Local copy for speed
+		if(fullRenderMode){
+			defaultNeuronColor = *netDisplay->getDefaultNeuronColorFullRender();
+			sphereQuality = Globals::getNetworkDisplay()->getSphereQuality();
+			sphereRadius = Globals::getNetworkDisplay()->getSphereRadius();
+		}
+		else{
+			defaultNeuronColor = *netDisplay->getDefaultNeuronColor();
+			glPointSize(netDisplay->getVertexSize());//Set the size of points in OpenGL
+		}
+		float neuronAlpha = netDisplay->getNeuronTransparency();
 
-			//Set the color of the neuron
-			if(connectionMode & CONNECTION_MODE_ENABLED){
-				if(netDisplay->getSingleNeuronID() == (*neurIter)->getID() ){//Single selected neuron
-					tmpColor2 = netDisplay->getSingleNeuronColor();
-					glColor4f(tmpColor2.red, tmpColor2.green, tmpColor2.blue, neuronAlpha);
+		//Get map with colours of neurons
+		QHash<unsigned int, RGBColor*> neuronColorMap = netDisplay->getNeuronColorMap();
+
+		//Initialize list of names for clicking on neurons
+		glInitNames();
+
+		//Work through the neuron groups listed in the view vector
+		QList<unsigned int> neuronGrpIDs = Globals::getNetworkDisplay()->getVisibleNeuronGroupIDs();
+		for(QList<unsigned int>::iterator neurGrpIter = neuronGrpIDs.begin(); neurGrpIter != neuronGrpIDs.end(); ++neurGrpIter){
+			//Get the map of neurons associated with this group
+			NeuronMap* neuronMap = network->getNeuronGroup(*neurGrpIter)->getNeuronMap();
+
+			//Draw the neurons in the map
+			NeuronMap::iterator neurMapEnd = neuronMap->end();
+			for(NeuronMap::iterator neurIter = neuronMap->begin(); neurIter != neurMapEnd; ++neurIter){
+
+				//Set the color of the neuron
+				if(connectionMode & CONNECTION_MODE_ENABLED){
+					if(netDisplay->getSingleNeuronID() == (*neurIter)->getID() ){//Single selected neuron
+						tmpColor2 = netDisplay->getSingleNeuronColor();
+						glColor4f(tmpColor2.red, tmpColor2.green, tmpColor2.blue, neuronAlpha);
+					}
+					else if(netDisplay->getToNeuronID() == (*neurIter)->getID() ){//To neuron
+						tmpColor2 = netDisplay->getToNeuronColor();
+						glColor4f(tmpColor2.red, tmpColor2.green, tmpColor2.blue, neuronAlpha);
+					}
+					else if(connectedNeuronMap.contains((*neurIter)->getID())){//A connected neuron
+						weight = connectedNeuronMap[(*neurIter)->getID()];
+						if(weight > 0)//Positive connection
+							glColor4f(1.0f, 0.0f, 0.0f, neuronAlpha);
+						else if(weight < 0)
+							glColor4f(0.0f, 0.0f, 1.0f, neuronAlpha);
+						else
+							glColor4f(0.0f, 0.0f, 0.0f, neuronAlpha);
+					}
+					else{
+						glColor4f(defaultNeuronColor.red, defaultNeuronColor.green, defaultNeuronColor.blue, neuronAlpha);
+					}
 				}
-				else if(netDisplay->getToNeuronID() == (*neurIter)->getID() ){//To neuron
-					tmpColor2 = netDisplay->getToNeuronColor();
-					glColor4f(tmpColor2.red, tmpColor2.green, tmpColor2.blue, neuronAlpha);
-				}
-				else if(connectedNeuronMap.contains((*neurIter)->getID())){//A connected neuron
-					weight = connectedNeuronMap[(*neurIter)->getID()];
-					if(weight > 0)//Positive connection
-						glColor4f(1.0f, 0.0f, 0.0f, neuronAlpha);
-					else if(weight < 0)
-						glColor4f(0.0f, 0.0f, 1.0f, neuronAlpha);
-					else
-						glColor4f(0.0f, 0.0f, 0.0f, neuronAlpha);
+				else if(neuronColorMap.contains(neurIter.key())){
+					tmpColor = neuronColorMap[neurIter.key()];
+					glColor4f(tmpColor->red, tmpColor->green, tmpColor->blue, neuronAlpha);
 				}
 				else{
 					glColor4f(defaultNeuronColor.red, defaultNeuronColor.green, defaultNeuronColor.blue, neuronAlpha);
 				}
-			}
-			else if(neuronColorMap.contains(neurIter.key())){
-				tmpColor = neuronColorMap[neurIter.key()];
-				glColor4f(tmpColor->red, tmpColor->green, tmpColor->blue, neuronAlpha);
-			}
-			else{
-				glColor4f(defaultNeuronColor.red, defaultNeuronColor.green, defaultNeuronColor.blue, neuronAlpha);
-			}
 
-			//Draw the neuron
-			glPushName((*neurIter)->getID());
-				if(!fullRenderMode){//Draw neurons as a vertex
-					glBegin(GL_POINTS);
-						glVertex3f(neurIter.value()->getXPos(), neurIter.value()->getYPos(), neurIter.value()->getZPos());
-					glEnd();
-				}
-				else{//Draw neurons as a sphere
-					drawSphere(neurIter.value()->getXPos(), neurIter.value()->getYPos(), neurIter.value()->getZPos(), sphereRadius, sphereQuality);
-				}
-			glPopName();
+				//Draw the neuron
+				glPushName((*neurIter)->getID());
+					if(!fullRenderMode){//Draw neurons as a vertex
+						glBegin(GL_POINTS);
+							glVertex3f(neurIter.value()->getXPos(), neurIter.value()->getYPos(), neurIter.value()->getZPos());
+						glEnd();
+					}
+					else{//Draw neurons as a sphere
+						drawSphere(neurIter.value()->getXPos(), neurIter.value()->getYPos(), neurIter.value()->getZPos(), sphereRadius, sphereQuality);
+					}
+				glPopName();
+			}
 		}
+
+		//Finished creating neurons display list
+		glEndList();
+		useNeuronsDisplayList = true;
 	}
 }
 

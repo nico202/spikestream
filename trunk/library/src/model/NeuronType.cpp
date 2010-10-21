@@ -5,6 +5,15 @@ using namespace spikestream;
 //Qt includes
 #include <QDebug>
 
+/*! Empty construtor */
+NeuronType::NeuronType(){
+	id = 0;
+	description = "Undescribed";
+	parameterTableName = "Invalid parameter table name.";
+	classLibraryName = "Invalid class library name.";
+}
+
+
 /*! Standard constructor */
 NeuronType::NeuronType(unsigned int neuronTypeID, const QString& description, const QString& paramTableName, const QString& classLibraryName){
 	this->id = neuronTypeID;

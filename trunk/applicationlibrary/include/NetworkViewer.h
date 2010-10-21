@@ -41,6 +41,8 @@ namespace spikestream {
 			void moveDown();
 			void moveLeft();
 			void moveRight();
+			void refreshConnections();
+			void refreshNeurons();
 			void resetView();
 			void rotateUp();
 			void rotateDown();
@@ -52,13 +54,23 @@ namespace spikestream {
 
 		private:
 			//=======================  VARIABLES  ========================
-			/*! Reference to the display list for the graphics. This stores OpenGL
-				commands, which can then be played back as a block. */
-			GLuint mainDisplayList;
+			/*! Reference to the display list for the axes.*/
+			GLuint axesDisplayList;
 
-			/*! Determines whether the stored display list should be used or a new one generated.
-			A new one should be generated if the network or the network display is changed */
-			bool useMainDisplayList;
+			/*! Determines whether the stored display list should be used or a new one generated.*/
+			bool useAxesDisplayList;
+
+			/*! Reference to the display list for the neurons.*/
+			GLuint neuronsDisplayList;
+
+			/*! Controls whether the neuron display list should be used or a new one generated. */
+			GLuint useNeuronsDisplayList;
+
+			/*! Reference to the display list for the connections.*/
+			GLuint connectionsDisplayList;
+
+			/*! Controls whether the connections display list should be used or a new one generated. */
+			GLuint useConnectionsDisplayList;
 
 			/*! Reference to the display list for drawing spheres. */
 			GLuint sphereDisplayList;

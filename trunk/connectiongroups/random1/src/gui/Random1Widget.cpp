@@ -97,7 +97,7 @@ ConnectionGroupInfo Random1Widget::getConnectionGroupInfo(){
 	//Extract variables
 	unsigned int fromNeurGrpID = getNeuronGroupID(fromCombo->currentText());
 	unsigned int toNeurGrpID = getNeuronGroupID(toCombo->currentText());
-	unsigned int synapseType = getSynapseTypeID(synapseTypeCombo->currentText());
+	unsigned int synapseTypeID = getSynapseTypeID(synapseTypeCombo->currentText());
 
 	//Store parameters in parameter map
 	QHash<QString, double> paramMap;
@@ -111,7 +111,7 @@ ConnectionGroupInfo Random1Widget::getConnectionGroupInfo(){
 	paramMap["connection_probability"] = Util::getDouble(connectionProbabilityEdit->text());
 
 	//Use extracted praameters to construct connection group info
-	ConnectionGroupInfo info(0, descriptionEdit->text(), fromNeurGrpID, toNeurGrpID, paramMap, synapseType);
+	ConnectionGroupInfo info(0, descriptionEdit->text(), fromNeurGrpID, toNeurGrpID, paramMap, Globals::getNetworkDao()->getSynapseType(synapseTypeID));
 	return info;
 }
 

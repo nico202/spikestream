@@ -186,9 +186,9 @@ QList<ConnectionGroupInfo> NetworkDao::getConnectionGroupsInfo(unsigned int netw
 						query.value(2).toUInt(),//From group id
 						query.value(3).toUInt(),//To group id
 						parameterParser.getParameterMap(query.value(4).toString()),//Parameters
-						query.value(5).toUInt()//Synapse id
-						)
-				);
+						getSynapseType(query.value(5).toUInt())//Synapse type
+				)
+		);
 	}
 	return tmpList;
 }
@@ -498,9 +498,9 @@ QList<NeuronGroupInfo> NetworkDao::getNeuronGroupsInfo(unsigned int networkID){
 						query.value(1).toString(),
 						query.value(2).toString(),
 						parameterParser.getParameterMap(query.value(3).toString()),
-						query.value(4).toUInt()
-						)
-				);
+						getNeuronType(query.value(4).toUInt())
+				)
+		);
 	}
 	return tmpList;
 
