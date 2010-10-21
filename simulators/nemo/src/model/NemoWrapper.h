@@ -7,6 +7,7 @@
 #include "ArchiveInfo.h"
 #include "NetworkDao.h"
 #include "ParameterInfo.h"
+#include "Pattern.h"
 
 //Qt includes
 #include <QHash>
@@ -51,6 +52,7 @@ namespace spikestream {
 			void setArchiveMode(bool mode);
 			void setFrameRate(unsigned int frameRate);
 			void setInjectNoise(unsigned neuronGroupID, double percentage);
+			void setInjectionPattern(Pattern* pattern, unsigned neuronGroupID, bool sustain);
 			void setMonitor(bool mode);
 			void setMonitorFiringNeurons(bool mode);
 			void setNemoConfig(nemo_configuration_t nemoConfig) { this->nemoConfig = nemoConfig; }
@@ -190,6 +192,13 @@ namespace spikestream {
 
 			/*! Map containing neuron parameters. */
 			QHash<QString, double> neuronParameterMap;
+
+			/*! Pattern to be injected */
+			Pattern* injectionPattern;
+
+			/*! Neuron group in which pattern is to be injected. */
+			unsigned patternNeuronGroupID;
+
 
 
 			//======================  METHODS  ========================

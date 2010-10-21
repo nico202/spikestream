@@ -3,6 +3,8 @@
 #include "NemoParametersDialog.h"
 #include "NemoWidget.h"
 #include "NeuronParametersDialog.h"
+#include "Pattern.h"
+#include "PatternManager.h"
 #include "SpikeStreamSimulationException.h"
 #include "SynapseParametersDialog.h"
 #include "Util.h"
@@ -10,9 +12,13 @@ using namespace spikestream;
 
 //Qt includes
 #include <QDebug>
+#include <QFileDialog>
 #include <QLayout>
 #include <QMessageBox>
 #include <QMutexLocker>
+
+/*! String user selects to load a pattern */
+#define LOAD_PATTERN_STRING "Load Pattern"
 
 
 //Functions for dynamic library loading
@@ -121,7 +127,15 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	injectPatternNeurGrpCombo = new QComboBox();
 	injectPatternNeurGrpCombo->setMinimumSize(200, 27);
 	injectPatternBox->addWidget(injectPatternNeurGrpCombo);
-
+	patternCombo = new QComboBox();
+	patternCombo->addItem(LOAD_PATTERN_STRING);
+	connect(patternCombo, SIGNAL(currentIndexChanged(QString)), this, SLOT(loadPattern(QString)));
+	injectPatternBox->addWidget(patternCombo);
+	injectPatternButton = new QPushButton("Inject Pattern");
+	connect(injectPatternButton, SIGNAL(clicked()), this, SLOT(injectPatternButtonClicked()));
+	injectPatternBox->addWidget(injectPatternButton);
+	QCheckBox* sustainPatternChkBox = new QCheckBox("Sustain Pattern");
+	connect(sustainPatternChkBox, SIGNAL(clicked(bool)), this, SLOT(sustainPatternChanged(bool)));
 
 	//Put layout into enclosing box
 	mainVBox->addWidget(controlsWidget);
@@ -329,6 +343,36 @@ void NemoWidget::injectNoiseButtonClicked(){
 }
 
 
+/*! Called when inject pattern button is clicked.
+	Sets the injection of the selected pattern for the next time step in the nemo wrapper */
+void NemoWidget::injectPatternButtonClicked(){
+
+}
+
+
+/*! If the string is set to LOAD_PATTERN_STRING, a dialog is displayed
+	for the user to load up a new pattern into memory. */
+void NemoWidget::loadPattern(QString comboStr){
+	//Return if we are setting the pattern to another pattern.
+	if(comboStr != LOAD_PATTERN_STRING){
+		return;
+	}
+
+	//Select file containing new pattern.
+	QString filePath = getFilePath("*.pat");
+	if(filePath.isEmpty())
+		return;
+	if(!QFile::exists(filePath)){
+		qCritical()<<"Selected file '"<<filePath<<"' does not exist.";
+		return;
+	}
+
+	Pattern* pattern = PatternManager::load(filePath);
+	patternCombo->addItem(pattern->getName());
+	nemoWrapper->setInjectionPattern(pattern, getNeuronGroupID(injectPatternNeurGrpCombo->currentText()), false);
+}
+
+
 /*! Instructs the Nemo wrapper to load the network from the database into Nemo */
 void NemoWidget::loadSimulation(){
 	//Run some checks
@@ -522,11 +566,6 @@ void NemoWidget::setArchiveDescription(){
 
 /*! Sets the parameters of the neurons in the network */
 void  NemoWidget::setNeuronParameters(){
-	if(Globals::isSimulationLoaded()){
-		qWarning()<<"Method not yet implemented when simulation is loaded - wait 2 weeks!";
-		return;
-	}
-
 	NeuronParametersDialog* dialog = new NeuronParametersDialog(this);
 	dialog->exec();
 	delete dialog;
@@ -641,6 +680,18 @@ void NemoWidget::stopSimulation(){
 }
 
 
+/*! Switches between pattern injection controlled by button and
+	continuous pattern injection at every time step */
+void NemoWidget::sustainPatternChanged(bool enabled){
+	if(enabled){
+		injectPatternButton->setEnabled(true);
+	}
+	else{
+		injectPatternButton->setEnabled(false);
+	}
+}
+
+
 /*! Instructs the nemo wrapper to discard the current simulation */
 void NemoWidget::unloadSimulation(bool confirmWithUser){
 	//Double check that user wants to unload simulation
@@ -712,6 +763,23 @@ void NemoWidget::checkWidgetEnabled(){
 		mainGroupBox->setEnabled(true);
 	else
 		mainGroupBox->setEnabled(false);
+}
+
+
+/*! Enables user to enter a file path */
+QString NemoWidget::getFilePath(QString fileFilter){
+	QFileDialog dialog(this);
+	dialog.setDirectory(Globals::getWorkingDirectory());
+	dialog.setFileMode(QFileDialog::ExistingFile);
+	dialog.setNameFilter( QString("Configuration files (" + fileFilter + ")") );
+	dialog.setViewMode(QFileDialog::Detail);
+	QStringList fileNames;
+	if (dialog.exec())
+		fileNames = dialog.selectedFiles();
+	if(fileNames.size() > 0)
+		return fileNames[0];
+	else
+		return QString("");
 }
 
 
