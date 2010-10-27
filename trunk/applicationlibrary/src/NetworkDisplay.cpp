@@ -116,6 +116,15 @@ void NetworkDisplay::clearZoom(){
 /*-----                PUBLIC METHODS                  -----*/
 /*----------------------------------------------------------*/
 
+/*! Adds a default colour, which will not be erased when the colour map is cleared.
+	The invoking class is responsible for deleting this colour. */
+void NetworkDisplay::addDefaultColor(RGBColor *color){
+	if(defaultColorMap.contains(color))
+		throw SpikeStreamException("Default colour has already been set.");
+	defaultColorMap[color] = true;
+}
+
+
 /*! Adds highlight neurons. If the color is already set it is deleted and replaced with the
 	new color.  */
 void NetworkDisplay::addHighlightNeurons(const QList<unsigned int>& neuronIDs, RGBColor* color){

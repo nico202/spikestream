@@ -12,8 +12,11 @@
 # The width of the pattern runs from 0 to the maximum X index.
 
 # The name that appears in the drop down combo to select the pattern
-Name: 
+Name: Cats whiskers
 
-# Everything after the word pattern will be interpreted as the pattern.
-Pattern:
-0:9 x 0:9 x 0:9
+# A box with side length of 10 starting at 3,2,1
+3:12 x 2:11 x 1:10
+
+# A point 
+1.3, 2.2, 1.7
+

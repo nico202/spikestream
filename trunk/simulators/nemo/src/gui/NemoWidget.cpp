@@ -1,5 +1,6 @@
 //SpikeStream includes
 #include "Globals.h"
+#include "GlobalVariables.h"
 #include "NemoParametersDialog.h"
 #include "NemoWidget.h"
 #include "NeuronParametersDialog.h"
@@ -11,6 +12,7 @@
 using namespace spikestream;
 
 //Qt includes
+#include <QButtonGroup>
 #include <QDebug>
 #include <QFileDialog>
 #include <QLayout>
@@ -20,6 +22,9 @@ using namespace spikestream;
 /*! String user selects to load a pattern */
 #define LOAD_PATTERN_STRING "Load Pattern"
 
+#define MONITOR_NEURONS_OFF 0
+#define MONITOR_NEURONS_FIRING 1
+#define MONITOR_NEURONS_MEMBRANE 2
 
 //Functions for dynamic library loading
 extern "C" {
@@ -37,8 +42,12 @@ extern "C" {
 
 /*! Constructor */
 NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
-	//Register QList<unsigned> type to enable signals slots to work
+	//Register types to enable signals and slots to work
 	qRegisterMetaType< QList<unsigned> >("QList<unsigned>");
+	qRegisterMetaType< QHash<unsigned, float> >("QHash<unsigned, float>");
+
+	//Create colours to be used for membrane potential
+	createMembranePotentialColors();
 
 	//Create layout for the entire widget
 	QVBoxLayout* mainVBox = new QVBoxLayout(this);
@@ -71,10 +80,23 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	toolBar = getToolBar();
 	controlsVBox->addWidget(toolBar);
 
-	//Add widget to control live monitoring of simulation
-	monitorFiringNeuronsCheckBox = new QCheckBox("Monitor firing neurons");
-	connect(monitorFiringNeuronsCheckBox, SIGNAL(stateChanged(int)), this, SLOT(monitorFiringNeuronsStateChanged(int)));
-	controlsVBox->addWidget(monitorFiringNeuronsCheckBox);
+	//Add widget to control live monitoring of neurons
+	QHBoxLayout* monitorNeuronsBox = new QHBoxLayout();
+	monitorNeuronsBox->addWidget(new QLabel("Monitor neurons: "));
+	QButtonGroup* monitorNeuronsButtonGroup = new QButtonGroup();
+	connect(monitorNeuronsButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(monitorNeuronsStateChanged(int)));
+	noMonitorNeuronsButton = new QRadioButton("Off");
+	noMonitorNeuronsButton->setChecked(true);
+	monitorNeuronsButtonGroup->addButton(noMonitorNeuronsButton, MONITOR_NEURONS_OFF);
+	monitorNeuronsBox->addWidget(noMonitorNeuronsButton);
+	monitorFiringNeuronsButton = new QRadioButton("Firing");
+	monitorNeuronsButtonGroup->addButton(monitorFiringNeuronsButton, MONITOR_NEURONS_FIRING);
+	monitorNeuronsBox->addWidget(monitorFiringNeuronsButton);
+	monitorMemPotNeuronsButton = new QRadioButton("Membrane potential");
+	monitorNeuronsButtonGroup->addButton(monitorMemPotNeuronsButton, MONITOR_NEURONS_MEMBRANE);
+	monitorNeuronsBox->addWidget(monitorMemPotNeuronsButton);
+	monitorNeuronsBox->addStretch(5);
+	controlsVBox->addLayout(monitorNeuronsBox);
 
 	//Add widgets to monitor, save and reset the weights
 	QHBoxLayout* saveWeightsBox = new QHBoxLayout();
@@ -107,35 +129,41 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	//Add widgets to inject noise into specified layers
 	QHBoxLayout* injectNoiseBox = new QHBoxLayout();
 	injectNoiseNeuronGroupCombo = new QComboBox();
-	injectNoiseNeuronGroupCombo->setMinimumSize(200, 27);
+	injectNoiseNeuronGroupCombo->setMinimumSize(200, 20);
 	injectNoiseBox->addWidget(injectNoiseNeuronGroupCombo);
 	injectNoisePercentCombo = new QComboBox();
 	for(int i=10; i<=100; i += 10)
 		injectNoisePercentCombo->addItem(QString::number(i) + " %");
-	injectNoisePercentCombo->setMinimumSize(60, 27);
+	injectNoisePercentCombo->setMinimumSize(60, 20);
 	injectNoiseBox->addWidget(injectNoisePercentCombo);
 	QPushButton* injectNoiseButton = new QPushButton("Inject Noise");
-	injectNoiseButton->setMinimumSize(120, 27);
+	injectNoiseButton->setMinimumHeight(20);
 	connect(injectNoiseButton, SIGNAL(clicked()), this, SLOT(injectNoiseButtonClicked()));
 	injectNoiseBox->addWidget(injectNoiseButton);
 	injectNoiseBox->addStretch(5);
-	controlsVBox->addSpacing(10);
+	controlsVBox->addSpacing(5);
 	controlsVBox->addLayout(injectNoiseBox);
 
 	//Add widgets to enable injection of patterns
 	QHBoxLayout* injectPatternBox = new QHBoxLayout();
 	injectPatternNeurGrpCombo = new QComboBox();
-	injectPatternNeurGrpCombo->setMinimumSize(200, 27);
+	injectPatternNeurGrpCombo->setMinimumSize(200, 20);
 	injectPatternBox->addWidget(injectPatternNeurGrpCombo);
 	patternCombo = new QComboBox();
+	patternCombo->setMinimumSize(200, 20);
+	patternCombo->addItem("");
 	patternCombo->addItem(LOAD_PATTERN_STRING);
 	connect(patternCombo, SIGNAL(currentIndexChanged(QString)), this, SLOT(loadPattern(QString)));
 	injectPatternBox->addWidget(patternCombo);
 	injectPatternButton = new QPushButton("Inject Pattern");
+	injectPatternButton->setMinimumHeight(22);
 	connect(injectPatternButton, SIGNAL(clicked()), this, SLOT(injectPatternButtonClicked()));
 	injectPatternBox->addWidget(injectPatternButton);
-	QCheckBox* sustainPatternChkBox = new QCheckBox("Sustain Pattern");
+	QCheckBox* sustainPatternChkBox = new QCheckBox("Sustain");
 	connect(sustainPatternChkBox, SIGNAL(clicked(bool)), this, SLOT(sustainPatternChanged(bool)));
+	injectPatternBox->addWidget(sustainPatternChkBox);
+	controlsVBox->addSpacing(5);
+	controlsVBox->addLayout(injectPatternBox);
 
 	//Put layout into enclosing box
 	mainVBox->addWidget(controlsWidget);
@@ -147,7 +175,9 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	connect(nemoWrapper, SIGNAL(finished()), this, SLOT(nemoWrapperFinished()));
 	connect(nemoWrapper, SIGNAL(progress(int,int)), this, SLOT(updateProgress(int, int)), Qt::QueuedConnection);
 	connect(nemoWrapper, SIGNAL(simulationStopped()), this, SLOT(simulationStopped()), Qt::QueuedConnection);
+	connect(nemoWrapper, SIGNAL(timeStepChanged(unsigned)), this, SLOT(updateTimeStep(unsigned)), Qt::QueuedConnection);
 	connect(nemoWrapper, SIGNAL(timeStepChanged(unsigned, const QList<unsigned>&)), this, SLOT(updateTimeStep(unsigned, const QList<unsigned>&)), Qt::QueuedConnection);
+	connect(nemoWrapper, SIGNAL(timeStepChanged(unsigned, const QHash<unsigned, float>&)), this, SLOT(updateTimeStep(unsigned, const QHash<unsigned, float>&)), Qt::QueuedConnection);
 
 	//Listen for network changes
 	connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(networkChanged()));
@@ -163,6 +193,9 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 /*! Destructor */
 NemoWidget::~NemoWidget(){
 	delete nemoWrapper;
+	for(QHash<int, RGBColor*>::iterator iter = heatColorMap.begin(); iter != heatColorMap.end(); ++iter)
+		delete iter.value();
+	heatColorMap.clear();
 }
 
 
@@ -231,7 +264,6 @@ void NemoWidget::checkLoadingProgress(){
 	controlsWidget->setEnabled(true);
 	playAction->setEnabled(true);
 	stopAction->setEnabled(false);
-	monitorFiringNeuronsCheckBox->setChecked(nemoWrapper->isMonitorFiringNeurons());
 	monitorWeightsCheckBox->setChecked(nemoWrapper->isMonitorWeights());
 
 	//Cannot save weights or archive if the network is not fully saved in the database
@@ -346,7 +378,13 @@ void NemoWidget::injectNoiseButtonClicked(){
 /*! Called when inject pattern button is clicked.
 	Sets the injection of the selected pattern for the next time step in the nemo wrapper */
 void NemoWidget::injectPatternButtonClicked(){
-
+	//Set pattern in the nemo wrapper
+	try{
+		nemoWrapper->setInjectionPattern(patternMap[getPatternKey(patternCombo->currentText())], getNeuronGroupID(injectPatternNeurGrpCombo->currentText()), false);
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<ex.getMessage();
+	}
 }
 
 
@@ -358,6 +396,9 @@ void NemoWidget::loadPattern(QString comboStr){
 		return;
 	}
 
+	//Reset pattern combo
+	patternCombo->setCurrentIndex(0);
+
 	//Select file containing new pattern.
 	QString filePath = getFilePath("*.pat");
 	if(filePath.isEmpty())
@@ -367,9 +408,26 @@ void NemoWidget::loadPattern(QString comboStr){
 		return;
 	}
 
-	Pattern* pattern = PatternManager::load(filePath);
-	patternCombo->addItem(pattern->getName());
-	nemoWrapper->setInjectionPattern(pattern, getNeuronGroupID(injectPatternNeurGrpCombo->currentText()), false);
+	try{
+		//Load up the new pattern
+		Pattern newPattern;
+		PatternManager::load(filePath, newPattern);
+
+		//Add name to combo if it does not already exist
+		if(!patternMap.contains(filePath))
+			patternCombo->insertItem(patternCombo->count() - 1, newPattern.getName());
+
+		//Replace pattern stored for this name with new pattern or add it if it doesn't exist.
+		patternMap[filePath] = newPattern;
+
+		//Set combo to display loaded item
+		if(patternCombo->itemText(0) == "")
+			patternCombo->removeItem(0);
+		patternCombo->setCurrentIndex(patternCombo->count() - 2);
+	}
+	catch(SpikeStreamException* ex){
+		qCritical()<<ex->getMessage();
+	}
 }
 
 
@@ -423,12 +481,16 @@ void NemoWidget::monitorChanged(int state){
 			if(nemoWrapper->isSimulationLoaded()){
 				timeStepLabel->setText(QString::number(nemoWrapper->getTimeStep()));
 			}
-			monitorFiringNeuronsCheckBox->setEnabled(true);
+			noMonitorNeuronsButton->setEnabled(true);
+			monitorFiringNeuronsButton->setEnabled(true);
+			monitorMemPotNeuronsButton->setEnabled(true);
 			monitorWeightsCheckBox->setEnabled(true);
 		}
 		else{
 			nemoWrapper->setMonitor(false);
-			monitorFiringNeuronsCheckBox->setEnabled(false);
+			noMonitorNeuronsButton->setEnabled(false);
+			monitorFiringNeuronsButton->setEnabled(false);
+			monitorMemPotNeuronsButton->setEnabled(false);
 			monitorWeightsCheckBox->setEnabled(false);
 		}
 	}
@@ -439,18 +501,27 @@ void NemoWidget::monitorChanged(int state){
 
 
 /*! Switches the monitoring of the simulation on or off */
-void NemoWidget::monitorFiringNeuronsStateChanged(int state){
+void NemoWidget::monitorNeuronsStateChanged(int monitorType){
 	try{
-		if(state == Qt::Checked)
-			nemoWrapper->setMonitorFiringNeurons(true);
-		else{
-			//Set the monitor mode
-			nemoWrapper->setMonitorFiringNeurons(false);
-
-			//Clear highlights
-			QHash<unsigned int, RGBColor*>* newHighlightMap = new QHash<unsigned int, RGBColor*>();
-			Globals::getNetworkDisplay()->setNeuronColorMap(newHighlightMap);
+		//No monitoring at all
+		if(monitorType == MONITOR_NEURONS_OFF)
+			nemoWrapper->setMonitorNeurons(false, false);
+		//Monitoring firing neurons
+		else if(monitorType == MONITOR_NEURONS_FIRING){
+			nemoWrapper->setMonitorNeurons(true, false);
 		}
+		//Monitoring membrane potential
+		else if(monitorType == MONITOR_NEURONS_MEMBRANE){
+			nemoWrapper->setMonitorNeurons(false, true);
+		}
+		//Unrecognized value
+		else{
+			throw SpikeStreamException("Monitor neuron type not recognized: " + QString::number(monitorType));
+		}
+
+		//Clear current highlights
+		QHash<unsigned int, RGBColor*>* newHighlightMap = new QHash<unsigned int, RGBColor*>();
+		Globals::getNetworkDisplay()->setNeuronColorMap(newHighlightMap);
 	}
 	catch(SpikeStreamException& ex){
 		qCritical()<<ex.getMessage();
@@ -605,21 +676,75 @@ void NemoWidget::simulationStopped(){
 }
 
 
-/*! Called when the simulation has advanced one time step */
+/*! Called when the simulation has advanced one time step
+	This version of the method only updates the time step. */
+void NemoWidget::updateTimeStep(unsigned int timeStep){
+	timeStepLabel->setText(QString::number(timeStep));
+
+	//Allow simulation to proceed on to next step
+	nemoWrapper->clearWaitForGraphics();
+}
+
+
+/*! Called when the simulation has advanced one time step.
+	This version fo the method updates the time step and firing neuron IDs. */
 void NemoWidget::updateTimeStep(unsigned int timeStep, const QList<unsigned>& neuronIDList){
 	timeStepLabel->setText(QString::number(timeStep));
 
-	if(nemoWrapper->isMonitorFiringNeurons()){
-		//Fill map with neuron ids
-		QHash<unsigned int, RGBColor*>* newHighlightMap = new QHash<unsigned int, RGBColor*>();
-		QList<unsigned>::const_iterator endList = neuronIDList.end();
-		for(QList<unsigned>::const_iterator iter = neuronIDList.begin(); iter != endList; ++iter){
-			(*newHighlightMap)[*iter] = neuronColor;
-		}
-
-		//Set network display
-		Globals::getNetworkDisplay()->setNeuronColorMap(newHighlightMap);
+	//Fill map with neuron ids
+	QHash<unsigned int, RGBColor*>* newHighlightMap = new QHash<unsigned int, RGBColor*>();
+	QList<unsigned>::const_iterator endList = neuronIDList.end();
+	for(QList<unsigned>::const_iterator iter = neuronIDList.begin(); iter != endList; ++iter){
+		(*newHighlightMap)[*iter] = neuronColor;
 	}
+
+	//Set network display
+	Globals::getNetworkDisplay()->setNeuronColorMap(newHighlightMap);
+
+	//Allow simulation to proceed on to next step
+	nemoWrapper->clearWaitForGraphics();
+}
+
+
+/*! Called when the simulation has advanced one time step.
+	This version of the method updats the time step and membrane potential. */
+void NemoWidget::updateTimeStep(unsigned int timeStep, const QHash<unsigned, float>& membranePotentialMap){
+	timeStepLabel->setText(QString::number(timeStep));
+
+	//Fill map with appropriate colours depending on membrane potential.
+	float tmpMemPot = 0.0f;
+	QHash<unsigned int, RGBColor*>* newHighlightMap = new QHash<unsigned int, RGBColor*>();
+	QHash<unsigned, float>::const_iterator endMap = membranePotentialMap.end();
+	for(QHash<unsigned, float>::const_iterator iter = membranePotentialMap.begin(); iter != endMap; ++iter){
+		tmpMemPot = iter.value();
+		if(tmpMemPot < -89.0f)
+			(*newHighlightMap)[iter.key()] = heatColorMap[-1];
+		else if(tmpMemPot < -78.0f)
+			(*newHighlightMap)[iter.key()] = heatColorMap[0];
+		else if(tmpMemPot < -67.0f)
+			(*newHighlightMap)[iter.key()] = heatColorMap[1];
+		else if(tmpMemPot < -56.0f)
+			(*newHighlightMap)[iter.key()] = heatColorMap[2];
+		else if(tmpMemPot < -45.0f)
+			(*newHighlightMap)[iter.key()] = heatColorMap[3];
+		else if(tmpMemPot < -34.0f)
+			(*newHighlightMap)[iter.key()] = heatColorMap[4];
+		else if(tmpMemPot < -23.0f)
+			(*newHighlightMap)[iter.key()] = heatColorMap[5];
+		else if(tmpMemPot < -12.0f)
+			(*newHighlightMap)[iter.key()] = heatColorMap[6];
+		else if(tmpMemPot < -1.0f)
+			(*newHighlightMap)[iter.key()] = heatColorMap[7];
+		else if(tmpMemPot < 10.0f)
+			(*newHighlightMap)[iter.key()] = heatColorMap[8];
+		else if(tmpMemPot < 21.0f)
+			(*newHighlightMap)[iter.key()] = heatColorMap[9];
+		else
+			(*newHighlightMap)[iter.key()] = heatColorMap[10];
+	}
+
+	//Set network display
+	Globals::getNetworkDisplay()->setNeuronColorMap(newHighlightMap);
 
 	//Allow simulation to proceed on to next step
 	nemoWrapper->clearWaitForGraphics();
@@ -684,10 +809,25 @@ void NemoWidget::stopSimulation(){
 	continuous pattern injection at every time step */
 void NemoWidget::sustainPatternChanged(bool enabled){
 	if(enabled){
-		injectPatternButton->setEnabled(true);
+		injectPatternButton->setEnabled(false);
+		injectPatternNeurGrpCombo->setEnabled(false);
+		patternCombo->setEnabled(false);
+
+		//Set pattern in the nemo wrapper
+		try{
+			nemoWrapper->setInjectionPattern(patternMap[getPatternKey(patternCombo->currentText())], getNeuronGroupID(injectPatternNeurGrpCombo->currentText()), true);
+		}
+		catch(SpikeStreamException& ex){
+			qCritical()<<ex.getMessage();
+		}
 	}
 	else{
-		injectPatternButton->setEnabled(false);
+		injectPatternButton->setEnabled(true);
+		injectPatternNeurGrpCombo->setEnabled(true);
+		patternCombo->setEnabled(true);
+
+		//Switch off sustain pattern - the pattern will be automatically deleted on next step.
+		nemoWrapper->setSustainPattern(false);
 	}
 }
 
@@ -704,6 +844,9 @@ void NemoWidget::unloadSimulation(bool confirmWithUser){
 	//Unload the simulation
 	nemoWrapper->unloadSimulation();
 	Globals::setSimulation(NULL);
+
+	//Clear network display
+	Globals::getNetworkDisplay()->setNeuronColorMap(new QHash<unsigned int, RGBColor*>());
 
 	//Set buttons appropriately
 	loadButton->setEnabled(true);
@@ -766,6 +909,35 @@ void NemoWidget::checkWidgetEnabled(){
 }
 
 
+/*! Builds a set of colours for use when displaying the membrane potential. */
+void NemoWidget::createMembranePotentialColors(){
+		heatColorMap[-1] = new RGBColor(0.0f, 0.0f, 0.0f);
+		Globals::getNetworkDisplay()->addDefaultColor(heatColorMap[-1]);
+		heatColorMap[0] = new RGBColor(HEAT_COLOR_0);
+		Globals::getNetworkDisplay()->addDefaultColor(heatColorMap[0]);
+		heatColorMap[1] = new RGBColor(HEAT_COLOR_1);
+		Globals::getNetworkDisplay()->addDefaultColor(heatColorMap[1]);
+		heatColorMap[2] = new RGBColor(HEAT_COLOR_2);
+		Globals::getNetworkDisplay()->addDefaultColor(heatColorMap[2]);
+		heatColorMap[3] = new RGBColor(HEAT_COLOR_3);
+		Globals::getNetworkDisplay()->addDefaultColor(heatColorMap[3]);
+		heatColorMap[4] = new RGBColor(HEAT_COLOR_4);
+		Globals::getNetworkDisplay()->addDefaultColor(heatColorMap[4]);
+		heatColorMap[5] = new RGBColor(HEAT_COLOR_5);
+		Globals::getNetworkDisplay()->addDefaultColor(heatColorMap[5]);
+		heatColorMap[6] = new RGBColor(HEAT_COLOR_6);
+		Globals::getNetworkDisplay()->addDefaultColor(heatColorMap[6]);
+		heatColorMap[7] = new RGBColor(HEAT_COLOR_7);
+		Globals::getNetworkDisplay()->addDefaultColor(heatColorMap[7]);
+		heatColorMap[8] = new RGBColor(HEAT_COLOR_8);
+		Globals::getNetworkDisplay()->addDefaultColor(heatColorMap[8]);
+		heatColorMap[9] = new RGBColor(HEAT_COLOR_9);
+		Globals::getNetworkDisplay()->addDefaultColor(heatColorMap[9]);
+		heatColorMap[10] = new RGBColor(HEAT_COLOR_10);
+		Globals::getNetworkDisplay()->addDefaultColor(heatColorMap[10]);
+}
+
+
 /*! Enables user to enter a file path */
 QString NemoWidget::getFilePath(QString fileFilter){
 	QFileDialog dialog(this);
@@ -787,6 +959,33 @@ QString NemoWidget::getFilePath(QString fileFilter){
 unsigned NemoWidget::getNeuronGroupID(QString neurGrpStr){
 	QRegExp regExp("[()]");
 	return Util::getUInt(neurGrpStr.section(regExp, 1, 1));
+}
+
+
+/*! The pattern map uses the file path as the key; the pattern combo uses the name of the pattern.
+	This method looks up the file path corresponding to a pattern name, returning the first result
+	that is found. Exception is thrown if pattern name does not exist in the patterns in the pattern
+	map. */
+QString NemoWidget::getPatternKey(const QString& patternComboText){
+	if(patternComboText == LOAD_PATTERN_STRING){
+		throw SpikeStreamException("Cannot inject pattern: no patterns added.");
+	}
+
+	//Find the key to the pattern in the pattern map
+	QString patternKey = "";
+	for(QHash<QString, Pattern>::iterator iter = patternMap.begin(); iter != patternMap.end(); ++iter){
+		if(iter.value().getName() == patternComboText){
+			patternKey = iter.key();
+			break;
+		}
+	}
+
+	//Check that key has been found
+	if(patternKey.isEmpty()){
+		throw SpikeStreamException("Pattern not found: " + patternComboText);
+	}
+
+	return patternKey;
 }
 
 
@@ -837,10 +1036,12 @@ QToolBar* NemoWidget::getToolBar(){
 /*! Loads the current neuron groups into the control widgets */
 void NemoWidget::loadNeuronGroups(){
 	injectNoiseNeuronGroupCombo->clear();
+	injectPatternNeurGrpCombo->clear();
 
 	QList<NeuronGroupInfo> neurGrpInfoList = Globals::getNetwork()->getNeuronGroupsInfo();
 	foreach(NeuronGroupInfo info, neurGrpInfoList){
 		injectNoiseNeuronGroupCombo->addItem(info.getName() + "(" + QString::number(info.getID()) + ")");
+		injectPatternNeurGrpCombo->addItem(info.getName() + "(" + QString::number(info.getID()) + ")");
 	}
 }
 

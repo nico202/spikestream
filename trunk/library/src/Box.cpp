@@ -59,7 +59,19 @@ Box& Box::operator=(const Box& rhs){
 	this->z2 = rhs.z2;
 
 	return *this;
+}
 
+
+/*! Equality operator */
+bool Box::operator==(const Box& rhs){
+	if(this == &rhs)//Same object
+		return true;
+
+	if(this->x1 == rhs.x1 && this->y1 == rhs.y1 && this->z1 == rhs.z1 &&
+		this->x2 == rhs.x2 && this->y2 == rhs.y2 && this->z2 == rhs.z2)
+		return true;
+
+	return false;
 }
 
 
@@ -133,6 +145,52 @@ Box Box::getEnclosingBox(const QList<Box>& boxList){
 }
 
 
+/*! Returns a box enclosing the boxes in the list */
+Box Box::getEnclosingBox(const QList<Point3D>& pointList){
+	Box newBox;
+	bool firstTime = true;
+	for(int i=0; i<pointList.size(); ++i){
+		const Point3D& tmpPnt = pointList.at(i);
+		if(firstTime){
+			newBox.setCoordinates(tmpPnt.getXPos(), tmpPnt.getYPos(), tmpPnt.getZPos(),
+								  tmpPnt.getXPos(), tmpPnt.getYPos(), tmpPnt.getZPos());
+			firstTime = false;
+		}
+		else{
+			if(tmpPnt.getXPos() < newBox.x1)
+				newBox.x1 = tmpPnt.getXPos();
+			if(tmpPnt.getYPos() < newBox.y1)
+				newBox.y1 = tmpPnt.getYPos();
+			if(tmpPnt.getZPos() < newBox.z1)
+				newBox.z1 = tmpPnt.getZPos();
+
+			if(tmpPnt.getXPos() > newBox.x2)
+				newBox.x2 = tmpPnt.getXPos();
+			if(tmpPnt.getYPos() > newBox.y2)
+				newBox.y2 = tmpPnt.getYPos();
+			if(tmpPnt.getZPos() > newBox.z2)
+				newBox.z2 = tmpPnt.getZPos();
+		}
+	}
+	return newBox;
+}
+
+
+/*! Returns a box enclosing the boxes and points in the list */
+Box Box::getEnclosingBox(const QList<Box> &boxList, const QList<Point3D> &pointList){
+	Box newBox;
+	QList<Box> tmpBoxList = boxList;//Overcome constant constraint
+	if(!pointList.isEmpty()){
+		newBox = getEnclosingBox(pointList);
+		tmpBoxList.append(newBox);
+	}
+	if(!tmpBoxList.isEmpty()){
+		newBox = getEnclosingBox(tmpBoxList);
+	}
+	return newBox;
+}
+
+
 /*! Returns the width of the box */
 float Box::getWidth() const{
 	if( (x2-x1) >= 0.0f )
@@ -167,6 +225,17 @@ bool Box::intersects(const Box &box) const{
 		}
 	}
 	return false;
+}
+
+
+/*! Sets the coordinates of the box */
+void Box::setCoordinates(float x1, float y1, float z1, float x2, float y2, float z2){
+	this->x1 = x1;
+	this->x2 = x2;
+	this->y1 = y1;
+	this->y2 = y2;
+	this->z1 = z1;
+	this->z2 = z2;
 }
 
 

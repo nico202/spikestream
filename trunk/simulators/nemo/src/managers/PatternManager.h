@@ -14,9 +14,11 @@ namespace spikestream {
 		public:
 			PatternManager();
 			~PatternManager();
-			static Pattern* load(const QString& filePath);
+			static void load(const QString& filePath, Pattern& pattern);
 
 		private:
+			static Box getBox(const QString& str);
+			static Point3D getPoint(const QString& str);
 	};
 
 }

@@ -15,6 +15,7 @@
 #include <QMutex>
 #include <QProgressDialog>
 #include <QPushButton>
+#include <QRadioButton>
 #include <QTimer>
 #include <QToolBar>
 #include <QWidget>
@@ -39,7 +40,7 @@ namespace spikestream {
 			void loadPattern(QString comboStr);
 			void loadSimulation();
 			void monitorChanged(int state);
-			void monitorFiringNeuronsStateChanged(int state);
+			void monitorNeuronsStateChanged(int monitorType);
 			void nemoWrapperFinished();
 			void networkChanged();
 			void resetWeights();
@@ -57,7 +58,9 @@ namespace spikestream {
 			void sustainPatternChanged(bool enabled);
 			void unloadSimulation(bool confirmWithUser=true);
 			void updateProgress(int stepsCompleted, int totalSteps);
+			void updateTimeStep(unsigned int timeStep);
 			void updateTimeStep(unsigned int timeStep, const QList<unsigned>& neuronIDList);
+			void updateTimeStep(unsigned int timeStep, const QHash<unsigned, float>& membranePotentialMap);
 
 		private:
 			//========================  VARIABLES  ========================
@@ -94,8 +97,14 @@ namespace spikestream {
 			/*! Stop action */
 			QAction* stopAction;
 
-			/*! Controls the monitoring of firing neurons*/
-			QCheckBox* monitorFiringNeuronsCheckBox;
+			/*! Switches off monitoring of neurons */
+			QRadioButton* noMonitorNeuronsButton;
+
+			/*! Switches on monitoring of firing neurons. */
+			QRadioButton* monitorFiringNeuronsButton;
+
+			/*! Switches on monitoring of membrane potential */
+			QRadioButton* monitorMemPotNeuronsButton;
 
 			/*! Controls the monitoring of weights */
 			QCheckBox* monitorWeightsCheckBox;
@@ -157,11 +166,21 @@ namespace spikestream {
 			/*! Button for injecting patterns into network. */
 			QPushButton* injectPatternButton;
 
+			/*! Map linking file path with patterns */
+			QHash<QString, Pattern> patternMap;
+
+			/*! Map with colours for plotting heat maps.
+				indexes range from 0 to 10 inclusive with increasing temperature. */
+			QHash<int, RGBColor*> heatColorMap;
+
+
 			//=======================  METHODS  =========================
 			bool checkForErrors();
 			void checkWidgetEnabled();
+			void createMembranePotentialColors();
 			QString getFilePath(QString fileFilter);
 			unsigned getNeuronGroupID(QString neurGrpStr);
+			QString getPatternKey(const QString& patternComboText);
 			QToolBar* getToolBar();
 			void loadNeuronGroups();
 	};

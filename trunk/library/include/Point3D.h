@@ -24,6 +24,7 @@ namespace spikestream{
 			void setYPos(float yPos) { this->yPos = yPos; }
 			void setZPos(float zPos) { this->zPos = zPos; }
 			QString toString() const;
+			void translate(float dx, float dy, float dz);
 
 		private:
 			//=================  VARIABLES  ==================
