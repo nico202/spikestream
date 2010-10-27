@@ -25,12 +25,12 @@ NemoWrapper::NemoWrapper() : AbstractSimulation() {
 	stopThread = true;
 	archiveMode = false;
 	monitorFiringNeurons = false;
+	monitorMembranePotential = false;
 	monitor = true;
 	monitorWeights = false;
 	updateInterval_ms = 500;
-	injectionPattern = NULL;
 	patternNeuronGroupID = 0;
-
+	sustainPattern = false;
 
 	//Zero is the default STDP function
 	stdpFunctionID = 0;
@@ -281,19 +281,34 @@ void NemoWrapper::setArchiveMode(bool newArchiveMode){
 
 /*! Sets the pattern to be injected along with the neuron group.
 	The pattern can be injected for one time step or continuously. */
-void NemoWrapper::setInjectionPattern(Pattern* pattern, unsigned neuronGroupID, bool sustain){
+void NemoWrapper::setInjectionPattern(const Pattern& pattern, unsigned neuronGroupID, bool sustain){
+	sustainPattern = sustain;
 
+	//Get copy of the pattern that is aligned on the centre of the neuron group
+	NeuronGroup* neurGrp = Globals::getNetwork()->getNeuronGroup(neuronGroupID);
+	Pattern alignedPattern( pattern.getAlignedPattern(neurGrp->getBoundingBox()) );
+
+	//Add neurons that are contained within the pattern
+	NeuronMap::iterator neuronMapEnd = neurGrp->end();
+	for(NeuronMap::iterator iter = neurGrp->begin(); iter != neuronMapEnd; ++iter){
+		if(alignedPattern.contains( (*iter)->getLocation() ) ){
+			injectionPatternVector.push_back( (*iter)->getID());
+		}
+	}
 }
 
 
 /*! Sets the monitor mode, which controls whether firing neuron data is extracted
 	from the simulation at each time step */
-void NemoWrapper::setMonitorFiringNeurons(bool newMonitorMode){
-	if(newMonitorMode && !simulationLoaded)
-		throw SpikeStreamSimulationException("Cannot switch monitor mode on unless simulation is loaded.");
+void NemoWrapper::setMonitorNeurons(bool firing, bool membranePotential){
+	if( (firing || membranePotential) && !simulationLoaded)
+		throw SpikeStreamSimulationException("Cannot switch neuron monitor mode on unless simulation is loaded.");
+	if(firing && membranePotential)
+		throw SpikeStreamSimulationException("Cannot monitor firing neurons and membrane potential at the same time.");
 
 	//Store new monitoring mode
-	this->monitorFiringNeurons = newMonitorMode;
+	this->monitorFiringNeurons = firing;
+	this->monitorMembranePotential = membranePotential;
 }
 
 
@@ -370,7 +385,6 @@ void NemoWrapper::clearError(){
 }
 
 
-
 /*! Fills the supplied array with a selection of neurons to force to fire at the next time step. */
 void NemoWrapper::fillInjectNoiseArray(unsigned*& array, int* arraySize){
 	//Calculate total number of firing neurons
@@ -392,8 +406,6 @@ void NemoWrapper::fillInjectNoiseArray(unsigned*& array, int* arraySize){
 		addedNeurIndxMap.clear();
 		numSelectedNeurons = iter.value();
 
-		//qDebug()<<"START NEURON ID: "<<Globals::getNetwork()->getNeuronGroup(iter.key())->getStartNeuronID();
-
 		//Select indexes from the list of neuron ids
 		while((unsigned)addedNeurIndxMap.size() < numSelectedNeurons){
 			randomIndex = Util::getRandom(0, neurGrpSize);//Get random position in list of neuron ids
@@ -406,6 +418,28 @@ void NemoWrapper::fillInjectNoiseArray(unsigned*& array, int* arraySize){
 			}
 		}
 	}
+}
+
+
+/*! Extracts the membrane potential for all the neurons from the simulation. */
+void NemoWrapper::getMembranePotential(){
+	membranePotentialMap.clear();
+
+	float tmpMemPot, maxMemPot = 0.0f, minMemPot = 0.0f;
+	QList<NeuronGroup*> neurGrpList = Globals::getNetwork()->getNeuronGroups();
+	for(int i=0; i<neurGrpList.size(); ++i){
+		NeuronMap::iterator neurGrpListEnd = neurGrpList.at(i)->end();
+		for(NeuronMap::iterator iter = neurGrpList.at(i)->begin(); iter != neurGrpListEnd; ++iter){
+			checkNemoOutput(nemo_get_membrane_potential(nemoSimulation, iter.key(), &tmpMemPot), "Error getting membrane potential.");
+			membranePotentialMap[iter.key()] = tmpMemPot;
+			if(tmpMemPot > maxMemPot)
+				maxMemPot = tmpMemPot;
+			if(tmpMemPot < minMemPot)
+				minMemPot = tmpMemPot;
+			qDebug()<<"Neuron ID: "<<iter.key()<<"; membrane potential: "<<tmpMemPot;
+		}
+	}
+	qDebug()<<"Min membrane potential: "<<minMemPot<<"; Max membrane potential: "<<maxMemPot;
 }
 
 
@@ -642,9 +676,9 @@ void NemoWrapper::stepNemo(){
 	unsigned *firedArray, firedCount;
 	firingNeuronList.clear();
 
-	//------------------------------------------------------------
-	//     Inject noise into neuron groups and step simulation
-	//------------------------------------------------------------
+	//---------------------------------------
+	//     Inject noise into neuron groups
+	//---------------------------------------
 	if(!injectNoiseMap.isEmpty()){
 		//Build array of neurons to inject noise into
 		unsigned* injectNoiseNeurIDArr = NULL;
@@ -655,7 +689,7 @@ void NemoWrapper::stepNemo(){
 		#ifdef DEBUG_STEP
 			qDebug()<<"About to step nemo with injection of noise";
 		#endif//DEBUG_STEP
-		checkNemoOutput( nemo_step(nemoSimulation, injectNoiseNeurIDArr, injectNoiseArrSize, NULL, NULL, 0, &firedArray, &firedCount), "Nemo error on step" );
+		checkNemoOutput( nemo_step(nemoSimulation, injectNoiseNeurIDArr, injectNoiseArrSize, NULL, NULL, 0, &firedArray, &firedCount), "Nemo error on step with injection of noise." );
 		#ifdef DEBUG_STEP
 			qDebug()<<"Nemo successfully stepped with injection of noise.";
 		#endif//DEBUG_STEP
@@ -664,7 +698,28 @@ void NemoWrapper::stepNemo(){
 		delete [] injectNoiseNeurIDArr;
 		injectNoiseMap.clear();
 	}
-	//Advance the simulation one time step
+
+	//------------------------------------------
+	//     Inject pattern(s) into neuron groups
+	//------------------------------------------
+	else if(!injectionPatternVector.empty()){
+		//Advance simulation using injection pattern
+		#ifdef DEBUG_STEP
+			qDebug()<<"About to step nemo with injection of pattern";
+		#endif//DEBUG_STEP
+		checkNemoOutput( nemo_step(nemoSimulation, &injectionPatternVector.front(), injectionPatternVector.size(), NULL, NULL, 0, &firedArray, &firedCount), "Nemo error on step with pattern." );
+		#ifdef DEBUG_STEP
+			qDebug()<<"Nemo successfully stepped with injection of pattern.";
+		#endif//DEBUG_STEP
+
+		//Delete pattern if it is not sustained
+		if(!sustainPattern)
+			injectionPatternVector.clear();
+	}
+
+	//----------------------------------------------------
+	//     Advance simulation without noise or patterns
+	//----------------------------------------------------
 	else{
 		checkNemoOutput( nemo_step(nemoSimulation, 0, 0, NULL, NULL, 0, &firedArray, &firedCount), "Nemo error on step" );
 	}
@@ -682,6 +737,14 @@ void NemoWrapper::stepNemo(){
 		if(archiveMode){
 			archiveDao->addArchiveData(archiveInfo.getID(), timeStepCounter, firingNeuronList);
 		}
+	}
+
+
+	//-----------------------------------------------
+	//         Extract membrane potential
+	//-----------------------------------------------
+	if(monitor && monitorMembranePotential){
+		getMembranePotential();
 	}
 
 
@@ -709,7 +772,12 @@ void NemoWrapper::stepNemo(){
 		waitForGraphics = true;
 
 		//Inform listening classes that this time step has been processed
-		emit timeStepChanged(timeStepCounter, firingNeuronList);
+		if(monitorFiringNeurons)
+			emit timeStepChanged(timeStepCounter, firingNeuronList);
+		else if (monitorMembranePotential)
+			emit timeStepChanged(timeStepCounter, membranePotentialMap);
+		else
+			emit(timeStepChanged(timeStepCounter));
 	}
 
 	//Update time step counter

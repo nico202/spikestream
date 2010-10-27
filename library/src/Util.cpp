@@ -144,6 +144,41 @@ unsigned int Util::getRandomUInt(unsigned min, unsigned max){
 }
 
 
+/*! Returns true if the string is a number */
+bool Util::isNumber(const QString& str){
+	//Is it a float - return true if no exception is thrown
+	try{
+		getFloat(str);
+		return true;
+	}
+	catch(SpikeStreamException&){}
+
+	//Is it a double - return true if no exception is thrown
+	try{
+		getDouble(str);
+		return true;
+	}
+	catch(SpikeStreamException&){}
+
+	//Is it an integer - return true if no exception is thrown
+	try{
+		getInt(str);
+		return true;
+	}
+	catch(SpikeStreamException&){}
+
+	//Is it an unsigned integer - return true if no exception is thrown
+	try{
+		getUInt(str);
+		return true;
+	}
+	catch(SpikeStreamException&){}
+
+	//If we have got to here no number conversion method will work on the string.
+	return false;
+}
+
+
 /*! Returns the minimum of three numbers */
 float Util::min(float n1, float n2, float n3){
 	if(n1 < n2 && n1 < n3)//Is n1 the minimum?

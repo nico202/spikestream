@@ -17,6 +17,10 @@
 //Nemo includes
 #include "nemo.h"
 
+//Other includes
+#include <vector>
+using namespace std;
+
 
 namespace spikestream {
 
@@ -52,19 +56,21 @@ namespace spikestream {
 			void setArchiveMode(bool mode);
 			void setFrameRate(unsigned int frameRate);
 			void setInjectNoise(unsigned neuronGroupID, double percentage);
-			void setInjectionPattern(Pattern* pattern, unsigned neuronGroupID, bool sustain);
+			void setInjectionPattern(const Pattern& pattern, unsigned neuronGroupID, bool sustain);
 			void setMonitor(bool mode);
-			void setMonitorFiringNeurons(bool mode);
+			void setMonitorNeurons(bool firing, bool membranePotential);
 			void setNemoConfig(nemo_configuration_t nemoConfig) { this->nemoConfig = nemoConfig; }
 			void setMonitorWeights(bool enable);
 			void setNeuronParameters(unsigned neuronGroupID, QHash<QString, double> parameterMap);
 			void setSynapseParameters(unsigned connectionGroupID, QHash<QString, double> parameterMap);
 			void setSTDPFunctionID(unsigned stdpFunctionID) { this->stdpFunctionID = stdpFunctionID; }
+			void setSustainPattern(bool sustainPattern) { this->sustainPattern = sustainPattern; }
 			void setUpdateInterval_ms(unsigned int interval) { this->updateInterval_ms = interval; }
 			void playSimulation();
 			void stepSimulation();
 			void stopSimulation();
 			void unloadSimulation();
+
 
 			///====================  VARIABLES  ==========================
 			/*! No task defined */
@@ -89,7 +95,9 @@ namespace spikestream {
 		signals:
 			void progress(int stepsComplete, int totalSteps);
 			void simulationStopped();
+			void timeStepChanged(unsigned int timeStep);
 			void timeStepChanged(unsigned int timeStep, const QList<unsigned>& neuronIDList);
+			void timeStepChanged(unsigned int timeStep, const QHash<unsigned, float>& membranePotentialMap);
 
 
 		private slots:
@@ -118,6 +126,10 @@ namespace spikestream {
 
 			/*! In monitor firing neurons mode a signal is emitted containing a list of the firing neurons */
 			bool monitorFiringNeurons;
+
+			/*! In monitor membrane potential mode a signal is emitted containing a map
+				linking neuron ids with their membrane potential. */
+			bool monitorMembranePotential;
 
 			/*! In monitor weights mode the volatile weights are updated at each time step */
 			bool monitorWeights;
@@ -163,6 +175,9 @@ namespace spikestream {
 				The key is the neuron group ID, the value is the number of neurons to fire. */
 			QHash<unsigned, unsigned> injectNoiseMap;
 
+			/*! Map linking neurons with membrane potential */
+			QHash<unsigned, float> membranePotentialMap;
+
 			/*! Map of the volatile connection groups.
 				The key in the outer map is the volatile connection group ID.
 				The key in the inner map is the Nemo ID of the connection.
@@ -193,8 +208,11 @@ namespace spikestream {
 			/*! Map containing neuron parameters. */
 			QHash<QString, double> neuronParameterMap;
 
-			/*! Pattern to be injected */
-			Pattern* injectionPattern;
+			/*! Map linking neuron group IDs with list of neuron IDs to be injected */
+			vector<unsigned> injectionPatternVector;
+
+			/*! Controls whether pattern is injected on every time step. */
+			bool sustainPattern;
 
 			/*! Neuron group in which pattern is to be injected. */
 			unsigned patternNeuronGroupID;
@@ -205,6 +223,7 @@ namespace spikestream {
 			void checkNemoOutput(nemo_status_t result, const QString& errorMessage);
 			void clearError();
 			void fillInjectNoiseArray(unsigned*& array, int* arraySize);
+			void getMembranePotential();
 			void loadNemo();
 			void resetNemoWeights();
 			void runNemo();

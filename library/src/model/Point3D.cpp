@@ -2,6 +2,9 @@
 #include "Point3D.h"
 using namespace spikestream;
 
+//Qt includes
+#include <QDebug>
+
 //Other includes
 #include <math.h>
 
@@ -83,5 +86,16 @@ QString Point3D::toString() const{
     tmpStr += QString::number(yPos) + ", ";
     tmpStr += QString::number(zPos) + ")";
     return tmpStr;
+}
+
+
+/*! Translates the point by the specified amount  */
+void Point3D::translate(float dx, float dy, float dz){
+	qDebug()<<"BEFORE: xPos="<<xPos<<"; yPos="<<yPos<<"; zPos="<<zPos;
+	qDebug()<<"BEFORE: dx="<<dx<<"; dy="<<dy<<"; dz="<<dz;
+	xPos += dx;
+	yPos += dy;
+	zPos += dz;
+	qDebug()<<"AFTER: xPos="<<xPos<<"; yPos="<<yPos<<"; zPos="<<zPos;
 }
 

@@ -21,6 +21,7 @@ namespace spikestream {
 		public:
 			NetworkDisplay();
 			~NetworkDisplay();
+			void addDefaultColor(RGBColor* color);
 			void addHighlightNeurons(const QList<unsigned int>& neuronIDs, RGBColor* color);
 			void addHighlightNeurons(const QHash< unsigned int, RGBColor*>& colorMap);
 			void removeHighlightNeurons(const QList<unsigned int>& neuronIDs);
