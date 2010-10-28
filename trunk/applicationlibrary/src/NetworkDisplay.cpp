@@ -84,12 +84,23 @@ void NetworkDisplay::networkChanged(){
 		//Make the neuron groups visible by default
 		setVisibleNeuronGroupIDs(Globals::getNetwork()->getNeuronGroupIDs(), false);
 
-		//Show connection groups that are smaller than the loading threshold
-		QList<unsigned> visibleConGrpIDs;
+		//Add up the number of potentially visible connections
+		int totalVisCons = 0;
+		int thinThresh = getConnectionThinningThreshold();
 		QList<ConnectionGroup*> tmpConGrpList = Globals::getNetwork()->getConnectionGroups();
 		foreach(ConnectionGroup* tmpConGrp, tmpConGrpList){
-			if(tmpConGrp->size() <= connectionLoadingThreshold)
+			if(tmpConGrp->size() > thinThresh)
+				totalVisCons += thinThresh;
+			else
+				totalVisCons += tmpConGrp->size();
+		}
+
+		//Show connection groups if the total number of visible connections is less than the threshold
+		QList<unsigned> visibleConGrpIDs;
+		if(totalVisCons < connectionVisibilityThreshold){
+			foreach(ConnectionGroup* tmpConGrp, tmpConGrpList){
 				visibleConGrpIDs.append(tmpConGrp->getID());
+			}
 		}
 		setVisibleConnectionGroupIDs(visibleConGrpIDs, false);
 	}
@@ -177,6 +188,16 @@ void NetworkDisplay::addHighlightNeurons(const QHash<unsigned int, RGBColor*>& c
 }
 
 
+/*! Returns the connection thinning threshold. Connection groups above this threshold
+	will be thinned out at random to improve render times.
+	The value returned depends on the render mode. */
+unsigned NetworkDisplay::getConnectionThinningThreshold(){
+	if(fullRenderMode && (weightRenderMode & WEIGHT_RENDER_ENABLED))
+		return connectionThinningThreshold_full;
+	return connectionThinningThreshold_fast;
+}
+
+
 /*! Removes highlight neurons */
 void NetworkDisplay::removeHighlightNeurons(const QList<unsigned int>& neuronIDs){
 	foreach(unsigned int neurID, neuronIDs){
@@ -218,10 +239,12 @@ void NetworkDisplay::loadDisplaySettings(ConfigLoader* configLoader){
 	drawAxes = Util::getBool( configLoader->getParameter("draw_axes") );
 	sphereRadius = Util::getFloat( configLoader->getParameter("sphere_radius") );
 	sphereQuality = Util::getUInt( configLoader->getParameter("sphere_quality") );
-	connectionLoadingThreshold = Util::getInt( configLoader->getParameter("connection_loading_threshold") );
+	connectionVisibilityThreshold = Util::getInt( configLoader->getParameter("connection_visibility_threshold") );
 	minimumConnectionRadius = Util::getFloat( configLoader->getParameter("minimum_connection_radius") );
 	weightRadiusFactor = Util::getFloat( configLoader->getParameter("weight_radius_factor") );
 	connectionQuality = Util::getUInt( configLoader->getParameter("connection_quality") );
+	connectionThinningThreshold_fast = Util::getUInt( configLoader->getParameter("connection_thinning_threshold_fast") );
+	connectionThinningThreshold_full = Util::getUInt( configLoader->getParameter("connection_thinning_threshold_full") );
 }
 
 

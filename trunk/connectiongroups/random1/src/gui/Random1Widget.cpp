@@ -125,8 +125,8 @@ void Random1Widget::buildGUI(QVBoxLayout* mainVBox){
 	QGroupBox* mainGroupBox = new QGroupBox("Random1 Connection Group Builder", this);
 
 	//Validators for double and integer parameters
-	QDoubleValidator* doubleValidator = new QDoubleValidator(-1.0, 1000000.0, 2, this);
-	QDoubleValidator* weightValidator = new QDoubleValidator(-1.0, 1.0, 3, this);
+	QDoubleValidator* doubleValidator = new QDoubleValidator(-1.0, 1000000.0, 5, this);
+	QDoubleValidator* weightValidator = new QDoubleValidator(-1.0, 1.0, 5, this);
 	QIntValidator* delayValidator = new QIntValidator(0, 10000, this);
 	QIntValidator* percentValidator = new QIntValidator(0, 100, this);
 

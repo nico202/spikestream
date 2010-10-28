@@ -26,11 +26,12 @@ draw_axes = true
 maximize_gui = true
 sphere_radius = 0.1
 sphere_quality = 10
-connection_loading_threshold =  500000
 connection_quality = 8
 minimum_connection_radius = 0.01
 weight_radius_factor = 0.25
-
+connection_visibility_threshold =  500000
+connection_thinning_threshold_fast = 10000
+connection_thinning_threshold_full = 1000
 
 # DATABASE OPTIMIZATION PARAMETERS
 number_insert_connection_buffers = 100

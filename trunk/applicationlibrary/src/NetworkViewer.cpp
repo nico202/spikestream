@@ -4,6 +4,7 @@
 #include "GlobalVariables.h"
 #include "NetworkViewer.h"
 #include "SpikeStreamException.h"
+#include "Util.h"
 using namespace spikestream;
 
 //Qt includes
@@ -559,12 +560,19 @@ void NetworkViewer::drawConnections(){
 
 		//Work through the connection groups listed in the network display
 		bool drawConnection;
+		int thinningThreshold = Globals::getNetworkDisplay()->getConnectionThinningThreshold();
 		Connection* tmpCon;
+		unsigned ignoreConCnt = 0;
 		QList<unsigned int> conGrpIDs = Globals::getNetworkDisplay()->getVisibleConnectionGroupIDs();
 		for(QList<unsigned int>::iterator conGrpIter = conGrpIDs.begin(); conGrpIter != conGrpIDs.end(); ++conGrpIter){
 
 			//Pointer to connection group
 			ConnectionGroup* conGrp = network->getConnectionGroup(*conGrpIter);
+			int numCons = conGrp->size();
+			int drawingThreshold = 0;
+			if(numCons > thinningThreshold){
+				drawingThreshold = Util::rInt(RAND_MAX * ( (double)thinningThreshold/(double)numCons));
+			}
 
 			//Get neuron groups for extracting the position information
 			NeuronGroup* fromNeuronGroup = network->getNeuronGroup(conGrp->getFromNeuronGroupID());
@@ -631,6 +639,11 @@ void NetworkViewer::drawConnections(){
 					if( weight >= 0 && (connectionMode & SHOW_NEGATIVE_CONNECTIONS))
 						drawConnection = false;
 				}
+				//Draw all connections, potentially thinned
+				else if(drawingThreshold && (rand() > drawingThreshold)){
+					drawConnection = false;
+					++ignoreConCnt;
+				}
 
 				//Draw the connection
 				if(drawConnection){
@@ -665,9 +678,11 @@ void NetworkViewer::drawConnections(){
 							glVertex3f(toNeuronPoint->getXPos(), toNeuronPoint->getYPos(), toNeuronPoint->getZPos());
 						glEnd();//End of line drawing
 					}
+
 				}
 			}
 		}
+		qDebug()<<"Number of ignored connections = "<<ignoreConCnt;
 
 		//Finished creating connection display list
 		glEndList();
