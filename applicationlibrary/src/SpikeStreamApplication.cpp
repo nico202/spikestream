@@ -1,6 +1,10 @@
 //SpikeStream includes
 #include "SpikeStreamApplication.h"
+#include "SpikeStreamException.h"
 using namespace spikestream;
+
+//Qt includes
+#include <QDebug>
 
 //Other includes
 #ifdef LINUX32_SPIKESTREAM
@@ -23,6 +27,22 @@ SpikeStreamApplication::SpikeStreamApplication(int & argc, char ** argv) : QAppl
 
 /*! Destructor. */
 SpikeStreamApplication::~SpikeStreamApplication(){
+}
+
+
+//Inherited from QApplication
+bool SpikeStreamApplication::notify(QObject* receiver, QEvent* event){
+	bool result = true;
+	try{
+		result = QApplication::notify(receiver, event);
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<"Event handling exception: "<<ex.getMessage();
+	}
+	catch(...){
+		qCritical()<<"Unknown event handling exception.";
+	}
+	return result;
 }
 
 

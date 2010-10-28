@@ -39,6 +39,7 @@ namespace spikestream{
 			void fastForwardButtonPressed();
 			void stopButtonPressed();
 			void frameRateComboChanged(int);
+			void setArchiveProperties();
 			void updateTimeStep(unsigned timeStep, const QList<unsigned>& neuronIDList);
 
 
@@ -88,13 +89,15 @@ namespace spikestream{
 			/*! Displays the maximum time step */
 			QLabel* maxTimeStepLabel;
 
-
-			const static int idCol = 0;
-			const static int netIDCol = 1;
-			const static int dateCol = 2;
-			const static int descCol = 3;
-			const static int loadButCol = 4;
-			const static int delButCol = 5;
+			// Columns for different types of information
+			const static int propCol = 0;
+			const static int idCol = 1;
+			const static int netIDCol = 2;
+			const static int dateCol = 3;
+			const static int descCol = 4;
+			const static int loadButCol = 5;
+			const static int delButCol = 6;
+			const static int numCols = 7;
 
 			//========================  METHODS  =========================
 			QToolBar* getToolBar();

@@ -150,7 +150,8 @@ HEADERS += include/AbstractParametersEditDialog.h \
 			include/ViewParametersDialog.h \
 			include/ParametersDialog.h \
 			include/NeuronGroupDialog.h \
-			include/ConnectionGroupDialog.h
+			include/ConnectionGroupDialog.h \
+			include/DescriptionDialog.h
 SOURCES += src/dialogs/AbstractParametersEditDialog.cpp \
 			src/dialogs/NRMImportDialog.cpp \
 			src/dialogs/LoadAnalysisDialog.cpp \
@@ -164,7 +165,8 @@ SOURCES += src/dialogs/AbstractParametersEditDialog.cpp \
 			src/dialogs/ViewParametersDialog.cpp \
 			src/dialogs/ParametersDialog.cpp \
 			src/dialogs/NeuronGroupDialog.cpp \
-			src/dialogs/ConnectionGroupDialog.cpp
+			src/dialogs/ConnectionGroupDialog.cpp \
+			src/dialogs/DescriptionDialog.cpp
 
 
 #----------------------------------------------#

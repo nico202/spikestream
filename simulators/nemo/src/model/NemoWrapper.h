@@ -53,7 +53,7 @@ namespace spikestream {
 			void resetWeights();
 			void run();
 			void saveWeights();
-			void setArchiveMode(bool mode);
+			void setArchiveMode(bool mode, const QString& archiveDescription = "");
 			void setFrameRate(unsigned int frameRate);
 			void setInjectNoise(unsigned neuronGroupID, double percentage);
 			void setFiringInjectionPattern(const Pattern& pattern, unsigned neuronGroupID, bool sustain);

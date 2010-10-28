@@ -264,14 +264,21 @@ void NemoWrapper::setFrameRate(unsigned int frameRate){
 
 /*! Sets the archive mode.
 	An archive is created the first time this method is called after the simulation has loaded. */
-void NemoWrapper::setArchiveMode(bool newArchiveMode){
+void NemoWrapper::setArchiveMode(bool newArchiveMode, const QString& description){
 	if(newArchiveMode && !simulationLoaded)
 		throw SpikeStreamSimulationException("Cannot switch archive mode on unless simulation is loaded.");
 
 	/* Create archive if this is the first time the mode has been set
 		Use globals archive dao because this method is called from a separate thread */
 	if(archiveInfo.getID() == 0){
+		archiveInfo.setDescription(description);
 		Globals::getArchiveDao()->addArchive(archiveInfo);
+		Globals::getEventRouter()->archiveListChangedSlot();
+	}
+	//Rename archive if one is already loaded
+	else{
+		archiveInfo.setDescription(description);
+		Globals::getArchiveDao()->setArchiveProperties(archiveInfo.getID(), description);
 		Globals::getEventRouter()->archiveListChangedSlot();
 	}
 
@@ -816,6 +823,7 @@ void NemoWrapper::unloadNemo(){
 	mutex.tryLock();
 	mutex.unlock();
 	simulationLoaded = false;
+	archiveInfo.reset();
 }
 
 

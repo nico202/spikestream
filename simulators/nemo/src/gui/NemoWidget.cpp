@@ -117,9 +117,7 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	archiveCheckBox = new QCheckBox("Archive.");
 	connect(archiveCheckBox, SIGNAL(stateChanged(int)), this, SLOT(archiveStateChanged(int)));
 	archiveDescriptionEdit = new QLineEdit("Undescribed");
-	archiveDescriptionEdit->setEnabled(false);
 	setArchiveDescriptionButton = new QPushButton("Set Description");
-	setArchiveDescriptionButton->setEnabled(false);
 	connect(setArchiveDescriptionButton, SIGNAL(clicked()), this, SLOT(setArchiveDescription()));
 	QHBoxLayout* archiveLayout = new QHBoxLayout();
 	archiveLayout->addWidget(archiveCheckBox);
@@ -210,13 +208,11 @@ NemoWidget::~NemoWidget(){
 /*! Switches the archiving of the simulation on or off */
 void NemoWidget::archiveStateChanged(int state){
 	if(state == Qt::Checked){
-		archiveDescriptionEdit->setEnabled(true);
-		setArchiveDescriptionButton->setEnabled(true);
-		nemoWrapper->setArchiveMode(true);
+		if(archiveDescriptionEdit->text().isEmpty())
+			archiveDescriptionEdit->setText("Undescribed");
+		nemoWrapper->setArchiveMode(true, archiveDescriptionEdit->text());
 	}
 	else{
-		archiveDescriptionEdit->setEnabled(false);
-		setArchiveDescriptionButton->setEnabled(false);
 		nemoWrapper->setArchiveMode(false);
 	}
 }
@@ -269,6 +265,7 @@ void NemoWidget::checkLoadingProgress(){
 	playAction->setEnabled(true);
 	stopAction->setEnabled(false);
 	monitorWeightsCheckBox->setChecked(nemoWrapper->isMonitorWeights());
+	archiveCheckBox->setChecked(false);//Single archive associated with each simulation run
 
 	//Cannot save weights or archive if the network is not fully saved in the database
 	if(!Globals::getNetwork()->isSaved()){
@@ -514,7 +511,8 @@ void NemoWidget::monitorNeuronsStateChanged(int monitorType){
 		}
 		//Unrecognized value
 		else{
-			throw SpikeStreamException("Monitor neuron type not recognized: " + QString::number(monitorType));
+			qCritical()<<"Monitor neuron type not recognized: "<<monitorType;
+			return;
 		}
 
 		//Clear current highlights
@@ -626,9 +624,11 @@ void NemoWidget::setMonitorWeights(bool enable){
 void NemoWidget::setArchiveDescription(){
 	if(archiveDescriptionEdit->text().isEmpty())
 		archiveDescriptionEdit->setText("Undescribed");
-	if(nemoWrapper->getArchiveID() == 0)
-		throw SpikeStreamSimulationException("Attempting to set archive description when no archive is loaded.");
-	Globals::getArchiveDao()->setArchiveDescription(nemoWrapper->getArchiveID(), archiveDescriptionEdit->text());
+	if(nemoWrapper->getArchiveID() == 0){
+		qCritical()<<"Attempting to set archive description when no archive is in use by NeMo.";
+		return;
+	}
+	Globals::getArchiveDao()->setArchiveProperties(nemoWrapper->getArchiveID(), archiveDescriptionEdit->text());
 	Globals::getEventRouter()->archiveListChangedSlot();
 }
 
@@ -848,6 +848,7 @@ void NemoWidget::unloadSimulation(bool confirmWithUser){
 	nemoParametersButton->setEnabled(true);
 	controlsWidget->setEnabled(false);
 	archiveDescriptionEdit->setText("Undescribed");
+	archiveCheckBox->setChecked(false);//Single archive associated with each simulation run
 	timeStepLabel->setText("0");
 }
 

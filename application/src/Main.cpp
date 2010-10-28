@@ -1,6 +1,7 @@
 //SpikeStream includes
 #include "SpikeStreamMainWindow.h"
 #include "SpikeStreamApplication.h"
+#include "SpikeStreamException.h"
 using namespace spikestream;
 
 //Qt includes
@@ -53,6 +54,9 @@ int main( int argc, char ** argv ) {
 
 		//Execute application
 		return spikeStrApp.exec();
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<"Fatal error: "<<ex.getMessage();
 	}
 	catch(...){
 		qCritical()<<"SpikeStream has thrown an unknown exception and will now exit.";
