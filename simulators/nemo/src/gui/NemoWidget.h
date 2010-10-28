@@ -163,6 +163,10 @@ namespace spikestream {
 			/*! Combo to select the pattern to be injected or to add a new pattern. */
 			QComboBox* patternCombo;
 
+			/*! Combo enabling user to switch between firing the neuron or setting an
+				amount of injection current */
+			QComboBox* patternCurrentCombo;
+
 			/*! Button for injecting patterns into network. */
 			QPushButton* injectPatternButton;
 
@@ -178,11 +182,13 @@ namespace spikestream {
 			bool checkForErrors();
 			void checkWidgetEnabled();
 			void createMembranePotentialColors();
+			void fillPatternCurrentCombo();
 			QString getFilePath(QString fileFilter);
 			unsigned getNeuronGroupID(QString neurGrpStr);
 			QString getPatternKey(const QString& patternComboText);
 			QToolBar* getToolBar();
 			void loadNeuronGroups();
+			void setInjectionPattern(bool sustain);
 	};
 
 }
