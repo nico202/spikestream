@@ -28,6 +28,7 @@ namespace spikestream {
 			bool connectionGroupVisible(unsigned int connGrpID);
 			unsigned int getConnectionMode() { return connectionMode; }
 			unsigned getConnectionQuality() { return connectionQuality; }
+			unsigned getConnectionThinningThreshold();
 			QHash<unsigned int, RGBColor*>& getNeuronColorMap() { return *neuronColorMap; }
 			RGBColor* getDefaultNeuronColor() { return &defaultNeuronColor; }
 			RGBColor* getDefaultNeuronColorFullRender() { return &defaultNeuronColorFullRender; }
@@ -188,8 +189,10 @@ namespace spikestream {
 			/*! Transparency of the neuron. Should be between 0 and 1. */
 			float neuronTransparency;
 
-			/*! Connection groups with more connections than this threshold are not shown by default. */
-			int connectionLoadingThreshold;
+			/*! Connection groups with more visible connections than this threshold
+				are not shown by default. The thinning thresholds interact with this
+				parameter.*/
+			int connectionVisibilityThreshold;
 
 			/*! Weight is multiplied by this this factor to get the radius of the connections
 				when drawn in full render mode with weights rendered as thickness of connections*/
@@ -200,6 +203,14 @@ namespace spikestream {
 
 			/*! Quality of cones used to render a weighted connection */
 			unsigned connectionQuality;
+
+			/*! Threshold above which thinning of the drawn connections takes place
+				in fast render mode. */
+			unsigned connectionThinningThreshold_fast;
+
+			/*! Threshold above which thinning of the drawn connections takes place
+				in full render mode. */
+			unsigned connectionThinningThreshold_full;
 
 
 			//=========================  METHODS  =========================

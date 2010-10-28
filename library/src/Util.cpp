@@ -256,6 +256,13 @@ double Util::rDouble(double num, int numPlaces){
 }
 
 
+/*! Rounds the double and returns it as an integer */
+int Util::rInt(double num){
+	num = rint(num);
+	return (int) num;
+}
+
+
 /*! Rounds the double and returns it as an unsigned integer */
 unsigned int Util::rUInt(double num){
 	num = rint(num);
