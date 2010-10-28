@@ -279,9 +279,9 @@ void NemoWrapper::setArchiveMode(bool newArchiveMode){
 }
 
 
-/*! Sets the pattern to be injected along with the neuron group.
+/*! Sets a firing pattern along with the neuron group.
 	The pattern can be injected for one time step or continuously. */
-void NemoWrapper::setInjectionPattern(const Pattern& pattern, unsigned neuronGroupID, bool sustain){
+void NemoWrapper::setFiringInjectionPattern(const Pattern& pattern, unsigned neuronGroupID, bool sustain){
 	sustainPattern = sustain;
 
 	//Get copy of the pattern that is aligned on the centre of the neuron group
@@ -293,6 +293,26 @@ void NemoWrapper::setInjectionPattern(const Pattern& pattern, unsigned neuronGro
 	for(NeuronMap::iterator iter = neurGrp->begin(); iter != neuronMapEnd; ++iter){
 		if(alignedPattern.contains( (*iter)->getLocation() ) ){
 			injectionPatternVector.push_back( (*iter)->getID());
+		}
+	}
+}
+
+
+/*! Sets a current injection pattern along with the neuron group.
+	The pattern can be injected for one time step or continuously. */
+void NemoWrapper::setCurrentInjectionPattern(const Pattern& pattern, float current, unsigned neuronGroupID, bool sustain){
+	sustainPattern = sustain;
+
+	//Get copy of the pattern that is aligned on the centre of the neuron group
+	NeuronGroup* neurGrp = Globals::getNetwork()->getNeuronGroup(neuronGroupID);
+	Pattern alignedPattern( pattern.getAlignedPattern(neurGrp->getBoundingBox()) );
+
+	//Add neurons that are contained within the pattern
+	NeuronMap::iterator neuronMapEnd = neurGrp->end();
+	for(NeuronMap::iterator iter = neurGrp->begin(); iter != neuronMapEnd; ++iter){
+		if(alignedPattern.contains( (*iter)->getLocation() ) ){
+			injectionCurrentNeurIDVector.push_back( (*iter)->getID());
+			injectionCurrentVector.push_back(current);
 		}
 	}
 }
@@ -436,10 +456,10 @@ void NemoWrapper::getMembranePotential(){
 				maxMemPot = tmpMemPot;
 			if(tmpMemPot < minMemPot)
 				minMemPot = tmpMemPot;
-			qDebug()<<"Neuron ID: "<<iter.key()<<"; membrane potential: "<<tmpMemPot;
+			//qDebug()<<"Neuron ID: "<<iter.key()<<"; membrane potential: "<<tmpMemPot;
 		}
 	}
-	qDebug()<<"Min membrane potential: "<<minMemPot<<"; Max membrane potential: "<<maxMemPot;
+	//qDebug()<<"Min membrane potential: "<<minMemPot<<"; Max membrane potential: "<<maxMemPot;
 }
 
 
@@ -702,19 +722,22 @@ void NemoWrapper::stepNemo(){
 	//------------------------------------------
 	//     Inject pattern(s) into neuron groups
 	//------------------------------------------
-	else if(!injectionPatternVector.empty()){
+	else if(!( injectionPatternVector.empty() && injectionCurrentNeurIDVector.empty() ) ){
 		//Advance simulation using injection pattern
 		#ifdef DEBUG_STEP
 			qDebug()<<"About to step nemo with injection of pattern";
 		#endif//DEBUG_STEP
-		checkNemoOutput( nemo_step(nemoSimulation, &injectionPatternVector.front(), injectionPatternVector.size(), NULL, NULL, 0, &firedArray, &firedCount), "Nemo error on step with pattern." );
+		checkNemoOutput( nemo_step(nemoSimulation, &injectionPatternVector.front(), injectionPatternVector.size(), &injectionCurrentNeurIDVector.front(), &injectionCurrentVector.front(), injectionCurrentNeurIDVector.size(), &firedArray, &firedCount), "Nemo error on step with pattern." );
 		#ifdef DEBUG_STEP
 			qDebug()<<"Nemo successfully stepped with injection of pattern.";
 		#endif//DEBUG_STEP
 
 		//Delete pattern if it is not sustained
-		if(!sustainPattern)
+		if(!sustainPattern){
 			injectionPatternVector.clear();
+			injectionCurrentNeurIDVector.clear();
+			injectionCurrentVector.clear();
+		}
 	}
 
 	//----------------------------------------------------

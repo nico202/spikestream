@@ -56,7 +56,8 @@ namespace spikestream {
 			void setArchiveMode(bool mode);
 			void setFrameRate(unsigned int frameRate);
 			void setInjectNoise(unsigned neuronGroupID, double percentage);
-			void setInjectionPattern(const Pattern& pattern, unsigned neuronGroupID, bool sustain);
+			void setFiringInjectionPattern(const Pattern& pattern, unsigned neuronGroupID, bool sustain);
+			void setCurrentInjectionPattern(const Pattern& pattern, float current, unsigned neuronGroupID, bool sustain);
 			void setMonitor(bool mode);
 			void setMonitorNeurons(bool firing, bool membranePotential);
 			void setNemoConfig(nemo_configuration_t nemoConfig) { this->nemoConfig = nemoConfig; }
@@ -208,8 +209,14 @@ namespace spikestream {
 			/*! Map containing neuron parameters. */
 			QHash<QString, double> neuronParameterMap;
 
-			/*! Map linking neuron group IDs with list of neuron IDs to be injected */
+			/*! Vector of neuron IDs to be fired at next time step */
 			vector<unsigned> injectionPatternVector;
+
+			/*! Vector of neuron IDs to have current injected at next time step. */
+			vector<unsigned> injectionCurrentNeurIDVector;
+
+			/*! Current associated with the injection IDs. */
+			vector<float> injectionCurrentVector;
 
 			/*! Controls whether pattern is injected on every time step. */
 			bool sustainPattern;

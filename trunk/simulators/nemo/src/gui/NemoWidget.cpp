@@ -97,6 +97,7 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	monitorNeuronsBox->addWidget(monitorMemPotNeuronsButton);
 	monitorNeuronsBox->addStretch(5);
 	controlsVBox->addLayout(monitorNeuronsBox);
+	controlsVBox->addSpacing(5);
 
 	//Add widgets to monitor, save and reset the weights
 	QHBoxLayout* saveWeightsBox = new QHBoxLayout();
@@ -154,6 +155,9 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	patternCombo->addItem("");
 	patternCombo->addItem(LOAD_PATTERN_STRING);
 	connect(patternCombo, SIGNAL(currentIndexChanged(QString)), this, SLOT(loadPattern(QString)));
+	patternCurrentCombo = new QComboBox();
+	fillPatternCurrentCombo();
+	injectPatternBox->addWidget(patternCurrentCombo);
 	injectPatternBox->addWidget(patternCombo);
 	injectPatternButton = new QPushButton("Inject Pattern");
 	injectPatternButton->setMinimumHeight(22);
@@ -378,13 +382,7 @@ void NemoWidget::injectNoiseButtonClicked(){
 /*! Called when inject pattern button is clicked.
 	Sets the injection of the selected pattern for the next time step in the nemo wrapper */
 void NemoWidget::injectPatternButtonClicked(){
-	//Set pattern in the nemo wrapper
-	try{
-		nemoWrapper->setInjectionPattern(patternMap[getPatternKey(patternCombo->currentText())], getNeuronGroupID(injectPatternNeurGrpCombo->currentText()), false);
-	}
-	catch(SpikeStreamException& ex){
-		qCritical()<<ex.getMessage();
-	}
+	setInjectionPattern(false);
 }
 
 
@@ -812,19 +810,14 @@ void NemoWidget::sustainPatternChanged(bool enabled){
 		injectPatternButton->setEnabled(false);
 		injectPatternNeurGrpCombo->setEnabled(false);
 		patternCombo->setEnabled(false);
-
-		//Set pattern in the nemo wrapper
-		try{
-			nemoWrapper->setInjectionPattern(patternMap[getPatternKey(patternCombo->currentText())], getNeuronGroupID(injectPatternNeurGrpCombo->currentText()), true);
-		}
-		catch(SpikeStreamException& ex){
-			qCritical()<<ex.getMessage();
-		}
+		patternCurrentCombo->setEnabled(false);
+		setInjectionPattern(true);
 	}
 	else{
 		injectPatternButton->setEnabled(true);
 		injectPatternNeurGrpCombo->setEnabled(true);
 		patternCombo->setEnabled(true);
+		patternCurrentCombo->setEnabled(true);
 
 		//Switch off sustain pattern - the pattern will be automatically deleted on next step.
 		nemoWrapper->setSustainPattern(false);
@@ -938,6 +931,13 @@ void NemoWidget::createMembranePotentialColors(){
 }
 
 
+/*! Fills the pattern current combo with appropriate values */
+void NemoWidget::fillPatternCurrentCombo(){
+	patternCurrentCombo->addItem("Fire");
+	for(int i=0; i<=100; i+=10)
+		patternCurrentCombo->addItem(QString::number(i));
+}
+
 /*! Enables user to enter a file path */
 QString NemoWidget::getFilePath(QString fileFilter){
 	QFileDialog dialog(this);
@@ -1045,4 +1045,29 @@ void NemoWidget::loadNeuronGroups(){
 	}
 }
 
+
+/*! Sets the injection pattern */
+void NemoWidget::setInjectionPattern(bool sustain){
+	//Set pattern in the nemo wrapper
+	try{
+		if(patternCurrentCombo->currentIndex() == 0)//Fire neurons
+			nemoWrapper->setFiringInjectionPattern(
+					patternMap[getPatternKey(patternCombo->currentText())],
+					getNeuronGroupID(injectPatternNeurGrpCombo->currentText()),
+					sustain
+			);
+		else{
+			float injectionCurrent = Util::getFloat(patternCurrentCombo->currentText());
+			nemoWrapper->setCurrentInjectionPattern(
+					patternMap[getPatternKey(patternCombo->currentText())],
+					injectionCurrent,
+					getNeuronGroupID(injectPatternNeurGrpCombo->currentText()),
+					sustain
+			);
+		}
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<ex.getMessage();
+	}
+}
 
