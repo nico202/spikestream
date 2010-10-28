@@ -25,7 +25,7 @@ namespace spikestream {
 			unsigned int getMaxTimeStep(unsigned int archiveID);
 			unsigned int getMinTimeStep(unsigned int archiveID);
 			bool networkHasArchives(unsigned int networkID);
-			void setArchiveDescription(unsigned archiveID, const QString& description);//UNTESTED
+			void setArchiveProperties(unsigned archiveID, const QString& description);//UNTESTED
 		};
 
 }

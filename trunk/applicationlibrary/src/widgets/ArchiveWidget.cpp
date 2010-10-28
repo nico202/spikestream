@@ -1,5 +1,6 @@
 //SpikeStream includes
 #include "ArchiveWidget.h"
+#include "DescriptionDialog.h"
 #include "Globals.h"
 #include "SpikeStreamException.h"
 #include "Util.h"
@@ -25,10 +26,8 @@ ArchiveWidget::ArchiveWidget(QWidget* parent) : QWidget(parent){
     gridLayout->setMargin(10);
     gridLayout->setColumnMinimumWidth(idCol, 50);//Archive ID
     gridLayout->setColumnMinimumWidth(netIDCol, 50);//NetworkID
-    gridLayout->setColumnMinimumWidth(dateCol, 100);//Date and time
+	gridLayout->setColumnMinimumWidth(dateCol, 150);//Date and time
     gridLayout->setColumnMinimumWidth(descCol, 250);//Description
-    gridLayout->setColumnMinimumWidth(loadButCol, 100);//Load button
-    gridLayout->setColumnMinimumWidth(delButCol, 100);//Delete button
 
     QHBoxLayout* gridLayoutHolder = new QHBoxLayout();
     gridLayoutHolder->addLayout(gridLayout);
@@ -171,22 +170,27 @@ void ArchiveWidget::loadArchiveList(){
     for(int i=0; i<archiveInfoList.size(); ++i){
 		ArchiveInfo archInfo = archiveInfoList[i];
 
-		//Create labels
+		//Property button
+		QPushButton* propButton = new QPushButton("P");
+		propButton->setMaximumWidth(20);
+		propButton->setObjectName(QString::number(archInfo.getID()));
+		connect ( propButton, SIGNAL(clicked()), this, SLOT( setArchiveProperties() ) );
+		gridLayout->addWidget(propButton, i, propCol);
+
+		//Archive ID, network ID, date and description
 		QLabel* idLabel = new QLabel(QString::number(archInfo.getID()));
 		QLabel* networkIDLabel = new QLabel(QString::number(archInfo.getNetworkID()));
 		QLabel* dateLabel = new QLabel(archInfo.getDateTime().toString());
 		QLabel* descriptionLabel = new QLabel(archInfo.getDescription());
 
-		//Create the load button and name it with the object id so we can tell which button was invoked
+		//Load button and name it with the object id so we can tell which button was invoked
 		QPushButton* loadButton = new QPushButton("Load");
-		loadButton->setMinimumHeight(25);
 		loadButton->setObjectName(QString::number(archInfo.getID()));
 		connect ( loadButton, SIGNAL(clicked()), this, SLOT( loadArchive() ) );
 
 		//Create the delete button and name it with the object id so we can tell which button was invoked
-		QPushButton* deleteButton = new QPushButton("Delete");
+		QPushButton* deleteButton = new QPushButton(QIcon(Globals::getSpikeStreamRoot() + "/images/trash_can.jpg"), "");
 		deleteButton->setObjectName(QString::number(archInfo.getID()));
-		deleteButton->setMinimumHeight(25);
 		connect ( deleteButton, SIGNAL(clicked()), this, SLOT( deleteArchive() ) );
 
 		//Set labels and buttons depending on whether it is the current archive
@@ -229,27 +233,6 @@ void ArchiveWidget::loadArchiveList(){
 }
 
 
-/*! Called when the time step changes and updates the time step counter */
-void ArchiveWidget::updateTimeStep(unsigned timeStep, const QList<unsigned>& neuronIDList){
-	//Update the time step counter and the time step in the archive
-    timeStepLabel->setText(QString::number(Globals::getArchive()->getTimeStep()));
-	Globals::getArchive()->setTimeStep(timeStep);
-
-	//Build new highlight map from list of IDs
-	QHash<unsigned int, RGBColor*>* newHighlightMap = new QHash<unsigned int, RGBColor*>();
-	RGBColor* neuronColor = Globals::getNetworkDisplay()->getArchiveFiringNeuronColor();
-	foreach(unsigned tmpNeurID, neuronIDList){
-		(*newHighlightMap)[tmpNeurID] = neuronColor;
-	}
-
-	//Set the colour map - this should automatically delete the old one.
-	Globals::getNetworkDisplay()->setNeuronColorMap(newHighlightMap);
-
-	//Instruct thread to continue with next time step
-	archivePlayer->clearWaitForGraphics();
-}
-
-
 /*! Rewinds the archive */
 void ArchiveWidget::rewindButtonPressed(){
     //Stop thread if it is running. Rewind will be done when thread finishes
@@ -282,6 +265,8 @@ void ArchiveWidget::playButtonPressed(){
     //If archive is already playing, set the frame rate to its regular frame rate and return
     if(archivePlayer->isRunning()){
 		archivePlayer->setFrameRate(Util::getUInt(frameRateCombo->currentText()));
+		fastForwardAction->setEnabled(true);
+		playAction->setEnabled(false);
 		return;
     }
 
@@ -372,6 +357,47 @@ void ArchiveWidget::archivePlayerStopped(){
 	stopAction->setEnabled(false);
 }
 
+
+/*! Sets the properties of the archive - currently just the description. */
+void ArchiveWidget::setArchiveProperties(){
+	unsigned int archiveID = sender()->objectName().toUInt();
+	if(!archiveInfoMap.contains(archiveID)){
+		qCritical()<<"Archive with ID "<<archiveID<<" cannot be found.";
+		return;
+	}
+	try{
+		DescriptionDialog* descDialog = new DescriptionDialog(archiveInfoMap[archiveID].getDescription(), this);
+		if(descDialog->exec() == QDialog::Accepted){
+			Globals::getArchiveDao()->setArchiveProperties(archiveID, descDialog->getDescription());
+			loadArchiveList();
+		}
+		delete descDialog;
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<ex.getMessage();
+	}
+}
+
+
+/*! Called when the time step changes and updates the time step counter */
+void ArchiveWidget::updateTimeStep(unsigned timeStep, const QList<unsigned>& neuronIDList){
+	//Update the time step counter and the time step in the archive
+	timeStepLabel->setText(QString::number(Globals::getArchive()->getTimeStep()));
+	Globals::getArchive()->setTimeStep(timeStep);
+
+	//Build new highlight map from list of IDs
+	QHash<unsigned int, RGBColor*>* newHighlightMap = new QHash<unsigned int, RGBColor*>();
+	RGBColor* neuronColor = Globals::getNetworkDisplay()->getArchiveFiringNeuronColor();
+	foreach(unsigned tmpNeurID, neuronIDList){
+		(*newHighlightMap)[tmpNeurID] = neuronColor;
+	}
+
+	//Set the colour map - this should automatically delete the old one.
+	Globals::getNetworkDisplay()->setNeuronColorMap(newHighlightMap);
+
+	//Instruct thread to continue with next time step
+	archivePlayer->clearWaitForGraphics();
+}
 
 /*----------------------------------------------------------*/
 /*-----                PRIVATE METHODS                 -----*/
@@ -479,30 +505,12 @@ void ArchiveWidget::reset(){
     }
 
     //Remove list of archives
-    for(int i=0; i<archiveInfoMap.size(); ++i){
-		QLayoutItem* item = gridLayout->itemAtPosition(i, idCol);
-		if(item != 0){
-			item->widget()->deleteLater();
-		}
-		item = gridLayout->itemAtPosition(i, netIDCol);
-		if(item != 0){
-			item->widget()->deleteLater();
-		}
-		item = gridLayout->itemAtPosition(i, dateCol);
-		if(item != 0){
-			item->widget()->deleteLater();
-		}
-		item = gridLayout->itemAtPosition(i, descCol);
-		if(item != 0){
-			item->widget()->deleteLater();
-		}
-		item = gridLayout->itemAtPosition(i, loadButCol);
-		if(item != 0){
-			item->widget()->deleteLater();
-		}
-		item = gridLayout->itemAtPosition(i, delButCol);
-		if(item != 0){
-			item->widget()->deleteLater();
+	for(int rowIndx=0; rowIndx<archiveInfoMap.size(); ++rowIndx){
+		for(int colIndx=0; colIndx < numCols; ++colIndx){
+			QLayoutItem* item = gridLayout->itemAtPosition(rowIndx, colIndx);
+			if(item != 0){
+				item->widget()->deleteLater();
+			}
 		}
 	}
     archiveInfoMap.clear();
@@ -513,7 +521,6 @@ void ArchiveWidget::reset(){
 }
 
 
-
 /*! Rewinds the archive back to the beginning */
 void ArchiveWidget::rewindArchive(){
     if(!Globals::archiveLoaded()){
@@ -521,7 +528,9 @@ void ArchiveWidget::rewindArchive(){
 		return;
     }
 
-    Globals::getArchive()->setTimeStep(Globals::getArchiveDao()->getMinTimeStep(Globals::getArchive()->getID()));
+	unsigned minTimeStep = Globals::getArchiveDao()->getMinTimeStep(Globals::getArchive()->getID());
+	Globals::getArchive()->setTimeStep(minTimeStep);
+	timeStepLabel->setText(QString::number(minTimeStep));
 	Globals::getNetworkDisplay()->setNeuronColorMap(new QHash<unsigned int, RGBColor*>());
     archiveOpen = false;
 }
@@ -534,7 +543,6 @@ void ArchiveWidget::setMaxTimeStepLabel(){
 		return;
 	}
 	unsigned int tmpArchiveID = Globals::getArchive()->getID();
-
 	maxTimeStepLabel->setText( QString::number(Globals::getArchiveDao()->getMaxTimeStep(tmpArchiveID)) );
 }
 

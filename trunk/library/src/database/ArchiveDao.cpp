@@ -20,10 +20,14 @@ ArchiveDao::~ArchiveDao(){
 
 /*! Adds the archive with the specified ID */
 void ArchiveDao::addArchive(ArchiveInfo& archInfo){
+	//Get date at which archive is being created.
+	archInfo.setDateTime(QDateTime::currentDateTime());
+
+	//Create the archive
     QSqlQuery query = getQuery("INSERT INTO Archives (StartTime, NetworkID, Description) VALUES (" + QString::number(archInfo.getDateTime().toTime_t()) + ", " + QString::number(archInfo.getNetworkID()) + ", '" + archInfo.getDescription() + "')");
     executeQuery(query);
 
-    //Check id is correct and add to network info if it is
+	//Check id is correct and add to archive info if it is
     int lastInsertID = query.lastInsertId().toInt();
     if(lastInsertID >= START_ARCHIVE_ID)
 		archInfo.setID(lastInsertID);
@@ -152,8 +156,8 @@ bool ArchiveDao::networkHasArchives(unsigned int networkID){
 }
 
 
-/*! Sets the archive description */
-void ArchiveDao::setArchiveDescription(unsigned archiveID, const QString &description){
+/*! Sets the archive's properties, currently just the description. */
+void ArchiveDao::setArchiveProperties(unsigned archiveID, const QString &description){
 	executeQuery("UPDATE Archives SET Description='" + description + "' WHERE ArchiveID=" + QString::number(archiveID));
 }
 

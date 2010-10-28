@@ -21,6 +21,8 @@ namespace spikestream {
 			QDateTime getDateTime() { return startDateTime; }
 			QString getDescription() { return description; }
 			void reset();
+			void setDateTime(const QDateTime& dateTime) { this->startDateTime = dateTime; }
+			void setDescription(const QString& description) { this->description = description; }
 			void setID(unsigned int id) { this->id = id; }
 			void setNetworkID(unsigned int netID) { this->networkID = netID; }
 

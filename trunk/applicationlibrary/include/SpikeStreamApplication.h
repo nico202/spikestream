@@ -17,6 +17,7 @@ namespace spikestream {
 		public:
 			SpikeStreamApplication(int & argc, char ** argv);
 			~SpikeStreamApplication();
+			bool notify(QObject* receiver, QEvent* event);
 
 		protected:
 			#ifdef LINUX32_SPIKESTREAM
