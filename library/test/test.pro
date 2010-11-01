@@ -32,6 +32,7 @@ win32 {
 #---            Test Files                  ---#
 #----------------------------------------------#
 HEADERS += src/TestRunner.h \
+			src/TestConnection.h \
 			src/TestDatabaseDao.h \
 			src/TestNetworkDao.h \
 			src/TestNetworkDaoThread.h \
@@ -45,6 +46,7 @@ HEADERS += src/TestRunner.h \
 
 SOURCES += src/Main.cpp \
 			src/TestRunner.cpp \
+			src/TestConnection.cpp \
 			src/TestDatabaseDao.cpp \
 			src/TestNetworkDao.cpp \
 			src/TestNetworkDaoThread.cpp \

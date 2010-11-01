@@ -54,18 +54,16 @@ QVariant ConnectionsModel::data(const QModelIndex & index, int role) const{
 
 		if(index.column() == idCol)
 			return tmpConnection->getID();
-		if(index.column() == conGrpIDCol)
-			return tmpConnection->getConnectionGroupID();
 		if(index.column() == fromIDCol)
-			return tmpConnection->fromNeuronID;
+			return tmpConnection->getFromNeuronID();
 		if(index.column() == toIDCol)
-			return tmpConnection->toNeuronID;
+			return tmpConnection->getToNeuronID();
 		if(index.column() == delayCol)
-			return tmpConnection->delay;
+			return tmpConnection->getDelay();
 		if(index.column() == weightCol)
-			return tmpConnection->weight;
+			return tmpConnection->getWeight();
 		if(index.column() == tmpWeightCol)
-			return tmpConnection->tempWeight;
+			return tmpConnection->getTempWeight();
     }
 
 
@@ -82,8 +80,6 @@ QVariant ConnectionsModel::headerData(int section, Qt::Orientation orientation, 
     if (orientation == Qt::Horizontal){
 		if(section == idCol)
 			return "ID";
-		if(section == conGrpIDCol)
-			return "Connection Group ID";
 		if(section == fromIDCol)
 			return "From";
 		if(section == toIDCol)

@@ -286,6 +286,10 @@ void NetworksWidget::loadNetworkList(){
 	NOTE: This is currently only used for deleting networks - will need to be adapted
 	if used for other tasks. */
 void NetworksWidget::networkDaoThreadFinished(){
+	//Check for errors
+	if(networkDaoThread->isError())
+		qCritical()<<networkDaoThread->getErrorMessage();
+
 	//Clean up progress dialog
 	progressDialog->close();
 	delete progressDialog;

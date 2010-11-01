@@ -8,6 +8,9 @@ using namespace spikestream;
 #include <iostream>
 using namespace std;
 
+//Outputs memory debugging information
+#define DEBUG_MEMORY
+
 /*! Constructor that creates a new network and adds it to the database */
 Network::Network(const QString& name, const QString& description, const DBInfo& networkDBInfo, const DBInfo& archiveDBInfo){
     //Store information
@@ -55,6 +58,7 @@ Network::Network(const NetworkInfo& networkInfo, const DBInfo& networkDBInfo, co
     //Load up basic information about the neuron and connection groups
     loadNeuronGroupsInfo();
     loadConnectionGroupsInfo();
+	cout<<"SHORT SIZE: "<<sizeof(short)<<"; short max: "<<SHRT_MAX<<endl;
 }
 
 
@@ -103,6 +107,10 @@ void Network::addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList){
 			conGrp->setID(tmpID);//Set ID in connection group
 			connGrpMap[tmpID] = conGrp;//Add connection group to network
 			newConnectionGroupMap[tmpID] = conGrp;//Store connection group in map for adding to database later
+			#ifdef DEBUG_MEMORY
+				cout<<"Network size: "<<sizeof(*this)<<"; adding connection group with memory size: "<<sizeof(*conGrp);
+				cout<<"; size of 1 connection: "<<sizeof(*(*conGrp->begin()))<<endl;
+			#endif//DEBUG_MEMORY
 		}
 	}
 	//In normal mode, connection groups are saved immediately to the database
@@ -318,7 +326,7 @@ QList<Connection*> Network::getConnections(unsigned connectionMode, unsigned sin
 			for(int i=0; i<tmpConList.size(); ++i){
 				Connection* tmpCon = tmpConList.at(i);
 				if(!filterConnection(tmpCon, connectionMode)){
-					if(tmpCon->toNeuronID == toNeuronID)
+					if(tmpCon->getToNeuronID() == toNeuronID)
 						conList.append(tmpCon);
 				}
 			}
@@ -895,11 +903,11 @@ void Network::deleteNeuronGroupFromMemory(unsigned neurGrpID){
 bool Network::filterConnection(Connection *connection, unsigned connectionMode){
 	//Filter by weight
 	if(connectionMode & SHOW_POSITIVE_CONNECTIONS){
-		if(connection->weight < 0 || connection->tempWeight < 0)
+		if(connection->getWeight() < 0 || connection->getTempWeight() < 0)
 			return true;
 	}
 	else if(connectionMode & SHOW_NEGATIVE_CONNECTIONS){
-		if(connection->weight >= 0 || connection->tempWeight >= 0)
+		if(connection->getWeight() >= 0 || connection->getTempWeight() >= 0)
 			return true;
 	}
 	return false;

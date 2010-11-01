@@ -108,7 +108,7 @@ ConnectionGroupInfo Topographic1Widget::getConnectionGroupInfo(){
 	//Extract variables
 	unsigned int fromNeurGrpID = getNeuronGroupID(fromNeuronGrpCombo->currentText());
 	unsigned int toNeurGrpID = getNeuronGroupID(toNeuronGrpCombo->currentText());
-	unsigned int synapseType = getSynapseTypeID(synapseTypeCombo->currentText());
+	unsigned int synapseTypeID = getSynapseTypeID(synapseTypeCombo->currentText());
 
 	//Store parameters in parameter map
 	QHash<QString, double> paramMap;
@@ -130,7 +130,7 @@ ConnectionGroupInfo Topographic1Widget::getConnectionGroupInfo(){
 	paramMap["density"] = Util::getDouble(densityEdit->text());
 
 	//Use extracted praameters to construct connection group info
-	ConnectionGroupInfo info(0, descriptionEdit->text(), fromNeurGrpID, toNeurGrpID, paramMap, synapseType);
+	ConnectionGroupInfo info(0, descriptionEdit->text(), fromNeurGrpID, toNeurGrpID, paramMap, Globals::getNetworkDao()->getSynapseType(synapseTypeID));
 	return info;
 }
 

@@ -44,8 +44,8 @@ Connection* ConnectionGroup::addConnection(Connection* newConn){
 	(*connectionMap)[newConn->getID()] = newConn;
 
 	//Store connection data in easy to access format
-	fromConnectionMap[newConn->fromNeuronID].append(newConn);
-	toConnectionMap[newConn->toNeuronID].append(newConn);
+	fromConnectionMap[newConn->getFromNeuronID()].append(newConn);
+	toConnectionMap[newConn->getToNeuronID()].append(newConn);
 
 	//Return pointer to connection
 	return newConn;
@@ -57,7 +57,7 @@ Connection* ConnectionGroup::addConnection(unsigned int fromNeuronID, unsigned i
 	unsigned tmpID = getTemporaryID();
 	if(connectionMap->contains(tmpID))
 		throw SpikeStreamException("Automatically generated temporary connection ID clashes with one in the network. New ID=" + QString::number(tmpID));
-	Connection* tmpCon = new Connection(tmpID, getID(), fromNeuronID, toNeuronID, delay, weight);
+	Connection* tmpCon = new Connection(tmpID, fromNeuronID, toNeuronID, delay, weight);
 
 	//Store connection
 	return addConnection(tmpCon);

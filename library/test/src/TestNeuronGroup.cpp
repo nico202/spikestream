@@ -11,7 +11,8 @@ using namespace spikestream;
 /*----------------------------------------------------------*/
 
 void TestNeuronGroup::testAddLayer(){
-    NeuronGroup neurGrp( NeuronGroupInfo(0, "no name", "no description", QHash<QString, double>(), 2) );
+	NeuronType neurType(2, "neur type description", "neur type paramTableName", "");
+	NeuronGroup neurGrp( NeuronGroupInfo(0, "no name", "no description", QHash<QString, double>(), neurType) );
 
     //Add a couple of neurons to check the offset
     neurGrp.addNeuron(-1, -1, -1);
@@ -31,7 +32,8 @@ void TestNeuronGroup::testAddLayer(){
 
 
 void TestNeuronGroup::testAddNeuron(){
-    NeuronGroup neurGrp( NeuronGroupInfo(0, "no name", "no description", QHash<QString, double>(), 2) );
+	NeuronType neurType(2, "neur type description", "neur type paramTableName", "");
+	NeuronGroup neurGrp( NeuronGroupInfo(0, "no name", "no description", QHash<QString, double>(), neurType) );
     neurGrp.addNeuron(23, 27, 12);
     neurGrp.addNeuron(230, 270, 120);
     neurGrp.addNeuron(2334, 2745, 1245);
@@ -71,7 +73,8 @@ void TestNeuronGroup::testGetPositionKey(){
 
 
 void TestNeuronGroup::testPositionIterator(){
-	NeuronGroup neurGrp( NeuronGroupInfo(0, "no name", "no description", QHash<QString, double>(), 2) );
+	NeuronType neurType(2, "neur type description", "neur type paramTableName", "");
+	NeuronGroup neurGrp( NeuronGroupInfo(0, "no name", "no description", QHash<QString, double>(), neurType) );
 	Neuron* neur5 = neurGrp.addNeuron(23, 27, 14);//Should be 5th
 	Neuron* neur3 = neurGrp.addNeuron(23, 27, 12);//Should be 3rd
 	Neuron* neur2 = neurGrp.addNeuron(23, 26, 13);//Should be 2nd

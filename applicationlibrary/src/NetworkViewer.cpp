@@ -584,9 +584,9 @@ void NetworkViewer::drawConnections(){
 				tmpCon = conIter.value();
 
 				//Get the weight
-				weight = tmpCon->weight;
+				weight = tmpCon->getWeight();
 				if( (weightRenderMode & WEIGHT_RENDER_ENABLED) && (weightRenderMode & RENDER_TEMP_WEIGHTS) )
-					weight = tmpCon->tempWeight;
+					weight = tmpCon->getTempWeight();
 
 				//Decide if connection should be drawn, depending on the connection mode and neuron id
 				drawConnection = true;
@@ -595,33 +595,33 @@ void NetworkViewer::drawConnections(){
 					if( !(connectionMode & SHOW_BETWEEN_CONNECTIONS) ){
 						//Show only connections from a single neuron
 						if(connectionMode & SHOW_FROM_CONNECTIONS){
-							if( tmpCon->fromNeuronID != singleNeuronID){
+							if( tmpCon->getFromNeuronID() != singleNeuronID){
 								drawConnection = false;
 							}
 							else{
-								connectedNeuronMap[tmpCon->toNeuronID] = weight;
+								connectedNeuronMap[tmpCon->getToNeuronID()] = weight;
 							}
 						}
 						//Show only connections to a single neuron
 						else if(connectionMode & SHOW_TO_CONNECTIONS){
-							if( tmpCon->toNeuronID != singleNeuronID){
+							if( tmpCon->getToNeuronID() != singleNeuronID){
 								drawConnection = false;
 							}
 							else{
-								connectedNeuronMap[tmpCon->fromNeuronID] = weight;//Positive connection
+								connectedNeuronMap[tmpCon->getFromNeuronID()] = weight;//Positive connection
 							}
 						}
 						//Show from and to connections to a single neuron
 						else {
-							if( (tmpCon->fromNeuronID != singleNeuronID) && (tmpCon->toNeuronID != singleNeuronID) ){
+							if( (tmpCon->getFromNeuronID() != singleNeuronID) && (tmpCon->getToNeuronID() != singleNeuronID) ){
 								drawConnection = false;
 							}
 							else {//Highlight connected neurons
-								if( tmpCon->fromNeuronID == singleNeuronID){
-									connectedNeuronMap[tmpCon->toNeuronID] = weight;//Positive connection
+								if( tmpCon->getFromNeuronID() == singleNeuronID){
+									connectedNeuronMap[tmpCon->getToNeuronID()] = weight;//Positive connection
 								}
-								else if( tmpCon->toNeuronID == singleNeuronID){
-									connectedNeuronMap[tmpCon->fromNeuronID] = weight;//Positive connection
+								else if( tmpCon->getToNeuronID() == singleNeuronID){
+									connectedNeuronMap[tmpCon->getFromNeuronID()] = weight;//Positive connection
 								}
 							}
 						}
@@ -629,7 +629,7 @@ void NetworkViewer::drawConnections(){
 					//Between neuron mode
 					else{
 						//Only show connections from first neuron to second
-						if( tmpCon->fromNeuronID != singleNeuronID || tmpCon->toNeuronID != toNeuronID)
+						if( tmpCon->getFromNeuronID() != singleNeuronID || tmpCon->getToNeuronID() != toNeuronID)
 							drawConnection = false;
 					}
 
@@ -648,8 +648,8 @@ void NetworkViewer::drawConnections(){
 				//Draw the connection
 				if(drawConnection){
 					//Get the position of the from and to neurons
-					fromNeuronPoint = &fromNeuronGroup->getNeuronLocation(tmpCon->fromNeuronID);
-					toNeuronPoint = &toNeuronGroup->getNeuronLocation(tmpCon->toNeuronID);
+					fromNeuronPoint = &fromNeuronGroup->getNeuronLocation(tmpCon->getFromNeuronID());
+					toNeuronPoint = &toNeuronGroup->getNeuronLocation(tmpCon->getToNeuronID());
 
 					//Set the colour
 					if(weight > 0)
