@@ -59,7 +59,7 @@ void TononiNetworkBuilder::addBalduzziTononiFigure5(const QString& networkName, 
 
     //Build neuron group - keep references to neurons
     QHash<QString, double> paramMap;
-	NeuronGroup neurGrp(NeuronGroupInfo(0, "Neuron group 1", "Main neuron group", paramMap, NEURON_TYPE_ID));
+	NeuronGroup neurGrp(NeuronGroupInfo(0, "Neuron group 1", "Main neuron group", paramMap, networkDao->getNeuronType(NEURON_TYPE_ID)));
     Neuron* neur1 = neurGrp.addNeuron(1, 1, 1);
     Neuron* neur2 = neurGrp.addNeuron(2, 2, 1);
     Neuron* neur3 = neurGrp.addNeuron(3, 3, 1);
@@ -79,7 +79,7 @@ void TononiNetworkBuilder::addBalduzziTononiFigure5(const QString& networkName, 
     runThread(netDaoThread);
 
     //Build the connection group that is to be added
-	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neurGrp.getID(), neurGrp.getID(),  paramMap, SYNAPSE_TYPE_ID);
+	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neurGrp.getID(), neurGrp.getID(),  paramMap, networkDao->getSynapseType(SYNAPSE_TYPE_ID));
     ConnectionGroup connGrp(connGrpInfo);
 
     //Add connections
@@ -216,7 +216,7 @@ void TononiNetworkBuilder::addBalduzziTononiFigure6(const QString& networkName, 
 
     //Build neuron group - store neurons in order in a list
     QHash<QString, double> paramMap;
-	NeuronGroup neurGrp(NeuronGroupInfo(0, "Neuron group 1", "Main neuron group", paramMap, NEURON_TYPE_ID));
+	NeuronGroup neurGrp(NeuronGroupInfo(0, "Neuron group 1", "Main neuron group", paramMap, networkDao->getNeuronType(NEURON_TYPE_ID)));
     NeuronMap neuronMap;
     neuronMap[1] = neurGrp.addNeuron(1, 2, 1);
     neuronMap[2] = neurGrp.addNeuron(3, 2, 1);
@@ -232,7 +232,7 @@ void TononiNetworkBuilder::addBalduzziTononiFigure6(const QString& networkName, 
     runThread(netDaoThread);
 
     //Build the connection group that is to be added
-	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neurGrp.getID(), neurGrp.getID(),  paramMap, SYNAPSE_TYPE_ID);
+	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neurGrp.getID(), neurGrp.getID(),  paramMap, networkDao->getSynapseType(SYNAPSE_TYPE_ID));
     ConnectionGroup connGrp(connGrpInfo);
 
     //Add connections
@@ -323,7 +323,7 @@ void TononiNetworkBuilder::addBalduzziTononiFigure12(const QString& networkName,
 
     //Build neuron group - keep references to neurons
     QHash<QString, double> paramMap;
-	NeuronGroup neurGrp(NeuronGroupInfo(0, "Neuron group 1", "Main neuron group", paramMap, NEURON_TYPE_ID));
+	NeuronGroup neurGrp(NeuronGroupInfo(0, "Neuron group 1", "Main neuron group", paramMap, networkDao->getNeuronType(NEURON_TYPE_ID)));
     Neuron* neur1 = neurGrp.addNeuron(2, 4, 1);
     Neuron* neur2 = neurGrp.addNeuron(3, 4, 1);
     Neuron* neur3 = neurGrp.addNeuron(4, 3, 1);
@@ -340,7 +340,7 @@ void TononiNetworkBuilder::addBalduzziTononiFigure12(const QString& networkName,
     runThread(netDaoThread);
 
     //Build the connection group that is to be added
-	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neurGrp.getID(), neurGrp.getID(),  paramMap, SYNAPSE_TYPE_ID);
+	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neurGrp.getID(), neurGrp.getID(),  paramMap, networkDao->getSynapseType(SYNAPSE_TYPE_ID));
     ConnectionGroup connGrp(connGrpInfo);
 
     //Add connections
@@ -459,7 +459,7 @@ void TononiNetworkBuilder::addBalduzziTononiFigure13(const QString& networkName,
 
     //Build neuron group - keep references to neurons
     QHash<QString, double> paramMap;
-	NeuronGroup neurGrp(NeuronGroupInfo(0, "Neuron group 1", "Main neuron group", paramMap, NEURON_TYPE_ID));
+	NeuronGroup neurGrp(NeuronGroupInfo(0, "Neuron group 1", "Main neuron group", paramMap, networkDao->getNeuronType(NEURON_TYPE_ID)));
     Neuron* neur1 = neurGrp.addNeuron(1, 4, 1);
     Neuron* neur2 = neurGrp.addNeuron(3, 4, 1);
     Neuron* neur3 = neurGrp.addNeuron(2, 3, 1);
@@ -480,7 +480,7 @@ void TononiNetworkBuilder::addBalduzziTononiFigure13(const QString& networkName,
     runThread(netDaoThread);
 
     //Build the connection group that is to be added
-	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neurGrp.getID(), neurGrp.getID(),  paramMap, SYNAPSE_TYPE_ID);
+	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neurGrp.getID(), neurGrp.getID(),  paramMap, networkDao->getSynapseType(SYNAPSE_TYPE_ID));
     ConnectionGroup connGrp(connGrpInfo);
 
     //1->2	1->3

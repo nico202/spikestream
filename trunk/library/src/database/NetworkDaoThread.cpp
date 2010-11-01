@@ -308,6 +308,12 @@ void NetworkDaoThread::addConnectionGroups(){
 		//Add parameter table entry for this connection group
 		executeQuery( "INSERT INTO " + synapseType.getParameterTableName() + "(ConnectionGroupID) VALUES (" + QString::number(connectionGroup->getID()) + ")" );
 
+		//Set synapse parameters to default values if they have not been set
+		if(!connectionGroup->parametersSet()){
+			QHash<QString, double> tmpParamMap = getDefaultSynapseParameters(connectionGroup->getSynapseTypeID());
+			connectionGroup->setParameters(tmpParamMap);
+		}
+
 		//Copy parameters from connection group into parameter table
 		QHash<QString, double> tmpParamMap = connectionGroup->getParameters();
 		setSynapseParameters(connGrpInfo, tmpParamMap);
@@ -339,10 +345,10 @@ void NetworkDaoThread::addConnectionGroups(){
 			//Bind values to query
 			tmpConList.append(iter.value());
 			query.bindValue(0 + offset, connectionGroup->getID());
-			query.bindValue(1 + offset, iter.value()->fromNeuronID);
-			query.bindValue(2 + offset, iter.value()->toNeuronID);
-			query.bindValue(3 + offset, iter.value()->delay);
-			query.bindValue(4 + offset, iter.value()->weight);
+			query.bindValue(1 + offset, iter.value()->getFromNeuronID());
+			query.bindValue(2 + offset, iter.value()->getToNeuronID());
+			query.bindValue(3 + offset, iter.value()->getDelay());
+			query.bindValue(4 + offset, iter.value()->getWeight());
 
 			//Execute query
 			if(conCntr % numConBuffers == numConBuffers-1){
@@ -383,10 +389,10 @@ void NetworkDaoThread::addConnectionGroups(){
 			query.prepare("INSERT INTO Connections ( ConnectionGroupID, FromNeuronID, ToNeuronID, Delay, Weight) VALUES (?, ?, ?, ?, ?)");
 			for(QList<Connection*>::iterator iter = tmpConList.begin(); iter != tmpConList.end(); ++iter){
 				query.bindValue(0, connectionGroup->getID());
-				query.bindValue(1, (*iter)->fromNeuronID);
-				query.bindValue(2, (*iter)->toNeuronID);
-				query.bindValue(3, (*iter)->delay);
-				query.bindValue(4, (*iter)->weight);
+				query.bindValue(1, (*iter)->getFromNeuronID());
+				query.bindValue(2, (*iter)->getToNeuronID());
+				query.bindValue(3, (*iter)->getDelay());
+				query.bindValue(4, (*iter)->getWeight());
 
 				//Execute query
 				executeQuery(query);
@@ -462,6 +468,12 @@ void NetworkDaoThread::addNeuronGroups(){
 
 		//Add parameter table entry for this neuron group
 		executeQuery( "INSERT INTO " + neurType.getParameterTableName() + "(NeuronGroupID) VALUES (" + QString::number(neuronGroup->getID()) + ")" );
+
+		//Check neuron group has parameters set and add default parameters if not
+		if(!neuronGroup->parametersSet()){
+			QHash<QString, double> tmpParamMap = getDefaultNeuronParameters(neuronGroup->getNeuronTypeID());
+			neuronGroup->setParameters(tmpParamMap);
+		}
 
 		//Copy parameters from neuron group into parameter table
 		QHash<QString, double> tmpParamMap = neuronGroup->getParameters();
@@ -634,7 +646,6 @@ void NetworkDaoThread::loadConnections(){
 		while ( query.next() ) {
 			Connection* tmpConn = new Connection(
 					query.value(0).toUInt(),//ConnectionID
-					tmpConGrpID,//Connection Group ID
 					query.value(1).toUInt(),//FromNeuronID
 					query.value(2).toUInt(),//ToNeuronID
 					query.value(3).toString().toFloat(),//Delay

@@ -117,7 +117,7 @@ void MotorNetworksBuilder::addBasicNetwork(const QString& networkName, const QSt
 
 	//Build neuron group - store neurons in list and then put ids in map
 	QHash<QString, double> paramMap;
-	NeuronGroup neuronGroup(NeuronGroupInfo(0, "Neuron group 1", "Main neuron group", paramMap, NEURON_TYPE_ID));
+	NeuronGroup neuronGroup(NeuronGroupInfo(0, "Neuron group 1", "Main neuron group", paramMap, networkDao->getNeuronType(NEURON_TYPE_ID)));
 	QList<Neuron*> neuronList;
 	neuronList.append(neuronGroup.addNeuron(3, 1, 1));
 	neuronList.append(neuronGroup.addNeuron(5, 2, 1));
@@ -153,7 +153,7 @@ void MotorNetworksBuilder::addBasicNetwork(const QString& networkName, const QSt
 void MotorNetworksBuilder::addConnections(){
 	//Build the connection group that is to be added
 	QHash<QString, double> paramMap;
-	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neuronGroupID, neuronGroupID,  paramMap, SYNAPSE_TYPE_ID);
+	ConnectionGroupInfo connGrpInfo(0, "Connection Group", neuronGroupID, neuronGroupID,  paramMap, networkDao->getSynapseType(SYNAPSE_TYPE_ID));
 	ConnectionGroup connGrp(connGrpInfo);
 
 	/* Add connections

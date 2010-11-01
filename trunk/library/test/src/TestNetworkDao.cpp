@@ -200,22 +200,23 @@ void TestNetworkDao::testGetConnectionCount1(){
 
 
 void TestNetworkDao::testGetConnectionCount2(){
+	NetworkDao netDao(dbInfo);
+
 	//Add a couple of networks
 	addTestNetwork1();
 	addTestNetwork2();
 
 	//Build list of connection groups for each network
 	QList<ConnectionGroup*> conGrpList1;
-	ConnectionGroup conGrp1(ConnectionGroupInfo(connGrp1ID, "DESC", 0, 0, QHash<QString,double>(), 1));
+	ConnectionGroup conGrp1(ConnectionGroupInfo(connGrp1ID, "DESC", 0, 0, QHash<QString,double>(), netDao.getSynapseType(1)));
 	conGrpList1.append(&conGrp1);
 
 	QList<ConnectionGroup*> conGrpList2;
-	ConnectionGroup conGrp2(ConnectionGroupInfo(connGrp21ID, "DESC", 0, 0, QHash<QString,double>(), 1));
+	ConnectionGroup conGrp2(ConnectionGroupInfo(connGrp21ID, "DESC", 0, 0, QHash<QString,double>(), netDao.getSynapseType(1)));
 	conGrpList2.append(&conGrp1);
 	conGrpList2.append(&conGrp2);
 
 	//Check counts are correct for the two lists
-	NetworkDao netDao(dbInfo);
 	QCOMPARE(netDao.getConnectionCount(conGrpList1), (unsigned int)6);
 	QCOMPARE(netDao.getConnectionCount(conGrpList2), (unsigned int)10);
 }
@@ -235,87 +236,95 @@ void TestNetworkDao::testGetConnections1(){
 	QCOMPARE(conList.size(), (int)1);
 
 	//Check values of connection
-	QCOMPARE(conList[0].fromNeuronID, testNeurIDList[4]);
-	QCOMPARE(conList[0].toNeuronID, testNeurIDList[3]);
-	QCOMPARE(conList[0].delay, 1.4f);
-	QCOMPARE(conList[0].weight, 0.4f);
+	QCOMPARE(conList[0].getFromNeuronID(), testNeurIDList[4]);
+	QCOMPARE(conList[0].getToNeuronID(), testNeurIDList[3]);
+	QCOMPARE(conList[0].getDelay(), 1.4f);
+	QCOMPARE(conList[0].getWeight(), 0.4f);
 }
 
 
 void TestNetworkDao::testGetConnections2(){
-	//Add the test network
-	addTestNetwork1();
+	try{
+		//Add the test network
+		addTestNetwork1();
 
-	//The network dao being tested
-	NetworkDao networkDao(dbInfo);
+		//The network dao being tested
+		NetworkDao networkDao(dbInfo);
 
-	//Test all connections mode
-	unsigned int connectionMode = 0;
-	QList<Connection*> conList = networkDao.getConnections(connectionMode, testNeurIDList[0], 0);
-	QCOMPARE(conList.size(), (int)0);
+		//Test all connections mode
+		unsigned int connectionMode = 0;
+		QList<Connection*> conList = networkDao.getConnections(connectionMode, testNeurIDList[0], 0);
+		QCOMPARE(conList.size(), (int)0);
 
-	//Test single neuron all connections
-	connectionMode = 0;
-	connectionMode |= CONNECTION_MODE_ENABLED;
-	conList = networkDao.getConnections(connectionMode, testNeurIDList[0], 0);
-	QCOMPARE(conList.size(), (int)3);
-	QCOMPARE(conList[0]->fromNeuronID, testNeurIDList[0]);
-	QCOMPARE(conList[0]->toNeuronID, testNeurIDList[1]);
-	QCOMPARE(conList[1]->toNeuronID, testNeurIDList[2]);
-	QCOMPARE(conList[2]->toNeuronID, testNeurIDList[3]);
+		//Test single neuron all connections
+		connectionMode = 0;
+		connectionMode |= CONNECTION_MODE_ENABLED;
+		conList = networkDao.getConnections(connectionMode, testNeurIDList[0], 0);
+		QCOMPARE(conList.size(), (int)3);
+		QCOMPARE(conList[0]->getFromNeuronID(), testNeurIDList[0]);
+		QCOMPARE(conList[0]->getToNeuronID(), testNeurIDList[1]);
+		QCOMPARE(conList[1]->getToNeuronID(), testNeurIDList[2]);
+		QCOMPARE(conList[2]->getToNeuronID(), testNeurIDList[3]);
 
-	//Test single neuron from connections
-	connectionMode = 0;
-	connectionMode |= CONNECTION_MODE_ENABLED;
-	connectionMode |= SHOW_FROM_CONNECTIONS;
-	conList = networkDao.getConnections(connectionMode, testNeurIDList[4], 0);
-	QCOMPARE(conList.size(), (int)2);
-	QCOMPARE(conList[0]->fromNeuronID, testNeurIDList[4]);
-	QCOMPARE(conList[1]->fromNeuronID, testNeurIDList[4]);
-	QCOMPARE(conList[1]->toNeuronID, testNeurIDList[3]);
-	QCOMPARE(conList[0]->toNeuronID, testNeurIDList[1]);
+		//Test single neuron from connections
+		connectionMode = 0;
+		connectionMode |= CONNECTION_MODE_ENABLED;
+		connectionMode |= SHOW_FROM_CONNECTIONS;
+		conList = networkDao.getConnections(connectionMode, testNeurIDList[4], 0);
+		QCOMPARE(conList.size(), (int)2);
+		QCOMPARE(conList[0]->getFromNeuronID(), testNeurIDList[4]);
+		QCOMPARE(conList[1]->getFromNeuronID(), testNeurIDList[4]);
+		QCOMPARE(conList[1]->getToNeuronID(), testNeurIDList[3]);
+		QCOMPARE(conList[0]->getToNeuronID(), testNeurIDList[1]);
 
-	//Test single neuron to connections
-	connectionMode = 0;
-	connectionMode |= CONNECTION_MODE_ENABLED;
-	connectionMode |= SHOW_TO_CONNECTIONS;
-	conList = networkDao.getConnections(connectionMode, testNeurIDList[3], 0);
-	QCOMPARE(conList.size(), (int)2);
-	QCOMPARE(conList[0]->fromNeuronID, testNeurIDList[0]);
-	QCOMPARE(conList[1]->fromNeuronID, testNeurIDList[4]);
-	QCOMPARE(conList[1]->toNeuronID, testNeurIDList[3]);
-	QCOMPARE(conList[0]->toNeuronID, testNeurIDList[3]);
+		//Test single neuron to connections
+		connectionMode = 0;
+		connectionMode |= CONNECTION_MODE_ENABLED;
+		connectionMode |= SHOW_TO_CONNECTIONS;
+		conList = networkDao.getConnections(connectionMode, testNeurIDList[3], 0);
+		QCOMPARE(conList.size(), (int)2);
+		QCOMPARE(conList[0]->getFromNeuronID(), testNeurIDList[0]);
+		QCOMPARE(conList[1]->getFromNeuronID(), testNeurIDList[4]);
+		QCOMPARE(conList[1]->getToNeuronID(), testNeurIDList[3]);
+		QCOMPARE(conList[0]->getToNeuronID(), testNeurIDList[3]);
 
-	//Test between connections
-	connectionMode = 0;
-	connectionMode |= CONNECTION_MODE_ENABLED;
-	connectionMode |= SHOW_BETWEEN_CONNECTIONS;
-	conList = networkDao.getConnections(connectionMode, testNeurIDList[3], testNeurIDList[2]);
-	QCOMPARE(conList.size(), (int)1);
-	QCOMPARE(conList[0]->fromNeuronID, testNeurIDList[3]);
-	QCOMPARE(conList[0]->toNeuronID, testNeurIDList[2]);
+		//Test between connections
+		connectionMode = 0;
+		connectionMode |= CONNECTION_MODE_ENABLED;
+		connectionMode |= SHOW_BETWEEN_CONNECTIONS;
+		conList = networkDao.getConnections(connectionMode, testNeurIDList[3], testNeurIDList[2]);
+		QCOMPARE(conList.size(), (int)1);
+		QCOMPARE(conList[0]->getFromNeuronID(), testNeurIDList[3]);
+		QCOMPARE(conList[0]->getToNeuronID(), testNeurIDList[2]);
 
-	//Test weight filtering
-	testConnIDList.append(addTestConnection(connGrp1ID, testNeurIDList[3], testNeurIDList[1], -1.95, 1.6));
-	connectionMode = 0;
-	connectionMode |= CONNECTION_MODE_ENABLED;
-	connectionMode |= SHOW_FROM_CONNECTIONS;
-	connectionMode |= SHOW_POSITIVE_CONNECTIONS;
-	conList = networkDao.getConnections(connectionMode, testNeurIDList[3], 0);
-	QCOMPARE(conList.size(), (int)1);
-	QCOMPARE(conList[0]->fromNeuronID, testNeurIDList[3]);
-	QCOMPARE(conList[0]->toNeuronID, testNeurIDList[2]);
-	QCOMPARE(conList[0]->weight, 0.6f);
+		//Test weight filtering
+		testConnIDList.append(addTestConnection(connGrp1ID, testNeurIDList[3], testNeurIDList[1], -0.95, 1.6));
+		connectionMode = 0;
+		connectionMode |= CONNECTION_MODE_ENABLED;
+		connectionMode |= SHOW_FROM_CONNECTIONS;
+		connectionMode |= SHOW_POSITIVE_CONNECTIONS;
+		conList = networkDao.getConnections(connectionMode, testNeurIDList[3], 0);
+		QCOMPARE(conList.size(), (int)1);
+		QCOMPARE(conList[0]->getFromNeuronID(), testNeurIDList[3]);
+		QCOMPARE(conList[0]->getToNeuronID(), testNeurIDList[2]);
+		QCOMPARE(conList[0]->getWeight(), 0.6f);
 
-	connectionMode = 0;
-	connectionMode |= CONNECTION_MODE_ENABLED;
-	connectionMode |= SHOW_FROM_CONNECTIONS;
-	connectionMode |= SHOW_NEGATIVE_CONNECTIONS;
-	conList = networkDao.getConnections(connectionMode, testNeurIDList[3], 0);
-	QCOMPARE(conList.size(), (int)1);
-	QCOMPARE(conList[0]->fromNeuronID, testNeurIDList[3]);
-	QCOMPARE(conList[0]->toNeuronID, testNeurIDList[1]);
-	QCOMPARE(conList[0]->weight, -1.95f);
+		connectionMode = 0;
+		connectionMode |= CONNECTION_MODE_ENABLED;
+		connectionMode |= SHOW_FROM_CONNECTIONS;
+		connectionMode |= SHOW_NEGATIVE_CONNECTIONS;
+		conList = networkDao.getConnections(connectionMode, testNeurIDList[3], 0);
+		QCOMPARE(conList.size(), (int)1);
+		QCOMPARE(conList[0]->getFromNeuronID(), testNeurIDList[3]);
+		QCOMPARE(conList[0]->getToNeuronID(), testNeurIDList[1]);
+		QCOMPARE(conList[0]->getWeight(), -0.95f);
+	}
+	catch(SpikeStreamException ex){
+		QFAIL(ex.getMessage().toAscii());
+	}
+	catch(...){
+		QFAIL("Unrecognized exception thrown.");
+	}
 }
 
 
@@ -589,12 +598,13 @@ void TestNetworkDao::testGetNeuronCount3(){
 
 	//Build list of neuron groups for each network
 	QList<NeuronGroup*> neurGrpList1;
-	NeuronGroup neurGrp1(NeuronGroupInfo(neurGrp1ID, "NAME", "DESC", QHash<QString,double>(), 1));
+	NeuronType neurType(1, "neur type description", "neur type paramTableName", "");
+	NeuronGroup neurGrp1(NeuronGroupInfo(neurGrp1ID, "NAME", "DESC", QHash<QString,double>(), neurType));
 	neurGrpList1.append(&neurGrp1);
 
 	QList<NeuronGroup*> neurGrpList2;
-	NeuronGroup neurGrp2(NeuronGroupInfo(neurGrp21ID, "NAME", "DESC", QHash<QString,double>(), 1));
-	NeuronGroup neurGrp3(NeuronGroupInfo(neurGrp22ID, "NAME", "DESC", QHash<QString,double>(), 1));
+	NeuronGroup neurGrp2(NeuronGroupInfo(neurGrp21ID, "NAME", "DESC", QHash<QString,double>(), neurType));
+	NeuronGroup neurGrp3(NeuronGroupInfo(neurGrp22ID, "NAME", "DESC", QHash<QString,double>(), neurType));
 	neurGrpList2.append(&neurGrp2);
 	neurGrpList2.append(&neurGrp3);
 
@@ -727,7 +737,7 @@ void TestNetworkDao::testGetNeuronParameters(){
 	try{
 		//Get the values of the parameters - this should be the default
 		NetworkDao networkDao(dbInfo);
-		NeuronGroupInfo neurGrpInfo (neurGrp1ID, "name", "description", QHash<QString, double>(), 1);
+		NeuronGroupInfo neurGrpInfo (neurGrp1ID, "name", "description", QHash<QString, double>(), networkDao.getNeuronType(1));
 		QHash<QString, double> neurParamMap = networkDao.getNeuronParameters(neurGrpInfo);
 
 		//Check parameters
@@ -842,7 +852,7 @@ void TestNetworkDao::testGetSynapseParameters(){
 	try{
 		//Get the values of the parameters - this should be the default
 		NetworkDao networkDao(dbInfo);
-		ConnectionGroupInfo info(connGrp1ID, "description", 0, 0, QHash<QString, double>(), 1);
+		ConnectionGroupInfo info(connGrp1ID, "description", 0, 0, QHash<QString, double>(), networkDao.getSynapseType(1));
 		QHash<QString, double> conParamMap = networkDao.getSynapseParameters(info);
 
 		//Check parameters
@@ -1116,7 +1126,8 @@ void TestNetworkDao::testSetNeuronParameters(){
 
 	try{
 		//Build neuron group info and parameter map for the update
-		NeuronGroupInfo info(neurGrp1ID, "name", "description", QHash<QString, double>(), 1);
+		NeuronType neurType(1, "neur type description", "neur type paramTableName", "");
+		NeuronGroupInfo info(neurGrp1ID, "name", "description", QHash<QString, double>(), neurType);
 		QHash<QString, double> paramMap;
 		paramMap["a"] = 20.3;
 		paramMap["b"] = 21.3;
@@ -1186,7 +1197,8 @@ void TestNetworkDao::testSetSynapseParameters(){
 
 	try{
 		//Build connection group info and parameter map for the update
-		ConnectionGroupInfo info(connGrp1ID, "description", 0, 0, QHash<QString, double>(), 1);
+		SynapseType synType(1, "syn type description", "syn type paramTableName", "");
+		ConnectionGroupInfo info(connGrp1ID, "description", 0, 0, QHash<QString, double>(), synType);
 		QHash<QString, double> paramMap;
 		paramMap["Learning"] = 1;
 		paramMap["Disable"] = 1;

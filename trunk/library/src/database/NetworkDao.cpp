@@ -153,17 +153,16 @@ unsigned int NetworkDao::getConnectionCount(const ConnectionGroupInfo& conGrpInf
 
 /*! Returns all of the connections from the specified neuron to the specified neuron. */
 QList<Connection> NetworkDao::getConnections(unsigned int fromNeuronID, unsigned int toNeuronID){
-	QSqlQuery query = getQuery("SELECT ConnectionID, ConnectionGroupID, Delay, Weight FROM Connections WHERE FromNeuronID=" + QString::number(fromNeuronID) + " AND ToNeuronID="+ QString::number(toNeuronID));
+	QSqlQuery query = getQuery("SELECT ConnectionID, Delay, Weight FROM Connections WHERE FromNeuronID=" + QString::number(fromNeuronID) + " AND ToNeuronID="+ QString::number(toNeuronID));
 	executeQuery(query);
 	QList<Connection> conList;
 	while ( query.next() ) {
 		Connection tmpCon(
 				query.value(0).toUInt(),//ConnectionID
-				query.value(1).toUInt(),//Connection group id
 				fromNeuronID,//FromNeuronID
 				toNeuronID,//ToNeuronID
-				query.value(2).toString().toFloat(),//Delay
-				query.value(3).toString().toFloat()//Weight
+				query.value(1).toString().toFloat(),//Delay
+				query.value(2).toString().toFloat()//Weight
 		);
 		conList.append(tmpCon);
 	}
@@ -279,7 +278,7 @@ QList<Connection*> NetworkDao::getConnections(unsigned int connectionMode, unsig
 	if( !(connectionMode & CONNECTION_MODE_ENABLED) )
 		return conList;
 
-	QString queryStr = "SELECT ConnectionID, ConnectionGroupID, FromNeuronID, ToNeuronID, Delay, Weight FROM Connections WHERE ";
+	QString queryStr = "SELECT ConnectionID, FromNeuronID, ToNeuronID, Delay, Weight FROM Connections WHERE ";
 
 	//Filter by weight
 	if(connectionMode & SHOW_POSITIVE_CONNECTIONS)
@@ -312,11 +311,10 @@ QList<Connection*> NetworkDao::getConnections(unsigned int connectionMode, unsig
 	while ( query.next() ) {
 		Connection* tmpConn = new Connection(
 				query.value(0).toUInt(),//ConnectionID
-				query.value(1).toUInt(),//Connection Group ID
-				query.value(2).toUInt(),//FromNeuronID
-				query.value(3).toUInt(),//ToNeuronID
-				query.value(4).toString().toFloat(),//Delay
-				query.value(5).toString().toFloat()//Weight
+				query.value(1).toUInt(),//FromNeuronID
+				query.value(2).toUInt(),//ToNeuronID
+				query.value(3).toString().toFloat(),//Delay
+				query.value(4).toString().toFloat()//Weight
 		);
 		conList.append(tmpConn);
 	}
@@ -811,6 +809,10 @@ void NetworkDao::setNeuronParameters(const NeuronGroupInfo& neurGrpInfo, QHash<Q
 		table name and info about the parameters */
 	NeuronType neuronType = getNeuronType(neurGrpInfo.getNeuronTypeID());
 
+	//Do nothing if there are no parameters
+	if(neuronType.getParameterCount() == 0)
+		return;
+
 	//Build query to update parameters for this neuron group
 	QString queryStr = "UPDATE " + neuronType.getParameterTableName() + " SET ";
 	foreach(ParameterInfo paramInfo, neuronType.getParameterInfoList()){
@@ -831,11 +833,15 @@ void NetworkDao::setSynapseParameters(const ConnectionGroupInfo& conGrpInfo, QHa
 		table name and info about the parameters */
 	SynapseType synapseType = getSynapseType(conGrpInfo.getSynapseTypeID());
 
+	//Do nothing if there are no parameters
+	if(synapseType.getParameterCount() == 0)
+		return;
+
 	//Build query to update parameters for this neuron group
 	QString queryStr = "UPDATE " + synapseType.getParameterTableName() + " SET ";
 	foreach(ParameterInfo paramInfo, synapseType.getParameterInfoList()){
 		if(!paramMap.contains(paramInfo.getName()))
-			throw SpikeStreamException("Parameters in neuron type and parameters in paramter map do not match.");
+			throw SpikeStreamException("Parameters in synapse type and parameters in paramter map do not match.");
 
 		queryStr += paramInfo.getName() + "=" + QString::number(paramMap[paramInfo.getName()]) + ",";
 	}

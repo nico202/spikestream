@@ -2,6 +2,7 @@
 //SpikeStream includes
 #include "TestAnalysisDao.h"
 #include "TestArchiveDao.h"
+#include "TestConnection.h"
 #include "TestDatabaseDao.h"
 #include "TestRunner.h"
 #include "TestNetwork.h"
@@ -24,6 +25,9 @@ void TestRunner::runTests(){
 	char* argsChar[0];
 	QCoreApplication coreApplication(argsSize, argsChar);
 
+	TestConnection testConnection;
+	QTest::qExec(&testConnection);
+/*
 	TestDatabaseDao testDatabaseDao;
 	QTest::qExec(&testDatabaseDao);
 
@@ -52,7 +56,7 @@ void TestRunner::runTests(){
     QTest::qExec(&testUtil);
 
     TestWeightlessNeuron testWeightlessNeuron;
-	QTest::qExec(&testWeightlessNeuron);
+	QTest::qExec(&testWeightlessNeuron);*/
 }
 
 
