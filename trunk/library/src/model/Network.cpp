@@ -841,7 +841,7 @@ void Network::checkConnectionGroupID(unsigned int id){
 }
 
 
-/*! Checks that the specified connection group id is present in the network
+/*! Checks that the specified neuron group id is present in the network
     and throws an exception if not. */
 void Network::checkNeuronGroupID(unsigned int id){
     if(!neurGrpMap.contains(id))
@@ -869,8 +869,6 @@ void Network::deleteConnectionGroupFromMemory(unsigned conGrpID){
 
 /*! Removes the specified neuron group from memory along with all of its associated connections */
 void Network::deleteNeuronGroupFromMemory(unsigned neurGrpID){
-	QHash<unsigned, bool> tmpDeleteConMap;
-
 	//Remove neuron group from map of new groups that only exist in memory
 	if(prototypeMode){
 		if(newNeuronGroupMap.contains(neurGrpID)){//Deleting a new neuron group
@@ -879,12 +877,13 @@ void Network::deleteNeuronGroupFromMemory(unsigned neurGrpID){
 		else{//Schedule neuron group for deletion when network is saved
 			deleteNeuronGroupIDs.append(neurGrpID);
 		}
+	}
 
-		//Identify connection groups involving this neuron group
-		for(QHash<unsigned int, ConnectionGroup*>::iterator iter = connGrpMap.begin(); iter != connGrpMap.end(); ++iter){
-			if(iter.value()->getFromNeuronGroupID() == neurGrpID || iter.value()->getToNeuronGroupID() == neurGrpID){
-				tmpDeleteConMap[iter.value()->getID()] = true;
-			}
+	//Identify connection groups involving this neuron group
+	QHash<unsigned, bool> tmpDeleteConMap;
+	for(QHash<unsigned int, ConnectionGroup*>::iterator iter = connGrpMap.begin(); iter != connGrpMap.end(); ++iter){
+		if(iter.value()->getFromNeuronGroupID() == neurGrpID || iter.value()->getToNeuronGroupID() == neurGrpID){
+			tmpDeleteConMap[iter.value()->getID()] = true;
 		}
 	}
 

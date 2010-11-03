@@ -138,6 +138,10 @@ void SpikeStreamMainWindow::about(){
 
 /*! Called when the database manager has finished its task */
 void SpikeStreamMainWindow::databaseManagerFinished(){
+	//Check for errors
+	if(databaseManager->isError())
+		qCritical()<<databaseManager->getErrorMessage();
+
 	if(databaseManager->getTaskID() == DatabaseManager::CLEAR_DATABASES_TASK){
 		//Inform other classes about the change
 		Globals::setNetwork(NULL);

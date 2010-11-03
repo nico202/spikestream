@@ -165,8 +165,11 @@ void NRMImportDialog::addNetwork(){
 		qCritical()<<"Error occurred adding neuron groups to network: "<<ex.getMessage();
 
 		//Delete network from database
-		if(newNetwork != NULL)
-			Globals::getNetworkDao()->deleteNetwork(newNetwork->getID());
+		if(newNetwork != NULL){
+			NetworkDaoThread netDaoThread(Globals::getNetworkDao()->getDBInfo());
+			netDaoThread.startDeleteNetwork(newNetwork->getID());
+			netDaoThread.wait();
+		}
     }
 }
 
@@ -223,7 +226,9 @@ void NRMImportDialog::threadFinished(){
 		case ADD_NEURON_GROUPS_TASK:
 			if(newNetwork->isError()){
 				qCritical()<<newNetwork->getErrorMessage();
-				Globals::getNetworkDao()->deleteNetwork(newNetwork->getID());
+				NetworkDaoThread netDaoThread(Globals::getNetworkDao()->getDBInfo());
+				netDaoThread.startDeleteNetwork(newNetwork->getID());
+				netDaoThread.wait();
 				threadError = true;
 			}
 		break;

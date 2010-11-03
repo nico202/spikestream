@@ -69,6 +69,11 @@ void NeuronGroupWidget::deleteSelectedNeurons(){
 		qCritical()<<"Attempting to delete neurons when network is not loaded";
 		return;
 	}
+	//Check if network is editable or not
+	if(Globals::getNetwork()->hasArchives()){
+		qWarning()<<"You cannot alter a network that has archives.\nDelete the archives and try again.";
+		return;
+	}
 	if(!Globals::networkChangeOk())
 		return;
 
@@ -92,6 +97,9 @@ void NeuronGroupWidget::deleteSelectedNeurons(){
 	}
 	catch(SpikeStreamException& ex){
 		qCritical()<<ex.getMessage();
+
+		//Call networkTaskFinished to handle error
+		networkTaskFinished();
 	}
 }
 
@@ -128,6 +136,8 @@ void NeuronGroupWidget::networkTaskFinished(){
 	disconnect(Globals::getNetwork(), SIGNAL(taskFinished()), this, SLOT(networkTaskFinished()));
 
 	//Inform other classes that network has changed
+	qDebug()<<"about to call network change slot";
 	Globals::getEventRouter()->networkChangedSlot();
+	qDebug()<<"just callled network change slot";
 }
 
