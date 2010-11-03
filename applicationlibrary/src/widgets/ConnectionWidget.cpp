@@ -74,6 +74,12 @@ void ConnectionWidget::deleteSelectedConnections(){
 		qCritical()<<"Attempting to delete connections when network is not loaded";
 		return;
 	}
+	//Check if network is editable or not
+	if(Globals::getNetwork()->hasArchives()){
+		qCritical()<<"You cannot alter a network that has archives.\nDelete the archives and try again.";
+		return;
+	}
+
 	if(!Globals::networkChangeOk())
 		return;
 

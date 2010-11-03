@@ -45,7 +45,7 @@ void DatabaseManager::run(){
 	try{
 		switch(taskID){
 			case CLEAR_DATABASES_TASK:
-				networkDao->deleteAllNetworks();
+				;//networkDao->deleteAllNetworks();
 			break;
 			default:
 				setError("TaskID not recognized.");

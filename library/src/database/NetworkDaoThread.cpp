@@ -197,6 +197,11 @@ void NetworkDaoThread::run(){
 			case DELETE_CONNECTION_GROUPS_TASK:
 				deleteConnectionGroups();
 			break;
+			case DELETE_NETWORK_TASK:
+				deleteConnectionGroups();
+				deleteNeuronGroups();
+				deleteNetwork();
+			break;
 			case DELETE_NEURON_GROUPS_TASK:
 				deleteNeuronGroups();
 			break;
@@ -205,10 +210,6 @@ void NetworkDaoThread::run(){
 			break;
 			case LOAD_NEURONS_TASK:
 				loadNeurons();
-			break;
-			case DELETE_NETWORK_TASK:
-				deleteNetwork(deleteNetworkID);
-				deleteNetworkID = 0;
 			break;
 			case SAVE_NETWORK_TASK:
 				saveNetwork();
@@ -239,7 +240,20 @@ void NetworkDaoThread::run(){
 
 /*! Starts a thread to delete the specified network */
 void NetworkDaoThread::startDeleteNetwork(unsigned networkID){
-	deleteNetworkID = networkID;
+	this->networkID = networkID;
+	//Store list of connection group IDs
+	connectionGroupIDList.clear();
+	QList<ConnectionGroupInfo> conGrpInfoList = getConnectionGroupsInfo(networkID);
+	foreach(ConnectionGroupInfo conGrpInfo, conGrpInfoList)
+		connectionGroupIDList.append(conGrpInfo.getID());
+
+	//Store list of neuron group IDs
+	neuronGroupIDList.clear();
+	QList<NeuronGroupInfo> neurGrpInfoList = getNeuronGroupsInfo(networkID);
+	foreach(NeuronGroupInfo neurGrpInfo, neurGrpInfoList)
+		neuronGroupIDList.append(neurGrpInfo.getID());
+
+	//Prepare and start task
 	currentTask = DELETE_NETWORK_TASK;
 	start();
 }
@@ -600,13 +614,22 @@ void NetworkDaoThread::deleteConnectionGroups(){
 		return;
 	}
 
-	//Work through the list of neuron groups
+	//Work through the list of connection groups
 	foreach(unsigned int conGroupID, connectionGroupIDList){
+		executeQuery("DELETE FROM Connections WHERE ConnectionGroupID=" + QString::number(conGroupID) );
 		executeQuery("DELETE FROM ConnectionGroups WHERE NetworkID="+ QString::number(networkID) + " AND ConnectionGroupID=" + QString::number(conGroupID) );
 	}
 
 	//Reset list
 	connectionGroupIDList.clear();
+}
+
+
+/*! Deletes a network from the database. Does nothing if a network with the specified
+	id does not exist. */
+void NetworkDaoThread::deleteNetwork(){
+	executeQuery("DELETE FROM Networks WHERE NetworkID = " + QString::number(networkID));
+	networkID = 0;
 }
 
 
@@ -620,6 +643,7 @@ void NetworkDaoThread::deleteNeuronGroups(){
 
 	//Work through the list of neuron groups
 	foreach(unsigned int neuronGroupID, neuronGroupIDList){
+		executeQuery("DELETE FROM Neurons WHERE NeuronGroupID=" + QString::number(neuronGroupID) );
 		executeQuery("DELETE FROM NeuronGroups WHERE NetworkID="+ QString::number(networkID) + " AND NeuronGroupID=" + QString::number(neuronGroupID) );
 	}
 

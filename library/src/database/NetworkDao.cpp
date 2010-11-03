@@ -40,13 +40,6 @@ void NetworkDao::addNetwork(NetworkInfo& netInfo){
 }
 
 
-/*! Deletes a network from the database. Does nothing if a network with the specified
-	id does not exist. */
-void NetworkDao::deleteNetwork(unsigned int networkID){
-	executeQuery("DELETE FROM Networks WHERE NetworkID = " + QString::number(networkID));
-}
-
-
 /*! Adds a weightless connection pattern index to the database */
 void NetworkDao::addWeightlessConnection(unsigned int connectionID, unsigned int patternIndex){
 	QSqlQuery query = getQuery("INSERT INTO WeightlessConnections (ConnectionID, PatternIndex) VALUES (" + QString::number(connectionID) + ", " + QString::number(patternIndex) + ")");
@@ -71,12 +64,6 @@ unsigned int NetworkDao::addWeightlessNeuronTrainingPattern(unsigned int neuronI
 
 	//Throw exception if the last insert id is not in the valid range
 	throw SpikeStreamDBException("Insert ID for WeightlessNeuronTrainingPatterns is invalid: " + QString::number(lastInsertID));
-}
-
-
-/*! Deletes all networks and associated data from the database. */
-void NetworkDao::deleteAllNetworks(){
-	executeQuery("DELETE FROM Networks");
 }
 
 

@@ -84,9 +84,6 @@ namespace spikestream {
 			/*! The number of values statement used when adding neurons */
 			int numNeurBuffers;
 
-			/*! The ID of the network to be deleted */
-			unsigned deleteNetworkID;
-
 			const static unsigned int NO_TASK_DEFINED = 1;
 			const static unsigned int ADD_CONNECTION_GROUPS_TASK = 2;
 			const static unsigned int ADD_NEURON_GROUPS_TASK = 3;
@@ -101,6 +98,7 @@ namespace spikestream {
 			void addNeuronGroups();
 			void addConnectionGroups();
 			void deleteConnectionGroups();
+			void deleteNetwork();
 			void deleteNeuronGroups();
 			void loadConnections();
 			void loadNeurons();
