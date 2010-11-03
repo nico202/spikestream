@@ -1,5 +1,8 @@
 //SpikeStream includes
 #include "DatabaseManager.h"
+#include "NetworkDaoThread.h"
+#include "ArchiveDao.h"
+#include "AnalysisDao.h"
 #include "SpikeStreamException.h"
 using namespace spikestream;
 
@@ -8,10 +11,7 @@ using namespace spikestream;
 
 
 /*! Constructor */
-DatabaseManager::DatabaseManager(const DBInfo& networkDBInfo, const DBInfo& archiveDBInfo, const DBInfo& analysisDBInfo){
-	networkDao = NULL;
-	archiveDao = NULL;
-	analysisDao = NULL;
+DatabaseManager::DatabaseManager(const DBInfo& networkDBInfo, const DBInfo& archiveDBInfo, const DBInfo& analysisDBInfo) : SpikeStreamThread() {
 	this->networkDBInfo = networkDBInfo;
 	this->archiveDBInfo = archiveDBInfo;
 	this->analysisDBInfo = analysisDBInfo;
@@ -27,9 +27,10 @@ DatabaseManager::~DatabaseManager(){
 /*-----                 PUBLIC METHODS                 -----*/
 /*----------------------------------------------------------*/
 
-/*! Sets up class for the clear databases task, which is executed when the thread is run. */
-void DatabaseManager::prepareClearDatabases(){
+/*! Sets up class for the clear databases task and starts thread running. */
+void DatabaseManager::startClearDatabases(){
 	taskID = CLEAR_DATABASES_TASK;
+	start();
 }
 
 
@@ -38,14 +39,21 @@ void DatabaseManager::run(){
 	clearError();
 
 	//Create databases within the thread
-	networkDao = new NetworkDao(networkDBInfo);
-	archiveDao = new ArchiveDao(archiveDBInfo);
-	analysisDao = new AnalysisDao(analysisDBInfo);
+	NetworkDaoThread networkDaoThread(networkDBInfo);
+	ArchiveDao archiveDao(archiveDBInfo);
+	AnalysisDao analysisDao(analysisDBInfo);
 
 	try{
 		switch(taskID){
-			case CLEAR_DATABASES_TASK:
-				;//networkDao->deleteAllNetworks();
+			case CLEAR_DATABASES_TASK:{
+				analysisDao.deleteAllAnalyses();
+				archiveDao.deleteAllArchives();
+				QList<NetworkInfo> netInfoList = networkDaoThread.getNetworksInfo();
+				foreach(NetworkInfo netInfo, netInfoList){
+					networkDaoThread.startDeleteNetwork(netInfo.getID());
+					networkDaoThread.wait();
+				}
+			}
 			break;
 			default:
 				setError("TaskID not recognized.");
@@ -57,7 +65,6 @@ void DatabaseManager::run(){
 	catch(...){
 		setError("DatabaseManager: unknown exception.");
 	}
-	cleanUp();
 }
 
 
@@ -65,32 +72,5 @@ void DatabaseManager::run(){
 /*-----                PRIVATE METHODS                 -----*/
 /*----------------------------------------------------------*/
 
-/*! Clears the error state of the class. */
-void DatabaseManager::clearError(){
-	error = false;
-	errorMessage = "";
-}
-
-
-/*! Sets the class in an error state. Used when running as a thread. */
-void DatabaseManager::setError(const QString &errMsg){
-	errorMessage = errMsg;
-	error = true;
-}
-
-
-/*! Deletes database classes that are specific to the thread. */
-void DatabaseManager::cleanUp(){
-	if(networkDao != NULL)
-		delete networkDao;
-	if(archiveDao != NULL)
-		delete archiveDao;
-	if(analysisDao != NULL)
-		delete analysisDao;
-
-	networkDao = NULL;
-	archiveDao = NULL;
-	analysisDao = NULL;
-}
 
 

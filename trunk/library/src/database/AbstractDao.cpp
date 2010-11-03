@@ -132,17 +132,22 @@ void AbstractDao::executeQuery(const QString& queryStr){
 }
 
 
-/*! Returns a query object for the database */
+/*! Returns a query object for the database.
+	Query has setForwardOnly set to true. */
 QSqlQuery AbstractDao::getQuery(){
     checkDatabase();
-    return QSqlQuery(QSqlDatabase::database(dbName));
+	QSqlQuery tmpQuery(QSqlDatabase::database(dbName));
+	tmpQuery.setForwardOnly(true);
+	return tmpQuery;
 }
 
 
-/*! Returns a query object for the database using specified string to create query */
+/*! Returns a query object for the database using specified string to create query.
+	Query has setForwardOnly set to true. */
 QSqlQuery AbstractDao::getQuery(const QString& queryStr){
     checkDatabase();
     QSqlQuery tmpQuery(QSqlDatabase::database(dbName));
+	tmpQuery.setForwardOnly(true);
     tmpQuery.prepare(queryStr);
     return tmpQuery;
 }

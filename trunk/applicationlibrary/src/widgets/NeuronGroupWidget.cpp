@@ -19,12 +19,11 @@ NeuronGroupWidget::NeuronGroupWidget(QWidget* parent)  : QWidget(parent) {
 
 	//Add button to launch add neurons dialog and button to delete neuron groups
 	QHBoxLayout* buttonLayout = new QHBoxLayout();
-	addNeuronsButton = new QPushButton("Add Neurons");
-	addNeuronsButton->setMaximumSize(150, 30);
+	addNeuronsButton = new QPushButton(" Add Neurons ");
 	addNeuronsButton->setEnabled(false);
 	connect (addNeuronsButton, SIGNAL(clicked()), this, SLOT(addNeurons()));
 	buttonLayout->addWidget(addNeuronsButton);
-	deleteButton = new QPushButton("Delete");
+	deleteButton = new QPushButton(QIcon(Globals::getSpikeStreamRoot() + "/images/trash_can.jpg"), "");
 	deleteButton->setMaximumSize(150, 30);
 	deleteButton->setEnabled(false);
 	connect (deleteButton, SIGNAL(clicked()), this, SLOT(deleteSelectedNeurons()));

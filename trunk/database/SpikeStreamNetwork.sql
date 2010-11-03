@@ -40,8 +40,6 @@ CREATE TABLE NeuronGroups (
     NeuronTypeID SMALLINT UNSIGNED NOT NULL, /*The type of neuron in the group. Used for parameters and class loading */
 
     PRIMARY KEY (NeuronGroupID),
-    INDEX NeuronGroupIDIndex(NeuronGroupID),
-    INDEX NetworkIDIndex(NetworkID),/* To support the foreign key constraint */
 
     FOREIGN KEY NetworkID_FK(NetworkID) REFERENCES Networks(NetworkID) ON DELETE CASCADE,
     FOREIGN KEY NeuronTypeID_FK(NeuronTypeID) REFERENCES NeuronTypes(NeuronTypeID) ON DELETE NO ACTION
@@ -57,12 +55,11 @@ CREATE TABLE Neurons (
     NeuronGroupID SMALLINT UNSIGNED NOT NULL,
 
     /* Location of the neuron in 3D space */ 
-    X SMALLINT NOT NULL,
-    Y SMALLINT NOT NULL,
-    Z SMALLINT NOT NULL,
+    X FLOAT NOT NULL,
+    Y FLOAT NOT NULL,
+    Z FLOAT NOT NULL,
 
     PRIMARY KEY (NeuronID),
-    INDEX Positions (X, Y, Z),/* Used when creating connections. FIXME: CHECK MIN(X), MIN(Y) AND MIN(Z) ON THE INDEX. */
     INDEX NeuronGroupIDIndex(NeuronGroupID),
 
 	CONSTRAINT UniquePositions_CON UNIQUE (NeuronGroupID, X, Y, Z),/* Neurons in the same group cannot occupy the same point in space. */
@@ -98,7 +95,7 @@ CREATE TABLE ConnectionGroups (
 	Parameters TEXT,
 
 	PRIMARY KEY (ConnectionGroupID),
-	INDEX ConnectionGroupIDIndex(ConnectionGroupID),
+	/* INDEX ConnectionGroupIDIndex(ConnectionGroupID), */
 
     FOREIGN KEY NetworkID_FK(NetworkID) REFERENCES Networks(NetworkID) ON DELETE CASCADE,
     FOREIGN KEY FromNeuronGroupID_FK(FromNeuronGroupID) REFERENCES NeuronGroups(NeuronGroupID) ON DELETE CASCADE,
@@ -122,8 +119,6 @@ CREATE TABLE Connections (
 	Weight FLOAT NOT NULL,
 
 	PRIMARY KEY(ConnectionID),
-	INDEX FromNeuronIndex (FromNeuronID, ToNeuronID),
-	INDEX ToNeuronIndex (ToNeuronID),
 	INDEX ConnectionGroupID (ConnectionGroupID),
 
     FOREIGN KEY ConnectionGroupID_FK(ConnectionGroupID) REFERENCES ConnectionGroups(ConnectionGroupID) ON DELETE CASCADE,

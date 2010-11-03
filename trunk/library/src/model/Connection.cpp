@@ -21,7 +21,7 @@ Connection::Connection (unsigned int fromNeuronID, unsigned int toNeuronID, floa
     this->toNeuronID = toNeuronID;
 	this->delay = (unsigned short) rint(delay* DELAY_FACTOR);
 	this->weight = (short) rint(weight * WEIGHT_FACTOR);
-	this->tempWeight = weight;
+	this->tempWeight = this->weight;
 }
 
 
@@ -39,7 +39,7 @@ Connection::Connection (unsigned int id, unsigned int fromNeuronID, unsigned int
     this->toNeuronID = toNeuronID;
 	this->delay = (unsigned short)rint(delay * DELAY_FACTOR);
 	this->weight = (short) rint(weight * WEIGHT_FACTOR);
-	this->tempWeight = weight;
+	this->tempWeight = this->weight;
 }
 
 
