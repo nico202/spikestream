@@ -3,25 +3,19 @@
 
 //SpikeStream includes
 #include "DBInfo.h"
-#include "NetworkDao.h"
-#include "ArchiveDao.h"
-#include "AnalysisDao.h"
-
-//Qt includes
-#include <QThread>
+#include "SpikeStreamThread.h"
 
 namespace spikestream {
 
 	/*! Handles potentially heavy database tasks, such as deleting all databases */
-	class DatabaseManager : public QThread {
+	class DatabaseManager : public SpikeStreamThread {
 		Q_OBJECT
+
 		public:
 			DatabaseManager(const DBInfo& networkDBInfo, const DBInfo& archiveDBInfo, const DBInfo& analysisDBInfo);
 			~DatabaseManager();
-			void prepareClearDatabases();
+			void startClearDatabases();
 			void run();
-			bool isError() { return error; }
-			QString getErrorMessage() { return errorMessage; }
 			int getTaskID() { return taskID; }
 
 			/*! Task of clearing all databases */
@@ -32,25 +26,17 @@ namespace spikestream {
 			/*! ID of the task that is currently running */
 			int taskID;
 
-			/*! Records if there has been an error when running as a thread */
-			bool error;
-
-			/*! Message associated with an error */
-			QString errorMessage;
-
-			NetworkDao* networkDao;
-			ArchiveDao* archiveDao;
-			AnalysisDao* analysisDao;
-
+			/*! Information about network database */
 			DBInfo networkDBInfo;
+
+			/*! Information about archive database */
 			DBInfo archiveDBInfo;
+
+			/*! Information about analysis database */
 			DBInfo analysisDBInfo;
 
 
 			//==========================  METHODS  ==========================
-			void clearError();
-			void cleanUp();
-			void setError(const QString& errMsg);
 	};
 
 }

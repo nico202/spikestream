@@ -56,6 +56,12 @@ void AnalysisDao::deleteAnalysis(unsigned int analysisID){
 }
 
 
+/*! Deletes all analyses from the SpikeStreamAnalysis database. */
+void AnalysisDao::deleteAllAnalyses(){
+	executeQuery("DELETE FROM Analyses");
+}
+
+
 /*! Returns a list of information about analyses matching the network and archive ID */
 QList<AnalysisInfo> AnalysisDao::getAnalysesInfo(unsigned int networkID, unsigned int archiveID, unsigned int analysisType){
 	QString queryStr = "SELECT AnalysisID, StartTime, Description, Parameters, AnalysisTypeID FROM Analyses ";

@@ -11,7 +11,6 @@ namespace spikestream {
 
 		private slots:
 			void testGetDelay();
-			void testSetDelay();
 			void testGetWeight();
 			void testSetWeight();
 			void testGetTempWeight();

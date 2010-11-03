@@ -76,6 +76,12 @@ void ArchiveDao::deleteArchive(unsigned int archiveID){
 }
 
 
+/*! Deletes all archives in the database. */
+void ArchiveDao::deleteAllArchives(){
+	executeQuery("DELETE FROM Archives");
+}
+
+
 /*! Returns a list of the archives in the database that are associated with the specified network. */
 QList<ArchiveInfo> ArchiveDao::getArchivesInfo(unsigned int networkID){
     QSqlQuery query = getQuery("SELECT ArchiveID, StartTime, Description FROM Archives WHERE NetworkID=" + QString::number(networkID) + " ORDER BY StartTime");

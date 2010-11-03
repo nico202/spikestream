@@ -27,13 +27,9 @@ void TestConnection::testGetDelay(){
 }
 
 
-void TestConnection::testSetDelay(){
-
-}
-
 
 void TestConnection::testGetWeight(){
-	//Check delay is accurately returned for different values
+	//Check weight is accurately returned for different values
 	Connection con1(1, 1, 1, 0.5);
 	QCOMPARE (con1.getWeight(), 0.5f);
 	Connection con2(1, 1, 1, 1.0);
@@ -52,18 +48,49 @@ void TestConnection::testGetWeight(){
 
 
 void TestConnection::testSetWeight(){
-	FIXME: SORTING THIS OUT
+	Connection con1(1, 1, 1, 0.545);
+	QCOMPARE (con1.getWeight(), 0.545f);
+	con1.setWeight(0.546f);
+	QCOMPARE (con1.getWeight(), 0.546f);
+	con1.setWeight(-0.999f);
+	QCOMPARE (con1.getWeight(), -0.999f);
 
+	//Check that an out of range weight is picked up
+	try{
+		con1.setWeight(1.0001f);
+		QFAIL("Exception should have been thrown by out of range weight.");
+	}
+	catch(SpikeStreamException& ex){
+	}
 }
 
 
 void TestConnection::testGetTempWeight(){
-
-
+	//Check weight is accurately returned for different values
+	Connection con1(1, 1, 1, 0.5);
+	QCOMPARE (con1.getTempWeight(), 0.5f);
+	Connection con2(1, 1, 1, 1.0);
+	QCOMPARE (con2.getTempWeight(), 1.0f);
+	Connection con3(1, 1, 1, -0.0007);
+	QCOMPARE (con3.getTempWeight(), -0.0007f);
 }
 
 
 void TestConnection::testSetTempWeight(){
+	Connection con1(1, 1, 1, 0.545);
+	QCOMPARE (con1.getTempWeight(), 0.545f);
+	con1.setTempWeight(0.746f);
+	QCOMPARE (con1.getWeight(), 0.545f);
+	QCOMPARE (con1.getTempWeight(), 0.746f);
+	con1.setTempWeight(-0.555f);
+	QCOMPARE (con1.getTempWeight(), -0.555f);
 
+	//Check that an out of range weight is picked up
+	try{
+		con1.setTempWeight(-1.0001f);
+		QFAIL("Exception should have been thrown by out of range weight.");
+	}
+	catch(SpikeStreamException& ex){
+	}
 }
 

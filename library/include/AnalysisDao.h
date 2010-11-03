@@ -17,6 +17,7 @@ namespace spikestream {
 
 			void addAnalysis(AnalysisInfo& analysisInfo);
 			void deleteAnalysis(unsigned int analysisID);
+			void deleteAllAnalyses();
 			QList<AnalysisInfo> getAnalysesInfo(unsigned int networkID, unsigned int archiveID, unsigned int analysisType);
 			bool networkHasAnalyses(unsigned networkID);//UNTESTED
 			void updateDescription(unsigned int analysisID, const QString& description);

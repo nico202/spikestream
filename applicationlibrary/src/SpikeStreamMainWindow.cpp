@@ -206,8 +206,7 @@ void SpikeStreamMainWindow::clearDatabases(){
 	progressDialog = new QProgressDialog("Clearing databases, please wait", "", 0, 0, this, Qt::CustomizeWindowHint);
 	progressDialog->setWindowModality(Qt::WindowModal);
 	progressDialog->setCancelButton(0);//Cannot implement cancel sensibly
-	databaseManager->prepareClearDatabases();
-	databaseManager->start();
+	databaseManager->startClearDatabases();
 	progressDialog->show();
 }
 
