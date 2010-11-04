@@ -15,7 +15,6 @@ unsigned NeuronGroup::neuronIDCounter = LAST_NEURON_ID + 1;
 NeuronGroup::NeuronGroup(const NeuronGroupInfo& info){
 	this->info = info;
 	neuronMap = new NeuronMap();
-	loaded = false;
 	startNeuronID = 0;
 	calculateBoundingBox = false;
 	positionMapBuilt = false;

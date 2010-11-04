@@ -3,10 +3,30 @@
 #include "TestConnection.h"
 using namespace spikestream;
 
+//Other includes
+#include <iostream>
+using namespace std;
+
 
 /*----------------------------------------------------------*/
 /*-----                     TESTS                      -----*/
 /*----------------------------------------------------------*/
+
+/* http://marknelson.us/1989/10/01/lzw-data-compression/
+	http://www.dspguide.com/ch27/5.htm
+*/
+void TestConnection::testCompression(){
+	unsigned num1 = 123456;
+	unsigned num2 = 4;
+	unsigned num3 = 2929290000l;
+	unsigned ander = 0x000000ff;
+
+	for(int i=0; i<12; ++i){
+		num1 & ander;
+	}
+	//int cats[7];
+	//cout<<"SIZE OF CATS: "<<sizeof(cats)<<endl;
+}
 
 void TestConnection::testGetDelay(){
 	//Check delay is accurately returned for different values

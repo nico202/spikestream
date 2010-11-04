@@ -15,6 +15,9 @@ using namespace spikestream;
 #include <iostream>
 using namespace std;
 
+//Outputs debugging information when enabled
+//#define DEBUG
+
 //Defines for OpenGL
 /*! Constant for PI. */
 #define GL_PI 3.1415f
@@ -551,11 +554,15 @@ void NetworkViewer::drawConnections(){
 		//Sort out the connection mode
 		unsigned int singleNeuronID=0, toNeuronID=0;
 		unsigned int connectionMode = netDisplay->getConnectionMode();
+		QList<Connection*>& visConList = netDisplay->getVisibleConnectionsList();
 		if(connectionMode & CONNECTION_MODE_ENABLED){
 			connectedNeuronMap.clear();
 			singleNeuronID = netDisplay->getSingleNeuronID();
 			if(connectionMode & SHOW_BETWEEN_CONNECTIONS)
 				toNeuronID = netDisplay->getToNeuronID();
+
+			//Rebuild list of visible connections
+			visConList.clear();
 		}
 
 		//Work through the connection groups listed in the network display
@@ -638,6 +645,11 @@ void NetworkViewer::drawConnections(){
 						drawConnection = false;
 					if( weight >= 0 && (connectionMode & SHOW_NEGATIVE_CONNECTIONS))
 						drawConnection = false;
+
+					//Add connection to list of visible connections
+					if(drawConnection)
+						visConList.append(tmpCon);
+
 				}
 				//Draw all connections, potentially thinned
 				else if(drawingThreshold && (rand() > drawingThreshold)){
@@ -682,7 +694,15 @@ void NetworkViewer::drawConnections(){
 				}
 			}
 		}
-		qDebug()<<"Number of ignored connections = "<<ignoreConCnt;
+
+		//Inform other classes that the list of visible connections has changed.
+		if(connectionMode & CONNECTION_MODE_ENABLED){
+			Globals::getEventRouter()->visibleConnectionsChangedSlot();
+		}
+
+		#ifdef DEBUG
+			qDebug()<<"Number of ignored connections = "<<ignoreConCnt;
+		#endif//DEBUG
 
 		//Finished creating connection display list
 		glEndList();

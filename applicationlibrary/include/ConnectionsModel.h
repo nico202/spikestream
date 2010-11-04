@@ -12,7 +12,8 @@ using namespace spikestream;
 namespace spikestream {
 
 	/*! Model for displaying connection groups. Based on the ConnectionGroups table in the
-		SpikeStreamNetwork database. */
+		SpikeStreamNetwork database. Uses the connections list that is held in the
+		NetworkDisplay class and populated by the NetworkViewer when it renders the connections. */
 	class ConnectionsModel : public QAbstractTableModel {
 		Q_OBJECT
 
@@ -25,14 +26,10 @@ namespace spikestream {
 			int rowCount(const QModelIndex& parent = QModelIndex()) const;
 
 		private slots:
-			void networkDisplayChanged();
+			void visibleConnectionsChanged();
 
 		private:
 			//====================  VARIABLES  ====================
-			/*! List containing the information about the neuron groups in the current network
-			This list is automatically refreshed when the network changes. */
-			QList<Connection*> connectionsList;
-
 			static const int numCols = 6;
 			static const int idCol = 0;
 			static const int fromIDCol = 1;
@@ -42,7 +39,6 @@ namespace spikestream {
 			static const int tmpWeightCol = 5;
 
 			//=====================  METHODS  ======================
-			void clearConnectionsList();
     };
 
 }

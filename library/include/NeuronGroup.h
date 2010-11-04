@@ -51,10 +51,8 @@ namespace spikestream {
 			static Point3D getPointFromPositionKey(uint64_t positionKey);
 			static uint64_t getPositionKey(int xPos, int yPos, int zPos);
 			unsigned int getStartNeuronID() { return startNeuronID; }
-			bool isLoaded() { return loaded; }
 			bool parametersSet();
 			void setID(unsigned int id);
-			void setLoaded(bool loaded) { this->loaded = loaded; }
 			void setDescription(const QString& description);
 			void setName(const QString& name);
 			void setNeuronMap(NeuronMap* newMap);
@@ -83,11 +81,6 @@ namespace spikestream {
 				Position map takes processor power and memory and is rarely used,
 				so it is generated on demand when an iterator to it is requested. */
 			bool positionMapBuilt;
-
-			/*! Returns true if the state of the neuron map matches the database.
-				This should be false if no neurons have been loaded and false
-				if the neuron map is full of neurons with dummy ids */
-			bool loaded;
 
 			/*! The first and lowest neuron id in the group. Useful when you know that
 				a neuron group has continuously increasing IDs. */

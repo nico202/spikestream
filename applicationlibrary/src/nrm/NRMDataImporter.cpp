@@ -337,9 +337,9 @@ void NRMDataImporter::addTraining(){
 				The order of these neuron ids should match the order in the pattern string. */
 
 			//Check that the number of connections matches the number of connections in the network
-			if(network->getNumberOfToConnections(neuronID) != neuronConnectionList.size()){
-				throw SpikeStreamException("Number of connections in the network does not match the number of NRM connections. Number of network connections=" + QString::number(network->getNumberOfToConnections(neuronID)) + " neuronConnectionList connections=" + QString::number(neuronConnectionList.size()));
-			}
+//			if(network->getNumberOfToConnections(neuronID) != neuronConnectionList.size()){
+//				throw SpikeStreamException("Number of connections in the network does not match the number of NRM connections. Number of network connections=" + QString::number(network->getNumberOfToConnections(neuronID)) + " neuronConnectionList connections=" + QString::number(neuronConnectionList.size()));
+//			}
 
 			//Calculate the expected pattern length in bytes
 			int expectedPatternLength = neuronConnectionList.size() / 8;

@@ -436,9 +436,6 @@ void NetworkDaoThread::addConnectionGroups(){
 
 		//Add the new map to the neuron group. This should also clean up the old map
 		connectionGroup->setConnectionMap(newConMap);
-
-		//ConnectionGroup should now match information in database
-		connectionGroup->setLoaded(true);
     }
 }
 
@@ -599,9 +596,6 @@ void NetworkDaoThread::addNeuronGroups(){
 
 		//Add the new map to the neuron group. This should also clean up the old map
 		neuronGroup->setNeuronMap(newNeurMap);
-
-		//Neuron group now reflects state of table in database, so set loaded to true
-		neuronGroup->setLoaded(true);
     }
 }
 
@@ -688,9 +682,6 @@ void NetworkDaoThread::loadConnections(){
 		//Load parameters in connection group
 		QHash<QString, double> tmpParamMap = getSynapseParameters( (*iter)->getInfo());
 		(*iter)->setParameters(tmpParamMap);
-
-		//Connection group now matches the database
-		(*iter)->setLoaded(true);
     }
 }
 
@@ -739,9 +730,6 @@ void NetworkDaoThread::loadNeurons(){
 		//Load parameters in neuron group
 		QHash<QString, double> tmpParamMap = getNeuronParameters( (*iter)->getInfo());
 		(*iter)->setParameters(tmpParamMap);
-
-		//Neuron group now matches the database
-		(*iter)->setLoaded(true);
     }
 }
 

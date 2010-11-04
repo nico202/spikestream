@@ -3,6 +3,7 @@
 
 //SpikeStream includes
 #include "ConfigLoader.h"
+#include "Connection.h"
 #include "RGBColor.h"
 using namespace spikestream;
 
@@ -45,6 +46,7 @@ namespace spikestream {
 			float getSphereRadius() { return sphereRadius; }
 			float getVertexSize() { return vertexSize; }
 			QList<unsigned int> getVisibleConnectionGroupIDs() { return connGrpDisplayMap.keys(); }
+			QList<Connection*>& getVisibleConnectionsList() { return visibleConnectionsList; }
 			QList<unsigned int> getVisibleNeuronGroupIDs() { return neurGrpDisplayMap.keys(); }
 			float getWeightRadiusFactor() { return weightRadiusFactor; }
 			unsigned getWeightRenderMode() { return weightRenderMode; }
@@ -99,6 +101,8 @@ namespace spikestream {
 		signals:
 			void networkDisplayChanged();
 			void neuronGroupDisplayChanged();
+			void visibleConnectionsChanged();
+
 
 		public slots:
 			void networkChanged();
@@ -211,6 +215,10 @@ namespace spikestream {
 			/*! Threshold above which thinning of the drawn connections takes place
 				in full render mode. */
 			unsigned connectionThinningThreshold_full;
+
+			/*! List of the currently visible connections -
+				Loaded by NetworkViewer and used when in single connectiosn mode */
+			QList<Connection*> visibleConnectionsList;
 
 
 			//=========================  METHODS  =========================

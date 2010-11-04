@@ -27,6 +27,7 @@ namespace spikestream {
 			void networkListChangedSlot() { emit networkListChangedSignal(); }
 			void networkDisplayChangedSlot() { emit networkDisplayChangedSignal(); }
 			void neuronGroupDisplayChangedSlot() { emit neuronGroupDisplayChangedSignal(); }
+			void visibleConnectionsChangedSlot() { emit visibleConnectionsChangedSignal(); }
 			void weightsChangedSlot() { emit weightsChangedSignal(); }
 
 			//Other slots
@@ -62,6 +63,7 @@ namespace spikestream {
 			void networkListChangedSignal();
 			void networkViewChangedSignal();
 			void neuronGroupDisplayChangedSignal();
+			void visibleConnectionsChangedSignal();
 			void weightsChangedSignal();
 
 			//Other signals

@@ -6,6 +6,7 @@ using namespace spikestream;
 
 //Qt includes
 #include <QApplication>
+#include <QDebug>
 #include <QMessageBox>
 
 //Other includes
