@@ -35,12 +35,12 @@ ConnectionGroup::~ConnectionGroup(){
 
 /*! Adds a connection to the group */
 Connection* ConnectionGroup::addConnection(Connection* newConn){
-	//Check that we do not already have this connection
-	if(connectionMap->contains(newConn->getID()))
-		throw SpikeStreamException("Connection with ID " + QString::number(newConn->getID()) + " already exists in this group.");
+//	//Check that we do not already have this connection
+//	if(connectionMap->contains(newConn->getID()))
+//		throw SpikeStreamException("Connection with ID " + QString::number(newConn->getID()) + " already exists in this group.");
 
-	//Store connection
-	(*connectionMap)[newConn->getID()] = newConn;
+//	//Store connection
+//	(*connectionMap)[newConn->getID()] = newConn;
 
 	//Return pointer to connection
 	return newConn;

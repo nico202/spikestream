@@ -33,7 +33,7 @@ namespace spikestream {
 			unsigned getToNeuronID(){ return toNeuronID; }
 			float getTempWeight();
 			float getWeight();
-			unsigned int getID() { return id; }
+	//		unsigned int getID() { return id; }
 			void setID(unsigned int id){ this->id = id; }
 			void setFromNeuronID(unsigned fromNeurID) { this->fromNeuronID = fromNeurID; }
 			void setToNeuronID(unsigned toNeurID) { this->toNeuronID = toNeurID; }
