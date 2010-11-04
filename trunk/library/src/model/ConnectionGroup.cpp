@@ -15,7 +15,6 @@ unsigned ConnectionGroup::connectionIDCounter = LAST_CONNECTION_ID + 1;
 /*! Constructor */
 ConnectionGroup::ConnectionGroup(const ConnectionGroupInfo& connGrpInfo){
     this->info = connGrpInfo;
-    loaded = false;
 	connectionMap = new QHash<unsigned, Connection*>();
 }
 
@@ -43,10 +42,6 @@ Connection* ConnectionGroup::addConnection(Connection* newConn){
 	//Store connection
 	(*connectionMap)[newConn->getID()] = newConn;
 
-	//Store connection data in easy to access format
-	fromConnectionMap[newConn->getFromNeuronID()].append(newConn);
-	toConnectionMap[newConn->getToNeuronID()].append(newConn);
-
 	//Return pointer to connection
 	return newConn;
 }
@@ -70,14 +65,6 @@ QHash<unsigned, Connection*>::const_iterator ConnectionGroup::begin(){
 }
 
 
-/*! Returns true if the connection group contains the specified neuron ID */
-bool ConnectionGroup::contains(unsigned neuronID){
-	if(fromConnectionMap.contains(neuronID) || toConnectionMap.contains(neuronID))
-		return true;
-	return false;
-}
-
-
 /*! Returns iterator pointing to end of connection group */
 QHash<unsigned, Connection*>::const_iterator ConnectionGroup::end(){
 	return connectionMap->end();
@@ -98,18 +85,6 @@ void ConnectionGroup::clearConnections(){
 		delete iter.value();
     }
 	connectionMap->clear();
-    fromConnectionMap.clear();
-    toConnectionMap.clear();
-    loaded = false;
-}
-
-
-/*! Returns a list of connections from the neuron with this ID.
-    Empty list is returned if neuron id cannot be found. */
-QList<Connection*> ConnectionGroup::getFromConnections(unsigned int neurID){
-    if(!fromConnectionMap.contains(neurID))
-		return QList<Connection*>();//Returns an empty connection list without filling map with invalid from and to neurons
-    return fromConnectionMap[neurID];
 }
 
 
@@ -127,14 +102,6 @@ unsigned ConnectionGroup::getSynapseTypeID(){
 	return info.getSynapseTypeID();
 }
 
-/*! Returns a list of connections to the neuron with the specified id.
-    Exception is thrown if the neuron cannot be found. */
-QList<Connection*> ConnectionGroup::getToConnections(unsigned int neurID){
-	if(!toConnectionMap.contains(neurID))
-		return QList<Connection*>();//Returns an empty connection list without filling map with invalid from and to neurons
-	return toConnectionMap[neurID];
-}
-
 
 /*! Returns true if the parameters have been set. */
 bool ConnectionGroup::parametersSet(){
@@ -150,7 +117,6 @@ void ConnectionGroup::setConnectionMap(QHash<unsigned, Connection *> *newConnect
 	delete connectionMap;
 	this->connectionMap = newConnectionMap;
 }
-
 
 
 /*! Sets the description of the connection group */

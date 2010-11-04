@@ -16,6 +16,7 @@ class TestNetworkDaoThread : public TestDao {
 		void testAddConnectionGroup();
 	    void testAddNeuronGroup();
 		void testDeleteConnectionGroups();
+		void testDeleteNetwork();
 		void testDeleteNeuronGroups();
 	    void testLoadConnections();
 	    void testLoadNeurons();

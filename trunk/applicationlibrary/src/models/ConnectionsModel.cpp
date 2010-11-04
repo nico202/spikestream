@@ -13,14 +13,13 @@ using namespace spikestream;
 
 /*! Constructor */
 ConnectionsModel::ConnectionsModel() : QAbstractTableModel(){
-	connect(Globals::getEventRouter(), SIGNAL(networkDisplayChangedSignal()), this, SLOT(networkDisplayChanged()), Qt::QueuedConnection);
-	connect(Globals::getEventRouter(), SIGNAL(weightsChangedSignal()), this, SLOT(networkDisplayChanged()), Qt::QueuedConnection);
+	connect(Globals::getEventRouter(), SIGNAL(visibleConnectionsChangedSignal()), this, SLOT(visibleConnectionsChanged()), Qt::QueuedConnection);
+	connect(Globals::getEventRouter(), SIGNAL(weightsChangedSignal()), this, SLOT(visibleConnectionsChanged()), Qt::QueuedConnection);
 }
 
 
 /*! Destructor */
 ConnectionsModel::~ConnectionsModel(){
-    clearConnectionsList();
 }
 
 
@@ -50,7 +49,8 @@ QVariant ConnectionsModel::data(const QModelIndex & index, int role) const{
     //Return appropriate data
     if (role == Qt::DisplayRole){
 		//Get pointer to the appropriate Connection class
-		Connection* tmpConnection = connectionsList[index.row()];
+		QList<Connection*>& tmpConList = Globals::getNetworkDisplay()->getVisibleConnectionsList();
+		Connection* tmpConnection = tmpConList[index.row()];
 
 		if(index.column() == idCol)
 			return tmpConnection->getID();
@@ -99,24 +99,12 @@ QVariant ConnectionsModel::headerData(int section, Qt::Orientation orientation, 
 
 /*! Inherited from QAbstractTableModel. Returns the number of rows in the model. */
 int ConnectionsModel::rowCount(const QModelIndex&) const{
-    return connectionsList.size();
+	return Globals::getNetworkDisplay()->getVisibleConnectionsList().size();
 }
 
 
 /*! Instructs viewers to reload model when network display has changed */
-void ConnectionsModel::networkDisplayChanged(){
-	//Empty connections list
-	//clearConnectionsList();
-	connectionsList.clear();
-
-	//Fill connections list if appropriate
-	NetworkDisplay* netDisplay = Globals::getNetworkDisplay();
-	unsigned int connectionMode = netDisplay->getConnectionMode();
-	if(connectionMode & CONNECTION_MODE_ENABLED){
-		unsigned int singleNeuronID = netDisplay->getSingleNeuronID();
-		unsigned int toNeuronID = netDisplay->getToNeuronID();
-		connectionsList = Globals::getNetwork()->getConnections(connectionMode, singleNeuronID, toNeuronID);
-	}
+void ConnectionsModel::visibleConnectionsChanged(){
 	reset();
 }
 
@@ -124,12 +112,5 @@ void ConnectionsModel::networkDisplayChanged(){
 /*----------------------------------------------------------*/
 /*-----                PRIVATE METHODS                 -----*/
 /*----------------------------------------------------------*/
-
-/*! Empties the connection list and deletes the Connection classes */
-void ConnectionsModel::clearConnectionsList(){
-    foreach(Connection* tmpCon, connectionsList)
-		delete tmpCon;
-    connectionsList.clear();
-}
 
 

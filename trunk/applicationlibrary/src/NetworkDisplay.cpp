@@ -14,6 +14,7 @@ NetworkDisplay::NetworkDisplay(){
 
 	//Inform other classes when the display has changed
 	connect(this, SIGNAL(networkDisplayChanged()), Globals::getEventRouter(), SLOT(networkDisplayChangedSlot()), Qt:: QueuedConnection);
+	connect(this, SIGNAL(visibleConnectionsChanged()), Globals::getEventRouter(), SLOT(visibleConnectionsChangedSlot()), Qt:: QueuedConnection);
 	connect(this, SIGNAL(neuronGroupDisplayChanged()), Globals::getEventRouter(), SLOT(neuronGroupDisplayChangedSlot()), Qt:: QueuedConnection);
 
 	//Listen for changes to network viewer
@@ -431,6 +432,8 @@ void NetworkDisplay::setSelectedNeuronID(unsigned int id, bool ctrlBtnDown){
 		}
 	}
 
+	visibleConnectionsList.clear();
+	emit visibleConnectionsChanged();
 	emit networkDisplayChanged();
 }
 

@@ -30,7 +30,6 @@ namespace spikestream {
 			void addNeuronGroups(QList<NeuronGroup*>& neuronGroupList);
 			void cancel();
 			void clearError();
-			bool connectionGroupIsLoaded(unsigned int connGrpID);
 			bool containsNeuron(unsigned int neurID);
 			bool containsNeuronGroup(unsigned int neuronGroupID);//UNTESTED
 			void deleteConnectionGroups(QList<unsigned int>& deleteConGrpIDList);
@@ -45,7 +44,6 @@ namespace spikestream {
 			ConnectionGroupInfo getConnectionGroupInfo(unsigned int id);
 			QList<ConnectionGroupInfo> getConnectionGroupsInfo(unsigned int synapseTypeID);
 			QList<ConnectionGroupInfo> getConnectionGroupsInfo();
-			QList<Connection*> getConnections(unsigned int connectionMode, unsigned int singleNeuronID, unsigned int toNeuronID);
 			int getNeuronGroupCount() { return neurGrpMap.size(); }
 			Box getNeuronGroupBoundingBox(unsigned int neurGrpID);
 			QList<unsigned int> getNeuronGroupIDs();
@@ -55,7 +53,6 @@ namespace spikestream {
 			NeuronGroupInfo getNeuronGroupInfo(unsigned int id);
 			QList<NeuronGroupInfo> getNeuronGroupsInfo();
 			QList<NeuronGroupInfo> getNeuronGroupsInfo(unsigned int neuronTypeID);
-			int getNumberOfToConnections(unsigned int neuronID);
 			int getNumberOfCompletedSteps();
 			int getTotalNumberOfSteps();
 			bool isBusy();
@@ -65,7 +62,6 @@ namespace spikestream {
 			bool hasArchives();
 			void load();
 			void loadWait();
-			bool neuronGroupIsLoaded(unsigned int neurGrpID);
 			bool overlaps(const Box& box);
 			void save();
 			void setError(const QString& errorMsg);

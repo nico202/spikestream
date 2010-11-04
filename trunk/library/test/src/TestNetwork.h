@@ -12,7 +12,7 @@ class TestNetwork : public TestDao {
 
 	private slots:
 	    void testGetBoundingBox();
-		void testGetConnections();
+		//void testGetConnections();
 
 	private:
 

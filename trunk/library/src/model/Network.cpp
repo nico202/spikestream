@@ -304,82 +304,6 @@ QList<ConnectionGroupInfo> Network::getConnectionGroupsInfo(unsigned int synapse
 }
 
 
-/*! Returns a list of pointers to connections that are appropriate for the connection mode */
-QList<Connection*> Network::getConnections(unsigned connectionMode, unsigned singleNeuronID, unsigned toNeuronID){
-	QList<Connection*> conList;//List of connections to return
-	QList<ConnectionGroup*> conGrpList;//List of connection groups that contain the single neuron
-
-	//Return empty list if connection mode is disabled
-	if( !(connectionMode & CONNECTION_MODE_ENABLED) )
-		return conList;
-
-	//Get connection groups that include the single neuron ID
-	for(QHash<unsigned int, ConnectionGroup*>::iterator iter = connGrpMap.begin(); iter != connGrpMap.end(); ++iter){
-		if(iter.value()->contains(singleNeuronID))
-			conGrpList.append(iter.value());
-	}
-
-	//Showing connections FROM singleNeuronID TO toNeuronID
-	if(connectionMode & SHOW_BETWEEN_CONNECTIONS){
-		foreach(ConnectionGroup* tmpConGrp, conGrpList){//Work through all connection groups including this neuron
-			QList<Connection*> tmpConList = tmpConGrp->getFromConnections(singleNeuronID);
-			for(int i=0; i<tmpConList.size(); ++i){
-				Connection* tmpCon = tmpConList.at(i);
-				if(!filterConnection(tmpCon, connectionMode)){
-					if(tmpCon->getToNeuronID() == toNeuronID)
-						conList.append(tmpCon);
-				}
-			}
-		}
-		//Return list of between connections
-		return conList;
-	}
-
-	//Filter by FROM or TO in single neuron connection mode
-	if(connectionMode & SHOW_FROM_CONNECTIONS){
-		//Collect connections FROM the single neuron ID
-		foreach(ConnectionGroup* tmpConGrp, conGrpList){//Work through all connection groups including this neuron
-			QList<Connection*> tmpConList = tmpConGrp->getFromConnections(singleNeuronID);
-			for(int i=0; i<tmpConList.size(); ++i){
-				Connection* tmpCon = tmpConList.at(i);
-				if(!filterConnection(tmpCon, connectionMode))
-					conList.append(tmpCon);
-			}
-		}
-	}
-	else if(connectionMode & SHOW_TO_CONNECTIONS){
-		//Collect connections TO the single neuron ID
-		foreach(ConnectionGroup* tmpConGrp, conGrpList){//Work through all connection groups including this neuron
-			QList<Connection*> tmpConList = tmpConGrp->getToConnections(singleNeuronID);
-			for(int i=0; i<tmpConList.size(); ++i){
-				Connection* tmpCon = tmpConList.at(i);
-				if(!filterConnection(tmpCon, connectionMode))
-					conList.append(tmpCon);
-			}
-		}
-	}
-	else {//Collect connections TO and FROM the single neuron ID
-		foreach(ConnectionGroup* tmpConGrp, conGrpList){//Work through all connection groups including this neuron
-			QList<Connection*> tmpConList = tmpConGrp->getFromConnections(singleNeuronID);
-			for(int i=0; i<tmpConList.size(); ++i){
-				Connection* tmpCon = tmpConList.at(i);
-				if(!filterConnection(tmpCon, connectionMode))
-					conList.append(tmpCon);
-			}
-			tmpConList = tmpConGrp->getToConnections(singleNeuronID);
-			for(int i=0; i<tmpConList.size(); ++i){
-				Connection* tmpCon = tmpConList.at(i);
-				if(!filterConnection(tmpCon, connectionMode))
-					conList.append(tmpCon);
-			}
-		}
-	}
-
-	//Return the list
-	return conList;
-}
-
-
 /*! Returns a list of the neuron groups in the network. */
 QList<NeuronGroup*> Network::getNeuronGroups(){
 	QList<NeuronGroup*> tmpList;
@@ -406,24 +330,6 @@ QList<NeuronGroupInfo> Network::getNeuronGroupsInfo(unsigned int neuronTypeID){
 			tmpList.append(iter.value()->getInfo());
 	}
 	return tmpList;
-}
-
-
-/*! Returns the number of neurons that connect to the specified neuron */
-int Network::getNumberOfToConnections(unsigned int neuronID){
-    //Check neuron id is in the network
-    if(!containsNeuron(neuronID))
-		throw SpikeStreamException("Request for number of connections to a neuron that is not in the network.");
-
-    //Count up the number of connections to this neuron in each connection group
-    int toConCount = 0;
-    for(QHash<unsigned int, ConnectionGroup*>::iterator iter = connGrpMap.begin(); iter != connGrpMap.end(); ++iter){
-		//Get the number of connections to the neuron in this connection group
-		toConCount += iter.value()->getToConnections(neuronID).size();
-    }
-
-    //Return final count
-    return toConCount;
 }
 
 
@@ -518,20 +424,6 @@ NeuronGroupInfo Network::getNeuronGroupInfo(unsigned int id){
 ConnectionGroup* Network::getConnectionGroup(unsigned int id){
     checkConnectionGroupID(id);
     return connGrpMap[id];
-}
-
-
-/*! Returns true if the connection group in the network matches the connection group in the datatabase */
-bool Network::connectionGroupIsLoaded(unsigned int id){
-    checkConnectionGroupID(id);
-    return connGrpMap[id]->isLoaded();
-}
-
-
-/*! Returns true if the neuron group in the network matches the neuron group in the database */
-bool Network::neuronGroupIsLoaded(unsigned int id){
-    checkNeuronGroupID(id);
-    return neurGrpMap[id]->isLoaded();
 }
 
 

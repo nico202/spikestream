@@ -84,7 +84,6 @@ void TestNetworkDaoThread::testAddConnectionGroup(){
 		QVERIFY(connGrp.getID() != 0);
 
 		//Check that connections were added correctly
-		QCOMPARE(connGrp.isLoaded(), true);
 		for(QHash<unsigned, Connection*>::const_iterator iter = connGrp.begin(); iter != connGrp.end(); ++iter){
 			query = getQuery("SELECT ConnectionGroupID, FromNeuronID, ToNeuronID, Delay, Weight FROM Connections WHERE ConnectionID = " + QString::number((*iter)->getID()));
 			executeQuery(query);
@@ -146,7 +145,6 @@ void TestNetworkDaoThread::testAddNeuronGroup(){
 		QVERIFY( neurGrpInfo.getID() != 0);
 
 		//Check that the neurons were added correctly
-		QCOMPARE(neurGrp.isLoaded(), true);
 		query = getQuery("SELECT NeuronID, X, Y, Z FROM Neurons WHERE NeuronGroupID = " + QString::number(neurGrp.getID()));
 		executeQuery(query);
 		QCOMPARE(4, query.size());//4 neurons should have been added
@@ -216,6 +214,44 @@ void TestNetworkDaoThread::testDeleteConnectionGroups(){
 }
 
 
+void TestNetworkDaoThread::testDeleteNetwork(){
+	//Add test network
+	addTestNetwork1();
+
+	//Check that test network is in database
+	QSqlQuery query = getQuery("SELECT * FROM Networks WHERE NetworkID = " + QString::number(testNetID));
+	executeQuery(query);
+
+	//Should be a single network
+	QCOMPARE(query.size(), (int)1);
+
+	//Invoke method being tested
+	NetworkDaoThread netDaoThread(dbInfo);
+	netDaoThread.startDeleteNetwork(testNetID);
+	netDaoThread.wait();
+
+	//Check to see if network with this id has been removed from the database
+	query = getQuery("SELECT * FROM Networks WHERE NetworkID = " + QString::number(testNetID));
+	executeQuery(query);
+	QCOMPARE(query.size(), (int)0);
+
+	//Check neurons have gone
+	query = getQuery("SELECT * FROM Neurons");
+	executeQuery(query);
+	QCOMPARE(query.size(), (int)0);
+
+	//Check archive has gone
+	query = getArchiveQuery("SELECT * FROM Archives");
+	executeQuery(query);
+	QCOMPARE(query.size(), (int)0);
+
+	//Check analysis has gone
+	query = getAnalysisQuery("SELECT * FROM Analyses");
+	executeQuery(query);
+	QCOMPARE(query.size(), (int)0);
+}
+
+
 void TestNetworkDaoThread::testDeleteNeuronGroups(){
 	try{
 		//Add test network
@@ -258,24 +294,23 @@ void TestNetworkDaoThread::testLoadConnections(){
 		//Check that connections were correctly loaded.
 		QList<Connection*> allConnList = connGrp.getConnections();
 		QCOMPARE(allConnList.size(), 6);
-		QVERIFY(connGrp.isLoaded());
 
-		//Should be three connections from the first neuron in the list
-		QList<Connection*> fromList = connGrp.getFromConnections(testNeurIDList[0]);
-		QCOMPARE(fromList.size(), 3);
-		QCOMPARE(fromList[0]->getToNeuronID(), testNeurIDList[1]);
-		QCOMPARE(fromList[1]->getToNeuronID(), testNeurIDList[2]);
-		QCOMPARE(fromList[2]->getToNeuronID(), testNeurIDList[3]);
-		QCOMPARE(fromList[2]->getWeight(), 0.3f);
-		QCOMPARE(fromList[2]->getDelay(), 1.3f);
+//		//Should be three connections from the first neuron in the list
+//		QList<Connection*> fromList = connGrp.getFromConnections(testNeurIDList[0]);
+//		QCOMPARE(fromList.size(), 3);
+//		QCOMPARE(fromList[0]->getToNeuronID(), testNeurIDList[1]);
+//		QCOMPARE(fromList[1]->getToNeuronID(), testNeurIDList[2]);
+//		QCOMPARE(fromList[2]->getToNeuronID(), testNeurIDList[3]);
+//		QCOMPARE(fromList[2]->getWeight(), 0.3f);
+//		QCOMPARE(fromList[2]->getDelay(), 1.3f);
 
-		//Should be two connections to the first neuron in the list
-		QList<Connection*> toList = connGrp.getToConnections(testNeurIDList[2]);
-		QCOMPARE(toList.size(), 2);
-		QCOMPARE(toList[0]->getFromNeuronID(), testNeurIDList[0]);
-		QCOMPARE(toList[1]->getFromNeuronID(), testNeurIDList[3]);
-		QCOMPARE(toList[1]->getWeight(), 0.6f);
-		QCOMPARE(toList[1]->getDelay(), 1.6f);
+//		//Should be two connections to the first neuron in the list
+//		QList<Connection*> toList = connGrp.getToConnections(testNeurIDList[2]);
+//		QCOMPARE(toList.size(), 2);
+//		QCOMPARE(toList[0]->getFromNeuronID(), testNeurIDList[0]);
+//		QCOMPARE(toList[1]->getFromNeuronID(), testNeurIDList[3]);
+//		QCOMPARE(toList[1]->getWeight(), 0.6f);
+//		QCOMPARE(toList[1]->getDelay(), 1.6f);
 	}
 	catch(SpikeStreamException ex){
 		QFAIL(ex.getMessage().toAscii());
@@ -298,18 +333,10 @@ void TestNetworkDaoThread::testLoadNeurons(){
     neurGrpList.append(&neurGrp1);
     neurGrpList.append(&neurGrp2);
 
-    //Check that both neuron groups are not loaded
-    QVERIFY(!neurGrp1.isLoaded());
-    QVERIFY(!neurGrp2.isLoaded());
-
     //Load neurons associated with this neuron group
     NetworkDaoThread networkDaoThread(dbInfo);
     networkDaoThread.prepareLoadNeurons(neurGrpList);
     runThread(networkDaoThread);
-
-    //Check that both neuron groups are loaded
-    QVERIFY(neurGrp1.isLoaded());
-    QVERIFY(neurGrp2.isLoaded());
 
     //Check that neuron groups have correct number of neurons
     QCOMPARE(neurGrp1.size(), (int)3);
