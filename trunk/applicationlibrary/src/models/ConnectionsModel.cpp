@@ -53,7 +53,7 @@ QVariant ConnectionsModel::data(const QModelIndex & index, int role) const{
 		Connection* tmpConnection = tmpConList[index.row()];
 
 		if(index.column() == idCol)
-			return tmpConnection->getID();
+			return 0;//tmpConnection->getID();
 		if(index.column() == fromIDCol)
 			return tmpConnection->getFromNeuronID();
 		if(index.column() == toIDCol)

@@ -360,26 +360,26 @@ void NRMDataImporter::addTraining(){
 
 				//Get the connections between these two neurons from the database
 				QList<Connection> tmpConList = networkDao.getConnections(tmpFromNeurID, neuronID);
+FIXME
+//				//Check that there is at least one connection
+//				if(tmpConList.isEmpty())
+//					throw SpikeStreamException( "No matching connection found in database from " + QString::number(tmpFromNeurID) + " to " + QString::number(neuronID) );
 
-				//Check that there is at least one connection
-				if(tmpConList.isEmpty())
-					throw SpikeStreamException( "No matching connection found in database from " + QString::number(tmpFromNeurID) + " to " + QString::number(neuronID) );
+//				/* Add the index of the weightless connection to the database using the id of the connection
+//					In the case of multiple connections between neurons, need to use the first connection id for the
+//					first connection, the second connection id for the second connection and so on */
+//				if(duplicateMap.contains(tmpFromNeurID)){
+//					//Double check size
+//					if(duplicateMap[tmpFromNeurID] >= tmpConList.size())
+//						throw SpikeStreamException("Duplicate map entry for neuron " + QString::number(tmpFromNeurID) + " is out of range.");
 
-				/* Add the index of the weightless connection to the database using the id of the connection
-					In the case of multiple connections between neurons, need to use the first connection id for the
-					first connection, the second connection id for the second connection and so on */
-				if(duplicateMap.contains(tmpFromNeurID)){
-					//Double check size
-					if(duplicateMap[tmpFromNeurID] >= tmpConList.size())
-						throw SpikeStreamException("Duplicate map entry for neuron " + QString::number(tmpFromNeurID) + " is out of range.");
-
-					networkDao.addWeightlessConnection(tmpConList[ duplicateMap[tmpFromNeurID] ].getID(), patIndex);
-					++duplicateMap[tmpFromNeurID];//Increase the index that will be used next time the duplicate is encountered
-				}
-				else{
-					networkDao.addWeightlessConnection(tmpConList[0].getID(), patIndex);
-					duplicateMap[tmpFromNeurID] = 1;
-				}
+//					networkDao.addWeightlessConnection(tmpConList[ duplicateMap[tmpFromNeurID] ].getID(), patIndex);
+//					++duplicateMap[tmpFromNeurID];//Increase the index that will be used next time the duplicate is encountered
+//				}
+//				else{
+//					networkDao.addWeightlessConnection(tmpConList[0].getID(), patIndex);
+//					duplicateMap[tmpFromNeurID] = 1;
+//				}
 			}
 		}
 	}
