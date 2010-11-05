@@ -116,7 +116,7 @@ void NemoLoader::addConnectionGroup(ConnectionGroup* conGroup, nemo_network_t ne
 
 		//Store link between connection group ID and map linking nemo connection IDs and SpikeStream connection IDs
 		if(learning){
-			(*volatileConGrpMap)[conGrpID][newNemoSynapseID] = conIter.value()->getID();
+			(*volatileConGrpMap)[conGrpID][newNemoSynapseID] = conIter.key();
 		}
 	}
 }

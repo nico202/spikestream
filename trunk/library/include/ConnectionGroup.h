@@ -13,8 +13,10 @@ namespace spikestream {
 		public:
 			ConnectionGroup(const ConnectionGroupInfo& connGrpInfo);
 			~ConnectionGroup();
-			Connection* addConnection(Connection* newConn);
-			Connection* addConnection(unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight);//UNTESTED
+			//Connection* addConnection(unsigned conID, Connection* newConn);
+			unsigned addConnection(unsigned conID, Connection* newConn);
+			//Connection* addConnection(unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight);//UNTESTED
+			unsigned addConnection(unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight);//UNTESTED
 			QHash<unsigned, Connection*>::const_iterator begin();
 			void clearConnections();
 			QHash<unsigned, Connection*>::const_iterator end();

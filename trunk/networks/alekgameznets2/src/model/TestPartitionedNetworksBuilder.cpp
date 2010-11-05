@@ -122,7 +122,7 @@ void TestPartitionedNetworksBuilder::addConnections(){
 
 	//Array of lists to hold connections
 	int numConnections = 3;
-	QList<Connection*> conListArray[numberOfNeurons];
+	QList<unsigned> conListArray[numberOfNeurons];
 
 	//Add connections. Each neuron receives connections from a random selection of six other neurons not including itself
 	for(unsigned int toNeurID=1; toNeurID<=numberOfNeurons; ++toNeurID){
@@ -148,7 +148,7 @@ void TestPartitionedNetworksBuilder::addConnections(){
 
 		//Add pattern indexes for this to neuron
 		for(int patternIndx=0; patternIndx < numConnections; ++patternIndx)
-			networkDao->addWeightlessConnection( conListArray[toNeurID-1].at(patternIndx)->getID(), patternIndx );
+			networkDao->addWeightlessConnection( conListArray[toNeurID-1].at(patternIndx), patternIndx );
 	}
 }
 

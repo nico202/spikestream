@@ -46,7 +46,7 @@ namespace spikestream {
 			const bool* stop;
 
 			/*! Holds all of the connections to neurons */
-			QList<Connection*>* conListArray;
+			QList<unsigned>* conListArray;
 
 			//==========================  METHODS  =============================
 			using NetworksBuilder::addTraining;

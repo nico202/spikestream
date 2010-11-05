@@ -22,7 +22,7 @@ using namespace std;
 ModularNetworksBuilder::ModularNetworksBuilder() : NetworksBuilder(){
 
 	//Create array to store connections for each neuron to add weightless indexes later when we have the connection id
-	conListArray = new QList<Connection*>[12];
+	conListArray = new QList<unsigned>[12];
 }
 
 
@@ -196,7 +196,7 @@ void ModularNetworksBuilder::addConnections(){
 	for(unsigned int toNeurID=1; toNeurID <= 12; ++toNeurID){
 		//Add pattern indexes for this TO neuron
 		for(int patternIndx=0; patternIndx < conListArray[toNeurID-1].size(); ++patternIndx)
-			networkDao->addWeightlessConnection( conListArray[toNeurID-1].at(patternIndx)->getID(), patternIndx );
+			networkDao->addWeightlessConnection( conListArray[toNeurID-1].at(patternIndx), patternIndx );
 	}
 }
 

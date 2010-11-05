@@ -84,102 +84,102 @@ void TononiNetworkBuilder::addBalduzziTononiFigure5(const QString& networkName, 
 
     //Add connections
     //2->1	3->2
-	Connection* con21 = connGrp.addConnection(neur2->getID(), neur1->getID(),  0,  0);
-	Connection* con32 = connGrp.addConnection(neur3->getID(), neur2->getID(),  0,  0);
+	unsigned con21 = connGrp.addConnection(neur2->getID(), neur1->getID(),  0,  0);
+	unsigned con32 = connGrp.addConnection(neur3->getID(), neur2->getID(),  0,  0);
 
     //3->4	3->5	3->6
-	Connection* con34 = connGrp.addConnection(neur3->getID(), neur4->getID(),  0,  0);
-	Connection* con35 = connGrp.addConnection(neur3->getID(), neur5->getID(),  0,  0);
-	Connection* con36 = connGrp.addConnection(neur3->getID(), neur6->getID(),  0,  0);
+	unsigned con34 = connGrp.addConnection(neur3->getID(), neur4->getID(),  0,  0);
+	unsigned con35 = connGrp.addConnection(neur3->getID(), neur5->getID(),  0,  0);
+	unsigned con36 = connGrp.addConnection(neur3->getID(), neur6->getID(),  0,  0);
 
     //4->3	4->5	4->6
-	Connection* con43 = connGrp.addConnection(neur4->getID(), neur3->getID(),  0,  0);
-	Connection* con45 = connGrp.addConnection(neur4->getID(), neur5->getID(),  0,  0);
-	Connection* con46 = connGrp.addConnection(neur4->getID(), neur6->getID(),  0,  0);
+	unsigned con43 = connGrp.addConnection(neur4->getID(), neur3->getID(),  0,  0);
+	unsigned con45 = connGrp.addConnection(neur4->getID(), neur5->getID(),  0,  0);
+	unsigned con46 = connGrp.addConnection(neur4->getID(), neur6->getID(),  0,  0);
 
     //5->3	5->4	5->6
-	Connection* con53 = connGrp.addConnection(neur5->getID(), neur3->getID(),  0,  0);
-	Connection* con54 = connGrp.addConnection(neur5->getID(), neur4->getID(),  0,  0);
-	Connection* con56 = connGrp.addConnection(neur5->getID(), neur6->getID(),  0,  0);
+	unsigned con53 = connGrp.addConnection(neur5->getID(), neur3->getID(),  0,  0);
+	unsigned con54 = connGrp.addConnection(neur5->getID(), neur4->getID(),  0,  0);
+	unsigned con56 = connGrp.addConnection(neur5->getID(), neur6->getID(),  0,  0);
 
     //6->3	6->4	6->5	6->7	6->8	6->10
-	Connection* con63 = connGrp.addConnection(neur6->getID(), neur3->getID(),  0,  0);
-	Connection* con64 = connGrp.addConnection(neur6->getID(), neur4->getID(),  0,  0);
-	Connection* con65 = connGrp.addConnection(neur6->getID(), neur5->getID(),  0,  0);
-	Connection* con67 = connGrp.addConnection(neur6->getID(), neur7->getID(),  0,  0);
-	Connection* con68 = connGrp.addConnection(neur6->getID(), neur8->getID(),  0,  0);
-	Connection* con610 = connGrp.addConnection(neur6->getID(), neur10->getID(),  0,  0);
+	unsigned con63 = connGrp.addConnection(neur6->getID(), neur3->getID(),  0,  0);
+	unsigned con64 = connGrp.addConnection(neur6->getID(), neur4->getID(),  0,  0);
+	unsigned con65 = connGrp.addConnection(neur6->getID(), neur5->getID(),  0,  0);
+	unsigned con67 = connGrp.addConnection(neur6->getID(), neur7->getID(),  0,  0);
+	unsigned con68 = connGrp.addConnection(neur6->getID(), neur8->getID(),  0,  0);
+	unsigned con610 = connGrp.addConnection(neur6->getID(), neur10->getID(),  0,  0);
 
     //7->6	7->8	7->10
-	Connection* con76 = connGrp.addConnection(neur7->getID(), neur6->getID(),  0,  0);
-	Connection* con78 = connGrp.addConnection(neur7->getID(), neur8->getID(),  0,  0);
-	Connection* con710 = connGrp.addConnection(neur7->getID(), neur10->getID(),  0,  0);
+	unsigned con76 = connGrp.addConnection(neur7->getID(), neur6->getID(),  0,  0);
+	unsigned con78 = connGrp.addConnection(neur7->getID(), neur8->getID(),  0,  0);
+	unsigned con710 = connGrp.addConnection(neur7->getID(), neur10->getID(),  0,  0);
 
     //8->6	8->7	8->10
-	Connection* con86 = connGrp.addConnection(neur8->getID(), neur6->getID(),  0,  0);
-	Connection* con87 = connGrp.addConnection(neur8->getID(), neur7->getID(),  0,  0);
-	Connection* con810 = connGrp.addConnection(neur8->getID(), neur10->getID(),  0,  0);
+	unsigned con86 = connGrp.addConnection(neur8->getID(), neur6->getID(),  0,  0);
+	unsigned con87 = connGrp.addConnection(neur8->getID(), neur7->getID(),  0,  0);
+	unsigned con810 = connGrp.addConnection(neur8->getID(), neur10->getID(),  0,  0);
 
     //10->6	10->7	10->8
-	Connection* con106 = connGrp.addConnection(neur10->getID(), neur6->getID(),  0,  0);
-	Connection* con107 = connGrp.addConnection(neur10->getID(), neur7->getID(),  0,  0);
-	Connection* con108 = connGrp.addConnection(neur10->getID(), neur8->getID(),  0,  0);
+	unsigned con106 = connGrp.addConnection(neur10->getID(), neur6->getID(),  0,  0);
+	unsigned con107 = connGrp.addConnection(neur10->getID(), neur7->getID(),  0,  0);
+	unsigned con108 = connGrp.addConnection(neur10->getID(), neur8->getID(),  0,  0);
 
     //9->7	11->9
-	Connection* con97 = connGrp.addConnection(neur9->getID(), neur7->getID(),  0,  0);
-	Connection* con119 = connGrp.addConnection(neur11->getID(), neur9->getID(),  0,  0);
+	unsigned con97 = connGrp.addConnection(neur9->getID(), neur7->getID(),  0,  0);
+	unsigned con119 = connGrp.addConnection(neur11->getID(), neur9->getID(),  0,  0);
 
     netDaoThread.prepareAddConnectionGroup(netInfo.getID(), &connGrp);
     runThread(netDaoThread);
 
     //Add weightless connections
     //1 connection to 1
-    networkDao->addWeightlessConnection(con21->getID(), 0);
+	networkDao->addWeightlessConnection(con21, 0);
 
     //1 connection to 2
-    networkDao->addWeightlessConnection(con32->getID(), 0);
+	networkDao->addWeightlessConnection(con32, 0);
 
     //3 connections to 3
-    networkDao->addWeightlessConnection(con43->getID(), 0);
-    networkDao->addWeightlessConnection(con53->getID(), 1);
-    networkDao->addWeightlessConnection(con63->getID(), 2);
+	networkDao->addWeightlessConnection(con43, 0);
+	networkDao->addWeightlessConnection(con53, 1);
+	networkDao->addWeightlessConnection(con63, 2);
 
     //3 connections to 4
-    networkDao->addWeightlessConnection(con34->getID(), 0);
-    networkDao->addWeightlessConnection(con54->getID(), 1);
-    networkDao->addWeightlessConnection(con64->getID(), 2);
+	networkDao->addWeightlessConnection(con34, 0);
+	networkDao->addWeightlessConnection(con54, 1);
+	networkDao->addWeightlessConnection(con64, 2);
 
     //3 connection to 5
-    networkDao->addWeightlessConnection(con35->getID(), 0);
-    networkDao->addWeightlessConnection(con45->getID(), 1);
-    networkDao->addWeightlessConnection(con65->getID(), 2);
+	networkDao->addWeightlessConnection(con35, 0);
+	networkDao->addWeightlessConnection(con45, 1);
+	networkDao->addWeightlessConnection(con65, 2);
 
     //6 connections to 6
-    networkDao->addWeightlessConnection(con36->getID(), 0);
-    networkDao->addWeightlessConnection(con46->getID(), 1);
-    networkDao->addWeightlessConnection(con56->getID(), 2);
-    networkDao->addWeightlessConnection(con76->getID(), 3);
-    networkDao->addWeightlessConnection(con86->getID(), 4);
-    networkDao->addWeightlessConnection(con106->getID(), 5);
+	networkDao->addWeightlessConnection(con36, 0);
+	networkDao->addWeightlessConnection(con46, 1);
+	networkDao->addWeightlessConnection(con56, 2);
+	networkDao->addWeightlessConnection(con76, 3);
+	networkDao->addWeightlessConnection(con86, 4);
+	networkDao->addWeightlessConnection(con106, 5);
 
     //4 connections to 7
-    networkDao->addWeightlessConnection(con67->getID(), 0);
-    networkDao->addWeightlessConnection(con87->getID(), 1);
-    networkDao->addWeightlessConnection(con97->getID(), 2);
-    networkDao->addWeightlessConnection(con107->getID(), 3);
+	networkDao->addWeightlessConnection(con67, 0);
+	networkDao->addWeightlessConnection(con87, 1);
+	networkDao->addWeightlessConnection(con97, 2);
+	networkDao->addWeightlessConnection(con107, 3);
 
     //3 connections to 8
-    networkDao->addWeightlessConnection(con68->getID(), 0);
-    networkDao->addWeightlessConnection(con78->getID(), 1);
-    networkDao->addWeightlessConnection(con108->getID(), 2);
+	networkDao->addWeightlessConnection(con68, 0);
+	networkDao->addWeightlessConnection(con78, 1);
+	networkDao->addWeightlessConnection(con108, 2);
 
     //1 connection to 9
-    networkDao->addWeightlessConnection(con119->getID(), 0);
+	networkDao->addWeightlessConnection(con119, 0);
 
     //3 connections to 10
-    networkDao->addWeightlessConnection(con610->getID(), 0);
-    networkDao->addWeightlessConnection(con710->getID(), 1);
-    networkDao->addWeightlessConnection(con810->getID(), 2);
+	networkDao->addWeightlessConnection(con610, 0);
+	networkDao->addWeightlessConnection(con710, 1);
+	networkDao->addWeightlessConnection(con810, 2);
 
     //No connections to 11
 
@@ -236,40 +236,40 @@ void TononiNetworkBuilder::addBalduzziTononiFigure6(const QString& networkName, 
     ConnectionGroup connGrp(connGrpInfo);
 
     //Add connections
-	Connection* con12 = connGrp.addConnection(neuronMap[1]->getID(), neuronMap[2]->getID(),  0,  0);
-	Connection* con13 = connGrp.addConnection(neuronMap[1]->getID(), neuronMap[3]->getID(),  0,  0);
-	Connection* con14 = connGrp.addConnection(neuronMap[1]->getID(), neuronMap[4]->getID(),  0,  0);
-	Connection* con21 = connGrp.addConnection(neuronMap[2]->getID(), neuronMap[1]->getID(),  0,  0);
-	Connection* con23 = connGrp.addConnection(neuronMap[2]->getID(), neuronMap[3]->getID(),  0,  0);
-	Connection* con25 = connGrp.addConnection(neuronMap[2]->getID(), neuronMap[5]->getID(),  0,  0);
-	Connection* con31 = connGrp.addConnection(neuronMap[3]->getID(), neuronMap[1]->getID(),  0,  0);
-	Connection* con32 = connGrp.addConnection(neuronMap[3]->getID(), neuronMap[2]->getID(),  0,  0);
-	Connection* con36 = connGrp.addConnection(neuronMap[3]->getID(), neuronMap[6]->getID(),  0,  0);
+	unsigned con12 = connGrp.addConnection(neuronMap[1]->getID(), neuronMap[2]->getID(),  0,  0);
+	unsigned con13 = connGrp.addConnection(neuronMap[1]->getID(), neuronMap[3]->getID(),  0,  0);
+	unsigned con14 = connGrp.addConnection(neuronMap[1]->getID(), neuronMap[4]->getID(),  0,  0);
+	unsigned con21 = connGrp.addConnection(neuronMap[2]->getID(), neuronMap[1]->getID(),  0,  0);
+	unsigned con23 = connGrp.addConnection(neuronMap[2]->getID(), neuronMap[3]->getID(),  0,  0);
+	unsigned con25 = connGrp.addConnection(neuronMap[2]->getID(), neuronMap[5]->getID(),  0,  0);
+	unsigned con31 = connGrp.addConnection(neuronMap[3]->getID(), neuronMap[1]->getID(),  0,  0);
+	unsigned con32 = connGrp.addConnection(neuronMap[3]->getID(), neuronMap[2]->getID(),  0,  0);
+	unsigned con36 = connGrp.addConnection(neuronMap[3]->getID(), neuronMap[6]->getID(),  0,  0);
 
     netDaoThread.prepareAddConnectionGroup(netInfo.getID(), &connGrp);
     runThread(netDaoThread);
 
     //Add weightless connections
     //2 connections to 1
-    networkDao->addWeightlessConnection(con21->getID(), 0);
-    networkDao->addWeightlessConnection(con31->getID(), 1);
+	networkDao->addWeightlessConnection(con21, 0);
+	networkDao->addWeightlessConnection(con31, 1);
 
     //2 connections to 2
-    networkDao->addWeightlessConnection(con12->getID(), 0);
-    networkDao->addWeightlessConnection(con32->getID(), 1);
+	networkDao->addWeightlessConnection(con12, 0);
+	networkDao->addWeightlessConnection(con32, 1);
 
     //2 connections to 3
-    networkDao->addWeightlessConnection(con13->getID(), 0);
-    networkDao->addWeightlessConnection(con23->getID(), 1);
+	networkDao->addWeightlessConnection(con13, 0);
+	networkDao->addWeightlessConnection(con23, 1);
 
     //1 connection to 4
-    networkDao->addWeightlessConnection(con14->getID(), 0);
+	networkDao->addWeightlessConnection(con14, 0);
 
     //1 connection to 5
-    networkDao->addWeightlessConnection(con25->getID(), 0);
+	networkDao->addWeightlessConnection(con25, 0);
 
     //1 connection to 6
-    networkDao->addWeightlessConnection(con36->getID(), 0);
+	networkDao->addWeightlessConnection(con36, 0);
 
     //Add training - 1,2,3 are ANDs; 4,5,6 copy the output of 1,2,3
     addTraining(neuronMap[1]->getID(), "00", 0);
@@ -344,52 +344,52 @@ void TononiNetworkBuilder::addBalduzziTononiFigure12(const QString& networkName,
     ConnectionGroup connGrp(connGrpInfo);
 
     //Add connections
-	Connection* con17 = connGrp.addConnection(neur1->getID(), neur7->getID(),  0,  0);
-	Connection* con21 = connGrp.addConnection(neur2->getID(), neur1->getID(),  0,  0);
-	Connection* con34 = connGrp.addConnection(neur3->getID(), neur4->getID(),  0,  0);
-	Connection* con37 = connGrp.addConnection(neur3->getID(), neur7->getID(),  0,  0);
+	unsigned con17 = connGrp.addConnection(neur1->getID(), neur7->getID(),  0,  0);
+	unsigned con21 = connGrp.addConnection(neur2->getID(), neur1->getID(),  0,  0);
+	unsigned con34 = connGrp.addConnection(neur3->getID(), neur4->getID(),  0,  0);
+	unsigned con37 = connGrp.addConnection(neur3->getID(), neur7->getID(),  0,  0);
 
-	Connection* con38 = connGrp.addConnection(neur3->getID(), neur8->getID(),  0,  0);
-	Connection* con42 = connGrp.addConnection(neur4->getID(), neur2->getID(),  0,  0);
-	Connection* con54 = connGrp.addConnection(neur5->getID(), neur4->getID(),  0,  0);
-	Connection* con62 = connGrp.addConnection(neur6->getID(), neur2->getID(),  0,  0);
+	unsigned con38 = connGrp.addConnection(neur3->getID(), neur8->getID(),  0,  0);
+	unsigned con42 = connGrp.addConnection(neur4->getID(), neur2->getID(),  0,  0);
+	unsigned con54 = connGrp.addConnection(neur5->getID(), neur4->getID(),  0,  0);
+	unsigned con62 = connGrp.addConnection(neur6->getID(), neur2->getID(),  0,  0);
 
-	Connection* con65 = connGrp.addConnection(neur6->getID(), neur5->getID(),  0,  0);
-	Connection* con78 = connGrp.addConnection(neur7->getID(), neur8->getID(),  0,  0);
-	Connection* con81 = connGrp.addConnection(neur8->getID(), neur1->getID(),  0,  0);
-	Connection* con85 = connGrp.addConnection(neur8->getID(), neur5->getID(),  0,  0);
+	unsigned con65 = connGrp.addConnection(neur6->getID(), neur5->getID(),  0,  0);
+	unsigned con78 = connGrp.addConnection(neur7->getID(), neur8->getID(),  0,  0);
+	unsigned con81 = connGrp.addConnection(neur8->getID(), neur1->getID(),  0,  0);
+	unsigned con85 = connGrp.addConnection(neur8->getID(), neur5->getID(),  0,  0);
 
     netDaoThread.prepareAddConnectionGroup(netInfo.getID(), &connGrp);
     runThread(netDaoThread);
 
     //Add weightless connections
     //2 connections to 1
-    networkDao->addWeightlessConnection(con21->getID(), 0);
-    networkDao->addWeightlessConnection(con81->getID(), 1);
+	networkDao->addWeightlessConnection(con21, 0);
+	networkDao->addWeightlessConnection(con81, 1);
 
     //2 connections to 2
-    networkDao->addWeightlessConnection(con42->getID(), 0);
-    networkDao->addWeightlessConnection(con62->getID(), 1);
+	networkDao->addWeightlessConnection(con42, 0);
+	networkDao->addWeightlessConnection(con62, 1);
 
     //0 connections to 3
 
     //2 connections to 4
-    networkDao->addWeightlessConnection(con34->getID(), 0);
-    networkDao->addWeightlessConnection(con54->getID(), 1);
+	networkDao->addWeightlessConnection(con34, 0);
+	networkDao->addWeightlessConnection(con54, 1);
 
     //2 connection to 5
-    networkDao->addWeightlessConnection(con65->getID(), 0);
-    networkDao->addWeightlessConnection(con85->getID(), 1);
+	networkDao->addWeightlessConnection(con65, 0);
+	networkDao->addWeightlessConnection(con85, 1);
 
     //0 connections to 6
 
     //2 connections to 7
-    networkDao->addWeightlessConnection(con17->getID(), 0);
-    networkDao->addWeightlessConnection(con37->getID(), 1);
+	networkDao->addWeightlessConnection(con17, 0);
+	networkDao->addWeightlessConnection(con37, 1);
 
     //2 connections to 8
-    networkDao->addWeightlessConnection(con38->getID(), 0);
-    networkDao->addWeightlessConnection(con78->getID(), 1);
+	networkDao->addWeightlessConnection(con38, 0);
+	networkDao->addWeightlessConnection(con78, 1);
 
     //Add training - all are ANDs, but 3 and 6 don't receive any connections, so don't need training
     addTraining(neur1->getID(), "00", 0);
@@ -484,60 +484,60 @@ void TononiNetworkBuilder::addBalduzziTononiFigure13(const QString& networkName,
     ConnectionGroup connGrp(connGrpInfo);
 
     //1->2	1->3
-	Connection* con12 = connGrp.addConnection(neur1->getID(), neur2->getID(),  0,  0);
-	Connection* con13 = connGrp.addConnection(neur1->getID(), neur3->getID(),  0,  0);
+	unsigned con12 = connGrp.addConnection(neur1->getID(), neur2->getID(),  0,  0);
+	unsigned con13 = connGrp.addConnection(neur1->getID(), neur3->getID(),  0,  0);
 
     //2->1	2->3
-	Connection* con21 = connGrp.addConnection(neur2->getID(), neur1->getID(),  0,  0);
-	Connection* con23 = connGrp.addConnection(neur2->getID(), neur3->getID(),  0,  0);
+	unsigned con21 = connGrp.addConnection(neur2->getID(), neur1->getID(),  0,  0);
+	unsigned con23 = connGrp.addConnection(neur2->getID(), neur3->getID(),  0,  0);
 
     //3->1	3->2	3->6	3->7
-	Connection* con31 = connGrp.addConnection(neur3->getID(), neur1->getID(),  0,  0);
-	Connection* con32 = connGrp.addConnection(neur3->getID(), neur2->getID(),  0,  0);
-	Connection* con36 = connGrp.addConnection(neur3->getID(), neur6->getID(),  0,  0);
-	Connection* con37 = connGrp.addConnection(neur3->getID(), neur7->getID(),  0,  0);
+	unsigned con31 = connGrp.addConnection(neur3->getID(), neur1->getID(),  0,  0);
+	unsigned con32 = connGrp.addConnection(neur3->getID(), neur2->getID(),  0,  0);
+	unsigned con36 = connGrp.addConnection(neur3->getID(), neur6->getID(),  0,  0);
+	unsigned con37 = connGrp.addConnection(neur3->getID(), neur7->getID(),  0,  0);
 
     //4->5	4->6
-	Connection* con45 = connGrp.addConnection(neur4->getID(), neur5->getID(),  0,  0);
-	Connection* con46 = connGrp.addConnection(neur4->getID(), neur6->getID(),  0,  0);
+	unsigned con45 = connGrp.addConnection(neur4->getID(), neur5->getID(),  0,  0);
+	unsigned con46 = connGrp.addConnection(neur4->getID(), neur6->getID(),  0,  0);
 
     //5->4	5->6
-	Connection* con54 = connGrp.addConnection(neur5->getID(), neur4->getID(),  0,  0);
-	Connection* con56 = connGrp.addConnection(neur5->getID(), neur6->getID(),  0,  0);
+	unsigned con54 = connGrp.addConnection(neur5->getID(), neur4->getID(),  0,  0);
+	unsigned con56 = connGrp.addConnection(neur5->getID(), neur6->getID(),  0,  0);
 
     //6->3	6->4	6->5	6->10
-	Connection* con63 = connGrp.addConnection(neur6->getID(), neur3->getID(),  0,  0);
-	Connection* con64 = connGrp.addConnection(neur6->getID(), neur4->getID(),  0,  0);
-	Connection* con65 = connGrp.addConnection(neur6->getID(), neur5->getID(),  0,  0);
-	Connection* con610 = connGrp.addConnection(neur6->getID(), neur10->getID(),  0,  0);
+	unsigned con63 = connGrp.addConnection(neur6->getID(), neur3->getID(),  0,  0);
+	unsigned con64 = connGrp.addConnection(neur6->getID(), neur4->getID(),  0,  0);
+	unsigned con65 = connGrp.addConnection(neur6->getID(), neur5->getID(),  0,  0);
+	unsigned con610 = connGrp.addConnection(neur6->getID(), neur10->getID(),  0,  0);
 
     //7->3	7->8	7->9	7->10
-	Connection* con73 = connGrp.addConnection(neur7->getID(), neur3->getID(),  0,  0);
-	Connection* con78 = connGrp.addConnection(neur7->getID(), neur8->getID(),  0,  0);
-	Connection* con79 = connGrp.addConnection(neur7->getID(), neur9->getID(),  0,  0);
-	Connection* con710 = connGrp.addConnection(neur7->getID(), neur10->getID(),  0,  0);
+	unsigned con73 = connGrp.addConnection(neur7->getID(), neur3->getID(),  0,  0);
+	unsigned con78 = connGrp.addConnection(neur7->getID(), neur8->getID(),  0,  0);
+	unsigned con79 = connGrp.addConnection(neur7->getID(), neur9->getID(),  0,  0);
+	unsigned con710 = connGrp.addConnection(neur7->getID(), neur10->getID(),  0,  0);
 
     //8->7	8->9
-	Connection* con87 = connGrp.addConnection(neur8->getID(), neur7->getID(),  0,  0);
-	Connection* con89 = connGrp.addConnection(neur8->getID(), neur9->getID(),  0,  0);
+	unsigned con87 = connGrp.addConnection(neur8->getID(), neur7->getID(),  0,  0);
+	unsigned con89 = connGrp.addConnection(neur8->getID(), neur9->getID(),  0,  0);
 
     //9->7	9->8
-	Connection* con97 = connGrp.addConnection(neur9->getID(), neur7->getID(),  0,  0);
-	Connection* con98 = connGrp.addConnection(neur9->getID(), neur8->getID(),  0,  0);
+	unsigned con97 = connGrp.addConnection(neur9->getID(), neur7->getID(),  0,  0);
+	unsigned con98 = connGrp.addConnection(neur9->getID(), neur8->getID(),  0,  0);
 
     //10->6	10->7	10->11	10->12
-	Connection* con106 = connGrp.addConnection(neur10->getID(), neur6->getID(),  0,  0);
-	Connection* con107 = connGrp.addConnection(neur10->getID(), neur7->getID(),  0,  0);
-	Connection* con1011 = connGrp.addConnection(neur10->getID(), neur11->getID(),  0,  0);
-	Connection* con1012 = connGrp.addConnection(neur10->getID(), neur12->getID(),  0,  0);
+	unsigned con106 = connGrp.addConnection(neur10->getID(), neur6->getID(),  0,  0);
+	unsigned con107 = connGrp.addConnection(neur10->getID(), neur7->getID(),  0,  0);
+	unsigned con1011 = connGrp.addConnection(neur10->getID(), neur11->getID(),  0,  0);
+	unsigned con1012 = connGrp.addConnection(neur10->getID(), neur12->getID(),  0,  0);
 
     //11->10	11->12
-	Connection* con1110 = connGrp.addConnection(neur11->getID(), neur10->getID(),  0,  0);
-	Connection* con1112 = connGrp.addConnection(neur11->getID(), neur12->getID(),  0,  0);
+	unsigned con1110 = connGrp.addConnection(neur11->getID(), neur10->getID(),  0,  0);
+	unsigned con1112 = connGrp.addConnection(neur11->getID(), neur12->getID(),  0,  0);
 
     //12->10	12->11
-	Connection* con1210 = connGrp.addConnection(neur12->getID(), neur10->getID(),  0,  0);
-	Connection* con1211 = connGrp.addConnection(neur12->getID(), neur11->getID(),  0,  0);
+	unsigned con1210 = connGrp.addConnection(neur12->getID(), neur10->getID(),  0,  0);
+	unsigned con1211 = connGrp.addConnection(neur12->getID(), neur11->getID(),  0,  0);
 
     netDaoThread.prepareAddConnectionGroup(netInfo.getID(), &connGrp);
     runThread(netDaoThread);
@@ -545,60 +545,60 @@ void TononiNetworkBuilder::addBalduzziTononiFigure13(const QString& networkName,
 
     //Add weightless connections
     //2 connections to 1
-    networkDao->addWeightlessConnection(con21->getID(), 0);
-    networkDao->addWeightlessConnection(con31->getID(), 1);
+	networkDao->addWeightlessConnection(con21, 0);
+	networkDao->addWeightlessConnection(con31, 1);
 
     //2 connections to 2
-    networkDao->addWeightlessConnection(con12->getID(), 0);
-    networkDao->addWeightlessConnection(con32->getID(), 1);
+	networkDao->addWeightlessConnection(con12, 0);
+	networkDao->addWeightlessConnection(con32, 1);
 
     //4 connections to 3
-    networkDao->addWeightlessConnection(con13->getID(), 0);
-    networkDao->addWeightlessConnection(con23->getID(), 1);
-    networkDao->addWeightlessConnection(con63->getID(), 2);
-    networkDao->addWeightlessConnection(con73->getID(), 3);
+	networkDao->addWeightlessConnection(con13, 0);
+	networkDao->addWeightlessConnection(con23, 1);
+	networkDao->addWeightlessConnection(con63, 2);
+	networkDao->addWeightlessConnection(con73, 3);
 
     //2 connections to 4
-    networkDao->addWeightlessConnection(con54->getID(), 0);
-    networkDao->addWeightlessConnection(con64->getID(), 1);
+	networkDao->addWeightlessConnection(con54, 0);
+	networkDao->addWeightlessConnection(con64, 1);
 
     //2 connections to 5
-    networkDao->addWeightlessConnection(con45->getID(), 0);
-    networkDao->addWeightlessConnection(con65->getID(), 1);
+	networkDao->addWeightlessConnection(con45, 0);
+	networkDao->addWeightlessConnection(con65, 1);
 
     //4 connections to 6
-    networkDao->addWeightlessConnection(con36->getID(), 0);
-    networkDao->addWeightlessConnection(con46->getID(), 1);
-    networkDao->addWeightlessConnection(con56->getID(), 2);
-    networkDao->addWeightlessConnection(con106->getID(), 3);
+	networkDao->addWeightlessConnection(con36, 0);
+	networkDao->addWeightlessConnection(con46, 1);
+	networkDao->addWeightlessConnection(con56, 2);
+	networkDao->addWeightlessConnection(con106, 3);
 
     //4 connections to 7
-    networkDao->addWeightlessConnection(con37->getID(), 0);
-    networkDao->addWeightlessConnection(con87->getID(), 1);
-    networkDao->addWeightlessConnection(con97->getID(), 2);
-    networkDao->addWeightlessConnection(con107->getID(), 3);
+	networkDao->addWeightlessConnection(con37, 0);
+	networkDao->addWeightlessConnection(con87, 1);
+	networkDao->addWeightlessConnection(con97, 2);
+	networkDao->addWeightlessConnection(con107, 3);
 
     //2 connections to 8
-    networkDao->addWeightlessConnection(con78->getID(), 0);
-    networkDao->addWeightlessConnection(con98->getID(), 1);
+	networkDao->addWeightlessConnection(con78, 0);
+	networkDao->addWeightlessConnection(con98, 1);
 
     //2 connections to 9
-    networkDao->addWeightlessConnection(con79->getID(), 0);
-    networkDao->addWeightlessConnection(con89->getID(), 1);
+	networkDao->addWeightlessConnection(con79, 0);
+	networkDao->addWeightlessConnection(con89, 1);
 
     //4 connections to 10
-    networkDao->addWeightlessConnection(con610->getID(), 0);
-    networkDao->addWeightlessConnection(con710->getID(), 1);
-    networkDao->addWeightlessConnection(con1110->getID(), 2);
-    networkDao->addWeightlessConnection(con1210->getID(), 3);
+	networkDao->addWeightlessConnection(con610, 0);
+	networkDao->addWeightlessConnection(con710, 1);
+	networkDao->addWeightlessConnection(con1110, 2);
+	networkDao->addWeightlessConnection(con1210, 3);
 
     //2 connections to 11
-    networkDao->addWeightlessConnection(con1011->getID(), 0);
-    networkDao->addWeightlessConnection(con1211->getID(), 1);
+	networkDao->addWeightlessConnection(con1011, 0);
+	networkDao->addWeightlessConnection(con1211, 1);
 
     //2 connections to 12
-    networkDao->addWeightlessConnection(con1012->getID(), 0);
-    networkDao->addWeightlessConnection(con1112->getID(), 1);
+	networkDao->addWeightlessConnection(con1012, 0);
+	networkDao->addWeightlessConnection(con1112, 1);
 
     //Add training - Elements fire when they receive two or more spikes
     addTwoOrMoreTraining(neur1->getID(), 2);

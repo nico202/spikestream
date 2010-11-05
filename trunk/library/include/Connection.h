@@ -23,7 +23,6 @@ namespace spikestream {
     class Connection{
 		public:
 			Connection (unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight);
-			Connection (unsigned int id, unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight);
 			Connection(const Connection& conn);
 			Connection& operator=(const Connection& rhs);
 			void print();
@@ -33,8 +32,6 @@ namespace spikestream {
 			unsigned getToNeuronID(){ return toNeuronID; }
 			float getTempWeight();
 			float getWeight();
-	//		unsigned int getID() { return id; }
-			void setID(unsigned int id){ this->id = id; }
 			void setFromNeuronID(unsigned fromNeurID) { this->fromNeuronID = fromNeurID; }
 			void setToNeuronID(unsigned toNeurID) { this->toNeuronID = toNeurID; }
 			void setTempWeight(float newTempWeight);
@@ -43,9 +40,6 @@ namespace spikestream {
 
 		private:
 			//=======================  VARIABLES  ========================
-			/*! ID of the connection in the database */
-			unsigned int id;
-
 			/*! Connection is from neuron with this ID. */
 			unsigned int fromNeuronID;
 

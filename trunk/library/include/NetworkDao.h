@@ -41,8 +41,7 @@ namespace spikestream{
 			unsigned getConnectionCount(const ConnectionGroupInfo& conGrpInfo);//UNTESTED
 			QList<ConnectionGroupInfo> getConnectionGroupsInfo(unsigned int networkID);
 			unsigned int getConnectionGroupSize(unsigned int connGrpID);
-			QList<Connection> getConnections(unsigned int fromNeuronID, unsigned int toNeuronID);
-			QList<Connection*> getConnections(unsigned int connectionMode, unsigned int singleNeuronID, unsigned int toNeuronID);
+			QList< QPair<unsigned, Connection> > getConnections(unsigned int fromNeuronID, unsigned int toNeuronID);
 			QHash<QString, double> getDefaultNeuronParameters(unsigned int neuronTypeID);
 			QHash<QString, double> getDefaultSynapseParameters(unsigned int synapseTypeID);
 			QList<unsigned int> getFromConnections(unsigned int fromNeuronID);
