@@ -155,7 +155,7 @@ void FullyConnectedNetworksBuilder::addConnections(){
 
 	//Array of lists to hold connections
 	int numConnections = 6;
-	QList<Connection*> conListArray[12];
+	QList<unsigned> conListArray[12];
 
 	//Add connections. Each neuron receives connections from a random selection of six other neurons not including itself
 	for(unsigned int toNeurID=1; toNeurID<=12; ++toNeurID){
@@ -181,7 +181,7 @@ void FullyConnectedNetworksBuilder::addConnections(){
 
 		//Add pattern indexes for this to neuron
 		for(int patternIndx=0; patternIndx < numConnections; ++patternIndx)
-			networkDao->addWeightlessConnection( conListArray[toNeurID-1].at(patternIndx)->getID(), patternIndx );
+			networkDao->addWeightlessConnection( conListArray[toNeurID-1].at(patternIndx), patternIndx );
 	}
 }
 

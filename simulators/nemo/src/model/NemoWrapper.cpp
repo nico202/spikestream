@@ -566,7 +566,7 @@ void NemoWrapper::saveNemoWeights(){
 		QHash<unsigned, Connection*>::const_iterator endConList = tmpConGrp->end();
 		for(QHash<unsigned, Connection*>::const_iterator conIter = tmpConGrp->begin(); conIter != endConList; ++conIter){
 			//Save in database
-			networkDao.setWeight(conIter.value()->getID(), conIter.value()->getTempWeight());
+			networkDao.setWeight(conIter.key(), conIter.value()->getTempWeight());
 
 			//Update weight field
 			conIter.value()->setWeight(conIter.value()->getTempWeight());

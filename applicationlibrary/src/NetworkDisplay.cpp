@@ -389,11 +389,15 @@ void NetworkDisplay::setZoom(unsigned int neurGrpID, int status){
 
 /*! Called when the user double clicks on a neuron */
 void NetworkDisplay::setSelectedNeuronID(unsigned int id, bool ctrlBtnDown){
-	//Connection mode is disabled and id is valid
+	bool refreshDisplay = false;
+
+	/* Connection mode is disabled and id is valid.
+	   Switch connection mode on for a single neuron */
 	if( !(connectionMode & CONNECTION_MODE_ENABLED) && id != 0){
 		setConnectionModeFlag(CONNECTION_MODE_ENABLED);
 		singleNeuronID = id;
 		toNeuronID = 0;
+		refreshDisplay = true;
 	}
 
 	//Switch off connection mode if neuron id is invalid
@@ -402,19 +406,22 @@ void NetworkDisplay::setSelectedNeuronID(unsigned int id, bool ctrlBtnDown){
 		unsetConnectionModeFlag(SHOW_BETWEEN_CONNECTIONS);
 		singleNeuronID = 0;
 		toNeuronID = 0;
+		refreshDisplay = true;
 	}
 
 	//Connection mode is enabled for a single neuron
 	else if( (connectionMode & CONNECTION_MODE_ENABLED) && !(connectionMode & SHOW_BETWEEN_CONNECTIONS) ){
-		//If a different neuron has been double clicked and control button is down
+		//Enable between mode if a different neuron has been double clicked and control button is down
 		if(singleNeuronID != id && ctrlBtnDown){
 			toNeuronID = id;
 			setConnectionModeFlag(SHOW_BETWEEN_CONNECTIONS);
-			return;
+			refreshDisplay = true;
+			//return;
 		}
 		//Control button is not down - select a different neuron
 		else if(singleNeuronID != id && !ctrlBtnDown){
 			singleNeuronID = id;
+			refreshDisplay = true;
 		}
 	}
 
@@ -425,16 +432,21 @@ void NetworkDisplay::setSelectedNeuronID(unsigned int id, bool ctrlBtnDown){
 			unsetConnectionModeFlag(SHOW_BETWEEN_CONNECTIONS);
 			singleNeuronID = id;
 			toNeuronID = 0;
+			refreshDisplay = true;
 		}
 		//User has double clicked on a different between neuron
 		else if (id != toNeuronID){
 			toNeuronID = id;
+			refreshDisplay = true;
 		}
 	}
 
-	visibleConnectionsList.clear();
-	emit visibleConnectionsChanged();
-	emit networkDisplayChanged();
+	//Refresh display if something has changed
+	if(refreshDisplay){
+		visibleConnectionsList.clear();
+		emit visibleConnectionsChanged();
+		emit networkDisplayChanged();
+	}
 }
 
 

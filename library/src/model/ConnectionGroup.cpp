@@ -33,29 +33,29 @@ ConnectionGroup::~ConnectionGroup(){
 /*-------             PUBLIC METHODS               -------*/
 /*--------------------------------------------------------*/
 
-/*! Adds a connection to the group */
-Connection* ConnectionGroup::addConnection(Connection* newConn){
-//	//Check that we do not already have this connection
-//	if(connectionMap->contains(newConn->getID()))
-//		throw SpikeStreamException("Connection with ID " + QString::number(newConn->getID()) + " already exists in this group.");
+/*! Adds a connection to the group and returns the connection ID*/
+unsigned ConnectionGroup::addConnection(unsigned conID, Connection* newConn){
+	//Check that we do not already have this connection
+	if(connectionMap->contains(conID))
+		throw SpikeStreamException("Connection with ID " + QString::number(conID) + " already exists in this group.");
 
-//	//Store connection
-//	(*connectionMap)[newConn->getID()] = newConn;
+	//Store connection
+	(*connectionMap)[conID] = newConn;
 
 	//Return pointer to connection
-	return newConn;
+	return conID;
 }
 
 
 /*! Creates a new connection and adds it to the group.*/
-Connection* ConnectionGroup::addConnection(unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight){
+unsigned ConnectionGroup::addConnection(unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight){
 	unsigned tmpID = getTemporaryID();
 	if(connectionMap->contains(tmpID))
 		throw SpikeStreamException("Automatically generated temporary connection ID clashes with one in the network. New ID=" + QString::number(tmpID));
-	Connection* tmpCon = new Connection(tmpID, fromNeuronID, toNeuronID, delay, weight);
+	Connection* tmpCon = new Connection(fromNeuronID, toNeuronID, delay, weight);
 
 	//Store connection
-	return addConnection(tmpCon);
+	return addConnection(tmpID, tmpCon);
 }
 
 

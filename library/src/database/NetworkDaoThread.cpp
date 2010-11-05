@@ -379,7 +379,6 @@ void NetworkDaoThread::addConnectionGroups(){
 
 				//Set connection ID in connection groups
 				for(int i=0; i<tmpConList.size(); ++i){
-					tmpConList.at(i)->setID(lastInsertID + i);
 					(*newConMap)[lastInsertID + i] = tmpConList.at(i);
 				}
 
@@ -417,7 +416,6 @@ void NetworkDaoThread::addConnectionGroups(){
 					throw SpikeStreamException("Database generated connection ID is out of range: " + QString::number(lastInsertID) + ". It must be less than or equal to " + QString::number(LAST_CONNECTION_ID));
 				if(lastInsertID < START_CONNECTION_ID)
 					throw SpikeStreamException("Insert ID for Connection is invalid.");
-				(*iter)->setID(lastInsertID);
 				(*newConMap)[lastInsertID] = *iter;
 
 				//Count number of connections that have been added
@@ -663,13 +661,12 @@ void NetworkDaoThread::loadConnections(){
 		executeQuery(query);
 		while ( query.next() ) {
 			Connection* tmpConn = new Connection(
-					query.value(0).toUInt(),//ConnectionID
 					query.value(1).toUInt(),//FromNeuronID
 					query.value(2).toUInt(),//ToNeuronID
 					query.value(3).toString().toFloat(),//Delay
 					query.value(4).toString().toFloat()//Weight
 			);
-			(*iter)->addConnection(tmpConn);
+			(*iter)->addConnection(query.value(0).toUInt(), tmpConn);
 
 			//Track progress
 			++numberOfCompletedSteps;

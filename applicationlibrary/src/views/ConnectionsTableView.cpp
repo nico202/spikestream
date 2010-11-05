@@ -33,12 +33,11 @@ ConnectionsTableView::~ConnectionsTableView(){
 void ConnectionsTableView::resizeHeaders(){
 	QHeaderView* hHeader = horizontalHeader();
 	hHeader->setMinimumSectionSize(10);
-	hHeader->resizeSection(hHeader->logicalIndex(0), 50);//ID
-	hHeader->resizeSection(hHeader->logicalIndex(1), 50);//From ID
-	hHeader->resizeSection(hHeader->logicalIndex(2), 50);//To ID
-	hHeader->resizeSection(hHeader->logicalIndex(3), 50);//Delay
-	hHeader->resizeSection(hHeader->logicalIndex(4), 50);//Weight
-	hHeader->resizeSection(hHeader->logicalIndex(5), 100);//Temporary weight
+	hHeader->resizeSection(hHeader->logicalIndex(0), 50);//From ID
+	hHeader->resizeSection(hHeader->logicalIndex(1), 50);//To ID
+	hHeader->resizeSection(hHeader->logicalIndex(2), 50);//Delay
+	hHeader->resizeSection(hHeader->logicalIndex(3), 50);//Weight
+	hHeader->resizeSection(hHeader->logicalIndex(4), 100);//Temporary weight
 	hHeader->setDefaultAlignment(Qt::AlignLeft);
 }
 

@@ -16,36 +16,18 @@ Connection::Connection (unsigned int fromNeuronID, unsigned int toNeuronID, floa
 	if(weight < WEIGHT_MIN)
 		throw SpikeStreamException("Weight out of range: " + QString::number(weight) + "; minimum possible weight value: " + QString::number(WEIGHT_MIN));
 
-    id = 0;
-    this->fromNeuronID = fromNeuronID;
-    this->toNeuronID = toNeuronID;
+	this->fromNeuronID = fromNeuronID;
+	this->toNeuronID = toNeuronID;
 	this->delay = (unsigned short) rint(delay* DELAY_FACTOR);
 	this->weight = (short) rint(weight * WEIGHT_FACTOR);
 	this->tempWeight = this->weight;
-}
 
-
-/*! Constructor */
-Connection::Connection (unsigned int id, unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight){
-	if(delay > DELAY_MAX)
-		throw SpikeStreamException("Delay out of range. Current delay: " + QString::number(delay) + "; maximum possible delay value: " + QString::number(DELAY_MAX));
-	if(weight > WEIGHT_MAX)
-		throw SpikeStreamException("Weight out of range. Current weight: " + QString::number(weight) + "; maximum possible weight value: " + QString::number(WEIGHT_MAX));
-	if(weight < WEIGHT_MIN)
-		throw SpikeStreamException("Weight out of range. Current weight: " + QString::number(weight) + "; minimum possible weight value: " + QString::number(WEIGHT_MIN));
-
-	this->id = id;
-    this->fromNeuronID = fromNeuronID;
-    this->toNeuronID = toNeuronID;
-	this->delay = (unsigned short)rint(delay * DELAY_FACTOR);
-	this->weight = (short) rint(weight * WEIGHT_FACTOR);
-	this->tempWeight = this->weight;
+//	cout<<"SIZE OF CONNECTION: "<<sizeof(*this)<<endl;
 }
 
 
 /*! Copy constructor */
 Connection::Connection(const Connection& conn){
-    this->id = conn.id;
     this->fromNeuronID = conn.fromNeuronID;
     this->toNeuronID = conn.toNeuronID;
     this->delay = conn.delay;
@@ -64,7 +46,6 @@ Connection& Connection::operator=(const Connection& rhs){
     if(this == &rhs)
 	return *this;
 
-    this->id = rhs.id;
     this->fromNeuronID = rhs.fromNeuronID;
     this->toNeuronID = rhs.toNeuronID;
     this->delay = rhs.delay;
@@ -77,7 +58,7 @@ Connection& Connection::operator=(const Connection& rhs){
 
 /*! Prints out information about the connection. */
 void Connection::print(){
-   cout<<"Connection: id="<<id<<"; fromNeuronID="<<fromNeuronID;
+   cout<<"Connection: fromNeuronID="<<fromNeuronID;
    cout<<" toNeuronID="<<toNeuronID<<"; delay="<<delay<<"; weight="<<weight<<"; tempWeight="<<tempWeight<<endl;
 }
 
