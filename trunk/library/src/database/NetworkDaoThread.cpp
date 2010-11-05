@@ -350,19 +350,19 @@ void NetworkDaoThread::addConnectionGroups(){
 
 		//Add connections to database
 		int conCntr = 0, offset = 0, conAddedCntr = 0;
-		QHash<unsigned, Connection*>* newConMap = new QHash<unsigned, Connection*>();
+//		QHash<unsigned, Connection*>* newConMap = new QHash<unsigned, Connection*>();
 		QList<Connection*> tmpConList;
-		QHash<unsigned, Connection*>::const_iterator endConGrp = connectionGroup->end();
-		for(QHash<unsigned, Connection*>::const_iterator iter = connectionGroup->begin(); iter != endConGrp; ++iter){
+		ConnectionIterator endConGrp = connectionGroup->end();
+		for(ConnectionIterator iter = connectionGroup->begin(); iter != endConGrp; ++iter){
 			offset = 5 * (conCntr % numConBuffers);
 
 			//Bind values to query
-			tmpConList.append(iter.value());
+			tmpConList.append(&(*iter));
 			query.bindValue(0 + offset, connectionGroup->getID());
-			query.bindValue(1 + offset, iter.value()->getFromNeuronID());
-			query.bindValue(2 + offset, iter.value()->getToNeuronID());
-			query.bindValue(3 + offset, iter.value()->getDelay());
-			query.bindValue(4 + offset, iter.value()->getWeight());
+			query.bindValue(1 + offset, iter->getFromNeuronID());
+			query.bindValue(2 + offset, iter->getToNeuronID());
+			query.bindValue(3 + offset, iter->getDelay());
+			query.bindValue(4 + offset, iter->getWeight());
 
 			//Execute query
 			if(conCntr % numConBuffers == numConBuffers-1){
@@ -379,7 +379,8 @@ void NetworkDaoThread::addConnectionGroups(){
 
 				//Set connection ID in connection groups
 				for(int i=0; i<tmpConList.size(); ++i){
-					(*newConMap)[lastInsertID + i] = tmpConList.at(i);
+					tmpConList.at(i)->setID(lastInsertID + i);
+					//(*newConMap)[] = tmpConList.at(i);
 				}
 
 				//Count number of connections that have been added
@@ -416,7 +417,8 @@ void NetworkDaoThread::addConnectionGroups(){
 					throw SpikeStreamException("Database generated connection ID is out of range: " + QString::number(lastInsertID) + ". It must be less than or equal to " + QString::number(LAST_CONNECTION_ID));
 				if(lastInsertID < START_CONNECTION_ID)
 					throw SpikeStreamException("Insert ID for Connection is invalid.");
-				(*newConMap)[lastInsertID] = *iter;
+				//(*newConMap)[lastInsertID] = *iter;
+				(*iter)->setID(lastInsertID);
 
 				//Count number of connections that have been added
 				++conAddedCntr;
@@ -433,7 +435,7 @@ void NetworkDaoThread::addConnectionGroups(){
 
 
 		//Add the new map to the neuron group. This should also clean up the old map
-		connectionGroup->setConnectionMap(newConMap);
+		//connectionGroup->setConnectionMap(newConMap);
     }
 }
 
@@ -660,13 +662,13 @@ void NetworkDaoThread::loadConnections(){
 		QSqlQuery query = getQuery("SELECT ConnectionID, FromNeuronID, ToNeuronID, Delay, Weight FROM Connections WHERE ConnectionGroupID = " + QString::number(tmpConGrpID));
 		executeQuery(query);
 		while ( query.next() ) {
-			Connection* tmpConn = new Connection(
+			(*iter)->addConnection(
+					query.value(0).toUInt(),//ID
 					query.value(1).toUInt(),//FromNeuronID
 					query.value(2).toUInt(),//ToNeuronID
 					query.value(3).toString().toFloat(),//Delay
 					query.value(4).toString().toFloat()//Weight
 			);
-			(*iter)->addConnection(query.value(0).toUInt(), tmpConn);
 
 			//Track progress
 			++numberOfCompletedSteps;
@@ -802,25 +804,25 @@ void NetworkDaoThread::saveNetwork(){
 		//Update FROM neuron group ID and FROM neuron IDs
 		if(oldIDNeurGrpMap.contains(tmpConGrp->getFromNeuronGroupID())){
 			tmpConGrp->setFromNeuronGroupID(oldIDNeurGrpMap[tmpConGrp->getFromNeuronGroupID()]->getID());
-			QHash<unsigned, Connection*>::const_iterator endConGrp = tmpConGrp->end();
-			for(QHash<unsigned, Connection*>::const_iterator conIter = tmpConGrp->begin(); conIter!= endConGrp; ++conIter){
+			ConnectionIterator endConGrp = tmpConGrp->end();
+			for(ConnectionIterator conIter = tmpConGrp->begin(); conIter!= endConGrp; ++conIter){
 				//Check FROM neuron ID exists
-				if(oldIDNeurMap.contains(conIter.value()->getFromNeuronID()))
-					conIter.value()->setFromNeuronID(oldIDNeurMap[conIter.value()->getFromNeuronID()]->getID());
+				if(oldIDNeurMap.contains(conIter->getFromNeuronID()))
+					conIter->setFromNeuronID(oldIDNeurMap[conIter->getFromNeuronID()]->getID());
 				else
-					throw SpikeStreamException("FROM neuron ID missing from old ID neuron map: " + QString::number(conIter.value()->getFromNeuronID()));
+					throw SpikeStreamException("FROM neuron ID missing from old ID neuron map: " + QString::number(conIter->getFromNeuronID()));
 			}
 		}
 		//Update TO neuron group ID and TO neuron IDs
 		if(oldIDNeurGrpMap.contains(tmpConGrp->getToNeuronGroupID())){
 			tmpConGrp->setToNeuronGroupID(oldIDNeurGrpMap[tmpConGrp->getToNeuronGroupID()]->getID());
-			QHash<unsigned, Connection*>::const_iterator endConGrp = tmpConGrp->end();
-			for(QHash<unsigned, Connection*>::const_iterator conIter = tmpConGrp->begin(); conIter!= endConGrp; ++conIter){
+			ConnectionIterator endConGrp = tmpConGrp->end();
+			for(ConnectionIterator conIter = tmpConGrp->begin(); conIter!= endConGrp; ++conIter){
 				//Check TO neuron ID exists
-				if(oldIDNeurMap.contains(conIter.value()->getToNeuronID()))
-					conIter.value()->setToNeuronID(oldIDNeurMap[conIter.value()->getToNeuronID()]->getID());
+				if(oldIDNeurMap.contains(conIter->getToNeuronID()))
+					conIter->setToNeuronID(oldIDNeurMap[conIter->getToNeuronID()]->getID());
 				else
-					throw SpikeStreamException("TO neuron ID missing from old ID neuron map: " + QString::number(conIter.value()->getToNeuronID()));
+					throw SpikeStreamException("TO neuron ID missing from old ID neuron map: " + QString::number(conIter->getToNeuronID()));
 			}
 		}
 	}

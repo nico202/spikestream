@@ -4,6 +4,7 @@
 #include "TestArchiveDao.h"
 #include "TestConnection.h"
 #include "TestDatabaseDao.h"
+#include "TestMemory.h"
 #include "TestRunner.h"
 #include "TestNetwork.h"
 #include "TestNeuronGroup.h"
@@ -25,9 +26,12 @@ void TestRunner::runTests(){
 	char* argsChar[0];
 	QCoreApplication coreApplication(argsSize, argsChar);
 
-	TestConnection testConnection;
+	TestMemory testMemory;
+	QTest::qExec(&testMemory);
+
+/*	TestConnection testConnection;
 	QTest::qExec(&testConnection);
-/*
+
 	TestDatabaseDao testDatabaseDao;
 	QTest::qExec(&testDatabaseDao);
 

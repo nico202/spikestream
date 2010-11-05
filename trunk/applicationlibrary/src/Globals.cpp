@@ -8,6 +8,8 @@ using namespace spikestream;
 #include <iostream>
 using namespace std;
 
+//Define controlling output of memory information
+#define MEMORY_DEBUG
 
 //Declare static variables
 QHash<QString, unsigned int> Globals::analysisMap;
@@ -83,6 +85,10 @@ bool Globals::archiveLoaded(){
 /*! Cleans up all classes stored in Globals.
 	Everything stored in Globals is deleted by Globals. */
 void Globals::cleanUp(){
+	#ifdef MEMORY_DEBUG
+		cout<<"Cleaning up Globals"<<endl;
+	#endif//MEMORY_DEBUG
+
 	if(archive != NULL){
 		delete archive;
 		archive = NULL;

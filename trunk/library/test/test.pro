@@ -42,7 +42,8 @@ HEADERS += src/TestRunner.h \
 			src/TestArchiveDao.h \
 			src/TestAnalysisDao.h \
 			src/TestUtil.h \
-			src/TestWeightlessNeuron.h
+			src/TestWeightlessNeuron.h \
+			src/TestMemory.h
 
 SOURCES += src/Main.cpp \
 			src/TestRunner.cpp \
@@ -57,6 +58,7 @@ SOURCES += src/Main.cpp \
 			src/TestAnalysisDao.cpp \
 			src/TestUtil.cpp \
 			src/TestWeightlessNeuron.cpp \
+			src/TestMemory.cpp
 
 
 
