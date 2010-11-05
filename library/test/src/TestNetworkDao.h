@@ -22,7 +22,6 @@ class TestNetworkDao : public TestDao {
 		void testGetConnectionCount1();
 		void testGetConnectionCount2();
 		void testGetConnections1();
-		void testGetConnections2();
 		void testGetDefaultNeuronParameters();
 		void testGetDefaultSynapseParameters();
 		void testGetFromConnections();

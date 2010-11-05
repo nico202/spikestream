@@ -9,7 +9,7 @@ using namespace spikestream;
 using namespace std;
 
 //Outputs memory debugging information
-#define DEBUG_MEMORY
+#define MEMORY_DEBUG
 
 /*! Constructor that creates a new network and adds it to the database */
 Network::Network(const QString& name, const QString& description, const DBInfo& networkDBInfo, const DBInfo& archiveDBInfo){
@@ -64,6 +64,10 @@ Network::Network(const NetworkInfo& networkInfo, const DBInfo& networkDBInfo, co
 
 /*! Destructor */
 Network::~Network(){
+	#ifdef MEMORY_DEBUG
+		cout<<"Deleting network"<<endl;
+	#endif//MEMORY_DEBUG
+
     if(neuronNetworkDaoThread != NULL){
 		neuronNetworkDaoThread->stop();
 		neuronNetworkDaoThread->wait();
@@ -91,7 +95,7 @@ void Network::addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList){
 	if(!prototypeMode && hasArchives())//Check if network is editable or not
 		throw SpikeStreamException("Cannot add connection groups to a locked network.");
 
-	//Set default parameters
+	//Set default parameters and compress memory
 	NetworkDao netDao(networkDBInfo);
 	foreach(ConnectionGroup* conGrp, connectionGroupList){
 		if(!conGrp->parametersSet()){
@@ -107,10 +111,10 @@ void Network::addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList){
 			conGrp->setID(tmpID);//Set ID in connection group
 			connGrpMap[tmpID] = conGrp;//Add connection group to network
 			newConnectionGroupMap[tmpID] = conGrp;//Store connection group in map for adding to database later
-			#ifdef DEBUG_MEMORY
+			#ifdef MEMORY_DEBUG
 				cout<<"Network size: "<<sizeof(*this)<<"; adding connection group with memory size: "<<sizeof(*conGrp);
-				cout<<"; size of 1 connection: "<<sizeof(*(*conGrp->begin()))<<endl;
-			#endif//DEBUG_MEMORY
+				cout<<"; size of 1 connection: "<<sizeof(*conGrp->begin())<<endl;
+			#endif//MEMORY_DEBUG
 		}
 	}
 	//In normal mode, connection groups are saved immediately to the database

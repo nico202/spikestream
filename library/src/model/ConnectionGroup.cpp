@@ -8,23 +8,43 @@ using namespace spikestream;
 #include <iostream>
 using namespace std;
 
+//Outputs debugging information about memory
+#define MEMORY_DEBUG
+
 //Initialize static variables
 unsigned ConnectionGroup::connectionIDCounter = LAST_CONNECTION_ID + 1;
 
 
-/*! Constructor */
+/*! Empty constructor */
+ConnectionGroup::ConnectionGroup(){
+	#ifdef MEMORY_DEBUG
+		cout<<"New connection group (empty constructor) with size: "<<sizeof(*this)<<endl;
+	#endif//MEMORY_DEBUG
+	connectionVector = NULL;
+}
+
+
+/*! Standard constructor */
 ConnectionGroup::ConnectionGroup(const ConnectionGroupInfo& connGrpInfo){
     this->info = connGrpInfo;
-	connectionMap = new QHash<unsigned, Connection*>();
+	connectionVector = new vector<Connection>();
+
+	#ifdef MEMORY_DEBUG
+		cout<<"New connection group (standard constructor) with size: "<<sizeof(*this)<<endl;
+	#endif//MEMORY_DEBUG
 }
 
 
 /*! Destructor */
 ConnectionGroup::~ConnectionGroup(){
+	#ifdef MEMORY_DEBUG
+		cout<<"Connection group destructor size of class: "<<sizeof(*this)<<"; size of map: "<<sizeof(*connectionVector)<<"; number of connections: "<<connectionVector->size()<<endl;
+	#endif//MEMORY_DEBUG
+
 	//Deletes connection map and all its dynamically allocated objects
-	if(connectionMap != NULL){
+	if(connectionVector != NULL){
 		clearConnections();
-		delete connectionMap;
+		delete connectionVector;
 	}
 }
 
@@ -34,57 +54,40 @@ ConnectionGroup::~ConnectionGroup(){
 /*--------------------------------------------------------*/
 
 /*! Adds a connection to the group and returns the connection ID*/
-unsigned ConnectionGroup::addConnection(unsigned conID, Connection* newConn){
-	//Check that we do not already have this connection
-	if(connectionMap->contains(conID))
-		throw SpikeStreamException("Connection with ID " + QString::number(conID) + " already exists in this group.");
-
+unsigned ConnectionGroup::addConnection(unsigned id, unsigned fromNeuronID, unsigned toNeuronID, float delay, float weight){
 	//Store connection
-	(*connectionMap)[conID] = newConn;
+	connectionVector->push_back(Connection(id, fromNeuronID, toNeuronID, delay, weight));
 
-	//Return pointer to connection
-	return conID;
+	//Return ID of connection
+	return id;
 }
 
 
 /*! Creates a new connection and adds it to the group.*/
 unsigned ConnectionGroup::addConnection(unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight){
 	unsigned tmpID = getTemporaryID();
-	if(connectionMap->contains(tmpID))
-		throw SpikeStreamException("Automatically generated temporary connection ID clashes with one in the network. New ID=" + QString::number(tmpID));
-	Connection* tmpCon = new Connection(fromNeuronID, toNeuronID, delay, weight);
 
 	//Store connection
-	return addConnection(tmpID, tmpCon);
+	connectionVector->push_back(Connection(tmpID, fromNeuronID, toNeuronID, delay, weight));
+	return tmpID;
 }
 
 
 /*! Returns iterator pointing to beginning of connection group */
-QHash<unsigned, Connection*>::const_iterator ConnectionGroup::begin(){
-	return connectionMap->begin();
+ConnectionIterator ConnectionGroup::begin(){
+	return connectionVector->begin();
 }
 
 
 /*! Returns iterator pointing to end of connection group */
-QHash<unsigned, Connection*>::const_iterator ConnectionGroup::end(){
-	return connectionMap->end();
-}
-
-
-/*! Returns list of connections.
-	Not an efficient way to access connections - use iterators instead.*/
-QList<Connection*> ConnectionGroup::getConnections(){
-	return connectionMap->values();
+ConnectionIterator ConnectionGroup::end(){
+	return connectionVector->end();
 }
 
 
 /*! Removes all connections from this group */
 void ConnectionGroup::clearConnections(){
-	QHash<unsigned, Connection*>::const_iterator endConnList = this->end();
-	for(QHash<unsigned, Connection*>::const_iterator iter = this->begin(); iter != endConnList; ++iter){
-		delete iter.value();
-    }
-	connectionMap->clear();
+	connectionVector->clear();
 }
 
 
@@ -113,10 +116,10 @@ bool ConnectionGroup::parametersSet(){
 
 /*! Replaces the connection map with a new neuron map, most likely to fix connection IDs.
 	Connections are not cleaned up because they might be included in the new map. */
-void ConnectionGroup::setConnectionMap(QHash<unsigned, Connection *> *newConnectionMap){
-	delete connectionMap;
-	this->connectionMap = newConnectionMap;
-}
+//void ConnectionGroup::setConnectionMap(QHash<unsigned, Connection *> *newConnectionMap){
+//	delete connectionMap;
+//	this->connectionMap = newConnectionMap;
+//}
 
 
 /*! Sets the description of the connection group */
@@ -156,19 +159,19 @@ void ConnectionGroup::setToNeuronGroupID(unsigned id){
 
 
 /*! Sets the weight of a specific connection */
-void ConnectionGroup::setTempWeight(unsigned connectionID, float tempWeight){
-	if(!connectionMap->contains(connectionID))
-		throw SpikeStreamException("Failed to set temp weight. Connection with ID " + QString::number(connectionID) + " does not exist in this connection group.");
-	(*connectionMap)[connectionID]->setTempWeight(tempWeight);
-}
+//void ConnectionGroup::setTempWeight(unsigned connectionID, float tempWeight){
+//	if(!connectionMap->contains(connectionID))
+//		throw SpikeStreamException("Failed to set temp weight. Connection with ID " + QString::number(connectionID) + " does not exist in this connection group.");
+//	(*connectionMap)[connectionID]->setTempWeight(tempWeight);
+//}
 
 
-/*! Sets the weight of a specific connection */
-void ConnectionGroup::setWeight(unsigned connectionID, float weight){
-	if(!connectionMap->contains(connectionID))
-		throw SpikeStreamException("Failed to set weight. Connection with ID " + QString::number(connectionID) + " does not exist in this connection group.");
-	(*connectionMap)[connectionID]->setWeight(weight);
-}
+///*! Sets the weight of a specific connection */
+//void ConnectionGroup::setWeight(unsigned connectionID, float weight){
+//	if(!connectionMap->contains(connectionID))
+//		throw SpikeStreamException("Failed to set weight. Connection with ID " + QString::number(connectionID) + " does not exist in this connection group.");
+//	(*connectionMap)[connectionID]->setWeight(weight);
+//}
 
 
 /*--------------------------------------------------------*/

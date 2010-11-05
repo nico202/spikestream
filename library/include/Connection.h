@@ -22,16 +22,20 @@ namespace spikestream {
 		in the Connections table of the SpikeStreamNetwork database. */
     class Connection{
 		public:
-			Connection (unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight);
+			Connection();
+			Connection (unsigned fromNeuronID, unsigned toNeuronID, float delay, float weight);
+			Connection (unsigned id, unsigned fromNeuronID, unsigned toNeuronID, float delay, float weight);
 			Connection(const Connection& conn);
 			Connection& operator=(const Connection& rhs);
 			void print();
 
+			unsigned getID() { return id; }
 			float getDelay();
 			unsigned getFromNeuronID(){ return fromNeuronID; }
 			unsigned getToNeuronID(){ return toNeuronID; }
 			float getTempWeight();
 			float getWeight();
+			void setID(unsigned id) { this->id = id; }
 			void setFromNeuronID(unsigned fromNeurID) { this->fromNeuronID = fromNeurID; }
 			void setToNeuronID(unsigned toNeurID) { this->toNeuronID = toNeurID; }
 			void setTempWeight(float newTempWeight);
@@ -40,6 +44,9 @@ namespace spikestream {
 
 		private:
 			//=======================  VARIABLES  ========================
+			/*! ID of the connection from the Connections database. */
+			unsigned id;
+
 			/*! Connection is from neuron with this ID. */
 			unsigned int fromNeuronID;
 
