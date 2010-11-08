@@ -107,7 +107,6 @@ void AbstractConnectionWidget::addButtonClicked(){
 		progressDialog = new QProgressDialog("Adding connection group", "Cancel", 0, 100, this, Qt::CustomizeWindowHint);
 		progressDialog->setWindowModality(Qt::WindowModal);
 		progressDialog->setMinimumDuration(2000);
-		progressDialog->setCancelButton(0);//Too complicated to implement cancel sensibly
 		progressDialog->show();
 		updatingProgress = false;
 	}
@@ -140,7 +139,10 @@ void AbstractConnectionWidget::updateProgress(int stepsCompleted, int totalSteps
 
 	//Check for cancellation
 	if(progressDialog->wasCanceled()){
-		qCritical()<<"This plugin does not currently support cancellation of adding connections.";
+		connectionBuilder->stop();
+		progressDialog->setLabelText("Cleaning up.");
+		progressDialog->setCancelButton(0);//Should not be able to cancel the clean up
+		progressDialog->show();
 	}
 	//Update progress
 	else if(stepsCompleted < totalSteps){

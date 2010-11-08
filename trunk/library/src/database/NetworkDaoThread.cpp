@@ -289,7 +289,7 @@ void NetworkDaoThread::stop(){
     FIXME: MAKE THIS ALL ONE TRANSACTION */
 void NetworkDaoThread::addConnectionGroups(){
     //Work through the list of connection groups
-    for(QList<ConnectionGroup*>::iterator iter = connectionGroupList.begin(); iter != connectionGroupList.end(); ++iter){
+	for(QList<ConnectionGroup*>::iterator iter = connectionGroupList.begin(); iter != connectionGroupList.end() && !stopThread; ++iter){
 		//Get a pointer to the connection group
 		ConnectionGroup* connectionGroup = *iter;
 
@@ -332,10 +332,6 @@ void NetworkDaoThread::addConnectionGroups(){
 		QHash<QString, double> tmpParamMap = connectionGroup->getParameters();
 		setSynapseParameters(connGrpInfo, tmpParamMap);
 
-		//Check for cancellation of task
-		if(stopThread)
-			return;
-
 		#ifdef TIME_PERFORMANCE
 			PerformanceTimer timer;
 		#endif//TIME_PERFORMANCE
@@ -350,10 +346,9 @@ void NetworkDaoThread::addConnectionGroups(){
 
 		//Add connections to database
 		int conCntr = 0, offset = 0, conAddedCntr = 0;
-//		QHash<unsigned, Connection*>* newConMap = new QHash<unsigned, Connection*>();
 		QList<Connection*> tmpConList;
 		ConnectionIterator endConGrp = connectionGroup->end();
-		for(ConnectionIterator iter = connectionGroup->begin(); iter != endConGrp; ++iter){
+		for(ConnectionIterator iter = connectionGroup->begin(); iter != endConGrp && !stopThread; ++iter){
 			offset = 5 * (conCntr % numConBuffers);
 
 			//Bind values to query
@@ -392,13 +387,10 @@ void NetworkDaoThread::addConnectionGroups(){
 
 			//Keep track of the number of connections
 			++conCntr;
-
-			if(stopThread)
-				return;
 		}
 
 		//Add remaining connections individually
-		if(!tmpConList.isEmpty()){
+		if(!tmpConList.isEmpty() && !stopThread){
 			query = getQuery();
 			query.prepare("INSERT INTO Connections ( ConnectionGroupID, FromNeuronID, ToNeuronID, Delay, Weight) VALUES (?, ?, ?, ?, ?)");
 			for(QList<Connection*>::iterator iter = tmpConList.begin(); iter != tmpConList.end(); ++iter){
@@ -426,17 +418,21 @@ void NetworkDaoThread::addConnectionGroups(){
 		}
 
 		//Check that we have added all the connections
-		if(connectionGroup->size() != conAddedCntr)
+		if(!stopThread && (connectionGroup->size() != conAddedCntr) )
 			throw SpikeStreamException("Number of connections added to database: " + QString::number(conAddedCntr) + " does not match size of connection group: " + QString::number(connectionGroup->size()));
 
 		#ifdef TIME_PERFORMANCE
 			timer.printTime("Number of buffers: " + QString::number(numConBuffers) + ". Number of connections remaining: " + QString::number(tmpConList.size()) + ". Adding " + QString::number(conCntr) + " connections");
 		#endif//TIME_PERFORMANCE
-
-
-		//Add the new map to the neuron group. This should also clean up the old map
-		//connectionGroup->setConnectionMap(newConMap);
     }
+
+	//Clean up connection groups if task was cancelled.
+	if(stopThread){
+		connectionGroupIDList.clear();
+		foreach(ConnectionGroup* conGrp, connectionGroupList)
+			connectionGroupIDList.append(conGrp->getID());
+		deleteConnectionGroups();
+	}
 }
 
 
@@ -449,7 +445,7 @@ void NetworkDaoThread::addNeuronGroups(){
 		return;
     }
     //Work through the list of neuron groups
-	for(QList<NeuronGroup*>::iterator neurGrpIter = neuronGroupList.begin(); neurGrpIter != neuronGroupList.end(); ++neurGrpIter){
+	for(QList<NeuronGroup*>::iterator neurGrpIter = neuronGroupList.begin(); neurGrpIter != neuronGroupList.end() && !stopThread; ++neurGrpIter){
 		//User friendly pointer to group
 		NeuronGroup* neuronGroup = *neurGrpIter;
 
@@ -511,7 +507,7 @@ void NetworkDaoThread::addNeuronGroups(){
 		NeuronMap* newNeurMap = new NeuronMap();
 		QList<Neuron*> tmpNeurList;
 		NeuronIterator endNeurGrp = neuronGroup->end();
-		for(NeuronIterator neurIter = neuronGroup->begin(); neurIter != endNeurGrp; ++neurIter){
+		for(NeuronIterator neurIter = neuronGroup->begin(); neurIter != endNeurGrp && !stopThread; ++neurIter){
 			offset = 4 * (neurCntr % numNeurBuffers);
 
 			//Bind values to query
@@ -582,7 +578,7 @@ void NetworkDaoThread::addNeuronGroups(){
 		}
 
 		//Check that we have added all the neurons
-		if(neuronGroup->size() != neurAddedCntr)
+		if(!stopThread && (neuronGroup->size() != neurAddedCntr))
 			throw SpikeStreamException("Number of neurons added to database: " + QString::number(neurAddedCntr) + " does not match size of neuron group: " + QString::number(neuronGroup->size()));
 
 
@@ -597,6 +593,14 @@ void NetworkDaoThread::addNeuronGroups(){
 		//Add the new map to the neuron group. This should also clean up the old map
 		neuronGroup->setNeuronMap(newNeurMap);
     }
+
+	//Clean up neuron groups if task was cancelled.
+	if(stopThread){
+		neuronGroupIDList.clear();
+		foreach(NeuronGroup* neurGrp, neuronGroupList)
+			neuronGroupIDList.append(neurGrp->getID());
+		deleteNeuronGroups();
+	}
 }
 
 

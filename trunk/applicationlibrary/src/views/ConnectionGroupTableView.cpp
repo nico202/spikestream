@@ -12,9 +12,11 @@ using namespace spikestream;
 /*! Constructor */
 ConnectionGroupTableView::ConnectionGroupTableView(QWidget* parent, ConnectionGroupModel* model) : QTableView(parent) {
 	//Set up the view
+	this->horizontalHeader()->setClickable(true);
 	setShowGrid(false);
 	setSelectionMode(QAbstractItemView::NoSelection);
 	connect(this, SIGNAL(clicked(QModelIndex)), this, SLOT(tableClicked(QModelIndex)));
+	connect(this->horizontalHeader(), SIGNAL(sectionClicked(int)), this, SLOT(headerClicked(int)));
 	connect(this, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(tableDoubleClicked(QModelIndex)));
 
 	//Set the model for this view and show it
@@ -55,6 +57,13 @@ void ConnectionGroupTableView::resizeHeaders(){
 /*--------------------------------------------------------*/
 /*-------             PRIVATE SLOTS                -------*/
 /*--------------------------------------------------------*/
+
+/*! Called when the header of the table is clicked */
+void ConnectionGroupTableView::headerClicked(int column){
+	if(column == ConnectionGroupModel::SELECT_COL)
+		connectionGroupModel->selectAllOrNone();
+}
+
 
 /*! Called when the table is clicked and passes this information on to model. */
 void ConnectionGroupTableView::tableClicked(QModelIndex index){

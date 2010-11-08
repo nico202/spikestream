@@ -99,7 +99,7 @@ void NemoWrapper::loadNemo(){
 	//Build the Nemo network
 	NemoLoader* nemoLoader = new NemoLoader();
 	connect(nemoLoader, SIGNAL(progress(int, int)), this, SLOT(updateProgress(int, int)));
-	nemo_network_t nemoNet = nemoLoader->buildNemoNetwork(currentNetwork, &volatileConGrpMap, &stopThread);
+	nemo_network_t nemoNet = nemoLoader->buildNemoNetwork(currentNetwork, volatileConGrpMap, &stopThread);
 
 	//Clean up loader
 	delete nemoLoader;
@@ -521,12 +521,12 @@ void NemoWrapper::resetNemoWeights(){
 
 	//Work through all connection groups
 	Network* currentNetwork = Globals::getNetwork();
-	for(QHash<unsigned, QHash<synapse_id, unsigned> >::iterator volIter = volatileConGrpMap.begin(); volIter != volatileConGrpMap.end(); ++volIter){
-		ConnectionGroup* tmpConGrp = currentNetwork->getConnectionGroup(volIter.key());
-		QHash<unsigned, Connection*>::const_iterator endConList = tmpConGrp->end();
-		for(QHash<unsigned, Connection*>::const_iterator conIter = tmpConGrp->begin(); conIter != endConList; ++conIter){
+	for(QHash<unsigned, synapse_id*>::iterator conGrpIter = volatileConGrpMap.begin(); conGrpIter != volatileConGrpMap.end(); ++conGrpIter){
+		ConnectionGroup* tmpConGrp = currentNetwork->getConnectionGroup(conGrpIter.key());
+		ConnectionIterator endConGrp = tmpConGrp->end();
+		for(ConnectionIterator conIter = tmpConGrp->begin(); conIter != endConGrp; ++conIter){
 			//Copy current weights to temporary weights
-			conIter.value()->setTempWeight(conIter.value()->getWeight());
+			conIter->setTempWeight(conIter->getWeight());
 
 			//Check for cancellation
 			if(weightResetCancelled){
@@ -561,15 +561,17 @@ void NemoWrapper::saveNemoWeights(){
 
 	//Work through all connection groups
 	Network* currentNetwork = Globals::getNetwork();
-	for(QHash<unsigned, QHash<synapse_id, unsigned> >::iterator volIter = volatileConGrpMap.begin(); volIter != volatileConGrpMap.end(); ++volIter){
-		ConnectionGroup* tmpConGrp = currentNetwork->getConnectionGroup(volIter.key());
-		QHash<unsigned, Connection*>::const_iterator endConList = tmpConGrp->end();
-		for(QHash<unsigned, Connection*>::const_iterator conIter = tmpConGrp->begin(); conIter != endConList; ++conIter){
+	for(QHash<unsigned, synapse_id*>::iterator conGrpIter = volatileConGrpMap.begin(); conGrpIter != volatileConGrpMap.end(); ++conGrpIter){
+		ConnectionGroup* tmpConGrp = currentNetwork->getConnectionGroup(conGrpIter.key());
+
+		//Work through the connections
+		ConnectionIterator endConGrp = tmpConGrp->end();
+		for(ConnectionIterator conIter = tmpConGrp->begin(); conIter != endConGrp; ++conIter){
 			//Save in database
-			networkDao.setWeight(conIter.key(), conIter.value()->getTempWeight());
+			networkDao.setWeight(conIter->getID(), conIter->getTempWeight());
 
 			//Update weight field
-			conIter.value()->setWeight(conIter.value()->getTempWeight());
+			conIter->setWeight(conIter->getTempWeight());
 
 			//Check for cancellation
 			if(weightSaveCancelled){
@@ -822,6 +824,13 @@ void NemoWrapper::unloadNemo(){
 		unlock again may cause a crash */
 	mutex.tryLock();
 	mutex.unlock();
+
+	//Clean up dynamic arrays in volatile connection group map
+	for(QHash<unsigned, synapse_id*>::iterator conGrpIter = volatileConGrpMap.begin(); conGrpIter != volatileConGrpMap.end(); ++conGrpIter){
+		delete conGrpIter.value();
+	}
+	volatileConGrpMap.clear();
+
 	simulationLoaded = false;
 	archiveInfo.reset();
 }
@@ -835,24 +844,32 @@ void NemoWrapper::updateNetworkWeights(){
 	}
 
 	//Work through all of the volatile connection groups
-	for(QHash<unsigned, QHash<synapse_id, unsigned> >::iterator outerIter = volatileConGrpMap.begin(); outerIter != volatileConGrpMap.end(); ++outerIter){
-		//Get the volatile connection group
-		ConnectionGroup* tmpConGrp = Globals::getNetwork()->getConnectionGroup(outerIter.key());
+	for(QHash<unsigned, synapse_id*>::iterator conGrpIter = volatileConGrpMap.begin(); conGrpIter != volatileConGrpMap.end(); ++conGrpIter){
+		//Get the volatile connection group and matching array of nemo synapse IDs
+		ConnectionGroup* tmpConGrp = Globals::getNetwork()->getConnectionGroup(conGrpIter.key());
+		synapse_id* synapseIDArray = conGrpIter.value();
 
-		//Query the volatile connections in NeMo
-		synapse_id synapseIDArray[1];
+		//Work through connection group and query volatile connections
 		float* weightArray;//Will point to array of returned weights
-		QHash<synapse_id, unsigned>::iterator endInnerHashMap = outerIter.value().end();
-		for(QHash<synapse_id, unsigned>::iterator innerIter = outerIter.value().begin(); innerIter != endInnerHashMap; ++innerIter){
-			synapseIDArray[0] = innerIter.key();
+		unsigned conCntr = 0;
+		ConnectionIterator conGrpEnd = tmpConGrp->end();
+		for(ConnectionIterator conIter = tmpConGrp->begin(); conIter != conGrpEnd; ++conIter){
 			#ifdef DEBUG_WEIGHTS
-				qDebug()<<"About to query weights: nemo synapseID="<<synapseIDArray[0]<<" spikestream synapse id="<<innerIter.value();
+				qDebug()<<"About to query weights: nemo synapseID="<<synapseIDArray[0]<<" spikestream synapse id="<<conIter.value();
 			#endif//DEBUG_WEIGHTS
-			checkNemoOutput( nemo_get_weights(nemoSimulation, synapseIDArray, 1, &weightArray), "Error getting weights." );
+
+			//Query weight
+			checkNemoOutput( nemo_get_weights(nemoSimulation, &synapseIDArray[conCntr], 1, &weightArray), "Error getting weights." );
+
+			//Update weight in connection
+			conIter->setTempWeight(weightArray[0]);
+
+			//Increase counter for accessing synapse id array
+			++conCntr;
+
 			#ifdef DEBUG_WEIGHTS
 				qDebug()<<"Weight query complete: weight="<<weightArray[0];
 			#endif//DEBUG_WEIGHTS
-			tmpConGrp->setTempWeight(innerIter.value(), weightArray[0]);
 		}
 	}
 }

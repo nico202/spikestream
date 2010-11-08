@@ -69,6 +69,8 @@ namespace spikestream {
 				Key is the neuron type ID. */
 			QHash<unsigned int, QLineEdit*> neuronTypeEditMap;
 
+			/*! Flag to prevent calls to progress dialog while it is redrawing. */
+			bool updatingProgress;
 
 			//=====================  METHODS  =======================
 			void checkInput(QLineEdit* inputEdit, const QString& errorMessage);

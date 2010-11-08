@@ -52,6 +52,8 @@ QVariant ConnectionsModel::data(const QModelIndex & index, int role) const{
 		QList<Connection*>& tmpConList = Globals::getNetworkDisplay()->getVisibleConnectionsList();
 		Connection* tmpConnection = tmpConList[index.row()];
 
+		if(index.column() == idCol)
+			return tmpConnection->getID();
 		if(index.column() == fromIDCol)
 			return tmpConnection->getFromNeuronID();
 		if(index.column() == toIDCol)
@@ -76,6 +78,8 @@ QVariant ConnectionsModel::headerData(int section, Qt::Orientation orientation, 
 		return QVariant();
 
     if (orientation == Qt::Horizontal){
+		if(section == idCol)
+			return "ID";
 		if(section == fromIDCol)
 			return "From";
 		if(section == toIDCol)

@@ -21,6 +21,7 @@ namespace spikestream {
 			void resizeHeaders();
 
 		private slots:
+			void headerClicked(int column);
 			void tableClicked(QModelIndex index);
 			void tableDoubleClicked(QModelIndex index);
 

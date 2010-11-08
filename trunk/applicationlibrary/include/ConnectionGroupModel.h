@@ -28,6 +28,7 @@ namespace spikestream {
 			QHash<QString, double> getParameters(int row);
 			void reload();
 			int rowCount(const QModelIndex& parent = QModelIndex()) const;
+			void selectAllOrNone();
 			bool setData(const QModelIndex& index, const QVariant& value, int role=Qt::EditRole);
 
 			friend class ConnectionGroupTableView;

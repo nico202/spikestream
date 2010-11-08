@@ -134,52 +134,52 @@ void TononiNetworkBuilder::addBalduzziTononiFigure5(const QString& networkName, 
 
     //Add weightless connections
     //1 connection to 1
-	networkDao->addWeightlessConnection(con21, 0);
+	networkDao->addWeightlessConnection(connGrp[con21].getID(), 0);
 
     //1 connection to 2
-	networkDao->addWeightlessConnection(con32, 0);
+	networkDao->addWeightlessConnection(connGrp[con32].getID(), 0);
 
     //3 connections to 3
-	networkDao->addWeightlessConnection(con43, 0);
-	networkDao->addWeightlessConnection(con53, 1);
-	networkDao->addWeightlessConnection(con63, 2);
+	networkDao->addWeightlessConnection(connGrp[con43].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[con53].getID(), 1);
+	networkDao->addWeightlessConnection(connGrp[con63].getID(), 2);
 
     //3 connections to 4
-	networkDao->addWeightlessConnection(con34, 0);
-	networkDao->addWeightlessConnection(con54, 1);
-	networkDao->addWeightlessConnection(con64, 2);
+	networkDao->addWeightlessConnection(connGrp[con34].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[con54].getID(), 1);
+	networkDao->addWeightlessConnection(connGrp[con64].getID(), 2);
 
     //3 connection to 5
-	networkDao->addWeightlessConnection(con35, 0);
-	networkDao->addWeightlessConnection(con45, 1);
-	networkDao->addWeightlessConnection(con65, 2);
+	networkDao->addWeightlessConnection(connGrp[con35].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[con45].getID(), 1);
+	networkDao->addWeightlessConnection(connGrp[con65].getID(), 2);
 
     //6 connections to 6
-	networkDao->addWeightlessConnection(con36, 0);
-	networkDao->addWeightlessConnection(con46, 1);
-	networkDao->addWeightlessConnection(con56, 2);
-	networkDao->addWeightlessConnection(con76, 3);
-	networkDao->addWeightlessConnection(con86, 4);
-	networkDao->addWeightlessConnection(con106, 5);
+	networkDao->addWeightlessConnection(connGrp[con36].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[con46].getID(), 1);
+	networkDao->addWeightlessConnection(connGrp[con56].getID(), 2);
+	networkDao->addWeightlessConnection(connGrp[con76].getID(), 3);
+	networkDao->addWeightlessConnection(connGrp[con86].getID(), 4);
+	networkDao->addWeightlessConnection(connGrp[con106].getID(), 5);
 
     //4 connections to 7
-	networkDao->addWeightlessConnection(con67, 0);
-	networkDao->addWeightlessConnection(con87, 1);
-	networkDao->addWeightlessConnection(con97, 2);
-	networkDao->addWeightlessConnection(con107, 3);
+	networkDao->addWeightlessConnection(connGrp[con67].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[con87].getID(), 1);
+	networkDao->addWeightlessConnection(connGrp[con97].getID(), 2);
+	networkDao->addWeightlessConnection(connGrp[con107].getID(), 3);
 
     //3 connections to 8
-	networkDao->addWeightlessConnection(con68, 0);
-	networkDao->addWeightlessConnection(con78, 1);
-	networkDao->addWeightlessConnection(con108, 2);
+	networkDao->addWeightlessConnection(connGrp[con68].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[con78].getID(), 1);
+	networkDao->addWeightlessConnection(connGrp[con108].getID(), 2);
 
     //1 connection to 9
-	networkDao->addWeightlessConnection(con119, 0);
+	networkDao->addWeightlessConnection(connGrp[con119].getID(), 0);
 
     //3 connections to 10
-	networkDao->addWeightlessConnection(con610, 0);
-	networkDao->addWeightlessConnection(con710, 1);
-	networkDao->addWeightlessConnection(con810, 2);
+	networkDao->addWeightlessConnection(connGrp[con610].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[con710].getID(), 1);
+	networkDao->addWeightlessConnection(connGrp[con810].getID(), 2);
 
     //No connections to 11
 
@@ -251,25 +251,25 @@ void TononiNetworkBuilder::addBalduzziTononiFigure6(const QString& networkName, 
 
     //Add weightless connections
     //2 connections to 1
-	networkDao->addWeightlessConnection(con21, 0);
-	networkDao->addWeightlessConnection(con31, 1);
+	networkDao->addWeightlessConnection(connGrp[con21].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[con31].getID(), 1);
 
     //2 connections to 2
-	networkDao->addWeightlessConnection(con12, 0);
-	networkDao->addWeightlessConnection(con32, 1);
+	networkDao->addWeightlessConnection(connGrp[con12].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[con32].getID(), 1);
 
     //2 connections to 3
-	networkDao->addWeightlessConnection(con13, 0);
-	networkDao->addWeightlessConnection(con23, 1);
+	networkDao->addWeightlessConnection(connGrp[con13].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[con23].getID(), 1);
 
     //1 connection to 4
-	networkDao->addWeightlessConnection(con14, 0);
+	networkDao->addWeightlessConnection(connGrp[con14].getID(), 0);
 
     //1 connection to 5
-	networkDao->addWeightlessConnection(con25, 0);
+	networkDao->addWeightlessConnection(connGrp[con25].getID(), 0);
 
     //1 connection to 6
-	networkDao->addWeightlessConnection(con36, 0);
+	networkDao->addWeightlessConnection(connGrp[con36].getID(), 0);
 
     //Add training - 1,2,3 are ANDs; 4,5,6 copy the output of 1,2,3
     addTraining(neuronMap[1]->getID(), "00", 0);
@@ -364,32 +364,32 @@ void TononiNetworkBuilder::addBalduzziTononiFigure12(const QString& networkName,
 
     //Add weightless connections
     //2 connections to 1
-	networkDao->addWeightlessConnection(con21, 0);
-	networkDao->addWeightlessConnection(con81, 1);
+	networkDao->addWeightlessConnection(connGrp[con21].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[con81].getID(), 1);
 
     //2 connections to 2
-	networkDao->addWeightlessConnection(con42, 0);
-	networkDao->addWeightlessConnection(con62, 1);
+	networkDao->addWeightlessConnection(connGrp[con42].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[con62].getID(), 1);
 
     //0 connections to 3
 
     //2 connections to 4
-	networkDao->addWeightlessConnection(con34, 0);
-	networkDao->addWeightlessConnection(con54, 1);
+	networkDao->addWeightlessConnection(connGrp[con34].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[con54].getID(), 1);
 
     //2 connection to 5
-	networkDao->addWeightlessConnection(con65, 0);
-	networkDao->addWeightlessConnection(con85, 1);
+	networkDao->addWeightlessConnection(connGrp[con65].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[con85].getID(), 1);
 
     //0 connections to 6
 
     //2 connections to 7
-	networkDao->addWeightlessConnection(con17, 0);
-	networkDao->addWeightlessConnection(con37, 1);
+	networkDao->addWeightlessConnection(connGrp[con17].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[con37].getID(), 1);
 
     //2 connections to 8
-	networkDao->addWeightlessConnection(con38, 0);
-	networkDao->addWeightlessConnection(con78, 1);
+	networkDao->addWeightlessConnection(connGrp[con38].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[con78].getID(), 1);
 
     //Add training - all are ANDs, but 3 and 6 don't receive any connections, so don't need training
     addTraining(neur1->getID(), "00", 0);
@@ -545,60 +545,60 @@ void TononiNetworkBuilder::addBalduzziTononiFigure13(const QString& networkName,
 
     //Add weightless connections
     //2 connections to 1
-	networkDao->addWeightlessConnection(con21, 0);
-	networkDao->addWeightlessConnection(con31, 1);
+	networkDao->addWeightlessConnection(connGrp[con21].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[con31].getID(), 1);
 
     //2 connections to 2
-	networkDao->addWeightlessConnection(con12, 0);
-	networkDao->addWeightlessConnection(con32, 1);
+	networkDao->addWeightlessConnection(connGrp[con12].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[con32].getID(), 1);
 
     //4 connections to 3
-	networkDao->addWeightlessConnection(con13, 0);
-	networkDao->addWeightlessConnection(con23, 1);
-	networkDao->addWeightlessConnection(con63, 2);
-	networkDao->addWeightlessConnection(con73, 3);
+	networkDao->addWeightlessConnection(connGrp[con13].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[con23].getID(), 1);
+	networkDao->addWeightlessConnection(connGrp[con63].getID(), 2);
+	networkDao->addWeightlessConnection(connGrp[con73].getID(), 3);
 
     //2 connections to 4
-	networkDao->addWeightlessConnection(con54, 0);
-	networkDao->addWeightlessConnection(con64, 1);
+	networkDao->addWeightlessConnection(connGrp[con54].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[con64].getID(), 1);
 
     //2 connections to 5
-	networkDao->addWeightlessConnection(con45, 0);
-	networkDao->addWeightlessConnection(con65, 1);
+	networkDao->addWeightlessConnection(connGrp[con45].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[con65].getID(), 1);
 
     //4 connections to 6
-	networkDao->addWeightlessConnection(con36, 0);
-	networkDao->addWeightlessConnection(con46, 1);
-	networkDao->addWeightlessConnection(con56, 2);
-	networkDao->addWeightlessConnection(con106, 3);
+	networkDao->addWeightlessConnection(connGrp[con36].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[con46].getID(), 1);
+	networkDao->addWeightlessConnection(connGrp[con56].getID(), 2);
+	networkDao->addWeightlessConnection(connGrp[con106].getID(), 3);
 
     //4 connections to 7
-	networkDao->addWeightlessConnection(con37, 0);
-	networkDao->addWeightlessConnection(con87, 1);
-	networkDao->addWeightlessConnection(con97, 2);
-	networkDao->addWeightlessConnection(con107, 3);
+	networkDao->addWeightlessConnection(connGrp[con37].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[con87].getID(), 1);
+	networkDao->addWeightlessConnection(connGrp[con97].getID(), 2);
+	networkDao->addWeightlessConnection(connGrp[con107].getID(), 3);
 
     //2 connections to 8
-	networkDao->addWeightlessConnection(con78, 0);
-	networkDao->addWeightlessConnection(con98, 1);
+	networkDao->addWeightlessConnection(connGrp[con78].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[con98].getID(), 1);
 
     //2 connections to 9
-	networkDao->addWeightlessConnection(con79, 0);
-	networkDao->addWeightlessConnection(con89, 1);
+	networkDao->addWeightlessConnection(connGrp[con79].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[con89].getID(), 1);
 
     //4 connections to 10
-	networkDao->addWeightlessConnection(con610, 0);
-	networkDao->addWeightlessConnection(con710, 1);
-	networkDao->addWeightlessConnection(con1110, 2);
-	networkDao->addWeightlessConnection(con1210, 3);
+	networkDao->addWeightlessConnection(connGrp[con610].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[con710].getID(), 1);
+	networkDao->addWeightlessConnection(connGrp[con1110].getID(), 2);
+	networkDao->addWeightlessConnection(connGrp[con1210].getID(), 3);
 
     //2 connections to 11
-	networkDao->addWeightlessConnection(con1011, 0);
-	networkDao->addWeightlessConnection(con1211, 1);
+	networkDao->addWeightlessConnection(connGrp[con1011].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[con1211].getID(), 1);
 
     //2 connections to 12
-	networkDao->addWeightlessConnection(con1012, 0);
-	networkDao->addWeightlessConnection(con1112, 1);
+	networkDao->addWeightlessConnection(connGrp[con1012].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[con1112].getID(), 1);
 
     //Add training - Elements fire when they receive two or more spikes
     addTwoOrMoreTraining(neur1->getID(), 2);

@@ -139,6 +139,22 @@ void ConnectionGroupModel::reload(){
 }
 
 
+/*! Selects all or none of the connection groups */
+void ConnectionGroupModel::selectAllOrNone(){
+	//Deselect all groups
+	if(selectionMap.size() == conGrpInfoList.size()){
+		selectionMap.clear();
+	}
+
+	//Select all groups
+	else{
+		for(int i=0; i<conGrpInfoList.size(); ++i)
+			selectionMap[i] = true;
+	}
+	reset();
+}
+
+
 /*! Inherited from QAbstractTableModel */
 bool ConnectionGroupModel::setData(const QModelIndex& index, const QVariant&, int) {
     if (!index.isValid() || !Globals::networkLoaded())

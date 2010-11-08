@@ -182,7 +182,7 @@ void MotorNetworksBuilder::addConnections(){
 	for(unsigned int toNeurID=1; toNeurID <= 12; ++toNeurID){
 		//Add pattern indexes for this TO neuron
 		for(int patternIndx=0; patternIndx < conListArray[toNeurID-1].size(); ++patternIndx)
-			networkDao->addWeightlessConnection( conListArray[toNeurID-1].at(patternIndx), patternIndx );
+			networkDao->addWeightlessConnection( connGrp[conListArray[toNeurID-1].at(patternIndx)].getID(), patternIndx );
 	}
 }
 

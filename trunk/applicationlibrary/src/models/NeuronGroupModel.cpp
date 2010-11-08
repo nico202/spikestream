@@ -145,6 +145,22 @@ void NeuronGroupModel::reload(){
 }
 
 
+/*! Selects all or none of the connection groups */
+void NeuronGroupModel::selectAllOrNone(){
+	//Deselect all groups
+	if(selectionMap.size() == neurGrpInfoList.size()){
+		selectionMap.clear();
+	}
+
+	//Select all groups
+	else{
+		for(int i=0; i<neurGrpInfoList.size(); ++i)
+			selectionMap[i] = true;
+	}
+	reset();
+}
+
+
 /*! Inherited from QAbstractTableModel. */
 bool NeuronGroupModel::setData(const QModelIndex& index, const QVariant&, int) {
     if (!index.isValid() || !Globals::networkLoaded())

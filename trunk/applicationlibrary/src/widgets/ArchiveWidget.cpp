@@ -17,6 +17,9 @@ using namespace spikestream;
 ArchiveWidget::ArchiveWidget(QWidget* parent) : QWidget(parent){
 	QVBoxLayout* verticalBox = new QVBoxLayout(this);
 
+	//Register types to enable signals and slots to work
+	qRegisterMetaType< QList<unsigned> >("QList<unsigned>");
+
     //Add tool bar
     toolBar = getToolBar();
     verticalBox->addWidget(toolBar);
