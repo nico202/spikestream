@@ -92,7 +92,11 @@ Network::~Network(){
 
 /*! Adds connection groups to the network. */
 void Network::addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList){
-	if(!prototypeMode && hasArchives())//Check if network is editable or not
+	//Clear variables
+	connectionTaskCancelled = false;
+
+	//Check if network is editable or not
+	if(!prototypeMode && hasArchives())
 		throw SpikeStreamException("Cannot add connection groups to a locked network.");
 
 	//Set default parameters and compress memory
@@ -132,7 +136,11 @@ void Network::addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList){
 
 /*! Adds neuron groups to the network */
 void Network::addNeuronGroups(QList<NeuronGroup*>& neuronGroupList){
-	if(!prototypeMode && hasArchives())//Check if network is editable or not
+	//Reset variables
+	neuronTaskCancelled = false;
+
+	//Check if network is editable or not
+	if(!prototypeMode && hasArchives())
 		throw SpikeStreamException("Cannot add neuron groups to a locked network.");
 
 	//Set default parameters
@@ -166,12 +174,15 @@ void Network::addNeuronGroups(QList<NeuronGroup*>& neuronGroupList){
 }
 
 
-/*! Cancels thread-based operations that are in progress */
+/*! Cancels connection thread-based operations that are in progress.
+	It is the responsibility of the dao thread to clean up when task has been stopped. */
 void Network::cancel(){
-    neuronNetworkDaoThread->stop();
-    connectionNetworkDaoThread->stop();
-    currentNeuronTask = -1;
-    currentConnectionTask = -1;
+	if(connectionNetworkDaoThread->isRunning()){
+		connectionNetworkDaoThread->stop();
+		connectionTaskCancelled = true;
+	}
+	if(neuronNetworkDaoThread->isRunning())
+		neuronNetworkDaoThread->stop();
 }
 
 
@@ -652,7 +663,7 @@ void Network::connectionThreadFinished(){
 			}
 		}
 		catch(SpikeStreamException& ex){
-			setError(" End connection thread error " + ex.getMessage());
+			setError("End connection thread error " + ex.getMessage());
 		}
 	}
 
@@ -939,15 +950,18 @@ void Network::startDeleteNeuronGroups(QList<unsigned>& deleteNeurGrpIDList){
 }
 
 
-/*! When neuron groups have been added to the database their internal ID reflects the database state
+/*! When connection groups have been added to the database their internal ID reflects the database state
 	but the ID in the map held in network does not. This method fixes this and clears the map of
 	new neuron groups. */
 void Network::updateConnectionGroupsAfterSave(){
-	//Add connection groups to network now that they have the correct ID
+	//Add connection groups to network now that they have the correct ID or delete them if task has been cancelled
 	for(QHash<unsigned, ConnectionGroup*>::iterator iter = newConnectionGroupMap.begin(); iter != newConnectionGroupMap.end(); ++iter){
 		if(connGrpMap.contains(iter.value()->getID()))
 			throw SpikeStreamException("Connection group with ID " + QString::number(iter.value()->getID()) + " is already present in the network.");
-		connGrpMap[iter.value()->getID()] = iter.value();
+		if(connectionTaskCancelled)
+			delete iter.value();
+		else
+			connGrpMap[iter.value()->getID()] = iter.value();
 	}
 	newConnectionGroupMap.clear();
 }
@@ -957,13 +971,16 @@ void Network::updateConnectionGroupsAfterSave(){
 	but the ID in the map held in network does not. This method fixes this and clears the map of
 	new neuron groups. */
 void Network::updateNeuronGroupsAfterSave(){
-	//Add neuron groups to the network now that they have the correct ID
+	//Add neuron groups to the network now that they have the correct ID, or delete if task has not been cancelled
 	for(QHash<unsigned, NeuronGroup*>::iterator iter = newNeuronGroupMap.begin(); iter != newNeuronGroupMap.end(); ++iter){
 		//Check to see if ID already exists - error in this case
 		if( neurGrpMap.contains( iter.value()->getID() ) ){
 			throw SpikeStreamException("Adding neurons task - trying to add a neuron group with ID " + QString::number(iter.value()->getID()) + " that already exists in the network.");
 		}
-		neurGrpMap[ iter.value()->getID() ] = iter.value();
+		if(neuronTaskCancelled)
+			delete iter.value();
+		else
+			neurGrpMap[ iter.value()->getID() ] = iter.value();
 	}
 	newNeuronGroupMap.clear();
 }

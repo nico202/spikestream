@@ -28,6 +28,7 @@ namespace spikestream {
 			QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 			void reload();
 			int rowCount(const QModelIndex& parent = QModelIndex()) const;
+			void selectAllOrNone();
 			bool setData(const QModelIndex& index, const QVariant& value, int role=Qt::EditRole);
 
 			friend class NeuronGroupTableView;

@@ -6,6 +6,7 @@
 #include "NetworkDao.h"
 #include "NeuronGroup.h"
 #include "NeuronGroupInfo.h"
+#include "SpikeStreamThread.h"
 
 //Qt includes
 #include <QThread>
@@ -14,17 +15,14 @@
 namespace spikestream {
 
 	/*! Adds a neuron group to the current network, which automatically adds it to the database */
-	class CuboidBuilderThread : public QThread {
+	class CuboidBuilderThread : public SpikeStreamThread {
 		Q_OBJECT
 
 		public:
 			CuboidBuilderThread();
 			~CuboidBuilderThread();
-			QString getErrorMessage(){ return errorMessage; }
-			bool isError() { return error; }
 			void prepareAddNeuronGroups(const QString& name, const QString& description, QHash<QString, double>& paramMap);
 			void run();
-			void stop();
 
 		signals:
 			void progress(int stepsCompleted, int totalSteps, QString message);
@@ -46,15 +44,6 @@ namespace spikestream {
 
 			/*! Archive Dao used by Network when in thread */
 			ArchiveDao* threadArchiveDao;
-
-			/*! Used to cancel the operation */
-			bool stopThread;
-
-			/*! Set to true when an error has occurred */
-			bool error;
-
-			/*! Message associated with an error */
-			QString errorMessage;
 
 			/*! Starting x position of neurons to be added */
 			int xStart;
@@ -90,15 +79,10 @@ namespace spikestream {
 			//=======================  METHODS  ==========================
 			void addNeuronGroupsToDatabase();
 			void addNeurons();
-			void clearError();
 			void createNeuronGroups(const QString& name, const QString& description, QHash<QString, double>& paramMap);
 			double getParameter(const QString& paramName, const QHash<QString, double>& paramMap);
 			void printSummary();
-			void setError(const QString& errorMessage);
 			void storeParameters(const QHash<QString, double>& paramMap);
-
-			void testCheckProgress();
-
 	};
 }
 

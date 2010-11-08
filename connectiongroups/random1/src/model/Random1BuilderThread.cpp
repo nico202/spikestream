@@ -41,7 +41,7 @@ void Random1BuilderThread::buildConnectionGroup(){
 	numberOfProgressSteps = fromNeurGrp->size() + 1;
 	int cntr = 0;
 	double weight = 0;
-	for(NeuronMap::iterator fromIter = fromNeurGrp->begin(); fromIter != fromNeurGrp->end(); ++fromIter){
+	for(NeuronMap::iterator fromIter = fromNeurGrp->begin(); fromIter != fromNeurGrp->end() && !stopThread; ++fromIter){
 		for(NeuronMap::iterator toIter = toNeurGrp->begin(); toIter != toNeurGrp->end(); ++toIter){
 			//Decide if connection is made
 			double ranNum = (double)rand() / (double)RAND_MAX;

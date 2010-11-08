@@ -645,7 +645,7 @@ void NetworkViewer::drawConnections(){
 
 					//Add connection to list of visible connections
 					if(drawConnection)
-						visConList.append(conIter);
+						visConList.append(&(*conIter));
 
 				}
 				//Draw all connections, potentially thinned

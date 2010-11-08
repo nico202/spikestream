@@ -183,7 +183,7 @@ namespace spikestream {
 				The key in the outer map is the volatile connection group ID.
 				The key in the inner map is the Nemo ID of the connection.
 				The value in the inner map is the SpikeStream ID of the connection. */
-			QHash<unsigned, QHash<synapse_id, unsigned> > volatileConGrpMap;
+			QHash<unsigned, synapse_id*> volatileConGrpMap;
 
 			/*! List of presynaptic neuron ids used for saving weights. */
 			QList<unsigned> preSynapticNeuronIDs;

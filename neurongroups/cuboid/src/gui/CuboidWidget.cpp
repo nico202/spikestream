@@ -248,7 +248,6 @@ void CuboidWidget::addButtonClicked(){
 		progressDialog = new QProgressDialog("Building neuron group", "Cancel", 0, 100, this, Qt::CustomizeWindowHint);
 		progressDialog->setWindowModality(Qt::WindowModal);
 		progressDialog->setMinimumDuration(2000);
-		progressDialog->setCancelButton(0);//Too complicated to implement cancel sensibly
 		builderThread->start();
 	}
 	catch(SpikeStreamException& ex){
@@ -274,9 +273,17 @@ void CuboidWidget::builderThreadFinished(){
 
 /*! Updates user with feedback about progress with the operation */
 void CuboidWidget::updateProgress(int stepsCompleted, int totalSteps, QString message){
+	//Set flag to avoid multiple calls to progress dialog while it is redrawing
+	if(updatingProgress)
+		return;
+	updatingProgress = true;
+
 	//Check for cancellation
 	if(progressDialog->wasCanceled()){
-		qCritical()<<"Cuboid plugin does not currently support cancellation of adding neurons.";
+		builderThread->stop();
+		progressDialog->setLabelText("Cleaning up.");
+		progressDialog->setCancelButton(0);//Should not be able to cancel the clean up
+		progressDialog->show();
 	}
 	//Update progress
 	else if(stepsCompleted < totalSteps){
@@ -287,6 +294,9 @@ void CuboidWidget::updateProgress(int stepsCompleted, int totalSteps, QString me
 	else{
 		progressDialog->close();
 	}
+
+	//Clear flag to indicate that update of progress is complete
+	updatingProgress = false;
 }
 
 

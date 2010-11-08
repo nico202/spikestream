@@ -58,9 +58,14 @@ void CuboidBuilderThread::run(){
 		//Add the neuron groups to the database
 		addNeuronGroupsToDatabase();
 
+		if(stopThread)
+			return;
+
 		//Wait for network to finish
 		while(currentNetwork->isBusy()){
 			emit progress(threadNetworkDao->getNeuronCount(newNeuronGroupList), totalNumberOfNeurons, "Adding neurons to database...");
+			if(stopThread)
+				currentNetwork->cancel();
 			msleep(250);
 		}
 
@@ -81,12 +86,6 @@ void CuboidBuilderThread::run(){
 }
 
 
-/*! Stops the thread running  */
-void CuboidBuilderThread::stop(){
-	stopThread = true;
-}
-
-
 /*----------------------------------------------------------*/
 /*-----                PRIVATE METHODS                 -----*/
 /*----------------------------------------------------------*/
@@ -98,14 +97,6 @@ void CuboidBuilderThread::addNeuronGroupsToDatabase(){
 
 	//Add the neuron groups to the network
 	Globals::getNetwork()->addNeuronGroups(newNeuronGroupList);
-}
-
-
-
-/*! Clears error state and message */
-void CuboidBuilderThread::clearError(){
-	error = false;
-	errorMessage = "";
 }
 
 
@@ -188,14 +179,6 @@ void CuboidBuilderThread::printSummary(){
 	for(QHash<unsigned int, NeuronGroup*>::iterator iter = newNeuronGroupMap.begin(); iter != newNeuronGroupMap.end(); ++iter){
 		cout<<"Neuron type "<<iter.key()<<" added "<<iter.value()->size()<<" neurons."<<endl;
 	}
-}
-
-
-/*! Puts the thread into error state and stores the message */
-void CuboidBuilderThread::setError(const QString& errorMessage){
-	error = true;
-	this->errorMessage = errorMessage;
-	stopThread = true;
 }
 
 

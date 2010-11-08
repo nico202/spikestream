@@ -30,12 +30,13 @@ namespace spikestream {
 
 		private:
 			//====================  VARIABLES  ====================
-			static const int numCols = 5;
-			static const int fromIDCol = 0;
-			static const int toIDCol = 1;
-			static const int delayCol = 2;
-			static const int weightCol = 3;
-			static const int tmpWeightCol = 4;
+			static const int numCols = 6;
+			static const int idCol = 0;
+			static const int fromIDCol = 1;
+			static const int toIDCol = 2;
+			static const int delayCol = 3;
+			static const int weightCol = 4;
+			static const int tmpWeightCol = 5;
 
 			//=====================  METHODS  ======================
     };

@@ -31,7 +31,7 @@ namespace spikestream {
 		public:
 			NemoLoader();
 			~NemoLoader();
-			nemo_network_t buildNemoNetwork(Network* network, QHash<unsigned, QHash<synapse_id, unsigned> >* volatileConGrpMap, const bool* stop);
+			nemo_network_t buildNemoNetwork(Network* network, QHash<unsigned, synapse_id*>& volatileConGrpMap, const bool* stop);
 
 		signals:
 			void progress(int stepsCompleted, int totalSteps);
@@ -42,7 +42,7 @@ namespace spikestream {
 			//======================  METHODS  =======================
 			void addExcitatoryNeuronGroup(NeuronGroup* neuronGroup, nemo_network_t nemoNetwork, urng_t& ranNumGen);
 			void addInhibitoryNeuronGroup(NeuronGroup* neuronGroup, nemo_network_t nemoNetwork, urng_t& ranNumGen);
-			void addConnectionGroup(ConnectionGroup* conGroup, nemo_network_t nemoNetwork, QHash<unsigned, QHash<synapse_id, unsigned> >* volatileConGrpMap);
+			void addConnectionGroup(ConnectionGroup* conGroup, nemo_network_t nemoNetwork, QHash<unsigned, synapse_id*>& volatileConGrpMap);
 			void printConnection(unsigned source,unsigned targets[], unsigned delays[], float weights[], unsigned char is_plastic[], size_t length);
 	};
 }

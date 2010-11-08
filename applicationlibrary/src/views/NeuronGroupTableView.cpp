@@ -17,6 +17,10 @@ NeuronGroupTableView::NeuronGroupTableView(QWidget* parent, NeuronGroupModel* mo
 	connect(this, SIGNAL(clicked(QModelIndex)), this, SLOT(tableClicked(QModelIndex)));
 	connect(this, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(tableDoubleClicked(QModelIndex)));
 
+	//Header click events
+	this->horizontalHeader()->setClickable(true);
+	connect(this->horizontalHeader(), SIGNAL(sectionClicked(int)), this, SLOT(headerClicked(int)));
+
 	//Set the model for this view and show it
 	this->neuronGroupModel = model;
 	setModel(model);
@@ -29,6 +33,10 @@ NeuronGroupTableView::NeuronGroupTableView(QWidget* parent, NeuronGroupModel* mo
 NeuronGroupTableView::~NeuronGroupTableView(){
 }
 
+
+/*--------------------------------------------------------*/
+/*-------             PUBLIC METHODS               -------*/
+/*--------------------------------------------------------*/
 
 /*! Sets up the size of the headers. Does not work in the constructor because there
 	is not any data or model */
@@ -45,6 +53,17 @@ void NeuronGroupTableView::resizeHeaders(){
 	hHeader->resizeSection(hHeader->logicalIndex(NeuronGroupModel::SELECT_COL), 20);//Selection
 	hHeader->resizeSection(hHeader->logicalIndex(NeuronGroupModel::PARAM_COL), 70);//Parameters
 	hHeader->setDefaultAlignment(Qt::AlignLeft);
+}
+
+
+/*--------------------------------------------------------*/
+/*-------             PRIVATE SLOTS                -------*/
+/*--------------------------------------------------------*/
+
+/*! Called when the header of the table is clicked */
+void NeuronGroupTableView::headerClicked(int column){
+	if(column == NeuronGroupModel::SELECT_COL)
+		neuronGroupModel->selectAllOrNone();
 }
 
 

@@ -148,7 +148,7 @@ void TestPartitionedNetworksBuilder::addConnections(){
 
 		//Add pattern indexes for this to neuron
 		for(int patternIndx=0; patternIndx < numConnections; ++patternIndx)
-			networkDao->addWeightlessConnection( conListArray[toNeurID-1].at(patternIndx), patternIndx );
+			networkDao->addWeightlessConnection( connGrp[conListArray[toNeurID-1].at(patternIndx)].getID(), patternIndx );
 	}
 }
 

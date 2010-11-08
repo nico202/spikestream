@@ -183,7 +183,7 @@ void NRMImportDialog::cancel(){
 	    fileLoader->stop();
 		break;
 	case ADD_NEURON_GROUPS_TASK:
-	    newNetwork->cancel();
+		newNetwork->cancel();
 		break;
 	case ADD_CONNECTION_GROUPS_TASK:
 	    dataImporter->stop();

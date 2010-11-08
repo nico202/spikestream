@@ -54,10 +54,10 @@ void AleksanderNetworksBuilder::add4NeuronNetwork1(const QString& networkName, c
 	addConnectionGroup(networkID, connGrp);
 
 	//Add weightless connections. Only 1 connection per neuron, so pattern index is zero in all cases
-	networkDao->addWeightlessConnection(baCon, 0);
-	networkDao->addWeightlessConnection(abCon, 0);
-	networkDao->addWeightlessConnection(dcCon, 0);
-	networkDao->addWeightlessConnection(cdCon, 0);
+	networkDao->addWeightlessConnection(connGrp[baCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[abCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[dcCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[cdCon].getID(), 0);
 
 	//Add training
 	addTraining(neuronMap[1]->getID(), "0", 0);
@@ -91,13 +91,13 @@ void AleksanderNetworksBuilder::add4NeuronNetwork2_AND(const QString& networkNam
 	addConnectionGroup(networkID, connGrp);
 
 	//Add weightless connections.1 connection to A, B and D
-	networkDao->addWeightlessConnection(baCon, 0);
-	networkDao->addWeightlessConnection(abCon, 0);
-	networkDao->addWeightlessConnection(cdCon, 0);
+	networkDao->addWeightlessConnection(connGrp[baCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[abCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[cdCon].getID(), 0);
 
 	//2 connections to C;
-	networkDao->addWeightlessConnection(acCon, 0);
-	networkDao->addWeightlessConnection(dcCon, 1);
+	networkDao->addWeightlessConnection(connGrp[acCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[dcCon].getID(), 1);
 
 	//Add AND training. C has two inputs, the rest have one.
 	addTraining(neuronMap[1]->getID(), "0", 0);
@@ -133,13 +133,13 @@ void AleksanderNetworksBuilder::add4NeuronNetwork2_XOR(const QString& networkNam
 	addConnectionGroup(networkID, connGrp);
 
 	//Add weightless connections.1 connection to A, B and D
-	networkDao->addWeightlessConnection(baCon, 0);
-	networkDao->addWeightlessConnection(abCon, 0);
-	networkDao->addWeightlessConnection(cdCon, 0);
+	networkDao->addWeightlessConnection(connGrp[baCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[abCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[cdCon].getID(), 0);
 
 	//2 connections to C;
-	networkDao->addWeightlessConnection(acCon, 0);
-	networkDao->addWeightlessConnection(dcCon, 1);
+	networkDao->addWeightlessConnection(connGrp[acCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[dcCon].getID(), 1);
 
 	//Add XOR training. C has two inputs, the rest have one.
 	addTraining(neuronMap[1]->getID(), "0", 0);
@@ -176,14 +176,14 @@ void AleksanderNetworksBuilder::add4NeuronNetwork3_AND(const QString& networkNam
 	addConnectionGroup(networkID, connGrp);
 
 	//Add weightless connections.1 connection to B and D
-	networkDao->addWeightlessConnection(abCon, 0);
-	networkDao->addWeightlessConnection(cdCon, 0);
+	networkDao->addWeightlessConnection(connGrp[abCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[cdCon].getID(), 0);
 
 	//2 connections to A and C;
-	networkDao->addWeightlessConnection(baCon, 0);
-	networkDao->addWeightlessConnection(caCon, 1);
-	networkDao->addWeightlessConnection(acCon, 0);
-	networkDao->addWeightlessConnection(dcCon, 1);
+	networkDao->addWeightlessConnection(connGrp[baCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[caCon].getID(), 1);
+	networkDao->addWeightlessConnection(connGrp[acCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[dcCon].getID(), 1);
 
 	//Add AND training.A and C have two inputs, the rest have one.
 	addTraining(neuronMap[1]->getID(), "00", 0);
@@ -222,14 +222,14 @@ void AleksanderNetworksBuilder::add4NeuronNetwork3_XOR(const QString& networkNam
 	addConnectionGroup(networkID, connGrp);
 
 	//Add weightless connections.1 connection to B and D
-	networkDao->addWeightlessConnection(abCon, 0);
-	networkDao->addWeightlessConnection(cdCon, 0);
+	networkDao->addWeightlessConnection(connGrp[abCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[cdCon].getID(), 0);
 
 	//2 connections to A and C;
-	networkDao->addWeightlessConnection(baCon, 0);
-	networkDao->addWeightlessConnection(caCon, 1);
-	networkDao->addWeightlessConnection(acCon, 0);
-	networkDao->addWeightlessConnection(dcCon, 1);
+	networkDao->addWeightlessConnection(connGrp[baCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[caCon].getID(), 1);
+	networkDao->addWeightlessConnection(connGrp[acCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[dcCon].getID(), 1);
 
 	//Add XOR training.A and C have two inputs, the rest have one.
 	addTraining(neuronMap[1]->getID(), "00", 0);
@@ -271,14 +271,14 @@ void AleksanderNetworksBuilder::add4NeuronNetwork4_AND(const QString& networkNam
 	addConnectionGroup(networkID, connGrp);
 
 	//Add weightless connections. All neurons have two connections
-	networkDao->addWeightlessConnection(baCon, 0);
-	networkDao->addWeightlessConnection(caCon, 1);
-	networkDao->addWeightlessConnection(abCon, 0);
-	networkDao->addWeightlessConnection(dbCon, 1);
-	networkDao->addWeightlessConnection(acCon, 0);
-	networkDao->addWeightlessConnection(dcCon, 1);
-	networkDao->addWeightlessConnection(bdCon, 0);
-	networkDao->addWeightlessConnection(cdCon, 1);
+	networkDao->addWeightlessConnection(connGrp[baCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[caCon].getID(), 1);
+	networkDao->addWeightlessConnection(connGrp[abCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[dbCon].getID(), 1);
+	networkDao->addWeightlessConnection(connGrp[acCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[dcCon].getID(), 1);
+	networkDao->addWeightlessConnection(connGrp[bdCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[cdCon].getID(), 1);
 
 	//Add AND training. All neurons have two inputs
 	addTraining(neuronMap[1]->getID(), "00", 0);
@@ -323,14 +323,14 @@ void AleksanderNetworksBuilder::add4NeuronNetwork4_XOR(const QString& networkNam
 	addConnectionGroup(networkID, connGrp);
 
 	//Add weightless connections. All neurons have two connections
-	networkDao->addWeightlessConnection(baCon, 0);
-	networkDao->addWeightlessConnection(caCon, 1);
-	networkDao->addWeightlessConnection(abCon, 0);
-	networkDao->addWeightlessConnection(dbCon, 1);
-	networkDao->addWeightlessConnection(acCon, 0);
-	networkDao->addWeightlessConnection(dcCon, 1);
-	networkDao->addWeightlessConnection(bdCon, 0);
-	networkDao->addWeightlessConnection(cdCon, 1);
+	networkDao->addWeightlessConnection(connGrp[baCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[caCon].getID(), 1);
+	networkDao->addWeightlessConnection(connGrp[abCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[dbCon].getID(), 1);
+	networkDao->addWeightlessConnection(connGrp[acCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[dcCon].getID(), 1);
+	networkDao->addWeightlessConnection(connGrp[bdCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[cdCon].getID(), 1);
 
 	//Add AND training. All neurons have two inputs
 	addTraining(neuronMap[1]->getID(), "00", 0);
@@ -379,18 +379,18 @@ void AleksanderNetworksBuilder::add4NeuronNetwork5_AND(const QString& networkNam
 	addConnectionGroup(networkID, connGrp);
 
 	//Add weightless connections. All neurons have three connections
-	networkDao->addWeightlessConnection(baCon, 0);
-	networkDao->addWeightlessConnection(caCon, 1);
-	networkDao->addWeightlessConnection(daCon, 2);
-	networkDao->addWeightlessConnection(abCon, 0);
-	networkDao->addWeightlessConnection(cbCon, 1);
-	networkDao->addWeightlessConnection(dbCon, 2);
-	networkDao->addWeightlessConnection(acCon, 0);
-	networkDao->addWeightlessConnection(bcCon, 1);
-	networkDao->addWeightlessConnection(dcCon, 2);
-	networkDao->addWeightlessConnection(adCon, 0);
-	networkDao->addWeightlessConnection(bdCon, 1);
-	networkDao->addWeightlessConnection(cdCon, 2);
+	networkDao->addWeightlessConnection(connGrp[baCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[caCon].getID(), 1);
+	networkDao->addWeightlessConnection(connGrp[daCon].getID(), 2);
+	networkDao->addWeightlessConnection(connGrp[abCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[cbCon].getID(), 1);
+	networkDao->addWeightlessConnection(connGrp[dbCon].getID(), 2);
+	networkDao->addWeightlessConnection(connGrp[acCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[bcCon].getID(), 1);
+	networkDao->addWeightlessConnection(connGrp[dcCon].getID(), 2);
+	networkDao->addWeightlessConnection(connGrp[adCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[bdCon].getID(), 1);
+	networkDao->addWeightlessConnection(connGrp[cdCon].getID(), 2);
 
 	//Add AND training. All neurons have three inputs
 	addTraining(neuronMap[1]->getID(), "000", 0);
@@ -458,18 +458,18 @@ void AleksanderNetworksBuilder::add4NeuronNetwork5_XOR(const QString& networkNam
 	addConnectionGroup(networkID, connGrp);
 
 	//Add weightless connections. All neurons have three connections
-	networkDao->addWeightlessConnection(baCon, 0);
-	networkDao->addWeightlessConnection(caCon, 1);
-	networkDao->addWeightlessConnection(daCon, 2);
-	networkDao->addWeightlessConnection(abCon, 0);
-	networkDao->addWeightlessConnection(cbCon, 1);
-	networkDao->addWeightlessConnection(dbCon, 2);
-	networkDao->addWeightlessConnection(acCon, 0);
-	networkDao->addWeightlessConnection(bcCon, 1);
-	networkDao->addWeightlessConnection(dcCon, 2);
-	networkDao->addWeightlessConnection(adCon, 0);
-	networkDao->addWeightlessConnection(bdCon, 1);
-	networkDao->addWeightlessConnection(cdCon, 2);
+	networkDao->addWeightlessConnection(connGrp[baCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[caCon].getID(), 1);
+	networkDao->addWeightlessConnection(connGrp[daCon].getID(), 2);
+	networkDao->addWeightlessConnection(connGrp[abCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[cbCon].getID(), 1);
+	networkDao->addWeightlessConnection(connGrp[dbCon].getID(), 2);
+	networkDao->addWeightlessConnection(connGrp[acCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[bcCon].getID(), 1);
+	networkDao->addWeightlessConnection(connGrp[dcCon].getID(), 2);
+	networkDao->addWeightlessConnection(connGrp[adCon].getID(), 0);
+	networkDao->addWeightlessConnection(connGrp[bdCon].getID(), 1);
+	networkDao->addWeightlessConnection(connGrp[cdCon].getID(), 2);
 
 	//Add XOR training. All neurons have three inputs
 	addTraining(neuronMap[1]->getID(), "000", 0);

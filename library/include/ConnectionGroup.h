@@ -22,11 +22,10 @@ namespace spikestream {
 			ConnectionGroup(const ConnectionGroupInfo& connGrpInfo);
 			~ConnectionGroup();
 			unsigned addConnection(unsigned id, unsigned fromNeuronID, unsigned toNeuronID, float delay, float weight);
-			unsigned addConnection(unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight);//UNTESTED
+			unsigned addConnection(unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight);
 			ConnectionIterator begin();
 			void clearConnections();
 			ConnectionIterator end();
-			//QList<Connection*> getConnections();
 			unsigned int getID() { return info.getID(); }
 			unsigned int getFromNeuronGroupID() { return info.getFromNeuronGroupID(); }
 			ConnectionGroupInfo getInfo() { return info; }
@@ -34,15 +33,13 @@ namespace spikestream {
 			QHash<QString, double> getParameters() { return parameterMap; }
 			unsigned getSynapseTypeID();
 			unsigned int getToNeuronGroupID() { return info.getToNeuronGroupID(); }
+			Connection& operator[] (unsigned index);
 			bool parametersSet();
-			//void setConnectionMap(QHash<unsigned, Connection*>* newConnectionMap);
 			void setDescription(const QString& description);
 			void setFromNeuronGroupID(unsigned id);
 			void setID(unsigned int id) { info.setID(id); }
 			void setParameters(QHash<QString, double>& paramMap);
-			//void setTempWeight(unsigned connectionID, float tempWeight);
 			void setToNeuronGroupID(unsigned id);
-			//void setWeight(unsigned connectionID, float weight);
 			int size() { return connectionVector->size(); }
 
 		private:

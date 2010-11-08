@@ -20,7 +20,7 @@ ConnectionGroup::ConnectionGroup(){
 	#ifdef MEMORY_DEBUG
 		cout<<"New connection group (empty constructor) with size: "<<sizeof(*this)<<endl;
 	#endif//MEMORY_DEBUG
-	connectionVector = NULL;
+	connectionVector = new vector<Connection>();
 }
 
 
@@ -53,23 +53,25 @@ ConnectionGroup::~ConnectionGroup(){
 /*-------             PUBLIC METHODS               -------*/
 /*--------------------------------------------------------*/
 
-/*! Adds a connection to the group and returns the connection ID*/
+/*! Adds a connection to the group using the specified ID and returns the index of the connection.
+	The connection can be accessed later using []. */
 unsigned ConnectionGroup::addConnection(unsigned id, unsigned fromNeuronID, unsigned toNeuronID, float delay, float weight){
 	//Store connection
 	connectionVector->push_back(Connection(id, fromNeuronID, toNeuronID, delay, weight));
 
-	//Return ID of connection
-	return id;
+	//Return pointer to connection
+	return connectionVector->size() - 1;
 }
 
 
-/*! Creates a new connection and adds it to the group.*/
+/*! Adds a connection to the group using a temporary ID and returns the index of the connection.
+	The connection can be accessed later using []. */
 unsigned ConnectionGroup::addConnection(unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight){
 	unsigned tmpID = getTemporaryID();
 
-	//Store connection
+	//Store connection and return reference
 	connectionVector->push_back(Connection(tmpID, fromNeuronID, toNeuronID, delay, weight));
-	return tmpID;
+	return connectionVector->size() - 1;
 }
 
 
@@ -106,20 +108,20 @@ unsigned ConnectionGroup::getSynapseTypeID(){
 }
 
 
+/*! Returns a reference to the operator at a specific index. */
+Connection& ConnectionGroup::operator[] (unsigned index){
+	if(index >= connectionVector->size())
+		throw SpikeStreamException("Connection vector index out of range: " + QString::number(index));
+	return (*connectionVector)[index];
+}
+
+
 /*! Returns true if the parameters have been set. */
 bool ConnectionGroup::parametersSet(){
 	if(getInfo().getSynapseType().getParameterCount() == parameterMap.size())
 		return true;
 	return false;
 }
-
-
-/*! Replaces the connection map with a new neuron map, most likely to fix connection IDs.
-	Connections are not cleaned up because they might be included in the new map. */
-//void ConnectionGroup::setConnectionMap(QHash<unsigned, Connection *> *newConnectionMap){
-//	delete connectionMap;
-//	this->connectionMap = newConnectionMap;
-//}
 
 
 /*! Sets the description of the connection group */

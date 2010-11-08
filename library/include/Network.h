@@ -152,6 +152,12 @@ namespace spikestream {
 			static const int LOAD_CONNECTIONS_TASK = 6;
 			static const int SAVE_NETWORK_TASK = 7;
 
+			/*! Records when a connections related task has been cancelled. */
+			bool connectionTaskCancelled;
+
+			/*! Records when a neuron related task has been cancelled. */
+			bool neuronTaskCancelled;
+
 
 			//============================  METHODS  ==============================
 			void checkConnectionGroupID(unsigned int id);

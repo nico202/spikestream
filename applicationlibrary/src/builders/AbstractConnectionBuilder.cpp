@@ -35,6 +35,9 @@ void AbstractConnectionBuilder::run(){
 
 		//Build connection group and add it to network
 		buildConnectionGroup();
+		if(stopThread)
+			return;
+
 		QList<ConnectionGroup*> conGrpList;
 		conGrpList.append(newConnectionGroup);
 		Globals::getNetwork()->addConnectionGroups(conGrpList);
@@ -42,6 +45,8 @@ void AbstractConnectionBuilder::run(){
 		//Wait for network to finish adding connection groups
 		while(currentNetwork->isBusy()){
 			emit progress(threadNetworkDao->getConnectionCount(newConnectionGroup), newConnectionGroup->size(), "Adding connections to database...");
+			if(stopThread)
+				currentNetwork->cancel();
 			msleep(250);
 		}
 
