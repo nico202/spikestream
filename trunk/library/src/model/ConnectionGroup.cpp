@@ -9,7 +9,7 @@ using namespace spikestream;
 using namespace std;
 
 //Outputs debugging information about memory
-#define MEMORY_DEBUG
+//#define MEMORY_DEBUG
 
 //Initialize static variables
 unsigned ConnectionGroup::connectionIDCounter = LAST_CONNECTION_ID + 1;
@@ -20,14 +20,14 @@ ConnectionGroup::ConnectionGroup(){
 	#ifdef MEMORY_DEBUG
 		cout<<"New connection group (empty constructor) with size: "<<sizeof(*this)<<endl;
 	#endif//MEMORY_DEBUG
-	connectionVector = new vector<Connection>();
+	connectionDeque = new deque<Connection>();
 }
 
 
 /*! Standard constructor */
 ConnectionGroup::ConnectionGroup(const ConnectionGroupInfo& connGrpInfo){
     this->info = connGrpInfo;
-	connectionVector = new vector<Connection>();
+	connectionDeque = new deque<Connection>();
 
 	#ifdef MEMORY_DEBUG
 		cout<<"New connection group (standard constructor) with size: "<<sizeof(*this)<<endl;
@@ -38,13 +38,13 @@ ConnectionGroup::ConnectionGroup(const ConnectionGroupInfo& connGrpInfo){
 /*! Destructor */
 ConnectionGroup::~ConnectionGroup(){
 	#ifdef MEMORY_DEBUG
-		cout<<"Connection group destructor size of class: "<<sizeof(*this)<<"; size of map: "<<sizeof(*connectionVector)<<"; number of connections: "<<connectionVector->size()<<endl;
+		cout<<"Connection group destructor size of class: "<<sizeof(*this)<<"; size of map: "<<sizeof(*connectionDeque)<<"; number of connections: "<<connectionDeque->size()<<endl;
 	#endif//MEMORY_DEBUG
 
 	//Deletes connection map and all its dynamically allocated objects
-	if(connectionVector != NULL){
+	if(connectionDeque != NULL){
 		clearConnections();
-		delete connectionVector;
+		delete connectionDeque;
 	}
 }
 
@@ -57,10 +57,10 @@ ConnectionGroup::~ConnectionGroup(){
 	The connection can be accessed later using []. */
 unsigned ConnectionGroup::addConnection(unsigned id, unsigned fromNeuronID, unsigned toNeuronID, float delay, float weight){
 	//Store connection
-	connectionVector->push_back(Connection(id, fromNeuronID, toNeuronID, delay, weight));
+	connectionDeque->push_back(Connection(id, fromNeuronID, toNeuronID, delay, weight));
 
-	//Return pointer to connection
-	return connectionVector->size() - 1;
+	//Return index of connection
+	return connectionDeque->size() - 1;
 }
 
 
@@ -69,27 +69,27 @@ unsigned ConnectionGroup::addConnection(unsigned id, unsigned fromNeuronID, unsi
 unsigned ConnectionGroup::addConnection(unsigned int fromNeuronID, unsigned int toNeuronID, float delay, float weight){
 	unsigned tmpID = getTemporaryID();
 
-	//Store connection and return reference
-	connectionVector->push_back(Connection(tmpID, fromNeuronID, toNeuronID, delay, weight));
-	return connectionVector->size() - 1;
+	//Store connection and return index
+	connectionDeque->push_back(Connection(tmpID, fromNeuronID, toNeuronID, delay, weight));
+	return connectionDeque->size() - 1;
 }
 
 
 /*! Returns iterator pointing to beginning of connection group */
 ConnectionIterator ConnectionGroup::begin(){
-	return connectionVector->begin();
+	return connectionDeque->begin();
 }
 
 
 /*! Returns iterator pointing to end of connection group */
 ConnectionIterator ConnectionGroup::end(){
-	return connectionVector->end();
+	return connectionDeque->end();
 }
 
 
 /*! Removes all connections from this group */
 void ConnectionGroup::clearConnections(){
-	connectionVector->clear();
+	connectionDeque->clear();
 }
 
 
@@ -110,9 +110,9 @@ unsigned ConnectionGroup::getSynapseTypeID(){
 
 /*! Returns a reference to the operator at a specific index. */
 Connection& ConnectionGroup::operator[] (unsigned index){
-	if(index >= connectionVector->size())
+	if(index >= connectionDeque->size())
 		throw SpikeStreamException("Connection vector index out of range: " + QString::number(index));
-	return (*connectionVector)[index];
+	return (*connectionDeque)[index];
 }
 
 

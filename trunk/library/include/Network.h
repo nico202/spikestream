@@ -46,6 +46,7 @@ namespace spikestream {
 			QList<ConnectionGroupInfo> getConnectionGroupsInfo();
 			int getNeuronGroupCount() { return neurGrpMap.size(); }
 			Box getNeuronGroupBoundingBox(unsigned int neurGrpID);
+			NeuronGroup* getNeuronGroupFromNeuronID(unsigned neuronID);
 			QList<unsigned int> getNeuronGroupIDs();
 			QList<unsigned int> getConnectionGroupIDs();
 			NeuronGroup* getNeuronGroup(unsigned int id);

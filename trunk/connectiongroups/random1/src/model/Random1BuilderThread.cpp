@@ -61,6 +61,7 @@ void Random1BuilderThread::buildConnectionGroup(){
 		++cntr;
 		emit progress(cntr, numberOfProgressSteps, "Building connections...");
 	}
+	qDebug()<<"CONNECTIONS BUILT";
 }
 
 

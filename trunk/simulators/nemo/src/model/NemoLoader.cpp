@@ -3,6 +3,7 @@
 #include "NemoLoader.h"
 #include "NeuronGroup.h"
 #include "SpikeStreamSimulationException.h"
+#include "SpikeStreamIOException.h"
 #include "Util.h"
 using namespace spikestream;
 
@@ -15,7 +16,8 @@ using namespace spikestream;
 using namespace std;
 
 // Outputs verbose debugging behaviour about the loading of the network.
-//#define DEBUG
+#define DEBUG_NEURONS
+//#define DEBUG_SYNAPSES
 
 //Neuron type IDs in database. FIXME: WOULD BE BETTER TO USE THE NAME
 #define IZHIKEVICH_EXCITATORY_NEURON_ID 1
@@ -24,11 +26,26 @@ using namespace std;
 
 /*! Constructor */
 NemoLoader::NemoLoader(){
+	//Open up log file if logging is enabled
+	#if defined(DEBUG_NEURONS) || defined(DEBUG_SYNAPSES)
+		logFile = new QFile(Globals::getSpikeStreamRoot() + "/log/NemoLoader.log");
+		if(logFile->open(QFile::WriteOnly | QFile::Truncate))
+			logTextStream = new QTextStream(logFile);
+		else{
+			throw SpikeStreamIOException("Cannot open log file for NemoLoader.");
+		}
+	#endif//DEBUG_NEURONS || DEBUG_SYNAPSES
 }
 
 
 /*! Destructor */
 NemoLoader::~NemoLoader(){
+	//Clean up log file if logging is enabled
+	#if defined(DEBUG_NEURONS) || defined(DEBUG_SYNAPSES)
+		logFile->close();
+		delete logFile;
+		delete logTextStream;
+	#endif//DEBUG_NEURONS || DEBUG_SYNAPSES
 }
 
 
@@ -108,9 +125,9 @@ void NemoLoader::addConnectionGroup(ConnectionGroup* conGroup, nemo_network_t ne
 	for(ConnectionIterator conIter = conGroup->begin(); conIter != endConGrp; ++conIter){
 		//Add synapse
 		result = nemo_add_synapse(nemoNetwork, conIter->getFromNeuronID(), conIter->getToNeuronID(), conIter->getDelay(), conIter->getWeight(), learning, &newNemoSynapseID);
-		#ifdef DEBUG
-			cout<<"nemo_add_synapses(nemoNetwork, "<<tmpCon->getFromNeuronID()<<", "<<tmpCon->getToNeuronID()<<", "<<tmpCon->getDelay()<<", "<<tmpCon->getWeight()<<", "<<learning<<", "<<newNemoSynapseID<<");"<<endl;
-		#endif//DEBUG
+		#ifdef DEBUG_SYNAPSES
+			(*logTextStream)<<"nemo_add_synapses(nemoNetwork, "<<conIter->getFromNeuronID()<<", "<<conIter->getToNeuronID()<<", "<<conIter->getDelay()<<", "<<conIter->getWeight()<<", "<<learning<<", "<<newNemoSynapseID<<");"<<endl;
+		#endif//DEBUG_SYNAPSES
 		if(result != NEMO_OK)
 			throw SpikeStreamException("Error code returned from Nemo when adding synapse." + QString(nemo_strerror()));
 
@@ -140,15 +157,15 @@ void NemoLoader::addExcitatoryNeuronGroup(NeuronGroup* neuronGroup, nemo_network
 		//Calculate random parameters
 		rand1 = ranNumGen();
 		rand2 = ranNumGen();
-		c = v + c_1 * rand1 * rand2;
-		d = d_1 - d_2 * rand1 * rand2;
+		c = v + c_1 * rand1 * rand1;
+		d = d_1 - d_2 * rand2 * rand2;
 		u = b * v;
 
 		//Add the neuron to the network
-		#ifdef DEBUG
-			cout<<"nemo_add_neuron(nemoNetwork, "<<iter.value()->getID()<<", "<<a<<", "<<b<<", "<<v<<", "<<d<<", "<<u<<", "<<v<<", "<<sigma<<");"<<endl;
-		#endif//DEBUG
-		nemo_status_t result = nemo_add_neuron(nemoNetwork, iter.value()->getID(), a, b, v, d, u, v, sigma);
+		#ifdef DEBUG_NEURONS
+			(*logTextStream)<<"nemo_add_neuron(nemoNetwork, "<<iter.value()->getID()<<", "<<a<<", "<<b<<", "<<c<<", "<<d<<", "<<u<<", "<<v<<", "<<sigma<<");"<<endl;
+		#endif//DEBUG_NEURONS
+		nemo_status_t result = nemo_add_neuron(nemoNetwork, iter.value()->getID(), a, b, c, d, u, v, sigma);
 		if(result != NEMO_OK)
 			throw SpikeStreamException("Error code returned from Nemo when adding neuron." + QString(nemo_strerror()));
 	}
@@ -177,9 +194,9 @@ void NemoLoader::addInhibitoryNeuronGroup(NeuronGroup* neuronGroup, nemo_network
 		u = b * v;
 
 		//Add neuron to the network
-		#ifdef DEBUG
-			cout<<"nemo_add_neuron(nemoNetwork, "<<iter.value()->getID()<<", "<<a<<", "<<b<<", "<<v<<", "<<d<<", "<<u<<", "<<v<<", "<<sigma<<");"<<endl;
-		#endif//DEBUG
+		#ifdef DEBUG_NEURONS
+			(*logTextStream)<<"nemo_add_neuron(nemoNetwork, "<<iter.value()->getID()<<", "<<a<<", "<<b<<", "<<v<<", "<<d<<", "<<u<<", "<<v<<", "<<sigma<<");"<<endl;
+		#endif//DEBUG_NEURONS
 		nemo_status_t result = nemo_add_neuron(nemoNetwork, iter.value()->getID(), a, b, v, d, u, v, sigma);
 		if(result != NEMO_OK)
 			throw SpikeStreamException("Error code returned from Nemo when adding neuron." + QString(nemo_strerror()));

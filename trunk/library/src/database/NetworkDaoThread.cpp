@@ -486,10 +486,6 @@ void NetworkDaoThread::addNeuronGroups(){
 		QHash<QString, double> tmpParamMap = neuronGroup->getParameters();
 		setNeuronParameters(neurGrpInfo, tmpParamMap);
 
-		//Check for cancellation of task
-		if(stopThread)
-			return;
-
 		#ifdef TIME_PERFORMANCE
 			PerformanceTimer timer;
 		#endif//TIME_PERFORMANCE
@@ -545,9 +541,6 @@ void NetworkDaoThread::addNeuronGroups(){
 
 			//Keep track of the number of neurons
 			++neurCntr;
-
-			if(stopThread)
-				return;
 		}
 
 		//Add remaining neurons individually
@@ -580,7 +573,6 @@ void NetworkDaoThread::addNeuronGroups(){
 		//Check that we have added all the neurons
 		if(!stopThread && (neuronGroup->size() != neurAddedCntr))
 			throw SpikeStreamException("Number of neurons added to database: " + QString::number(neurAddedCntr) + " does not match size of neuron group: " + QString::number(neuronGroup->size()));
-
 
 		//Set the start ID of the neuron group
 		NetworkDao networkDao(this->getDBInfo());

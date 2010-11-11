@@ -155,6 +155,24 @@ void ConnectionGroupModel::selectAllOrNone(){
 }
 
 
+/*! Shows all or none of the connection groups */
+void ConnectionGroupModel::showAllOrNone(){
+	//Make all groups visible if there are none showing
+	QList<unsigned> visConGrpIds = Globals::getNetworkDisplay()->getVisibleConnectionGroupIDs();
+	if(visConGrpIds.isEmpty()){
+		for(int i=0; i<conGrpInfoList.size(); ++i)
+			visConGrpIds.append(conGrpInfoList.at(i).getID());
+	}
+
+	//One or more is hidden: make all groups invisible
+	else{
+		visConGrpIds.clear();
+	}
+	Globals::getNetworkDisplay()->setVisibleConnectionGroupIDs(visConGrpIds);
+	reset();
+}
+
+
 /*! Inherited from QAbstractTableModel */
 bool ConnectionGroupModel::setData(const QModelIndex& index, const QVariant&, int) {
     if (!index.isValid() || !Globals::networkLoaded())

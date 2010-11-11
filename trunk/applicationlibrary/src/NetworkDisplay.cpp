@@ -309,7 +309,7 @@ void NetworkDisplay::setNeuronGroupVisibility(unsigned int neurGrpID, bool visib
 /*! Sets the transparency of the neurons */
 void NetworkDisplay::setNeuronTransparency(float neuronTransparency){
 	 this->neuronTransparency = neuronTransparency;
-	 emit networkDisplayChanged();
+	 emit neuronGroupDisplayChanged();
 }
 
 
@@ -416,7 +416,6 @@ void NetworkDisplay::setSelectedNeuronID(unsigned int id, bool ctrlBtnDown){
 			toNeuronID = id;
 			setConnectionModeFlag(SHOW_BETWEEN_CONNECTIONS);
 			refreshDisplay = true;
-			//return;
 		}
 		//Control button is not down - select a different neuron
 		else if(singleNeuronID != id && !ctrlBtnDown){

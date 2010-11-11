@@ -51,6 +51,7 @@ namespace spikestream {
 			static Point3D getPointFromPositionKey(uint64_t positionKey);
 			static uint64_t getPositionKey(int xPos, int yPos, int zPos);
 			unsigned int getStartNeuronID() { return startNeuronID; }
+			bool isWeightless();
 			bool parametersSet();
 			void setID(unsigned int id);
 			void setDescription(const QString& description);

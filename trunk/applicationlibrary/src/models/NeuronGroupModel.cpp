@@ -61,7 +61,7 @@ QVariant NeuronGroupModel::data(const QModelIndex & index, int role) const{
 		if(index.column() == SIZE_COL)
 			return neurGrpSizeList[index.row()];
 		if(index.column() == NEUR_TYPE_COL)
-			return neurGrpInfoList[index.row()].getNeuronTypeID();
+			return neurGrpInfoList[index.row()].getNeuronType().getDescription();
     }
 
 	//Icons
@@ -160,6 +160,24 @@ void NeuronGroupModel::selectAllOrNone(){
 	reset();
 }
 
+
+
+/*! Shows all or none of the neuron groups */
+void NeuronGroupModel::showAllOrNone(){
+	//Make all groups visible if there are none showing
+	QList<unsigned> visNeurGrpIds = Globals::getNetworkDisplay()->getVisibleNeuronGroupIDs();
+	if(visNeurGrpIds.isEmpty()){
+		for(int i=0; i<neurGrpInfoList.size(); ++i)
+			visNeurGrpIds.append(neurGrpInfoList.at(i).getID());
+	}
+
+	//One or more is hidden: make all groups invisible
+	else{
+		visNeurGrpIds.clear();
+	}
+	Globals::getNetworkDisplay()->setVisibleNeuronGroupIDs(visNeurGrpIds);
+	reset();
+}
 
 /*! Inherited from QAbstractTableModel. */
 bool NeuronGroupModel::setData(const QModelIndex& index, const QVariant&, int) {
@@ -261,7 +279,7 @@ void NeuronGroupModel::loadNeuronGroups(){
 
 	//Load up sizes of connection groups
 	for(int i=0; i<neurGrpInfoList.size(); ++i)
-		neurGrpSizeList.append( Globals::getNetworkDao()->getNeuronCount( neurGrpInfoList.at(i) ) );
+		neurGrpSizeList.append(Globals::getNetwork()->getNeuronGroup(neurGrpInfoList.at(i).getID())->size());
 
 	//Sanity check
 	if(neurGrpInfoList.size() != neurGrpSizeList.size())

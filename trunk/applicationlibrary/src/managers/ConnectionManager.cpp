@@ -25,7 +25,6 @@ ConnectionManager::~ConnectionManager(){
 /*! Prepares for deletion of connection groups and starts separate thread to execute task. */
 void ConnectionManager::deleteConnectionGroups(QList<unsigned>& connectionGroupIDs){
 	deleteConnectionGroupIDs = connectionGroupIDs;
-	totalNumberOfConnections = Globals::getNetworkDao()->getConnectionCount(deleteConnectionGroupIDs);
 	this->start();
 }
 
@@ -38,13 +37,10 @@ void ConnectionManager::run(){
 	try{
 		//Delete the connection group
 		Network* currentNetwork = Globals::getNetwork();
-		NetworkDao threadNetworkDao(Globals::getNetworkDao()->getDBInfo());
 		Globals::getNetwork()->deleteConnectionGroups(deleteConnectionGroupIDs);
 
 		//Wait for network to finish adding connection groups
 		while(currentNetwork->isBusy()){
-			int connectionsDeleted = totalNumberOfConnections - threadNetworkDao.getConnectionCount(deleteConnectionGroupIDs);
-			emit progress(connectionsDeleted, totalNumberOfConnections, "Deleting connections from database...");
 			msleep(250);
 		}
 

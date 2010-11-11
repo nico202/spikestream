@@ -128,11 +128,6 @@ void ConnectionWidget::updateProgress(int stepsCompleted, int totalSteps, QStrin
 	//Progress has finished
 	else{
 		progressDialog->close();
-//		if(progressDialog != NULL){
-//			progressDialog->close();
-//			delete progressDialog;
-//			progressDialog = NULL;
-//		}
 	}
 
 	//Clear flag to indicate that update of progress is complete
