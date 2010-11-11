@@ -274,6 +274,14 @@ Point3D NeuronGroup::getPointFromPositionKey(uint64_t positionKey){
 }
 
 
+/*! Returns true if this neuron group is weightless */
+bool NeuronGroup::isWeightless(){
+	if(info.getNeuronType().getDescription().toUpper() == "WEIGHTLESS NEURON")
+		return true;
+	return false;
+}
+
+
 /*! Returns true if the parameters have been set. */
 bool NeuronGroup::parametersSet(){
 	if(getInfo().getNeuronType().getParameterCount() == parameterMap.size())

@@ -13,7 +13,8 @@ using namespace spikestream;
 #include "boost/random.hpp"
 
 //Outputs debugging information for NeMo calls
-//#define DEBUG_STEP
+#define DEBUG_LOAD
+#define DEBUG_STEP
 //#define DEBUG_WEIGHTS
 
 
@@ -99,7 +100,13 @@ void NemoWrapper::loadNemo(){
 	//Build the Nemo network
 	NemoLoader* nemoLoader = new NemoLoader();
 	connect(nemoLoader, SIGNAL(progress(int, int)), this, SLOT(updateProgress(int, int)));
+	#ifdef DEBUG_LOAD
+		qDebug()<<"About to build nemo network.";
+	#endif//DEBUG_LOAD
 	nemo_network_t nemoNet = nemoLoader->buildNemoNetwork(currentNetwork, volatileConGrpMap, &stopThread);
+	#ifdef DEBUG_LOAD
+		qDebug()<<"Nemo network successfully built.";
+	#endif//DEBUG_LOAD
 
 	//Clean up loader
 	delete nemoLoader;
@@ -116,10 +123,16 @@ void NemoWrapper::loadNemo(){
 	stdpReward = STDPFunctions::getReward(stdpFunctionID);
 
 	//Load the network into the simulator
+	#ifdef DEBUG_LOAD
+		qDebug()<<"About to load nemo network into simulator.";
+	#endif//DEBUG_LOAD
 	nemoSimulation = nemo_new_simulation(nemoNet, nemoConfig);
 	if(nemoSimulation == NULL) {
 		throw SpikeStreamSimulationException(QString("Failed to create Nemo simulation: ") + nemo_strerror());
 	}
+	#ifdef DEBUG_LOAD
+		qDebug()<<"Nemo network successfully loaded into simulator.";
+	#endif//DEBUG_LOAD
 
 	if(!stopThread)
 		simulationLoaded = true;
@@ -716,7 +729,7 @@ void NemoWrapper::stepNemo(){
 
 		//Advance simulation
 		#ifdef DEBUG_STEP
-			qDebug()<<"About to step nemo with injection of noise";
+			qDebug()<<"About to step nemo with injection of noise.";
 		#endif//DEBUG_STEP
 		checkNemoOutput( nemo_step(nemoSimulation, injectNoiseNeurIDArr, injectNoiseArrSize, NULL, NULL, 0, &firedArray, &firedCount), "Nemo error on step with injection of noise." );
 		#ifdef DEBUG_STEP
@@ -734,7 +747,7 @@ void NemoWrapper::stepNemo(){
 	else if(!( injectionPatternVector.empty() && injectionCurrentNeurIDVector.empty() ) ){
 		//Advance simulation using injection pattern
 		#ifdef DEBUG_STEP
-			qDebug()<<"About to step nemo with injection of pattern";
+			qDebug()<<"About to step nemo with injection of pattern.";
 		#endif//DEBUG_STEP
 		checkNemoOutput( nemo_step(nemoSimulation, &injectionPatternVector.front(), injectionPatternVector.size(), &injectionCurrentNeurIDVector.front(), &injectionCurrentVector.front(), injectionCurrentNeurIDVector.size(), &firedArray, &firedCount), "Nemo error on step with pattern." );
 		#ifdef DEBUG_STEP
@@ -753,7 +766,13 @@ void NemoWrapper::stepNemo(){
 	//     Advance simulation without noise or patterns
 	//----------------------------------------------------
 	else{
+		#ifdef DEBUG_STEP
+			qDebug()<<"About to step nemo.";
+		#endif//DEBUG_STEP
 		checkNemoOutput( nemo_step(nemoSimulation, 0, 0, NULL, NULL, 0, &firedArray, &firedCount), "Nemo error on step" );
+		#ifdef DEBUG_STEP
+					qDebug()<<"NeMo successfully stepped.";
+		#endif//DEBUG_STEP
 	}
 
 
@@ -776,7 +795,13 @@ void NemoWrapper::stepNemo(){
 	//         Extract membrane potential
 	//-----------------------------------------------
 	if(monitor && monitorMembranePotential){
+		#ifdef DEBUG_STEP
+			qDebug()<<"About to read membrane potential.";
+		#endif//DEBUG_STEP
 		getMembranePotential();
+		#ifdef DEBUG_STEP
+					qDebug()<<"Successfully read membrane potential.";
+		#endif//DEBUG_STEP
 	}
 
 

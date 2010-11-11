@@ -61,7 +61,7 @@ void AbstractConnectionBuilder::run(){
 		setError(ex.getMessage());
 	}
 	catch(...){
-		setError("An unknown error occurred.");
+		setError("Abstract Connection Builder: An unknown error occurred.");
 	}
 }
 

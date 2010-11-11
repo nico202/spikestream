@@ -7,11 +7,11 @@
 using namespace spikestream;
 
 //Other includes
-#include <vector>
+#include <deque>
 using namespace std;
 
 /*! An iterator for working through all of the connections in the group. */
-typedef vector<Connection>::iterator ConnectionIterator;
+typedef deque<Connection>::iterator ConnectionIterator;
 
 namespace spikestream {
 
@@ -40,7 +40,7 @@ namespace spikestream {
 			void setID(unsigned int id) { info.setID(id); }
 			void setParameters(QHash<QString, double>& paramMap);
 			void setToNeuronGroupID(unsigned id);
-			int size() { return connectionVector->size(); }
+			int size() { return connectionDeque->size(); }
 
 		private:
 			/*! Holds information about the connection group.
@@ -48,7 +48,7 @@ namespace spikestream {
 			ConnectionGroupInfo info;
 
 			/*! Vector of connections. */
-			vector<Connection>* connectionVector;
+			deque<Connection>* connectionDeque;
 
 			/*! Map of parameters for the synapses in the connection group */
 			QHash<QString, double> parameterMap;

@@ -9,7 +9,7 @@ using namespace spikestream;
 using namespace std;
 
 //Outputs memory debugging information
-#define MEMORY_DEBUG
+//#define MEMORY_DEBUG
 
 /*! Constructor that creates a new network and adds it to the database */
 Network::Network(const QString& name, const QString& description, const DBInfo& networkDBInfo, const DBInfo& archiveDBInfo){
@@ -58,7 +58,6 @@ Network::Network(const NetworkInfo& networkInfo, const DBInfo& networkDBInfo, co
     //Load up basic information about the neuron and connection groups
     loadNeuronGroupsInfo();
     loadConnectionGroupsInfo();
-	cout<<"SHORT SIZE: "<<sizeof(short)<<"; short max: "<<SHRT_MAX<<endl;
 }
 
 
@@ -181,8 +180,10 @@ void Network::cancel(){
 		connectionNetworkDaoThread->stop();
 		connectionTaskCancelled = true;
 	}
-	if(neuronNetworkDaoThread->isRunning())
+	if(neuronNetworkDaoThread->isRunning()){
 		neuronNetworkDaoThread->stop();
+		neuronTaskCancelled = true;
+	}
 }
 
 
@@ -316,6 +317,19 @@ QList<ConnectionGroupInfo> Network::getConnectionGroupsInfo(unsigned int synapse
 			tmpList.append(iter.value()->getInfo());
 	}
 	return tmpList;
+}
+
+
+/*! Returns the neuron group containing the specified neuron ID.
+	Throws an exception if this cannot be found.  */
+NeuronGroup* Network::getNeuronGroupFromNeuronID(unsigned neuronID){
+	//Need to check each neuron group to see if it contains the neuron.
+	for(QHash<unsigned int, NeuronGroup*>::iterator iter = neurGrpMap.begin(); iter != neurGrpMap.end(); ++iter){
+		if(iter.value()->contains(neuronID)){
+			return iter.value();
+		}
+	}
+	throw SpikeStreamException("Neuron group containing neuron with id " + QString::number(neuronID) + " cannot be found.");
 }
 
 

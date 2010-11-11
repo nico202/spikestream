@@ -135,7 +135,7 @@ void NetworksWidget::deleteNetwork(){
 		progressDialog = new QProgressDialog("Deleting network", "", 0, 0, this, Qt::CustomizeWindowHint);
 		progressDialog->setCancelButton(0);//Cancel not implemented at this stage
 		progressDialog->setWindowModality(Qt::WindowModal);
-		progressDialog->setMinimumDuration(1000);
+		progressDialog->show();
 		networkDaoThread->startDeleteNetwork(deleteNetworkID);
 	}
 	catch(SpikeStreamException& ex){

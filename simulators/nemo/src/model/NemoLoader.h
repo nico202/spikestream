@@ -38,6 +38,11 @@ namespace spikestream {
 
 		private:
 			//======================  VARIABLES  =======================
+			/*! File where log is written if required. */
+			QFile* logFile;
+
+			/*! Text stream connected to log file */
+			QTextStream* logTextStream;
 
 			//======================  METHODS  =======================
 			void addExcitatoryNeuronGroup(NeuronGroup* neuronGroup, nemo_network_t nemoNetwork, urng_t& ranNumGen);

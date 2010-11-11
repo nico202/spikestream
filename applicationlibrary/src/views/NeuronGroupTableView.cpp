@@ -46,10 +46,10 @@ void NeuronGroupTableView::resizeHeaders(){
 	hHeader->resizeSection(hHeader->logicalIndex(NeuronGroupModel::VIS_COL), 20);//Visibility icon
 	hHeader->resizeSection(hHeader->logicalIndex(NeuronGroupModel::ZOOM_COL), 20);//Zoom icon
 	hHeader->resizeSection(hHeader->logicalIndex(NeuronGroupModel::ID_COL), 50);//ID
-	hHeader->resizeSection(hHeader->logicalIndex(NeuronGroupModel::NAME_COL), 200);//Name
+	hHeader->resizeSection(hHeader->logicalIndex(NeuronGroupModel::NAME_COL), 100);//Name
 	hHeader->resizeSection(hHeader->logicalIndex(NeuronGroupModel::DESC_COL), 300);//Description
 	hHeader->resizeSection(hHeader->logicalIndex(NeuronGroupModel::SIZE_COL), 100);//Size
-	hHeader->resizeSection(hHeader->logicalIndex(NeuronGroupModel::NEUR_TYPE_COL), 100);//Neuron type
+	hHeader->resizeSection(hHeader->logicalIndex(NeuronGroupModel::NEUR_TYPE_COL), 200);//Neuron type
 	hHeader->resizeSection(hHeader->logicalIndex(NeuronGroupModel::SELECT_COL), 20);//Selection
 	hHeader->resizeSection(hHeader->logicalIndex(NeuronGroupModel::PARAM_COL), 70);//Parameters
 	hHeader->setDefaultAlignment(Qt::AlignLeft);
@@ -64,6 +64,8 @@ void NeuronGroupTableView::resizeHeaders(){
 void NeuronGroupTableView::headerClicked(int column){
 	if(column == NeuronGroupModel::SELECT_COL)
 		neuronGroupModel->selectAllOrNone();
+	else if(column == NeuronGroupModel::VIS_COL)
+		neuronGroupModel->showAllOrNone();
 }
 
 

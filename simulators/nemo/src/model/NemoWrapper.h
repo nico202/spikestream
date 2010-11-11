@@ -225,7 +225,6 @@ namespace spikestream {
 			unsigned patternNeuronGroupID;
 
 
-
 			//======================  METHODS  ========================
 			void checkNemoOutput(nemo_status_t result, const QString& errorMessage);
 			void clearError();

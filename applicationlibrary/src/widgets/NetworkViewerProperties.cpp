@@ -310,7 +310,7 @@ void NetworkViewerProperties::showSingleConnections(){
 	toLabel->setEnabled(false);
 
 	//Show button to launch truth table dialog if to neuron connections are shown and it is a weightless neuron
-	if(Globals::getNetworkDao()->isWeightlessNeuron(singleNeuronID)){
+	if(Globals::getNetwork()->getNeuronGroupFromNeuronID(singleNeuronID)->isWeightless()){
 		//Update neuron in truth table dialog if it is visible
 		if(truthTableDialog != NULL && truthTableDialog->isVisible())
 			showTruthTableDialog(singleNeuronID);

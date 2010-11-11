@@ -62,6 +62,8 @@ void ConnectionGroupTableView::resizeHeaders(){
 void ConnectionGroupTableView::headerClicked(int column){
 	if(column == ConnectionGroupModel::SELECT_COL)
 		connectionGroupModel->selectAllOrNone();
+	else if(column == ConnectionGroupModel::VIS_COL)
+		connectionGroupModel->showAllOrNone();
 }
 
 
