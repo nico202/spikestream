@@ -10,6 +10,7 @@
 #include <QList>
 
 //Other includes
+#include <stdint.h>
 #include <gmpxx.h>
 
 

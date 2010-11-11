@@ -8,6 +8,7 @@
 using namespace spikestream;
 
 //Qt includes
+#include <stdint.h>
 #include <QMap>
 
 /*! Structure holding pointers to neurons. */
