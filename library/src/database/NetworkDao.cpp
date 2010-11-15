@@ -507,6 +507,18 @@ NeuronType NetworkDao::getNeuronType(unsigned int neuronTypeID){
 }
 
 
+/*! Returns the neuron type for a specific neuron type description */
+NeuronType NetworkDao::getNeuronType(const QString& neuronTypeDescription){
+	//Resuse other method - not efficient, but more likely to be reliable than duplicating code.
+	QList<NeuronType> neurTypesList = getNeuronTypes();
+	foreach(NeuronType neurType, neurTypesList){
+		if(neurType.getDescription().toUpper() == neuronTypeDescription.toUpper())
+			return neurType;
+	}
+	throw SpikeStreamException("Neuron type with description " + neuronTypeDescription + " not found.");
+}
+
+
 /*! Returns the current list of available neuron types.
 	This information is stored in the NeuronTypes table. */
 QList<NeuronType> NetworkDao::getNeuronTypes(){

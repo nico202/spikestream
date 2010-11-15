@@ -34,8 +34,12 @@ win32{
 #---                 FILES                  ---#
 #----------------------------------------------#
 HEADERS = src/gui/ConnectionMatrixImporterWidget.h \
-			src/model/NeuronGroupBuilder.h
+			src/model/MatrixImporter.h \
+			src/model/NeuronGroupBuilder.h \
+			src/model/ConnectionGroupBuilder.h
 
 SOURCES = src/gui/ConnectionMatrixImporterWidget.cpp \
-			src/model/NeuronGroupBuilder.cpp
+			src/model/MatrixImporter.cpp \
+			src/model/NeuronGroupBuilder.cpp \
+			src/model/ConnectionGroupBuilder.cpp
 

@@ -48,6 +48,7 @@ namespace spikestream {
 			static void setAnalysisID(const QString& analysisName, unsigned int id);
 			static void setAnalysisRunning(const QString& analysisName);
 			static void setArchivePlaying(bool archivePlaying);
+			static void setNetwork(Network* network);
 			static void setSimulation(AbstractSimulation* simulation);
 			static void setSimulationLoading(bool simulationLoading);
 			static void setSimulationRunning(bool simulationRunning);
@@ -119,7 +120,6 @@ namespace spikestream {
 			static void setEventRouter(EventRouter* eventRouter);
 			static void setNetworkDisplay(NetworkDisplay* networkDisplay);
 			static void setNetworkDao(NetworkDao* networkDao);
-			static void setNetwork(Network* network);
 			static void setRendering(bool rendering);
 			static void setSpikeStreamRoot(QString rootDir);
 			static void setWorkingDirectory(QString workingDir);
