@@ -14,10 +14,10 @@ using namespace spikestream;
 using namespace std;
 
 /*! Controls whether performance measurements are made for this class */
-#define TIME_PERFORMANCE
+//#define TIME_PERFORMANCE
 
 /*! Switches on output of more debugging information */
-#define DEBUG
+//#define DEBUG
 
 
 /*! Constructor  */

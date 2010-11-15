@@ -56,6 +56,7 @@ namespace spikestream{
 			QList<NeuronGroupInfo> getNeuronGroupsInfo(unsigned int networkID);
 			QList<unsigned int> getNeuronIDs(unsigned int networkID);
 			NeuronType getNeuronType(unsigned int neuronTypeID);
+			NeuronType getNeuronType(const QString& neuronTypeDescription);//UNTESTED
 			QList<NeuronType> getNeuronTypes();
 			QHash<QString, double> getNeuronParameters(const NeuronGroupInfo& neurGrpInfo);
 			unsigned getStartNeuronID(unsigned neuronGroupID);
