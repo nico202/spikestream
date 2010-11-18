@@ -566,6 +566,18 @@ SynapseType NetworkDao::getSynapseType(unsigned int synapseTypeID){
 }
 
 
+/*! Returns the synapse type for a specific description. */
+SynapseType NetworkDao::getSynapseType(const QString& synapseTypeDescription){
+	//Resuse other method - not efficient, but more likely to be reliable than duplicating code.
+	QList<SynapseType> synTypesList = getSynapseTypes();
+	foreach(SynapseType synType, synTypesList){
+		if(synType.getDescription().toUpper() == synapseTypeDescription.toUpper())
+			return synType;
+	}
+	throw SpikeStreamException("Synapse type with description " + synapseTypeDescription + " not found.");
+}
+
+
 /*! Returns a map containing the parameters for the specified connection group */
 QHash<QString, double> NetworkDao::getSynapseParameters(const ConnectionGroupInfo& conGrpInfo){
 	/* Get class describing the type of synapse in this group - this contains the parameter

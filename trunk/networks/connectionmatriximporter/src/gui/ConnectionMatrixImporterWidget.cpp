@@ -47,20 +47,9 @@ ConnectionMatrixImporterWidget::ConnectionMatrixImporterWidget(){
 	gridLayout->addWidget(parametersButton, rowCntr, 2);
 	++rowCntr;
 
-	//Coordinates
-	gridLayout->addWidget(new QLabel("Talairach Coordinates File: "), rowCntr, 0);
-	coordinatesFilePathEdit = new QLineEdit();
-	connect(coordinatesFilePathEdit, SIGNAL(textChanged(const QString&)), this, SLOT(checkImportEnabled(const QString&)));
-	coordinatesFilePathEdit->setMinimumSize(250, 30);
-	gridLayout->addWidget(coordinatesFilePathEdit, rowCntr, 1);
-	QPushButton* coordinatesFileButt = new QPushButton("Browse");
-	connect (coordinatesFileButt, SIGNAL(clicked()), this, SLOT(getCoordinatesFile()));
-	gridLayout->addWidget(coordinatesFileButt, rowCntr, 2);
-	++rowCntr;
-
 	//Node Names
 	gridLayout->addWidget(new QLabel("Node Names File: "), rowCntr, 0);
-	nodeNamesFilePathEdit = new QLineEdit();
+	nodeNamesFilePathEdit = new QLineEdit("C:/Users/daogamez/Home/Experiments/HagmanConnectivityMatrix/AnatomicalLabels.dat");
 	connect(nodeNamesFilePathEdit, SIGNAL(textChanged(const QString&)), this, SLOT(checkImportEnabled(const QString&)));
 	nodeNamesFilePathEdit->setMinimumSize(250, 30);
 	gridLayout->addWidget(nodeNamesFilePathEdit, rowCntr, 1);
@@ -69,9 +58,20 @@ ConnectionMatrixImporterWidget::ConnectionMatrixImporterWidget(){
 	gridLayout->addWidget(nodeNamesFileButt, rowCntr, 2);
 	++rowCntr;
 
+	//Coordinates
+	gridLayout->addWidget(new QLabel("Talairach Coordinates File: "), rowCntr, 0);
+	coordinatesFilePathEdit = new QLineEdit("C:/Users/daogamez/Home/Experiments/HagmanConnectivityMatrix/TalairachCoordinates.dat");
+	connect(coordinatesFilePathEdit, SIGNAL(textChanged(const QString&)), this, SLOT(checkImportEnabled(const QString&)));
+	coordinatesFilePathEdit->setMinimumSize(250, 30);
+	gridLayout->addWidget(coordinatesFilePathEdit, rowCntr, 1);
+	QPushButton* coordinatesFileButt = new QPushButton("Browse");
+	connect (coordinatesFileButt, SIGNAL(clicked()), this, SLOT(getCoordinatesFile()));
+	gridLayout->addWidget(coordinatesFileButt, rowCntr, 2);
+	++rowCntr;
+
 	//Weights
 	gridLayout->addWidget(new QLabel("Connectivity Matrix File: "), rowCntr, 0);
-	weightsFilePathEdit = new QLineEdit();
+	weightsFilePathEdit = new QLineEdit("C:/Users/daogamez/Home/Experiments/HagmanConnectivityMatrix/C.dat");
 	connect(weightsFilePathEdit, SIGNAL(textChanged(const QString&)), this, SLOT(checkImportEnabled(const QString&)));
 	weightsFilePathEdit->setMinimumSize(250, 30);
 	gridLayout->addWidget(weightsFilePathEdit, rowCntr, 1);
@@ -82,7 +82,7 @@ ConnectionMatrixImporterWidget::ConnectionMatrixImporterWidget(){
 
 	//Delays
 	gridLayout->addWidget(new QLabel("Delays File: "), rowCntr, 0);
-	delaysFilePathEdit = new QLineEdit();
+	delaysFilePathEdit = new QLineEdit("C:/Users/daogamez/Home/Experiments/HagmanConnectivityMatrix/L.dat");
 	connect(delaysFilePathEdit, SIGNAL(textChanged(const QString&)), this, SLOT(checkImportEnabled(const QString&)));
 	delaysFilePathEdit->setMinimumSize(250, 30);
 	gridLayout->addWidget(delaysFilePathEdit, rowCntr, 1);
@@ -235,7 +235,7 @@ void ConnectionMatrixImporterWidget::setParameters(){
 	info list. */
 void ConnectionMatrixImporterWidget::buildParameters(){
 	parameterInfoList.append(ParameterInfo("neuron_group_size", "Size of the neuron group at each node.", ParameterInfo::UNSIGNED_INTEGER));
-	defaultParameterMap["neuron_group_size"] = 100;
+	defaultParameterMap["neuron_group_size"] = 10;
 	parameterMap["neuron_group_size"] = defaultParameterMap["neuron_group_size"];
 
 	parameterInfoList.append(ParameterInfo("proportion_excitatory_neurons", "Proportion of excitatory neurons. Varies between 0 and 1.", ParameterInfo::DOUBLE));
@@ -243,7 +243,7 @@ void ConnectionMatrixImporterWidget::buildParameters(){
 	parameterMap["proportion_excitatory_neurons"] = defaultParameterMap["proportion_excitatory_neurons"];
 
 	parameterInfoList.append(ParameterInfo("rewire_probability", "Probability that connection will be made outside of the group.\n0.0: All connections within each group; 1.0: All connections between groups.", ParameterInfo::DOUBLE));
-	defaultParameterMap["rewire_probability"] = 0.8;
+	defaultParameterMap["rewire_probability"] = 0.1;
 	parameterMap["rewire_probability"] = defaultParameterMap["rewire_probability"];
 
 	parameterInfoList.append(ParameterInfo("min_intra_delay", "Minimum delay for a connection within the group.", ParameterInfo::UNSIGNED_INTEGER));
@@ -254,21 +254,21 @@ void ConnectionMatrixImporterWidget::buildParameters(){
 	defaultParameterMap["max_intra_delay"] = 1.0;
 	parameterMap["max_intra_delay"] = defaultParameterMap["max_intra_delay"];
 
-	parameterInfoList.append(ParameterInfo("min_excitatory_intra_weight", "Minimum weight for an excitatory connection within the group.", ParameterInfo::DOUBLE));
-	defaultParameterMap["min_excitatory_intra_weight"] = 0.0;
-	parameterMap["min_excitatory_intra_weight"] = defaultParameterMap["min_excitatory_intra_weight"];
+	parameterInfoList.append(ParameterInfo("min_excitatory_weight", "Minimum weight for an excitatory connection.", ParameterInfo::DOUBLE));
+	defaultParameterMap["min_excitatory_weight"] = 0.0;
+	parameterMap["min_excitatory_weight"] = defaultParameterMap["min_excitatory_weight"];
 
-	parameterInfoList.append(ParameterInfo("max_excitatory_intra_weight", "Maximim weight for an excitatory connection within the group.", ParameterInfo::DOUBLE));
-	defaultParameterMap["max_excitatory_intra_weight"] = 0.5;
-	parameterMap["max_excitatory_intra_weight"] = defaultParameterMap["max_excitatory_intra_weight"];
+	parameterInfoList.append(ParameterInfo("max_excitatory_weight", "Maximim weight for an excitatory connection.", ParameterInfo::DOUBLE));
+	defaultParameterMap["max_excitatory_weight"] = 0.5;
+	parameterMap["max_excitatory_weight"] = defaultParameterMap["max_excitatory_weight"];
 
-	parameterInfoList.append(ParameterInfo("min_inhibitory_intra_weight", "Minimum weight for an inhibitory connection within the group.", ParameterInfo::DOUBLE));
-	defaultParameterMap["min_inhibitory_intra_weight"] = -1.0;
-	parameterMap["min_inhibitory_intra_weight"] = defaultParameterMap["min_inhibitory_intra_weight"];
+	parameterInfoList.append(ParameterInfo("min_inhibitory_weight", "Minimum weight for an inhibitory connection.", ParameterInfo::DOUBLE));
+	defaultParameterMap["min_inhibitory_weight"] = -1.0;
+	parameterMap["min_inhibitory_weight"] = defaultParameterMap["min_inhibitory_weight"];
 
-	parameterInfoList.append(ParameterInfo("max_inhibitory_intra_weight", "Maximim weight for an inhibitory connection within the group.", ParameterInfo::DOUBLE));
-	defaultParameterMap["max_inhibitory_intra_weight"] = 0.0;
-	parameterMap["max_inhibitory_intra_weight"] = defaultParameterMap["max_inhibitory_intra_weight"];
+	parameterInfoList.append(ParameterInfo("max_inhibitory_weight", "Maximim weight for an inhibitory connection.", ParameterInfo::DOUBLE));
+	defaultParameterMap["max_inhibitory_weight"] = 0.0;
+	parameterMap["max_inhibitory_weight"] = defaultParameterMap["max_inhibitory_weight"];
 }
 
 
