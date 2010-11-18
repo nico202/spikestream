@@ -18,7 +18,8 @@ namespace spikestream {
 			NeuronGroupBuilder();
 			~NeuronGroupBuilder();
 			void addNeuronGroups(Network* network, const QString& coordinatesFilePath, const QString& nodeNamesFilePath, QHash<QString, double> parameterMap);
-			QList<QString> getNodeNames() { return nodeNamesList; }
+			QList<NeuronGroup*> getExcitatoryNeuronGroups() { return excitNeurGrpList; }
+			QList<NeuronGroup*> getInhibitoryNeuronGroups() { return inhibNeurGrpList; }
 
 		signals:
 			void progress(int stepsCompleted, int totalSteps, QString message);
@@ -26,8 +27,15 @@ namespace spikestream {
 
 		private:
 			//======================  VARIABLES  =========================
-			/*! List of node names - stored here so that it can be passed to the connection builder. */
-			QList<QString> nodeNamesList;
+			/*! List of excitatory neuron groups - stored for use creating connections. */
+			QList<NeuronGroup*> excitNeurGrpList;
+
+			/*! List of inhibitory neuron groups - stored for use creating connections. */
+			QList<NeuronGroup*> inhibNeurGrpList;
+
+			/*! List of node names */
+			QList<QString> nodeNameList;
+
 
 			//======================  METHODS  ===========================
 			void addNeurons(NeuronGroup* exNeurGrp, NeuronGroup* inibNeurGrp, unsigned numNeurPerGroup, double proportionExcitatoryNeur, float neurGrpDimen, const Point3D& cartCoord);

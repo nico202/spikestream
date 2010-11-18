@@ -44,9 +44,9 @@ void MatrixImporter::run(){
 		neuronGroupBuilder.addNeuronGroups(newNetwork, coordinatesFilePath, nodeNamesFilePath, parameterMap);
 
 		//Add connections
-		ConnectionGroupBuilder connectionGroupBuilder(neuronGroupBuilder.getNodeNames());
+		ConnectionGroupBuilder connectionGroupBuilder(neuronGroupBuilder.getExcitatoryNeuronGroups(), neuronGroupBuilder.getInhibitoryNeuronGroups());
 		connect(&connectionGroupBuilder, SIGNAL(progress(int,int,QString)), this, SLOT(updateProgress(int,int,QString)));
-		connectionGroupBuilder.addConnectionGroups(newNetwork, weightsFilePath, delaysFilePath, parameterMap);
+		connectionGroupBuilder.addConnectionGroups(newNetwork, &stopThread, weightsFilePath, delaysFilePath, parameterMap);
 
 		//Make the network the current network
 		Globals::setNetwork(newNetwork);

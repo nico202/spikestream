@@ -141,7 +141,7 @@ void Network::addNeuronGroups(QList<NeuronGroup*>& neuronGroupList){
 	//Check if network is editable or not
 	if(!prototypeMode && hasArchives())
 		throw SpikeStreamException("Cannot add neuron groups to a locked network.");
-
+qDebug()<<"GETTING DEFAULT PARAMETERS FIXME: GETTING THE SAME SET OF PARAMETERS 120 ODD TIMES.";
 	//Set default parameters
 	NetworkDao netDao(networkDBInfo);
 	foreach(NeuronGroup* neurGrp, neuronGroupList){
@@ -150,15 +150,18 @@ void Network::addNeuronGroups(QList<NeuronGroup*>& neuronGroupList){
 			neurGrp->setParameters(tmpParamMap);
 		}
 	}
+qDebug()<<"GOT DEFAULT PARAMETERS";
 
 	//In prototype mode, we add connection groups to network and store them in a list for later
 	if(prototypeMode){
+		qDebug()<<"STORING NEURON GROUPS IN MEMORY";
 		foreach(NeuronGroup* neurGrp, neuronGroupList){
 			unsigned tmpID = getTemporaryNeurGrpID();//Get an ID for the neuron group
 			neurGrp->setID(tmpID);//Set ID in neuron group
 			neurGrpMap[tmpID] = neurGrp;//Add neuron group to network
 			newNeuronGroupMap[tmpID] = neurGrp;//Store neuron group in map for adding to database later
 		}
+		qDebug()<<"NEURON GROUPS STORED IN MEMORY";
 	}
 	//In normal mode, neuron groups are saved immediately to the database
 	else{

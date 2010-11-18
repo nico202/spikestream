@@ -32,10 +32,12 @@ namespace spikestream {
 			static QList<unsigned int> getUIntList(const QString& str);
 			static double getDouble(const QString& str);
 			static double getDoubleParameter(const QString& paramName, QHash<QString, double>& paramMap);
+			static float getFloatParameter(const QString& paramName, QHash<QString, double>& paramMap);
 			static int getIntParameter(const QString& paramName, QHash<QString, double>& paramMap);
 			static unsigned getUIntParameter(const QString& paramName, QHash<QString, double>& paramMap);
 			static int getRandom(int min, int max);
 			static double getRandomDouble(double min, double max);
+			static float getRandomFloat(float min, float max);
 			static unsigned getRandomUInt(unsigned min, unsigned max);
 			static bool isNumber(const QString& str);
 			static mpf_class factorial(unsigned int num);

@@ -104,7 +104,6 @@ namespace spikestream {
 
 			//====================  METHODS  ==========================
 			unsigned getTemporaryID();
-			void loadDefaultParameters();
 			void neuronGroupChanged();
 			NeuronGroup(const NeuronGroup& connGrp);
 			NeuronGroup& operator=(const NeuronGroup& rhs);

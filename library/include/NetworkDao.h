@@ -62,6 +62,7 @@ namespace spikestream{
 			unsigned getStartNeuronID(unsigned neuronGroupID);
 			QHash<QString, double> getSynapseParameters(const ConnectionGroupInfo& conGrpInfo);
 			SynapseType getSynapseType(unsigned int synapseTypeID);
+			SynapseType getSynapseType(const QString& synapseTypeDescription);//UNTESTED
 			QList<SynapseType> getSynapseTypes();
 			WeightlessNeuron* getWeightlessNeuron(unsigned int neuronID);
 			bool isWeightlessNetwork(unsigned int networkID);

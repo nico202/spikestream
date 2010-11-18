@@ -110,6 +110,14 @@ double Util::getDoubleParameter(const QString& paramName, QHash<QString, double>
 }
 
 
+/*! Returns a float parameter from the supplied map and throws an exception if the parameter does not exist. */
+float Util::getFloatParameter(const QString& paramName, QHash<QString, double>& paramMap){
+	if(!paramMap.contains(paramName))
+		throw SpikeStreamException("Parameter " + paramName + " not found in parameter map.");
+	return (float)paramMap[paramName];
+}
+
+
 /*! Returns an integer parameter from the supplied map and throws an exception if the parameter does not exist. */
 int Util::getIntParameter(const QString& paramName, QHash<QString, double>& paramMap){
 	if(!paramMap.contains(paramName))
@@ -160,6 +168,17 @@ double Util::getRandomDouble(double min, double max){
 	if(min == max)
 		return min;
 	double ranNum = (double)rand() / (double) RAND_MAX;
+	return min + (max-min)*ranNum;
+}
+
+
+/*! Returns a random float in the specified range */
+float Util::getRandomFloat(float min, float max){
+	if(min > max)
+		throw SpikeStreamException("Minimum cannot be greater than maximum");
+	if(min == max)
+		return min;
+	float ranNum = (float)rand() / (float) RAND_MAX;
 	return min + (max-min)*ranNum;
 }
 

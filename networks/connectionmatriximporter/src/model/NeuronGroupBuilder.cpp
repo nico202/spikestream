@@ -30,16 +30,17 @@ NeuronGroupBuilder::~NeuronGroupBuilder(){
 /*! Adds neuron groups to the supplied network using the coordinates
 	in the file. */
 void NeuronGroupBuilder::addNeuronGroups(Network* network, const QString& coordinatesFilePath, const QString& nodeNamesFilePath, QHash<QString, double> parameterMap){
+	excitNeurGrpList.clear();
+	inhibNeurGrpList.clear();
+
 	//Extract parameters
 	unsigned numNeurPerGroup = Util::getUIntParameter("neuron_group_size", parameterMap);
 	double proportionExcitatoryNeur = Util::getDoubleParameter("proportion_excitatory_neurons", parameterMap);
 
-	//List for adding neuron groups to the network
-	QList<NeuronGroup*> neuronGroupList;
-
 	emit progress(0, 1, "Loading coordinates");
 	QList<Point3D> cartCoords = getCartesianCoordinates(coordinatesFilePath);
 	float neurGrpDimen = getNeuronGroupDimension(cartCoords);
+
 	loadNodeNames(nodeNamesFilePath);
 	if(cartCoords.size() != nodeNameList.size())
 		throw SpikeStreamException("Number of node names does not match number of coordinates.");
@@ -57,13 +58,15 @@ void NeuronGroupBuilder::addNeuronGroups(Network* network, const QString& coordi
 		NeuronGroup* exNeurGrp = new NeuronGroup(NeuronGroupInfo(0, nodeNameList.at(i),  nodeNameList.at(i), parameterMap, exNeurType));
 		NeuronGroup* inhibNeurGrp = new NeuronGroup(NeuronGroupInfo(0, nodeNameList.at(i),  nodeNameList.at(i), parameterMap, inhibNeurType));
 		addNeurons(exNeurGrp, inhibNeurGrp, numNeurPerGroup, proportionExcitatoryNeur, neurGrpDimen, cartCoords.at(i));
-		neuronGroupList.append(exNeurGrp);
-		neuronGroupList.append(inhibNeurGrp);
+		excitNeurGrpList.append(exNeurGrp);
+		inhibNeurGrpList.append(inhibNeurGrp);
 		emit progress(i, cartCoords.size()-1, "Adding neuron groups to network.");
 	}
-
+qDebug()<<"FINISHED BUILDIGN NEURON GROUPS";
 	//Add neuron groups to the network
-	network->addNeuronGroups(neuronGroupList);
+	network->addNeuronGroups(excitNeurGrpList);
+	network->addNeuronGroups(inhibNeurGrpList);
+	qDebug()<<"FINISHED ADDING NEURON GROUPS TO NETWORK";
 }
 
 
@@ -190,7 +193,7 @@ float NeuronGroupBuilder::getNeuronGroupDimension(const QList<Point3D>& cartesia
 /*! Loads up the list of names of nodes */
 void NeuronGroupBuilder::loadNodeNames(const QString& nodeNameFileLocation){
 	QFile nodeNamesFile(nodeNameFileLocation);
-	nodeNamesList.clear();
+	nodeNameList.clear();
 	QHash<QString, bool> nodeNamesMap;//To check for uniqueness
 
 	//Check file exists and open it
@@ -208,7 +211,7 @@ void NeuronGroupBuilder::loadNodeNames(const QString& nodeNameFileLocation){
 			QString nodeName(line.trimmed());
 			if(nodeNamesMap.contains(nodeName))
 				throw SpikeStreamException("Duplicate node name: " + nodeName);
-			nodeNamesList.append(nodeName);
+			nodeNameList.append(nodeName);
 			nodeNamesMap[nodeName] = true;
 		}
 	}
