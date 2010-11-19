@@ -49,7 +49,7 @@ ConnectionMatrixImporterWidget::ConnectionMatrixImporterWidget(){
 
 	//Node Names
 	gridLayout->addWidget(new QLabel("Node Names File: "), rowCntr, 0);
-	nodeNamesFilePathEdit = new QLineEdit("C:/Users/daogamez/Home/Experiments/HagmanConnectivityMatrix/AnatomicalLabels.dat");
+	nodeNamesFilePathEdit = new QLineEdit("C:/Users/Taropeg/Home/NeuralNetworks/Experiments/Matrices/Test1_4Neurons/4Neuron_Labels.dat");
 	connect(nodeNamesFilePathEdit, SIGNAL(textChanged(const QString&)), this, SLOT(checkImportEnabled(const QString&)));
 	nodeNamesFilePathEdit->setMinimumSize(250, 30);
 	gridLayout->addWidget(nodeNamesFilePathEdit, rowCntr, 1);
@@ -60,7 +60,7 @@ ConnectionMatrixImporterWidget::ConnectionMatrixImporterWidget(){
 
 	//Coordinates
 	gridLayout->addWidget(new QLabel("Talairach Coordinates File: "), rowCntr, 0);
-	coordinatesFilePathEdit = new QLineEdit("C:/Users/daogamez/Home/Experiments/HagmanConnectivityMatrix/TalairachCoordinates.dat");
+	coordinatesFilePathEdit = new QLineEdit("C:/Users/Taropeg/Home/NeuralNetworks/Experiments/Matrices/Test1_4Neurons/4Neuron_Positions.dat");
 	connect(coordinatesFilePathEdit, SIGNAL(textChanged(const QString&)), this, SLOT(checkImportEnabled(const QString&)));
 	coordinatesFilePathEdit->setMinimumSize(250, 30);
 	gridLayout->addWidget(coordinatesFilePathEdit, rowCntr, 1);
@@ -71,7 +71,7 @@ ConnectionMatrixImporterWidget::ConnectionMatrixImporterWidget(){
 
 	//Weights
 	gridLayout->addWidget(new QLabel("Connectivity Matrix File: "), rowCntr, 0);
-	weightsFilePathEdit = new QLineEdit("C:/Users/daogamez/Home/Experiments/HagmanConnectivityMatrix/C.dat");
+	weightsFilePathEdit = new QLineEdit("C:/Users/Taropeg/Home/NeuralNetworks/Experiments/Matrices/Test1_4Neurons/4Neuron_C.dat");
 	connect(weightsFilePathEdit, SIGNAL(textChanged(const QString&)), this, SLOT(checkImportEnabled(const QString&)));
 	weightsFilePathEdit->setMinimumSize(250, 30);
 	gridLayout->addWidget(weightsFilePathEdit, rowCntr, 1);
@@ -82,7 +82,7 @@ ConnectionMatrixImporterWidget::ConnectionMatrixImporterWidget(){
 
 	//Delays
 	gridLayout->addWidget(new QLabel("Delays File: "), rowCntr, 0);
-	delaysFilePathEdit = new QLineEdit("C:/Users/daogamez/Home/Experiments/HagmanConnectivityMatrix/L.dat");
+	delaysFilePathEdit = new QLineEdit("C:/Users/Taropeg/Home/NeuralNetworks/Experiments/Matrices/Test1_4Neurons/4Neuron_L.dat");
 	connect(delaysFilePathEdit, SIGNAL(textChanged(const QString&)), this, SLOT(checkImportEnabled(const QString&)));
 	delaysFilePathEdit->setMinimumSize(250, 30);
 	gridLayout->addWidget(delaysFilePathEdit, rowCntr, 1);
@@ -96,6 +96,7 @@ ConnectionMatrixImporterWidget::ConnectionMatrixImporterWidget(){
 	importButton->setEnabled(false);
 	connect (importButton, SIGNAL(clicked()), this, SLOT(importMatrix()));
 	gridLayout->addWidget(importButton, rowCntr, 2);
+	checkImportEnabled();
 
 	//Add layout to dialog
 	mainVBox->addLayout(gridLayout);
@@ -189,6 +190,7 @@ void ConnectionMatrixImporterWidget::importMatrix(){
 
 	//Start the import
 	progressDialog->show();
+	progressUpdating = false;
 	matrixImporter->startImport(
 			networkNameEdit->text(), networkNameEdit->text(),
 			coordinatesFilePathEdit->text(), nodeNamesFilePathEdit->text(),
@@ -201,16 +203,26 @@ void ConnectionMatrixImporterWidget::matrixImporterFinished(){
 	if(matrixImporter->isError())
 		qCritical()<<matrixImporter->getErrorMessage();
 	progressDialog->hide();
+
+	Globals::getEventRouter()->networkChangedSlot();
 }
 
 
 /*! Informs user about progress with import */
 void ConnectionMatrixImporterWidget::updateProgress(int stepsCompleted, int totalSteps, QString message){
-	if(progressDialog->isVisible()){
+	//Avoid multiple calls to graphics
+	if(progressUpdating)
+		return;
+
+	progressUpdating = true;
+
+	if(matrixImporter->isRunning() && progressDialog->isVisible()){
 		progressDialog->setMaximum(totalSteps);
 		progressDialog->setValue(stepsCompleted);
 		progressDialog->setLabelText(message);
 	}
+
+	progressUpdating = false;
 }
 
 
@@ -235,7 +247,7 @@ void ConnectionMatrixImporterWidget::setParameters(){
 	info list. */
 void ConnectionMatrixImporterWidget::buildParameters(){
 	parameterInfoList.append(ParameterInfo("neuron_group_size", "Size of the neuron group at each node.", ParameterInfo::UNSIGNED_INTEGER));
-	defaultParameterMap["neuron_group_size"] = 10;
+	defaultParameterMap["neuron_group_size"] = 5;
 	parameterMap["neuron_group_size"] = defaultParameterMap["neuron_group_size"];
 
 	parameterInfoList.append(ParameterInfo("proportion_excitatory_neurons", "Proportion of excitatory neurons. Varies between 0 and 1.", ParameterInfo::DOUBLE));

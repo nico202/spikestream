@@ -36,12 +36,16 @@ namespace spikestream {
 			/*! List of node names */
 			QList<QString> nodeNameList;
 
+			/*! Default neuron parameters. The key is the neuron type ID. The value is the map of default parameters. */
+			QHash<unsigned, QHash<QString, double> > defaultParameterMaps;
+
 
 			//======================  METHODS  ===========================
 			void addNeurons(NeuronGroup* exNeurGrp, NeuronGroup* inibNeurGrp, unsigned numNeurPerGroup, double proportionExcitatoryNeur, float neurGrpDimen, const Point3D& cartCoord);
 			QList<Point3D> getCartesianCoordinates(const QString& coordinatesFile);
 			float getNeuronGroupDimension(const QList<Point3D>& cartesianCoordinatesList);
 			Point3D getTalairachCoordinate(const QString& line);
+			void loadDefaultParameters();
 			void loadNodeNames(const QString& nodeNameFileLocation);
 			QList<Point3D> loadTalairachCoordinates(const QString& coordinatesFileLocation);
 	};

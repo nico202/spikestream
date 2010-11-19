@@ -50,8 +50,6 @@ void MatrixImporter::run(){
 
 		//Make the network the current network
 		Globals::setNetwork(newNetwork);
-		Globals::getEventRouter()->networkChangedSlot();
-
 	}
 	catch(SpikeStreamException& ex){
 		setError(ex.getMessage());

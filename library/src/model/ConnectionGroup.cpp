@@ -124,6 +124,20 @@ bool ConnectionGroup::parametersSet(){
 }
 
 
+/*! Prints out the neuron group for debugging. */
+void ConnectionGroup::print(bool printConnections){
+	cout<<"------------- Connection Group: id="<<info.getID()<<"; '"<<info.getDescription().toStdString()<<"' ";
+	cout<<"From: "<<info.getFromNeuronGroupID()<<" To: "<<info.getToNeuronGroupID()<<" ";
+	cout<<info.getSynapseType().getDescription().toStdString()<<" -------------"<<endl;
+	if(printConnections){
+		ConnectionIterator endConGrp = this->end();
+		for(ConnectionIterator conIter = this->begin(); conIter != endConGrp; ++conIter){
+			conIter->print();
+		}
+	}
+}
+
+
 /*! Sets the description of the connection group */
 void ConnectionGroup::setDescription(const QString& description){
 	info.setDescription(description);
@@ -158,22 +172,6 @@ void ConnectionGroup::setParameters(QHash<QString, double> &paramMap){
 void ConnectionGroup::setToNeuronGroupID(unsigned id){
 	info.setToNeuronGroupID(id);
 }
-
-
-/*! Sets the weight of a specific connection */
-//void ConnectionGroup::setTempWeight(unsigned connectionID, float tempWeight){
-//	if(!connectionMap->contains(connectionID))
-//		throw SpikeStreamException("Failed to set temp weight. Connection with ID " + QString::number(connectionID) + " does not exist in this connection group.");
-//	(*connectionMap)[connectionID]->setTempWeight(tempWeight);
-//}
-
-
-///*! Sets the weight of a specific connection */
-//void ConnectionGroup::setWeight(unsigned connectionID, float weight){
-//	if(!connectionMap->contains(connectionID))
-//		throw SpikeStreamException("Failed to set weight. Connection with ID " + QString::number(connectionID) + " does not exist in this connection group.");
-//	(*connectionMap)[connectionID]->setWeight(weight);
-//}
 
 
 /*--------------------------------------------------------*/

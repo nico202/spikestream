@@ -3,6 +3,7 @@
 #include "NetworkDao.h"
 #include "NeuronGroupBuilder.h"
 #include "SpikeStreamIOException.h"
+#include "NeuronType.h"
 #include "Util.h"
 using namespace spikestream;
 
@@ -15,6 +16,7 @@ using namespace spikestream;
 
 /*! Constructor */
 NeuronGroupBuilder::NeuronGroupBuilder(){
+	loadDefaultParameters();
 }
 
 
@@ -51,22 +53,31 @@ void NeuronGroupBuilder::addNeuronGroups(Network* network, const QString& coordi
 	NeuronType exNeurType = networkDao.getNeuronType("Izhikevich Excitatory Neuron");
 	NeuronType inhibNeurType = networkDao.getNeuronType("Izhikevich Inhibitory Neuron");
 
+	//Check we have default parameters
+	if(!defaultParameterMaps.contains(exNeurType.getID()) || !defaultParameterMaps.contains(inhibNeurType.getID()))
+		throw SpikeStreamException("Default parameter map(s) missing.");
+
 	//Create neuron groups
 	emit progress(0, cartCoords.size()-1, "Adding neuron groups to network.");
 	for(int i=0; i<cartCoords.size(); ++i){
 		//Create excitatory and inhibitory neuron groups
 		NeuronGroup* exNeurGrp = new NeuronGroup(NeuronGroupInfo(0, nodeNameList.at(i),  nodeNameList.at(i), parameterMap, exNeurType));
 		NeuronGroup* inhibNeurGrp = new NeuronGroup(NeuronGroupInfo(0, nodeNameList.at(i),  nodeNameList.at(i), parameterMap, inhibNeurType));
+
+		//Set parameters in neuron groups
+		exNeurGrp->setParameters(defaultParameterMaps[exNeurGrp->getNeuronTypeID()]);
+		inhibNeurGrp->setParameters(defaultParameterMaps[inhibNeurGrp->getNeuronTypeID()]);
+
+		//Add neurons to neuron groups
 		addNeurons(exNeurGrp, inhibNeurGrp, numNeurPerGroup, proportionExcitatoryNeur, neurGrpDimen, cartCoords.at(i));
 		excitNeurGrpList.append(exNeurGrp);
 		inhibNeurGrpList.append(inhibNeurGrp);
 		emit progress(i, cartCoords.size()-1, "Adding neuron groups to network.");
 	}
-qDebug()<<"FINISHED BUILDIGN NEURON GROUPS";
+
 	//Add neuron groups to the network
 	network->addNeuronGroups(excitNeurGrpList);
 	network->addNeuronGroups(inhibNeurGrpList);
-	qDebug()<<"FINISHED ADDING NEURON GROUPS TO NETWORK";
 }
 
 
@@ -187,6 +198,16 @@ float NeuronGroupBuilder::getNeuronGroupDimension(const QList<Point3D>& cartesia
 	minDist *= 0.8;
 
 	return minDist;
+}
+
+
+/*! Loads up the default parameters for the available neuron types. */
+void NeuronGroupBuilder::loadDefaultParameters(){
+	defaultParameterMaps.clear();
+	NetworkDao netDao(Globals::getNetworkDao()->getDBInfo());
+	QList<NeuronType> neurTypeList = netDao.getNeuronTypes();
+	for(int i=0; i<neurTypeList.size(); ++i)
+		defaultParameterMaps[neurTypeList.at(i).getID()] = netDao.getDefaultNeuronParameters(neurTypeList.at(i).getID());
 }
 
 

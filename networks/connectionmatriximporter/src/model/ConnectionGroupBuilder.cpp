@@ -30,16 +30,8 @@ ConnectionGroupBuilder::ConnectionGroupBuilder(QList<NeuronGroup*> excitNeurGrpL
 	this->inhibNeurGrpList = inhibNeurGrpList;
 	numberOfNodes = excitNeurGrpList.size();
 
-//	rng_t generator(42u);
-
-//	  std::cout << "10 samples of a uniform distribution in [0..1):\n";
-
-//	  // Define a uniform random number distribution which produces "double"
-//	  // values between 0 and 1 (0 inclusive, 1 exclusive).
-//	  boost::uniform_real<> uni_dist(0,1);
-//	  boost::variate_generator<base_generator_type&, boost::uniform_real<> > uni(generator, uni_dist);
-
-
+	//Load up default parameters for the available synapse types
+	loadDefaultParameters();
 }
 
 
@@ -62,6 +54,10 @@ void ConnectionGroupBuilder::addConnectionGroups(Network* network, bool* stopThr
 	//Create synapse type for connections
 	NetworkDao networkDao(Globals::getNetworkDao()->getDBInfo());
 	synapseType = networkDao.getSynapseType("Izhikevich Synapse");
+
+	//Check we have default parameters
+	if(!defaultParameterMaps.contains(synapseType.getID()))
+		throw SpikeStreamException("Default parameter map(s) missing for synapse type.");
 
 	emit progress(0, 1, "Loading connection data.");
 
@@ -105,27 +101,33 @@ void ConnectionGroupBuilder::addConnections(Network* network, int nodeIndex, urn
 	NeuronGroup* excitNeurGrp = excitNeurGrpList.at(nodeIndex);
 	NeuronGroup* inhibNeurGrp = inhibNeurGrpList.at(nodeIndex);
 
-	//Add inhibitory connections within the node
-	addInhibitoryConnections(network, excitNeurGrp, inhibNeurGrp);
-
 	//Get list of the connections FROM the node TO other neuron groups
 	QList<ConnectionInfo>& connectionList = neurGrpConList[nodeIndex];
+
+	qDebug()<<"Adding connections for node: "<<nodeIndex<<"; Number of from connections: "<<connectionList.size()<<" Neuron group size: "<<excitNeurGrp->size();
+
+	//Add inhibitory connections within the node
+	addInhibitoryConnections(network, excitNeurGrp, inhibNeurGrp);
 
 	//Create inter node connection groups
 	for(int i=0; i<connectionList.size(); ++i){
 		ConnectionInfo& tmpConInfo = connectionList[i];
 		NeuronGroup* fromNeurGrp = excitNeurGrpList[tmpConInfo.fromIndex];
-		NeuronGroup* toNeurGrp = inhibNeurGrpList[tmpConInfo.toIndex];
+		NeuronGroup* toNeurGrp = excitNeurGrpList[tmpConInfo.toIndex];
 		QString description = getConGrpDescription(fromNeurGrp, toNeurGrp);
 		connectionList[i].connectionGroup = new ConnectionGroup(
 				ConnectionGroupInfo(0, description, fromNeurGrp->getID(), toNeurGrp->getID(), parameterMap, synapseType) );
+		connectionList[i].connectionGroup->setParameters(defaultParameterMaps[synapseType.getID()]);
 	}
 
 	//Create intra node excitatory-excitatory connection group
-	ConnectionGroup* excitExcitConGrp = new ConnectionGroup(ConnectionGroupInfo(0, getConGrpDescription(excitNeurGrp, excitNeurGrp), excitNeurGrp->getID(), excitNeurGrp->getID(), parameterMap, synapseType) );
+	ConnectionGroup* excitExcitConGrp = new ConnectionGroup(
+			ConnectionGroupInfo(0, getConGrpDescription(excitNeurGrp, excitNeurGrp),
+			excitNeurGrp->getID(), excitNeurGrp->getID(), parameterMap, synapseType) );
+	excitExcitConGrp->setParameters(defaultParameterMaps[synapseType.getID()]);
 
 	//Create the excitatory connections within and between nodes
-	double randomNum, previousWeightsTotal;
+	double randomNum, previousThresholdTotal, tmpRewireThresh = rewireThresholdList.at(nodeIndex);
 	for(NeuronMap::iterator fromIter = excitNeurGrp->begin(); fromIter != excitNeurGrp->end() && !*stopThread; ++fromIter){
 		for(NeuronMap::iterator toIter = excitNeurGrp->begin(); toIter != excitNeurGrp->end() && !*stopThread; ++toIter){
 			//Get random number between 0 and 1.0
@@ -135,8 +137,9 @@ void ConnectionGroupBuilder::addConnections(Network* network, int nodeIndex, urn
 			tmpWeight = Util::getRandomFloat(minExcitatoryWeight, maxExcitatoryWeight);
 
 			//Make excitatory connection within the from group
-			if(randomNum < rewireThreshold){
+			if(randomNum > tmpRewireThresh){
 				excitExcitConGrp->addConnection(fromIter.key(), toIter.key(), Util::getRandomUInt(minIntraDelay, maxIntraDelay), tmpWeight);
+				//qDebug()<<"RandomNum: "<<randomNum<<"; rewire threshold: "<<tmpRewireThresh<<"; Excitatory intra connection from: "<<fromIter.key()<<" to "<<toIter.key();
 			}
 			//Make connection to another group
 			else{
@@ -145,9 +148,10 @@ void ConnectionGroupBuilder::addConnections(Network* network, int nodeIndex, urn
 
 				//Find the connection group whose weight falls within the range
 				conGrpFound = false;
-				previousWeightsTotal = 0.0;
+				previousThresholdTotal = 0.0;
 				for(int conIdx=0; conIdx < connectionList.size(); ++conIdx){
-					if(randomNum <= (connectionList.at(conIdx).weight + previousWeightsTotal) ){
+					//qDebug()<<"SEEKING: Random num: "<<randomNum<<"; from: "<<connectionList[conIdx].fromIndex<<"; to: "<<connectionList[conIdx].toIndex<<"; weight: "<<connectionList[conIdx].threshold<<"; previousThresholdTotal: "<<previousThresholdTotal;
+					if(randomNum <= (connectionList.at(conIdx).threshold + previousThresholdTotal) ){
 						ConnectionInfo& tmpConInfo = connectionList[conIdx];
 						toNeurID = getRandomExcitatoryNeuronID(tmpConInfo.toIndex);
 						tmpConInfo.connectionGroup->addConnection(fromIter.key(), toNeurID, tmpConInfo.delay, tmpWeight);
@@ -156,13 +160,12 @@ void ConnectionGroupBuilder::addConnections(Network* network, int nodeIndex, urn
 						if(conGrpFound)
 							throw SpikeStreamException("Connection group has been found twice - error somewhere.");
 						conGrpFound = true;
+						//qDebug()<<"FOUND: Inter connection from: "<<connectionList[conIdx].fromIndex<<"; to: "<<connectionList[conIdx].toIndex<<"; weight: "<<connectionList[conIdx].threshold<<"; Random number: "<<randomNum<<"; previousThresholdTotal: "<<previousThresholdTotal;
 						break;
 					}
-					qDebug()<<"from: "<<connectionList[conIdx].fromIndex<<"; to: "<<connectionList[conIdx].toIndex<<"; weight: "<<connectionList[conIdx].weight;
-					qDebug()<<"Random number: "<<randomNum<<"; previousWeightsTotal: "<<previousWeightsTotal;
 
 					//Add the current weight to previous weights
-					previousWeightsTotal += connectionList.at(conIdx).weight;
+					previousThresholdTotal += connectionList.at(conIdx).weight;
 				}
 				if(!conGrpFound){
 					throw SpikeStreamException("Threshold error. No connection group with threshold less than random number was found.");
@@ -186,6 +189,8 @@ void ConnectionGroupBuilder::addConnections(Network* network, int nodeIndex, urn
 
 	//Add connection groups to network
 	network->addConnectionGroups(newConGrpList);
+
+	qDebug()<<"Finished adding connections for node "<<nodeIndex;
 }
 
 
@@ -198,10 +203,15 @@ void ConnectionGroupBuilder::addInhibitoryConnections(Network* network, NeuronGr
 	//Create connection groups
 	QList<ConnectionGroup*> newConGrpList;
 	ConnectionGroup* excitInhibConGrp = new ConnectionGroup(ConnectionGroupInfo(0, getConGrpDescription(excitNeurGrp, inhibNeurGrp), excitNeurGrp->getID(), inhibNeurGrp->getID(), parameterMap, synapseType) );
+	excitInhibConGrp->setParameters(defaultParameterMaps[synapseType.getID()]);
 	newConGrpList.append(excitInhibConGrp);
+
 	ConnectionGroup* inhibExcitConGrp = new ConnectionGroup(ConnectionGroupInfo(0, getConGrpDescription(inhibNeurGrp, excitNeurGrp), inhibNeurGrp->getID(), excitNeurGrp->getID(), parameterMap, synapseType) );
+	inhibExcitConGrp->setParameters(defaultParameterMaps[synapseType.getID()]);
 	newConGrpList.append(inhibExcitConGrp);
+
 	ConnectionGroup* inhibInhibConGrp = new ConnectionGroup(ConnectionGroupInfo(0, getConGrpDescription(inhibNeurGrp, inhibNeurGrp), inhibNeurGrp->getID(), inhibNeurGrp->getID(), parameterMap, synapseType) );
+	inhibInhibConGrp->setParameters(defaultParameterMaps[synapseType.getID()]);
 	newConGrpList.append(inhibInhibConGrp);
 
 	//Add excitatory-inhibitory connections
@@ -223,7 +233,7 @@ void ConnectionGroupBuilder::addInhibitoryConnections(Network* network, NeuronGr
 	}
 
 	//Add inhibitory-inhibitory connections
-	for(NeuronMap::iterator fromIter = excitNeurGrp->begin(); fromIter != excitNeurGrp->end() && !*stopThread; ++fromIter){
+	for(NeuronMap::iterator fromIter = inhibNeurGrp->begin(); fromIter != inhibNeurGrp->end() && !*stopThread; ++fromIter){
 		for(NeuronMap::iterator toIter = inhibNeurGrp->begin(); toIter != inhibNeurGrp->end() && !*stopThread; ++toIter){
 			tmpDelay = Util::getRandomUInt(minIntraDelay, maxIntraDelay);
 			tmpWeight = Util::getRandomFloat(minInhibitoryWeight, maxInhibitoryWeight);
@@ -236,27 +246,40 @@ void ConnectionGroupBuilder::addInhibitoryConnections(Network* network, NeuronGr
 }
 
 
-/*! Calculates the thresholds that are used to decide which connection group a rewired connection
-	is placed in. */
+/*! Calculates threshold that decides whether rewiring takes place.
+	This varies between nodes because we want the same number of rewired connections on all
+	connections with a weight of 1. */
 void ConnectionGroupBuilder::calculateThresholds(){
-	for(int i=0; i<neurGrpConList.size(); ++i){
-		double nextThreshold = rewireThreshold;
-		QList<ConnectionInfo>& conInfoList = neurGrpConList[i];
-		for(int i=0; i<conInfoList.size(); ++i){
-			conInfoList[i].threshold = nextThreshold;
+	rewireThresholdList.clear();
 
+	//Work through each neuron group
+	for(int nodeIdx=0; nodeIdx<neurGrpConList.size(); ++nodeIdx){
+		double totalWeight = 0.0;
 
-			qDebug()<<"from: "<<conInfoList[i].fromIndex<<"; to: "<<conInfoList[i].toIndex<<"; weight: "<<conInfoList.at(i).weight;
-			qDebug()<<"Rewire threshold: "<<rewireThreshold<<"; New threshold: "<<conInfoList[i].threshold<<"; next threshold: "<<nextThreshold;
-
-			nextThreshold += (1.0 - rewireThreshold) * conInfoList.at(i).weight;
+		//Add up the total connection weight from each neuron
+		QList<ConnectionInfo>& conInfoList = neurGrpConList[nodeIdx];
+		for(int conIdx=0; conIdx<conInfoList.size(); ++conIdx){
+			totalWeight += conInfoList[conIdx].weight;
 		}
 
-		//Last threshold in this group should be less than the maximum
-		if(!conInfoList.isEmpty() && (conInfoList.last().threshold >= 1.0 || conInfoList.last().threshold < rewireThreshold) )
-			throw SpikeStreamException("Last connection threshold should be greater than rewireThreshold and less than 1.0: " + QString::number(conInfoList.last().threshold, 'g', 12));
+		//Calculate the threshold of each connection
+		double weightFactor = 1.0 / totalWeight;
+		for(int conIdx=0; conIdx<conInfoList.size(); ++conIdx){
+			conInfoList[conIdx].threshold = conInfoList[conIdx].weight * weightFactor;
+		}
+
+		//Rewire threshold is the global rewire probablity multiplied by the totalweight
+		rewireThresholdList.append(rewireProbability * totalWeight);
+
+		//Should not exceed 1
+		if(rewireThresholdList[nodeIdx] > 1.0){
+			qDebug()<<"WARNING: Rewire threshold has been limited to 1. Better to choose a lower rewire probability.";
+			rewireThresholdList[nodeIdx] = 1.0;
+		}
+		qDebug()<<"Rewire threshold for node "<<nodeIdx<<" = "<<rewireThresholdList[nodeIdx];
 	}
 }
+
 
 
 /*! Returns an automatically generated description of a connection between two neuron groups */
@@ -273,6 +296,16 @@ unsigned ConnectionGroupBuilder::getRandomExcitatoryNeuronID(int index){
 	NeuronGroup* neurGrp = excitNeurGrpList.at(index);
 	unsigned ranIndx = Util::getRandomUInt(0, neurGrp->size() - 1);
 	return neurGrp->getNeuronMap()->values().at(ranIndx)->getID();
+}
+
+
+/*! Loads up the default parameters for the available synapse types. */
+void ConnectionGroupBuilder::loadDefaultParameters(){
+	defaultParameterMaps.clear();
+	NetworkDao netDao(Globals::getNetworkDao()->getDBInfo());
+	QList<SynapseType> synTypeList = netDao.getSynapseTypes();
+	for(int i=0; i<synTypeList.size(); ++i)
+		defaultParameterMaps[synTypeList.at(i).getID()] = netDao.getDefaultSynapseParameters(synTypeList.at(i).getID());
 }
 
 
@@ -295,7 +328,7 @@ void ConnectionGroupBuilder::loadDelays(const QString& delaysFilePath){
 	while (!in.atEnd()) {
 		line = in.readLine();
 		if(!line.isEmpty()){
-			QStringList strList = line.split(QRegExp("\\s+"));
+			QStringList strList = line.split(QRegExp("\\s+"), QString::SkipEmptyParts);
 			if(strList.size() != numberOfNodes)
 				throw SpikeStreamException("Number of nodes in delays file does not equal number of nodes loaded: " + numberOfNodes);
 
@@ -346,9 +379,9 @@ void ConnectionGroupBuilder::loadWeights(const QString& weightsFilePath){
 	while (!in.atEnd()) {
 		line = in.readLine();
 		if(!line.isEmpty()){
-			QStringList strList = line.split(QRegExp("\\s+"));
+			QStringList strList = line.split(QRegExp("\\s+"), QString::SkipEmptyParts);
 			if(strList.size() != numberOfNodes)
-				throw SpikeStreamException("Number of nodes in connection matrix does not equal number of nodes loaded: " + numberOfNodes);
+				throw SpikeStreamException("Number of nodes in connection matrix does not equal number of nodes loaded: Line: " + line + "; number of nodes: " + QString::number(numberOfNodes) + "; string list size: " + QString::number(strList.size()));
 
 			//Work through all the FROM indexes connecting TO the connection group represented by the row.
 			for(int i=0; i<strList.size(); ++i){
@@ -370,7 +403,7 @@ void ConnectionGroupBuilder::loadWeights(const QString& weightsFilePath){
 
 	//Normalize the weights and calculate the thresholds
 	normalizeWeights();
-	//calculateThresholds();
+	calculateThresholds();
 }
 
 
@@ -404,7 +437,7 @@ void ConnectionGroupBuilder::printConnections(bool printToFile){
 	if(printToFile){
 		QFile logFile(Globals::getSpikeStreamRoot() + "/log/ConnectionGroupBuilder.log");
 		if(!logFile.open(QFile::WriteOnly | QFile::Truncate))
-			throw SpikeStreamIOException("Cannot open log file for NemoLoader.");
+			throw SpikeStreamIOException("Cannot open log file for ConnectionGroupBuilder. Path: " + logFile.fileName());
 		QTextStream logOut(&logFile);
 		logOut<<"---------------------  CONNECTIONS -------------------"<<endl;
 		for(int i=0; i<neurGrpConList.size(); ++i){
@@ -437,7 +470,7 @@ void ConnectionGroupBuilder::storeParameters(){
 	double rewireProb = Util::getDoubleParameter("rewire_probability", parameterMap) ;
 	if(rewireProb < 0.0 || rewireProb > 1.0)
 		throw SpikeStreamException("Rewire probability out of range: " + QString::number(rewireProb) + ". It must be between 0.0 and 1.0 inclusive.");
-	rewireThreshold = 1.0 - rewireProb;
+	rewireProbability = rewireProb;
 
 	minIntraDelay = Util::getUIntParameter("min_intra_delay", parameterMap);
 	maxIntraDelay = Util::getUIntParameter("max_intra_delay", parameterMap);

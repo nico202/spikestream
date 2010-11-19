@@ -54,6 +54,7 @@ namespace spikestream {
 			unsigned int getStartNeuronID() { return startNeuronID; }
 			bool isWeightless();
 			bool parametersSet();
+			void print();
 			void setID(unsigned int id);
 			void setDescription(const QString& description);
 			void setName(const QString& name);

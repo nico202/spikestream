@@ -70,6 +70,9 @@ namespace spikestream {
 			/*! Dialog for showing progress */
 			QProgressDialog* progressDialog;
 
+			/*! Avoids multiple calls to progress dialog whilst it is redrawing */
+			bool progressUpdating;
+
 
 			//======================  METHODS  =========================
 			void buildParameters();
