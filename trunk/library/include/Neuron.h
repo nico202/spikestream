@@ -18,6 +18,7 @@ namespace spikestream {
 			float getZPos() { return location.getZPos(); }
 			unsigned int getID() { return id; }
 			Point3D& getLocation() { return location; }
+			void print();
 			void setID(unsigned int id) { this->id = id; }
 
 		private:

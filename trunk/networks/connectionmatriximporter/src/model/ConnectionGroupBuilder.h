@@ -104,7 +104,7 @@ namespace spikestream {
 			SynapseType synapseType;
 
 			/*! Threshold above which rewiring takes place */
-			double rewireThreshold;
+			double rewireProbability;
 
 			/*! Minimum delay for within node connections. */
 			float minIntraDelay;
@@ -124,6 +124,12 @@ namespace spikestream {
 			/*! Maximum weight of an inhibitory connection. */
 			float maxInhibitoryWeight;
 
+			/*! List of thresholds for the rewiring of each node. */
+			QList<double> rewireThresholdList;
+
+			/*! Default synapse parameters. The key is the synapse type ID. The value is the map of default parameters. */
+			QHash<unsigned, QHash<QString, double> > defaultParameterMaps;
+
 
 			//======================  METHODS  ===========================
 			void addConnections(Network* network, int nodeIndex, urng_t& ranNumGen);
@@ -131,6 +137,7 @@ namespace spikestream {
 			void calculateThresholds();
 			QString getConGrpDescription(NeuronGroup* fromNeuronGroup, NeuronGroup* toNeuronGroup);
 			unsigned getRandomExcitatoryNeuronID(int index);
+			void loadDefaultParameters();
 			void loadDelays(const QString& delaysFilePath);
 			void loadWeights(const QString& weightsFilePath);
 			void normalizeWeights();

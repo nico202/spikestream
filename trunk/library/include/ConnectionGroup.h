@@ -35,6 +35,7 @@ namespace spikestream {
 			unsigned int getToNeuronGroupID() { return info.getToNeuronGroupID(); }
 			Connection& operator[] (unsigned index);
 			bool parametersSet();
+			void print(bool printConnections = false);
 			void setDescription(const QString& description);
 			void setFromNeuronGroupID(unsigned id);
 			void setID(unsigned int id) { info.setID(id); }

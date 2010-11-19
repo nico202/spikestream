@@ -8,6 +8,10 @@ using namespace spikestream;
 //Qt includes
 #include <QDebug>
 
+//Other includes
+#include <iostream>
+using namespace std;
+
 //Initialize static variables
 unsigned NeuronGroup::neuronIDCounter = LAST_NEURON_ID + 1;
 
@@ -207,8 +211,10 @@ unsigned int NeuronGroup::getNeuronIDAtLocation(const Point3D& point){
 
 /*! Returns the location of the neuron with the specified ID */
 Point3D& NeuronGroup::getNeuronLocation(unsigned int neuronID){
-	if(!neuronMap->contains(neuronID))
+	if(!neuronMap->contains(neuronID)){
+		this->print();
 		throw SpikeStreamException("Neuron ID '" + QString::number(neuronID) + "' could not be found.");
+	}
 	return (*neuronMap)[neuronID]->getLocation();
 }
 
@@ -287,6 +293,17 @@ bool NeuronGroup::parametersSet(){
 	if(getInfo().getNeuronType().getParameterCount() == parameterMap.size())
 		return true;
 	return false;
+}
+
+
+/*! Prints out the neuron group for debugging. */
+void NeuronGroup::print(){
+	cout<<"------------- Neuron Group: id="<<info.getID()<<"; description="<<info.getDescription().toStdString();
+	cout<<" "<<info.getNeuronType().getDescription().toStdString()<<" -------------"<<endl;
+	NeuronMap::iterator mapEnd = neuronMap->end();
+	for(NeuronMap::iterator iter=neuronMap->begin(); iter != mapEnd; ++iter){
+		iter.value()->print();
+	}
 }
 
 

@@ -2,6 +2,10 @@
 #include "Neuron.h"
 using namespace spikestream;
 
+//Other includes
+#include <iostream>
+using namespace std;
+
 
 /*! Constructor */
 Neuron::Neuron(float xPos, float yPos, float zPos){
@@ -25,6 +29,12 @@ Neuron::Neuron(unsigned int id, float xPos, float yPos, float zPos){
 
 /*! Destructor */
 Neuron::~Neuron(){
+}
+
+
+/*! Prints out information about this neuron */
+void Neuron::print(){
+	cout<<"Neuron. id: "<<id<<endl;
 }
 
 
