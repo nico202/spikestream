@@ -101,7 +101,8 @@ void MatrixImporter::startImport(const QString& netName, const QString& netDesc,
 /*! Called by other classes to report progress,
 	emits signal with this progress information. */
 void MatrixImporter::updateProgress(int stepsCompleted, int totalSteps, QString message){
-	emit progress(stepsCompleted, totalSteps, message);
+	if(this->isRunning())
+		emit progress(stepsCompleted, totalSteps, message);
 }
 
 

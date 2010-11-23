@@ -105,7 +105,7 @@ double Util::getDouble(const QString& str){
 /*! Returns a double parameter from the supplied map and throws an exception if the parameter does not exist. */
 double Util::getDoubleParameter(const QString& paramName, QHash<QString, double>& paramMap){
 	if(!paramMap.contains(paramName))
-		throw SpikeStreamException("Parameter " + paramName + " not found in parameter map.");
+		throw SpikeStreamException("Parameter '" + paramName + "'' not found in parameter map.");
 	return paramMap[paramName];
 }
 
@@ -113,7 +113,7 @@ double Util::getDoubleParameter(const QString& paramName, QHash<QString, double>
 /*! Returns a float parameter from the supplied map and throws an exception if the parameter does not exist. */
 float Util::getFloatParameter(const QString& paramName, QHash<QString, double>& paramMap){
 	if(!paramMap.contains(paramName))
-		throw SpikeStreamException("Parameter " + paramName + " not found in parameter map.");
+		throw SpikeStreamException("Parameter '" + paramName + "'' not found in parameter map.");
 	return (float)paramMap[paramName];
 }
 
@@ -121,9 +121,9 @@ float Util::getFloatParameter(const QString& paramName, QHash<QString, double>& 
 /*! Returns an integer parameter from the supplied map and throws an exception if the parameter does not exist. */
 int Util::getIntParameter(const QString& paramName, QHash<QString, double>& paramMap){
 	if(!paramMap.contains(paramName))
-		throw SpikeStreamException("Parameter " + paramName + " not found in parameter map.");
+		throw SpikeStreamException("Parameter '" + paramName + "'' not found in parameter map.");
 	if(rint(paramMap[paramName]) != paramMap[paramName])
-		throw SpikeStreamException("Parameter " + paramName + " is not an integer.");
+		throw SpikeStreamException("Parameter '" + paramName + "'' is not an integer.");
 	return (int) paramMap[paramName];
 }
 
@@ -131,11 +131,11 @@ int Util::getIntParameter(const QString& paramName, QHash<QString, double>& para
 /*! Returns an unsigned parameter from the supplied map and throws an exception if the parameter does not exist. */
 unsigned Util::getUIntParameter(const QString& paramName, QHash<QString, double>& paramMap){
 	if(!paramMap.contains(paramName))
-		throw SpikeStreamException("Parameter " + paramName + " not found in parameter map.");
+		throw SpikeStreamException("Parameter '" + paramName + "'' not found in parameter map.");
 	if(rint(paramMap[paramName]) != paramMap[paramName])
-		throw SpikeStreamException("Parameter " + paramName + " is not a whole number.");
+		throw SpikeStreamException("Parameter '" + paramName + "'' is not a whole number.");
 	if(paramMap[paramName] < 0.0)
-		throw SpikeStreamException("Expecting a positive number, but parameter " + paramName + " is less than 0.");
+		throw SpikeStreamException("Expecting a positive number, but parameter '" + paramName + "'' is less than 0.");
 	return (unsigned) paramMap[paramName];
 }
 
