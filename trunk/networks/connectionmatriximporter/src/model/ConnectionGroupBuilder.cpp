@@ -77,13 +77,12 @@ void ConnectionGroupBuilder::addConnectionGroups(Network* network, bool* stopThr
 	#endif//DEBUG
 
 	//Work through all of the neuron groups
+	emit progress(0, excitNeurGrpList.size(), "Adding connections...");
 	for(int nodeIdx=0; nodeIdx<excitNeurGrpList.size(); ++nodeIdx){
 		addConnections(network, nodeIdx, ranNumGen);
+		emit progress(nodeIdx, excitNeurGrpList.size(), "Adding connections...");
 	}
 }
-
-
-
 
 
 /*----------------------------------------------------------*/

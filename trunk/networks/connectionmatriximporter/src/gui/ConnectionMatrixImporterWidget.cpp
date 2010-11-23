@@ -217,6 +217,7 @@ void ConnectionMatrixImporterWidget::updateProgress(int stepsCompleted, int tota
 	progressUpdating = true;
 
 	if(matrixImporter->isRunning() && progressDialog->isVisible()){
+		qDebug()<<"UPDATING PROGRESS msg: "<<message<<"; steps completed: "<<stepsCompleted<<"; max"<<totalSteps;
 		progressDialog->setMaximum(totalSteps);
 		progressDialog->setValue(stepsCompleted);
 		progressDialog->setLabelText(message);
@@ -253,6 +254,10 @@ void ConnectionMatrixImporterWidget::buildParameters(){
 	parameterInfoList.append(ParameterInfo("proportion_excitatory_neurons", "Proportion of excitatory neurons. Varies between 0 and 1.", ParameterInfo::DOUBLE));
 	defaultParameterMap["proportion_excitatory_neurons"] = 0.8;
 	parameterMap["proportion_excitatory_neurons"] = defaultParameterMap["proportion_excitatory_neurons"];
+
+	parameterInfoList.append(ParameterInfo("node_spacing_factor", "Factor by which space enclosing neuron groups is reduced to create space around neuron groups.\nSet to 1 to make neuron groups adjacent; set to a low number to increase spacing. ", ParameterInfo::DOUBLE));
+	defaultParameterMap["node_spacing_factor"] = 0.8;
+	parameterMap["node_spacing_factor"] = defaultParameterMap["node_spacing_factor"];
 
 	parameterInfoList.append(ParameterInfo("rewire_probability", "Probability that connection will be made outside of the group.\n0.0: All connections within each group; 1.0: All connections between groups.", ParameterInfo::DOUBLE));
 	defaultParameterMap["rewire_probability"] = 0.1;

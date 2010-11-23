@@ -13,6 +13,9 @@ using namespace spikestream;
 //Other includes
 #include <cmath>
 
+//Enable to output debugging information
+#define DEBUG
+
 
 /*! Constructor */
 NeuronGroupBuilder::NeuronGroupBuilder(){
@@ -36,8 +39,7 @@ void NeuronGroupBuilder::addNeuronGroups(Network* network, const QString& coordi
 	inhibNeurGrpList.clear();
 
 	//Extract parameters
-	unsigned numNeurPerGroup = Util::getUIntParameter("neuron_group_size", parameterMap);
-	double proportionExcitatoryNeur = Util::getDoubleParameter("proportion_excitatory_neurons", parameterMap);
+	storeParameters(parameterMap);
 
 	emit progress(0, 1, "Loading coordinates");
 	QList<Point3D> cartCoords = getCartesianCoordinates(coordinatesFilePath);
@@ -69,7 +71,7 @@ void NeuronGroupBuilder::addNeuronGroups(Network* network, const QString& coordi
 		inhibNeurGrp->setParameters(defaultParameterMaps[inhibNeurGrp->getNeuronTypeID()]);
 
 		//Add neurons to neuron groups
-		addNeurons(exNeurGrp, inhibNeurGrp, numNeurPerGroup, proportionExcitatoryNeur, neurGrpDimen, cartCoords.at(i));
+		addNeurons(exNeurGrp, inhibNeurGrp, neurGrpDimen, cartCoords.at(i));
 		excitNeurGrpList.append(exNeurGrp);
 		inhibNeurGrpList.append(inhibNeurGrp);
 		emit progress(i, cartCoords.size()-1, "Adding neuron groups to network.");
@@ -86,23 +88,37 @@ void NeuronGroupBuilder::addNeuronGroups(Network* network, const QString& coordi
 /*----------------------------------------------------------*/
 
 /*! Adds the neurons to the neuron groups */
-void NeuronGroupBuilder::addNeurons(NeuronGroup* exNeurGrp, NeuronGroup* inhibNeurGrp, unsigned numNeurPerGroup, double proportionExcitatoryNeur, float neurGrpDimen, const Point3D& cartCoord){
-	int inhibThreshold = Util::rUInt(proportionExcitatoryNeur * RAND_MAX);
+void NeuronGroupBuilder::addNeurons(NeuronGroup* exNeurGrp, NeuronGroup* inhibNeurGrp, float neurGrpDimen, const Point3D& cartCoord){
+	int inhibThreshold = Util::rUInt(proportionExcitatoryNeurons * RAND_MAX);
 
 	//Calculate the number of neurons down each side of the group.
-	unsigned numXNeur = (unsigned)floor(cbrt(numNeurPerGroup));
+	unsigned numXNeur = (unsigned)floor(cbrt(numberNeuronsPerNode));
 	unsigned numYNeur = numXNeur;
-	unsigned numZNeur = numNeurPerGroup / (numXNeur*numXNeur);
+	unsigned numZNeur = numberNeuronsPerNode / (numXNeur*numXNeur);
 
 	//Calculate the starting position.
-	float xStart = cartCoord.getXPos() - neurGrpDimen/2.0f;
-	float yStart = cartCoord.getYPos() - neurGrpDimen/2.0f;
-	float zStart = cartCoord.getZPos() - neurGrpDimen/2.0f;
+	float xStart = cartCoord.getXPos();// - neurGrpDimen/2.0f;
+	float yStart = cartCoord.getYPos();// - neurGrpDimen/2.0f;
+	float zStart = cartCoord.getZPos();// - neurGrpDimen/2.0f;
 
 	//Calculate the increments on each axis
-	float xSpacing = neurGrpDimen / numXNeur-1;
-	float ySpacing = neurGrpDimen / numYNeur-1;
-	float zSpacing = neurGrpDimen / numZNeur-1;
+	float xSpacing, ySpacing, zSpacing;
+	if(numXNeur > 1)
+		xSpacing = neurGrpDimen / (numXNeur-1);
+	else
+		xSpacing = neurGrpDimen ;
+	if(numYNeur > 1)
+		ySpacing = neurGrpDimen / (numYNeur-1);
+	else
+		ySpacing = neurGrpDimen;
+	if(numZNeur > 1)
+		zSpacing = neurGrpDimen / (numZNeur-1);
+	else
+		zSpacing = neurGrpDimen;
+
+	#ifdef DEBUG
+		qDebug()<<"Adding neurons. xStart="<<xStart<<"; yStart="<<yStart<<"; zStart="<<zStart<<"; xSpacing="<<xSpacing<<"; ySpacing="<<ySpacing<<"; zSpacing="<<zSpacing;
+	#endif//DEBUG
 
 	//Add the neurons to the groups
 	float xPos, yPos, zPos;
@@ -149,10 +165,22 @@ QList<Point3D> NeuronGroupBuilder::getCartesianCoordinates(const QString& coordi
 				minZ = tmpPoint.getZPos();
 		}
 	}
+	//Only translate if the coordinates are negative
+	if(minX < 0.0f)
+		minX = Util::toPositive(minX);
+	else
+		minX = 0.0f;
+	if(minY < 0.0f)
+		minY = Util::toPositive(minY);
+	else
+		minY  = 0.0f;
+	if(minZ < 0.0f)
+		minZ = Util::toPositive(minZ);
+	else minZ = 0.0f;
 
-	minX = Util::toPositive(minX);
-	minY = Util::toPositive(minY);
-	minZ = Util::toPositive(minZ);
+	#ifdef DEBUG
+		qDebug()<<"Translating. minX="<<minX<<"; minY="<<minY<<"; minZ="<<minZ;
+	#endif//DEBUG
 
 	for(int i=0; i<talairachCoords.size(); ++i){
 		talairachCoords[i].translate(minX, minY, minZ);
@@ -165,38 +193,31 @@ QList<Point3D> NeuronGroupBuilder::getCartesianCoordinates(const QString& coordi
 	without overlapping. */
 float NeuronGroupBuilder::getNeuronGroupDimension(const QList<Point3D>& cartesianCoordinatesList){
 	//Find the minimum spacing between points
-	float minDist = 0, xDist, yDist, zDist;
+	float minDist = 0, tmpDist;
 	bool firstTime = true;
 	for(int i=0; i<cartesianCoordinatesList.size(); ++i){
 		const Point3D& srcPoint = cartesianCoordinatesList.at(i);
 		for(int j=0; j<cartesianCoordinatesList.size(); ++j){
 			const Point3D& dstPoint = cartesianCoordinatesList.at(j);
-			xDist = Util::toPositive(srcPoint.getXPos() - dstPoint.getXPos());
-			yDist = Util::toPositive(srcPoint.getYPos() - dstPoint.getYPos());
-			zDist = Util::toPositive(srcPoint.getZPos() - dstPoint.getZPos());
+			if(srcPoint != dstPoint){
+				tmpDist = srcPoint.distance(dstPoint);
 
-			if(firstTime){
-				minDist = xDist;
-				if(yDist < minDist)
-					minDist = yDist;
-				if(zDist < minDist)
-					minDist = zDist;
-				firstTime = false;
-			}
-			else{
-				if(xDist < minDist)
-					minDist = xDist;
-				if(yDist < minDist)
-					minDist = yDist;
-				if(zDist < minDist)
-					minDist = zDist;
+				if(firstTime){
+					minDist = tmpDist;
+					firstTime = false;
+				}
+				else if(tmpDist < minDist){
+					minDist = tmpDist;
+				}
 			}
 		}
 	}
 
 	//Multiply minimum distance by 0.8 to give some extra space between groups
-	minDist *= 0.8;
-
+	minDist *= nodeSpacingFactor;
+	#ifdef DEBUG
+		qDebug()<<"Minimum distance between nodes="<<minDist;
+	#endif//DEBUG
 	return minDist;
 }
 
@@ -271,4 +292,14 @@ Point3D NeuronGroupBuilder::getTalairachCoordinate(const QString& line){
 	if(strList.size() != 3)
 		throw SpikeStreamException("Getting Talairach Coordinates: Incorrect number of dimensions: " + QString::number(strList.size()));
 	return Point3D( Util::getFloat(strList.at(0)), Util::getFloat(strList.at(1)), Util::getFloat(strList.at(2)) );
+}
+
+
+/*! Checks and stores the parameters */
+void NeuronGroupBuilder::storeParameters(QHash<QString, double>& parameterMap){
+	numberNeuronsPerNode = Util::getUIntParameter("neuron_group_size", parameterMap);
+	proportionExcitatoryNeurons = Util::getDoubleParameter("proportion_excitatory_neurons", parameterMap);
+	nodeSpacingFactor = Util::getFloatParameter("node_spacing_factor", parameterMap);
+	if(nodeSpacingFactor == 0.0f)
+		throw SpikeStreamException("Group spacing factor cannot be zero.");
 }
