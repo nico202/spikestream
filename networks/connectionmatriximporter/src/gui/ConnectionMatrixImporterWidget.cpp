@@ -49,7 +49,7 @@ ConnectionMatrixImporterWidget::ConnectionMatrixImporterWidget(){
 
 	//Node Names
 	gridLayout->addWidget(new QLabel("Node Names File: "), rowCntr, 0);
-	nodeNamesFilePathEdit = new QLineEdit("C:/Users/Taropeg/Home/NeuralNetworks/Experiments/Matrices/Test1_4Neurons/4Neuron_Labels.dat");
+	nodeNamesFilePathEdit = new QLineEdit("C:/Users/daogamez/Home/Experiments/Matrices/Test1_4Neurons/4Neuron_Labels.dat");
 	connect(nodeNamesFilePathEdit, SIGNAL(textChanged(const QString&)), this, SLOT(checkImportEnabled(const QString&)));
 	nodeNamesFilePathEdit->setMinimumSize(250, 30);
 	gridLayout->addWidget(nodeNamesFilePathEdit, rowCntr, 1);
@@ -60,7 +60,7 @@ ConnectionMatrixImporterWidget::ConnectionMatrixImporterWidget(){
 
 	//Coordinates
 	gridLayout->addWidget(new QLabel("Talairach Coordinates File: "), rowCntr, 0);
-	coordinatesFilePathEdit = new QLineEdit("C:/Users/Taropeg/Home/NeuralNetworks/Experiments/Matrices/Test1_4Neurons/4Neuron_Positions.dat");
+	coordinatesFilePathEdit = new QLineEdit("C:/Users/daogamez/Home/Experiments/Matrices/Test1_4Neurons/4Neuron_Positions.dat");
 	connect(coordinatesFilePathEdit, SIGNAL(textChanged(const QString&)), this, SLOT(checkImportEnabled(const QString&)));
 	coordinatesFilePathEdit->setMinimumSize(250, 30);
 	gridLayout->addWidget(coordinatesFilePathEdit, rowCntr, 1);
@@ -71,7 +71,7 @@ ConnectionMatrixImporterWidget::ConnectionMatrixImporterWidget(){
 
 	//Weights
 	gridLayout->addWidget(new QLabel("Connectivity Matrix File: "), rowCntr, 0);
-	weightsFilePathEdit = new QLineEdit("C:/Users/Taropeg/Home/NeuralNetworks/Experiments/Matrices/Test1_4Neurons/4Neuron_C.dat");
+	weightsFilePathEdit = new QLineEdit("C:/Users/daogamez/Home/Experiments/Matrices/Test1_4Neurons/4Neuron_C.dat");
 	connect(weightsFilePathEdit, SIGNAL(textChanged(const QString&)), this, SLOT(checkImportEnabled(const QString&)));
 	weightsFilePathEdit->setMinimumSize(250, 30);
 	gridLayout->addWidget(weightsFilePathEdit, rowCntr, 1);
@@ -82,7 +82,7 @@ ConnectionMatrixImporterWidget::ConnectionMatrixImporterWidget(){
 
 	//Delays
 	gridLayout->addWidget(new QLabel("Delays File: "), rowCntr, 0);
-	delaysFilePathEdit = new QLineEdit("C:/Users/Taropeg/Home/NeuralNetworks/Experiments/Matrices/Test1_4Neurons/4Neuron_L.dat");
+	delaysFilePathEdit = new QLineEdit("C:/Users/daogamez/Home/Experiments/Matrices/Test1_4Neurons/4Neuron_L.dat");
 	connect(delaysFilePathEdit, SIGNAL(textChanged(const QString&)), this, SLOT(checkImportEnabled(const QString&)));
 	delaysFilePathEdit->setMinimumSize(250, 30);
 	gridLayout->addWidget(delaysFilePathEdit, rowCntr, 1);
@@ -188,11 +188,15 @@ void ConnectionMatrixImporterWidget::importMatrix(){
 	if(networkNameEdit->text().isEmpty())
 		networkNameEdit->setText("Unnamed");
 
+	//Create network - need to create this outside of thread to avoid event handling problems.
+	newNetwork = new Network(networkNameEdit->text(), networkNameEdit->text(), Globals::getNetworkDao()->getDBInfo(), Globals::getArchiveDao()->getDBInfo());
+	newNetwork->setPrototypeMode(true);
+
 	//Start the import
 	progressDialog->show();
 	progressUpdating = false;
 	matrixImporter->startImport(
-			networkNameEdit->text(), networkNameEdit->text(),
+			newNetwork,
 			coordinatesFilePathEdit->text(), nodeNamesFilePathEdit->text(),
 			weightsFilePathEdit->text(), delaysFilePathEdit->text(), parameterMap);
 }
@@ -200,28 +204,57 @@ void ConnectionMatrixImporterWidget::importMatrix(){
 
 /*! Called when the matrix importer thread finishes */
 void ConnectionMatrixImporterWidget::matrixImporterFinished(){
-	if(matrixImporter->isError())
-		qCritical()<<matrixImporter->getErrorMessage();
+	qDebug()<<"Matrix importer finished";
 	progressDialog->hide();
 
-	Globals::getEventRouter()->networkChangedSlot();
+	//Show error
+	if(matrixImporter->isError()){
+		qCritical()<<matrixImporter->getErrorMessage();
+	}
+
+	//Delete network if there was an error or the operation was cancelled
+	if(matrixImporter->isError() || progressDialog->wasCanceled()){
+		if(newNetwork != NULL){
+			NetworkDaoThread netDaoThread(Globals::getNetworkDao()->getDBInfo());
+			netDaoThread.startDeleteNetwork(newNetwork->getID());
+			netDaoThread.wait();
+			if(netDaoThread.isError())
+				qCritical()<<netDaoThread.getErrorMessage();
+			delete newNetwork;
+		}
+	}
+	else{
+		//Make the network the current network
+		Globals::setNetwork(newNetwork);
+		Globals::getEventRouter()->networkChangedSlot();
+	}
 }
 
 
 /*! Informs user about progress with import */
 void ConnectionMatrixImporterWidget::updateProgress(int stepsCompleted, int totalSteps, QString message){
+	qDebug()<<"Updating progress.";
+
 	//Avoid multiple calls to graphics
 	if(progressUpdating)
 		return;
 
 	progressUpdating = true;
 
+	if(progressDialog->wasCanceled()){
+		matrixImporter->cancel();
+		progressDialog->show();
+	}
+
 	if(matrixImporter->isRunning() && progressDialog->isVisible()){
-		qDebug()<<"UPDATING PROGRESS msg: "<<message<<"; steps completed: "<<stepsCompleted<<"; max"<<totalSteps;
 		progressDialog->setMaximum(totalSteps);
 		progressDialog->setValue(stepsCompleted);
 		progressDialog->setLabelText(message);
 	}
+
+	//Make sure this method has not made progress visible after it has been hidden by matrix importer finishing
+	if(!matrixImporter->isRunning())
+		progressDialog->hide();
 
 	progressUpdating = false;
 }
@@ -263,13 +296,17 @@ void ConnectionMatrixImporterWidget::buildParameters(){
 	defaultParameterMap["rewire_probability"] = 0.1;
 	parameterMap["rewire_probability"] = defaultParameterMap["rewire_probability"];
 
-	parameterInfoList.append(ParameterInfo("min_intra_delay", "Minimum delay for a connection within the group.", ParameterInfo::UNSIGNED_INTEGER));
-	defaultParameterMap["min_intra_delay"] = 1.0;
-	parameterMap["min_intra_delay"] = defaultParameterMap["min_intra_delay"];
+	parameterInfoList.append(ParameterInfo("min_delay_range", "Minimum delay for a connection within the group.\nIntra node connections will add the distance delay to a delay drawn from the delay range.", ParameterInfo::POSITIVE_DOUBLE));
+	defaultParameterMap["min_delay_range"] = 1.0;
+	parameterMap["min_delay_range"] = defaultParameterMap["min_delay_range"];
 
-	parameterInfoList.append(ParameterInfo("max_intra_delay", "Maximum delay for a connection within the group.", ParameterInfo::UNSIGNED_INTEGER));
-	defaultParameterMap["max_intra_delay"] = 1.0;
-	parameterMap["max_intra_delay"] = defaultParameterMap["max_intra_delay"];
+	parameterInfoList.append(ParameterInfo("max_delay_range", "Maximum delay for a connection within the group.\nIntra node connections will add the distance delay to a delay drawn from the delay range.", ParameterInfo::POSITIVE_DOUBLE));
+	defaultParameterMap["max_delay_range"] = 1.0;
+	parameterMap["max_delay_range"] = defaultParameterMap["max_delay_range"];
+
+	parameterInfoList.append(ParameterInfo("spike_propagation_speed", "Speed at which a spike propagates along an axon in metres per second.\nMust be a positive number.", ParameterInfo::POSITIVE_DOUBLE));
+	defaultParameterMap["spike_propagation_speed"] = 10.0;
+	parameterMap["spike_propagation_speed"] = defaultParameterMap["spike_propagation_speed"];
 
 	parameterInfoList.append(ParameterInfo("min_excitatory_weight", "Minimum weight for an excitatory connection.", ParameterInfo::DOUBLE));
 	defaultParameterMap["min_excitatory_weight"] = 0.0;

@@ -17,8 +17,10 @@ namespace spikestream {
     /*! Thread-based wrapper for the SpikeStreamNetwork database that handles
 		heavy tasks that may take several minutes. */
 	class NetworkDaoThread : public QThread, public NetworkDao {
+		Q_OBJECT
+
 		public:
-			NetworkDaoThread(const DBInfo& dbInfo);
+			NetworkDaoThread(const DBInfo& dbInfo, const QString& name = "Unnamed");
 			~NetworkDaoThread();
 			void clearError();
 			int getNumberOfCompletedSteps() { return numberOfCompletedSteps; }
@@ -39,7 +41,6 @@ namespace spikestream {
 			void startDeleteNetwork(unsigned networkID);
 			void startSaveNetwork(unsigned networkID, QList<NeuronGroup*> newNeuronGroups, QList<ConnectionGroup*> newConnectionGroups, QList<unsigned> deleteNeuronGroupIDs, QList<unsigned> deleteConnectionGroupIDs);
 			void stop();
-
 
 		private:
 			//========================  VARIABLES  =========================

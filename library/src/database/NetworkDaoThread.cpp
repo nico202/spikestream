@@ -14,14 +14,15 @@ using namespace spikestream;
 using namespace std;
 
 /*! Controls whether performance measurements are made for this class */
-//#define TIME_PERFORMANCE
+#define TIME_PERFORMANCE
 
 /*! Switches on output of more debugging information */
 //#define DEBUG
 
 
 /*! Constructor  */
-NetworkDaoThread::NetworkDaoThread(const DBInfo& dbInfo) : NetworkDao(dbInfo) {
+NetworkDaoThread::NetworkDaoThread(const DBInfo& dbInfo, const QString& name) : NetworkDao(dbInfo) {
+	this->setObjectName(name);
     currentTask = NO_TASK_DEFINED;
     clearError();
     stopThread = true;
@@ -238,6 +239,7 @@ void NetworkDaoThread::run(){
     stopThread = true;
 }
 
+
 /*! Starts a thread to delete the specified network */
 void NetworkDaoThread::startDeleteNetwork(unsigned networkID){
 	this->networkID = networkID;
@@ -375,7 +377,6 @@ void NetworkDaoThread::addConnectionGroups(){
 				//Set connection ID in connection groups
 				for(int i=0; i<tmpConList.size(); ++i){
 					tmpConList.at(i)->setID(lastInsertID + i);
-					//(*newConMap)[] = tmpConList.at(i);
 				}
 
 				//Count number of connections that have been added
@@ -409,7 +410,6 @@ void NetworkDaoThread::addConnectionGroups(){
 					throw SpikeStreamException("Database generated connection ID is out of range: " + QString::number(lastInsertID) + ". It must be less than or equal to " + QString::number(LAST_CONNECTION_ID));
 				if(lastInsertID < START_CONNECTION_ID)
 					throw SpikeStreamException("Insert ID for Connection is invalid.");
-				//(*newConMap)[lastInsertID] = *iter;
 				(*iter)->setID(lastInsertID);
 
 				//Count number of connections that have been added

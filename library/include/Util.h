@@ -32,6 +32,7 @@ namespace spikestream {
 			static QList<unsigned int> getUIntList(const QString& str);
 			static double getDouble(const QString& str);
 			static double getDoubleParameter(const QString& paramName, QHash<QString, double>& paramMap);
+			static double getPositiveDoubleParameter(const QString& paramName, QHash<QString, double>& paramMap);
 			static float getFloatParameter(const QString& paramName, QHash<QString, double>& paramMap);
 			static int getIntParameter(const QString& paramName, QHash<QString, double>& paramMap);
 			static unsigned getUIntParameter(const QString& paramName, QHash<QString, double>& paramMap);

@@ -109,6 +109,15 @@ double Util::getDoubleParameter(const QString& paramName, QHash<QString, double>
 	return paramMap[paramName];
 }
 
+/*! Returns a double parameter from the supplied map and throws an exception if the parameter does not exist. */
+double Util::getPositiveDoubleParameter(const QString& paramName, QHash<QString, double>& paramMap){
+	if(!paramMap.contains(paramName))
+		throw SpikeStreamException("Parameter '" + paramName + "'' not found in parameter map.");
+	if(paramMap[paramName] < 0.0)
+		throw SpikeStreamException("Parameter '" + paramName + "'' should be greater than 0: " + QString::number(paramMap[paramName]));
+	return paramMap[paramName];
+}
+
 
 /*! Returns a float parameter from the supplied map and throws an exception if the parameter does not exist. */
 float Util::getFloatParameter(const QString& paramName, QHash<QString, double>& paramMap){

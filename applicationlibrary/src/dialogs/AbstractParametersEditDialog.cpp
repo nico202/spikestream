@@ -33,6 +33,7 @@ void AbstractParametersEditDialog::addParameters(QVBoxLayout* mainVLayout){
 
 	//Create validators
 	QDoubleValidator* doubleValidator = new QDoubleValidator(-100000.0, 100000.0, 5, this);
+	QDoubleValidator* positiveDoubleValidator = new QDoubleValidator(0.0, 100000.0, 5, this);
 	QIntValidator* intValidator = new QIntValidator(-1000000, 1000000, this);
 	QIntValidator* unsignedIntValidator = new QIntValidator(0, 1000000, this);
 
@@ -43,6 +44,15 @@ void AbstractParametersEditDialog::addParameters(QVBoxLayout* mainVLayout){
 			gridLayout->addWidget(new QLabel(info.getName()), cntr, 0);
 			QLineEdit* tmpLineEdit = new QLineEdit();
 			tmpLineEdit->setValidator(doubleValidator);
+			lineEditMap[info.getName()] = tmpLineEdit;
+			gridLayout->addWidget(tmpLineEdit, cntr, 1);
+		}
+
+		//Add positive double parameter
+		else if(info.getType() == ParameterInfo::POSITIVE_DOUBLE){
+			gridLayout->addWidget(new QLabel(info.getName()), cntr, 0);
+			QLineEdit* tmpLineEdit = new QLineEdit();
+			tmpLineEdit->setValidator(positiveDoubleValidator);
 			lineEditMap[info.getName()] = tmpLineEdit;
 			gridLayout->addWidget(tmpLineEdit, cntr, 1);
 		}

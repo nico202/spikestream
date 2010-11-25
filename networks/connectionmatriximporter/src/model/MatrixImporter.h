@@ -2,6 +2,7 @@
 #define MATRIXIMPORTER_H
 
 //SpikeStream includes
+#include "Network.h"
 #include "SpikeStreamThread.h"
 
 //Qt includes
@@ -17,8 +18,9 @@ namespace spikestream {
 		public:
 			MatrixImporter();
 			~MatrixImporter();
+			void cancel() { stopThread = true; }
 			void run();
-			void startImport(const QString& netName, const QString& netDesc, const QString& coordinatesFilePath, const QString& nodeNamesFilePath, const QString& weightsFilePath, const QString& delaysFilePath, QHash<QString, double>& parameterMap);
+			void startImport(Network* network, const QString& coordinatesFilePath, const QString& nodeNamesFilePath, const QString& weightsFilePath, const QString& delaysFilePath, QHash<QString, double>& parameterMap);
 
 		signals:
 			void progress(int stepsCompleted, int totalSteps, QString message);
@@ -49,6 +51,9 @@ namespace spikestream {
 
 			/*! Map containing parameters for the import */
 			QHash<QString, double> parameterMap;
+
+			/*! Network that is being created */
+			Network* newNetwork;
 
 
 			//======================  METHODS  ======================

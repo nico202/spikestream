@@ -31,35 +31,26 @@ MatrixImporter::~MatrixImporter(){
 void MatrixImporter::run(){
 	clearError();
 	stopThread = false;
-	Network* newNetwork = NULL;
 	try{
+		//Add neurons
 		NeuronGroupBuilder neuronGroupBuilder;
 		connect(&neuronGroupBuilder, SIGNAL(progress(int,int,QString)), this, SLOT(updateProgress(int,int,QString)));
-
-		//Create network
-		Network* newNetwork = new Network(networkName, networkDescription, Globals::getNetworkDao()->getDBInfo(), Globals::getArchiveDao()->getDBInfo());
-		newNetwork->setPrototypeMode(true);
-
-		//Add neurons
 		neuronGroupBuilder.addNeuronGroups(newNetwork, coordinatesFilePath, nodeNamesFilePath, parameterMap);
+
+		//Check for cancellation
+		if(stopThread)
+			return;
 
 		//Add connections
 		ConnectionGroupBuilder connectionGroupBuilder(neuronGroupBuilder.getExcitatoryNeuronGroups(), neuronGroupBuilder.getInhibitoryNeuronGroups());
 		connect(&connectionGroupBuilder, SIGNAL(progress(int,int,QString)), this, SLOT(updateProgress(int,int,QString)));
 		connectionGroupBuilder.addConnectionGroups(newNetwork, &stopThread, weightsFilePath, delaysFilePath, parameterMap);
-
-		//Make the network the current network
-		Globals::setNetwork(newNetwork);
 	}
 	catch(SpikeStreamException& ex){
 		setError(ex.getMessage());
-		if(newNetwork != NULL)
-			delete newNetwork;
 	}
 	catch(...){
 		setError("An unknown error occurred");
-		if(newNetwork != NULL)
-			delete newNetwork;
 	}
 
 	stopThread = true;
@@ -67,7 +58,7 @@ void MatrixImporter::run(){
 
 
 /*! Checks and stores the necessary parameters and starts the thread running. */
-void MatrixImporter::startImport(const QString& netName, const QString& netDesc, const QString& coordinatesFilePath, const QString& nodeNamesFilePath, const QString& weightsFilePath, const QString& delaysFilePath, QHash<QString, double>& parameterMap){
+void MatrixImporter::startImport(Network* network, const QString& coordinatesFilePath, const QString& nodeNamesFilePath, const QString& weightsFilePath, const QString& delaysFilePath, QHash<QString, double>& parameterMap){
 	//Check and store file locations
 	if(!QFile::exists(coordinatesFilePath))
 		throw SpikeStreamException("Coordinates file does not exist: " + coordinatesFilePath);
@@ -82,15 +73,8 @@ void MatrixImporter::startImport(const QString& netName, const QString& netDesc,
 		throw SpikeStreamException("Delays file does not exist: " + delaysFilePath);
 	this->delaysFilePath = delaysFilePath;
 
-	//Handle name and description
-	networkName = netName;
-	networkDescription = netDesc;
-	if(networkName.isEmpty())
-		networkName = "Unnamed";
-	if(networkDescription.isEmpty())
-		networkDescription = "Undescribed";
-
-	//Check and store the parameters
+	//Check and store the parameters and network
+	newNetwork = network;
 	storeParameters(parameterMap);
 
 	//Start thread running
