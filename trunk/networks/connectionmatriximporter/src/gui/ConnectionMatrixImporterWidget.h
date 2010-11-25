@@ -73,6 +73,9 @@ namespace spikestream {
 			/*! Avoids multiple calls to progress dialog whilst it is redrawing */
 			bool progressUpdating;
 
+			/*! Network that is being built. */
+			Network* newNetwork;
+
 
 			//======================  METHODS  =========================
 			void buildParameters();

@@ -423,14 +423,14 @@ void NetworksWidget::loadNetwork(NetworkInfo& netInfo, bool prototypeMode){
 		//Change from saved prototype to loaded mode
 		if(Globals::getNetwork()->isPrototypeMode() && Globals::getNetwork()->isSaved()){
 			//Change status of network and refresh list
-			newNetwork->setPrototypeMode(false);
+			Globals::getNetwork()->setPrototypeMode(false);
 			loadNetworkList();
 			return;
 		}
 		//Change from loaded to prototype
 		if(!Globals::getNetwork()->isPrototypeMode() && prototypeMode){
 			//Change status of network and refresh list
-			newNetwork->setPrototypeMode(true);
+			Globals::getNetwork()->setPrototypeMode(true);
 			loadNetworkList();
 			return;
 		}

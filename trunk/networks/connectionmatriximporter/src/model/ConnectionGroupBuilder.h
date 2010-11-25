@@ -57,7 +57,7 @@ namespace spikestream {
 			int fromIndex;
 			int toIndex;
 			float weight;
-			float delay;
+			double delay;
 			double threshold;
 			ConnectionGroup* connectionGroup;
 	};
@@ -107,10 +107,13 @@ namespace spikestream {
 			double rewireProbability;
 
 			/*! Minimum delay for within node connections. */
-			float minIntraDelay;
+			double minDelayRange;
 
 			/*! Maximum delay for within node connections. */
-			float maxIntraDelay;
+			double maxDelayRange;
+
+			/*! Speed at which a spike propagates along an axon in metres per second. */
+			double spikePropagationSpeed;
 
 			/*! Minimum weight of an excitatory connection */
 			float minExcitatoryWeight;
@@ -133,9 +136,11 @@ namespace spikestream {
 
 			//======================  METHODS  ===========================
 			void addConnections(Network* network, int nodeIndex, urng_t& ranNumGen);
-			void addInhibitoryConnections(Network* network, NeuronGroup* excitNeurGrp, NeuronGroup* inhibNeurGrp);
+			void addInhibitoryConnections(Network* network, NeuronGroup* excitNeurGrp, NeuronGroup* inhibNeurGrp, urng_t& ranNumGen);
 			void calculateThresholds();
 			QString getConGrpDescription(NeuronGroup* fromNeuronGroup, NeuronGroup* toNeuronGroup);
+			float getInterDelay(double randomNum, double connectionDelay);
+			float getIntraDelay(double randomNum);
 			unsigned getRandomExcitatoryNeuronID(int index);
 			void loadDefaultParameters();
 			void loadDelays(const QString& delaysFilePath);

@@ -14,15 +14,16 @@ using namespace std;
 /*! Constructor that creates a new network and adds it to the database */
 Network::Network(const QString& name, const QString& description, const DBInfo& networkDBInfo, const DBInfo& archiveDBInfo){
     //Store information
+	this->setObjectName(name);
     this->info.setName(name);
     this->info.setDescription(description);
 	this->networkDBInfo = networkDBInfo;
 	this->archiveDBInfo = archiveDBInfo;
 
     //Create network dao threads for heavy operations
-	neuronNetworkDaoThread = new NetworkDaoThread(networkDBInfo);
+	neuronNetworkDaoThread = new NetworkDaoThread(networkDBInfo, "neurNetDao1");
     connect (neuronNetworkDaoThread, SIGNAL(finished()), this, SLOT(neuronThreadFinished()));
-	connectionNetworkDaoThread = new NetworkDaoThread(networkDBInfo);
+	connectionNetworkDaoThread = new NetworkDaoThread(networkDBInfo, "conNetDao1");
     connect (connectionNetworkDaoThread, SIGNAL(finished()), this, SLOT(connectionThreadFinished()));
 
     //Initialize variables
@@ -37,6 +38,7 @@ Network::Network(const QString& name, const QString& description, const DBInfo& 
 /*! Constructor when using an existing network */
 Network::Network(const NetworkInfo& networkInfo, const DBInfo& networkDBInfo, const DBInfo& archiveDBInfo){
     //Store information
+	this->setObjectName(info.getName());
     this->info = networkInfo;
 	this->networkDBInfo = networkDBInfo;
 	this->archiveDBInfo = archiveDBInfo;
@@ -47,9 +49,9 @@ Network::Network(const NetworkInfo& networkInfo, const DBInfo& networkDBInfo, co
     }
 
     //Create network dao threads for heavy operations
-	neuronNetworkDaoThread = new NetworkDaoThread(networkDBInfo);
+	neuronNetworkDaoThread = new NetworkDaoThread(networkDBInfo, "neurNetDao2");
     connect (neuronNetworkDaoThread, SIGNAL(finished()), this, SLOT(neuronThreadFinished()));
-	connectionNetworkDaoThread = new NetworkDaoThread(networkDBInfo);
+	connectionNetworkDaoThread = new NetworkDaoThread(networkDBInfo, "conNetDao2");
     connect (connectionNetworkDaoThread, SIGNAL(finished()), this, SLOT(connectionThreadFinished()));
 
     //Initialize variables
@@ -98,7 +100,7 @@ void Network::addConnectionGroups(QList<ConnectionGroup*>& connectionGroupList){
 	if(!prototypeMode && hasArchives())
 		throw SpikeStreamException("Cannot add connection groups to a locked network.");
 
-	//Set default parameters and compress memory
+	//Set default parameters
 	NetworkDao netDao(networkDBInfo);
 	foreach(ConnectionGroup* conGrp, connectionGroupList){
 		if(!conGrp->parametersSet()){
@@ -717,7 +719,6 @@ void Network::neuronThreadFinished(){
 					//Remove IDs of neuron and connetion groups scheduled for deletion
 					deleteNeuronGroupIDs.clear();
 					deleteConnectionGroupIDs.clear();
-
 				break;
 				default:
 					throw SpikeStreamException("The current task ID has not been recognized.");

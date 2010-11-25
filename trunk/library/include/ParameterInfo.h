@@ -28,17 +28,20 @@ namespace spikestream {
 			/*! Parameter is a double */
 			static const int DOUBLE = 1;
 
+			/*! Parameter is a double */
+			static const int POSITIVE_DOUBLE = 2;
+
 			/*! Parameter is a boolean */
-			static const int BOOLEAN = 2;
+			static const int BOOLEAN = 3;
 
 			/*! Parameter is an integer */
-			static const int INTEGER = 3;
+			static const int INTEGER = 4;
 
 			/*! Parameter is an unsigned integer */
-			static const int UNSIGNED_INTEGER = 4;
+			static const int UNSIGNED_INTEGER = 5;
 
 			/*! Parameter is one of a predefined set of options */
-			static const int OPTION = 5;
+			static const int OPTION = 6;
 
 
 		private:
