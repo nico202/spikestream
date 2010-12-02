@@ -142,6 +142,8 @@ namespace spikestream {
 			float getInterDelay(double randomNum, double connectionDelay);
 			float getIntraDelay(double randomNum);
 			unsigned getRandomExcitatoryNeuronID(int index);
+			float getExcitatoryWeight(double randomNum);
+			float getInhibitoryWeight(double randomNum);
 			void loadDefaultParameters();
 			void loadDelays(const QString& delaysFilePath);
 			void loadWeights(const QString& weightsFilePath);
