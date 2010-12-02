@@ -49,7 +49,7 @@ ConnectionMatrixImporterWidget::ConnectionMatrixImporterWidget(){
 
 	//Node Names
 	gridLayout->addWidget(new QLabel("Node Names File: "), rowCntr, 0);
-	nodeNamesFilePathEdit = new QLineEdit("C:/Users/daogamez/Home/Experiments/Matrices/Test1_4Neurons/4Neuron_Labels.dat");
+	nodeNamesFilePathEdit = new QLineEdit("C:/Users/Taropeg/Home/NeuralNetworks/Experiments/Matrices/Test1_4Neurons/4Neuron_Labels.dat");
 	connect(nodeNamesFilePathEdit, SIGNAL(textChanged(const QString&)), this, SLOT(checkImportEnabled(const QString&)));
 	nodeNamesFilePathEdit->setMinimumSize(250, 30);
 	gridLayout->addWidget(nodeNamesFilePathEdit, rowCntr, 1);
@@ -60,7 +60,7 @@ ConnectionMatrixImporterWidget::ConnectionMatrixImporterWidget(){
 
 	//Coordinates
 	gridLayout->addWidget(new QLabel("Talairach Coordinates File: "), rowCntr, 0);
-	coordinatesFilePathEdit = new QLineEdit("C:/Users/daogamez/Home/Experiments/Matrices/Test1_4Neurons/4Neuron_Positions.dat");
+	coordinatesFilePathEdit = new QLineEdit("C:/Users/Taropeg/Home/NeuralNetworks/Experiments/Matrices/Test1_4Neurons/4Neuron_Positions.dat");
 	connect(coordinatesFilePathEdit, SIGNAL(textChanged(const QString&)), this, SLOT(checkImportEnabled(const QString&)));
 	coordinatesFilePathEdit->setMinimumSize(250, 30);
 	gridLayout->addWidget(coordinatesFilePathEdit, rowCntr, 1);
@@ -71,7 +71,7 @@ ConnectionMatrixImporterWidget::ConnectionMatrixImporterWidget(){
 
 	//Weights
 	gridLayout->addWidget(new QLabel("Connectivity Matrix File: "), rowCntr, 0);
-	weightsFilePathEdit = new QLineEdit("C:/Users/daogamez/Home/Experiments/Matrices/Test1_4Neurons/4Neuron_C.dat");
+	weightsFilePathEdit = new QLineEdit("C:/Users/Taropeg/Home/NeuralNetworks/Experiments/Matrices/Test1_4Neurons/4Neuron_C.dat");
 	connect(weightsFilePathEdit, SIGNAL(textChanged(const QString&)), this, SLOT(checkImportEnabled(const QString&)));
 	weightsFilePathEdit->setMinimumSize(250, 30);
 	gridLayout->addWidget(weightsFilePathEdit, rowCntr, 1);
@@ -82,7 +82,7 @@ ConnectionMatrixImporterWidget::ConnectionMatrixImporterWidget(){
 
 	//Delays
 	gridLayout->addWidget(new QLabel("Delays File: "), rowCntr, 0);
-	delaysFilePathEdit = new QLineEdit("C:/Users/daogamez/Home/Experiments/Matrices/Test1_4Neurons/4Neuron_L.dat");
+	delaysFilePathEdit = new QLineEdit("C:/Users/Taropeg/Home/NeuralNetworks/Experiments/Matrices/Test1_4Neurons/4Neuron_L.dat");
 	connect(delaysFilePathEdit, SIGNAL(textChanged(const QString&)), this, SLOT(checkImportEnabled(const QString&)));
 	delaysFilePathEdit->setMinimumSize(250, 30);
 	gridLayout->addWidget(delaysFilePathEdit, rowCntr, 1);
@@ -114,7 +114,7 @@ ConnectionMatrixImporterWidget::ConnectionMatrixImporterWidget(){
 	//Set up importer
 	matrixImporter = new MatrixImporter();
 	connect(matrixImporter, SIGNAL(progress(int,int,QString)), this, SLOT(updateProgress(int,int,QString)), Qt::QueuedConnection);
-	connect(matrixImporter, SIGNAL(finished()), this, SLOT(matrixImporterFinished()));
+	connect(matrixImporter, SIGNAL(finished()), this, SLOT(matrixImporterFinished()), Qt::QueuedConnection);
 }
 
 
@@ -281,7 +281,7 @@ void ConnectionMatrixImporterWidget::setParameters(){
 	info list. */
 void ConnectionMatrixImporterWidget::buildParameters(){
 	parameterInfoList.append(ParameterInfo("neuron_group_size", "Size of the neuron group at each node.", ParameterInfo::UNSIGNED_INTEGER));
-	defaultParameterMap["neuron_group_size"] = 5;
+	defaultParameterMap["neuron_group_size"] = 50;
 	parameterMap["neuron_group_size"] = defaultParameterMap["neuron_group_size"];
 
 	parameterInfoList.append(ParameterInfo("proportion_excitatory_neurons", "Proportion of excitatory neurons. Varies between 0 and 1.", ParameterInfo::DOUBLE));
@@ -289,7 +289,7 @@ void ConnectionMatrixImporterWidget::buildParameters(){
 	parameterMap["proportion_excitatory_neurons"] = defaultParameterMap["proportion_excitatory_neurons"];
 
 	parameterInfoList.append(ParameterInfo("node_spacing_factor", "Factor by which space enclosing neuron groups is reduced to create space around neuron groups.\nSet to 1 to make neuron groups adjacent; set to a low number to increase spacing. ", ParameterInfo::DOUBLE));
-	defaultParameterMap["node_spacing_factor"] = 0.8;
+	defaultParameterMap["node_spacing_factor"] = 0.5;
 	parameterMap["node_spacing_factor"] = defaultParameterMap["node_spacing_factor"];
 
 	parameterInfoList.append(ParameterInfo("rewire_probability", "Probability that connection will be made outside of the group.\n0.0: All connections within each group; 1.0: All connections between groups.", ParameterInfo::DOUBLE));
