@@ -8,6 +8,15 @@
 //Qt includes
 #include <QObject>
 
+//Other includes
+#include "boost/random.hpp"
+
+/*! The random number generator type */
+typedef boost::mt19937 rng_t;
+
+/*! The variate generator type, which includes the random number generator type. */
+typedef boost::variate_generator<rng_t&, boost::uniform_real<double> > urng_t;
+
 namespace spikestream {
 
 	/*! Adds neurons to the supplied network using the loaded talairach coordinates. */
@@ -17,7 +26,7 @@ namespace spikestream {
 		public:
 			NeuronGroupBuilder();
 			~NeuronGroupBuilder();
-			void addNeuronGroups(Network* network, const QString& coordinatesFilePath, const QString& nodeNamesFilePath, QHash<QString, double> parameterMap);
+			void addNeuronGroups(Network* network, const QString& coordinatesFilePath, const QString& nodeNamesFilePath, QHash<QString, double> parameterMap, urng_t& ranNumGen);
 			QList<NeuronGroup*> getExcitatoryNeuronGroups() { return excitNeurGrpList; }
 			QList<NeuronGroup*> getInhibitoryNeuronGroups() { return inhibNeurGrpList; }
 
@@ -51,7 +60,7 @@ namespace spikestream {
 
 
 			//======================  METHODS  ===========================
-			void addNeurons(NeuronGroup* exNeurGrp, NeuronGroup* inibNeurGrp, float neurGrpDimen, const Point3D& cartCoord);
+			void addNeurons(NeuronGroup* exNeurGrp, NeuronGroup* inibNeurGrp, float neurGrpDimen, const Point3D& cartCoord, urng_t& ranNumGen);
 			QList<Point3D> getCartesianCoordinates(const QString& coordinatesFile);
 			float getNeuronGroupDimension(const QList<Point3D>& cartesianCoordinatesList);
 			Point3D getTalairachCoordinate(const QString& line);

@@ -5,6 +5,7 @@
 #include "Network.h"
 #include "NeuronGroupBuilder.h"
 #include "SpikeStreamException.h"
+#include "Util.h"
 using namespace spikestream;
 
 //Qt includes
@@ -32,10 +33,14 @@ void MatrixImporter::run(){
 	clearError();
 	stopThread = false;
 	try{
+		//Create random number generator
+		rng_t rng(randomSeed);
+		urng_t ranNumGen( rng, boost::uniform_real<double>(0, 1) );//Constructor of the random number generator
+
 		//Add neurons
 		NeuronGroupBuilder neuronGroupBuilder;
 		connect(&neuronGroupBuilder, SIGNAL(progress(int,int,QString)), this, SLOT(updateProgress(int,int,QString)));
-		neuronGroupBuilder.addNeuronGroups(newNetwork, coordinatesFilePath, nodeNamesFilePath, parameterMap);
+		neuronGroupBuilder.addNeuronGroups(newNetwork, coordinatesFilePath, nodeNamesFilePath, parameterMap, ranNumGen);
 
 		//Check for cancellation
 		if(stopThread)
@@ -44,7 +49,7 @@ void MatrixImporter::run(){
 		//Add connections
 		ConnectionGroupBuilder connectionGroupBuilder(neuronGroupBuilder.getExcitatoryNeuronGroups(), neuronGroupBuilder.getInhibitoryNeuronGroups());
 		connect(&connectionGroupBuilder, SIGNAL(progress(int,int,QString)), this, SLOT(updateProgress(int,int,QString)));
-		connectionGroupBuilder.addConnectionGroups(newNetwork, &stopThread, weightsFilePath, delaysFilePath, parameterMap);
+		connectionGroupBuilder.addConnectionGroups(newNetwork, &stopThread, weightsFilePath, delaysFilePath, parameterMap, ranNumGen);
 	}
 	catch(SpikeStreamException& ex){
 		setError(ex.getMessage());
@@ -110,6 +115,8 @@ void MatrixImporter::storeParameters(QHash<QString, double>& paramMap){
 
 	if(paramMap["rewire_probability"] < 0.0 || paramMap["rewire_probability"] > 1.0)
 		throw SpikeStreamException("MatrixLoader: rewire_probability parameter out of range. It should be between 0.0 and 1.0.");
+
+	randomSeed = Util::getUIntParameter("random_seed", paramMap);
 
 	this->parameterMap = paramMap;
 }

@@ -34,7 +34,7 @@ NeuronGroupBuilder::~NeuronGroupBuilder(){
 
 /*! Adds neuron groups to the supplied network using the coordinates
 	in the file. */
-void NeuronGroupBuilder::addNeuronGroups(Network* network, const QString& coordinatesFilePath, const QString& nodeNamesFilePath, QHash<QString, double> parameterMap){
+void NeuronGroupBuilder::addNeuronGroups(Network* network, const QString& coordinatesFilePath, const QString& nodeNamesFilePath, QHash<QString, double> parameterMap, urng_t& ranNumGen){
 	excitNeurGrpList.clear();
 	inhibNeurGrpList.clear();
 
@@ -71,7 +71,7 @@ void NeuronGroupBuilder::addNeuronGroups(Network* network, const QString& coordi
 		inhibNeurGrp->setParameters(defaultParameterMaps[inhibNeurGrp->getNeuronTypeID()]);
 
 		//Add neurons to neuron groups
-		addNeurons(exNeurGrp, inhibNeurGrp, neurGrpDimen, cartCoords.at(i));
+		addNeurons(exNeurGrp, inhibNeurGrp, neurGrpDimen, cartCoords.at(i), ranNumGen);
 		excitNeurGrpList.append(exNeurGrp);
 		inhibNeurGrpList.append(inhibNeurGrp);
 		emit progress(i, cartCoords.size()-1, "Adding neuron groups to network.");
@@ -88,9 +88,7 @@ void NeuronGroupBuilder::addNeuronGroups(Network* network, const QString& coordi
 /*----------------------------------------------------------*/
 
 /*! Adds the neurons to the neuron groups */
-void NeuronGroupBuilder::addNeurons(NeuronGroup* exNeurGrp, NeuronGroup* inhibNeurGrp, float neurGrpDimen, const Point3D& cartCoord){
-	int inhibThreshold = Util::rUInt(proportionExcitatoryNeurons * RAND_MAX);
-
+void NeuronGroupBuilder::addNeurons(NeuronGroup* exNeurGrp, NeuronGroup* inhibNeurGrp, float neurGrpDimen, const Point3D& cartCoord, urng_t& ranNumGen){
 	//Calculate the number of neurons down each side of the group.
 	unsigned numXNeur = (unsigned)floor(cbrt(numberNeuronsPerNode));
 	unsigned numYNeur = numXNeur;
@@ -128,7 +126,7 @@ void NeuronGroupBuilder::addNeurons(NeuronGroup* exNeurGrp, NeuronGroup* inhibNe
 				xPos = xStart + xCntr*xSpacing;
 				yPos = yStart + yCntr*ySpacing;
 				zPos = zStart + zCntr*zSpacing;
-				if(rand() <= inhibThreshold){
+				if(ranNumGen() < proportionExcitatoryNeurons){
 					exNeurGrp->addNeuron(xPos, yPos, zPos);
 				}
 				else{

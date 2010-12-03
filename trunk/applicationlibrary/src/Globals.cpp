@@ -94,6 +94,12 @@ void Globals::cleanUp(){
 		archive = NULL;
 	}
 	if(network != NULL){
+		//Delete network if it has been marked as temporary and has not been saved.
+		if(network->isTransient() && !network->isSaved()){
+			NetworkDaoThread networkDaoThread(networkDao->getDBInfo());
+			networkDaoThread.startDeleteNetwork(network->getID());
+			networkDaoThread.wait();
+		}
 		delete network;
 		network = NULL;
 	}

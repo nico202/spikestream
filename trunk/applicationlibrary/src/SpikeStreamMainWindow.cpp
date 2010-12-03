@@ -121,6 +121,9 @@ void SpikeStreamMainWindow::closeEvent (QCloseEvent* event){
 		}
 	}
 
+	//Clean up Globals
+	Globals::cleanUp();
+
 	//Accept event if checks have been passed.
 	event->accept();
 }

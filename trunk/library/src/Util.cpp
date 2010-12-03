@@ -48,6 +48,17 @@ bool Util::getBool(const QString& str){
 }
 
 
+/*! Gets a bool parameter out of the hash map with the specified name.
+	Throws an exception if it cannot be found. */
+bool Util::getBoolParameter(const QString& paramName, QHash<QString, double>& paramMap){
+	if(!paramMap.contains(paramName))
+		throw SpikeStreamException("Parameter '" + paramName + "'' not found in parameter map.");
+	if(paramMap[paramName] == 0.0)
+		return false;
+	return true;
+}
+
+
 /*! Converts the QString to a float.
 	Throws a number conversion exception if the conversion fails. */
 float Util::getFloat(const QString& str){
