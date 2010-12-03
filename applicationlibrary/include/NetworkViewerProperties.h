@@ -32,6 +32,7 @@ namespace spikestream {
 			void posNegSelectionChanged(int index);
 			void setRenderMode();
 			void showTruthTable();
+			void updateConnectionCount();
 			void weightDisplayChanged(int buttonID);
 
 		private:
@@ -66,6 +67,9 @@ namespace spikestream {
 			/*! Keep reference to label saying "to" to enable and disable it */
 			QLabel* toLabel;
 
+			/*! Label listing number of connections in table */
+			QLabel* numberOfConnectionsLabel;
+
 			/*! Button to launch truth table dialog when to connections are shown and when neuron type is appropriate */
 			QPushButton* truthTableButton;
 
@@ -77,6 +81,7 @@ namespace spikestream {
 
 			/*! Widget holding full render controls */
 			QWidget* fullRenderControlsWidget;
+
 
 			//=======================  METHODS  =========================
 			void hideTruthTableDialog();

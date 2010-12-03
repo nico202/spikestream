@@ -60,6 +60,7 @@ namespace spikestream {
 			bool isError() { return error; }
 			bool isPrototypeMode() { return prototypeMode; }
 			bool isSaved();
+			bool isTransient() { return transient; }
 			bool hasArchives();
 			void load();
 			void loadWait();
@@ -70,6 +71,7 @@ namespace spikestream {
 			void setNeuronGroupParameters(unsigned neurGrpID, QHash<QString, double> paramMap);
 			void setNeuronGroupProperties(unsigned neurGrpID, const QString& name, const QString& description);
 			void setPrototypeMode(bool mode);
+			void setTransient(bool transient) { this->transient = transient; }
 			int size();
 
 		signals:
@@ -138,6 +140,11 @@ namespace spikestream {
 				saved to the database. The network has to be saved before archives or analyses
 				can be carried out or the weights saved. */
 			bool prototypeMode;
+
+			/*! Records if the network is transient or not.
+				A transient network that has not been saved will be deleted from the database
+				when SpikeStream shuts down. */
+			bool transient;
 
 			/*! Set to true when the parameters of a neuron group that is already stored are changed. */
 			bool neuronGroupParametersChanged;

@@ -58,8 +58,10 @@ Network::Network(const NetworkInfo& networkInfo, const DBInfo& networkDBInfo, co
 	initializeVariables();
 
     //Load up basic information about the neuron and connection groups
+	qDebug()<<"START loading neuron and connection groups";
     loadNeuronGroupsInfo();
     loadConnectionGroupsInfo();
+	qDebug()<<"FINISH loading neuron and connection groups";
 }
 
 
@@ -719,6 +721,9 @@ void Network::neuronThreadFinished(){
 					//Remove IDs of neuron and connetion groups scheduled for deletion
 					deleteNeuronGroupIDs.clear();
 					deleteConnectionGroupIDs.clear();
+
+					//Switch off transient mode in the network
+					transient = false;
 				break;
 				default:
 					throw SpikeStreamException("The current task ID has not been recognized.");
@@ -863,6 +868,7 @@ unsigned Network::getTemporaryNeurGrpID(){
 
 /*! Initializes variables with default values */
 void Network::initializeVariables(){
+	transient = false;
 	currentNeuronTask = -1;
 	currentConnectionTask = -1;
 	prototypeMode = false;

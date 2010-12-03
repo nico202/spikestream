@@ -44,7 +44,7 @@ ConnectionGroupBuilder::~ConnectionGroupBuilder(){
 /*-----                 PUBLIC METHODS                 -----*/
 /*----------------------------------------------------------*/
 
-void ConnectionGroupBuilder::addConnectionGroups(Network* network, bool* stopThread, const QString& weightsFilePath, const QString& delaysFilePath, QHash<QString, double>& parameterMap){
+void ConnectionGroupBuilder::addConnectionGroups(Network* network, bool* stopThread, const QString& weightsFilePath, const QString& delaysFilePath, QHash<QString, double>& parameterMap, urng_t& ranNumGen){
 	this->stopThread = stopThread;
 
 	//Store the parameters as variables and keep parameter map for connection group parameters
@@ -61,14 +61,14 @@ void ConnectionGroupBuilder::addConnectionGroups(Network* network, bool* stopThr
 
 	emit progress(0, 1, "Loading connection data.");
 
-	rng_t rng(42u);
-	urng_t ranNumGen( rng, boost::uniform_real<double>(0, 1) );//Constructor of the random number generator
-
 	//Load up the connections
 	loadWeights(weightsFilePath);
 
 	//Load up the delays
 	loadDelays(delaysFilePath);
+
+	if(rewireToConnections)
+		calculateToConnectionList();
 
 	emit progress(1, 1, "Connection data loaded.");
 
@@ -77,10 +77,9 @@ void ConnectionGroupBuilder::addConnectionGroups(Network* network, bool* stopThr
 	#endif//DEBUG
 
 	//Work through all of the neuron groups
-	emit progress(0, excitNeurGrpList.size()-1, "Adding connections...");
 	for(int nodeIdx=0; nodeIdx<excitNeurGrpList.size(); ++nodeIdx){
-		addConnections(network, nodeIdx, ranNumGen);
 		emit progress(nodeIdx, excitNeurGrpList.size()-1, "Adding connections...");
+		addConnections(network, nodeIdx, ranNumGen);
 	}
 }
 
@@ -89,11 +88,12 @@ void ConnectionGroupBuilder::addConnectionGroups(Network* network, bool* stopThr
 /*-----                 PRIVATE METHODS                -----*/
 /*----------------------------------------------------------*/
 
-/*! Adds excitatory and inhibitory connections to the network. */
+/*! Adds excitatory and inhibitory connections to the network.
+	Rewiring takes place of the connections FROM each neuron. */
 void ConnectionGroupBuilder::addConnections(Network* network, int nodeIndex, urng_t& ranNumGen){
 	//Local variables
 	bool conGrpFound;
-	unsigned toNeurID;
+	unsigned fromNeurID, toNeurID;
 
 	//Get neuron groups
 	NeuronGroup* excitNeurGrp = excitNeurGrpList.at(nodeIndex);
@@ -101,8 +101,8 @@ void ConnectionGroupBuilder::addConnections(Network* network, int nodeIndex, urn
 
 	//Get list of the connections FROM the node TO other neuron groups
 	QList<ConnectionInfo>& connectionList = neurGrpConList[nodeIndex];
-
-	qDebug()<<"Adding connections for node: "<<nodeIndex<<"; Number of from connections: "<<connectionList.size()<<" Neuron group size: "<<excitNeurGrp->size();
+	if(rewireToConnections)
+		connectionList = toNeurGrpConList[nodeIndex];
 
 	//Add inhibitory connections within the node
 	addInhibitoryConnections(network, excitNeurGrp, inhibNeurGrp, ranNumGen);
@@ -138,8 +138,14 @@ void ConnectionGroupBuilder::addConnections(Network* network, int nodeIndex, urn
 				if(randomNum < (connectionList.at(conIdx).threshold + previousThreshold) ){//Does the random number fall within range of this weight?
 					//Create connection
 					ConnectionInfo& tmpConInfo = connectionList[conIdx];
-					toNeurID = getRandomExcitatoryNeuronID(tmpConInfo.toIndex);
-					tmpConInfo.connectionGroup->addConnection(fromIter.key(), toNeurID, getInterDelay(ranNumGen(), tmpConInfo.delay), getExcitatoryWeight(ranNumGen()));
+					if(rewireToConnections){
+						fromNeurID = getRandomExcitatoryNeuronID(tmpConInfo.fromIndex);
+						tmpConInfo.connectionGroup->addConnection(fromNeurID, toIter.key(), getInterDelay(ranNumGen(), tmpConInfo.delay), getExcitatoryWeight(ranNumGen()));
+					}
+					else{
+						toNeurID = getRandomExcitatoryNeuronID(tmpConInfo.toIndex);
+						tmpConInfo.connectionGroup->addConnection(fromIter.key(), toNeurID, getInterDelay(ranNumGen(), tmpConInfo.delay), getExcitatoryWeight(ranNumGen()));
+					}
 
 					//Record that connection group has been found and exit loop.
 					conGrpFound = true;
@@ -172,8 +178,6 @@ void ConnectionGroupBuilder::addConnections(Network* network, int nodeIndex, urn
 
 	//Add connection groups to network
 	network->addConnectionGroups(newConGrpList);
-
-	qDebug()<<"Finished adding connections for node "<<nodeIndex;
 }
 
 
@@ -217,6 +221,24 @@ void ConnectionGroupBuilder::addInhibitoryConnections(Network* network, NeuronGr
 
 	//Add connection groups to network
 	network->addConnectionGroups(newConGrpList);
+}
+
+
+/*! Calculates the connections to each node. They are loaded from each node. */
+void ConnectionGroupBuilder::calculateToConnectionList(){
+	//Build the list - same number of nodes as from list
+	for(int nodeIdx=0; nodeIdx<neurGrpConList.size(); ++nodeIdx){
+		toNeurGrpConList.append(QList<ConnectionInfo>());
+	}
+
+	//Populate list
+	for(int nodeIdx=0; nodeIdx<neurGrpConList.size(); ++nodeIdx){
+		QList<ConnectionInfo>& conInfoList = neurGrpConList[nodeIdx];
+		for(int conIdx=0; conIdx<conInfoList.size(); ++conIdx){
+			ConnectionInfo& tmpConInfo = conInfoList[conIdx];
+			toNeurGrpConList[tmpConInfo.toIndex].append(tmpConInfo);
+		}
+	}
 }
 
 
@@ -442,15 +464,19 @@ void ConnectionGroupBuilder::normalizeWeights(){
 
 /*! Prints out the connections for debugging. */
 void ConnectionGroupBuilder::printConnections(bool printToFile){
+	QList< QList<ConnectionInfo> >& nodeConList = neurGrpConList;
+	if(rewireToConnections)
+		nodeConList = toNeurGrpConList;
+
 	if(printToFile){
 		QFile logFile(Globals::getSpikeStreamRoot() + "/log/ConnectionGroupBuilder.log");
 		if(!logFile.open(QFile::WriteOnly | QFile::Truncate))
 			throw SpikeStreamIOException("Cannot open log file for ConnectionGroupBuilder. Path: " + logFile.fileName());
 		QTextStream logOut(&logFile);
 		logOut<<"---------------------  CONNECTIONS -------------------"<<endl;
-		for(int i=0; i<neurGrpConList.size(); ++i){
+		for(int i=0; i<nodeConList.size(); ++i){
 			logOut<<"Neuron: "<<i<<" Connections."<<endl;
-			QList<ConnectionInfo>& conInfoList = neurGrpConList[i];
+			QList<ConnectionInfo>& conInfoList = nodeConList[i];
 			for(int j=0; j<conInfoList.size(); ++j){
 				ConnectionInfo& tmpCon = conInfoList[j];
 				logOut<<"\tFrom index: "<<tmpCon.fromIndex<<"; to index: "<<tmpCon.toIndex<<"; delay: "<<tmpCon.delay;
@@ -461,9 +487,9 @@ void ConnectionGroupBuilder::printConnections(bool printToFile){
 		return;
 	}
 	cout<<"---------------------  CONNECTIONS -------------------"<<endl;
-	for(int i=0; i<neurGrpConList.size(); ++i){
+	for(int i=0; i<nodeConList.size(); ++i){
 		cout<<"Neuron: "<<i<<" Connections."<<endl;
-		QList<ConnectionInfo>& conInfoList = neurGrpConList[i];
+		QList<ConnectionInfo>& conInfoList = nodeConList[i];
 		for(int j=0; j<conInfoList.size(); ++j){
 			ConnectionInfo& tmpCon = conInfoList[j];
 			cout<<"\tFrom index: "<<tmpCon.fromIndex<<"; to index: "<<tmpCon.toIndex<<"; delay: "<<tmpCon.delay;
@@ -502,6 +528,8 @@ void ConnectionGroupBuilder::storeParameters(){
 	maxInhibitoryWeight = Util::getFloatParameter("max_inhibitory_weight", parameterMap);
 	if(maxInhibitoryWeight < -1.0 || maxInhibitoryWeight > 1.0 )
 		throw SpikeStreamException("maxInhibitoryWeight out of range: " + QString::number(maxInhibitoryWeight) + ". It must be between -1.0 and 1.0 inclusive.");
+
+	rewireToConnections = Util::getBoolParameter("rewire_to_connections", parameterMap);
 }
 
 

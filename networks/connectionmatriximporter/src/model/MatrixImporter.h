@@ -49,6 +49,9 @@ namespace spikestream {
 			/*! Description of the network to be created */
 			QString networkDescription;
 
+			/*! Seed for the random number generator */
+			unsigned randomSeed;
+
 			/*! Map containing parameters for the import */
 			QHash<QString, double> parameterMap;
 

@@ -110,6 +110,7 @@ ConnectionMatrixImporterWidget::ConnectionMatrixImporterWidget(){
 	progressDialog->setAutoClose(false);
 	progressDialog->setAutoReset(false);
 	progressDialog->setModal(true);
+	progressDialog->setMinimumDuration(0);
 
 	//Set up importer
 	matrixImporter = new MatrixImporter();
@@ -191,6 +192,7 @@ void ConnectionMatrixImporterWidget::importMatrix(){
 	//Create network - need to create this outside of thread to avoid event handling problems.
 	newNetwork = new Network(networkNameEdit->text(), networkNameEdit->text(), Globals::getNetworkDao()->getDBInfo(), Globals::getArchiveDao()->getDBInfo());
 	newNetwork->setPrototypeMode(true);
+	newNetwork->setTransient(true);//Network will be deleted on close if it has not been saved
 
 	//Start the import
 	progressDialog->show();
@@ -233,8 +235,6 @@ void ConnectionMatrixImporterWidget::matrixImporterFinished(){
 
 /*! Informs user about progress with import */
 void ConnectionMatrixImporterWidget::updateProgress(int stepsCompleted, int totalSteps, QString message){
-	qDebug()<<"Updating progress.";
-
 	//Avoid multiple calls to graphics
 	if(progressUpdating)
 		return;
@@ -283,6 +283,14 @@ void ConnectionMatrixImporterWidget::buildParameters(){
 	parameterInfoList.append(ParameterInfo("neuron_group_size", "Size of the neuron group at each node.", ParameterInfo::UNSIGNED_INTEGER));
 	defaultParameterMap["neuron_group_size"] = 50;
 	parameterMap["neuron_group_size"] = defaultParameterMap["neuron_group_size"];
+
+	parameterInfoList.append(ParameterInfo("random_seed", "Seed for random number generator.", ParameterInfo::UNSIGNED_INTEGER));
+	defaultParameterMap["random_seed"] = 40;
+	parameterMap["random_seed"] = defaultParameterMap["random_seed"];
+
+	parameterInfoList.append(ParameterInfo("rewire_to_connections", "Backwards rewiring of connections to a neuron.", ParameterInfo::BOOLEAN));
+	defaultParameterMap["rewire_to_connections"] = 1.0;
+	parameterMap["rewire_to_connections"] = defaultParameterMap["rewire_to_connections"];
 
 	parameterInfoList.append(ParameterInfo("proportion_excitatory_neurons", "Proportion of excitatory neurons. Varies between 0 and 1.", ParameterInfo::DOUBLE));
 	defaultParameterMap["proportion_excitatory_neurons"] = 0.8;

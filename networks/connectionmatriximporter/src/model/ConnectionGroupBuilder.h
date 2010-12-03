@@ -70,7 +70,7 @@ namespace spikestream {
 		public:
 			ConnectionGroupBuilder(QList<NeuronGroup*> excitNeurGrpList, QList<NeuronGroup*> inhibNeurGrpList);
 			~ConnectionGroupBuilder();
-			void addConnectionGroups(Network* network, bool* stopThread, const QString& weightsFilePath, const QString& delaysFilePath, QHash<QString, double>& parameterMap);
+			void addConnectionGroups(Network* network, bool* stopThread, const QString& weightsFilePath, const QString& delaysFilePath, QHash<QString, double>& parameterMap, urng_t& ranNumGen);
 
 
 		signals:
@@ -96,6 +96,9 @@ namespace spikestream {
 
 			/*! List linking neuron group indexes with lists of connections. Connection struct holds to neuron group index and weight and delay. */
 			QList< QList<ConnectionInfo> > neurGrpConList;
+
+			/*! List linking neuron group indexes with the connections that connect TO the node. */
+			QList< QList<ConnectionInfo> > toNeurGrpConList;
 
 			/*! Map of parameters, stored in connection groups. */
 			QHash<QString, double> parameterMap;
@@ -127,8 +130,8 @@ namespace spikestream {
 			/*! Maximum weight of an inhibitory connection. */
 			float maxInhibitoryWeight;
 
-			/*! List of thresholds for the rewiring of each node. */
-			QList<double> rewireThresholdList;
+			/*! Rewires to connections */
+			bool rewireToConnections;
 
 			/*! Default synapse parameters. The key is the synapse type ID. The value is the map of default parameters. */
 			QHash<unsigned, QHash<QString, double> > defaultParameterMaps;
@@ -137,6 +140,7 @@ namespace spikestream {
 			//======================  METHODS  ===========================
 			void addConnections(Network* network, int nodeIndex, urng_t& ranNumGen);
 			void addInhibitoryConnections(Network* network, NeuronGroup* excitNeurGrp, NeuronGroup* inhibNeurGrp, urng_t& ranNumGen);
+			void calculateToConnectionList();
 			void calculateThresholds();
 			QString getConGrpDescription(NeuronGroup* fromNeuronGroup, NeuronGroup* toNeuronGroup);
 			float getInterDelay(double randomNum, double connectionDelay);

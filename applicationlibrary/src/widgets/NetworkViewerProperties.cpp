@@ -136,10 +136,19 @@ NetworkViewerProperties::NetworkViewerProperties(QWidget* parent) : QWidget(pare
 	connectionsView->setMinimumWidth(500);
 	connectionsView->setMinimumHeight(500);
 	mainVerticalBox->addWidget(connectionsView);
+
+	//Label listing number of connections in the table
+	QHBoxLayout* numConLabBox = new QHBoxLayout();
+	numConLabBox->addSpacing(5);
+	numberOfConnectionsLabel = new QLabel("Number of connections: 0");
+	numConLabBox->addWidget(numberOfConnectionsLabel);
+	numConLabBox->addStretch(5);
+	mainVerticalBox->addLayout(numConLabBox);
 	mainVerticalBox->addStretch(5);
 
 	//Listen for changes in the network display
 	connect(Globals::getEventRouter(), SIGNAL(networkDisplayChangedSignal()), this, SLOT(networkDisplayChanged()));
+	connect(Globals::getEventRouter(), SIGNAL(visibleConnectionsChangedSignal()), this, SLOT(updateConnectionCount()));
 
 	/* Initialize truth table dialog to NULL
 		Otherwise it appears as an annoying flash up during boot up of SpikeStream */
@@ -229,6 +238,12 @@ void NetworkViewerProperties::showTruthTable(){
 
 	//Show non modal dialog
 	showTruthTableDialog(tmpNeurID);
+}
+
+
+/*! Updates the field showing the number of connections in the table. */
+void NetworkViewerProperties::updateConnectionCount(){
+	numberOfConnectionsLabel->setText("Number of connections: " + QString::number( Globals::getNetworkDisplay()->getVisibleConnectionsList().size() ) );
 }
 
 
