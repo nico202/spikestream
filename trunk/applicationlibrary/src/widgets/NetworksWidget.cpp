@@ -19,6 +19,9 @@ using namespace spikestream;
 #include <iostream>
 using namespace std;
 
+//Enable to show debugging information
+#define DEBUG
+
 
 /*! Constructor */
 NetworksWidget::NetworksWidget(QWidget* parent) : QWidget(parent){
@@ -57,19 +60,15 @@ NetworksWidget::NetworksWidget(QWidget* parent) : QWidget(parent){
 	loadNetworkList();
 	verticalBox->addStretch(10);
 
-	//Create thread-based class for delete operations
-	networkDaoThread = new NetworkDaoThread(Globals::getNetworkDao()->getDBInfo());
-	connect(networkDaoThread, SIGNAL(finished()), this, SLOT(networkDaoThreadFinished()));
-
-	//Create thread-based class for load operations
+	//Create thread-based class for heavy operations
 	networkManager = new NetworkManager();
-	connect(networkManager, SIGNAL(progress(int, int, QString)), this, SLOT(updateLoadProgress(int, int, QString)), Qt::QueuedConnection);
+	connect(networkManager, SIGNAL(progress(int, int, QString, bool)), this, SLOT(updateProgress(int, int, QString, bool)), Qt::QueuedConnection);
 	connect(networkManager, SIGNAL(finished()), this, SLOT(networkManagerFinished()));
-	loadProgressDialog = new QProgressDialog(this);
-	loadProgressDialog->setAutoClose(false);
-	loadProgressDialog->setAutoReset(false);
-	loadProgressDialog->setModal(true);
-	loadProgressDialog->setMinimumDuration(0);
+	progressDialog = new QProgressDialog(this, Qt::CustomizeWindowHint);
+	progressDialog->setAutoClose(false);
+	progressDialog->setAutoReset(false);
+	progressDialog->setModal(true);
+	progressDialog->setMinimumDuration(0);
 
 	//Connect to global reload signal
 	connect(Globals::getEventRouter(), SIGNAL(reloadSignal()), this, SLOT(loadNetworkList()), Qt::QueuedConnection);
@@ -143,11 +142,13 @@ void NetworksWidget::deleteNetwork(){
 
 	//Delete the network from the database
 	try{
-		progressDialog = new QProgressDialog("Deleting network", "", 0, 0, this, Qt::CustomizeWindowHint);
+		//Start network manager to load network in a separate thread.
+		networkManager->startDeleteNetwork(Globals::getNetwork());
+		progressDialog->reset();
+		progressDialog->setLabelText("Starting network delete.");
 		progressDialog->setCancelButton(0);//Cancel not implemented at this stage
-		progressDialog->setWindowModality(Qt::WindowModal);
+		cancelButtonVisible = false;
 		progressDialog->show();
-		networkDaoThread->startDeleteNetwork(deleteNetworkID);
 	}
 	catch(SpikeStreamException& ex){
 		qCritical()<<"Exception thrown when deleting network.";
@@ -293,66 +294,47 @@ void NetworksWidget::loadNetworkList(){
 }
 
 
-/*! Called when the network dao thread finishes a heavy task.
-	NOTE: This is currently only used for deleting networks - will need to be adapted
-	if used for other tasks. */
-void NetworksWidget::networkDaoThreadFinished(){
-	//Check for errors
-	if(networkDaoThread->isError())
-		qCritical()<<networkDaoThread->getErrorMessage();
-
-	//Clean up progress dialog
-	progressDialog->close();
-	delete progressDialog;
-	progressDialog = NULL;
-
-	/* If we have deleted the current network, use event router to inform other classes that the network has changed.
-	   This will automatically reload the network list. */
-	if(Globals::networkLoaded() && Globals::getNetwork()->getID() == deleteNetworkID){
-		Globals::setNetwork(NULL);
-		emit networkChanged();
-	}
-
-	//Reload the network list
-	loadNetworkList();
-}
-
-
 /*! Called when the network manager finishes a task */
 void NetworksWidget::networkManagerFinished(){
 	//If we have reached this point, loading is complete
-	loadProgressDialog->hide();
+	progressDialog->hide();
 
 	//Check for errors
 	if(networkManager->isError()){
-		qCritical()<<"Error occurred loading network: '"<<networkManager->getErrorMessage()<<"'.";
-		delete newNetwork;
+		qCritical()<<"Error occurred saving network: '"<<networkManager->getErrorMessage()<<"'.";
 	}
-	else{
-		//Store network in global scope
-		Globals::setNetwork(newNetwork);
 
-		//Use event router to inform other classes that the network has changed.
-		emit networkChanged();
+	//Handle task specific stuff
+	switch(networkManager->getCurrentTask()){
+		case NetworkManager::LOAD_NETWORK_TASK:
+			if(networkManager->isError() || progressDialog->wasCanceled()){
+				delete newNetwork;
+			}
+			else{
+				//Store network in global scope
+				Globals::setNetwork(newNetwork);
+
+				//Use event router to inform other classes that the network has changed.
+				emit networkChanged();
+			}
+		break;
+		case NetworkManager::SAVE_NETWORK_TASK:
+			//Refresh network list
+			emit networkChanged();
+		break;
+		case NetworkManager::DELETE_NETWORK_TASK:
+			// If we have deleted the current network, use event router to inform other classes that the network has changed.
+			if(Globals::networkLoaded() && Globals::getNetwork()->getID() == deleteNetworkID){
+				Globals::setNetwork(NULL);
+				emit networkChanged();
+			}
+
+			//Reload the network list
+			loadNetworkList();
+		break;
+		default:
+			qCritical()<<"Network manager task not recognized: "<<networkManager->getCurrentTask();
 	}
-}
-
-
-/*! Called when network save has finished */
-void NetworksWidget::networkSaveFinished(){
-	//Check for errors
-	if(Globals::getNetwork()->isError())
-		qCritical()<<Globals::getNetwork()->getErrorMessage();
-
-	//Clean up progress dialog
-	progressDialog->close();
-	delete progressDialog;
-
-	//Prevent this method being called when network finishes other tasks
-	disconnect(Globals::getNetwork(), SIGNAL(taskFinished()), this, SLOT(networkSaveFinished()));
-
-	//Refresh network list
-	emit networkChanged();
 }
 
 
@@ -404,12 +386,13 @@ void NetworksWidget::saveNetwork(){
 
 	//Save network
 	try{
-		connect(Globals::getNetwork(), SIGNAL(taskFinished()), this, SLOT(networkSaveFinished()),  Qt::UniqueConnection);
-		progressDialog = new QProgressDialog("Saving network", "Cancel", 0, 0, this, Qt::CustomizeWindowHint);
-		progressDialog->setWindowModality(Qt::WindowModal);
-		progressDialog->setCancelButton(0);//Too complicated to implement cancel sensibly
+		//Start network manager to load network in a separate thread.
+		networkManager->startSaveNetwork(Globals::getNetwork());
+		progressDialog->reset();
+		progressDialog->setLabelText("Starting save network.");
+		progressDialog->setCancelButton(0);//Cancel not implemented at this stage
+		cancelButtonVisible = false;
 		progressDialog->show();
-		Globals::getNetwork()->save();
 	}
 	catch(SpikeStreamException& ex){
 		qCritical()<<ex.getMessage();
@@ -439,23 +422,35 @@ void NetworksWidget::setNetworkProperties(){
 
 
 /*! Updates progress dialog with load progress. */
-void NetworksWidget::updateLoadProgress(int stepsCompleted, int totalSteps, QString message){
+void NetworksWidget::updateProgress(int stepsCompleted, int totalSteps, QString message, bool showCancelButton){
+	#ifdef DEBUG
+		qDebug()<<"steps completed: "<<stepsCompleted<<"; totalSteps: "<<totalSteps<<"; message: |"<<message<<"|";
+	#endif//DEBUG
+
 	//Avoid multiple calls to graphics
 	if(progressUpdating)
 		return;
-
 	progressUpdating = true;
 
-	//Check for cancelation - stop timer and abort operation
-	if(loadProgressDialog->wasCanceled()){
-		networkManager->cancel();
-		loadProgressDialog->show();
+	//Add or remove cancel button depending on the current task that is being done
+	if(cancelButtonVisible != showCancelButton){
+		if(showCancelButton)
+			progressDialog->setCancelButton(new QPushButton("Cancel"));
+		else
+			progressDialog->setCancelButton(0);
+		cancelButtonVisible = showCancelButton;
 	}
 
-	if(networkManager->isRunning() && loadProgressDialog->isVisible()){
-		loadProgressDialog->setMaximum(totalSteps);
-		loadProgressDialog->setValue(stepsCompleted);
-		loadProgressDialog->setLabelText(message);
+	//Check for cancellation - stop timer and abort operation
+	if(progressDialog->wasCanceled()){
+		networkManager->cancel();
+		progressDialog->show();
+	}
+
+	if(networkManager->isRunning() && progressDialog->isVisible()){
+		progressDialog->setMaximum(totalSteps);
+		progressDialog->setValue(stepsCompleted);
+		progressDialog->setLabelText(message);
 	}
 
 	progressUpdating = false;
@@ -505,14 +500,18 @@ void NetworksWidget::loadNetwork(NetworkInfo& netInfo, bool prototypeMode){
 
 		//Start network manager to load network in a separate thread.
 		networkManager->startLoadNetwork(newNetwork);
-		loadProgressDialog->show();
+		progressDialog->reset();
+		progressDialog->setLabelText("Starting load network.");
+		progressDialog->setCancelButton(0);
+		cancelButtonVisible = false;
+		progressDialog->show();
 	}
 	catch (SpikeStreamException& ex){
 		qCritical()<<ex.getMessage();
 		if(newNetwork != NULL){
 			delete newNetwork;
 		}
-		loadProgressDialog->hide();
+		progressDialog->hide();
 		return;
 	}
 }

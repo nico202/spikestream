@@ -12,4 +12,5 @@ spikestream.config
 *.Debug
 *.exe
 *resource.rc
-extlib
+extlib*
+*.log

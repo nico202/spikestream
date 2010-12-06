@@ -489,6 +489,19 @@ int Network::getTotalNumberOfSteps(){
 }
 
 
+/*! Returns progress message */
+QString Network::getProgressMessage(){
+	if(neuronNetworkDaoThread->isRunning() && connectionNetworkDaoThread->isRunning())
+		return neuronNetworkDaoThread->getProgressMessage() + "; " + connectionNetworkDaoThread->getProgressMessage();
+	else if (neuronNetworkDaoThread->isRunning())
+		return neuronNetworkDaoThread->getProgressMessage();
+	else if (connectionNetworkDaoThread->isRunning())
+		return connectionNetworkDaoThread->getProgressMessage();
+	else
+		return progressMessage;
+}
+
+
 /*! Returns true if the network is not editable because it is associated with archives */
 bool Network::hasArchives(){
 	ArchiveDao archiveDao(archiveDBInfo);
@@ -517,6 +530,7 @@ bool Network::isSaved(){
 /*! Loads up the network from the database using separate threads */
 void Network::load(){
     clearError();
+	progressMessage = "Loading network...";
 
 	//Load up basic information about the neuron and connection groups
 	loadNeuronGroupsInfo();
@@ -690,7 +704,8 @@ void Network::connectionThreadFinished(){
     //Reset task
     currentConnectionTask = -1;
 
-    if(!isBusy())
+	//Emit signal that task has finished if no other threads are carrying out operations
+	if(!neuronNetworkDaoThread->isRunning())
 		emit taskFinished();
 }
 
@@ -740,7 +755,7 @@ void Network::neuronThreadFinished(){
     currentNeuronTask = -1;
 
     //Emit signal that task has finished if no other threads are carrying out operations
-    if(!isBusy())
+	if(!connectionNetworkDaoThread->isRunning())
 		emit taskFinished();
 }
 
