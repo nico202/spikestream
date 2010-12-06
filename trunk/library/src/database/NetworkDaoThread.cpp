@@ -124,9 +124,6 @@ void NetworkDaoThread::prepareLoadConnections(const QList<ConnectionGroup*>& con
 
     //Set the taks that will run when the thread starts
     currentTask = LOAD_CONNECTIONS_TASK;
-
-	//Calculate the total number of steps
-	totalNumberOfSteps = getConnectionCount(connectionGroupList);
 }
 
 
@@ -138,9 +135,6 @@ void NetworkDaoThread::prepareLoadConnections(ConnectionGroup* connGrp){
 
     //Set the task that will run when the thread starts
     currentTask = LOAD_CONNECTIONS_TASK;
-
-	//Calculate the total number of steps
-	totalNumberOfSteps = getConnectionCount(connectionGroupList);
 }
 
 
@@ -151,23 +145,17 @@ void NetworkDaoThread::prepareLoadNeurons(const QList<NeuronGroup*>& neurGrpList
 
     //Set the task that will run when the thread starts
     currentTask = LOAD_NEURONS_TASK;
-
-	//Calculate the total number of steps
-	totalNumberOfSteps = getNeuronCount(neuronGroupList);
 }
 
 
 /*! Prepares to load neurons for a single neuron group. This task is executed when the thread runs.  */
 void NetworkDaoThread::prepareLoadNeurons(NeuronGroup* neurGrp){
-    //Store necessary variables
-    neuronGroupList.clear();
-    neuronGroupList.append(neurGrp);
+	//Store necessary variables
+	neuronGroupList.clear();
+	neuronGroupList.append(neurGrp);
 
-    //Set the task that will run when the thread starts
-    currentTask = LOAD_NEURONS_TASK;
-
-	//Calculate the total number of steps
-	totalNumberOfSteps = getNeuronCount(neuronGroupList);
+	//Set the task that will run when the thread starts
+	currentTask = LOAD_NEURONS_TASK;
 }
 
 
@@ -245,13 +233,15 @@ void NetworkDaoThread::startDeleteNetwork(unsigned networkID){
 	this->networkID = networkID;
 	//Store list of connection group IDs
 	connectionGroupIDList.clear();
-	QList<ConnectionGroupInfo> conGrpInfoList = getConnectionGroupsInfo(networkID);
+	QList<ConnectionGroupInfo> conGrpInfoList;
+	getConnectionGroupsInfo(networkID, conGrpInfoList);
 	foreach(ConnectionGroupInfo conGrpInfo, conGrpInfoList)
 		connectionGroupIDList.append(conGrpInfo.getID());
 
 	//Store list of neuron group IDs
 	neuronGroupIDList.clear();
-	QList<NeuronGroupInfo> neurGrpInfoList = getNeuronGroupsInfo(networkID);
+	QList<NeuronGroupInfo> neurGrpInfoList;
+	getNeuronGroupsInfo(networkID, neurGrpInfoList);
 	foreach(NeuronGroupInfo neurGrpInfo, neurGrpInfoList)
 		neuronGroupIDList.append(neurGrpInfo.getID());
 
@@ -646,6 +636,7 @@ void NetworkDaoThread::deleteNeuronGroups(){
 void NetworkDaoThread::loadConnections(){
 	//Reset progress
 	numberOfCompletedSteps = 0;
+	totalNumberOfSteps = getConnectionCount(connectionGroupList);
 
     //Work through all the connections to be loaded
     for(QList<ConnectionGroup*>::iterator iter = connectionGroupList.begin(); iter != connectionGroupList.end(); ++iter){
@@ -685,6 +676,7 @@ void NetworkDaoThread::loadConnections(){
 void NetworkDaoThread::loadNeurons(){
 	//Reset progress measure
 	numberOfCompletedSteps = 0;
+	totalNumberOfSteps = getNeuronCount(neuronGroupList);
 
     //Work through all the neurons to be loaded
     for(QList<NeuronGroup*>::iterator iter = neuronGroupList.begin(); iter != neuronGroupList.end(); ++iter){

@@ -4,6 +4,7 @@
 //SpikeStream includes
 #include "NetworkDaoThread.h"
 #include "Network.h"
+#include "NetworkManager.h"
 using namespace spikestream;
 
 //Qt includes
@@ -29,15 +30,16 @@ namespace spikestream {
 		private slots:
 			void addNetworks();
 			void addNewNetwork();
-			void checkLoadingProgress();
 			void deleteNetwork();
 			void loadNetwork();
 			void loadNetworkList();
 			void networkDaoThreadFinished();
+			void networkManagerFinished();
 			void networkSaveFinished();
 			void prototypeNetwork();
 			void saveNetwork();
 			void setNetworkProperties();
+			void updateLoadProgress(int stepsCompleted, int totalSteps, QString message);
 
 		private:
 			//======================  VARIABLES  =====================
@@ -48,10 +50,13 @@ namespace spikestream {
 			networks to be dynamically reloaded */
 			QGridLayout* gridLayout;
 
-			/*! Timer to keep track of the loading of the network. */
-			QTimer* loadingTimer;
+			/*! Manages the loading of the network. */
+			NetworkManager* networkManager;
 
 			/*! Dialog providing feedback about the loading of the network */
+			QProgressDialog* loadProgressDialog;
+
+			/*! Dialog providing feedback about heavy network-related tasks. */
 			QProgressDialog* progressDialog;
 
 			/*! The network that is being loaded */
@@ -65,6 +70,9 @@ namespace spikestream {
 
 			/*! ID of network being deleted */
 			unsigned deleteNetworkID;
+
+			/*! Records when progress dialog is redrawing. */
+			bool progressUpdating;
 
 			/*! Columns for each type of data. */
 			static const int propCol = 0;

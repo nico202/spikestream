@@ -14,7 +14,7 @@ using namespace spikestream;
 #include <cmath>
 
 //Enable to output debugging information
-#define DEBUG
+//#define DEBUG
 
 
 /*! Constructor */
@@ -143,13 +143,14 @@ void NeuronGroupBuilder::addNeurons(NeuronGroup* exNeurGrp, NeuronGroup* inhibNe
 QList<Point3D> NeuronGroupBuilder::getCartesianCoordinates(const QString& coordinatesFile){
 	QList<Point3D> talairachCoords = loadTalairachCoordinates(coordinatesFile);
 
-	//Find minimum x, y and z values
-	float minX, minY, minZ;
+	//Find minimum x, y and z values and max x
+	float minX, minY, minZ, maxX;
 	bool firstTime = true;
 	for(int i=0; i<talairachCoords.size(); ++i){
 		Point3D tmpPoint = talairachCoords.at(i);
 		if(firstTime){
 			minX = tmpPoint.getXPos();
+			maxX = minX;
 			minY = tmpPoint.getYPos();
 			minZ = tmpPoint.getZPos();
 			firstTime = false;
@@ -157,6 +158,8 @@ QList<Point3D> NeuronGroupBuilder::getCartesianCoordinates(const QString& coordi
 		else{
 			if(tmpPoint.getXPos() < minX)
 				minX = tmpPoint.getXPos();
+			if(tmpPoint.getXPos() > maxX)
+				maxX = tmpPoint.getXPos();
 			if(tmpPoint.getYPos() < minY)
 				minY = tmpPoint.getYPos();
 			if(tmpPoint.getZPos() < minZ)
@@ -176,12 +179,26 @@ QList<Point3D> NeuronGroupBuilder::getCartesianCoordinates(const QString& coordi
 		minZ = Util::toPositive(minZ);
 	else minZ = 0.0f;
 
+	//Translate max x by same amount
+	maxX += minX;
+
 	#ifdef DEBUG
 		qDebug()<<"Translating. minX="<<minX<<"; minY="<<minY<<"; minZ="<<minZ;
 	#endif//DEBUG
 
+	//Translate and swap around X and Y, so that brain appears horizontally along X axis
+	float tmpX;
 	for(int i=0; i<talairachCoords.size(); ++i){
 		talairachCoords[i].translate(minX, minY, minZ);
+
+		//Flip x so that left and right are preserved after swapping x and y
+		talairachCoords[i].setXPos(maxX - talairachCoords[i].getXPos());
+
+		//Reverse x and y
+		tmpX = talairachCoords[i].getXPos();
+		talairachCoords[i].setXPos(talairachCoords[i].getYPos());
+		talairachCoords[i].setYPos(tmpX);
+
 	}
 	return talairachCoords;
 }

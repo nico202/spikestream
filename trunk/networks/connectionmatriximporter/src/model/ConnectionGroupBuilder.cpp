@@ -15,7 +15,7 @@ using namespace spikestream;
 using namespace std;
 
 //Enable debuggging information
-#define DEBUG
+//#define DEBUG
 
 
 /*! Constructor */
@@ -167,7 +167,9 @@ void ConnectionGroupBuilder::addConnections(Network* network, int nodeIndex, urn
 	QList<ConnectionGroup*> newConGrpList;
 	for(int i=0; i<connectionList.size(); ++i){
 		if(connectionList.at(i).connectionGroup->size() == 0){
-			qDebug()<<"Empty connection group: "<<connectionList.at(i).connectionGroup->getInfo().getDescription();
+			#ifdef DEBUG
+				qDebug()<<"Empty connection group: "<<connectionList.at(i).connectionGroup->getInfo().getDescription();
+			#endif//DEBUG
 		}
 		else{
 			newConGrpList.append(connectionList.at(i).connectionGroup);

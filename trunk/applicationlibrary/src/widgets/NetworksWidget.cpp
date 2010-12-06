@@ -57,9 +57,19 @@ NetworksWidget::NetworksWidget(QWidget* parent) : QWidget(parent){
 	loadNetworkList();
 	verticalBox->addStretch(10);
 
-	//Create thread for heavy operations
+	//Create thread-based class for delete operations
 	networkDaoThread = new NetworkDaoThread(Globals::getNetworkDao()->getDBInfo());
 	connect(networkDaoThread, SIGNAL(finished()), this, SLOT(networkDaoThreadFinished()));
+
+	//Create thread-based class for load operations
+	networkManager = new NetworkManager();
+	connect(networkManager, SIGNAL(progress(int, int, QString)), this, SLOT(updateLoadProgress(int, int, QString)), Qt::QueuedConnection);
+	connect(networkManager, SIGNAL(finished()), this, SLOT(networkManagerFinished()));
+	loadProgressDialog = new QProgressDialog(this);
+	loadProgressDialog->setAutoClose(false);
+	loadProgressDialog->setAutoReset(false);
+	loadProgressDialog->setModal(true);
+	loadProgressDialog->setMinimumDuration(0);
 
 	//Connect to global reload signal
 	connect(Globals::getEventRouter(), SIGNAL(reloadSignal()), this, SLOT(loadNetworkList()), Qt::QueuedConnection);
@@ -71,6 +81,7 @@ NetworksWidget::NetworksWidget(QWidget* parent) : QWidget(parent){
 
 /*! Destructor */
 NetworksWidget::~NetworksWidget(){
+	delete networkManager;
 }
 
 
@@ -307,6 +318,26 @@ void NetworksWidget::networkDaoThreadFinished(){
 }
 
 
+/*! Called when the network manager finishes a task */
+void NetworksWidget::networkManagerFinished(){
+	//If we have reached this point, loading is complete
+	loadProgressDialog->hide();
+
+	//Check for errors
+	if(networkManager->isError()){
+		qCritical()<<"Error occurred loading network: '"<<networkManager->getErrorMessage()<<"'.";
+		delete newNetwork;
+	}
+	else{
+		//Store network in global scope
+		Globals::setNetwork(newNetwork);
+
+		//Use event router to inform other classes that the network has changed.
+		emit networkChanged();
+	}
+}
+
+
 /*! Called when network save has finished */
 void NetworksWidget::networkSaveFinished(){
 	//Check for errors
@@ -407,6 +438,30 @@ void NetworksWidget::setNetworkProperties(){
 }
 
 
+/*! Updates progress dialog with load progress. */
+void NetworksWidget::updateLoadProgress(int stepsCompleted, int totalSteps, QString message){
+	//Avoid multiple calls to graphics
+	if(progressUpdating)
+		return;
+
+	progressUpdating = true;
+
+	//Check for cancelation - stop timer and abort operation
+	if(loadProgressDialog->wasCanceled()){
+		networkManager->cancel();
+		loadProgressDialog->show();
+	}
+
+	if(networkManager->isRunning() && loadProgressDialog->isVisible()){
+		loadProgressDialog->setMaximum(totalSteps);
+		loadProgressDialog->setValue(stepsCompleted);
+		loadProgressDialog->setLabelText(message);
+	}
+
+	progressUpdating = false;
+}
+
+
 /*----------------------------------------------------------*/
 /*-----                PRIVATE METHODS                 -----*/
 /*----------------------------------------------------------*/
@@ -437,6 +492,7 @@ void NetworksWidget::loadNetwork(NetworkInfo& netInfo, bool prototypeMode){
 	}
 
 	//Load the network
+	progressUpdating = false;
 	try{
 		/* Create new network and store it in global scope.
 			Network is set to null because if an exception is thrown during construction
@@ -444,70 +500,21 @@ void NetworksWidget::loadNetwork(NetworkInfo& netInfo, bool prototypeMode){
 		newNetwork = NULL;
 		newNetwork = new Network(netInfo, Globals::getNetworkDao()->getDBInfo(), Globals::getArchiveDao()->getDBInfo());
 
-		//Set prototype mode and start network loading, all the heavy work is done by separate threads
+		//Set prototype mode
 		newNetwork->setPrototypeMode(prototypeMode);
-		newNetwork->load();
+
+		//Start network manager to load network in a separate thread.
+		networkManager->startLoadNetwork(newNetwork);
+		loadProgressDialog->show();
 	}
 	catch (SpikeStreamException& ex){
 		qCritical()<<ex.getMessage();
-		if(newNetwork != NULL)
+		if(newNetwork != NULL){
 			delete newNetwork;
+		}
+		loadProgressDialog->hide();
 		return;
 	}
-
-	//Set up progress dialog, this checks on the network every 200ms until loading is complete
-	progressDialog = new QProgressDialog("Loading network", "Abort load", 0, newNetwork->getTotalNumberOfSteps(), this);
-	progressDialog->setWindowModality(Qt::WindowModal);
-	progressDialog->setMinimumDuration(1000);
-	loadingTimer  = new QTimer(this);
-	connect(loadingTimer, SIGNAL(timeout()), this, SLOT(checkLoadingProgress()));
-	loadingTimer->start(200);
-}
-
-
-/*! Called by a timer to establish whether the network has finished loading its neurons and connections
-	or whether an error has occurred. */
-void NetworksWidget::checkLoadingProgress(){
-	//Check for errors during loading
-	if(newNetwork->isError()){
-		loadingTimer->stop();
-		newNetwork->cancel();
-		progressDialog->setValue(progressDialog->maximum());
-		delete progressDialog;
-		delete loadingTimer;
-		progressDialog = NULL;
-		qCritical()<<"Error occurred loading network: '"<<newNetwork->getErrorMessage()<<"'.";
-		return;
-	}
-
-	//Check for cancelation - stop timer and abort operation
-	else if(progressDialog->wasCanceled()){
-		loadingTimer->stop();
-		newNetwork->cancel();
-		delete progressDialog;
-		delete loadingTimer;
-		progressDialog = NULL;
-		return;
-	}
-
-	//If networks is busy, update progress bar and return with loading timer still running
-	else if(newNetwork->isBusy()){
-		progressDialog->setValue(newNetwork->getNumberOfCompletedSteps());
-		return;
-	}
-
-	//If we have reached this point, loading is complete
-	loadingTimer->stop();
-	progressDialog->setValue(progressDialog->maximum());
-	delete progressDialog;
-	delete loadingTimer;
-	progressDialog = NULL;
-
-	//Store network in global scope
-	Globals::setNetwork(newNetwork);
-
-	//Use event router to inform other classes that the network has changed.
-	emit networkChanged();
 }
 
 

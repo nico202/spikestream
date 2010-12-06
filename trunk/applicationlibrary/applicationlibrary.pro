@@ -64,8 +64,10 @@ SOURCES += src/database/DatabaseManager.cpp
 #----------------------------------------------#
 #---                Managers                ---#
 #----------------------------------------------#
-HEADERS += include/ConnectionManager.h
-SOURCES += src/managers/ConnectionManager.cpp
+HEADERS += include/ConnectionManager.h \
+			include/NetworkManager.h
+SOURCES += src/managers/ConnectionManager.cpp \
+			src/managers/NetworkManager.cpp
 
 
 #----------------------------------------------#
