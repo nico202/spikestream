@@ -56,12 +56,6 @@ Network::Network(const NetworkInfo& networkInfo, const DBInfo& networkDBInfo, co
 
     //Initialize variables
 	initializeVariables();
-
-    //Load up basic information about the neuron and connection groups
-	qDebug()<<"START loading neuron and connection groups";
-    loadNeuronGroupsInfo();
-    loadConnectionGroupsInfo();
-	qDebug()<<"FINISH loading neuron and connection groups";
 }
 
 
@@ -524,15 +518,19 @@ bool Network::isSaved(){
 void Network::load(){
     clearError();
 
-    //Load up all neurons
-    neuronNetworkDaoThread->prepareLoadNeurons(neurGrpMap.values());
-    currentNeuronTask = LOAD_NEURONS_TASK;
-    neuronNetworkDaoThread->start();
+	//Load up basic information about the neuron and connection groups
+	loadNeuronGroupsInfo();
+	loadConnectionGroupsInfo();
+
+	//Load up all neurons
+	neuronNetworkDaoThread->prepareLoadNeurons(neurGrpMap.values());
+	currentNeuronTask = LOAD_NEURONS_TASK;
+	neuronNetworkDaoThread->start();
 
 	//Load all connection groups
 	connectionNetworkDaoThread->prepareLoadConnections(connGrpMap.values());
-    currentConnectionTask = LOAD_CONNECTIONS_TASK;
-    connectionNetworkDaoThread->start();
+	currentConnectionTask = LOAD_CONNECTIONS_TASK;
+	connectionNetworkDaoThread->start();
 }
 
 
@@ -541,6 +539,10 @@ void Network::load(){
 	Only returns when load is complete. Mainly used for testing */
 void Network::loadWait(){
 	clearError();
+
+	//Load up basic information about the neuron and connection groups
+	loadNeuronGroupsInfo();
+	loadConnectionGroupsInfo();
 
 	//Load up all neurons
 	neuronNetworkDaoThread->prepareLoadNeurons(neurGrpMap.values());
@@ -885,11 +887,12 @@ void Network::loadConnectionGroupsInfo(){
 
     //Get list of neuron groups from database
 	NetworkDao networkDao(networkDBInfo);
-	QList<ConnectionGroupInfo> connGrpInfoList = networkDao.getConnectionGroupsInfo(getID());
+	QList<ConnectionGroupInfo> conGrpInfoList;
+	networkDao.getConnectionGroupsInfo(getID(), conGrpInfoList);
 
     //Copy list into hash map for faster access
-    for(int i=0; i<connGrpInfoList.size(); ++i)
-		connGrpMap[ connGrpInfoList[i].getID() ] = new ConnectionGroup(connGrpInfoList[i]);
+	for(int i=0; i<conGrpInfoList.size(); ++i)
+		connGrpMap[ conGrpInfoList[i].getID() ] = new ConnectionGroup(conGrpInfoList[i]);
 }
 
 
@@ -901,7 +904,8 @@ void Network::loadNeuronGroupsInfo(){
 
     //Get list of neuron groups from database
 	NetworkDao networkDao(networkDBInfo);
-	QList<NeuronGroupInfo> neurGrpInfoList = networkDao.getNeuronGroupsInfo(getID());
+	QList<NeuronGroupInfo> neurGrpInfoList;
+	networkDao.getNeuronGroupsInfo(getID(), neurGrpInfoList);
 
     //Copy list into hash map for faster access
     for(int i=0; i<neurGrpInfoList.size(); ++i)

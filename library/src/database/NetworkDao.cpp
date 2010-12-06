@@ -158,15 +158,15 @@ QList< QPair<unsigned, Connection> > NetworkDao::getConnections(unsigned int fro
 }
 
 
-/*! Returns information about the connection groups associated with the specified network */
-QList<ConnectionGroupInfo> NetworkDao::getConnectionGroupsInfo(unsigned int networkID){
+/*! Fills supplied list with information about the connection groups associated with the specified network */
+void NetworkDao::getConnectionGroupsInfo(unsigned int networkID, QList<ConnectionGroupInfo>& conGrpInfoList){
+	conGrpInfoList.clear();
 	QSqlQuery query = getQuery("SELECT ConnectionGroupID, Description, FromNeuronGroupID, ToNeuronGroupID, Parameters, SynapseTypeID FROM ConnectionGroups WHERE NetworkID=" + QString::number(networkID));
 	executeQuery(query);
-	QList<ConnectionGroupInfo> tmpList;
 	XMLParameterParser parameterParser;
 	for(int i=0; i<query.size(); ++i){
 		query.next();
-		tmpList.append(
+		conGrpInfoList.append(
 				ConnectionGroupInfo(
 						query.value(0).toUInt(),//Connection group id
 						query.value(1).toString(),//Description
@@ -177,7 +177,6 @@ QList<ConnectionGroupInfo> NetworkDao::getConnectionGroupsInfo(unsigned int netw
 				)
 		);
 	}
-	return tmpList;
 }
 
 
@@ -418,14 +417,14 @@ QList<NetworkInfo> NetworkDao::getNetworksInfo(){
 
 
 /*! Returns information about the neuron groups associated with the specified network */
-QList<NeuronGroupInfo> NetworkDao::getNeuronGroupsInfo(unsigned int networkID){
+void NetworkDao::getNeuronGroupsInfo(unsigned int networkID, QList<NeuronGroupInfo>& neurGrpInfoList){
 	QSqlQuery query = getQuery("SELECT NeuronGroupID, Name, Description, Parameters, NeuronTypeID FROM NeuronGroups WHERE NetworkID=" + QString::number(networkID));
 	executeQuery(query);
-	QList<NeuronGroupInfo> tmpList;
+	neurGrpInfoList.clear();
 	XMLParameterParser parameterParser;
 	for(int i=0; i<query.size(); ++i){
 		query.next();
-		tmpList.append(
+		neurGrpInfoList.append(
 				NeuronGroupInfo(
 						query.value(0).toUInt(),
 						query.value(1).toString(),
@@ -435,8 +434,6 @@ QList<NeuronGroupInfo> NetworkDao::getNeuronGroupsInfo(unsigned int networkID){
 				)
 		);
 	}
-	return tmpList;
-
 }
 
 

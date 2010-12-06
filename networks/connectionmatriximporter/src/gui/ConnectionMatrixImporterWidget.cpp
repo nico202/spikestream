@@ -49,7 +49,7 @@ ConnectionMatrixImporterWidget::ConnectionMatrixImporterWidget(){
 
 	//Node Names
 	gridLayout->addWidget(new QLabel("Node Names File: "), rowCntr, 0);
-	nodeNamesFilePathEdit = new QLineEdit("C:/Users/Taropeg/Home/NeuralNetworks/Experiments/Matrices/Test1_4Neurons/4Neuron_Labels.dat");
+	nodeNamesFilePathEdit = new QLineEdit("");
 	connect(nodeNamesFilePathEdit, SIGNAL(textChanged(const QString&)), this, SLOT(checkImportEnabled(const QString&)));
 	nodeNamesFilePathEdit->setMinimumSize(250, 30);
 	gridLayout->addWidget(nodeNamesFilePathEdit, rowCntr, 1);
@@ -60,7 +60,7 @@ ConnectionMatrixImporterWidget::ConnectionMatrixImporterWidget(){
 
 	//Coordinates
 	gridLayout->addWidget(new QLabel("Talairach Coordinates File: "), rowCntr, 0);
-	coordinatesFilePathEdit = new QLineEdit("C:/Users/Taropeg/Home/NeuralNetworks/Experiments/Matrices/Test1_4Neurons/4Neuron_Positions.dat");
+	coordinatesFilePathEdit = new QLineEdit("");
 	connect(coordinatesFilePathEdit, SIGNAL(textChanged(const QString&)), this, SLOT(checkImportEnabled(const QString&)));
 	coordinatesFilePathEdit->setMinimumSize(250, 30);
 	gridLayout->addWidget(coordinatesFilePathEdit, rowCntr, 1);
@@ -71,7 +71,7 @@ ConnectionMatrixImporterWidget::ConnectionMatrixImporterWidget(){
 
 	//Weights
 	gridLayout->addWidget(new QLabel("Connectivity Matrix File: "), rowCntr, 0);
-	weightsFilePathEdit = new QLineEdit("C:/Users/Taropeg/Home/NeuralNetworks/Experiments/Matrices/Test1_4Neurons/4Neuron_C.dat");
+	weightsFilePathEdit = new QLineEdit("");
 	connect(weightsFilePathEdit, SIGNAL(textChanged(const QString&)), this, SLOT(checkImportEnabled(const QString&)));
 	weightsFilePathEdit->setMinimumSize(250, 30);
 	gridLayout->addWidget(weightsFilePathEdit, rowCntr, 1);
@@ -82,7 +82,7 @@ ConnectionMatrixImporterWidget::ConnectionMatrixImporterWidget(){
 
 	//Delays
 	gridLayout->addWidget(new QLabel("Delays File: "), rowCntr, 0);
-	delaysFilePathEdit = new QLineEdit("C:/Users/Taropeg/Home/NeuralNetworks/Experiments/Matrices/Test1_4Neurons/4Neuron_L.dat");
+	delaysFilePathEdit = new QLineEdit("");
 	connect(delaysFilePathEdit, SIGNAL(textChanged(const QString&)), this, SLOT(checkImportEnabled(const QString&)));
 	delaysFilePathEdit->setMinimumSize(250, 30);
 	gridLayout->addWidget(delaysFilePathEdit, rowCntr, 1);
@@ -147,7 +147,7 @@ void ConnectionMatrixImporterWidget::checkImportEnabled(const QString&){
 /*! Launches a file dialog to select file containing the coordinates
 	of the neuron groups. */
 void ConnectionMatrixImporterWidget::getCoordinatesFile(){
-	coordinatesFilePathEdit->setText(getFilePath("*.dat"));
+	coordinatesFilePathEdit->setText(getFilePath("*.dat", "Talairach Coordinates File"));
 	checkImportEnabled();
 }
 
@@ -156,7 +156,7 @@ void ConnectionMatrixImporterWidget::getCoordinatesFile(){
 /*! Launches a file dialog to select file containing the delays
 	of the connections between neuron groups. */
 void ConnectionMatrixImporterWidget::getDelaysFile(){
-	delaysFilePathEdit->setText(getFilePath("*.dat"));
+	delaysFilePathEdit->setText(getFilePath("*.dat", "Delays File"));
 	checkImportEnabled();
 }
 
@@ -164,7 +164,7 @@ void ConnectionMatrixImporterWidget::getDelaysFile(){
 /*! Launches a file dialog to select file containing the node names
 	of the neuron groups. */
 void ConnectionMatrixImporterWidget::getNodeNamesFile(){
-	nodeNamesFilePathEdit->setText(getFilePath("*.dat"));
+	nodeNamesFilePathEdit->setText(getFilePath("*.dat", "Node Names File"));
 	checkImportEnabled();
 }
 
@@ -172,7 +172,7 @@ void ConnectionMatrixImporterWidget::getNodeNamesFile(){
 /*! Launches a file dialog to select file containing the weights
 	of the connections between neuron groups. */
 void ConnectionMatrixImporterWidget::getWeightsFile(){
-	weightsFilePathEdit->setText(getFilePath("*.dat"));
+	weightsFilePathEdit->setText(getFilePath("*.dat", "Connection Weights File"));
 	checkImportEnabled();
 }
 
@@ -206,7 +206,6 @@ void ConnectionMatrixImporterWidget::importMatrix(){
 
 /*! Called when the matrix importer thread finishes */
 void ConnectionMatrixImporterWidget::matrixImporterFinished(){
-	qDebug()<<"Matrix importer finished";
 	progressDialog->hide();
 
 	//Show error
@@ -251,10 +250,6 @@ void ConnectionMatrixImporterWidget::updateProgress(int stepsCompleted, int tota
 		progressDialog->setValue(stepsCompleted);
 		progressDialog->setLabelText(message);
 	}
-
-	//Make sure this method has not made progress visible after it has been hidden by matrix importer finishing
-	if(!matrixImporter->isRunning())
-		progressDialog->hide();
 
 	progressUpdating = false;
 }
@@ -335,9 +330,10 @@ void ConnectionMatrixImporterWidget::buildParameters(){
 
 
 /*! Enables user to enter a file path */
-QString ConnectionMatrixImporterWidget::getFilePath(QString fileFilter){
+QString ConnectionMatrixImporterWidget::getFilePath(QString fileFilter, QString title){
 	QFileDialog dialog(this);
 	dialog.setDirectory(Globals::getWorkingDirectory());
+	dialog.setWindowTitle(title);
 	dialog.setFileMode(QFileDialog::ExistingFile);
 	dialog.setNameFilter( QString("Configuration files (" + fileFilter + ")") );
 	dialog.setViewMode(QFileDialog::Detail);

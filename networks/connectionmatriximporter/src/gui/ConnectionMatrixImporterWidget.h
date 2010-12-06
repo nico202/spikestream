@@ -79,7 +79,7 @@ namespace spikestream {
 
 			//======================  METHODS  =========================
 			void buildParameters();
-			QString getFilePath(QString fileFilter);
+			QString getFilePath(QString fileFilter, QString title);
     };
 
 }
