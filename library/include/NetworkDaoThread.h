@@ -27,6 +27,7 @@ namespace spikestream {
 			int getTotalNumberOfSteps() { return totalNumberOfSteps; }
 			bool isError() { return error; }
 			QString getErrorMessage() { return errorMessage; }
+			QString getProgressMessage() { return progressMessage; }
 			void prepareAddConnectionGroup(unsigned int networkID, ConnectionGroup* connGrp);
 			void prepareAddConnectionGroups(unsigned int networkID, QList<ConnectionGroup*>& connGrpList);
 			void prepareAddNeuronGroup(unsigned int networkID, NeuronGroup* neurGrp);
@@ -72,6 +73,9 @@ namespace spikestream {
 
 			/*! Error message */
 			QString errorMessage;
+
+			/*! Message reporting current task for progress bar. */
+			QString progressMessage;
 
 			/*! The total number of steps for a task */
 			int totalNumberOfSteps;

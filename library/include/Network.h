@@ -48,6 +48,7 @@ namespace spikestream {
 			Box getNeuronGroupBoundingBox(unsigned int neurGrpID);
 			NeuronGroup* getNeuronGroupFromNeuronID(unsigned neuronID);
 			QList<unsigned int> getNeuronGroupIDs();
+			QString getProgressMessage();
 			QList<unsigned int> getConnectionGroupIDs();
 			NeuronGroup* getNeuronGroup(unsigned int id);
 			QList<NeuronGroup*> getNeuronGroups();
@@ -116,6 +117,9 @@ namespace spikestream {
 
 			/*! Loading error message */
 			QString errorMessage;
+
+			/*! Message giving feedback about current task. */
+			QString progressMessage;
 
 			/*! List of neuron groups that are being added to the network */
 			QHash<unsigned, NeuronGroup*> newNeuronGroupMap;

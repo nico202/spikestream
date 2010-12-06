@@ -23,8 +23,7 @@ CREATE TABLE Networks (
     NetworkID SMALLINT NOT NULL AUTO_INCREMENT,
     Name CHAR(250) NOT NULL DEFAULT "Untitled",
     Description CHAR(250) NOT NULL DEFAULT "Untitled",
-    PRIMARY KEY (NetworkID),
-    INDEX NetworkIDIndex(NetworkID)
+    PRIMARY KEY (NetworkID)
 )
 ENGINE=InnoDB;
 
@@ -40,6 +39,7 @@ CREATE TABLE NeuronGroups (
     NeuronTypeID SMALLINT UNSIGNED NOT NULL, /*The type of neuron in the group. Used for parameters and class loading */
 
     PRIMARY KEY (NeuronGroupID),
+	INDEX NetworkIDIndex(NetworkID),
 
     FOREIGN KEY NetworkID_FK(NetworkID) REFERENCES Networks(NetworkID) ON DELETE CASCADE,
     FOREIGN KEY NeuronTypeID_FK(NeuronTypeID) REFERENCES NeuronTypes(NeuronTypeID) ON DELETE NO ACTION
@@ -95,7 +95,7 @@ CREATE TABLE ConnectionGroups (
 	Parameters TEXT,
 
 	PRIMARY KEY (ConnectionGroupID),
-	/* INDEX ConnectionGroupIDIndex(ConnectionGroupID), */
+	INDEX NetworkIDIndex(NetworkID),
 
     FOREIGN KEY NetworkID_FK(NetworkID) REFERENCES Networks(NetworkID) ON DELETE CASCADE,
     FOREIGN KEY FromNeuronGroupID_FK(FromNeuronGroupID) REFERENCES NeuronGroups(NeuronGroupID) ON DELETE CASCADE,

@@ -16,16 +16,39 @@ namespace spikestream {
 			NetworkManager();
 			~NetworkManager();
 			void cancel();
+			int getCurrentTask() { return currentTask; }
 			void run();
+			void startDeleteNetwork(Network* network);
 			void startLoadNetwork(Network* network);
+			void startSaveNetwork(Network* network);
+
+			//================  VARIABLES  ==================
+			/*! undefined task id */
+			static const int UNDEFINED_TASK = 0;
+
+			/*! Deleting network task. */
+			static const int DELETE_NETWORK_TASK = 1;
+
+			/*! Task of loading the network */
+			static const int LOAD_NETWORK_TASK = 2;
+
+			/*! Task of saving the network */
+			static const int SAVE_NETWORK_TASK = 3;
+
 
 		signals:
-			void progress(int stepsCompleted, int totalSteps, QString message);
+			void progress(int stepsCompleted, int totalSteps, QString message, bool showCancelButton);
+
 
 		private:
 			//================  VARIABLES  ==================
 			/*! The network that is being loaded */
 			Network* network;
+
+			/*! Current task being undertaken by the thread. */
+			int currentTask;
+
+
 	};
 
 

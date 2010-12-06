@@ -33,13 +33,11 @@ namespace spikestream {
 			void deleteNetwork();
 			void loadNetwork();
 			void loadNetworkList();
-			void networkDaoThreadFinished();
 			void networkManagerFinished();
-			void networkSaveFinished();
 			void prototypeNetwork();
 			void saveNetwork();
 			void setNetworkProperties();
-			void updateLoadProgress(int stepsCompleted, int totalSteps, QString message);
+			void updateProgress(int stepsCompleted, int totalSteps, QString message, bool showCancelButton);
 
 		private:
 			//======================  VARIABLES  =====================
@@ -54,9 +52,6 @@ namespace spikestream {
 			NetworkManager* networkManager;
 
 			/*! Dialog providing feedback about the loading of the network */
-			QProgressDialog* loadProgressDialog;
-
-			/*! Dialog providing feedback about heavy network-related tasks. */
 			QProgressDialog* progressDialog;
 
 			/*! The network that is being loaded */
@@ -65,14 +60,14 @@ namespace spikestream {
 			/** Holds widgets that were set to be deleted during earlier event cycle */
 			QList<QWidget*> cleanUpList;
 
-			/*! Database Dao thread for heavy operations */
-			NetworkDaoThread* networkDaoThread;
-
 			/*! ID of network being deleted */
 			unsigned deleteNetworkID;
 
 			/*! Records when progress dialog is redrawing. */
 			bool progressUpdating;
+
+			/*! Records whether progress dialog has cancel button */
+			bool cancelButtonVisible;
 
 			/*! Columns for each type of data. */
 			static const int propCol = 0;

@@ -26,6 +26,7 @@ NetworkDaoThread::NetworkDaoThread(const DBInfo& dbInfo, const QString& name) : 
     currentTask = NO_TASK_DEFINED;
     clearError();
     stopThread = true;
+	progressMessage = "Not running";
 
 	//Load up configuration parameters
 	ConfigLoader configLoader;
@@ -100,6 +101,7 @@ void NetworkDaoThread::prepareDeleteConnectionGroups(unsigned int networkID, QLi
 
 	//Record the total number of steps that the task involves
 	totalNumberOfSteps = 1;
+	progressMessage = "Deleting connection groups.";
 }
 
 
@@ -114,6 +116,7 @@ void NetworkDaoThread::prepareDeleteNeuronGroups(unsigned int networkID, QList<u
 
 	//Record the total number of steps that the task involves
 	totalNumberOfSteps = 1;
+	progressMessage = "Deleting neuron groups.";
 }
 
 
@@ -124,6 +127,7 @@ void NetworkDaoThread::prepareLoadConnections(const QList<ConnectionGroup*>& con
 
     //Set the taks that will run when the thread starts
     currentTask = LOAD_CONNECTIONS_TASK;
+	progressMessage = "Loading connections";
 }
 
 
@@ -135,6 +139,7 @@ void NetworkDaoThread::prepareLoadConnections(ConnectionGroup* connGrp){
 
     //Set the task that will run when the thread starts
     currentTask = LOAD_CONNECTIONS_TASK;
+	progressMessage = "Loading connections";
 }
 
 
@@ -145,6 +150,7 @@ void NetworkDaoThread::prepareLoadNeurons(const QList<NeuronGroup*>& neurGrpList
 
     //Set the task that will run when the thread starts
     currentTask = LOAD_NEURONS_TASK;
+	progressMessage = "Loading neurons";
 }
 
 
@@ -156,6 +162,7 @@ void NetworkDaoThread::prepareLoadNeurons(NeuronGroup* neurGrp){
 
 	//Set the task that will run when the thread starts
 	currentTask = LOAD_NEURONS_TASK;
+	progressMessage = "Loading neurons";
 }
 
 
@@ -247,6 +254,7 @@ void NetworkDaoThread::startDeleteNetwork(unsigned networkID){
 
 	//Prepare and start task
 	currentTask = DELETE_NETWORK_TASK;
+	progressMessage = "Deleting network";
 	start();
 }
 
@@ -262,6 +270,7 @@ void NetworkDaoThread::startSaveNetwork(unsigned networkID, QList<NeuronGroup*> 
 
 	//Start thread running
 	currentTask = SAVE_NETWORK_TASK;
+	progressMessage = "Saving network";
 	start();
 }
 
@@ -280,6 +289,11 @@ void NetworkDaoThread::stop(){
     Should only work if neuron groups with the specified ids already exist in the database.
     FIXME: MAKE THIS ALL ONE TRANSACTION */
 void NetworkDaoThread::addConnectionGroups(){
+	//Reset progress measure
+	numberOfCompletedSteps = 0;
+	totalNumberOfSteps = connectionGroupList.size();
+	progressMessage = "Adding Connections";
+
     //Work through the list of connection groups
 	for(QList<ConnectionGroup*>::iterator iter = connectionGroupList.begin(); iter != connectionGroupList.end() && !stopThread; ++iter){
 		//Get a pointer to the connection group
@@ -411,6 +425,9 @@ void NetworkDaoThread::addConnectionGroups(){
 		if(!stopThread && (connectionGroup->size() != conAddedCntr) )
 			throw SpikeStreamException("Number of connections added to database: " + QString::number(conAddedCntr) + " does not match size of connection group: " + QString::number(connectionGroup->size()));
 
+		//Update progress
+		++numberOfCompletedSteps;
+
 		#ifdef TIME_PERFORMANCE
 			timer.printTime("Number of buffers: " + QString::number(numConBuffers) + ". Number of connections remaining: " + QString::number(tmpConList.size()) + ". Adding " + QString::number(conCntr) + " connections");
 		#endif//TIME_PERFORMANCE
@@ -429,6 +446,11 @@ void NetworkDaoThread::addConnectionGroups(){
 /*! Adds a neuron group to the SpikeStreamNetwork database.
     FIXME: MAKE THIS ALL ONE TRANSACTION. */
 void NetworkDaoThread::addNeuronGroups(){
+	//Reset progress measure
+	numberOfCompletedSteps = 0;
+	totalNumberOfSteps = neuronGroupList.size();
+	progressMessage = "Adding Neurons";
+
     //Check that parameters have been set correctly
     if(networkID == 0){
 		setError("Network ID has not been set.");
@@ -574,6 +596,9 @@ void NetworkDaoThread::addNeuronGroups(){
 
 		//Add the new map to the neuron group. This should also clean up the old map
 		neuronGroup->setNeuronMap(newNeurMap);
+
+		//Track progress
+		++numberOfCompletedSteps;
     }
 
 	//Clean up neuron groups if task was cancelled.
@@ -588,7 +613,11 @@ void NetworkDaoThread::addNeuronGroups(){
 
 /*! Deletes connection groups from the SpikeStreamNetwork database. */
 void NetworkDaoThread::deleteConnectionGroups(){
-	//Check that parameters have been set correctly
+	numberOfCompletedSteps = 0;
+	totalNumberOfSteps = connectionGroupIDList.size();
+	progressMessage = "Deleting connection groups";
+
+	//Check that network ID is valid
 	if(networkID == 0){
 		setError("Network ID has not been set.");
 		return;
@@ -598,6 +627,7 @@ void NetworkDaoThread::deleteConnectionGroups(){
 	foreach(unsigned int conGroupID, connectionGroupIDList){
 		executeQuery("DELETE FROM Connections WHERE ConnectionGroupID=" + QString::number(conGroupID) );
 		executeQuery("DELETE FROM ConnectionGroups WHERE NetworkID="+ QString::number(networkID) + " AND ConnectionGroupID=" + QString::number(conGroupID) );
+		++numberOfCompletedSteps;
 	}
 
 	//Reset list
@@ -608,14 +638,22 @@ void NetworkDaoThread::deleteConnectionGroups(){
 /*! Deletes a network from the database. Does nothing if a network with the specified
 	id does not exist. */
 void NetworkDaoThread::deleteNetwork(){
+	numberOfCompletedSteps = 0;
+	totalNumberOfSteps = 1;
+	progressMessage = "Deleting network.";
 	executeQuery("DELETE FROM Networks WHERE NetworkID = " + QString::number(networkID));
 	networkID = 0;
+	numberOfCompletedSteps = 1;
 }
 
 
 /*! Deletes neuron groups from the SpikeStreamNetwork database. */
 void NetworkDaoThread::deleteNeuronGroups(){
-	//Check that parameters have been set correctly
+	numberOfCompletedSteps = 0;
+	totalNumberOfSteps = neuronGroupIDList.size();
+	progressMessage = "Deleting neuron groups";
+
+	//Check that network id is valid
 	if(networkID == 0){
 		setError("Network ID has not been set.");
 		return;
@@ -625,6 +663,7 @@ void NetworkDaoThread::deleteNeuronGroups(){
 	foreach(unsigned int neuronGroupID, neuronGroupIDList){
 		executeQuery("DELETE FROM Neurons WHERE NeuronGroupID=" + QString::number(neuronGroupID) );
 		executeQuery("DELETE FROM NeuronGroups WHERE NetworkID="+ QString::number(networkID) + " AND NeuronGroupID=" + QString::number(neuronGroupID) );
+		++numberOfCompletedSteps;
 	}
 
 	//Reset list
@@ -764,6 +803,8 @@ void NetworkDaoThread::saveNetwork(){
 			cout<<endl;
 		}
 	#endif//DEBUG
+
+	progressMessage = "Saving network";
 
 	//Delete neuron and connection groups that have been deleted from the prototype
 	deleteNeuronGroups();
