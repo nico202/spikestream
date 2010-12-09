@@ -426,7 +426,7 @@ void TestNetworkDao::testGetConnectionGroupsInfo(){
 	NetworkDao networkDao (dbInfo);
 	QList<ConnectionGroupInfo> connGrpInfoList;
 	try{
-		connGrpInfoList = networkDao.getConnectionGroupsInfo(networkID);
+		networkDao.getConnectionGroupsInfo(networkID, connGrpInfoList);
 	}
 	catch(SpikeStreamException& ex){
 		QFAIL(ex.getMessage().toAscii());
@@ -571,7 +571,7 @@ void TestNetworkDao::testGetNeuronGroupsInfo(){
 	NetworkDao networkDao (dbInfo);
 	QList<NeuronGroupInfo> neurGrpInfoList;
 	try{
-		neurGrpInfoList = networkDao.getNeuronGroupsInfo(networkID);
+		networkDao.getNeuronGroupsInfo(networkID, neurGrpInfoList);
 	}
 	catch(SpikeStreamException& ex){
 		QFAIL(ex.getMessage().toAscii());

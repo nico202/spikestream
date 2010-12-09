@@ -44,7 +44,7 @@ ArchiveWidget::ArchiveWidget(QWidget* parent) : QWidget(parent){
     verticalBox->addStretch(1);
 
     //Listen for changes in the network and archive
-    connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(loadArchiveList()));
+	connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(networkChanged()));
 	connect(Globals::getEventRouter(), SIGNAL(archiveListChangedSignal()), this, SLOT(loadArchiveList()));
 
     //Inform other classes when a different archive is loaded
@@ -236,6 +236,16 @@ void ArchiveWidget::loadArchiveList(){
 }
 
 
+/*! Called when network is changed */
+void ArchiveWidget::networkChanged(){
+	loadArchiveList();
+
+	//Reset time step labels
+	timeStepLabel->setText("0");
+	maxTimeStepLabel->setText("0");
+}
+
+
 /*! Rewinds the archive */
 void ArchiveWidget::rewindButtonPressed(){
     //Stop thread if it is running. Rewind will be done when thread finishes
@@ -385,8 +395,8 @@ void ArchiveWidget::setArchiveProperties(){
 /*! Called when the time step changes and updates the time step counter */
 void ArchiveWidget::updateTimeStep(unsigned timeStep, const QList<unsigned>& neuronIDList){
 	//Update the time step counter and the time step in the archive
-	timeStepLabel->setText(QString::number(Globals::getArchive()->getTimeStep()));
 	Globals::getArchive()->setTimeStep(timeStep);
+	timeStepLabel->setText(QString::number(timeStep));
 
 	//Build new highlight map from list of IDs
 	QHash<unsigned int, RGBColor*>* newHighlightMap = new QHash<unsigned int, RGBColor*>();
@@ -401,6 +411,7 @@ void ArchiveWidget::updateTimeStep(unsigned timeStep, const QList<unsigned>& neu
 	//Instruct thread to continue with next time step
 	archivePlayer->clearWaitForGraphics();
 }
+
 
 /*----------------------------------------------------------*/
 /*-----                PRIVATE METHODS                 -----*/
