@@ -1,6 +1,0 @@
-
-
-Panel input 1, Width 10, Height 10, ColPlanes 1
-
-Neural layer 1, Width 10, Height 10, ColPlanes 1
-AltNeu 0, AltParam1 0, AltParam2 0, Generalization 100

@@ -71,38 +71,6 @@ SOURCES += src/managers/ConnectionManager.cpp \
 
 
 #----------------------------------------------#
-#---                 NRM                    ---#
-#----------------------------------------------#
-HEADERS += include/NRMNetwork.h \
-			include/NRMConfigLoader.h \
-			include/NRMTrainingLoader.h \
-			include/NRMConstants.h \
-			include/NRMLayer.h \
-			include/NRMNeuralLayer.h \
-			include/NRMInputLayer.h \
-			include/NRMConnection.h \
-			include/NRMNeuron.h \
-			include/NRMRandom.h \
-			include/NRMFileLoader.h \
-			include/NRMDataImporter.h \
-			include/NRMDataSetImporter.h \
-			include/NRMDataSet.h
-SOURCES += src/nrm/NRMNetwork.cpp \
-			src/nrm/NRMConfigLoader.cpp \
-			src/nrm/NRMTrainingLoader.cpp \
-			src/nrm/NRMLayer.cpp \
-			src/nrm/NRMNeuralLayer.cpp \
-			src/nrm/NRMInputLayer.cpp \
-			src/nrm/NRMConnection.cpp \
-			src/nrm/NRMNeuron.cpp \
-			src/nrm/NRMRandom.cpp \
-			src/nrm/NRMFileLoader.cpp \
-			src/nrm/NRMDataImporter.cpp \
-			src/nrm/NRMDataSetImporter.cpp \
-			src/nrm/NRMDataSet.cpp
-
-
-#----------------------------------------------#
 #---                 Analysis               ---#
 #----------------------------------------------#
 HEADERS += include/AnalysisLoaderWidget.h \
@@ -140,7 +108,6 @@ SOURCES += src/builders/AbstractConnectionBuilder.cpp \
 #---                Dialogs                 ---#
 #----------------------------------------------#
 HEADERS += include/AbstractParametersEditDialog.h \
-			include/NRMImportDialog.h \
 			include/LoadAnalysisDialog.h \
 			include/PluginsDialog.h \
 			include/TruthTableDialog.h \
@@ -155,7 +122,6 @@ HEADERS += include/AbstractParametersEditDialog.h \
 			include/ConnectionGroupDialog.h \
 			include/DescriptionDialog.h
 SOURCES += src/dialogs/AbstractParametersEditDialog.cpp \
-			src/dialogs/NRMImportDialog.cpp \
 			src/dialogs/LoadAnalysisDialog.cpp \
 			src/dialogs/PluginsDialog.cpp \
 			src/dialogs/TruthTableDialog.cpp \
@@ -169,13 +135,6 @@ SOURCES += src/dialogs/AbstractParametersEditDialog.cpp \
 			src/dialogs/NeuronGroupDialog.cpp \
 			src/dialogs/ConnectionGroupDialog.cpp \
 			src/dialogs/DescriptionDialog.cpp
-
-
-#----------------------------------------------#
-#---               Exceptions               ---#
-#----------------------------------------------#
-HEADERS += include/NRMException.h
-SOURCES += src/exceptions/NRMException.cpp
 
 
 #----------------------------------------------#

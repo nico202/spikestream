@@ -4,7 +4,6 @@
 #include "GlobalVariables.h"
 #include "ConfigLoader.h"
 #include "Globals.h"
-#include "NRMImportDialog.h"
 #include "SpikeStreamException.h"
 #include "NetworksWidget.h"
 #include "ArchiveWidget.h"
@@ -214,37 +213,6 @@ void SpikeStreamMainWindow::clearDatabases(){
 }
 
 
-/*! Loads a neuron group and associated connections from a file.
-	This should be a comma separated matrix of connection weights. */
-void SpikeStreamMainWindow::importConnectionMatrix(){
-	qWarning()<<"Import connection matrix method not implemented";
-	//    //Warn user about limitations
-	//    int response = QMessageBox::warning(this, "Import ConnectionMatrix", "This is a preliminary method that will try create a new layer at position (0,0,0) with the default neuron and synapse types\n Make sure there is enough space for the new layer.\nDo you want to continue?", QMessageBox::Yes, QMessageBox::No, 0);
-	//    if(response != QMessageBox::Yes)
-	//	return;
-	//
-	//    //Get the file name
-	//    QString fileName = Q3FileDialog::getOpenFileName(defaultFileLocation, "All files (*.*)", this, "Load matrix dialog", "Choose a file to load" );
-	//    if(fileName.isNull())
-	//	return;
-	//
-	//    ConnectionMatrixLoader* matrixLoader = new ConnectionMatrixLoader(networkDBInterface);
-	//    matrixLoader->loadConnectionMatrix(fileName);
-	//
-	//    //Clean up matrix loader
-	//    delete matrixLoader;
-
-}
-
-
-/*! Displays a dialog/wizard to import networks from NRM files into the SpikeStream database */
-void SpikeStreamMainWindow::importNRMNetwork(){
-	NRMImportDialog* nrmDialog = new NRMImportDialog(this);
-	nrmDialog->exec();
-	delete nrmDialog;
-}
-
-
 /*! Loads databases from a file selected by the user.
 	Launches database manager, which allows user to select which database to load. */
 void SpikeStreamMainWindow::loadDatabases(){
@@ -378,8 +346,6 @@ void SpikeStreamMainWindow::initializeApplication(){
 	QMenu * fileMenu = new QMenu("File", this);
 	menuBar()->addMenu(fileMenu);
 	fileMenu->addAction("Clear databases", this, SLOT(clearDatabases()));
-	fileMenu->addSeparator();
-	fileMenu->addAction("Import NRM network", this, SLOT(importNRMNetwork()), Qt::CTRL+Qt::Key_M);
 	fileMenu->addSeparator();
 	fileMenu->addAction("Quit", qApp, SLOT(closeAllWindows()), Qt::CTRL+Qt::Key_Q);
 

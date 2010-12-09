@@ -29,8 +29,6 @@ namespace spikestream {
 		private slots:
 			void about();
 			void clearDatabases();
-			void importConnectionMatrix();
-			void importNRMNetwork();
 			void loadDatabases();
 			void saveDatabases();
 			void showAnalysisWidget();
