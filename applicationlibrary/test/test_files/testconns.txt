@@ -1,2 +1,0 @@
-NEURAL Input 1  to  Input 1   Connections per neuron: 8 Random Cols  (Global Random)
-
