@@ -13,9 +13,10 @@ using namespace spikestream;
 #include "boost/random.hpp"
 
 //Outputs debugging information for NeMo calls
-#define DEBUG_LOAD
-#define DEBUG_STEP
+//#define DEBUG_LOAD
+//#define DEBUG_STEP
 //#define DEBUG_WEIGHTS
+//#define DEBUG_PERFORMANCE
 
 
 /*! Constructor */
@@ -505,6 +506,9 @@ void NemoWrapper::runNemo(){
 
 		//Sleep if task was completed in less than the prescribed interval
 		elapsedTime_ms = startTime.msecsTo(QTime::currentTime());
+		#ifdef DEBUG_PERFORMANCE
+			qDebug()<<"Elapsed time: "<<elapsedTime_ms<<"; update interval: "<<updateInterval_ms;
+		#endif//DEBUG_PERFORMANCE
 		if(elapsedTime_ms < updateInterval_ms){
 			//Sleep for remaning time
 			usleep(1000 * (updateInterval_ms - elapsedTime_ms));
@@ -771,7 +775,7 @@ void NemoWrapper::stepNemo(){
 		#endif//DEBUG_STEP
 		checkNemoOutput( nemo_step(nemoSimulation, 0, 0, NULL, NULL, 0, &firedArray, &firedCount), "Nemo error on step" );
 		#ifdef DEBUG_STEP
-					qDebug()<<"NeMo successfully stepped.";
+			qDebug()<<"NeMo successfully stepped.";
 		#endif//DEBUG_STEP
 	}
 
@@ -800,7 +804,7 @@ void NemoWrapper::stepNemo(){
 		#endif//DEBUG_STEP
 		getMembranePotential();
 		#ifdef DEBUG_STEP
-					qDebug()<<"Successfully read membrane potential.";
+			qDebug()<<"Successfully read membrane potential.";
 		#endif//DEBUG_STEP
 	}
 
