@@ -115,12 +115,12 @@ void ArchivePlayerThread::run(){
 		try{
 			//Get string list of firing neuron ids
 			QList<unsigned> neuronIDList = archiveDao->getFiringNeuronIDs(archiveID, timeStep);
-			qDebug()<<"NEURON ID LENGTH: "<<neuronIDList.size();
 
 			//Set flag to true so that thread waits for graphics update before moving to next time step
 			waitForGraphics = true;
 
 			//Inform other classes that time step has changed
+			qDebug()<<"time step: "<<timeStep<<"; last time step: "<<lastTimeStep;
 			emit timeStepChanged(timeStep, neuronIDList);
 
 			//Increase time step and quit if we are at the maximum

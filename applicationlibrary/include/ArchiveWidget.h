@@ -33,6 +33,7 @@ namespace spikestream{
 			void deleteArchive();
 			void loadArchive();
 			void loadArchiveList();
+			void networkChanged();
 			void rewindButtonPressed();
 			void playButtonPressed();
 			void stepButtonPressed();

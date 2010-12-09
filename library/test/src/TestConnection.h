@@ -10,7 +10,6 @@ namespace spikestream {
 		Q_OBJECT
 
 		private slots:
-			void testCompression();
 			void testGetDelay();
 			void testGetWeight();
 			void testSetWeight();

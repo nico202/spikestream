@@ -26,10 +26,11 @@ void TestRunner::runTests(){
 	char* argsChar[0];
 	QCoreApplication coreApplication(argsSize, argsChar);
 
-	TestMemory testMemory;
-	QTest::qExec(&testMemory);
+	//Enable this test if you want to measure the amount of memory consumed by different classes
+	//TestMemory testMemory;
+	//QTest::qExec(&testMemory);
 
-/*	TestConnection testConnection;
+	TestConnection testConnection;
 	QTest::qExec(&testConnection);
 
 	TestDatabaseDao testDatabaseDao;
@@ -60,7 +61,7 @@ void TestRunner::runTests(){
     QTest::qExec(&testUtil);
 
     TestWeightlessNeuron testWeightlessNeuron;
-	QTest::qExec(&testWeightlessNeuron);*/
+	QTest::qExec(&testWeightlessNeuron);
 }
 
 

@@ -84,15 +84,15 @@ void TestNetworkDaoThread::testAddConnectionGroup(){
 		QVERIFY(connGrp.getID() != 0);
 
 		//Check that connections were added correctly
-		for(QHash<unsigned, Connection*>::const_iterator iter = connGrp.begin(); iter != connGrp.end(); ++iter){
-			query = getQuery("SELECT ConnectionGroupID, FromNeuronID, ToNeuronID, Delay, Weight FROM Connections WHERE ConnectionID = " + QString::number((iter).key()));
+		for(ConnectionIterator iter = connGrp.begin(); iter != connGrp.end(); ++iter){
+			query = getQuery("SELECT ConnectionGroupID, FromNeuronID, ToNeuronID, Delay, Weight FROM Connections WHERE ConnectionID = " + QString::number(iter->getID()));
 			executeQuery(query);
 			query.next();
 			QCOMPARE( query.value(0).toUInt(), connGrp.getID() );//Check connection group id
-			QCOMPARE( query.value(1).toUInt(), iter.value()->getFromNeuronID() );
-			QCOMPARE( query.value(2).toUInt(), iter.value()->getToNeuronID() );
-			QCOMPARE( query.value(3).toString().toFloat(), iter.value()->getDelay() );
-			QCOMPARE( query.value(4).toString().toFloat(), iter.value()->getWeight() );
+			QCOMPARE( query.value(1).toUInt(), iter->getFromNeuronID() );
+			QCOMPARE( query.value(2).toUInt(), iter->getToNeuronID() );
+			QCOMPARE( query.value(3).toString().toFloat(), iter->getDelay() );
+			QCOMPARE( query.value(4).toString().toFloat(), iter->getWeight() );
 		}
     }
     catch(SpikeStreamException& ex){
@@ -295,22 +295,22 @@ void TestNetworkDaoThread::testLoadConnections(){
 		QList<Connection*> allConnList = connGrp.getConnections();
 		QCOMPARE(allConnList.size(), 6);
 
-//		//Should be three connections from the first neuron in the list
-//		QList<Connection*> fromList = connGrp.getFromConnections(testNeurIDList[0]);
-//		QCOMPARE(fromList.size(), 3);
-//		QCOMPARE(fromList[0]->getToNeuronID(), testNeurIDList[1]);
-//		QCOMPARE(fromList[1]->getToNeuronID(), testNeurIDList[2]);
-//		QCOMPARE(fromList[2]->getToNeuronID(), testNeurIDList[3]);
-//		QCOMPARE(fromList[2]->getWeight(), 0.3f);
-//		QCOMPARE(fromList[2]->getDelay(), 1.3f);
+		//Should be three connections from the first neuron in the list
+		QList<Connection*> fromList = connGrp.getFromConnections(testNeurIDList[0]);
+		QCOMPARE(fromList.size(), 3);
+		QCOMPARE(fromList[0]->getToNeuronID(), testNeurIDList[1]);
+		QCOMPARE(fromList[1]->getToNeuronID(), testNeurIDList[2]);
+		QCOMPARE(fromList[2]->getToNeuronID(), testNeurIDList[3]);
+		QCOMPARE(fromList[2]->getWeight(), 0.3f);
+		QCOMPARE(fromList[2]->getDelay(), 1.3f);
 
-//		//Should be two connections to the first neuron in the list
-//		QList<Connection*> toList = connGrp.getToConnections(testNeurIDList[2]);
-//		QCOMPARE(toList.size(), 2);
-//		QCOMPARE(toList[0]->getFromNeuronID(), testNeurIDList[0]);
-//		QCOMPARE(toList[1]->getFromNeuronID(), testNeurIDList[3]);
-//		QCOMPARE(toList[1]->getWeight(), 0.6f);
-//		QCOMPARE(toList[1]->getDelay(), 1.6f);
+		//Should be two connections to the first neuron in the list
+		QList<Connection*> toList = connGrp.getToConnections(testNeurIDList[2]);
+		QCOMPARE(toList.size(), 2);
+		QCOMPARE(toList[0]->getFromNeuronID(), testNeurIDList[0]);
+		QCOMPARE(toList[1]->getFromNeuronID(), testNeurIDList[3]);
+		QCOMPARE(toList[1]->getWeight(), 0.6f);
+		QCOMPARE(toList[1]->getDelay(), 1.6f);
 	}
 	catch(SpikeStreamException ex){
 		QFAIL(ex.getMessage().toAscii());
