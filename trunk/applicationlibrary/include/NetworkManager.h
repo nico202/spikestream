@@ -18,7 +18,7 @@ namespace spikestream {
 			void cancel();
 			int getCurrentTask() { return currentTask; }
 			void run();
-			void startDeleteNetwork(Network* network);
+			void startDeleteNetwork(unsigned networkID);
 			void startLoadNetwork(Network* network);
 			void startSaveNetwork(Network* network);
 
@@ -42,8 +42,11 @@ namespace spikestream {
 
 		private:
 			//================  VARIABLES  ==================
-			/*! The network that is being loaded */
+			/*! The network that is being loaded or saved. */
 			Network* network;
+
+			/*! ID of the network that is being deleted */
+			unsigned networkID;
 
 			/*! Current task being undertaken by the thread. */
 			int currentTask;

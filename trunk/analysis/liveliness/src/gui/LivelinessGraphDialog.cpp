@@ -24,6 +24,9 @@ LivelinessGraphDialog::LivelinessGraphDialog(QWidget* parent, const AnalysisInfo
 	catch(SpikeStreamException& ex){
 		qCritical()<<"Spectrogram error: "<<ex.getMessage();
 	}
+	catch(...){
+		qCritical()<<"An unknown exception occurred";
+	}
 
 	//Add controls to select time step
 	QHBoxLayout* controlsLayout = new QHBoxLayout();

@@ -20,7 +20,7 @@ using namespace spikestream;
 using namespace std;
 
 //Enable to show debugging information
-#define DEBUG
+//#define DEBUG
 
 
 /*! Constructor */
@@ -143,7 +143,7 @@ void NetworksWidget::deleteNetwork(){
 	//Delete the network from the database
 	try{
 		//Start network manager to load network in a separate thread.
-		networkManager->startDeleteNetwork(Globals::getNetwork());
+		networkManager->startDeleteNetwork(deleteNetworkID);
 		progressDialog->reset();
 		progressDialog->setLabelText("Starting network delete.");
 		progressDialog->setCancelButton(0);//Cancel not implemented at this stage
@@ -151,7 +151,7 @@ void NetworksWidget::deleteNetwork(){
 		progressDialog->show();
 	}
 	catch(SpikeStreamException& ex){
-		qCritical()<<"Exception thrown when deleting network.";
+		qCritical()<<"Exception thrown when deleting network: "<<ex.getMessage();
 	}
 }
 

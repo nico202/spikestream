@@ -10,8 +10,7 @@ SUBDIRS += analysis/statebasedphi analysis/liveliness
 
 
 #================  NETWORKS PLUGINS  =================
-SUBDIRS += networks/tononinetworks networks/aleksandernetworks networks/alekgameznets2
-#SUBDIRS += networks/connectionmatriximporter
+SUBDIRS += networks/tononinetworks networks/aleksandernetworks networks/alekgameznets2 networks/connectionmatriximporter
 
 
 #================  NEURON GROUP PLUGINS  =================
