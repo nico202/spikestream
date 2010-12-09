@@ -1,12 +1,15 @@
+//SpikeStream includes
 #include "AnalysisSpectrogram.h"
 using namespace spikestream;
+
+//Qt includes
+#include <QDebug>
 
 
 /*! Constructor */
 AnalysisSpectrogram::AnalysisSpectrogram (QWidget* parent, QwtRasterData* data) : QwtPlot( parent ){
 	// Show a title
 	//setTitle( "This is an Example" );
-
 	d_spectrogram = new QwtPlotSpectrogram();
 
 	QwtLinearColorMap colorMap(Qt::darkCyan, Qt::red);
@@ -94,7 +97,6 @@ AnalysisSpectrogram::~AnalysisSpectrogram(){
 void AnalysisSpectrogram::rescale(){
 	setAxisScale(QwtPlot::yLeft, d_spectrogram->data().boundingRect().y(),d_spectrogram->data().boundingRect().y() + d_spectrogram->data().boundingRect().height(), 1);
 	setAxisScale(QwtPlot::xBottom, d_spectrogram->data().boundingRect().x(),d_spectrogram->data().boundingRect().x() + d_spectrogram->data().boundingRect().width(), 1);
-
 }
 
 

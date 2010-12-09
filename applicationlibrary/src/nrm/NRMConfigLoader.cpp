@@ -412,9 +412,9 @@ void NRMConfigLoader::loadInputs(FILE* file){
 					fReadFile(&bVal, 1, 1, file);
 					fReadFile(&b2Val, 1, 1, file);
 					//SetFrameColMasks(n, bVal, b2Val);
-					if ( winType == FRAME_WIN ){
-						;//RandomizeFramedInput(n);
-					}
+//					if ( winType == FRAME_WIN ){
+//						;//RandomizeFramedInput(n);
+//					}
 				}
 				//Read in name of framed image
 				if ( network->getConfigVersion() > 16 ) {

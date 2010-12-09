@@ -9,13 +9,11 @@ using namespace spikestream;
 
 /*! Constructor */
 NetworkManager::NetworkManager() : SpikeStreamThread(){
-
 }
 
 
 /*! Destructor */
 NetworkManager::~NetworkManager(){
-
 }
 
 
@@ -54,6 +52,10 @@ void NetworkManager::run(){
 					msleep(200);
 				}
 			}
+
+			//Check for errors
+			if(network->isError())
+				setError(network->getErrorMessage());
 		}
 		else if (currentTask == SAVE_NETWORK_TASK){
 			//Start task
@@ -64,17 +66,25 @@ void NetworkManager::run(){
 				emit progress(network->getNumberOfCompletedSteps(), network->getTotalNumberOfSteps(), network->getProgressMessage(), false);
 				msleep(200);
 			}
+
+			//Check for errors
+			if(network->isError())
+				setError(network->getErrorMessage());
 		}
 		else if (currentTask == DELETE_NETWORK_TASK){
 			//Start task
 			NetworkDaoThread networkDaoThread(Globals::getNetworkDao()->getDBInfo());
-			networkDaoThread.startDeleteNetwork(network->getID());
+			networkDaoThread.startDeleteNetwork(networkID);
 
 			//Wait for network dao thread to finish task
 			while(networkDaoThread.isRunning()){
 				emit progress(networkDaoThread.getNumberOfCompletedSteps(), networkDaoThread.getTotalNumberOfSteps(), networkDaoThread.getProgressMessage(), false);
 				msleep(200);
 			}
+
+			//Check for errors
+			if(networkDaoThread.isError())
+				setError(networkDaoThread.getErrorMessage());
 		}
 		else{
 			throw SpikeStreamException("Current task not recognized: " + QString::number(currentTask));
@@ -82,24 +92,19 @@ void NetworkManager::run(){
 	}
 	catch(SpikeStreamException& ex){
 		setError(ex.getMessage());
-		qDebug()<<"Exception: "<<ex.getMessage();
 	}
 	catch(...){
 		setError("Unrecognized exception thrown.");
-		qDebug()<<"Unknown Exception: ";
 	}
 
-	if(network->isError())
-		setError(network->getErrorMessage());
-
-	emit progress(1, 1, network->getProgressMessage() + " Complete.", false);
+	emit progress(1, 1, "Complete.", false);
 	stopThread = true;
 }
 
 
-/*! Stores the pointer to the network and starts the load in separate thread. */
-void NetworkManager::startDeleteNetwork(Network *network){
-	this->network = network;
+/*! Stores the ID of the network and starts the load in separate thread. */
+void NetworkManager::startDeleteNetwork(unsigned networkID){
+	this->networkID = networkID;
 	currentTask = DELETE_NETWORK_TASK;
 	start();
 }

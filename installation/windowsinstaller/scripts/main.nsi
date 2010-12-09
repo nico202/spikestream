@@ -80,6 +80,7 @@ Section "Uninstall"
 	
   # Remove files at the root of the installation directory
   Delete $INSTDIR\spikestream.config.template
+  Delete $INSTDIR\spikestream.config
   Delete $INSTDIR\uninstall.exe
   
   # Remove shortcuts
@@ -90,9 +91,11 @@ Section "Uninstall"
   RMDir "$SMPROGRAMS\SpikeStream"
 
   # Remove directories 
+  RMDir /r $INSTDIR\bin\sqldrivers
   RMDir /r $INSTDIR\bin
   RMDir /r $INSTDIR\database
   RMDir /r $INSTDIR\doc
+  RMDir /r $INSTDIR\log
   RMDir /r $INSTDIR\images
   RMDir /r $INSTDIR\plugins
   RMDir $INSTDIR

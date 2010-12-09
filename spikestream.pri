@@ -3,8 +3,13 @@
 #----------------------------------------------#
 #---            DEBUG OR RELEASE            ---#
 #----------------------------------------------#
-CONFIG += debug
-#CONFIG += release
+DEBUG_MODE = true
+contains (DEBUG_MODE, true) {
+	CONFIG += debug
+}
+else{
+	CONFIG += release
+}
 
 
 #----------------------------------------------#
@@ -27,7 +32,13 @@ unix {
 win32 {
 	# Qwt
 	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/qwt/include
-	LIBS += -lqwt5 -L$${SPIKESTREAM_ROOT_DIR}/extlib/qwt/lib
+	contains (DEBUG_MODE, true) {
+		LIBS += -lqwtd5 -L$${SPIKESTREAM_ROOT_DIR}/extlib/qwt/lib
+	}
+	else{
+		LIBS += -lqwt5 -L$${SPIKESTREAM_ROOT_DIR}/extlib/qwt/lib
+	}
+
 
 	# GMP
 	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/gmp/include

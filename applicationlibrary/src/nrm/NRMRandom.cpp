@@ -127,7 +127,7 @@ void NRMRandom::multiply64Bit(unsigned int& multiplicand, unsigned int multiplie
 	multiplicand *= multiplier;
 
 	//Overflow is the product divided by 2^32
-	mpz_fdiv_q_ui(tmpNum, tmpNum, 4294967295);
+	mpz_fdiv_q_ui(tmpNum, tmpNum, 4294967295u);
 	overflow = mpz_get_ui (tmpNum);
 
 	//Clean up
