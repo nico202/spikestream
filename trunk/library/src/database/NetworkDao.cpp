@@ -751,7 +751,6 @@ void NetworkDao::setNetworkProperties(unsigned networkID, const QString& name, c
 void NetworkDao::setNeuronGroupProperties(unsigned neuronGroupID, const QString& name, const QString& description){
 	QString queryStr = "UPDATE NeuronGroups SET Name='" + name + "', Description='" + description + "' ";
 	queryStr += "WHERE NeuronGroupID=" + QString::number(neuronGroupID);
-	qDebug()<<queryStr;
 	QSqlQuery query = getQuery(queryStr);
 	executeQuery(query);
 	if(query.numRowsAffected() != 1)

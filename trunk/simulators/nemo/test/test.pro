@@ -18,11 +18,13 @@ INCLUDEPATH += src ../src/model
 unix {
 	INCLUDEPATH += /usr/local/include \
 					$${SPIKESTREAM_ROOT_DIR}/library/include \
+					$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/include \
 					$${SPIKESTREAM_ROOT_DIR}/simulators/nemo/src/model
 }
 win32 {
 	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/nemo/include \
 					$${SPIKESTREAM_ROOT_DIR}/library/include \
+					$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/include \
 					$${SPIKESTREAM_ROOT_DIR}/simulators/nemo/src/model
 }
 
