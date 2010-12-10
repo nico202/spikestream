@@ -28,25 +28,26 @@ void TestArchiveDao::testAddArchive(){
     //Information about the archive to be added
     ArchiveInfo archInfo(0, testNetID, 1212121, "Test archive 1");
     try{
-	//Invoke method that is being tested
-	archiveDao.addArchive(archInfo);
+		//Invoke method that is being tested
+		archiveDao.addArchive(archInfo);
 
-	//Check that archive has been added
-	QSqlQuery query = getArchiveQuery("SELECT NetworkID, StartTime, Description FROM Archives");
-	executeQuery(query);
+		//Check that archive has been added
+		QSqlQuery query = getArchiveQuery("SELECT NetworkID, StartTime, Description FROM Archives");
+		executeQuery(query);
 
-	//Should only be one row
-	QCOMPARE(query.size(), 1);
-	query.next();
+		//Should only be one row
+		QCOMPARE(query.size(), 1);
+		query.next();
 
-	//Check details of archive
-	QVERIFY( archInfo.getID() != 0);
-	QCOMPARE(query.value(0).toUInt(), testNetID);
-	QCOMPARE(query.value(1).toUInt(), (unsigned int)1212121);
-	QCOMPARE(query.value(2).toString(), QString("Test archive 1"));
+		//Check details of archive
+		QVERIFY( archInfo.getID() != 0);
+		QCOMPARE(query.value(0).toUInt(), testNetID);
+		unsigned timeStamp = query.value(1).toUInt();
+		QVERIFY( timeStamp > (QDateTime::currentDateTime().toTime_t() - 10) );
+		QCOMPARE(query.value(2).toString(), QString("Test archive 1"));
     }
     catch(SpikeStreamException& ex){
-	QFAIL(ex.getMessage().toAscii());
+		QFAIL(ex.getMessage().toAscii());
     }
 }
 
@@ -61,11 +62,11 @@ void TestArchiveDao::testAddArchiveData(){
 
     //Invoke method being tested
     try{
-	archiveDao.addArchiveData(testArchive2ID, 1, "12,13,14,15");
-	archiveDao.addArchiveData(testArchive2ID, 3, "121,131,141,151");
+		archiveDao.addArchiveData(testArchive2ID, 1, "12,13,14,15");
+		archiveDao.addArchiveData(testArchive2ID, 3, "121,131,141,151");
     }
     catch(SpikeStreamException ex){
-	QFAIL(ex.getMessage().toAscii());
+		QFAIL(ex.getMessage().toAscii());
     }
 
     //Check data was added correctly

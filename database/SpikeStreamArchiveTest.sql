@@ -19,7 +19,7 @@ USE SpikeStreamArchiveTest;
     Holds general information about each archive */
 CREATE TABLE Archives (
 	ArchiveID MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
-	StartTime BIGINT NOT NULL, /*When the simulation was initialized */
+	StartTime BIGINT NOT NULL, /*When the archive was created. */
 	NetworkID SMALLINT NOT NULL, /* References a neural network in the SpikeStreamNetwork table. This network should not be editable if it is associated with simulation data. */
 	Description CHAR(100),/* Brief description of the run */
 

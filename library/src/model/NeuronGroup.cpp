@@ -156,9 +156,9 @@ Box NeuronGroup::getBoundingBox(){
 	}
 
 	//Expand outer edge of box so that it contains all neurons
-	boundingBox.x1 += 0.1f;
-	boundingBox.y1 += 0.1f;
-	boundingBox.z1 += 0.1f;
+	boundingBox.x2 += 0.1f;
+	boundingBox.y2 += 0.1f;
+	boundingBox.z2 += 0.1f;
 
 	//Return calculated box
 	calculateBoundingBox = false;

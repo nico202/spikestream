@@ -24,7 +24,7 @@ void TestDatabaseDao::testExecuteSQLFile(){
 
 	try{
 		//Execute first test method
-		DBInfo tmpDBInfo (dbInfo);
+		DBInfo tmpDBInfo (networkDBInfo);
 		tmpDBInfo.setDatabase("");
 		DatabaseDao dbDao;
 		dbDao.connectToDatabase(tmpDBInfo);
@@ -70,7 +70,7 @@ void TestDatabaseDao::testExecuteSQLFile(){
 }
 
 void TestDatabaseDao::testGetDatabaseNames(){
-		DatabaseDao dbDao(dbInfo);
+		DatabaseDao dbDao(networkDBInfo);
 		QList<QString> dbNames = dbDao.getDatabaseNames();
 
 		//Convert to lower case to handle Windows and Linux

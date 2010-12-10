@@ -10,7 +10,8 @@ SUBDIRS += analysis/statebasedphi analysis/liveliness
 
 
 #================  NETWORKS PLUGINS  =================
-SUBDIRS += networks/tononinetworks networks/aleksandernetworks networks/alekgameznets2 networks/connectionmatriximporter
+SUBDIRS += networks/tononinetworks networks/aleksandernetworks networks/alekgameznets2 
+SUBDIRS += networks/nrmimporter networks/connectionmatriximporter
 
 
 #================  NEURON GROUP PLUGINS  =================
@@ -32,9 +33,9 @@ SUBDIRS += installation/dbconfigtool
 #=================  TESTS  ===================
 #SUBDIRS += testlibrary
 #SUBDIRS += library/test
-#SUBDIRS += applicationlibrary/test
-#SUBDIRS += analysis/statebasedphi/test
 #SUBDIRS += analysis/liveliness/test
+#SUBDIRS += analysis/statebasedphi/test
+#SUBDIRS += networks/nrmimporter/test
 #SUBDIRS += simulators/nemo/test
 
 

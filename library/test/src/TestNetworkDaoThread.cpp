@@ -20,7 +20,7 @@ void TestNetworkDaoThread::testAddConnectionGroup(){
 		/* Add network - slightly sloppy to use the network dao method, but it has been tested elsewhere
 	    and we need a network because of foreign key constraints */
 		NetworkInfo netInfo(0, "test3Name", "test3Description");
-		NetworkDao networkDao (dbInfo);
+		NetworkDao networkDao (networkDBInfo);
 		networkDao.addNetwork(netInfo);
 
 		/* Add neuron groups - again, slightly sloppy, but it has been tested elsewhere
@@ -33,7 +33,7 @@ void TestNetworkDaoThread::testAddConnectionGroup(){
 		(*neurMap)[3] = new Neuron(1, 0, 0);
 		(*neurMap)[4] = new Neuron(1, 1, 0);
 		fromGrp.setNeuronMap(neurMap);
-		NetworkDaoThread netDaoThread(dbInfo);
+		NetworkDaoThread netDaoThread(networkDBInfo);
 		netDaoThread.prepareAddNeuronGroup(netInfo.getID(), &fromGrp);
 		runThread(netDaoThread);
 
@@ -111,14 +111,12 @@ void TestNetworkDaoThread::testAddNeuronGroup(){
 			Slightly sloppy to use the network dao method, but it has been tested elsewhere
 			and we need a network because of foreign key constraints */
 		NetworkInfo netInfo(0, "test2Name","test3Description");
-		NetworkDao networkDao(dbInfo);
+		NetworkDao networkDao(networkDBInfo);
 		networkDao.addNetwork(netInfo);
+		NeuronType neurType = networkDao.getNeuronType("Izhikevich Excitatory Neuron");
 
 		//Build the neuron group that is to be added
 		QHash<QString, double> paramMap;
-		paramMap["param1"] = 0.5;
-		paramMap["param2"] = 0.6;
-		NeuronType neurType(1, "neur type description", "neur type paramTableName", "");
 		NeuronGroup neurGrp(NeuronGroupInfo(0, "testNeuronGroup1Name", "testNeuronGroup1Desc", paramMap, neurType));
 		NeuronMap* neurMap = neurGrp.getNeuronMap();
 		(*neurMap)[1] = new Neuron(0, 0, 0);
@@ -127,7 +125,7 @@ void TestNetworkDaoThread::testAddNeuronGroup(){
 		(*neurMap)[4] = new Neuron(1, 1, 1);
 
 		//Add the neuron group
-		NetworkDaoThread netDaoThread(dbInfo);
+		NetworkDaoThread netDaoThread(networkDBInfo);
 		netDaoThread.prepareAddNeuronGroup(netInfo.getID(), &neurGrp);
 		runThread(netDaoThread);
 
@@ -197,7 +195,7 @@ void TestNetworkDaoThread::testDeleteConnectionGroups(){
 		//Run method to delete the second neuron group
 		QList<unsigned int> deleteList;
 		deleteList.append(connGrp2ID);
-		NetworkDaoThread netDaoThread(dbInfo);
+		NetworkDaoThread netDaoThread(networkDBInfo);
 		netDaoThread.prepareDeleteConnectionGroups(testNetID, deleteList);
 		runThread(netDaoThread);
 
@@ -226,7 +224,7 @@ void TestNetworkDaoThread::testDeleteNetwork(){
 	QCOMPARE(query.size(), (int)1);
 
 	//Invoke method being tested
-	NetworkDaoThread netDaoThread(dbInfo);
+	NetworkDaoThread netDaoThread(networkDBInfo);
 	netDaoThread.startDeleteNetwork(testNetID);
 	netDaoThread.wait();
 
@@ -260,7 +258,7 @@ void TestNetworkDaoThread::testDeleteNeuronGroups(){
 		//Run method to delete the second neuron group
 		QList<unsigned int> deleteList;
 		deleteList.append(neurGrp2ID);
-		NetworkDaoThread netDaoThread(dbInfo);
+		NetworkDaoThread netDaoThread(networkDBInfo);
 		netDaoThread.prepareDeleteNeuronGroups(testNetID, deleteList);
 		runThread(netDaoThread);
 
@@ -283,34 +281,47 @@ void TestNetworkDaoThread::testLoadConnections(){
 		addTestNetwork1();
 
 		//Create a connection group with the appropriate id
-		SynapseType synType(1, "syn type description", "syn type paramTableName", "");
+		NetworkDao networkDao(networkDBInfo);
+		SynapseType synType = networkDao.getSynapseType("Izhikevich Synapse");
 		ConnectionGroup connGrp( ConnectionGroupInfo(connGrp1ID, "undefined", 0, 0, QHash<QString, double>(), synType) );
 
 		//Load connections associated with this neuron group
-		NetworkDaoThread networkDaoThread(dbInfo);
+		NetworkDaoThread networkDaoThread(networkDBInfo);
 		networkDaoThread.prepareLoadConnections(&connGrp);
 		runThread(networkDaoThread);
 
 		//Check that connections were correctly loaded.
-		QList<Connection*> allConnList = connGrp.getConnections();
-		QCOMPARE(allConnList.size(), 6);
+		QCOMPARE(connGrp.size(), 6);
 
 		//Should be three connections from the first neuron in the list
-		QList<Connection*> fromList = connGrp.getFromConnections(testNeurIDList[0]);
-		QCOMPARE(fromList.size(), 3);
-		QCOMPARE(fromList[0]->getToNeuronID(), testNeurIDList[1]);
-		QCOMPARE(fromList[1]->getToNeuronID(), testNeurIDList[2]);
-		QCOMPARE(fromList[2]->getToNeuronID(), testNeurIDList[3]);
-		QCOMPARE(fromList[2]->getWeight(), 0.3f);
-		QCOMPARE(fromList[2]->getDelay(), 1.3f);
-
-		//Should be two connections to the first neuron in the list
-		QList<Connection*> toList = connGrp.getToConnections(testNeurIDList[2]);
-		QCOMPARE(toList.size(), 2);
-		QCOMPARE(toList[0]->getFromNeuronID(), testNeurIDList[0]);
-		QCOMPARE(toList[1]->getFromNeuronID(), testNeurIDList[3]);
-		QCOMPARE(toList[1]->getWeight(), 0.6f);
-		QCOMPARE(toList[1]->getDelay(), 1.6f);
+		QList<Connection*> fromList;
+		for(ConnectionIterator iter = connGrp.begin(); iter != connGrp.end(); ++iter){
+			if(iter->getFromNeuronID() == testNeurIDList[0]){
+				if(iter->getToNeuronID() == testNeurIDList[1]){
+					;
+				}
+				else if(iter->getToNeuronID() == testNeurIDList[2]){
+					;
+				}
+				else if(iter->getToNeuronID() == testNeurIDList[3]){
+					QCOMPARE(iter->getWeight(), 0.3f);
+					QCOMPARE(iter->getDelay(), 1.3f);
+				}
+				else
+					QFAIL("Unexpected connection in FROM list.");
+			}
+			else if(iter->getToNeuronID() == testNeurIDList[2]){
+				if(iter->getFromNeuronID() == testNeurIDList[0]){
+					;
+				}
+				else if(iter->getFromNeuronID() == testNeurIDList[3]){
+					QCOMPARE(iter->getWeight(), 0.6f);
+					QCOMPARE(iter->getDelay(), 1.6f);
+				}
+				else
+					QFAIL("Unexpected connection in TO list.");
+			}
+		}
 	}
 	catch(SpikeStreamException ex){
 		QFAIL(ex.getMessage().toAscii());
@@ -322,37 +333,48 @@ void TestNetworkDaoThread::testLoadConnections(){
 
 
 void TestNetworkDaoThread::testLoadNeurons(){
-    //Add test network
-    addTestNetwork1();
+	try{
+		//Add test network
+		addTestNetwork1();
 
-    //Create a list of neuron groups with the appropriate ids
-	NeuronType neurType(1, "neur type description", "neur type paramTableName", "");
-	NeuronGroup neurGrp1( NeuronGroupInfo(neurGrp1ID, "undefined name", "undefined desc", QHash<QString, double>(), neurType) );
-	NeuronGroup neurGrp2( NeuronGroupInfo(neurGrp2ID, "undefined name", "undefined desc", QHash<QString, double>(), neurType) );
-    QList<NeuronGroup*> neurGrpList;
-    neurGrpList.append(&neurGrp1);
-    neurGrpList.append(&neurGrp2);
+		//Get neuron type
+		NetworkDao networkDao(networkDBInfo);
+		NeuronType neurType = networkDao.getNeuronType("Izhikevich Excitatory Neuron");
 
-    //Load neurons associated with this neuron group
-    NetworkDaoThread networkDaoThread(dbInfo);
-    networkDaoThread.prepareLoadNeurons(neurGrpList);
-    runThread(networkDaoThread);
+		//Create a list of neuron groups with the appropriate ids
+		NeuronGroup neurGrp1( NeuronGroupInfo(neurGrp1ID, "undefined name", "undefined desc", QHash<QString, double>(), neurType) );
+		NeuronGroup neurGrp2( NeuronGroupInfo(neurGrp2ID, "undefined name", "undefined desc", QHash<QString, double>(), neurType) );
+		QList<NeuronGroup*> neurGrpList;
+		neurGrpList.append(&neurGrp1);
+		neurGrpList.append(&neurGrp2);
 
-    //Check that neuron groups have correct number of neurons
-    QCOMPARE(neurGrp1.size(), (int)3);
-    QCOMPARE(neurGrp2.size(), (int)2);
+		//Load neurons associated with this neuron group
+		NetworkDaoThread networkDaoThread(networkDBInfo);
+		networkDaoThread.prepareLoadNeurons(neurGrpList);
+		runThread(networkDaoThread);
 
-    //Check the ids and location in neuron group 1 are correct
-    QHash<unsigned int, Neuron*>* neurGrpMap = neurGrp1.getNeuronMap();
-    QCOMPARE((*neurGrpMap)[ testNeurIDList[0] ]->getXPos(), -1.0f);
-    QCOMPARE((*neurGrpMap)[ testNeurIDList[0] ]->getZPos(), -6.0f);
-    QCOMPARE((*neurGrpMap)[ testNeurIDList[2] ]->getYPos(), -4.0f);
+		//Check that neuron groups have correct number of neurons
+		QCOMPARE(neurGrp1.size(), (int)3);
+		QCOMPARE(neurGrp2.size(), (int)2);
 
-    //Check the ids and location in neuron group 2 are correct
-    neurGrpMap = neurGrp2.getNeuronMap();
-    QCOMPARE((*neurGrpMap)[ testNeurIDList[3] ]->getXPos(), 0.0f);
-    QCOMPARE((*neurGrpMap)[ testNeurIDList[3] ]->getZPos(), 10.0f);
-    QCOMPARE((*neurGrpMap)[ testNeurIDList[4] ]->getYPos(), -7.0f);
+		//Check the ids and location in neuron group 1 are correct
+		QHash<unsigned int, Neuron*>* neurGrpMap = neurGrp1.getNeuronMap();
+		QCOMPARE((*neurGrpMap)[ testNeurIDList[0] ]->getXPos(), -1.0f);
+		QCOMPARE((*neurGrpMap)[ testNeurIDList[0] ]->getZPos(), -6.0f);
+		QCOMPARE((*neurGrpMap)[ testNeurIDList[2] ]->getYPos(), -4.0f);
+
+		//Check the ids and location in neuron group 2 are correct
+		neurGrpMap = neurGrp2.getNeuronMap();
+		QCOMPARE((*neurGrpMap)[ testNeurIDList[3] ]->getXPos(), 0.0f);
+		QCOMPARE((*neurGrpMap)[ testNeurIDList[3] ]->getZPos(), 10.0f);
+		QCOMPARE((*neurGrpMap)[ testNeurIDList[4] ]->getYPos(), -7.0f);
+	}
+	catch(SpikeStreamException ex){
+		QFAIL(ex.getMessage().toAscii());
+	}
+	catch(...){
+		QFAIL("Unrecognized exception thrown.");
+	}
 }
 
 

@@ -56,31 +56,31 @@ void TestDao::connectToDatabases(const QString& networkDBName, const QString& ar
 	ConfigLoader configLoader;
 
 	//Connect to the network database. This is the default database
-    dbRefName = "NetworkTestDBRef";
-	dbInfo = DBInfo(
+	networkDBRef = "NetworkTestDBRef";
+	networkDBInfo = DBInfo(
 			configLoader.getParameter("spikeStreamNetworkHost"),
 			configLoader.getParameter("spikeStreamNetworkUser"),
 			configLoader.getParameter("spikeStreamNetworkPassword"),
 			networkDBName
 	);
-    database = QSqlDatabase::addDatabase("QMYSQL", dbRefName);
-    database.setHostName(dbInfo.getHost());
-    database.setDatabaseName(dbInfo.getDatabase());
-    database.setUserName(dbInfo.getUser());
-    database.setPassword(dbInfo.getPassword());
-    bool ok = database.open();
+	QSqlDatabase networkDatabase = QSqlDatabase::addDatabase("QMYSQL", networkDBRef);
+	networkDatabase.setHostName(networkDBInfo.getHost());
+	networkDatabase.setDatabaseName(networkDBInfo.getDatabase());
+	networkDatabase.setUserName(networkDBInfo.getUser());
+	networkDatabase.setPassword(networkDBInfo.getPassword());
+	bool ok = networkDatabase.open();
     if(!ok)
-		throw SpikeStreamDBException( QString("Cannot connect to network database ") + dbInfo.toString() + ". Error: " + database.lastError().text() );
+		throw SpikeStreamDBException( QString("Cannot connect to network database ") + networkDBInfo.toString() + ". Error: " + networkDatabase.lastError().text() );
 
     //Connect to the archive database
-    archiveDBRefName = "ArchiveTestDBRef";
+	archiveDBRef = "ArchiveTestDBRef";
 	archiveDBInfo = DBInfo(
 			configLoader.getParameter("spikeStreamArchiveHost"),
 			configLoader.getParameter("spikeStreamArchiveUser"),
 			configLoader.getParameter("spikeStreamArchivePassword"),
 			archiveDBName
 	);
-    archiveDatabase = QSqlDatabase::addDatabase("QMYSQL", archiveDBRefName);
+	QSqlDatabase archiveDatabase = QSqlDatabase::addDatabase("QMYSQL", archiveDBRef);
     archiveDatabase.setHostName(archiveDBInfo.getHost());
     archiveDatabase.setDatabaseName(archiveDBInfo.getDatabase());
     archiveDatabase.setUserName(archiveDBInfo.getUser());
@@ -90,14 +90,14 @@ void TestDao::connectToDatabases(const QString& networkDBName, const QString& ar
 		throw SpikeStreamDBException( QString("Cannot connect to archive database ") + archiveDBInfo.toString() + ". Error: " + archiveDatabase.lastError().text() );
 
     //Connect to the analysis database
-    analysisDBRefName = "AnalysisTestDBRef";
+	analysisDBRef = "AnalysisTestDBRef";
 	analysisDBInfo = DBInfo(
 			configLoader.getParameter("spikeStreamAnalysisHost"),
 			configLoader.getParameter("spikeStreamAnalysisUser"),
 			configLoader.getParameter("spikeStreamAnalysisPassword"),
 			analysisDBName
 	);
-    analysisDatabase = QSqlDatabase::addDatabase("QMYSQL", analysisDBRefName);
+	QSqlDatabase analysisDatabase = QSqlDatabase::addDatabase("QMYSQL", analysisDBRef);
     analysisDatabase.setHostName(analysisDBInfo.getHost());
     analysisDatabase.setDatabaseName(analysisDBInfo.getDatabase());
     analysisDatabase.setUserName(analysisDBInfo.getUser());
@@ -134,9 +134,9 @@ void TestDao::cleanTestDatabases(){
     FIXME: THIS CURRENTLY GENERATES A WARNING ABOUT OPEN QUERIES */
 void TestDao::closeDatabases(){
 	//Remove static database references
-    QSqlDatabase::removeDatabase(dbRefName);
-    QSqlDatabase::removeDatabase(archiveDBRefName);
-    QSqlDatabase::removeDatabase(analysisDBRefName);
+	QSqlDatabase::removeDatabase(networkDBRef);
+	QSqlDatabase::removeDatabase(archiveDBRef);
+	QSqlDatabase::removeDatabase(analysisDBRef);
 }
 
 
@@ -173,26 +173,26 @@ void TestDao::executeAnalysisQuery(const QString& queryStr){
 
 /*! Returns a query object for the network database */
 QSqlQuery TestDao::getQuery(){
-    return QSqlQuery(database);
+	return QSqlQuery(QSqlDatabase::database(networkDBRef));
 }
 
 
 /*! Returns a query object for the network database */
 QSqlQuery TestDao::getQuery(const QString& queryStr){
-    QSqlQuery tmpQuery(database);
+	QSqlQuery tmpQuery(QSqlDatabase::database(networkDBRef));
     tmpQuery.prepare(queryStr);
     return tmpQuery;
 }
 
 /*! Returns a query object for the analysis database */
 QSqlQuery TestDao::getAnalysisQuery(){
-    return QSqlQuery(analysisDatabase);
+	return QSqlQuery(QSqlDatabase::database(analysisDBRef));
 }
 
 
 /*! Returns a query object for the analysis database */
 QSqlQuery TestDao::getAnalysisQuery(const QString& queryStr){
-    QSqlQuery tmpQuery(analysisDatabase);
+	QSqlQuery tmpQuery(QSqlDatabase::database(analysisDBRef));
     tmpQuery.prepare(queryStr);
     return tmpQuery;
 }
@@ -200,13 +200,13 @@ QSqlQuery TestDao::getAnalysisQuery(const QString& queryStr){
 
 /*! Returns a query object for the archive database */
 QSqlQuery TestDao::getArchiveQuery(){
-    return QSqlQuery(archiveDatabase);
+	return QSqlQuery(QSqlDatabase::database(archiveDBRef));
 }
 
 
 /*! Returns a query object for the archive database */
 QSqlQuery TestDao::getArchiveQuery(const QString& queryStr){
-    QSqlQuery tmpQuery(archiveDatabase);
+	QSqlQuery tmpQuery(QSqlDatabase::database(archiveDBRef));
     tmpQuery.prepare(queryStr);
     return tmpQuery;
 }

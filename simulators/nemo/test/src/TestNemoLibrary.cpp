@@ -15,7 +15,12 @@ using namespace spikestream;
 
 #define DEBUG true
 
-void addExcitatoryNeuron(nemo_network_t c_net, unsigned nidx){
+//Initialize static variables
+synapse_id TestNemoLibrary::synapseIDCntr = 1;
+
+
+
+void TestNemoLibrary::addExcitatoryNeuron(nemo_network_t c_net, unsigned nidx){
 	float v = -65.0f;
 	float a = 0.02f;
 	float b = 0.2f;
@@ -30,22 +35,23 @@ void addExcitatoryNeuron(nemo_network_t c_net, unsigned nidx){
 }
 
 
-void addExcitatorySynapses(nemo_network_t c_net, unsigned source, unsigned ncount, unsigned scount){
-	std::vector<unsigned> targets(scount, 0U);
-	std::vector<unsigned> delays(scount, 1U);
-	std::vector<float> weights(scount, 0.0f);
-	std::vector<unsigned char> isPlastic(scount, 0);
-
+void TestNemoLibrary::addExcitatorySynapses(nemo_network_t c_net, unsigned source, unsigned ncount, unsigned scount){
 	for(unsigned s = 0; s < scount; ++s) {
-		targets.at(s) = rand() % ncount;
-		weights.at(s) = 0.5f * (float(rand()) / RAND_MAX);
+		synapse_id synID = getSynapseID();
+		nemo_add_synapse(
+				c_net, //Nemo network
+				source, //Source neuron ID
+				(rand() % ncount), //Target neuron ID
+				1, //Delay
+				0.5f * (float(rand()) / RAND_MAX), //Weight
+				0, //Is plastic
+				&synID //ID of synapse being created
+		);
 	}
-
-	nemo_add_synapses(c_net, source, &targets[0], &delays[0], &weights[0], &isPlastic[0], targets.size());
 }
 
 
-void addInhibitoryNeuron(nemo_network_t c_net, unsigned nidx){
+void TestNemoLibrary::addInhibitoryNeuron(nemo_network_t c_net, unsigned nidx){
 	float v = -65.0f;
 	float r1 = (float(rand()) / RAND_MAX);
 	float a = 0.02f + 0.08f * r1;
@@ -60,21 +66,23 @@ void addInhibitoryNeuron(nemo_network_t c_net, unsigned nidx){
 }
 
 
-void addInhibitorySynapses(nemo_network_t c_net, unsigned source, unsigned ncount, unsigned scount){
-	std::vector<unsigned> targets(scount, 0);
-	std::vector<unsigned> delays(scount, 1U);
-	std::vector<float> weights(scount, 0.0f);
-	std::vector<unsigned char> isPlastic(scount, 0);
-
+void TestNemoLibrary::addInhibitorySynapses(nemo_network_t c_net, unsigned source, unsigned ncount, unsigned scount){
 	for(unsigned s = 0; s < scount; ++s) {
-		targets.at(s) = rand() % ncount;
-		weights.at(s) = -(float(rand()) / RAND_MAX);
+		synapse_id synID = getSynapseID();
+		nemo_add_synapse(
+				c_net, //Nemo network
+				source, //Source neuron ID
+				(rand() % ncount), //Target neuron ID
+				1, //Delay
+				-1.0f * (float(rand()) / RAND_MAX), //Weight
+				0, //Is plastic
+				&synID //ID of synapse being created
+		);
 	}
-	nemo_add_synapses(c_net, source, &targets[0], &delays[0], &weights[0], &isPlastic[0], targets.size());
 }
 
 
-void c_runSimulation(const nemo_network_t net, const nemo_configuration_t conf, unsigned seconds,	std::vector<unsigned>* fcycles,	std::vector<unsigned>* fnidx){
+void TestNemoLibrary::c_runSimulation(const nemo_network_t net, const nemo_configuration_t conf, unsigned seconds,	std::vector<unsigned>* fcycles,	std::vector<unsigned>* fnidx){
 	if(DEBUG) qDebug()<<"About to create simulation";
 	nemo_simulation_t sim = nemo_new_simulation(net, conf);
 	if(DEBUG) qDebug()<<"Simulation created successfully.";
@@ -82,48 +90,19 @@ void c_runSimulation(const nemo_network_t net, const nemo_configuration_t conf, 
 	fcycles->clear();
 	fnidx->clear();
 
-	//! todo vary the step size between reads to firing buffer
+	unsigned* firedArray;
+	unsigned firedCount;
 
-	//for(unsigned s = 0; s < 1; ++s){
-		for(unsigned ms = 0; ms < 10; ++ms) {
-			if(DEBUG) qDebug()<<"Stepping simulation; milliseconds="<<ms;
-			nemo_step(sim, NULL, 0);
-			if(DEBUG) qDebug()<<"Simulation stepped; milliseconds="<<ms;
-
-			//! \todo could modify API here to make this nicer
-			unsigned* cycles_tmp;
-			unsigned* nidx_tmp;
-			unsigned nfired;
-			unsigned ncycles;
-
-			//if(ms >= 6){
-				if(DEBUG) qDebug()<<"Reading firing";
-				nemo_status_t result = nemo_read_firing(sim, &cycles_tmp, &nidx_tmp, &nfired, &ncycles);
-				if(result != NEMO_OK)
-					QFAIL(nemo_strerror());
-				if(DEBUG) qDebug()<<"Firing successfully read.";
-
-				// push data back onto local buffers
-				if(DEBUG) qDebug()<<"Copying firing data";
-				std::copy(cycles_tmp, cycles_tmp + nfired, back_inserter(*fcycles));
-				std::copy(nidx_tmp, nidx_tmp + nfired, back_inserter(*fnidx));
-				if(DEBUG) qDebug()<<"Firing data successfully copied";
-			//}
-		}
-//	}
+	for(unsigned ms = 0; ms < 10; ++ms) {
+		if(DEBUG) qDebug()<<"Stepping simulation; milliseconds="<<ms;
+			nemo_step(sim, NULL, 0, NULL, NULL, 0, &firedArray, &firedCount);
+		if(DEBUG) qDebug()<<"Simulation stepped; milliseconds="<<ms;
+	}
 
 	if(DEBUG) qDebug()<<"Deleting simulation";
 	nemo_delete_simulation(sim);
 	if(DEBUG) qDebug()<<"Simulation successfully deleted.";
 }
-
-
-void compareSimulationResults(const std::vector<unsigned>& cycles2, const std::vector<unsigned>& nidx2){
-	if(DEBUG) std::cerr << "Comparing results (" << cycles2.size() << " firings)\n";
-	assert(cycles2.size() == nidx2.size());
-
-}
-
 
 
 void TestNemoLibrary::testNemoDLL1(){
@@ -151,7 +130,6 @@ void TestNemoLibrary::testNemoDLL1(){
 	nemo_configuration_t c_conf = nemo_new_configuration();
 	std::cerr << "Running network (C API)\n";
 	c_runSimulation(c_net, c_conf, duration, &cycles2, &nidx2);
-	compareSimulationResults(cycles2, nidx2);
 
 	nemo_delete_configuration(c_conf);
 	nemo_delete_network(c_net);
@@ -247,19 +225,22 @@ void TestNemoLibrary::testNemoConfiguration(){
 			QFAIL("Unrecognized backend from NeMo");
 
 		//Test listing the CUDA devices
-//		unsigned numCudaDevices = 0;
-//		checkNemoOutput(nemo_cuda_device_count(&numCudaDevices), "Failed to get list of NeMo devices");
-//		if(numCudaDevices == 0)
-//			qDebug()<<"No CUDA devices available.";
-//		else {
-//			for(unsigned i=0; i<numCudaDevices; ++i){
-//				const char* devDesc;
-//				checkNemoOutput(nemo_cuda_device_description(i, &devDesc), "Error getting device description.");
-//				qDebug()<<"CUDA Device available: "<<devDesc;
-//			}
-//		}
+		unsigned numCudaDevices = 0;
+		bool testCUDA = true;
+		checkNemoOutput(nemo_cuda_device_count(&numCudaDevices), "Failed to get list of NeMo devices");
+		if(numCudaDevices == 0){
+			qDebug()<<"No CUDA devices available.";
+			testCUDA = false;
+		}
+		else {
+			for(unsigned i=0; i<numCudaDevices; ++i){
+				const char* devDesc;
+				checkNemoOutput(nemo_cuda_device_description(i, &devDesc), "Error getting device description.");
+				qDebug()<<"CUDA Device available: "<<devDesc;
+			}
+		}
 
-		//Set backend to CPU - FIXME: TEST MULTIPLE THREADS
+		//Set backend to CPU
 		checkNemoOutput(nemo_set_cpu_backend(nemoConfig, 1), "Failed to set backend to CPU: ");
 		checkNemoOutput(nemo_backend(nemoConfig, &backend), "Failed to get NeMo backend.");
 		QVERIFY(backend == NEMO_BACKEND_CPU);
@@ -267,11 +248,13 @@ void TestNemoLibrary::testNemoConfiguration(){
 		QCOMPARE(numThreads, 1);
 
 		//Set backend to CUDA
-		checkNemoOutput(nemo_set_cuda_backend(nemoConfig, 0), "Failed to set CUDA device: ");
-		checkNemoOutput(nemo_backend(nemoConfig, &backend), "Failed to get NeMo backend.");
-		checkNemoOutput(nemo_cuda_device(nemoConfig, &cudaDev), "Error getting CUDA device from NeMo");
-		QVERIFY(backend == NEMO_BACKEND_CUDA);
-		QCOMPARE(cudaDev, 0);
+		if(testCUDA){
+			checkNemoOutput(nemo_set_cuda_backend(nemoConfig, 0), "Failed to set CUDA device: ");
+			checkNemoOutput(nemo_backend(nemoConfig, &backend), "Failed to get NeMo backend.");
+			checkNemoOutput(nemo_cuda_device(nemoConfig, &cudaDev), "Error getting CUDA device from NeMo");
+			QVERIFY(backend == NEMO_BACKEND_CUDA);
+			QCOMPARE(cudaDev, 0);
+		}
 	}
 	catch(SpikeStreamException& ex){
 		QFAIL(ex.getMessage().toAscii());
@@ -279,9 +262,14 @@ void TestNemoLibrary::testNemoConfiguration(){
 	catch(...){
 		QFAIL("ERROR LOADING NEMO SIMULATION.");
 	}
-
 }
 
+
+/*! Returns a unique synapse id. */
+synapse_id TestNemoLibrary::getSynapseID(){
+	++synapseIDCntr;
+	return synapseIDCntr;
+}
 
 
 /*! Checks the output from a nemo function call and throws exception if there is an error */

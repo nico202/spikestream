@@ -21,7 +21,7 @@ using namespace std;
 /*! Tests the addition of a network to the database */
 void TestNetworkDao::testAddNetwork(){
 	//Create the network dao
-	NetworkDao networkDao (dbInfo);
+	NetworkDao networkDao (networkDBInfo);
 
 	//Information about the network to be added
 	NetworkInfo netInfo(0, "test1Name","test3Description");
@@ -49,7 +49,7 @@ void TestNetworkDao::testAddWeightlessConnection(){
 	addTestNetwork1();
 
 	//The network dao being tested
-	NetworkDao networkDao(dbInfo);
+	NetworkDao networkDao(networkDBInfo);
 
 	//Add a pattern index to the database
 	try{
@@ -78,7 +78,7 @@ void TestNetworkDao::testAddWeightlessNeuronTrainingPattern(){
 	addTestNetwork1();
 
 	//The network dao being tested
-	NetworkDao networkDao(dbInfo);
+	NetworkDao networkDao(networkDBInfo);
 
 	//Create the pattern array and add it to the database
 	unsigned char* patternArray = new unsigned char[3];
@@ -137,7 +137,7 @@ void TestNetworkDao::testAddWeightlessNeuronTrainingPattern(){
 //	QVERIFY(query.size() > 0);
 
 //	//Invoke test method
-//	NetworkDao networkDao(dbInfo);
+//	NetworkDao networkDao(networkDBInfo);
 //	networkDao.deleteAllNetworks();
 
 //	//Check networks have gone
@@ -168,14 +168,14 @@ void TestNetworkDao::testGetConnectionCount1(){
 	addTestNetwork2();
 
 	//Check counts are correct for the two networks
-	NetworkDao netDao(dbInfo);
+	NetworkDao netDao(networkDBInfo);
 	QCOMPARE(netDao.getConnectionCount(testNetID), (unsigned int)6);
 	QCOMPARE(netDao.getConnectionCount(testNet2ID), (unsigned int)4);
 }
 
 
 void TestNetworkDao::testGetConnectionCount2(){
-	NetworkDao netDao(dbInfo);
+	NetworkDao netDao(networkDBInfo);
 
 	//Add a couple of networks
 	addTestNetwork1();
@@ -202,7 +202,7 @@ void TestNetworkDao::testGetConnections1(){
 	addTestNetwork1();
 
 	//The network dao being tested
-	NetworkDao networkDao(dbInfo);
+	NetworkDao networkDao(networkDBInfo);
 
 	//Execute method
 	QList< QPair<unsigned, Connection> > conPairList = networkDao.getConnections(testNeurIDList[4], testNeurIDList[3]);
@@ -229,7 +229,7 @@ void TestNetworkDao::testGetAllFromConnections(){
 	addTestNetwork1();
 
 	//Create the network dao and run test method
-	NetworkDao networkDao (dbInfo);
+	NetworkDao networkDao (networkDBInfo);
 	QHash<unsigned int, QHash<unsigned int, bool> > fromConMap;
 	networkDao.getAllFromConnections(testNetID, fromConMap);
 	QCOMPARE(fromConMap[testNeurIDList[0]].size(), (int)3);
@@ -250,7 +250,7 @@ void TestNetworkDao::testGetAllToConnections(){
 	addTestNetwork1();
 
 	//Create the network dao and run test method
-	NetworkDao networkDao (dbInfo);
+	NetworkDao networkDao (networkDBInfo);
 	QHash<unsigned int, QHash<unsigned int, bool> > toConMap;
 	networkDao.getAllToConnections(testNetID, toConMap);
 	QCOMPARE(toConMap[testNeurIDList[0]].size(), (int)0);
@@ -264,7 +264,7 @@ void TestNetworkDao::testGetAllToConnections(){
 void TestNetworkDao::testGetDefaultNeuronParameters(){
 	try{
 		//Get the parameter map - no need for data
-		NetworkDao networkDao(dbInfo);
+		NetworkDao networkDao(networkDBInfo);
 		QHash<QString, double> resultsMap = networkDao.getDefaultNeuronParameters(1);
 
 		//Check the default values of the parameters are correct
@@ -298,7 +298,7 @@ void TestNetworkDao::testGetDefaultNeuronParameters(){
 void TestNetworkDao::testGetDefaultSynapseParameters(){
 	try{
 		//Get the parameter map - no need for data
-		NetworkDao networkDao(dbInfo);
+		NetworkDao networkDao(networkDBInfo);
 		QHash<QString, double> resultsMap = networkDao.getDefaultSynapseParameters(1);
 
 		//Check the default values of the parameters are correct
@@ -327,7 +327,7 @@ void TestNetworkDao::testGetFromConnections(){
 	addTestNetwork1();
 
 	//Create the network dao and run test method
-	NetworkDao networkDao (dbInfo);
+	NetworkDao networkDao (networkDBInfo);
 	QList<unsigned int> fromConList = networkDao.getFromConnections(testNeurIDList.at(0));
 	QCOMPARE(fromConList.size(), (int)3);
 	QCOMPARE(fromConList.at(0), (unsigned int)testNeurIDList[1]);
@@ -349,7 +349,7 @@ void TestNetworkDao::testGetToConnections(){
 	addTestNetwork1();
 
 	//Create the network dao and run test method
-	NetworkDao networkDao (dbInfo);
+	NetworkDao networkDao (networkDBInfo);
 	QList<unsigned int> toConList = networkDao.getToConnections(testNeurIDList.at(1));
 	QCOMPARE(toConList.size(), (int)2);
 	QCOMPARE(toConList.at(0), (unsigned int)testNeurIDList[0]);
@@ -372,7 +372,7 @@ void TestNetworkDao::testGetNetworksInfo(){
 	unsigned int network2ID = query.lastInsertId().toUInt();
 
 	//Create the network dao
-	NetworkDao networkDao (dbInfo);
+	NetworkDao networkDao (networkDBInfo);
 
 	//Get list of the available networks
 	QList<NetworkInfo> netInfoList = networkDao.getNetworksInfo();
@@ -423,7 +423,7 @@ void TestNetworkDao::testGetConnectionGroupsInfo(){
 	unsigned int connGrp2ID = query.lastInsertId().toUInt();
 
 	//Create the network dao and get list of connection groups in the test network
-	NetworkDao networkDao (dbInfo);
+	NetworkDao networkDao (networkDBInfo);
 	QList<ConnectionGroupInfo> connGrpInfoList;
 	try{
 		networkDao.getConnectionGroupsInfo(networkID, connGrpInfoList);
@@ -456,7 +456,7 @@ void TestNetworkDao::testGetNeuronCount1(){
 	addTestNetwork1();
 
 	//Create test class
-	NetworkDao networkDao(dbInfo);
+	NetworkDao networkDao(networkDBInfo);
 
 	//Box that should intersect with test network 1
 	Box intersectBox1(-1,-5,-6,0,0,0);
@@ -475,7 +475,7 @@ void TestNetworkDao::testGetNeuronCount2(){
 	addTestNetwork2();
 
 	//Check counts are correct for the two networks
-	NetworkDao netDao(dbInfo);
+	NetworkDao netDao(networkDBInfo);
 	QCOMPARE(netDao.getNeuronCount(testNetID), (unsigned int)5);
 	QCOMPARE(netDao.getNeuronCount(testNet2ID), (unsigned int)4);
 }
@@ -500,7 +500,7 @@ void TestNetworkDao::testGetNeuronCount3(){
 	neurGrpList2.append(&neurGrp3);
 
 	//Check counts are correct for the two lists
-	NetworkDao netDao(dbInfo);
+	NetworkDao netDao(networkDBInfo);
 	QCOMPARE(netDao.getNeuronCount(neurGrpList1), (unsigned int)3);
 	QCOMPARE(netDao.getNeuronCount(neurGrpList2), (unsigned int)4);
 }
@@ -510,7 +510,7 @@ void TestNetworkDao::testGetNeuronGroupBoundingBox(){
 	//Adds test network with known properties
 	addTestNetwork1();
 
-	NetworkDao networkDao(dbInfo);
+	NetworkDao networkDao(networkDBInfo);
 
 	//Check bounding box around neuron group 1
 	Box box = networkDao.getNeuronGroupBoundingBox(neurGrp1ID);
@@ -536,7 +536,7 @@ void TestNetworkDao::testGetConnectionGroupSize(){
 	//Adds test network with known properties
 	addTestNetwork1();
 
-	NetworkDao networkDao(dbInfo);
+	NetworkDao networkDao(networkDBInfo);
 	unsigned int numConns = networkDao.getConnectionGroupSize(connGrp1ID);
 	QCOMPARE(numConns, (unsigned int)6);
 }
@@ -568,7 +568,7 @@ void TestNetworkDao::testGetNeuronGroupsInfo(){
 	unsigned int neurGrp3ID = query.lastInsertId().toUInt();
 
 	//Create the network dao and get list of neuron groups in the test network
-	NetworkDao networkDao (dbInfo);
+	NetworkDao networkDao (networkDBInfo);
 	QList<NeuronGroupInfo> neurGrpInfoList;
 	try{
 		networkDao.getNeuronGroupsInfo(networkID, neurGrpInfoList);
@@ -603,7 +603,7 @@ void TestNetworkDao::testGetNeuronIDs(){
 	addTestNetwork2();
 
 	//Invoke method being tested
-	NetworkDao networkDao(dbInfo);
+	NetworkDao networkDao(networkDBInfo);
 	QList<unsigned int> neurIDList = networkDao.getNeuronIDs(testNet2ID);
 
 	//Check that list is correct
@@ -627,7 +627,7 @@ void TestNetworkDao::testGetNeuronParameters(){
 
 	try{
 		//Get the values of the parameters - this should be the default
-		NetworkDao networkDao(dbInfo);
+		NetworkDao networkDao(networkDBInfo);
 		NeuronGroupInfo neurGrpInfo (neurGrp1ID, "name", "description", QHash<QString, double>(), networkDao.getNeuronType(1));
 		QHash<QString, double> neurParamMap = networkDao.getNeuronParameters(neurGrpInfo);
 
@@ -661,7 +661,7 @@ void TestNetworkDao::testGetNeuronParameters(){
 
 void TestNetworkDao::testGetNeuronType(){
 	try{
-		NetworkDao networkDao(dbInfo);
+		NetworkDao networkDao(networkDBInfo);
 
 		//Test type 1 neurons
 		NeuronType type = networkDao.getNeuronType(1);
@@ -703,7 +703,7 @@ void TestNetworkDao::testGetNeuronType(){
 /*! Note this test will need to be updated if the default types change. */
 void TestNetworkDao::testGetNeuronTypes(){
 	//Invoke method being tested
-	NetworkDao networkDao(dbInfo);
+	NetworkDao networkDao(networkDBInfo);
 	try{
 		QList<NeuronType> neurTypesList = networkDao.getNeuronTypes();
 		QCOMPARE(neurTypesList.size(), (int)3);
@@ -742,7 +742,7 @@ void TestNetworkDao::testGetSynapseParameters(){
 
 	try{
 		//Get the values of the parameters - this should be the default
-		NetworkDao networkDao(dbInfo);
+		NetworkDao networkDao(networkDBInfo);
 		ConnectionGroupInfo info(connGrp1ID, "description", 0, 0, QHash<QString, double>(), networkDao.getSynapseType(1));
 		QHash<QString, double> conParamMap = networkDao.getSynapseParameters(info);
 
@@ -764,7 +764,7 @@ void TestNetworkDao::testGetSynapseParameters(){
 
 void TestNetworkDao::testGetSynapseType(){
 	try{
-		NetworkDao networkDao(dbInfo);
+		NetworkDao networkDao(networkDBInfo);
 
 		//Test type 1 synapses
 		SynapseType type = networkDao.getSynapseType(1);
@@ -793,7 +793,7 @@ void TestNetworkDao::testGetSynapseType(){
 /*! Note this test will need to be updated if the default types change. */
 void TestNetworkDao::testGetSynapseTypes(){
 	//Invoke method being tested
-	NetworkDao networkDao(dbInfo);
+	NetworkDao networkDao(networkDBInfo);
 	try{
 		QList<SynapseType> synTypesList = networkDao.getSynapseTypes();
 		QCOMPARE(synTypesList.size(), (int)2);
@@ -832,7 +832,7 @@ void TestNetworkDao::testGetWeightlessNeuron(){
 	addWeightlessTestNetwork1();
 
 	//Invoke method being tested
-	NetworkDao networkDao(dbInfo);
+	NetworkDao networkDao(networkDBInfo);
 	try{
 		WeightlessNeuron* neuron = networkDao.getWeightlessNeuron(testNeurIDList[1]);
 		QHash<unsigned int, QList<unsigned int> > conMap = neuron->getConnectionMap();
@@ -872,7 +872,7 @@ void TestNetworkDao::testGetNeuronGroupID(){
 	addTestNetwork2();
 
 	//Get id of neuron from second network
-	NetworkDao networkDao(dbInfo);
+	NetworkDao networkDao(networkDBInfo);
 	QCOMPARE(networkDao.getNeuronGroupID(testNeurIDList2[0]), neurGrp21ID);
 }
 
@@ -883,7 +883,7 @@ void TestNetworkDao::testGetStartNeuronID(){
 
 	//Check that method executes without crashing or returning null
 	try {
-		NetworkDao networkDao(dbInfo);
+		NetworkDao networkDao(networkDBInfo);
 		QVERIFY(networkDao.getStartNeuronID(neurGrp1ID) != 0);
 	}
 	catch(SpikeStreamException ex){
@@ -901,7 +901,7 @@ void TestNetworkDao::testIsWeightlessNetwork(){
 	addTestNetwork2();
 
 	//Create test class
-	NetworkDao networkDao(dbInfo);
+	NetworkDao networkDao(networkDBInfo);
 
 	//Neuron in group 1 should be weightless
 	QVERIFY( networkDao.isWeightlessNetwork(testNetID) );
@@ -915,7 +915,7 @@ void TestNetworkDao::testIsWeightlessNeuron(){
 	addTestNetwork2();
 
 	//Create test class
-	NetworkDao networkDao(dbInfo);
+	NetworkDao networkDao(networkDBInfo);
 
 	//Neuron in group 1 should be weightless
 	QVERIFY(networkDao.isWeightlessNeuron(testNeurIDList[0]));
@@ -933,7 +933,7 @@ void TestNetworkDao::testSetConnectionGroupProperties(){
 		query.next();
 		QCOMPARE(query.value(0).toString(), QString("conngrpdesc1"));
 
-		NetworkDao netDao(dbInfo);
+		NetworkDao netDao(networkDBInfo);
 		netDao.setConnectionGroupProperties(connGrp1ID, "newConnectionGroup1Description");
 
 		//Check description after update
@@ -962,7 +962,7 @@ void TestNetworkDao::testSetNetworkProperties(){
 		QCOMPARE(query.value(0).toString(), QString("testNetwork1Name"));
 		QCOMPARE(query.value(1).toString(), QString("testNetwork1Description"));
 
-		NetworkDao netDao(dbInfo);
+		NetworkDao netDao(networkDBInfo);
 		netDao.setNetworkProperties(testNetID, "newNetwork1Name", "newNetwork1Description");
 
 		//Check name and description after update
@@ -992,7 +992,7 @@ void TestNetworkDao::testSetNeuronGroupProperties(){
 		QCOMPARE(query.value(0).toString(), QString("name1"));
 		QCOMPARE(query.value(1).toString(), QString("desc1"));
 
-		NetworkDao netDao(dbInfo);
+		NetworkDao netDao(networkDBInfo);
 		netDao.setNeuronGroupProperties(neurGrp1ID, "newNeuronGrp1Name", "newNeuronGrp1Description");
 
 		//Check name and description after update
@@ -1030,7 +1030,7 @@ void TestNetworkDao::testSetNeuronParameters(){
 		paramMap["seed"] = 27.3;
 
 		//Check values of parameters
-		NetworkDao netDao(dbInfo);
+		NetworkDao netDao(networkDBInfo);
 		QHash<QString, double> resultsMap = netDao.getNeuronParameters(info);
 		QCOMPARE(resultsMap.size(), (int)8);
 		QVERIFY(resultsMap.contains("a"));
@@ -1095,7 +1095,7 @@ void TestNetworkDao::testSetSynapseParameters(){
 		paramMap["Disable"] = 1;
 
 		//Check values of parameters
-		NetworkDao netDao(dbInfo);
+		NetworkDao netDao(networkDBInfo);
 		QHash<QString, double> resultsMap = netDao.getSynapseParameters(info);
 		QCOMPARE(resultsMap.size(), (int)2);
 		QVERIFY(resultsMap.contains("Learning"));
@@ -1134,7 +1134,7 @@ void TestNetworkDao::testSetWeight(){
 	QCOMPARE(Util::getDouble(query.value(0).toString()), 0.4);
 
 	//Execute test method
-	NetworkDao networkDao(dbInfo);
+	NetworkDao networkDao(networkDBInfo);
 	networkDao.setWeight(testConnIDList[3], 2.132);
 
 	//Check weight has been updated

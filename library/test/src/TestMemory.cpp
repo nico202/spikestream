@@ -56,9 +56,10 @@ void TestMemory::run(){
 	}
 	this->sleep(sleepPeriod);
 
-	qDebug()<<"Creating array with connections";
+	qDebug()<<"Creating array with connection pointers";
 	Connection* conArray2 = new Connection[numCons];
 	this->sleep(sleepPeriod);
+	delete conArray2;
 
 	for(unsigned i=0; i<numCons; ++i)
 		delete conArray[i];

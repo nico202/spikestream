@@ -18,32 +18,22 @@ class TestDao : public QObject {
 	protected:
 		//=========================  VARIABLES  =========================
 		/*! Information about the SpikeStreamNetwork database used in the tests */
-		DBInfo dbInfo;
+		DBInfo networkDBInfo;
 
-		/*! SpikeStreamNetwork database connection */
-		QSqlDatabase database;
-
-		/*! Name to statically access SpikeStreamNetwork database via QSqlDatabase methods */
-		QString dbRefName;
+		/*! Name of SpikeStreamNetwork database connection */
+		QString networkDBRef;
 
 		/*! Information about the SpikeStreamArchive database used in the tests */
 		DBInfo archiveDBInfo;
 
-		/*! Information about th SpikeStreamAnalysis database used in the tests */
+		/*! Reference used to statically access the SpikeStream archive database */
+		QString archiveDBRef;
+
+		/*! Information about the SpikeStreamAnalysis database used in the tests */
 		DBInfo analysisDBInfo;
 
-		/*! SpikeStreamAnalysis database connection */
-		QSqlDatabase analysisDatabase;
-
-		/*! Name to statically access analysis database */
-		QString analysisDBRefName;
-
-		/*! SpikeStreamArchive database connection */
-		QSqlDatabase archiveDatabase;
-
-		/*! Name to statically access SpikeStreamArchive database via QSqlDatabase methods */
-		QString archiveDBRefName;
-
+		/*! Name used to access SpikeStreamAnalysis database connection */
+		QString analysisDBRef;
 
 		//Parameters for test networks
 		unsigned int testNetID;
