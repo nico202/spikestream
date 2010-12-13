@@ -55,7 +55,7 @@ namespace spikestream {
 			void saveWeights();
 			void setArchiveMode(bool mode, const QString& archiveDescription = "");
 			void setFrameRate(unsigned int frameRate);
-			void setInjectNoise(unsigned neuronGroupID, double percentage);
+			void setInjectNoise(unsigned neuronGroupID, double percentage, bool sustain);
 			void setFiringInjectionPattern(const Pattern& pattern, unsigned neuronGroupID, bool sustain);
 			void setCurrentInjectionPattern(const Pattern& pattern, float current, unsigned neuronGroupID, bool sustain);
 			void setMonitor(bool mode);
@@ -65,6 +65,7 @@ namespace spikestream {
 			void setNeuronParameters(unsigned neuronGroupID, QHash<QString, double> parameterMap);
 			void setSynapseParameters(unsigned connectionGroupID, QHash<QString, double> parameterMap);
 			void setSTDPFunctionID(unsigned stdpFunctionID) { this->stdpFunctionID = stdpFunctionID; }
+			void setSustainNoise(bool sustainNoise) { this->sustainNoise = sustainNoise; }
 			void setSustainPattern(bool sustainPattern) { this->sustainPattern = sustainPattern; }
 			void setUpdateInterval_ms(unsigned int interval) { this->updateInterval_ms = interval; }
 			void playSimulation();
@@ -175,6 +176,9 @@ namespace spikestream {
 			/*! Map of neuron groups to inject noise into at the next time step.
 				The key is the neuron group ID, the value is the number of neurons to fire. */
 			QHash<unsigned, unsigned> injectNoiseMap;
+
+			/*! Controls whether noise is sustained for more than one time step */
+			bool sustainNoise;
 
 			/*! Map linking neurons with membrane potential */
 			QHash<unsigned, float> membranePotentialMap;

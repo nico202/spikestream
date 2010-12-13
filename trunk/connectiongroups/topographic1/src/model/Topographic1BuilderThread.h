@@ -35,8 +35,6 @@ namespace spikestream {
 			double ovWidth;
 			double ovLength;
 			double ovHeight;
-			int projectionPosition;
-			bool forwardReverse;
 			int conPattern;
 			double minWeight;
 			double maxWeight;

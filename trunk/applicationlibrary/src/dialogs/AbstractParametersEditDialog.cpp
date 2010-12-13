@@ -121,6 +121,7 @@ void AbstractParametersEditDialog::addButtons(QVBoxLayout* mainVLayout){
 	buttonBox->addWidget(okButton);
 	connect (okButton, SIGNAL(clicked()), this, SLOT(okButtonClicked()));
 	mainVLayout->addLayout(buttonBox);
+	okButton->setFocus(Qt::OtherFocusReason);
 }
 
 

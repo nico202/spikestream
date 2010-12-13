@@ -37,8 +37,6 @@ void Topographic1BuilderThread::buildConnectionGroup(){
 	ovWidth = getParameter("overlap_width");
 	ovLength = getParameter("overlap_length");
 	ovHeight = getParameter("overlap_height");
-	projectionPosition = (int)getParameter("projection_position");
-	forwardReverse = (bool)getParameter("forward_reverse");
 	conPattern = getParameter("connection_pattern");
 	minWeight = getParameter("min_weight");
 	maxWeight = getParameter("max_weight");
@@ -186,8 +184,6 @@ void Topographic1BuilderThread::checkParameters(){
 	double overlapWidth = getParameter("overlap_width");
 	double overlapLength = getParameter("overlap_length");
 	double overlapHeight = getParameter("overlap_height");
-	int projectionPosition = (int)getParameter("projection_position");
-	getParameter("forward_reverse");
 	int connectionPattern = getParameter("connection_pattern");
 	double minWeight = getParameter("min_weight");
 	double maxWeight = getParameter("max_weight");
@@ -207,9 +203,6 @@ void Topographic1BuilderThread::checkParameters(){
 		throw SpikeStreamException("Overlap length cannot be less than 0: " + QString::number(overlapLength));
 	if(overlapHeight < 0.0)
 		throw SpikeStreamException("Overlap height cannot be less than 0: " + QString::number(overlapHeight));
-
-	if(projectionPosition < 0 || projectionPosition > 4)
-		throw SpikeStreamException("Projection position not recognized: " + QString::number(projectionPosition));
 
 	if(!(connectionPattern == GAUSSIAN_SPHERE || connectionPattern == UNIFORM_SPHERE || connectionPattern == UNIFORM_CUBE))
 		throw SpikeStreamException("Connection pattern not recognized: " + QString::number(connectionPattern));

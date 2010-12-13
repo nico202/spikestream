@@ -55,6 +55,7 @@ namespace spikestream {
 			void startSimulation();
 			void stepSimulation();
 			void stopSimulation();
+			void sustainNoiseChanged(bool enabled);
 			void sustainPatternChanged(bool enabled);
 			void unloadSimulation(bool confirmWithUser=true);
 			void updateProgress(int stepsCompleted, int totalSteps);
@@ -151,6 +152,9 @@ namespace spikestream {
 			/*! Flag to prevent calls to progress dialog while it is redrawing. */
 			bool updatingProgress;
 
+			/*! Button to inject noise into a neuron group */
+			QPushButton* injectNoiseButton;
+
 			/*! Combo box controlling the percentage of injected noise */
 			QComboBox* injectNoisePercentCombo;
 
@@ -188,6 +192,7 @@ namespace spikestream {
 			QString getPatternKey(const QString& patternComboText);
 			QToolBar* getToolBar();
 			void loadNeuronGroups();
+			void setInjectNoise(bool sustain);
 			void setInjectionPattern(bool sustain);
 	};
 

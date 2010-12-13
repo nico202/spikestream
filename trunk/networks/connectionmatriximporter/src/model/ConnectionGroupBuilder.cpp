@@ -15,7 +15,7 @@ using namespace spikestream;
 using namespace std;
 
 //Enable debuggging information
-#define DEBUG
+//#define DEBUG
 
 
 /*! Constructor */

@@ -171,7 +171,9 @@ void NemoWrapper::saveWeights(){
 /*! Forces the specified percentage of neurons in the specified neuron group to fire at the
 	next time step. Throws an exception if the neuron group ID does not exist in the current
 	network or if the percentage is < 0 or > 100. */
-void  NemoWrapper::setInjectNoise(unsigned neuronGroupID, double percentage){
+void  NemoWrapper::setInjectNoise(unsigned neuronGroupID, double percentage, bool sustain){
+	sustainNoise = sustain;
+
 	//Run checks
 	if(!simulationLoaded)
 		throw SpikeStreamException("Noise cannot be injected when a simulation is not loaded.");
@@ -740,9 +742,12 @@ void NemoWrapper::stepNemo(){
 			qDebug()<<"Nemo successfully stepped with injection of noise.";
 		#endif//DEBUG_STEP
 
-		//Clean up noise array and empty inject noise map
+		//Clean up noise array
 		delete [] injectNoiseNeurIDArr;
-		injectNoiseMap.clear();
+
+		//Empty noise injection map if we are not sustaining it
+		if(!sustainNoise)
+			injectNoiseMap.clear();
 	}
 
 	//------------------------------------------
