@@ -135,10 +135,13 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 		injectNoisePercentCombo->addItem(QString::number(i) + " %");
 	injectNoisePercentCombo->setMinimumSize(60, 20);
 	injectNoiseBox->addWidget(injectNoisePercentCombo);
-	QPushButton* injectNoiseButton = new QPushButton("Inject Noise");
+	injectNoiseButton = new QPushButton("Inject Noise");
 	injectNoiseButton->setMinimumHeight(20);
 	connect(injectNoiseButton, SIGNAL(clicked()), this, SLOT(injectNoiseButtonClicked()));
 	injectNoiseBox->addWidget(injectNoiseButton);
+	QCheckBox* sustainNoiseChkBox = new QCheckBox("Sustain");
+	connect(sustainNoiseChkBox, SIGNAL(clicked(bool)), this, SLOT(sustainNoiseChanged(bool)));
+	injectNoiseBox->addWidget(sustainNoiseChkBox);
 	injectNoiseBox->addStretch(5);
 	controlsVBox->addSpacing(5);
 	controlsVBox->addLayout(injectNoiseBox);
@@ -365,14 +368,7 @@ void NemoWidget::checkSaveWeightsProgress(){
 /*! Called when the inject noise button is clicked. Sets the injection
 	of noise in the nemo wrapper */
 void NemoWidget::injectNoiseButtonClicked(){
-	unsigned percentage = Util::getUInt(injectNoisePercentCombo->currentText().section(" ", 0, 0));
-	unsigned neurGrpID = getNeuronGroupID(injectNoiseNeuronGroupCombo->currentText());
-	try{
-		nemoWrapper->setInjectNoise(neurGrpID, percentage);
-	}
-	catch(SpikeStreamException& ex){
-		qCritical()<<ex.getMessage();
-	}
+	setInjectNoise(false);
 }
 
 
@@ -803,6 +799,25 @@ void NemoWidget::stopSimulation(){
 }
 
 
+/*! Switches between noise injection controlled by button and
+	continuous noise injection at every time step */
+void NemoWidget::sustainNoiseChanged(bool enabled){
+	if(enabled){
+		injectNoiseButton->setEnabled(false);
+		injectNoisePercentCombo->setEnabled(false);
+		injectNoiseNeuronGroupCombo->setEnabled(false);
+		setInjectNoise(true);
+	}
+	else{
+		injectNoiseButton->setEnabled(true);
+		injectNoisePercentCombo->setEnabled(true);
+		injectNoiseNeuronGroupCombo->setEnabled(true);
+
+		//Switch off sustain noise - it will be automatically deleted on next step.
+		nemoWrapper->setSustainNoise(false);
+	}
+}
+
 /*! Switches between pattern injection controlled by button and
 	continuous pattern injection at every time step */
 void NemoWidget::sustainPatternChanged(bool enabled){
@@ -1020,8 +1035,8 @@ QToolBar* NemoWidget::getToolBar(){
 
 	timeStepLabel = new QLabel ("0");
 	timeStepLabel->setStyleSheet( "QLabel { margin-left: 5px; background-color: #ffffff; border-color: #555555; border-width: 2px; border-style: outset; font-weight: bold;}");
-	timeStepLabel->setMinimumSize(100, 20);
-	timeStepLabel->setMaximumSize(100, 20);
+	timeStepLabel->setMinimumSize(150, 20);
+	timeStepLabel->setMaximumSize(150, 20);
 	timeStepLabel->setAlignment(Qt::AlignCenter);
 	tmpToolBar->addWidget(timeStepLabel);
 
@@ -1043,6 +1058,19 @@ void NemoWidget::loadNeuronGroups(){
 	foreach(NeuronGroupInfo info, neurGrpInfoList){
 		injectNoiseNeuronGroupCombo->addItem(info.getName() + "(" + QString::number(info.getID()) + ")");
 		injectPatternNeurGrpCombo->addItem(info.getName() + "(" + QString::number(info.getID()) + ")");
+	}
+}
+
+
+/*! Sets the injection of noise */
+void NemoWidget::setInjectNoise(bool sustain){
+	unsigned percentage = Util::getUInt(injectNoisePercentCombo->currentText().section(" ", 0, 0));
+	unsigned neurGrpID = getNeuronGroupID(injectNoiseNeuronGroupCombo->currentText());
+	try{
+		nemoWrapper->setInjectNoise(neurGrpID, percentage, sustain);
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<ex.getMessage();
 	}
 }
 

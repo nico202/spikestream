@@ -79,8 +79,6 @@ bool Topographic1Widget::checkInputs(){
 		checkInput(overlapWidthEdit, "Overlap width has not been set.");
 		checkInput(overlapLengthEdit, "Overlap length has not been set.");
 		checkInput(overlapHeightEdit, "Overlap height has not been set.");
-		checkInput(positionCombo, "Projection position has not been set");
-		checkInput(forRevCombo, "Forward or reverse direction has not been set");
 		checkInput(connectionPatternCombo, "Connection pattern has not been set");
 		checkInput(minWeightEdit, "Minimum weight has not been set.");
 		checkInput(maxWeightEdit, "Maximum weight has not been set.");
@@ -118,8 +116,6 @@ ConnectionGroupInfo Topographic1Widget::getConnectionGroupInfo(){
 	paramMap["overlap_width"] = Util::getDouble(overlapWidthEdit->text());
 	paramMap["overlap_length"] = Util::getDouble(overlapLengthEdit->text());
 	paramMap["overlap_height"] = Util::getDouble(overlapHeightEdit->text());
-	paramMap["projection_position"] = positionCombo->currentIndex();
-	paramMap["forward_reverse"] = forRevCombo->currentIndex();
 	paramMap["connection_pattern"] = connectionPatternCombo->currentIndex();
 	paramMap["min_weight"] = Util::getDouble(minWeightEdit->text());
 	paramMap["max_weight"] = Util::getDouble(maxWeightEdit->text());
@@ -226,13 +222,6 @@ void Topographic1Widget::buildGUI(QVBoxLayout* mainVBox){
 
 	//Other stuff
 	QHBoxLayout* projLayout2 = new QHBoxLayout();
-	positionCombo = new QComboBox();
-	fillPositionCombo();
-	//addInputWidget(positionCombo, projLayout2, "Position:");
-	forRevCombo = new QComboBox();
-	forRevCombo->addItem("Forward");
-	forRevCombo->addItem("Reverse");
-	addInputWidget(forRevCombo, projLayout2, "Direction:");
 	connectionPatternCombo = new QComboBox();
 	fillConnectionPatternCombo();
 	addInputWidget(connectionPatternCombo, projLayout2, "Pattern");
@@ -285,16 +274,5 @@ void Topographic1Widget::fillConnectionPatternCombo(){
 	connectionPatternCombo->addItem("Uniform sphere");
 	connectionPatternCombo->addItem("Uniform cube");
 }
-
-
-/*! Fills the position combo with top left etc. */
-void Topographic1Widget::fillPositionCombo(){
-	positionCombo->addItem("Centre");
-	positionCombo->addItem("Top left");
-	positionCombo->addItem("Top right");
-	positionCombo->addItem("Bottom left");
-	positionCombo->addItem("Bottom right");
-}
-
 
 

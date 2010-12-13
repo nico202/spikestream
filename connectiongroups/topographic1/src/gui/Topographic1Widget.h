@@ -56,12 +56,6 @@ namespace spikestream {
 			/*! Overlap on Z axis */
 			QLineEdit* overlapHeightEdit;
 
-			/*! Position of projections relative to destination layer */
-			QComboBox* positionCombo;
-
-			/*! Direction of the connection */
-			QComboBox* forRevCombo;
-
 			/*! Connection pattern - Gaussian, uniform sphere, uniform cube. */
 			QComboBox* connectionPatternCombo;
 
@@ -99,7 +93,6 @@ namespace spikestream {
 			void addInputWidget(QWidget* widget, QHBoxLayout* layout, QString label, bool limitWidth = false, bool lastWidget = false);
 			void buildGUI(QVBoxLayout* mainVBox);
 			void fillConnectionPatternCombo();
-			void fillPositionCombo();
 
 	};
 

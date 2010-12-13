@@ -94,6 +94,11 @@ void NeuronGroupBuilder::addNeurons(NeuronGroup* exNeurGrp, NeuronGroup* inhibNe
 	unsigned numYNeur = numXNeur;
 	unsigned numZNeur = numberNeuronsPerNode / (numXNeur*numXNeur);
 
+	//Use number of x neurons as the size of the group if neurGrpDimen = 0
+	if(neurGrpDimen == 0){
+		neurGrpDimen = (float)numXNeur;
+	}
+
 	//Calculate the starting position.
 	float xStart = cartCoord.getXPos();// - neurGrpDimen/2.0f;
 	float yStart = cartCoord.getYPos();// - neurGrpDimen/2.0f;
