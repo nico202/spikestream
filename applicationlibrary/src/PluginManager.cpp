@@ -56,6 +56,9 @@ void PluginManager::loadPlugins(){
 	#ifdef WIN32_SPIKESTREAM
 		filters << "*.dll";
 	#endif
+	#ifdef MAC32_SPIKESTREAM
+		filters << "*.dylib";
+	#endif
 	pluginDirectory.setNameFilters(filters);
 
 	//Get list of plugin files

@@ -18,16 +18,16 @@ using namespace spikestream;
 DBDetailsWidget::DBDetailsWidget(QWidget* parent) : QWidget(parent){
 	QVBoxLayout* mainVBox = new QVBoxLayout(this);
 
-	//Create a config loader so that we can load up existing settings
-	ConfigLoader configLoader;
-
-	//Add instructions at the top of the widget
-	QString instructionStr = "Enter the host, username and password for the databases that you want to configure.\n";
-	instructionStr += "These can be on the same or different machines.\n";
-	instructionStr += "You must have MySQL running on the specified  hosts before running this tool.";
-	mainVBox->addWidget(new QLabel(instructionStr));
-
 	try{
+		//Create a config loader so that we can load up existing settings
+		ConfigLoader configLoader;
+
+		//Add instructions at the top of the widget
+		QString instructionStr = "Enter the host, username and password for the databases that you want to configure.\n";
+		instructionStr += "These can be on the same or different machines.\n";
+		instructionStr += "You must have MySQL running on the specified  hosts before running this tool.";
+		mainVBox->addWidget(new QLabel(instructionStr));
+
 		//Add SpikeSreamNetwork fields
 		QGroupBox* networkGroupBox = new QGroupBox("");
 		netChkBox = new QCheckBox("Configure SpikeStreamNetwork database");

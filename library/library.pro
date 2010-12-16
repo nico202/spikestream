@@ -14,13 +14,18 @@ QT += sql xml
 #----------------------------------------------#
 #---          INSTALLATION LOCATION         ---#
 #----------------------------------------------#
-unix {
+unix && !macx {
 	target.path = /usr/local/lib
 	INSTALLS += target
 }
 win32 {
 	# Add a copy of the libary to the bin directory
 	target.path = $${SPIKESTREAM_ROOT_DIR}/bin
+	INSTALLS += target
+}
+macx {
+	# Add a copy of the libary to the lib directory
+	target.path = /usr/lib
 	INSTALLS += target
 }
 

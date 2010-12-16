@@ -51,10 +51,11 @@ int main( int argc, char ** argv ) {
 	dbConfigMainWin->setWindowTitle( "SpikeStream Database Configuration" );
 	dbConfigMainWin->show();
 
-	//Listen for window closing events
-	dbConfigApp.connect( &dbConfigApp, SIGNAL(lastWindowClosed()), &dbConfigApp, SLOT(quit()) );
 
-	//Execute application
-	return dbConfigApp.exec();
+//	//Listen for window closing events
+//	dbConfigApp.connect( &dbConfigApp, SIGNAL(lastWindowClosed()), &dbConfigApp, SLOT(quit()) );
+
+//	//Execute application
+//	return dbConfigApp.exec();
 }
 

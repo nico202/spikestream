@@ -4,6 +4,7 @@
 using namespace spikestream;
 
 //Qt includes
+#include <QDir>
 #include <QFile>
 #include <QTextStream>
 #include <QCoreApplication>
@@ -15,9 +16,13 @@ using namespace std;
 
 /*! Constructor loads up the configuration data from the given file path. */
 ConfigLoader::ConfigLoader(){
-	//Get root directory.
-	QString rootDirectory = QCoreApplication::applicationDirPath();
-	rootDirectory.truncate(rootDirectory.size() - 4);//Trim the "/bin" off the end
+	//Get the working directory - this varies depending on the operating system
+	#ifdef MAC32_SPIKESTREAM
+		QString rootDirectory = "..";
+	#else//Windows or Linux
+		QString rootDirectory = QCoreApplication::applicationDirPath();
+		rootDirectory.truncate(rootDirectory.size() - 4);//Trim the "/bin" off the end
+	#endif
 
 	/* Make sure that there is a config file already by attempting to copy from the template
 	   This function will not overwrite an existing config file */
@@ -25,8 +30,10 @@ ConfigLoader::ConfigLoader(){
 
 	//Create config file
 	QFile configFile(rootDirectory + "/spikestream.config");
-	if(!configFile.exists())
-		throw SpikeStreamIOException("Cannot find config file.");
+	if(!configFile.exists()){
+		QDir tmpDir(rootDirectory);
+		throw SpikeStreamIOException("Cannot find config file in directory: " + tmpDir.absolutePath());
+	}
 
 	//Load the config file into the map
 	if (!configFile.open(QIODevice::ReadOnly | QIODevice::Text))

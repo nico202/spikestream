@@ -9,6 +9,7 @@ using namespace spikestream;
 #include <QStringList>
 
 //Other includes
+#include <stdint.h>
 #include "math.h"
 #include <iostream>
 using namespace std;
@@ -262,7 +263,7 @@ float Util::min(float n1, float n2, float n3){
 /*! Prints out a binary number */
 void Util::printBinary(uint64_t number){
 	int numBits = sizeof(number) * 8;
-	uint64_t probe = 0x8000000000000000;
+        uint64_t probe = 2;// 0x8000000000000000;
 	for(int i=0; i<numBits; ++i){
 		if(probe & number)
 			cout<<"1";

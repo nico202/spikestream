@@ -10,7 +10,7 @@ TARGET = spikestreamapplication
 #----------------------------------------------#
 #---          INSTALLATION LOCATION         ---#
 #----------------------------------------------#
-unix {
+unix && !macx {
 	target.path = /usr/local/lib
 	INSTALLS += target
 }
@@ -19,21 +19,16 @@ win32 {
 	target.path = $${SPIKESTREAM_ROOT_DIR}/bin
 	INSTALLS += target
 }
+macx {
+	# Add a copy of the libary to the lib directory
+	target.path = /usr/lib
+	INSTALLS += target
+}
+
 
 DESTDIR = $${SPIKESTREAM_ROOT_DIR}/lib
 
 QT += xml opengl sql
-
-
-#----------------------------------------------#
-#---                DEFINES                 ---#
-#----------------------------------------------#
-unix {
-	DEFINES += LINUX32_SPIKESTREAM
-}
-win32 {
-	DEFINES += WIN32_SPIKESTREAM
-}
 
 
 #----------------------------------------------#
