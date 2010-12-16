@@ -13,12 +13,22 @@ using namespace spikestream;
 #include <QMessageBox>
 #include <QProgressDialog>
 
+//Other includes
+#include <iostream>
+using namespace std;
+
 
 /*! Constructor */
 DBConfigMainWindow::DBConfigMainWindow(QWidget* parent) : QMainWindow(parent) {
-	//Get the working directory
-	rootDirectory = QCoreApplication::applicationDirPath();
-	rootDirectory.truncate(rootDirectory.size() - 4);//Trim the "/bin" off the end
+	//Get the working directory - this varies depending on the operating system
+	#ifdef MAC32_SPIKESTREAM
+		rootDirectory = "../Resources";
+	#else//Windows or Linux
+		rootDirectory = QCoreApplication::applicationDirPath();
+		rootDirectory.truncate(rootDirectory.size() - 4);//Trim the "/bin" off the end
+	#endif
+	cout<<"ROOT DIRECTORY: "<<rootDirectory.toStdString()<<endl;
+	qCritical()<<"Root directory is: "<<rootDirectory;
 
 	//Add a stacked widget with the pages
 	QWidget* dbDetailsWidget = new DBDetailsWidget();

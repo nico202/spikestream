@@ -148,7 +148,7 @@ namespace spikestream {
 			void drawAxes();
 			void drawConnections();
 			void drawNeurons();
-			void drawSphere(float xPos, float yPos, float zPos, float radius, unsigned quality);
+			void drawSphere(float xPos, float yPos, float zPos);
 			void drawWeightedConnection(float x1, float y1, float z1, float x2, float y2, float z2, float weight);
 			void fillRotationMatrix(float angle, float x, float y, float z);
 			unsigned int getSelectedNeuron(GLuint selectBuffer[], int hitCount, int bufferSize);

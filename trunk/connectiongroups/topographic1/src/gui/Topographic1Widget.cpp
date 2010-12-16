@@ -173,9 +173,6 @@ void Topographic1Widget::addInputWidget(QWidget* widget, QHBoxLayout* layout, QS
 void Topographic1Widget::buildGUI(QVBoxLayout* mainVBox){
 	QGroupBox* mainGroupBox = new QGroupBox("Topographic1 Connection Group Builder", this);
 
-	uint64_t testLong = 0xffffffffffffffff;
-	qDebug()<<"Size: "<<sizeof(testLong)<<"; value="<<testLong;
-
 	//Validators for double and integer parameters
 	QDoubleValidator* posDoubleValidator = new QDoubleValidator(0.0, 1000000.0, 2, this);
 	QDoubleValidator* projectionValidator = new QDoubleValidator(0.1, 1000000.0, 2, this);

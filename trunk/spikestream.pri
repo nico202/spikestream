@@ -3,7 +3,7 @@
 #----------------------------------------------#
 #---            DEBUG OR RELEASE            ---#
 #----------------------------------------------#
-DEBUG_MODE = true
+DEBUG_MODE = false
 contains (DEBUG_MODE, true) {
 	CONFIG += debug
 }
@@ -21,7 +21,7 @@ CONFIG += console
 #----------------------------------------------#
 #---       INCLUDE AND LIBRARY PATHS        ---#
 #----------------------------------------------#
-unix {
+unix && !macx {
 	# Qwt
 	INCLUDEPATH += /usr/local/qwt-5.2.1-svn/include
 	LIBS += -lqwt -L/usr/local/qwt-5.2.1-svn/lib
@@ -47,7 +47,15 @@ win32 {
 	# Boost
 	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib
 }
+macx {
+        # Qwt
+        INCLUDEPATH += /usr/local/qwt-5.2.2-svn/include
+        LIBS += -lqwt -L/usr/local/qwt-5.2.2-svn/lib
 
+        # GMP and Boost
+        INCLUDEPATH += /opt/local/include
+        LIBS += -lgmpxx -lgmp -L/opt/local/lib
+}
 
 #----------------------------------------------#
 #---		 GENERAL BUILD SETTINGS         ---#
@@ -59,3 +67,18 @@ OBJECTS_DIR = build/objects
 MOC_DIR = build/moc
 
 CONFIG += thread exceptions
+
+
+#----------------------------------------------#
+#---                DEFINES                 ---#
+#----------------------------------------------#
+unix && !macx {
+	DEFINES += LINUX32_SPIKESTREAM
+}
+win32 {
+	DEFINES += WIN32_SPIKESTREAM
+}
+macx {
+	DEFINES += MAC32_SPIKESTREAM
+}
+

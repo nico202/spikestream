@@ -724,8 +724,7 @@ void NetworkViewer::drawNeurons(){
 
 		//Local variables
 		RGBColor *tmpColor, tmpColor2;
-		unsigned sphereQuality;
-		float sphereRadius, weight;
+		float weight;
 
 		//Get pointer to network that is to be drawn and its associated display
 		Network* network = Globals::getNetwork();
@@ -739,8 +738,6 @@ void NetworkViewer::drawNeurons(){
 		bool fullRenderMode = netDisplay->isFullRenderMode();//Local copy for speed
 		if(fullRenderMode){
 			defaultNeuronColor = *netDisplay->getDefaultNeuronColorFullRender();
-			sphereQuality = Globals::getNetworkDisplay()->getSphereQuality();
-			sphereRadius = Globals::getNetworkDisplay()->getSphereRadius();
 		}
 		else{
 			defaultNeuronColor = *netDisplay->getDefaultNeuronColor();
@@ -803,7 +800,7 @@ void NetworkViewer::drawNeurons(){
 						glEnd();
 					}
 					else{//Draw neurons as a sphere
-						drawSphere(neurIter.value()->getXPos(), neurIter.value()->getYPos(), neurIter.value()->getZPos(), sphereRadius, sphereQuality);
+						drawSphere(neurIter.value()->getXPos(), neurIter.value()->getYPos(), neurIter.value()->getZPos());
 					}
 				glPopName();
 			}
@@ -817,7 +814,7 @@ void NetworkViewer::drawNeurons(){
 
 
 /*! Draws a sphere using OpenGL */
-void NetworkViewer::drawSphere(float xPos, float yPos, float zPos, float radius, unsigned quality) {
+void NetworkViewer::drawSphere(float xPos, float yPos, float zPos) {
 	glPushMatrix();
 	glTranslatef(xPos, yPos, zPos);//Translate to sphere position
 
