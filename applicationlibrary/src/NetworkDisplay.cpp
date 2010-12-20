@@ -85,25 +85,8 @@ void NetworkDisplay::networkChanged(){
 		//Make the neuron groups visible by default
 		setVisibleNeuronGroupIDs(Globals::getNetwork()->getNeuronGroupIDs(), false);
 
-		//Add up the number of potentially visible connections
-		int totalVisCons = 0;
-		int thinThresh = getConnectionThinningThreshold();
-		QList<ConnectionGroup*> tmpConGrpList = Globals::getNetwork()->getConnectionGroups();
-		foreach(ConnectionGroup* tmpConGrp, tmpConGrpList){
-			if(tmpConGrp->size() > thinThresh)
-				totalVisCons += thinThresh;
-			else
-				totalVisCons += tmpConGrp->size();
-		}
-
-		//Show connection groups if the total number of visible connections is less than the threshold
-		QList<unsigned> visibleConGrpIDs;
-		if(totalVisCons < connectionVisibilityThreshold){
-			foreach(ConnectionGroup* tmpConGrp, tmpConGrpList){
-				visibleConGrpIDs.append(tmpConGrp->getID());
-			}
-		}
-		setVisibleConnectionGroupIDs(visibleConGrpIDs, false);
+		//Only show connection groups if they are not too many visible connections.
+		setDefaultVisibleConnectionGroupIDs();
 	}
 }
 
@@ -240,7 +223,8 @@ void NetworkDisplay::loadDisplaySettings(ConfigLoader* configLoader){
 	drawAxes = Util::getBool( configLoader->getParameter("draw_axes") );
 	sphereRadius = Util::getFloat( configLoader->getParameter("sphere_radius") );
 	sphereQuality = Util::getUInt( configLoader->getParameter("sphere_quality") );
-	connectionVisibilityThreshold = Util::getInt( configLoader->getParameter("connection_visibility_threshold") );
+	connectionVisibilityThreshold_fast = Util::getInt( configLoader->getParameter("connection_visibility_threshold_fast") );
+	connectionVisibilityThreshold_full = Util::getInt( configLoader->getParameter("connection_visibility_threshold_full") );
 	minimumConnectionRadius = Util::getFloat( configLoader->getParameter("minimum_connection_radius") );
 	weightRadiusFactor = Util::getFloat( configLoader->getParameter("weight_radius_factor") );
 	connectionQuality = Util::getUInt( configLoader->getParameter("connection_quality") );
@@ -272,6 +256,7 @@ void NetworkDisplay::setConnectionGroupVisibility(unsigned int conGrpID, bool vi
 /*! Sets the render mode of the 3D display */
 void NetworkDisplay::setFullRenderMode(bool fullRenderMode){
 	this->fullRenderMode = fullRenderMode;
+	setDefaultVisibleConnectionGroupIDs();
 	emit networkDisplayChanged();
 }
 
@@ -565,6 +550,35 @@ void NetworkDisplay::checkWeightRenderFlag(unsigned int flag){
 	if(flag == RENDER_CURRENT_WEIGHTS)
 		return;
 	throw SpikeStreamException("Weight render flag not recognized: " + QString::number(flag));
+}
+
+
+/*! Sets default visibility of connection groups. If too many connections will be
+		visible connection groups are hidden. */
+void NetworkDisplay::setDefaultVisibleConnectionGroupIDs(){
+	if(!Globals::networkLoaded())
+		return;
+
+	//Add up the number of potentially visible connections
+	int totalVisCons = 0;
+	int thinThresh = getConnectionThinningThreshold();
+	QList<ConnectionGroup*> tmpConGrpList = Globals::getNetwork()->getConnectionGroups();
+	foreach(ConnectionGroup* tmpConGrp, tmpConGrpList){
+		if(tmpConGrp->size() > thinThresh)
+			totalVisCons += thinThresh;
+		else
+			totalVisCons += tmpConGrp->size();
+	}
+
+	//Show connection groups if the total number of visible connections is less than the threshold
+	QList<unsigned> visibleConGrpIDs;
+	if(	(fullRenderMode && (totalVisCons < connectionVisibilityThreshold_full) )
+		|| (!fullRenderMode && (totalVisCons < connectionVisibilityThreshold_fast) ) ) {
+		foreach(ConnectionGroup* tmpConGrp, tmpConGrpList){
+			visibleConGrpIDs.append(tmpConGrp->getID());
+		}
+	}
+	setVisibleConnectionGroupIDs(visibleConGrpIDs, false);
 }
 
 

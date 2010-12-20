@@ -67,7 +67,6 @@ namespace spikestream {
 			void setSTDPFunctionID(unsigned stdpFunctionID) { this->stdpFunctionID = stdpFunctionID; }
 			void setSustainNoise(bool sustainNoise) { this->sustainNoise = sustainNoise; }
 			void setSustainPattern(bool sustainPattern) { this->sustainPattern = sustainPattern; }
-			void setUpdateInterval_ms(unsigned int interval) { this->updateInterval_ms = interval; }
 			void playSimulation();
 			void stepSimulation();
 			void stopSimulation();
@@ -230,6 +229,7 @@ namespace spikestream {
 
 
 			//======================  METHODS  ========================
+			unsigned addInjectNoiseNeuronIDs();
 			void checkNemoOutput(nemo_status_t result, const QString& errorMessage);
 			void clearError();
 			void fillInjectNoiseArray(unsigned*& array, int* arraySize);

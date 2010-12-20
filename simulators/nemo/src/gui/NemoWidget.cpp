@@ -35,7 +35,7 @@ extern "C" {
 
 	/*! Returns a descriptive name for this widget */
 	QString getName(){
-		return QString("Nemo CUDA Simulator");
+		return QString("NeMo CUDA Simulator");
 	}
 }
 
@@ -66,7 +66,7 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	connect(neuronParametersButton, SIGNAL(clicked()), this, SLOT(setNeuronParameters()));
 	synapseParametersButton = new QPushButton(" Synapse Parameters ");
 	connect(synapseParametersButton, SIGNAL(clicked()), this, SLOT(setSynapseParameters()));
-	nemoParametersButton = new QPushButton(" Nemo Parameters ");
+	nemoParametersButton = new QPushButton(" NeMo Parameters ");
 	connect(nemoParametersButton, SIGNAL(clicked()), this, SLOT(setNemoParameters()));
 	QHBoxLayout* loadLayout = new QHBoxLayout();
 	loadLayout->addWidget(loadButton);
@@ -117,7 +117,9 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	archiveCheckBox = new QCheckBox("Archive.");
 	connect(archiveCheckBox, SIGNAL(stateChanged(int)), this, SLOT(archiveStateChanged(int)));
 	archiveDescriptionEdit = new QLineEdit("Undescribed");
+	archiveDescriptionEdit->setEnabled(false);
 	setArchiveDescriptionButton = new QPushButton("Set Description");
+	setArchiveDescriptionButton->setEnabled(false);
 	connect(setArchiveDescriptionButton, SIGNAL(clicked()), this, SLOT(setArchiveDescription()));
 	QHBoxLayout* archiveLayout = new QHBoxLayout();
 	archiveLayout->addWidget(archiveCheckBox);
@@ -161,10 +163,12 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	injectPatternBox->addWidget(patternCurrentCombo);
 	injectPatternBox->addWidget(patternCombo);
 	injectPatternButton = new QPushButton("Inject Pattern");
+	injectPatternButton->setEnabled(false);
 	injectPatternButton->setMinimumHeight(22);
 	connect(injectPatternButton, SIGNAL(clicked()), this, SLOT(injectPatternButtonClicked()));
 	injectPatternBox->addWidget(injectPatternButton);
-	QCheckBox* sustainPatternChkBox = new QCheckBox("Sustain");
+	sustainPatternChkBox = new QCheckBox("Sustain");
+	sustainPatternChkBox->setEnabled(false);
 	connect(sustainPatternChkBox, SIGNAL(clicked(bool)), this, SLOT(sustainPatternChanged(bool)));
 	injectPatternBox->addWidget(sustainPatternChkBox);
 	controlsVBox->addSpacing(5);
@@ -211,11 +215,15 @@ NemoWidget::~NemoWidget(){
 /*! Switches the archiving of the simulation on or off */
 void NemoWidget::archiveStateChanged(int state){
 	if(state == Qt::Checked){
+		archiveDescriptionEdit->setEnabled(true);
+		setArchiveDescriptionButton->setEnabled(true);
 		if(archiveDescriptionEdit->text().isEmpty())
 			archiveDescriptionEdit->setText("Undescribed");
 		nemoWrapper->setArchiveMode(true, archiveDescriptionEdit->text());
 	}
 	else{
+		archiveDescriptionEdit->setEnabled(false);
+		setArchiveDescriptionButton->setEnabled(false);
 		nemoWrapper->setArchiveMode(false);
 	}
 }
@@ -415,6 +423,10 @@ void NemoWidget::loadPattern(QString comboStr){
 		if(patternCombo->itemText(0) == "")
 			patternCombo->removeItem(0);
 		patternCombo->setCurrentIndex(patternCombo->count() - 2);
+
+		//Enable injection and sustain buttons
+		injectPatternButton->setEnabled(true);
+		sustainPatternChkBox->setEnabled(true);
 	}
 	catch(SpikeStreamException* ex){
 		qCritical()<<ex->getMessage();

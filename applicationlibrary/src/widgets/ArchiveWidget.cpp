@@ -57,6 +57,8 @@ ArchiveWidget::ArchiveWidget(QWidget* parent) : QWidget(parent){
 
     //Initialise variables
     ignoreButton = false;
+
+	setMinimumHeight(200);
 }
 
 

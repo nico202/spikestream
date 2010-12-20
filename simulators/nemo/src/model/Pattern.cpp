@@ -69,6 +69,7 @@ Pattern Pattern::getAlignedPattern(const Box& box) const{
 
 	//Get the centres of the new and current patterns
 	Point3D thisCentre = thisBoundingBox.centre();
+
 	Point3D boxCentre = box.centre();
 	float dx = boxCentre.getXPos() - thisCentre.getXPos();
 	float dy = boxCentre.getYPos() - thisCentre.getYPos();

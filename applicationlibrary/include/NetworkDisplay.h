@@ -194,9 +194,14 @@ namespace spikestream {
 			float neuronTransparency;
 
 			/*! Connection groups with more visible connections than this threshold
-				are not shown by default. The thinning thresholds interact with this
-				parameter.*/
-			int connectionVisibilityThreshold;
+				in fast render mode are not shown by default. The thinning thresholds
+				interact with this parameter.*/
+			int connectionVisibilityThreshold_fast;
+
+			/*! Connection groups with more visible connections than this threshold
+				in full render mode are not shown by default. The thinning thresholds
+				interact with this parameter.*/
+			int connectionVisibilityThreshold_full;
 
 			/*! Weight is multiplied by this this factor to get the radius of the connections
 				when drawn in full render mode with weights rendered as thickness of connections*/
@@ -225,6 +230,7 @@ namespace spikestream {
 			void checkConnectionModeFlag(unsigned int flag);
 			void checkWeightRenderFlag(unsigned int flag);
 			void clearNeuronColorMap();
+			void setDefaultVisibleConnectionGroupIDs();
 			void setWeightRenderFlag(unsigned flag);
 			void unsetWeightRenderFlag(unsigned flag);
 	};

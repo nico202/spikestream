@@ -13,8 +13,8 @@ Name "SpikeStream 0.2"
 # The file to write
 outFile "../build/spikestream_setup-0.2.exe"
 
-# The default installation directory USE: $PROGRAMFILES
-InstallDir $DESKTOP\spikestream-0.2
+# The default installation directory 
+InstallDir $PROGRAMFILES\spikestream-0.2
 
 
 #------------------------------------------------#
@@ -43,6 +43,7 @@ Section "Start Menu Shortcuts"
   CreateDirectory "$SMPROGRAMS\SpikeStream"
   CreateShortCut "$SMPROGRAMS\SpikeStream\Uninstall SpikeStream.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
   CreateShortCut "$SMPROGRAMS\SpikeStream\SpikeStream.lnk" "$INSTDIR\bin\spikestream.exe" "" "$INSTDIR\bin\spikestream.exe" 0
+  CreateShortCut "$SMPROGRAMS\SpikeStream\Database Configuration.lnk" "$INSTDIR\bin\dbconfigtool.exe" "" "$INSTDIR\bin\dbconfigtool.exe" 0
 SectionEnd
 
 Section "Desktop Shortcut"
