@@ -174,6 +174,9 @@ namespace spikestream {
 			/*! Button for injecting patterns into network. */
 			QPushButton* injectPatternButton;
 
+			/*! Controls whether patterns are sustained across time steps. */
+			QCheckBox* sustainPatternChkBox;
+
 			/*! Map linking file path with patterns */
 			QHash<QString, Pattern> patternMap;
 

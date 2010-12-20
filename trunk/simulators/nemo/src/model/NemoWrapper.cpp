@@ -305,6 +305,9 @@ void NemoWrapper::setArchiveMode(bool newArchiveMode, const QString& description
 /*! Sets a firing pattern along with the neuron group.
 	The pattern can be injected for one time step or continuously. */
 void NemoWrapper::setFiringInjectionPattern(const Pattern& pattern, unsigned neuronGroupID, bool sustain){
+	//Lock mutex to prevent multiple threads accessing injection vector
+	mutex.lock();
+
 	sustainPattern = sustain;
 
 	//Get copy of the pattern that is aligned on the centre of the neuron group
@@ -318,12 +321,17 @@ void NemoWrapper::setFiringInjectionPattern(const Pattern& pattern, unsigned neu
 			injectionPatternVector.push_back( (*iter)->getID());
 		}
 	}
+	//Release mutex
+	mutex.unlock();
 }
 
 
 /*! Sets a current injection pattern along with the neuron group.
 	The pattern can be injected for one time step or continuously. */
 void NemoWrapper::setCurrentInjectionPattern(const Pattern& pattern, float current, unsigned neuronGroupID, bool sustain){
+	//Lock mutex to prevent multiple threads accessing current vectors
+	mutex.lock();
+
 	sustainPattern = sustain;
 
 	//Get copy of the pattern that is aligned on the centre of the neuron group
@@ -338,6 +346,8 @@ void NemoWrapper::setCurrentInjectionPattern(const Pattern& pattern, float curre
 			injectionCurrentVector.push_back(current);
 		}
 	}
+
+	mutex.unlock();
 }
 
 
@@ -413,6 +423,45 @@ void NemoWrapper::updateProgress(int stepsComplete, int totalSteps){
 /*----------------------------------------------------------*/
 /*-----                 PRIVATE METHODS                -----*/
 /*----------------------------------------------------------*/
+
+/*! Adds neurons due to noise at the end of the injectNeuronID vector.
+	These neurons will be forced to fire at the next time step.
+	Returns the number of neurons added. */
+unsigned NemoWrapper::addInjectNoiseNeuronIDs(){
+	//Calculate total number of firing neurons
+	unsigned arraySize = 0, arrayCounter = 0;
+	for(QHash<unsigned, unsigned>::iterator iter = injectNoiseMap.begin(); iter != injectNoiseMap.end(); ++iter)
+		arraySize += iter.value();
+
+	//Add a random selection of neuron ids from each group
+	unsigned randomIndex, neurGrpSize, numSelectedNeurons;
+	QHash<unsigned, bool> addedNeurIndxMap;//Prevent duplicates
+	for(QHash<unsigned, unsigned>::iterator iter = injectNoiseMap.begin(); iter != injectNoiseMap.end(); ++iter){
+		//Get list of neuron ids
+		QList<unsigned> neuronIDList = Globals::getNetwork()->getNeuronGroup(iter.key())->getNeuronIDs();
+		neurGrpSize = neuronIDList.size();
+		addedNeurIndxMap.clear();
+		numSelectedNeurons = iter.value();
+
+		//Select indexes from the list of neuron ids
+		while((unsigned)addedNeurIndxMap.size() < numSelectedNeurons){
+			randomIndex = Util::getRandom(0, neurGrpSize);//Get random position in list of neuron ids
+			if(!addedNeurIndxMap.contains(randomIndex)){//New index
+				if(arrayCounter >= arraySize)//Sanity check
+					throw SpikeStreamException("Error adding noise injection neuron ids - array counter out of range.");
+				injectionPatternVector.push_back(neuronIDList.at(randomIndex));//Add neuron id to pattern vector
+				addedNeurIndxMap[randomIndex] = true;//Record the fact that we have selected this ID
+				++arrayCounter;
+			}
+		}
+	}
+
+	//Sanity check, then return number of neurons added
+	if(arrayCounter != arraySize)
+		throw SpikeStreamException("Error adding inject noise neuron IDs. Array counter: " + QString::number(arrayCounter) + "; Array size: " + QString::number(arraySize));
+	return arraySize;
+}
+
 
 /*! Checks the output from a nemo function call and throws exception if there is an error */
 void NemoWrapper::checkNemoOutput(nemo_status_t result, const QString& errorMessage){
@@ -721,68 +770,102 @@ void NemoWrapper::setInhibitoryNeuronParameters(NeuronGroup* neuronGroup){
 
 /*! Advances the simulation by one step */
 void NemoWrapper::stepNemo(){
-	unsigned *firedArray, firedCount;
+	unsigned *firedArray, firedCount, numNoiseNeurons = 0;
 	firingNeuronList.clear();
-
+	qDebug()<<"BEFORE: Inject pattern vector size: "<<injectionPatternVector.size();
 	//---------------------------------------
-	//     Inject noise into neuron groups
+	//     Step simulation
 	//---------------------------------------
-	if(!injectNoiseMap.isEmpty()){
-		//Build array of neurons to inject noise into
-		unsigned* injectNoiseNeurIDArr = NULL;
-		int injectNoiseArrSize;
-		fillInjectNoiseArray(injectNoiseNeurIDArr, &injectNoiseArrSize);
+	//Add inject noise neurons to end of injection vector
+	if(!injectNoiseMap.isEmpty())
+		numNoiseNeurons = addInjectNoiseNeuronIDs();
 
-		//Advance simulation
-		#ifdef DEBUG_STEP
-			qDebug()<<"About to step nemo with injection of noise.";
-		#endif//DEBUG_STEP
-		checkNemoOutput( nemo_step(nemoSimulation, injectNoiseNeurIDArr, injectNoiseArrSize, NULL, NULL, 0, &firedArray, &firedCount), "Nemo error on step with injection of noise." );
-		#ifdef DEBUG_STEP
-			qDebug()<<"Nemo successfully stepped with injection of noise.";
-		#endif//DEBUG_STEP
+	#ifdef DEBUG_STEP
+		qDebug()<<"About to step nemo.";
+	#endif//DEBUG_STEP
+	checkNemoOutput( nemo_step(nemoSimulation, &injectionPatternVector.front(), injectionPatternVector.size(), &injectionCurrentNeurIDVector.front(), &injectionCurrentVector.front(), injectionCurrentNeurIDVector.size(), &firedArray, &firedCount), "Nemo error on step." );
+	#ifdef DEBUG_STEP
+		qDebug()<<"Nemo successfully stepped.";
+	#endif//DEBUG_STEP
 
-		//Clean up noise array
-		delete [] injectNoiseNeurIDArr;
+	//Empty noise injection map if we are not sustaining it
+	if(!sustainNoise)
+		injectNoiseMap.clear();
 
-		//Empty noise injection map if we are not sustaining it
-		if(!sustainNoise)
-			injectNoiseMap.clear();
+	//Delete pattern if it is not sustained
+	if(!sustainPattern){
+		injectionPatternVector.clear();
+		injectionCurrentNeurIDVector.clear();
+		injectionCurrentVector.clear();
+	}
+	//Delete neurons added to end of vector from noise
+	else if(numNoiseNeurons > 0){
+		injectionPatternVector.erase(injectionPatternVector.end() - numNoiseNeurons, injectionPatternVector.end());
 	}
 
-	//------------------------------------------
-	//     Inject pattern(s) into neuron groups
-	//------------------------------------------
-	else if(!( injectionPatternVector.empty() && injectionCurrentNeurIDVector.empty() ) ){
-		//Advance simulation using injection pattern
-		#ifdef DEBUG_STEP
-			qDebug()<<"About to step nemo with injection of pattern.";
-		#endif//DEBUG_STEP
-		checkNemoOutput( nemo_step(nemoSimulation, &injectionPatternVector.front(), injectionPatternVector.size(), &injectionCurrentNeurIDVector.front(), &injectionCurrentVector.front(), injectionCurrentNeurIDVector.size(), &firedArray, &firedCount), "Nemo error on step with pattern." );
-		#ifdef DEBUG_STEP
-			qDebug()<<"Nemo successfully stepped with injection of pattern.";
-		#endif//DEBUG_STEP
+	qDebug()<<"AFTER: Inject pattern vector size: "<<injectionPatternVector.size();
 
-		//Delete pattern if it is not sustained
-		if(!sustainPattern){
-			injectionPatternVector.clear();
-			injectionCurrentNeurIDVector.clear();
-			injectionCurrentVector.clear();
-		}
-	}
 
-	//----------------------------------------------------
-	//     Advance simulation without noise or patterns
-	//----------------------------------------------------
-	else{
-		#ifdef DEBUG_STEP
-			qDebug()<<"About to step nemo.";
-		#endif//DEBUG_STEP
-		checkNemoOutput( nemo_step(nemoSimulation, 0, 0, NULL, NULL, 0, &firedArray, &firedCount), "Nemo error on step" );
-		#ifdef DEBUG_STEP
-			qDebug()<<"NeMo successfully stepped.";
-		#endif//DEBUG_STEP
-	}
+
+//	//---------------------------------------
+//	//     Inject noise into neuron groups
+//	//---------------------------------------
+//	if(!injectNoiseMap.isEmpty()){
+//		//Build array of neurons to inject noise into
+//		unsigned* injectNoiseNeurIDArr = NULL;
+//		int injectNoiseArrSize;
+//		fillInjectNoiseArray(injectNoiseNeurIDArr, &injectNoiseArrSize);
+
+//		//Advance simulation
+//		#ifdef DEBUG_STEP
+//			qDebug()<<"About to step nemo with injection of noise.";
+//		#endif//DEBUG_STEP
+//		checkNemoOutput( nemo_step(nemoSimulation, injectNoiseNeurIDArr, injectNoiseArrSize, NULL, NULL, 0, &firedArray, &firedCount), "Nemo error on step with injection of noise." );
+//		#ifdef DEBUG_STEP
+//			qDebug()<<"Nemo successfully stepped with injection of noise.";
+//		#endif//DEBUG_STEP
+
+//		//Clean up noise array
+//		delete [] injectNoiseNeurIDArr;
+
+//		//Empty noise injection map if we are not sustaining it
+//		if(!sustainNoise)
+//			injectNoiseMap.clear();
+//	}
+
+//	//------------------------------------------
+//	//     Inject pattern(s) into neuron groups
+//	//------------------------------------------
+//	else if(!( injectionPatternVector.empty() && injectionCurrentNeurIDVector.empty() ) ){
+//		//Advance simulation using injection pattern
+//		#ifdef DEBUG_STEP
+//			qDebug()<<"About to step nemo with injection of pattern.";
+//		#endif//DEBUG_STEP
+//		checkNemoOutput( nemo_step(nemoSimulation, &injectionPatternVector.front(), injectionPatternVector.size(), &injectionCurrentNeurIDVector.front(), &injectionCurrentVector.front(), injectionCurrentNeurIDVector.size(), &firedArray, &firedCount), "Nemo error on step with pattern." );
+//		#ifdef DEBUG_STEP
+//			qDebug()<<"Nemo successfully stepped with injection of pattern.";
+//		#endif//DEBUG_STEP
+
+//		//Delete pattern if it is not sustained
+//		if(!sustainPattern){
+//			injectionPatternVector.clear();
+//			injectionCurrentNeurIDVector.clear();
+//			injectionCurrentVector.clear();
+//		}
+//	}
+
+//	//----------------------------------------------------
+//	//     Advance simulation without noise or patterns
+//	//----------------------------------------------------
+//	else{
+//		#ifdef DEBUG_STEP
+//			qDebug()<<"About to step nemo.";
+//		#endif//DEBUG_STEP
+//		checkNemoOutput( nemo_step(nemoSimulation, 0, 0, NULL, NULL, 0, &firedArray, &firedCount), "Nemo error on step" );
+//		#ifdef DEBUG_STEP
+//			qDebug()<<"NeMo successfully stepped.";
+//		#endif//DEBUG_STEP
+//	}
 
 
 	//-----------------------------------------------
