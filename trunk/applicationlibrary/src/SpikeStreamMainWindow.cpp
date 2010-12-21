@@ -38,8 +38,7 @@ SpikeStreamMainWindow::SpikeStreamMainWindow() : QMainWindow(){
 
 	try{
 		//Get the working directory and store in global scope
-		QString rootDir = QCoreApplication::applicationDirPath();
-		rootDir.truncate(rootDir.size() - 4);//Trim the "/bin" off the end
+		QString rootDir = Util::getRootDirectory();
 		Globals::setSpikeStreamRoot(rootDir);
 
 		//Set up splash screen to give feedback whilst application is loading
@@ -382,7 +381,7 @@ void SpikeStreamMainWindow::initializeApplication(){
 	tabWidget->addTab(layerSplitterWidget, "Editor");
 
 	//Create network viewer for right half of screen
-	new NetworkViewer(mainSplitterWidget);
+	NetworkViewer* networkViewer = new NetworkViewer(mainSplitterWidget);
 
 	//Set up viewer tab
 	QScrollArea* networkViewPropsScrollArea = new QScrollArea(tabWidget);
@@ -445,6 +444,8 @@ void SpikeStreamMainWindow::initializeApplication(){
 	setCentralWidget( mainSplitterWidget );
 	if( Util::getBool(configLoader->getParameter("maximize_gui") ))
 		setWindowState(Qt::WindowMaximized);
+
+	networkViewer->reset();
 
 	//Delete config loader
 	delete configLoader;

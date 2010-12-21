@@ -75,7 +75,7 @@ NetworkViewer::NetworkViewer(QWidget* parent) : QGLWidget(parent) {
 	setBaseSize(700, 60);
 
 	//Set display to initial state
-	reset();
+	//reset();
 }
 
 

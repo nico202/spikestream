@@ -2,6 +2,7 @@
 #include "ConfigEditor.h"
 #include "SpikeStreamException.h"
 #include "SpikeStreamIOException.h"
+#include "Util.h"
 using namespace spikestream;
 
 //Qt includes
@@ -13,8 +14,7 @@ using namespace spikestream;
 /*! Constructor */
 ConfigEditor::ConfigEditor(){
 	//Get root directory.
-	rootDirectory = QCoreApplication::applicationDirPath();
-	rootDirectory.truncate(rootDirectory.size() - 4);//Trim the "/bin" off the end
+	rootDirectory = Util::getRootDirectory();
 }
 
 
@@ -36,7 +36,7 @@ void ConfigEditor::setConfigParameters(QHash<QString, QString> newParamMap){
 	//Create config file
 	QFile configFile(rootDirectory + "/spikestream.config");
 	if(!configFile.exists())
-		throw SpikeStreamIOException("Cannot find config file.");
+		throw SpikeStreamIOException("Cannot find config file at location: " + rootDirectory + "/spikestream.config");
 
 	//Load the config file into a string
 	QString configFileStr;

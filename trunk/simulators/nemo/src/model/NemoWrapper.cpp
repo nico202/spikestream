@@ -770,7 +770,8 @@ void NemoWrapper::setInhibitoryNeuronParameters(NeuronGroup* neuronGroup){
 
 /*! Advances the simulation by one step */
 void NemoWrapper::stepNemo(){
-	unsigned *firedArray, firedCount, numNoiseNeurons = 0;
+	unsigned *firedArray, numNoiseNeurons = 0;
+	size_t firedCount;
 	firingNeuronList.clear();
 	qDebug()<<"BEFORE: Inject pattern vector size: "<<injectionPatternVector.size();
 	//---------------------------------------
@@ -783,7 +784,18 @@ void NemoWrapper::stepNemo(){
 	#ifdef DEBUG_STEP
 		qDebug()<<"About to step nemo.";
 	#endif//DEBUG_STEP
-	checkNemoOutput( nemo_step(nemoSimulation, &injectionPatternVector.front(), injectionPatternVector.size(), &injectionCurrentNeurIDVector.front(), &injectionCurrentVector.front(), injectionCurrentNeurIDVector.size(), &firedArray, &firedCount), "Nemo error on step." );
+	checkNemoOutput(
+		nemo_step(
+			nemoSimulation,
+			&injectionPatternVector.front(),
+			injectionPatternVector.size(),
+			&injectionCurrentNeurIDVector.front(),
+			&injectionCurrentVector.front(),
+			injectionCurrentNeurIDVector.size(),
+			&firedArray,
+			&firedCount
+		),
+		"Nemo error on step." );
 	#ifdef DEBUG_STEP
 		qDebug()<<"Nemo successfully stepped.";
 	#endif//DEBUG_STEP
