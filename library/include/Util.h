@@ -41,6 +41,7 @@ namespace spikestream {
 			static double getRandomDouble(double min, double max);
 			static float getRandomFloat(float min, float max);
 			static unsigned getRandomUInt(unsigned min, unsigned max);
+			static QString getRootDirectory();
 			static bool isNumber(const QString& str);
 			static mpf_class factorial(unsigned int num);
 			static float min(float n1, float n2, float n3);

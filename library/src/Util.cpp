@@ -7,6 +7,7 @@ using namespace spikestream;
 #include <QDebug>
 #include <QTime>
 #include <QStringList>
+#include <QCoreApplication>
 
 //Other includes
 #include <stdint.h>
@@ -213,6 +214,19 @@ unsigned int Util::getRandomUInt(unsigned min, unsigned max){
 	return min + rand() % (max-min);
 }
 
+
+/*! Returns the root directory of the application.
+	Assumes that application is launched from bin directory. */
+QString Util::getRootDirectory(){
+	//Get the working directory - this varies depending on the operating system
+	QString rootDirectory = QCoreApplication::applicationDirPath();
+	#ifdef MAC32_SPIKESTREAM
+		rootDirectory = rootDirectory.section("/bin", -2, -2, QString::SectionSkipEmpty);
+	#else//Windows or Linux
+		rootDirectory.truncate(rootDirectory.size() - 4);//Trim the "/bin" off the end
+	#endif
+	return rootDirectory;
+}
 
 /*! Returns true if the string is a number */
 bool Util::isNumber(const QString& str){

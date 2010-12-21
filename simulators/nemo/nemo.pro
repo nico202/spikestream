@@ -25,15 +25,19 @@ win32 {
 }
 
 
+
 #----------------------------------------------#
 #---               LIBRARIES                ---#
 #----------------------------------------------#
-unix{
+unix && !macx {
 	LIBS += -lnemo -L$${SPIKESTREAM_ROOT_DIR}/lib  -lspikestreamapplication -lspikestream
 }
 win32{
 	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/lib -lspikestreamapplication0 -lspikestream0
 	LIBS += -lnemo -L$${SPIKESTREAM_ROOT_DIR}/extlib/nemo/lib
+}
+macx {
+	LIBS += -lnemo -lspikestreamapplication -lspikestream
 }
 
 

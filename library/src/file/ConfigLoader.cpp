@@ -1,6 +1,7 @@
 //SpikeStream includes
 #include "ConfigLoader.h"
 #include "SpikeStreamIOException.h"
+#include "Util.h"
 using namespace spikestream;
 
 //Qt includes
@@ -16,13 +17,7 @@ using namespace std;
 
 /*! Constructor loads up the configuration data from the given file path. */
 ConfigLoader::ConfigLoader(){
-	//Get the working directory - this varies depending on the operating system
-	#ifdef MAC32_SPIKESTREAM
-		QString rootDirectory = "..";
-	#else//Windows or Linux
-		QString rootDirectory = QCoreApplication::applicationDirPath();
-		rootDirectory.truncate(rootDirectory.size() - 4);//Trim the "/bin" off the end
-	#endif
+	QString rootDirectory = Util::getRootDirectory();
 
 	/* Make sure that there is a config file already by attempting to copy from the template
 	   This function will not overwrite an existing config file */
