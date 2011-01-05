@@ -14,7 +14,7 @@ QT += sql xml
 #----------------------------------------------#
 #---          INSTALLATION LOCATION         ---#
 #----------------------------------------------#
-unix && !macx {
+unix:!macx {
 	target.path = /usr/local/lib
 	INSTALLS += target
 }

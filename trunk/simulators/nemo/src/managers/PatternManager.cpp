@@ -93,8 +93,6 @@ Box PatternManager::getBox(const QString &str){
 	float z1 = Util::getFloat(zCoords.section(':', 0, 0, QString::SectionSkipEmpty).trimmed());
 	float z2 = 0.1f + Util::getFloat(zCoords.section(':', 1, 1, QString::SectionSkipEmpty).trimmed());
 
-	qDebug()<<"Box extraction: x1="<<x1<<"; x2="<<x2<<"; y1="<<y1<<"; y2="<<y2<<"; z1="<<z1<<"; z2="<<z2;
-
 	return Box(x1, y1, z1, x2, y2, z2);
 }
 
@@ -104,8 +102,6 @@ Point3D PatternManager::getPoint(const QString &str){
 	float xPos = Util::getFloat(str.section(',', 0, 0, QString::SectionSkipEmpty).trimmed());
 	float yPos = Util::getFloat(str.section(',', 1, 1, QString::SectionSkipEmpty).trimmed());
 	float zPos = Util::getFloat(str.section(',', 2, 3, QString::SectionSkipEmpty).trimmed());
-
-	qDebug()<<"Point extraction: xPos="<<xPos<<"; yPos="<<yPos<<"; zPos="<<zPos;
 
 	return Point3D(xPos, yPos, zPos);
 }

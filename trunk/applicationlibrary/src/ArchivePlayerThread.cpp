@@ -120,7 +120,6 @@ void ArchivePlayerThread::run(){
 			waitForGraphics = true;
 
 			//Inform other classes that time step has changed
-			qDebug()<<"time step: "<<timeStep<<"; last time step: "<<lastTimeStep;
 			emit timeStepChanged(timeStep, neuronIDList);
 
 			//Increase time step and quit if we are at the maximum

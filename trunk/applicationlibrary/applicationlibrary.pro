@@ -10,7 +10,7 @@ TARGET = spikestreamapplication
 #----------------------------------------------#
 #---          INSTALLATION LOCATION         ---#
 #----------------------------------------------#
-unix && !macx {
+unix:!macx {
 	target.path = /usr/local/lib
 	INSTALLS += target
 }
