@@ -17,11 +17,10 @@ else{
 #----------------------------------------------#
 CONFIG += console
 
-
 #----------------------------------------------#
 #---       INCLUDE AND LIBRARY PATHS        ---#
 #----------------------------------------------#
-unix && !macx {
+unix:!macx {
 	# Qwt
 	INCLUDEPATH += /usr/local/qwt-5.2.1-svn/include
 	LIBS += -lqwt -L/usr/local/qwt-5.2.1-svn/lib
@@ -72,7 +71,7 @@ CONFIG += thread exceptions
 #----------------------------------------------#
 #---                DEFINES                 ---#
 #----------------------------------------------#
-unix && !macx {
+unix:!macx {
 	DEFINES += LINUX32_SPIKESTREAM
 }
 win32 {

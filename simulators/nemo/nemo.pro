@@ -29,7 +29,7 @@ win32 {
 #----------------------------------------------#
 #---               LIBRARIES                ---#
 #----------------------------------------------#
-unix && !macx {
+unix:!macx {
 	LIBS += -lnemo -L$${SPIKESTREAM_ROOT_DIR}/lib  -lspikestreamapplication -lspikestream
 }
 win32{

@@ -135,8 +135,6 @@ void NeuronGroupWidget::networkTaskFinished(){
 	disconnect(Globals::getNetwork(), SIGNAL(taskFinished()), this, SLOT(networkTaskFinished()));
 
 	//Inform other classes that network has changed
-	qDebug()<<"about to call network change slot";
 	Globals::getEventRouter()->networkChangedSlot();
-	qDebug()<<"just callled network change slot";
 }
 
