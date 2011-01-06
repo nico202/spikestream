@@ -11,7 +11,8 @@ else{
 	CONFIG += release
 }
 
-
+#QMAKE_LFLAGS_RELEASE += -rpath ./
+#message($${QMAKE_LFLAGS_RELEASE})
 #----------------------------------------------#
 #---             CONSOLE OUTPUT             ---#
 #----------------------------------------------#
