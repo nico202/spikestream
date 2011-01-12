@@ -4,6 +4,7 @@
 #include "NemoParametersDialog.h"
 #include "NemoWidget.h"
 #include "NeuronParametersDialog.h"
+#include "NeuronGroupSelectionDialog.h"
 #include "Pattern.h"
 #include "PatternManager.h"
 #include "SpikeStreamSimulationException.h"
@@ -25,6 +26,7 @@ using namespace spikestream;
 #define MONITOR_NEURONS_OFF 0
 #define MONITOR_NEURONS_FIRING 1
 #define MONITOR_NEURONS_MEMBRANE 2
+
 
 //Functions for dynamic library loading
 extern "C" {
@@ -80,6 +82,14 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	toolBar = getToolBar();
 	controlsVBox->addWidget(toolBar);
 
+	//Label to separate out areas
+	QHBoxLayout* monitorLabelBox = new QHBoxLayout();
+	monitorLabelBox->addStretch(3);
+	monitorLabelBox->addWidget(new QLabel("Monitor"));
+	monitorLabelBox->addStretch(3);
+	controlsVBox->addLayout(monitorLabelBox);
+	controlsVBox->addSpacing(5);
+
 	//Add widget to control live monitoring of neurons
 	QHBoxLayout* monitorNeuronsBox = new QHBoxLayout();
 	monitorNeuronsBox->addWidget(new QLabel("Monitor neurons: "));
@@ -92,6 +102,11 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	monitorFiringNeuronsButton = new QRadioButton("Firing");
 	monitorNeuronsButtonGroup->addButton(monitorFiringNeuronsButton, MONITOR_NEURONS_FIRING);
 	monitorNeuronsBox->addWidget(monitorFiringNeuronsButton);
+	rasterButton = new QPushButton("Raster");
+	connect(rasterButton, SIGNAL(clicked()), this, SLOT(rasterButtonClicked()));
+	rasterButton->setMaximumSize(60,20);
+	rasterButton->setEnabled(false);
+	monitorNeuronsBox->addWidget(rasterButton);
 	monitorMemPotNeuronsButton = new QRadioButton("Membrane potential");
 	monitorNeuronsButtonGroup->addButton(monitorMemPotNeuronsButton, MONITOR_NEURONS_MEMBRANE);
 	monitorNeuronsBox->addWidget(monitorMemPotNeuronsButton);
@@ -126,6 +141,15 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	archiveLayout->addWidget(archiveDescriptionEdit);
 	archiveLayout->addWidget(setArchiveDescriptionButton);
 	controlsVBox->addLayout(archiveLayout);
+
+	//Label to separate out areas FIXME USE GROUP BOX
+	QHBoxLayout* injectLabelBox = new QHBoxLayout();
+	injectLabelBox->addStretch(3);
+	injectLabelBox->addWidget(new QLabel("Inject"));
+	injectLabelBox->addStretch(3);
+	controlsVBox->addSpacing(10);
+	controlsVBox->addLayout(injectLabelBox);
+	controlsVBox->addSpacing(5);
 
 	//Add widgets to inject noise into specified layers
 	QHBoxLayout* injectNoiseBox = new QHBoxLayout();
@@ -196,6 +220,7 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 
 	//Initialise variables
 	progressDialog = NULL;
+	rasterDialogCtr = 0;
 }
 
 
@@ -373,6 +398,17 @@ void NemoWidget::checkSaveWeightsProgress(){
 }
 
 
+/*! Deletes the raster plot dialog that invoked this slot.
+	Should be triggered when the plot dialog is closed.  */
+void NemoWidget::deleteRasterPlotDialog(int){
+	unsigned tmpID = sender()->objectName().toUInt();
+	if(!rasterPlotMap.contains(tmpID))
+		throw SpikeStreamException("Raster plot dialog not found: ID=" + QString::number(tmpID));
+	delete rasterPlotMap[tmpID];
+	rasterPlotMap.remove(tmpID);
+}
+
+
 /*! Called when the inject noise button is clicked. Sets the injection
 	of noise in the nemo wrapper */
 void NemoWidget::injectNoiseButtonClicked(){
@@ -507,15 +543,19 @@ void NemoWidget::monitorChanged(int state){
 void NemoWidget::monitorNeuronsStateChanged(int monitorType){
 	try{
 		//No monitoring at all
-		if(monitorType == MONITOR_NEURONS_OFF)
+		if(monitorType == MONITOR_NEURONS_OFF){
 			nemoWrapper->setMonitorNeurons(false, false);
+			rasterButton->setEnabled(false);
+		}
 		//Monitoring firing neurons
 		else if(monitorType == MONITOR_NEURONS_FIRING){
 			nemoWrapper->setMonitorNeurons(true, false);
+			rasterButton->setEnabled(true);
 		}
 		//Monitoring membrane potential
 		else if(monitorType == MONITOR_NEURONS_MEMBRANE){
 			nemoWrapper->setMonitorNeurons(false, true);
+			rasterButton->setEnabled(false);
 		}
 		//Unrecognized value
 		else{
@@ -552,6 +592,27 @@ void NemoWidget::networkChanged(){
 
 	//Fix enabled status of toolbar
 	checkWidgetEnabled();
+}
+
+
+/*! Called when the raster button is clicked.
+	Launches a dialog to select the  neuron groups to monitor and then launches a raster plot dialog. */
+void NemoWidget::rasterButtonClicked(){
+	//Select neuron groups to monitor
+	NeuronGroupSelectionDialog selectDlg(Globals::getNetwork(), this);
+	if(selectDlg.exec() == QDialog::Accepted){
+		QList<NeuronGroup*> neurGrpList = selectDlg.getNeuronGroups();
+
+		//Create raster dialog
+		RasterPlotDialog* rasterDlg = new RasterPlotDialog(neurGrpList);
+		rasterDlg->setObjectName(QString::number(rasterDialogCtr));
+		connect(rasterDlg, SIGNAL(finished(int)), this, SLOT(deleteRasterPlotDialog(int)));
+		rasterDlg->show();
+
+		//Store details so that we can update it
+		rasterPlotMap[rasterDialogCtr] = rasterDlg;
+		++rasterDialogCtr;
+	}
 }
 
 
@@ -693,7 +754,7 @@ void NemoWidget::updateTimeStep(unsigned int timeStep){
 
 
 /*! Called when the simulation has advanced one time step.
-	This version fo the method updates the time step and firing neuron IDs. */
+	This version of the method updates the time step and firing neuron IDs. */
 void NemoWidget::updateTimeStep(unsigned int timeStep, const QList<unsigned>& neuronIDList){
 	timeStepLabel->setText(QString::number(timeStep));
 
@@ -704,8 +765,12 @@ void NemoWidget::updateTimeStep(unsigned int timeStep, const QList<unsigned>& ne
 		(*newHighlightMap)[*iter] = neuronColor;
 	}
 
-	//Set network display
+	//Set highlight map in network display
 	Globals::getNetworkDisplay()->setNeuronColorMap(newHighlightMap);
+
+	//Update spike rasters
+	for(QHash<unsigned, RasterPlotDialog*>::iterator iter = rasterPlotMap.begin(); iter != rasterPlotMap.end(); ++iter)
+		iter.value()->addData(neuronIDList, timeStep);
 
 	//Allow simulation to proceed on to next step
 	nemoWrapper->clearWaitForGraphics();

@@ -3,6 +3,7 @@
 
 //SpikeStream includes
 #include "NemoWrapper.h"
+#include "RasterPlotDialog.h"
 #include "RGBColor.h"
 
 //Qt includes
@@ -35,6 +36,7 @@ namespace spikestream {
 			void checkLoadingProgress();
 			void checkResetWeightsProgress();
 			void checkSaveWeightsProgress();
+			void deleteRasterPlotDialog(int);
 			void injectNoiseButtonClicked();
 			void injectPatternButtonClicked();
 			void loadPattern(QString comboStr);
@@ -43,6 +45,7 @@ namespace spikestream {
 			void monitorNeuronsStateChanged(int monitorType);
 			void nemoWrapperFinished();
 			void networkChanged();
+			void rasterButtonClicked();
 			void resetWeights();
 			void setArchiveDescription();
 			void setNeuronParameters();
@@ -106,6 +109,9 @@ namespace spikestream {
 
 			/*! Switches on monitoring of membrane potential */
 			QRadioButton* monitorMemPotNeuronsButton;
+
+			/*! Button launching raster plot */
+			QPushButton* rasterButton;
 
 			/*! Controls the monitoring of weights */
 			QCheckBox* monitorWeightsCheckBox;
@@ -183,6 +189,13 @@ namespace spikestream {
 			/*! Map with colours for plotting heat maps.
 				indexes range from 0 to 10 inclusive with increasing temperature. */
 			QHash<int, RGBColor*> heatColorMap;
+
+			/*! Counter used to give a unique name to the raster dialogs */
+			unsigned rasterDialogCtr;
+
+			/*! Map of the currently open raster dialogs
+				The key is the raster dialog id. */
+			QHash<unsigned, RasterPlotDialog*> rasterPlotMap;
 
 
 			//=======================  METHODS  =========================

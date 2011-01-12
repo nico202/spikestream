@@ -178,7 +178,7 @@ unsigned NeuronGroup::getID(){
 Neuron* NeuronGroup::getNearestNeuron(const Point3D& point){
 	double minDist = 0, tmpDist;
 	bool firstTime;
-	Neuron* closestNeuron;
+	Neuron* closestNeuron = NULL;
 	NeuronMap::iterator mapEnd = neuronMap->end();//Saves accessing this function multiple times
 	for(NeuronMap::iterator iter=neuronMap->begin(); iter != mapEnd; ++iter){
 		tmpDist = iter.value()->getLocation().distance(point);
