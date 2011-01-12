@@ -14,7 +14,7 @@ QT += xml opengl sql
 #----------------------------------------------#
 #---              INCLUDE PATH              ---#
 #----------------------------------------------#
-INCLUDEPATH += src src/model src/gui src/managers \
+INCLUDEPATH += src src/model src/gui src/managers src/dialogs src/views \
 				$${SPIKESTREAM_ROOT_DIR}/library/include \
 				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/include
 unix {
@@ -42,12 +42,19 @@ macx {
 
 
 #----------------------------------------------#
+#-----             Dialogs                -----#
+#----------------------------------------------#
+HEADERS += src/dialogs/RasterPlotDialog.h \
+			src/dialogs/NemoParametersDialog.h
+SOURCES += src/dialogs/RasterPlotDialog.cpp \
+			src/dialogs/NemoParametersDialog.cpp
+
+
+#----------------------------------------------#
 #-----               GUI                  -----#
 #----------------------------------------------#
-HEADERS += src/gui/NemoWidget.h \
-			src/gui/NemoParametersDialog.h
-SOURCES += src/gui/NemoWidget.cpp \
-			src/gui/NemoParametersDialog.cpp
+HEADERS += src/gui/NemoWidget.h
+SOURCES += src/gui/NemoWidget.cpp
 
 
 #----------------------------------------------#
@@ -65,12 +72,20 @@ HEADERS += src/model/NemoWrapper.h \
 			src/model/STDPFunctions.h \
 			src/model/StandardSTDPFunction.h \
 			src/model/AbstractSTDPFunction.h \
-			src/model/Pattern.h
+			src/model/Pattern.h \
+			src/model/RasterModel.h
 SOURCES += src/model/NemoWrapper.cpp \
 			src/model/NemoLoader.cpp \
 			src/model/STDPFunctions.cpp \
 			src/model/StandardSTDPFunction.cpp \
 			src/model/AbstractSTDPFunction.cpp \
-			src/model/Pattern.cpp
+			src/model/Pattern.cpp \
+			src/model/RasterModel.cpp
+
+#----------------------------------------------#
+#-----               View                 -----#
+#----------------------------------------------#
+HEADERS += src/views/RasterView.h
+SOURCES += src/views/RasterView.cpp
 
 

@@ -115,7 +115,8 @@ HEADERS += include/AbstractParametersEditDialog.h \
 			include/ParametersDialog.h \
 			include/NeuronGroupDialog.h \
 			include/ConnectionGroupDialog.h \
-			include/DescriptionDialog.h
+			include/DescriptionDialog.h \
+			include/NeuronGroupSelectionDialog.h
 SOURCES += src/dialogs/AbstractParametersEditDialog.cpp \
 			src/dialogs/LoadAnalysisDialog.cpp \
 			src/dialogs/PluginsDialog.cpp \
@@ -129,7 +130,8 @@ SOURCES += src/dialogs/AbstractParametersEditDialog.cpp \
 			src/dialogs/ParametersDialog.cpp \
 			src/dialogs/NeuronGroupDialog.cpp \
 			src/dialogs/ConnectionGroupDialog.cpp \
-			src/dialogs/DescriptionDialog.cpp
+			src/dialogs/DescriptionDialog.cpp \
+			src/dialogs/NeuronGroupSelectionDialog.cpp
 
 
 #----------------------------------------------#
@@ -141,14 +143,16 @@ HEADERS += include/NeuronGroupModel.h \
 			include/AnalysesModel.h \
 			include/TruthTableModel.h \
 			include/NeuronParametersModel.h \
-			include/SynapseParametersModel.h
+			include/SynapseParametersModel.h \
+			include/NeuronGroupSelectionModel.h
 SOURCES += src/models/NeuronGroupModel.cpp \
 			src/models/ConnectionGroupModel.cpp \
 			src/models/ConnectionsModel.cpp \
 			src/models/AnalysesModel.cpp \
 			src/models/TruthTableModel.cpp \
 			src/models/NeuronParametersModel.cpp \
-			src/models/SynapseParametersModel.cpp
+			src/models/SynapseParametersModel.cpp \
+			src/models/NeuronGroupSelectionModel.cpp
 
 
 #----------------------------------------------#
@@ -167,14 +171,16 @@ HEADERS += include/NeuronGroupTableView.h \
 			include/AnalysesTableView.h \
 			include/TruthTableView.h \
 			include/NeuronParametersView.h \
-			include/SynapseParametersView.h
+			include/SynapseParametersView.h \
+			include/NeuronGroupSelectionView.h
 SOURCES += src/views/NeuronGroupTableView.cpp \
 			src/views/ConnectionGroupTableView.cpp \
 			src/views/ConnectionsTableView.cpp \
 			src/views/AnalysesTableView.cpp \
 			src/views/TruthTableView.cpp \
 			src/views/NeuronParametersView.cpp \
-			src/views/SynapseParametersView.cpp
+			src/views/SynapseParametersView.cpp \
+			src/views/NeuronGroupSelectionView.cpp
 
 
 #----------------------------------------------#

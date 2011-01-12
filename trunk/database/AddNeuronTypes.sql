@@ -27,7 +27,8 @@ CREATE TABLE IzhikevichExcitatoryNeuronParameters (
 	d_2 DOUBLE DEFAULT 6.0 COMMENT 'After-spike reset of the recovery variable, u.\nd is calculated using the equation d = d_1 - d_2 * random1 * random2',
 	v DOUBLE DEFAULT -65.0 COMMENT 'Initial value for the membrane potential.',
 	sigma DOUBLE DEFAULT 5.0 COMMENT 'Parameter for a random gaussian per-neuron process, which generates random input current drawn from an N(0,\a sigma) distribution. If set to zero no random input current will be generated.',
-	seed DOUBLE DEFAULT 123456789.0 COMMENT 'Seed for the random number generator. Will be rounded to the nearest integer. If the seed is <=0 the random number generator will be seeded using the time.',
+	seed DOUBLE DEFAULT 45 COMMENT 'Seed for the random number generator. Will be rounded to the nearest integer. If the seed is <=0 the random number generator will be seeded using the time.',
+	weight_factor DOUBLE DEFAULT 10.0 COMMENT 'Factor by which weights are multiplied for the simulation. When set to 10 it typically takes two synchronous spikes to fire an Izhikevich neuron.',
 	
 	PRIMARY KEY (NeuronGroupID),
 	FOREIGN KEY NeuronGroupID_FK(NeuronGroupID) REFERENCES NeuronGroups(NeuronGroupID) ON DELETE CASCADE
@@ -47,7 +48,8 @@ CREATE TABLE IzhikevichInhibitoryNeuronParameters (
 	d DOUBLE DEFAULT 2.0 COMMENT 'After-spike reset of the recovery variable, u.',
 	v DOUBLE DEFAULT -65.0 COMMENT 'Initial value for the membrane potential.',
 	sigma DOUBLE DEFAULT 2.0 COMMENT 'Parameter for a random gaussian per-neuron process, which generates random input current drawn from an N(0,\a sigma) distribution. If set to zero no random input current will be generated.',
-	seed DOUBLE DEFAULT 123456789.0 COMMENT 'Seed for the random number generator. Will be rounded to the nearest integer. If the seed is <=0 the random number generator will be seeded using the time.',
+	seed DOUBLE DEFAULT 45 COMMENT 'Seed for the random number generator. Will be rounded to the nearest integer. If the seed is <=0 the random number generator will be seeded using the time.',
+	weight_factor DOUBLE DEFAULT 10.0 COMMENT 'Factor by which weights are multiplied for the simulation. When set to 10 it typically takes two synchronous spikes to fire an Izhikevich neuron.',
 	
 	PRIMARY KEY (NeuronGroupID),
 	FOREIGN KEY NeuronGroupID_FK(NeuronGroupID) REFERENCES NeuronGroups(NeuronGroupID) ON DELETE CASCADE
