@@ -34,7 +34,7 @@ NeuronGroupSelectionDialog::NeuronGroupSelectionDialog(Network* network, QWidget
 	buttonLayout->addWidget(okButton);
 	verticalBox->addLayout(buttonLayout);
 
-	this->setMinimumSize(400, 800);
+	this->setMinimumSize(400, 100 + network->getNeuronGroupCount() * 30);
 }
 
 

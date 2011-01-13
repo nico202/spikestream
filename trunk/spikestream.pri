@@ -3,7 +3,7 @@
 #----------------------------------------------#
 #---            DEBUG OR RELEASE            ---#
 #----------------------------------------------#
-DEBUG_MODE = false
+DEBUG_MODE = true
 contains (DEBUG_MODE, true) {
 	CONFIG += debug
 }
@@ -11,8 +11,7 @@ else{
 	CONFIG += release
 }
 
-#QMAKE_LFLAGS_RELEASE += -rpath ./
-#message($${QMAKE_LFLAGS_RELEASE})
+
 #----------------------------------------------#
 #---             CONSOLE OUTPUT             ---#
 #----------------------------------------------#

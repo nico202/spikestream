@@ -3,7 +3,7 @@
 
 //SpikeStream includes
 #include "NemoWrapper.h"
-#include "RasterPlotDialog.h"
+#include "SpikeRasterDialog.h"
 #include "RGBColor.h"
 
 //Qt includes
@@ -195,7 +195,7 @@ namespace spikestream {
 
 			/*! Map of the currently open raster dialogs
 				The key is the raster dialog id. */
-			QHash<unsigned, RasterPlotDialog*> rasterPlotMap;
+			QHash<unsigned,  SpikeRasterDialog*> rasterDialogMap;
 
 
 			//=======================  METHODS  =========================
