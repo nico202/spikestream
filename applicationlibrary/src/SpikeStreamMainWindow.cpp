@@ -133,7 +133,7 @@ void SpikeStreamMainWindow::closeEvent (QCloseEvent* event){
 
 /*! Displays brief information about the application. */
 void SpikeStreamMainWindow::about(){
-	QMessageBox::about( this, "About", "SpikeStream Version 0.2\nCreated by David Gamez: www.davidgamez.eu.\nAdditional credits: Andreas Fidjeland.");
+	QMessageBox::about( this, "About", "SpikeStream Version 0.2\nCreated by David Gamez: www.davidgamez.eu.\nOther contributors: Andreas Fidjeland.");
 }
 
 

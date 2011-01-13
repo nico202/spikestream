@@ -72,21 +72,25 @@ QwtRasterData* RasterModel::copy() const{
 }
 
 
+/*! Returns the minimum value of X */
 int RasterModel::getMinX(){
 	return minTimeStep;
 }
 
 
+/*! Returns the maximum value of X */
 int RasterModel::getMaxX(){
 	return minTimeStep + numTimeSteps;
 }
 
 
+/*! Returns the minimum value of Y */
 int RasterModel::getMinY(){
 	return 0;
 }
 
 
+/*! Returns the maximum value of Y */
 int RasterModel::getMaxY(){
 	return maxNeuronID;
 }

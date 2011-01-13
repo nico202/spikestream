@@ -44,10 +44,8 @@ macx {
 #----------------------------------------------#
 #-----             Dialogs                -----#
 #----------------------------------------------#
-HEADERS += src/dialogs/RasterPlotDialog.h \
-			src/dialogs/NemoParametersDialog.h
-SOURCES += src/dialogs/RasterPlotDialog.cpp \
-			src/dialogs/NemoParametersDialog.cpp
+HEADERS += src/dialogs/NemoParametersDialog.h
+SOURCES += src/dialogs/NemoParametersDialog.cpp
 
 
 #----------------------------------------------#

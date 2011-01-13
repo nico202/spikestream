@@ -18,7 +18,7 @@ RasterView::RasterView (RasterModel* rasterModel, QWidget* parent) : QwtPlot( pa
 	qwtSpectrogram = new QwtPlotSpectrogram();
 	qwtSpectrogram->setDisplayMode(QwtPlotSpectrogram::ContourMode, false);
 	QwtLinearColorMap colorMap();
-	qwtSpectrogram->setColorMap(colorMap);
+	//qwtSpectrogram->setColorMap(colorMap);
 	qwtSpectrogram->setData(*rasterModel);
 	qwtSpectrogram->attach(this);
 
@@ -26,8 +26,8 @@ RasterView::RasterView (RasterModel* rasterModel, QWidget* parent) : QwtPlot( pa
 	//enableAxis(QwtPlot::yRight);
 
 	//Only show major markings on axes
-	setAxisMaxMinor( QwtPlot::yLeft, 0);
-	setAxisMaxMinor( QwtPlot::xBottom, 0);
+	setAxisMaxMinor(QwtPlot::yLeft, 0);
+	setAxisMaxMinor(QwtPlot::xBottom, 0);
 
 	rescale();
 //	plotLayout()->setAlignCanvasToScales(true);

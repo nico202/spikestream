@@ -402,10 +402,11 @@ void NemoWidget::checkSaveWeightsProgress(){
 	Should be triggered when the plot dialog is closed.  */
 void NemoWidget::deleteRasterPlotDialog(int){
 	unsigned tmpID = sender()->objectName().toUInt();
-	if(!rasterPlotMap.contains(tmpID))
-		throw SpikeStreamException("Raster plot dialog not found: ID=" + QString::number(tmpID));
-	delete rasterPlotMap[tmpID];
-	rasterPlotMap.remove(tmpID);
+	qDebug()<<"Deleting Raster plot dialog with ID: "<<tmpID;
+	if(!rasterDialogMap.contains(tmpID))
+		throw SpikeStreamException("Raster dialog not found: ID=" + QString::number(tmpID));
+	//delete rasterDialogMap[tmpID];
+	rasterDialogMap.remove(tmpID);
 }
 
 
@@ -604,13 +605,13 @@ void NemoWidget::rasterButtonClicked(){
 		QList<NeuronGroup*> neurGrpList = selectDlg.getNeuronGroups();
 
 		//Create raster dialog
-		RasterPlotDialog* rasterDlg = new RasterPlotDialog(neurGrpList);
+		SpikeRasterDialog* rasterDlg = new SpikeRasterDialog(neurGrpList, this);
 		rasterDlg->setObjectName(QString::number(rasterDialogCtr));
 		connect(rasterDlg, SIGNAL(finished(int)), this, SLOT(deleteRasterPlotDialog(int)));
 		rasterDlg->show();
 
 		//Store details so that we can update it
-		rasterPlotMap[rasterDialogCtr] = rasterDlg;
+		rasterDialogMap[rasterDialogCtr] = rasterDlg;
 		++rasterDialogCtr;
 	}
 }
@@ -769,7 +770,7 @@ void NemoWidget::updateTimeStep(unsigned int timeStep, const QList<unsigned>& ne
 	Globals::getNetworkDisplay()->setNeuronColorMap(newHighlightMap);
 
 	//Update spike rasters
-	for(QHash<unsigned, RasterPlotDialog*>::iterator iter = rasterPlotMap.begin(); iter != rasterPlotMap.end(); ++iter)
+	for(QHash<unsigned, SpikeRasterDialog*>::iterator iter = rasterDialogMap.begin(); iter != rasterDialogMap.end(); ++iter)
 		iter.value()->addData(neuronIDList, timeStep);
 
 	//Allow simulation to proceed on to next step
@@ -942,6 +943,12 @@ void NemoWidget::unloadSimulation(bool confirmWithUser){
 	archiveDescriptionEdit->setText("Undescribed");
 	archiveCheckBox->setChecked(false);//Single archive associated with each simulation run
 	timeStepLabel->setText("0");
+
+	//Clean up any raster plots
+	for(QHash<unsigned, SpikeRasterDialog*>::iterator iter = rasterDialogMap.begin(); iter != rasterDialogMap.end(); ++iter){
+		delete iter.value();
+	}
+	rasterDialogMap.clear();
 }
 
 
