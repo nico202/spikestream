@@ -24,6 +24,7 @@ namespace spikestream {
 
 
 		protected:
+			void mouseDoubleClickEvent (QMouseEvent* event);
 			void paintEvent(QPaintEvent* event);
 			void resizeEvent(QResizeEvent* event);
 
@@ -34,40 +35,23 @@ namespace spikestream {
 				Filters spikes for ones within the particular neuron groups. */
 			QList<NeuronGroup*> neuronGroupList;
 
-			QVector< QPair<int, int> > m_spikes;
-			QTime m_runtime;
-			int m_updates;
+			/*! Offset for spikes from each neuron group.
+				Key is the neuron group ID; value is the offset. */
+			QHash<unsigned, unsigned> neurGrpOffsetMap;
 
-			/*! buffer each slice independently, only update the last one  */
-			QVector<QImage> imageBufferVector;//! \todo deal with resizing here
+			/*! Color of spikes for each neuron group */
+			QHash<unsigned, unsigned> neurGrpColorMap;
 
-			/*! Number of neurons */
-			int numNeurons;
-
-			qreal m_yscale;
-
-			/*! Width of the buffer */
-			int bufferWidth;
+			/*! Image onto which spikes and buffer are painted */
+			QImage* bufferImage;
 
 			/*! Number of time steps on the horizontal axis */
-			int numTimeSteps; // for display, not for running
+			int numTimeSteps;
 
-			//! \todo avoid overflow!
-			/*! Last cycle for which we have complete data */
-			int m_cycle;
+			/*! Number of neurons being monitored */
+			int numNeurons;
 
-			/*! Location in buffer vector to which new data should be added, corresponding to the
-			 * interval m_fillCycle to m_fillCycle + m_temporalResolution */
-			int writeIndex;
-
-			/*! Starting point for reading from image buffer vector */
-			int readIndex;
-
-			/*! Records when read index should be incremented.
-				This occurs when entire buffer has been filled.  */
-			bool incrementReadIndex;
-
-			/*! Minimum time step */
+			/*! Minimum time step on the X axis*/
 			int minTimeStep;
 
 			/*! Width of the widget */
@@ -75,6 +59,15 @@ namespace spikestream {
 
 			/*! Height of the widget */
 			int widgetHeight;
+
+			/*! Width of the image */
+			int imageWidth;
+
+			/*! Height of the image */
+			int imageHeight;
+
+			/*! Flag to indicate whether painter should redraw axes */
+			bool updateAxes;
 
 			/*! Height of X axis above botton */
 			int xAxisPadding;
@@ -88,21 +81,24 @@ namespace spikestream {
 			/*! Y axis tick length */
 			int yAxisTickLength;
 
-			/*! Size of the font in pixels */
-			int fontSize; // in pixels
+			/*! Size of the axes font in pixels */
+			int fontSize;
 
-			int m_fillCycle;
-		//	QPainter m_fillPainter;
+			/*! Size of the neuron group names in pixels */
+			int neurGrpNameFontSize;
 
-			// Axis variables
-			int m_axisPadding;
-			int m_axisTickSize;
+			/*! Color of background */
+			QRgb backgroundColor;
+
+			/*! Color of axes */
+			QRgb axesColor;
 
 
 			//========================  METHODS  =======================
-			void addSpike(int time, int neuron);
+			QString getFilePath(QString fileFilter);
+			QList<unsigned> getHueList(unsigned numItems);
 			void increaseTimeStep(int currentTimeStep);
-			void paintData(QPainter&);
+			void paintNeuronGroupNames(QPainter& painter);
 			void paintYAxis(QPainter&);
 			void paintYAxisTick(QPainter& painter, int yPos, int label);
 			void paintXAxis(QPainter&);

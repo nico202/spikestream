@@ -9,6 +9,7 @@ using namespace spikestream;
 //Qt includes
 #include <QLayout>
 #include <QPushButton>
+#include <QScrollArea>
 
 
 /*! Constructor */
@@ -34,7 +35,10 @@ NeuronGroupSelectionDialog::NeuronGroupSelectionDialog(Network* network, QWidget
 	buttonLayout->addWidget(okButton);
 	verticalBox->addLayout(buttonLayout);
 
-	this->setMinimumSize(400, 100 + network->getNeuronGroupCount() * 30);
+	if((100 + network->getNeuronGroupCount() * 30) < 750)
+		this->setMinimumSize(400, 100 + network->getNeuronGroupCount() * 30);
+	else
+		this->setMinimumSize(400, 750);
 }
 
 
