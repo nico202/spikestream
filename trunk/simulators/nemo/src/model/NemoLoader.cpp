@@ -116,6 +116,7 @@ void NemoLoader::addConnectionGroup(ConnectionGroup* conGroup, nemo_network_t ne
 		synapseIDArray = new synapse_id[conGroup->size()];
 		volatileConGrpMap[conGroup->getID()] = synapseIDArray;
 	}
+	double weightFactor = conGroup->getParameter("weight_factor");
 
 	//Work through each connection
 	unsigned conCntr = 0;
@@ -124,9 +125,9 @@ void NemoLoader::addConnectionGroup(ConnectionGroup* conGroup, nemo_network_t ne
 	ConnectionIterator endConGrp = conGroup->end();
 	for(ConnectionIterator conIter = conGroup->begin(); conIter != endConGrp; ++conIter){
 		//Add synapse
-		result = nemo_add_synapse(nemoNetwork, conIter->getFromNeuronID(), conIter->getToNeuronID(), conIter->getDelay(), conIter->getWeight(), learning, &newNemoSynapseID);
+		result = nemo_add_synapse(nemoNetwork, conIter->getFromNeuronID(), conIter->getToNeuronID(), conIter->getDelay(), weightFactor * conIter->getWeight(), learning, &newNemoSynapseID);
 		#ifdef DEBUG_SYNAPSES
-			(*logTextStream)<<"nemo_add_synapses(nemoNetwork, "<<conIter->getFromNeuronID()<<", "<<conIter->getToNeuronID()<<", "<<conIter->getDelay()<<", "<<conIter->getWeight()<<", "<<learning<<", "<<newNemoSynapseID<<");"<<endl;
+			(*logTextStream)<<"nemo_add_synapses(nemoNetwork, "<<conIter->getFromNeuronID()<<", "<<conIter->getToNeuronID()<<", "<<conIter->getDelay()<<", "<<(weightFactor * conIter->getWeight())<<", "<<learning<<", "<<newNemoSynapseID<<");"<<endl;
 		#endif//DEBUG_SYNAPSES
 		if(result != NEMO_OK)
 			throw SpikeStreamException("Error code returned from Nemo when adding synapse." + QString(nemo_strerror()));

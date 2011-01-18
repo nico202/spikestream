@@ -34,7 +34,7 @@ namespace spikestream {
 		IzhikevichNetworkBuilder* networkBuilder;
 
 	    /*! Holds the network description */
-	    QLineEdit* networkName;
+		QLineEdit* networkNameEdit;
 
 		/*! Network that is being built. */
 		Network* newNetwork;

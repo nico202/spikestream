@@ -21,6 +21,7 @@ CREATE TABLE IzhikevichSynapseParameters (
 	ConnectionGroupID SMALLINT UNSIGNED NOT NULL,
 	Learning BOOLEAN DEFAULT 0 COMMENT 'Switches STDP learning on and off.',
 	Disable BOOLEAN DEFAULT 0 COMMENT 'Disables the connection group, which will not be included in the simulation.',
+	weight_factor DOUBLE DEFAULT 10.0 COMMENT 'Factor by which weights are multiplied for the simulation. When set to 10 it typically takes two synchronous spikes to fire an Izhikevich neuron.',
 
 	PRIMARY KEY (ConnectionGroupID),
 	FOREIGN KEY ConnectionGroupID_FK(ConnectionGroupID) REFERENCES ConnectionGroups(ConnectionGroupID) ON DELETE CASCADE
