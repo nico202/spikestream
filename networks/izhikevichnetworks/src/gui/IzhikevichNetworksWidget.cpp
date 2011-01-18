@@ -30,7 +30,7 @@ extern "C" {
 IzhikevichNetworksWidget::IzhikevichNetworksWidget(){
     //Create class that will be used to build networks
 	networkBuilder = new IzhikevichNetworkBuilder();
-	connect(networkBuilder, SIGNAL( progress(int, int) ), this, SLOT( updateProgress(int, int) ) );
+	connect(networkBuilder, SIGNAL( progress(int, int, QString) ), this, SLOT( updateProgress(int, int, QString) ) );
 	connect(networkBuilder, SIGNAL( finished() ), this, SLOT( networkBuilderFinished() ) );
 
 	//Set up progress dialog
@@ -49,9 +49,9 @@ IzhikevichNetworksWidget::IzhikevichNetworksWidget(){
 
     //Field to enable user to enter network name
     gridLayout->addWidget(new QLabel("Network name: "), 0, 0);
-    networkName = new QLineEdit("Unnamed");
-    networkName->setMinimumSize(250, 30);
-    gridLayout->addWidget(networkName, 0, 1);
+	networkNameEdit = new QLineEdit("Unnamed");
+	networkNameEdit->setMinimumSize(250, 30);
+	gridLayout->addWidget(networkNameEdit, 0, 1);
 
     //Add buttons for each network
 	QPushButton* newButton = addNetworkButton(gridLayout, "2006 Polychronization Network");
@@ -95,8 +95,6 @@ void IzhikevichNetworksWidget::addNetwork(){
 		}
 		else
 			throw SpikeStreamException("Network descrption not recognized: " + netDesc);
-
-		Globals::getEventRouter()->reloadSlot();
     }
     catch(SpikeStreamException& ex){
 		qCritical()<<ex.getMessage();
@@ -141,7 +139,7 @@ void IzhikevichNetworksWidget::updateProgress(int stepsCompleted, int totalSteps
 	progressUpdating = true;
 
 	if(progressDialog->wasCanceled()){
-		networkBuilder->cancel();
+		networkBuilder->stop();
 		progressDialog->show();
 	}
 
@@ -161,9 +159,9 @@ void IzhikevichNetworksWidget::updateProgress(int stepsCompleted, int totalSteps
 
 /*! Returns the name of the network to be added, or 'Unnamed' if this is not specified. */
 QString IzhikevichNetworksWidget::getNetworkName(){
-    if(networkName->text() == "")
+	if(networkNameEdit->text() == "")
 	return QString("Unnamed");
-    return networkName->text();
+	return networkNameEdit->text();
 }
 
 

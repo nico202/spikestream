@@ -911,6 +911,7 @@ void NemoWrapper::updateNetworkWeights(){
 		//Get the volatile connection group and matching array of nemo synapse IDs
 		ConnectionGroup* tmpConGrp = Globals::getNetwork()->getConnectionGroup(conGrpIter.key());
 		synapse_id* synapseIDArray = conGrpIter.value();
+		double weightFactor = tmpConGrp->getParameter("weight_factor");//Amount by which weight was multiplied when connection was added to NeMo
 
 		//Work through connection group and query volatile connections
 		float* weightArray;//Will point to array of returned weights
@@ -925,7 +926,7 @@ void NemoWrapper::updateNetworkWeights(){
 			checkNemoOutput( nemo_get_weights(nemoSimulation, &synapseIDArray[conCntr], 1, &weightArray), "Error getting weights." );
 
 			//Update weight in connection
-			conIter->setTempWeight(weightArray[0]);
+			conIter->setTempWeight(weightArray[0] / weightFactor);
 
 			//Increase counter for accessing synapse id array
 			++conCntr;

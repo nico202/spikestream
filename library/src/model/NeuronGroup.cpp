@@ -45,6 +45,12 @@ Neuron* NeuronGroup::addNeuron(float xPos, float yPos, float zPos){
 	//Get temporary ID for the neuron - this must be unique and not exist in the current map
 	unsigned tmpID = getTemporaryID();
 
+	//Fix start neuron id
+	if(neuronMap->isEmpty())
+		startNeuronID = tmpID;
+	else if(tmpID < startNeuronID)
+		startNeuronID = tmpID;
+
 	//Create neuron class
 	Neuron* tmpNeuron = new Neuron(tmpID, xPos, yPos, zPos);
 
@@ -52,10 +58,6 @@ Neuron* NeuronGroup::addNeuron(float xPos, float yPos, float zPos){
 	if(neuronMap->contains(tmpID))
 		throw SpikeStreamException("Automatically generated temporary neuron ID clashes with one in the network. New ID=" + QString::number(tmpID));
 	(*neuronMap)[tmpID] = tmpNeuron;
-
-	//Fix start neuron id
-	if(tmpID < startNeuronID)
-		startNeuronID = tmpID;
 
 	//Finish off
 	neuronGroupChanged();
