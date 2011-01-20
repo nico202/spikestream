@@ -33,6 +33,9 @@ NemoWrapper::NemoWrapper() : AbstractSimulation() {
 	updateInterval_ms = 500;
 	patternNeuronGroupID = 0;
 	sustainPattern = false;
+	injectCurrentNeuronCount = 0;
+	injectCurrentAmount = 0;
+	sustainInjectCurrent = false;
 
 	//Zero is the default STDP function
 	stdpFunctionID = 0;
@@ -165,6 +168,24 @@ void NemoWrapper::saveWeights(){
 	weightsSaved = false;
 	weightSaveCancelled = false;
 	currentTaskID = SAVE_WEIGHTS_TASK;
+}
+
+/*! Injects the specified amount of current in the specified number of randomly
+	selected neurons at each time step. Throws an exception if the number of neurons is
+	greater than the number of neurons in the network. */
+void  NemoWrapper::setInjectCurrent(int numNeurons, float current, bool sustain){
+	sustainNoise = sustain;
+
+	//Run checks
+	if(!simulationLoaded)
+		throw SpikeStreamException("Current cannot be injected when a simulation is not loaded.");
+	if(numNeurons > Globals::getNetwork()->size())
+		throw SpikeStreamException("Injecting current. Number of neurons is greater than the network size.");
+
+	//Store variables
+	injectCurrentNeuronCount = numNeurons;
+	injectCurrentAmount = current;
+	sustainInjectCurrent = sustain;
 }
 
 
@@ -460,6 +481,38 @@ unsigned NemoWrapper::addInjectNoiseNeuronIDs(){
 	if(arrayCounter != arraySize)
 		throw SpikeStreamException("Error adding inject noise neuron IDs. Array counter: " + QString::number(arrayCounter) + "; Array size: " + QString::number(arraySize));
 	return arraySize;
+}
+
+
+/*! Adds current to a random selection of neurons */
+unsigned NemoWrapper::addInjectCurrentNeuronIDs(){
+	//Use a hash map to avoid duplicates
+	QHash<unsigned, bool> selectionMap;
+
+	//Select the required number of neurons from the network.
+	QList<NeuronGroup*> neurGrpList = Globals::getNetwork()->getNeuronGroups();
+	unsigned tmpNeurID, tmpMax;
+	while(selectionMap.size() != injectCurrentNeuronCount){
+		tmpNeurID = 0;
+		tmpMax = 0;
+		//Random number between 0 and size of network
+		int tmpRand = Util::getRandom(0, Globals::getNetwork()->size());
+		for(QList<NeuronGroup*>::iterator iter = neurGrpList.begin(); iter != neurGrpList.end(); ++iter){
+			tmpMax += (*iter)->size();
+			if((unsigned)tmpRand < tmpMax){
+				tmpNeurID = tmpRand - (tmpMax - (*iter)->size()) + (*iter)->getStartNeuronID();
+			}
+		}
+		if(tmpNeurID == 0)
+			throw SpikeStreamException("Neuron ID not found for injection of current.");
+
+		if(!selectionMap.contains(tmpNeurID)){
+			selectionMap[tmpNeurID] = true;
+			injectionCurrentNeurIDVector.push_back(tmpNeurID);
+			injectionCurrentVector.push_back(injectCurrentAmount);
+		}
+	}
+	return (unsigned)selectionMap.size();
 }
 
 
@@ -768,7 +821,7 @@ void NemoWrapper::setInhibitoryNeuronParameters(NeuronGroup* neuronGroup){
 
 /*! Advances the simulation by one step */
 void NemoWrapper::stepNemo(){
-	unsigned *firedArray, numNoiseNeurons = 0;
+	unsigned *firedArray, numNoiseNeurons = 0, numCurrentNeurons = 0;
 	size_t firedCount;
 	firingNeuronList.clear();
 
@@ -778,6 +831,9 @@ void NemoWrapper::stepNemo(){
 	//Add inject noise neurons to end of injection vector
 	if(!injectNoiseMap.isEmpty())
 		numNoiseNeurons = addInjectNoiseNeuronIDs();
+
+	if(injectCurrentNeuronCount > 0)
+		numCurrentNeurons = addInjectCurrentNeuronIDs();
 
 	#ifdef DEBUG_STEP
 		qDebug()<<"About to step nemo.";
@@ -802,15 +858,27 @@ void NemoWrapper::stepNemo(){
 	if(!sustainNoise)
 		injectNoiseMap.clear();
 
+	//Clear inject current parameters if we are not sustaining it
+	if(!sustainInjectCurrent){
+		injectCurrentNeuronCount = 0;
+		injectCurrentAmount = 0;
+	}
+
 	//Delete pattern if it is not sustained
 	if(!sustainPattern){
 		injectionPatternVector.clear();
 		injectionCurrentNeurIDVector.clear();
 		injectionCurrentVector.clear();
 	}
-	//Delete neurons added to end of vector from noise
-	else if(numNoiseNeurons > 0){
-		injectionPatternVector.erase(injectionPatternVector.end() - numNoiseNeurons, injectionPatternVector.end());
+	//Delete neurons added to end of vector from noise or current
+	else {
+		if(numNoiseNeurons > 0){
+			injectionPatternVector.erase(injectionPatternVector.end() - numNoiseNeurons, injectionPatternVector.end());
+		}
+		if(numCurrentNeurons > 0){
+			injectionCurrentNeurIDVector.erase(injectionCurrentNeurIDVector.end() - numCurrentNeurons, injectionCurrentNeurIDVector.end());
+			injectionCurrentVector.erase(injectionCurrentVector.end() - numCurrentNeurons, injectionCurrentVector.end());
+		}
 	}
 
 

@@ -4,6 +4,7 @@
 using namespace spikestream;
 
 //Qt includes
+#include <QComboBox>
 #include <QDebug>
 #include <QLayout>
 
@@ -13,14 +14,14 @@ SpikeRasterDialog::SpikeRasterDialog(QList<NeuronGroup*> neuronGroupList, QWidge
 	QVBoxLayout* mainVBox = new QVBoxLayout(this);
 
 	try{
-		//Create data
-//		rasterModel = new RasterModel(neuronGroupList);
-
-//		//Add view to display data
-//		rasterView = new RasterView(rasterModel, this);
-//		mainVBox->addWidget(rasterView);
-
 		spikeRasterWidget = new SpikeRasterWidget(neuronGroupList, this);
+
+		QComboBox* colorCombo = new QComboBox();
+		colorCombo->addItem("Color");
+		colorCombo->addItem("Black and white");
+		connect(colorCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(colorComboChanged(int)));
+
+		mainVBox->addWidget(colorCombo);
 		mainVBox->addWidget(spikeRasterWidget);
 	}
 	catch(SpikeStreamException& ex){
@@ -36,6 +37,23 @@ SpikeRasterDialog::SpikeRasterDialog(QList<NeuronGroup*> neuronGroupList, QWidge
 SpikeRasterDialog::~SpikeRasterDialog(){
 }
 
+
+/*----------------------------------------------------------*/
+/*------                PRIVATE SLOTS                 ------*/
+/*----------------------------------------------------------*/
+
+/*! Sets the spike raster to black and white or coloured. */
+void SpikeRasterDialog::colorComboChanged(int index){
+	if(index == 0){
+		spikeRasterWidget->setBlackAndWhite(false);
+	}
+	else if (index == 1){
+		spikeRasterWidget->setBlackAndWhite(true);
+	}
+	else{
+		throw SpikeStreamException("Index not recognized: " + QString::number(index));
+	}
+}
 
 /*! Adds firing neuron data and replots the spike raster. */
 void SpikeRasterDialog::addData(const QList<unsigned>& firingNeuronIDs, unsigned timeStep){

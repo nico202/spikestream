@@ -18,6 +18,9 @@ namespace spikestream {
 			~SpikeRasterDialog();
 			void addData(const QList<unsigned>& firingNeuronIDs, unsigned timeStep);
 
+		private slots:
+			void colorComboChanged(int index);
+
 		private:
 			//====================  VARIABLES  ======================
 			SpikeRasterWidget* spikeRasterWidget;
