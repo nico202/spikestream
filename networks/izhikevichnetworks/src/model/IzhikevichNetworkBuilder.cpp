@@ -140,7 +140,12 @@ void IzhikevichNetworkBuilder::addPolychronizationNetwork(){
 	//Create excitatory and inhibitory neuron groups
 	QHash<QString, double> parameterMap;
 	NeuronGroup* exNeurGrp = new NeuronGroup(NeuronGroupInfo(0, "Excitatory neuron group", "Excitatory neuron group", parameterMap, exNeurType));
+	setExcitatoryParameters(parameterMap);
+	exNeurGrp->setParameters(parameterMap);
+
 	NeuronGroup* inhibNeurGrp = new NeuronGroup(NeuronGroupInfo(0, "Inhibitory neuron group",  "Inhibitory neuron group", parameterMap, inhibNeurType));
+	setInhibitoryParameters(parameterMap);
+	inhibNeurGrp->setParameters(parameterMap);
 
 	//Create a group of excitatory neurons
 	float xStart = 0.0f, yStart = 0.0f, zStart = 0.0f;
@@ -248,6 +253,33 @@ QString IzhikevichNetworkBuilder::getConGrpDescription(NeuronGroup* fromNeuronGr
 	return QString(fromGrpStr + "->" + toGrpStr);
 }
 
+
+/*! Sets excitatory parameters to match Izhikevich paper */
+void IzhikevichNetworkBuilder::setExcitatoryParameters(QHash<QString, double>& parameterMap){
+	parameterMap.clear();
+	parameterMap["a"] = 0.02;
+	parameterMap["b"] = 0.2;
+	parameterMap["c_1"] = 0.0;
+	parameterMap["d_1"] = 8.0;
+	parameterMap["d_2"] = 0.0;
+	parameterMap["v"] = -65.0;
+	parameterMap["sigma"] = 0.0;
+	parameterMap["seed"] = 45;
+}
+
+
+/*! Sets inhibitory parameters to match Izhikevich paper */
+void IzhikevichNetworkBuilder::setInhibitoryParameters(QHash<QString, double>& parameterMap){
+	parameterMap.clear();
+	parameterMap["a_1"] = 0.1;
+	parameterMap["a_2"] = 0.0;
+	parameterMap["b_1"] = 0.2;
+	parameterMap["b_2"] = 0.0;
+	parameterMap["d"] = 2;
+	parameterMap["v"] = -65.0;
+	parameterMap["sigma"] = 0.0;
+	parameterMap["seed"] = 45;
+}
 
 
 

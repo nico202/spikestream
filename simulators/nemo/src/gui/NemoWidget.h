@@ -37,6 +37,7 @@ namespace spikestream {
 			void checkResetWeightsProgress();
 			void checkSaveWeightsProgress();
 			void deleteRasterPlotDialog(int);
+			void injectCurrentButtonClicked();
 			void injectNoiseButtonClicked();
 			void injectPatternButtonClicked();
 			void loadPattern(QString comboStr);
@@ -58,6 +59,7 @@ namespace spikestream {
 			void startSimulation();
 			void stepSimulation();
 			void stopSimulation();
+			void sustainCurrentChanged(bool enabled);
 			void sustainNoiseChanged(bool enabled);
 			void sustainPatternChanged(bool enabled);
 			void unloadSimulation(bool confirmWithUser=true);
@@ -158,6 +160,15 @@ namespace spikestream {
 			/*! Flag to prevent calls to progress dialog while it is redrawing. */
 			bool updatingProgress;
 
+			/*! Combo to select number of neurons to inject current into */
+			QComboBox* injectCurrentNeuronCountCombo;
+
+			/*! Amount of current to be injected */
+			QComboBox* injectCurrentAmountCombo;
+
+			/*! Button to inject current on single time step. */
+			QPushButton* injectCurrentButton;
+
 			/*! Button to inject noise into a neuron group */
 			QPushButton* injectNoiseButton;
 
@@ -208,6 +219,7 @@ namespace spikestream {
 			QString getPatternKey(const QString& patternComboText);
 			QToolBar* getToolBar();
 			void loadNeuronGroups();
+			void setInjectCurrent(bool sustain);
 			void setInjectNoise(bool sustain);
 			void setInjectionPattern(bool sustain);
 	};

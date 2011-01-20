@@ -21,6 +21,7 @@ namespace spikestream {
 			SpikeRasterWidget(QList<NeuronGroup*>& neuronGroupList, QWidget* parent=0);
 			~SpikeRasterWidget();
 			void addSpikes(const QList<unsigned>& firingNeuronIDs, int timeStep);
+			void setBlackAndWhite(bool on);
 
 
 		protected:
@@ -92,6 +93,9 @@ namespace spikestream {
 
 			/*! Color of axes */
 			QRgb axesColor;
+
+			/*! Controls whether spikes are rendered with varying hues or black and white. */
+			bool blackAndWhiteMode;
 
 
 			//========================  METHODS  =======================

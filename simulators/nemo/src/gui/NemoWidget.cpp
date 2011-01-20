@@ -82,13 +82,9 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	toolBar = getToolBar();
 	controlsVBox->addWidget(toolBar);
 
-	//Label to separate out areas
-	QHBoxLayout* monitorLabelBox = new QHBoxLayout();
-	monitorLabelBox->addStretch(3);
-	monitorLabelBox->addWidget(new QLabel("Monitor"));
-	monitorLabelBox->addStretch(3);
-	controlsVBox->addLayout(monitorLabelBox);
-	controlsVBox->addSpacing(5);
+	//Group box for monitoring controls
+	QGroupBox* monitorGroupBox = new QGroupBox("Monitor", controlsWidget);
+	QVBoxLayout* monitorVBox = new QVBoxLayout();
 
 	//Add widget to control live monitoring of neurons
 	QHBoxLayout* monitorNeuronsBox = new QHBoxLayout();
@@ -111,8 +107,8 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	monitorNeuronsButtonGroup->addButton(monitorMemPotNeuronsButton, MONITOR_NEURONS_MEMBRANE);
 	monitorNeuronsBox->addWidget(monitorMemPotNeuronsButton);
 	monitorNeuronsBox->addStretch(5);
-	controlsVBox->addLayout(monitorNeuronsBox);
-	controlsVBox->addSpacing(5);
+	monitorVBox->addLayout(monitorNeuronsBox);
+	monitorVBox->addSpacing(5);
 
 	//Add widgets to monitor, save and reset the weights
 	QHBoxLayout* saveWeightsBox = new QHBoxLayout();
@@ -126,7 +122,7 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	connect(saveWeightsButton, SIGNAL(clicked()), this, SLOT(saveWeights()));
 	saveWeightsBox->addWidget(saveWeightsButton);
 	saveWeightsBox->addStretch(5);
-	controlsVBox->addLayout(saveWeightsBox);
+	monitorVBox->addLayout(saveWeightsBox);
 
 	//Add widgets to control archiving
 	archiveCheckBox = new QCheckBox("Archive.");
@@ -140,16 +136,41 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	archiveLayout->addWidget(archiveCheckBox);
 	archiveLayout->addWidget(archiveDescriptionEdit);
 	archiveLayout->addWidget(setArchiveDescriptionButton);
-	controlsVBox->addLayout(archiveLayout);
+	monitorVBox->addLayout(archiveLayout);
 
-	//Label to separate out areas FIXME USE GROUP BOX
-	QHBoxLayout* injectLabelBox = new QHBoxLayout();
-	injectLabelBox->addStretch(3);
-	injectLabelBox->addWidget(new QLabel("Inject"));
-	injectLabelBox->addStretch(3);
-	controlsVBox->addSpacing(10);
-	controlsVBox->addLayout(injectLabelBox);
-	controlsVBox->addSpacing(5);
+	//Add monitor group box to layout
+	monitorGroupBox->setLayout(monitorVBox);
+	controlsVBox->addWidget(monitorGroupBox);
+
+	//Group box for injection controls
+	QGroupBox* injectGroupBox = new QGroupBox("Inject", controlsWidget);
+	QVBoxLayout* injectVBox = new QVBoxLayout();
+
+	//Add widget to enable injection of current into specific numbers of neurons
+	QHBoxLayout* injectCurrentBox = new QHBoxLayout();
+	injectCurrentNeuronCountCombo = new QComboBox();
+	injectCurrentNeuronCountCombo->setMinimumSize(200, 20);
+	injectCurrentNeuronCountCombo->addItem("1 neuron");
+	injectCurrentNeuronCountCombo->addItem("10 neurons");
+	injectCurrentNeuronCountCombo->addItem("100 neurons");
+	injectCurrentNeuronCountCombo->addItem("1000 neurons");
+	injectCurrentBox->addWidget(injectCurrentNeuronCountCombo);
+	injectCurrentAmountCombo = new QComboBox();
+	injectCurrentAmountCombo->setMinimumSize(50, 20);
+	for(int i=10; i<=100; i+= 10)
+		injectCurrentAmountCombo->addItem(QString::number(i));
+	injectCurrentBox->addWidget(injectCurrentAmountCombo);
+	injectCurrentButton = new QPushButton("Inject Current");
+	injectCurrentButton->setMinimumHeight(20);
+	connect(injectCurrentButton, SIGNAL(clicked()), this, SLOT(injectCurrentButtonClicked()));
+	injectCurrentBox->addWidget(injectCurrentButton);
+	QCheckBox* sustainCurrentChkBox = new QCheckBox("Sustain");
+	connect(sustainCurrentChkBox, SIGNAL(clicked(bool)), this, SLOT(sustainCurrentChanged(bool)));
+	injectCurrentBox->addWidget(sustainCurrentChkBox);
+	injectCurrentBox->addStretch(5);
+	injectVBox->addSpacing(5);
+	injectVBox->addLayout(injectCurrentBox);
+
 
 	//Add widgets to inject noise into specified layers
 	QHBoxLayout* injectNoiseBox = new QHBoxLayout();
@@ -169,8 +190,8 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	connect(sustainNoiseChkBox, SIGNAL(clicked(bool)), this, SLOT(sustainNoiseChanged(bool)));
 	injectNoiseBox->addWidget(sustainNoiseChkBox);
 	injectNoiseBox->addStretch(5);
-	controlsVBox->addSpacing(5);
-	controlsVBox->addLayout(injectNoiseBox);
+	injectVBox->addSpacing(5);
+	injectVBox->addLayout(injectNoiseBox);
 
 	//Add widgets to enable injection of patterns
 	QHBoxLayout* injectPatternBox = new QHBoxLayout();
@@ -195,8 +216,12 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	sustainPatternChkBox->setEnabled(false);
 	connect(sustainPatternChkBox, SIGNAL(clicked(bool)), this, SLOT(sustainPatternChanged(bool)));
 	injectPatternBox->addWidget(sustainPatternChkBox);
-	controlsVBox->addSpacing(5);
-	controlsVBox->addLayout(injectPatternBox);
+	injectVBox->addSpacing(5);
+	injectVBox->addLayout(injectPatternBox);
+
+	//Add inject group box to layout
+	injectGroupBox->setLayout(injectVBox);
+	controlsVBox->addWidget(injectGroupBox);
 
 	//Put layout into enclosing box
 	mainVBox->addWidget(controlsWidget);
@@ -407,6 +432,13 @@ void NemoWidget::deleteRasterPlotDialog(int){
 		throw SpikeStreamException("Raster dialog not found: ID=" + QString::number(tmpID));
 	//delete rasterDialogMap[tmpID];
 	rasterDialogMap.remove(tmpID);
+}
+
+
+/*! Called when the inject current button is clicked. Sets the injection
+	of current in the nemo wrapper */
+void NemoWidget::injectCurrentButtonClicked(){
+	setInjectCurrent(false);
 }
 
 
@@ -877,6 +909,26 @@ void NemoWidget::stopSimulation(){
 }
 
 
+/*! Switches between current injection controlled by button and continuous
+	current injection at every time step. */
+void NemoWidget::sustainCurrentChanged(bool enabled){
+	if(enabled){
+		injectCurrentButton->setEnabled(false);
+		injectCurrentNeuronCountCombo->setEnabled(false);
+		injectCurrentAmountCombo->setEnabled(false);
+		setInjectCurrent(true);
+	}
+	else{
+		injectCurrentButton->setEnabled(true);
+		injectCurrentNeuronCountCombo->setEnabled(true);
+		injectCurrentAmountCombo->setEnabled(true);
+
+		//Switch off sustain noise - it will be automatically deleted on next step.
+		nemoWrapper->setSustainCurrent(false);
+	}
+}
+
+
 /*! Switches between noise injection controlled by button and
 	continuous noise injection at every time step */
 void NemoWidget::sustainNoiseChanged(bool enabled){
@@ -1142,6 +1194,23 @@ void NemoWidget::loadNeuronGroups(){
 	foreach(NeuronGroupInfo info, neurGrpInfoList){
 		injectNoiseNeuronGroupCombo->addItem(info.getName() + "(" + QString::number(info.getID()) + ")");
 		injectPatternNeurGrpCombo->addItem(info.getName() + "(" + QString::number(info.getID()) + ")");
+	}
+}
+
+
+/*! Sets the injection of current */
+void NemoWidget::setInjectCurrent(bool sustain){
+	int numNeurons = Util::getUInt(injectCurrentNeuronCountCombo->currentText().section(" ", 0, 0));
+	if(numNeurons > Globals::getNetwork()->size()){
+		qCritical()<<"Number of neurons ("<<numNeurons<<" cannot be greater than the size of the network ("<<Globals::getNetwork()->size();
+		return;
+	}
+	float amount = Util::getFloat(injectCurrentAmountCombo->currentText());
+	try{
+		nemoWrapper->setInjectCurrent(numNeurons, amount, sustain);
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<ex.getMessage();
 	}
 }
 

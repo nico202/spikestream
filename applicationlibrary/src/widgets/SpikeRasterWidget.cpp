@@ -29,6 +29,7 @@ SpikeRasterWidget::SpikeRasterWidget(QList<NeuronGroup*>& neuronGroupList, QWidg
 	}
 
 	//Initialize display variables
+	blackAndWhiteMode = false;
 	xAxisTickLength = 2;
 	yAxisTickLength = 2;
 	fontSize = 10;
@@ -95,6 +96,21 @@ void SpikeRasterWidget::addSpikes(const QList<unsigned>& firingNeuronIDs, int ti
 
 	//Advance the time step
 	increaseTimeStep(timeStep);
+	repaint();
+}
+
+
+/*! Controls whether spikes are rendered in black or varying hues. */
+void SpikeRasterWidget::setBlackAndWhite(bool on){
+	blackAndWhiteMode = on;
+
+	//Reload hues
+	QList<unsigned> hueList = getHueList(neuronGroupList.size());
+	int hueCntr = 0;
+	for(QList<NeuronGroup*>::iterator iter = neuronGroupList.begin(); iter != neuronGroupList.end(); ++iter){
+		neurGrpColorMap[(*iter)->getID()] = hueList.at(hueCntr);
+		++hueCntr;
+	}
 	repaint();
 }
 
@@ -169,8 +185,17 @@ QString SpikeRasterWidget::getFilePath(QString fileFilter){
 
 /*! Returns a list of hues with the required lightness */
 QList<unsigned> SpikeRasterWidget::getHueList(unsigned numItems){
-	unsigned numHues = 1530;
 	QList<unsigned> tmpHueList;
+
+	//Return black spike colour in black and white mode
+	if(blackAndWhiteMode){
+		for(unsigned i=0; i<numItems; ++i)
+			tmpHueList.append(qRgb(0, 0, 0));
+		return tmpHueList;
+	}
+
+	//Colour mode
+	unsigned numHues = 1530;
 
 	//Sanity check
 	if(numItems > numHues)

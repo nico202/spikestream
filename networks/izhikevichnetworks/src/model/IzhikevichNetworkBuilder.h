@@ -37,6 +37,8 @@ namespace spikestream {
 			//===================  METHODS  ======================
 			void addPolychronizationNetwork();
 			QString getConGrpDescription(NeuronGroup* fromNeuronGroup, NeuronGroup* toNeuronGroup);
+			void setExcitatoryParameters(QHash<QString, double>& parameterMap);
+			void setInhibitoryParameters(QHash<QString, double>& parameterMap);
 
 	};
 
