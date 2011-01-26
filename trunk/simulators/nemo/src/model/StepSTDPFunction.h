@@ -1,15 +1,15 @@
-#ifndef STANDARDSTDPFUNCTION_H
-#define STANDARDSTDPFUNCTION_H
+#ifndef STEPSTDPFUNCTION_H
+#define STEPSTDPFUNCTION_H
 
 //SpikeStream includes
 #include "AbstractSTDPFunction.h"
 
 namespace spikestream {
 
-	class StandardSTDPFunction : public AbstractSTDPFunction {
+	class StepSTDPFunction : public AbstractSTDPFunction {
 		public:
-			StandardSTDPFunction();
-			~StandardSTDPFunction();
+			StepSTDPFunction();
+			~StepSTDPFunction();
 			float* getPreArray();
 			int getPreLength();
 			float* getPostArray();
@@ -25,15 +25,15 @@ namespace spikestream {
 			/*! Array of the post values */
 			float* postArray;
 
-			/*! Size of the pre array*/
+			/*! Length of pre array */
 			int preLength;
 
-			/*! Size of the post array*/
+			/*! Length of post array */
 			int postLength;
 
 
 			//=====================  METHODS  ======================
-			void buildStandardSTDPFunction();
+			void buildStepSTDPFunction();
 			void checkFunctionUpToDate();
 			void cleanUp();
 			void print();
@@ -41,4 +41,4 @@ namespace spikestream {
 
 }
 
-#endif//STANDARDSTDPFUNCTION_H
+#endif//STEPSTDPFUNCTION_H

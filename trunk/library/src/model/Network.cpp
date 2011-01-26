@@ -205,10 +205,28 @@ bool Network::containsNeuron(unsigned int neurID){
 
 
 /*! Returns true if the network contains the neuron group with the specified ID. */
-bool  Network::containsNeuronGroup(unsigned int neuronGroupID){
+bool Network::containsNeuronGroup(unsigned int neuronGroupID){
 	if(neurGrpMap.contains(neuronGroupID))
 		return true;
 	return false;
+}
+
+
+/*! Copies temporary weights to the weights field and sets network saved state to false */
+void Network::copyTempWeightsToWeights(unsigned conGrpID){
+	//Copy temp weight into weight
+	ConnectionGroup* tmpConGrp = getConnectionGroup(conGrpID);
+	ConnectionIterator endConGrp = tmpConGrp->end();
+	for(ConnectionIterator iter = tmpConGrp->begin(); iter != endConGrp; ++iter){
+		iter->setWeight(iter->getTempWeight());
+	}
+
+	//Put network into prototype mode
+	prototypeMode = true;
+
+	//Record that connection group has unsaved weights
+	if(!newConnectionGroupMap.contains(conGrpID))
+		volatileConnectionGroupMap[conGrpID] = true;
 }
 
 
@@ -522,6 +540,8 @@ bool Network::isSaved(){
 			return false;
 		if(neuronGroupParametersChanged || connectionGroupParametersChanged)
 			return false;
+		if(!volatileConnectionGroupMap.isEmpty())
+			return false;
 	}
 	return true;
 }
@@ -580,6 +600,11 @@ void Network::save(){
 	if(!prototypeMode)
 		throw SpikeStreamException("Network should not be saved unless it is in prototype mode.");
 
+	//Get the volatile connection groups
+	QList<ConnectionGroup*> tmpVolConGrpList;
+	for(QHash<unsigned,bool>::iterator iter = volatileConnectionGroupMap.begin(); iter != volatileConnectionGroupMap.end(); ++iter)
+		tmpVolConGrpList.append(getConnectionGroup(iter.key()));
+
 	//Remove connection and neuron groups from network - they will be added later with the correct IDs.
 	for(QHash<unsigned, ConnectionGroup*>::iterator iter = newConnectionGroupMap.begin(); iter != newConnectionGroupMap.end(); ++iter)
 		connGrpMap.remove(iter.value()->getID());
@@ -590,7 +615,7 @@ void Network::save(){
 	currentNeuronTask = SAVE_NETWORK_TASK;
 	neuronNetworkDaoThread->startSaveNetwork(getID(),
 			newNeuronGroupMap.values(), newConnectionGroupMap.values(),
-			deleteNeuronGroupIDs, deleteConnectionGroupIDs
+			deleteNeuronGroupIDs, deleteConnectionGroupIDs, tmpVolConGrpList
 	);
 
 	//Store parameters in already saved neuron groups
@@ -739,6 +764,9 @@ void Network::neuronThreadFinished(){
 					deleteNeuronGroupIDs.clear();
 					deleteConnectionGroupIDs.clear();
 
+					//Clean up volatile connection groups
+					volatileConnectionGroupMap.clear();
+
 					//Switch off transient mode in the network
 					transient = false;
 				break;
@@ -799,6 +827,9 @@ void Network::deleteConnectionGroupFromMemory(unsigned conGrpID){
 	if(prototypeMode){
 		if(newConnectionGroupMap.contains(conGrpID)){//Deleting a new connection group
 			newConnectionGroupMap.remove(conGrpID);
+		}
+		if(volatileConnectionGroupMap.contains(conGrpID)){//Don't update weights on this group any more
+			volatileConnectionGroupMap.remove(conGrpID);
 		}
 		else{//Schedule connection group for deletion when network is saved
 			deleteConnectionGroupIDs.append(conGrpID);

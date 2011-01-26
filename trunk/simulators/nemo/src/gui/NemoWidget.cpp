@@ -330,13 +330,11 @@ void NemoWidget::checkLoadingProgress(){
 
 	//Cannot save weights or archive if the network is not fully saved in the database
 	if(!Globals::getNetwork()->isSaved()){
-		saveWeightsButton->setEnabled(false);
 		archiveCheckBox->setEnabled(false);
 		setArchiveDescriptionButton->setEnabled(false);
 		archiveDescriptionEdit->setEnabled(false);
 	}
 	else{
-		saveWeightsButton->setEnabled(true);
 		archiveCheckBox->setEnabled(true);
 		setArchiveDescriptionButton->setEnabled(true);
 		archiveDescriptionEdit->setEnabled(true);
@@ -411,6 +409,7 @@ void NemoWidget::checkSaveWeightsProgress(){
 		return;
 	}
 
+	//Make sure that progress dialog is not being redrawn
 	else if (updatingProgress){
 		return;
 	}
@@ -683,7 +682,7 @@ void NemoWidget::resetWeights(){
 	weight field in database at the next time step */
 void NemoWidget::saveWeights(){
 	//Check user wants to save weights.
-	int response = QMessageBox::warning(this, "Save Weights?", "Are you sure that you want to save weights.\nThis will overwrite the current weights in the database and cannot be undone.", QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel);
+	int response = QMessageBox::warning(this, "Save Weights?", "Are you sure that you want to save weights.\nThis will overwrite the current weights in the loaded network.", QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel);
 	if(response != QMessageBox::Ok)
 		return;
 
@@ -692,14 +691,17 @@ void NemoWidget::saveWeights(){
 		qCritical()<<"Network is linked to analyses - weights cannot be saved until analyses are deleted.";
 		return;
 	}
+
 	try{
 
 		//Start saving of weights
 		updatingProgress = false;
 		taskCancelled = false;
-		progressDialog = new QProgressDialog("Saving weights", "Cancel", 0, 100, this);
+		progressDialog = new QProgressDialog("Saving weights", "Cancel", 0, 100, this, Qt::CustomizeWindowHint);
 		progressDialog->setWindowModality(Qt::WindowModal);
-		progressDialog->setMinimumDuration(1000);
+		progressDialog->setMinimumDuration(0);
+		progressDialog->setAutoClose(false);
+		progressDialog->show();
 
 		//Instruct wrapper thread to start saving weights
 		nemoWrapper->saveWeights();

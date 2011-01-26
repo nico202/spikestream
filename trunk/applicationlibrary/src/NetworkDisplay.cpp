@@ -32,7 +32,7 @@ NetworkDisplay::NetworkDisplay(){
 	//Set neuron colours that are used directly by NetworkViewer and do not need to be stored in map
 	defaultNeuronColor.set(0.0f, 0.0f, 0.0f);
 	defaultNeuronColorFullRender.set(0.5f, 0.5f, 0.5f);
-	singleNeuronColor.set(0.0f, 1.0f, 0.0f);
+	singleNeuronColor.set(1.0f, 0.75f, 0.0f);
 	toNeuronColor.set(1.0f, 0.0f, 1.0f);
 
 	//Connection colors do not need to be stored at present

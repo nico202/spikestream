@@ -153,11 +153,11 @@ void Random1Widget::buildGUI(QVBoxLayout* mainVBox){
 	mainVBox->addSpacing(10);
 
 	//Weight range 1
-	minWeightRange1Edit = new QLineEdit("-1.0");
+	minWeightRange1Edit = new QLineEdit("0.0");
 	minWeightRange1Edit->setValidator(weightValidator);
-	maxWeightRange1Edit = new QLineEdit("0.0");
+	maxWeightRange1Edit = new QLineEdit("0.5");
 	maxWeightRange1Edit->setValidator(weightValidator);
-	weightRange1PercentEdit = new QLineEdit("20");
+	weightRange1PercentEdit = new QLineEdit("100");
 	weightRange1PercentEdit->setValidator(percentValidator);
 	QHBoxLayout* weightRange1Box = new QHBoxLayout();
 	weightRange1Box->addWidget(new QLabel("Weight range 1 from: "));

@@ -40,7 +40,8 @@ namespace spikestream {
 			void prepareLoadNeurons(NeuronGroup* neurGrp);
 			void run();
 			void startDeleteNetwork(unsigned networkID);
-			void startSaveNetwork(unsigned networkID, QList<NeuronGroup*> newNeuronGroups, QList<ConnectionGroup*> newConnectionGroups, QList<unsigned> deleteNeuronGroupIDs, QList<unsigned> deleteConnectionGroupIDs);
+			void startSaveNetwork(unsigned networkID, QList<NeuronGroup*> newNeuronGroups, QList<ConnectionGroup*> newConnectionGroups, QList<unsigned> deleteNeuronGroupIDs, QList<unsigned> deleteConnectionGroupIDs, QList<ConnectionGroup*> volatileConnectionGroups);
+			void startSaveTempWeights(QList<ConnectionGroup*>& connectionGroupList);
 			void stop();
 
 		private:
@@ -57,6 +58,9 @@ namespace spikestream {
 
 			/*! List of neuron group ids used for deleting neuron groups */
 			QList<unsigned int> neuronGroupIDList;
+
+			/*! List of volatile connection groups used for saving temporary weights */
+			QList<ConnectionGroup*> volatileConnectionGroupList;
 
 			/*! Id of network to which neuron or connection group are added */
 			unsigned int networkID;
@@ -98,6 +102,8 @@ namespace spikestream {
 			const static unsigned int LOAD_NEURONS_TASK = 7;
 			const static unsigned int LOAD_CONNECTIONS_TASK = 8;
 			const static unsigned int SAVE_NETWORK_TASK = 9;
+			const static unsigned int SAVE_TEMP_WEIGHTS_TASK = 10;
+
 
 			//========================  METHODS  ===========================
 			void addNeuronGroups();
@@ -108,6 +114,7 @@ namespace spikestream {
 			void loadConnections();
 			void loadNeurons();
 			void saveNetwork();
+			void saveTempWeights();
 			void setError(const QString& msg);
     };
 

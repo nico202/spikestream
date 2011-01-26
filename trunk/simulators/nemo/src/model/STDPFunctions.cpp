@@ -1,11 +1,13 @@
 //SpikeStream includes
 #include "SpikeStreamException.h"
 #include "StandardSTDPFunction.h"
+#include "StepSTDPFunction.h"
 #include "STDPFunctions.h"
 using namespace spikestream;
 
 //Declare static variables
 unsigned STDPFunctions::STANDARD_STDP = 0;
+unsigned STDPFunctions::STEP_STDP = 1;
 bool STDPFunctions::initialized = false;
 QHash<unsigned, AbstractSTDPFunction*> STDPFunctions::functionMap;
 
@@ -60,6 +62,8 @@ QList<ParameterInfo> STDPFunctions::getParameterInfoList(unsigned functionID){
 QString STDPFunctions::getFunctionDescription(unsigned functionID){
 	if(functionID == STANDARD_STDP)
 		return "Standard STDP function.";
+	else if(functionID == STEP_STDP)
+		return "Step STDP function.";
 	throw SpikeStreamException("STDP Function ID not recognized: " + QString::number(functionID));
 }
 
@@ -68,6 +72,7 @@ QString STDPFunctions::getFunctionDescription(unsigned functionID){
 QList<unsigned> STDPFunctions::getFunctionIDs(){
 	QList<unsigned> tmpList;
 	tmpList.append(STANDARD_STDP);
+	tmpList.append(STEP_STDP);
 	return tmpList;
 }
 
@@ -164,6 +169,7 @@ void STDPFunctions::checkInitialization(){
 void STDPFunctions::initialize(){
 	//Create a class for each STDP function
 	functionMap[STANDARD_STDP] = new StandardSTDPFunction();
+	functionMap[STEP_STDP] = new StepSTDPFunction();
 
 	//Record the fact that initialization has now been carried out.
 	initialized = true;

@@ -210,6 +210,9 @@ void NetworkDaoThread::run(){
 			case SAVE_NETWORK_TASK:
 				saveNetwork();
 			break;
+			case SAVE_TEMP_WEIGHTS_TASK:
+				saveTempWeights();
+			break;
 			default:
 				setError("NetworkDaoThread started without defined task.");
 		}
@@ -260,17 +263,32 @@ void NetworkDaoThread::startDeleteNetwork(unsigned networkID){
 
 
 /*! Saves network using supplied lists of neuron and connection groups to add and delete */
-void NetworkDaoThread::startSaveNetwork(unsigned networkID, QList<NeuronGroup*> newNeuronGroups, QList<ConnectionGroup*> newConnectionGroups, QList<unsigned> deleteNeuronGroupIDs, QList<unsigned> deleteConnectionGroupIDs){
+void NetworkDaoThread::startSaveNetwork(unsigned networkID, QList<NeuronGroup*> newNeuronGroups, QList<ConnectionGroup*> newConnectionGroups, QList<unsigned> deleteNeuronGroupIDs, QList<unsigned> deleteConnectionGroupIDs, QList<ConnectionGroup*> volatileConnectionGroups){
 	//Store data
 	this->networkID = networkID;
 	this->neuronGroupList = newNeuronGroups;
 	this->connectionGroupList = newConnectionGroups;
 	this->neuronGroupIDList = deleteNeuronGroupIDs;
 	this->connectionGroupIDList = deleteConnectionGroupIDs;
+	this->volatileConnectionGroupList = volatileConnectionGroups;
 
 	//Start thread running
 	currentTask = SAVE_NETWORK_TASK;
 	progressMessage = "Saving network";
+	start();
+}
+
+
+/*! Saves temp weights to weights field in database */
+void NetworkDaoThread::startSaveTempWeights(QList<ConnectionGroup*>& connectionGroupList){
+	//Store data
+	this->volatileConnectionGroupList = connectionGroupList;
+
+	//Start thread running
+	currentTask = SAVE_TEMP_WEIGHTS_TASK;
+	numberOfCompletedSteps = 0;
+	totalNumberOfSteps = 0;
+	progressMessage = "Saving temporary weights";
 	start();
 }
 
@@ -858,5 +876,93 @@ void NetworkDaoThread::saveNetwork(){
 
 	//Add connection groups to the database, the new IDs will be stored in the connection groups
 	addConnectionGroups();
+
+	//Store volatile connection groups
+	saveTempWeights();
+}
+
+
+/*! Saves temporary weights in specified connection groups to weights field in database */
+void NetworkDaoThread::saveTempWeights(){
+	//Reset progress measure
+	numberOfCompletedSteps = 0;
+	progressMessage = "Saving temporary weights";
+
+	//Calculate number of steps
+	for(QList<ConnectionGroup*>::iterator conGrpIter = volatileConnectionGroupList.begin(); conGrpIter != volatileConnectionGroupList.end() && !stopThread; ++conGrpIter)
+		totalNumberOfSteps += (*conGrpIter)->size();
+
+	//Work through the list of connection groups
+	for(QList<ConnectionGroup*>::iterator conGrpIter = volatileConnectionGroupList.begin(); conGrpIter != volatileConnectionGroupList.end() && !stopThread; ++conGrpIter){
+		//Get a pointer to the connection group
+		ConnectionGroup* tmpConGrp = *conGrpIter;
+
+		#ifdef TIME_PERFORMANCE
+			PerformanceTimer timer;
+		#endif//TIME_PERFORMANCE
+
+		//Build query
+		QSqlQuery query = getQuery();
+		QString queryStr;
+		for(int i=0; i<numConBuffers; ++i)
+			queryStr += "UPDATE Connections SET Weight= ? WHERE ConnectionID = ?;";
+		query.prepare(queryStr);
+
+		//Work through the connections
+		int conCntr = 0, offset = 0, conAddedCntr = 0;
+		QList<Connection*> tmpConList;
+		ConnectionIterator endConGrp = tmpConGrp->end();
+		for(ConnectionIterator conIter = tmpConGrp->begin(); conIter != endConGrp && !stopThread; ++conIter){
+			offset = 2 * (conCntr % numConBuffers);
+
+			//Bind values to query
+			tmpConList.append(&(*conIter));
+			query.bindValue(0 + offset, conIter->getTempWeight());
+			query.bindValue(1 + offset, conIter->getID());
+
+			//Execute query
+			if(conCntr % numConBuffers == numConBuffers-1){
+				executeQuery(query);
+
+				//Count number of connections that have been added
+				conAddedCntr += numConBuffers;
+				numberOfCompletedSteps = conAddedCntr;
+
+				//Clear up list
+				tmpConList.clear();
+			}
+
+			//Keep track of the number of connections
+			++conCntr;
+		}
+
+		//Add remaining connections individually
+		if(!tmpConList.isEmpty() && !stopThread){
+			query = getQuery();
+			query.prepare("UPDATE Connections SET Weight= ? WHERE ConnectionID = ?");
+			for(QList<Connection*>::iterator conIter = tmpConList.begin(); conIter != tmpConList.end(); ++conIter){
+				query.bindValue(0, (*conIter)->getTempWeight());
+				query.bindValue(1, (*conIter)->getID());
+
+				//Execute query
+				executeQuery(query);
+
+				//Count number of connections that have been added
+				++conAddedCntr;
+				numberOfCompletedSteps = conAddedCntr;
+			}
+		}
+
+		//Check that we have added all the connections
+		if(!stopThread && (tmpConGrp->size() != conAddedCntr) )
+			throw SpikeStreamException("Number of connections added to database: " + QString::number(conAddedCntr) + " does not match size of connection group: " + QString::number(tmpConGrp->size()));
+
+		#ifdef TIME_PERFORMANCE
+			timer.printTime("Number of buffers: " + QString::number(numConBuffers) + ". Number of connections remaining: " + QString::number(tmpConList.size()) + ". Adding " + QString::number(conCntr) + " connections");
+		#endif//TIME_PERFORMANCE
+	}
+
+	//Clean up
+	volatileConnectionGroupList.clear();
 }
 

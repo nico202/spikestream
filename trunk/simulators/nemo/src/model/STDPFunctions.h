@@ -35,9 +35,10 @@ namespace spikestream {
 
 		private:
 			//=====================  VARIABLES  ====================
-			/*! Type ID for the standard STDP function.
+			/*! Type IDs for the STDP functions.
 				NOTE: These should start at 0 and increase continuously. */
 			static unsigned STANDARD_STDP;
+			static unsigned STEP_STDP;
 
 			/*! Map containing instances of classes implementing each of the functions */
 			static QHash<unsigned, AbstractSTDPFunction*> functionMap;
