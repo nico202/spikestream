@@ -675,33 +675,18 @@ void NemoWrapper::saveNemoWeights(){
 	//Update temporary weights in network to match weights in NeMo
 	updateNetworkWeights();
 
-	//NetworkDao specific to the calling thread
-	NetworkDao networkDao(Globals::getNetworkDao()->getDBInfo());
-
-	//Work through all connection groups
+	//Copy temporary weight to weight field in network
 	Network* currentNetwork = Globals::getNetwork();
-	for(QHash<unsigned, synapse_id*>::iterator conGrpIter = volatileConGrpMap.begin(); conGrpIter != volatileConGrpMap.end(); ++conGrpIter){
-		ConnectionGroup* tmpConGrp = currentNetwork->getConnectionGroup(conGrpIter.key());
-
-		//Work through the connections
-		ConnectionIterator endConGrp = tmpConGrp->end();
-		for(ConnectionIterator conIter = tmpConGrp->begin(); conIter != endConGrp; ++conIter){
-			//Save in database
-			networkDao.setWeight(conIter->getID(), conIter->getTempWeight());
-
-			//Update weight field
-			conIter->setWeight(conIter->getTempWeight());
-
-			//Check for cancellation
-			if(weightSaveCancelled){
-				Globals::getEventRouter()->weightsChangedSlot();
-				return;
-			}
-		}
+	unsigned cntr = 0;
+	for(QHash<unsigned, synapse_id*>::iterator conGrpIter = volatileConGrpMap.begin(); !weightSaveCancelled && conGrpIter != volatileConGrpMap.end(); ++conGrpIter){
+		currentNetwork->copyTempWeightsToWeights(conGrpIter.key());
+		++cntr;
+		emit progress(cntr, volatileConGrpMap.size());
 	}
 
-	//Inform other classes about weight change
+	//Inform other classes about weight change and saved state of network
 	Globals::getEventRouter()->weightsChangedSlot();
+	Globals::getEventRouter()->networkListChangedSlot();
 
 	//Weight saving is complete
 	weightsSaved = true;

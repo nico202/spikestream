@@ -1,0 +1,5 @@
+TODO
+
+Test weight saving with deleted connection groups etc.
+
+Fix parameters  - when they are set in prototype mode they are not saved correctly.

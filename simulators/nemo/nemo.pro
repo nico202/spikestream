@@ -71,14 +71,16 @@ HEADERS += src/model/NemoWrapper.h \
 			src/model/StandardSTDPFunction.h \
 			src/model/AbstractSTDPFunction.h \
 			src/model/Pattern.h \
-			src/model/RasterModel.h
+			src/model/RasterModel.h \
+			src/model/StepSTDPFunction.h
 SOURCES += src/model/NemoWrapper.cpp \
 			src/model/NemoLoader.cpp \
 			src/model/STDPFunctions.cpp \
 			src/model/StandardSTDPFunction.cpp \
 			src/model/AbstractSTDPFunction.cpp \
 			src/model/Pattern.cpp \
-			src/model/RasterModel.cpp
+			src/model/RasterModel.cpp \
+			src/model/StepSTDPFunction.cpp
 
 #----------------------------------------------#
 #-----               View                 -----#

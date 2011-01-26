@@ -32,6 +32,7 @@ namespace spikestream {
 			void clearError();
 			bool containsNeuron(unsigned int neurID);
 			bool containsNeuronGroup(unsigned int neuronGroupID);//UNTESTED
+			void copyTempWeightsToWeights(unsigned conGrpID);//UNTESTED
 			void deleteConnectionGroups(QList<unsigned int>& deleteConGrpIDList);
 			void deleteNeuronGroups(QList<unsigned int>& deleteNeurGrpIDList);
 			Box getBoundingBox();
@@ -155,6 +156,9 @@ namespace spikestream {
 
 			/*! Set to true when the parameters of a connection group that is already stored are changed. */
 			bool connectionGroupParametersChanged;
+
+			/*! Map holding IDs of connection groups whose weights are not saved */
+			QHash<unsigned, bool> volatileConnectionGroupMap;
 
 			static const int ADD_NEURONS_TASK = 1;
 			static const int DELETE_CONNECTIONS_TASK = 2;
