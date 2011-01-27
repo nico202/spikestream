@@ -29,13 +29,18 @@ namespace spikestream {
 			void reload();
 			int rowCount(const QModelIndex& parent = QModelIndex()) const;
 			void selectAllOrNone();
-			void showAllOrNone();
 			bool setData(const QModelIndex& index, const QVariant& value, int role=Qt::EditRole);
 
 			friend class ConnectionGroupTableView;
 
+
+		public slots:
+			void showAllOrNone();
+
+
 		private slots:
 			void loadConnectionGroups();
+
 
 		private:
 			//====================  VARIABLES  ====================

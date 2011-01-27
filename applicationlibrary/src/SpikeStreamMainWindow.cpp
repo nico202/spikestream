@@ -340,6 +340,12 @@ void SpikeStreamMainWindow::initializeApplication(){
 	connect(rotateRightAction, SIGNAL(triggered()), Globals::getEventRouter(), SLOT(rotateRightSlot()));
 	this->addAction(rotateRightAction);
 
+	//Show/hide all connection groups
+	QAction* showAllNoneConnectionsActions = new QAction(this);
+	showAllNoneConnectionsActions->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_W));
+	connect(showAllNoneConnectionsActions, SIGNAL(triggered()), Globals::getEventRouter(), SLOT(showAllOrNoneConnectionsSlot()));
+	this->addAction(showAllNoneConnectionsActions);
+
 	//Set up menus.
 	//Add file menu.
 	QMenu * fileMenu = new QMenu("File", this);

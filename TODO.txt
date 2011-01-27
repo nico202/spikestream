@@ -2,4 +2,6 @@ TODO
 
 Test weight saving with deleted connection groups etc.
 
+Set parameters correctly for Izhikevich network.
+
 Fix parameters  - when they are set in prototype mode they are not saved correctly.
