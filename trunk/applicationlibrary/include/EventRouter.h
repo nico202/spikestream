@@ -68,6 +68,7 @@ namespace spikestream {
 
 			//Other signals
 			void reloadSignal();
+			void showAllOrNoneConnectionsSignal();
 
 
 		private slots:
@@ -83,6 +84,8 @@ namespace spikestream {
 			void rotateDownSlot() { emit rotateDownSignal(); emit networkViewChangedSignal(); }
 			void rotateLeftSlot() { emit rotateLeftSignal(); emit networkViewChangedSignal(); }
 			void rotateRightSlot() { emit rotateRightSignal(); emit networkViewChangedSignal(); }
+
+			void showAllOrNoneConnectionsSlot() { emit showAllOrNoneConnectionsSignal(); }
 	};
 
 }

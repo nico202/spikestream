@@ -12,6 +12,7 @@ using namespace spikestream;
 /*! Constructor */
 ConnectionGroupModel::ConnectionGroupModel() : QAbstractTableModel(){
 	connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(loadConnectionGroups()));
+	connect(Globals::getEventRouter(), SIGNAL(showAllOrNoneConnectionsSignal()), this, SLOT(showAllOrNone()));
 }
 
 
