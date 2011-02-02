@@ -86,10 +86,11 @@ Point3D Box::centre() const{
 }
 
 
-/*! Returns true if the box contains the point */
+/*! Returns true if the box contains the point.
+	Points on the border of the box are considered to be within the box. */
 bool Box::contains(const Point3D& point) const{
 	if(point.getXPos() < x1 || point.getYPos() < y1 || point.getZPos() < z1
-				|| point.getXPos() >= x2 || point.getYPos() >= y2 || point.getZPos() >= z2)
+				|| point.getXPos() > x2 || point.getYPos() > y2 || point.getZPos() > z2)
 		return false;
 	return true;
 }

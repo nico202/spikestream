@@ -74,24 +74,22 @@ void PatternManager::load(const QString &filePath, Pattern& pattern){
 /*-----                 PRIVATE METHODS                -----*/
 /*----------------------------------------------------------*/
 
-/*! Extracts a box from the string.
-	Box contains points that are less than the second set of coordinates,
-	 so add 0.1 to contain all of the points. */
+/*! Extracts a box from the string.*/
 Box PatternManager::getBox(const QString &str){
 	//X coordinates
 	QString xCoords = str.section('x', 0, 0, QString::SectionSkipEmpty).trimmed();
 	float x1 = Util::getFloat(xCoords.section(':', 0, 0, QString::SectionSkipEmpty).trimmed());
-	float x2 = 0.1f + Util::getFloat(xCoords.section(':', 1, 1, QString::SectionSkipEmpty).trimmed());
+	float x2 = Util::getFloat(xCoords.section(':', 1, 1, QString::SectionSkipEmpty).trimmed());
 
 	//Y coordinates
 	QString yCoords = str.section('x', 1, 1, QString::SectionSkipEmpty).trimmed();
 	float y1 = Util::getFloat(yCoords.section(':', 0, 0, QString::SectionSkipEmpty).trimmed());
-	float y2 = 0.1f + Util::getFloat(yCoords.section(':', 1, 1, QString::SectionSkipEmpty).trimmed());
+	float y2 = Util::getFloat(yCoords.section(':', 1, 1, QString::SectionSkipEmpty).trimmed());
 
 	//Z coordinates
 	QString zCoords = str.section('x', 2, 2, QString::SectionSkipEmpty).trimmed();
 	float z1 = Util::getFloat(zCoords.section(':', 0, 0, QString::SectionSkipEmpty).trimmed());
-	float z2 = 0.1f + Util::getFloat(zCoords.section(':', 1, 1, QString::SectionSkipEmpty).trimmed());
+	float z2 = Util::getFloat(zCoords.section(':', 1, 1, QString::SectionSkipEmpty).trimmed());
 
 	return Box(x1, y1, z1, x2, y2, z2);
 }

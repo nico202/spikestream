@@ -481,8 +481,9 @@ void NemoWidget::loadPattern(QString comboStr){
 		PatternManager::load(filePath, newPattern);
 
 		//Add name to combo if it does not already exist
-		if(!patternMap.contains(filePath))
+		if(!patternMap.contains(filePath)){
 			patternCombo->insertItem(patternCombo->count() - 1, newPattern.getName());
+		}
 
 		//Replace pattern stored for this name with new pattern or add it if it doesn't exist.
 		patternMap[filePath] = newPattern;
@@ -813,7 +814,7 @@ void NemoWidget::updateTimeStep(unsigned int timeStep, const QList<unsigned>& ne
 
 
 /*! Called when the simulation has advanced one time step.
-	This version of the method updats the time step and membrane potential. */
+	This version of the method updates the time step and membrane potential. */
 void NemoWidget::updateTimeStep(unsigned int timeStep, const QHash<unsigned, float>& membranePotentialMap){
 	timeStepLabel->setText(QString::number(timeStep));
 
@@ -976,7 +977,7 @@ void NemoWidget::sustainPatternChanged(bool enabled){
 void NemoWidget::unloadSimulation(bool confirmWithUser){
 	//Double check that user wants to unload simulation
 	if(confirmWithUser){
-		int response = QMessageBox::warning(this, "Unload?", "Are you sure that you want to unload the simulation?", QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel);
+		int response = QMessageBox::warning(this, "Unload?", "Are you sure that you want to unload the simulation?\nAny unsaved weight changes will be lost.", QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel);
 		if(response != QMessageBox::Ok)
 			return;
 	}

@@ -25,6 +25,7 @@ namespace spikestream {
 			bool contains(const Point3D& point);
 			Pattern getAlignedPattern(const Box& box) const;
 			QString getName(){ return name; }
+			void print();
 			void reset();
 			void setName(const QString& name) { this->name = name; }
 			void translate(float dx, float dy, float dz);
