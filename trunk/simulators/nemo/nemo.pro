@@ -10,11 +10,29 @@ DESTDIR = $${SPIKESTREAM_ROOT_DIR}/plugins/simulation
 
 QT += xml opengl sql
 
+#----------------------------------------------#
+#---          INSTALLATION LOCATION         ---#
+#----------------------------------------------#
+unix:!macx {
+	target.path = /usr/local/lib
+	INSTALLS += target
+}
+win32 {
+	# Add a copy of the libary to the bin directory
+	target.path = $${SPIKESTREAM_ROOT_DIR}/bin
+	INSTALLS += target
+}
+macx {
+	# Add a copy of the libary to the lib directory
+	target.path = /usr/lib
+	INSTALLS += target
+}
+
 
 #----------------------------------------------#
 #---              INCLUDE PATH              ---#
 #----------------------------------------------#
-INCLUDEPATH += src src/model src/gui src/managers src/dialogs src/views \
+INCLUDEPATH += include \
 				$${SPIKESTREAM_ROOT_DIR}/library/include \
 				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/include
 unix {
@@ -44,35 +62,36 @@ macx {
 #----------------------------------------------#
 #-----             Dialogs                -----#
 #----------------------------------------------#
-HEADERS += src/dialogs/NemoParametersDialog.h
+HEADERS += include/NemoParametersDialog.h
 SOURCES += src/dialogs/NemoParametersDialog.cpp
 
 
 #----------------------------------------------#
 #-----               GUI                  -----#
 #----------------------------------------------#
-HEADERS += src/gui/NemoWidget.h
-SOURCES += src/gui/NemoWidget.cpp
-
+HEADERS += include/NemoWidget.h \
+			include/ExperimentLoaderWidget.h
+SOURCES += src/gui/NemoWidget.cpp \
+			src/gui/ExperimentLoaderWidget.cpp
 
 #----------------------------------------------#
 #-----              Managers              -----#
 #----------------------------------------------#
-HEADERS += src/managers/PatternManager.h
+HEADERS += include/PatternManager.h
 SOURCES += src/managers/PatternManager.cpp
 
 
 #----------------------------------------------#
 #-----              Model                 -----#
 #----------------------------------------------#
-HEADERS += src/model/NemoWrapper.h \
-			src/model/NemoLoader.h \
-			src/model/STDPFunctions.h \
-			src/model/StandardSTDPFunction.h \
-			src/model/AbstractSTDPFunction.h \
-			src/model/Pattern.h \
-			src/model/RasterModel.h \
-			src/model/StepSTDPFunction.h
+HEADERS += include/NemoWrapper.h \
+			include/NemoLoader.h \
+			include/STDPFunctions.h \
+			include/StandardSTDPFunction.h \
+			include/AbstractSTDPFunction.h \
+			include/Pattern.h \
+			include/RasterModel.h \
+			include/StepSTDPFunction.h
 SOURCES += src/model/NemoWrapper.cpp \
 			src/model/NemoLoader.cpp \
 			src/model/STDPFunctions.cpp \
@@ -85,7 +104,7 @@ SOURCES += src/model/NemoWrapper.cpp \
 #----------------------------------------------#
 #-----               View                 -----#
 #----------------------------------------------#
-HEADERS += src/views/RasterView.h
+HEADERS += include/RasterView.h
 SOURCES += src/views/RasterView.cpp
 
 
