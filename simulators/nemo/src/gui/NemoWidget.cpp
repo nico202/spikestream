@@ -1,4 +1,5 @@
 //SpikeStream includes
+#include "ExperimentLoaderWidget.h"
 #include "Globals.h"
 #include "GlobalVariables.h"
 #include "NemoParametersDialog.h"
@@ -83,7 +84,7 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	controlsVBox->addWidget(toolBar);
 
 	//Group box for monitoring controls
-	QGroupBox* monitorGroupBox = new QGroupBox("Monitor", controlsWidget);
+	monitorGroupBox = new QGroupBox("Monitor", controlsWidget);
 	QVBoxLayout* monitorVBox = new QVBoxLayout();
 
 	//Add widget to control live monitoring of neurons
@@ -143,7 +144,7 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	controlsVBox->addWidget(monitorGroupBox);
 
 	//Group box for injection controls
-	QGroupBox* injectGroupBox = new QGroupBox("Inject", controlsWidget);
+	injectGroupBox = new QGroupBox("Inject", controlsWidget);
 	QVBoxLayout* injectVBox = new QVBoxLayout();
 
 	//Add widget to enable injection of current into specific numbers of neurons
@@ -170,7 +171,6 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	injectCurrentBox->addStretch(5);
 	injectVBox->addSpacing(5);
 	injectVBox->addLayout(injectCurrentBox);
-
 
 	//Add widgets to inject noise into specified layers
 	QHBoxLayout* injectNoiseBox = new QHBoxLayout();
@@ -223,6 +223,19 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	injectGroupBox->setLayout(injectVBox);
 	controlsVBox->addWidget(injectGroupBox);
 
+	//Group box for experiment plugins
+	QGroupBox* experimentGroupBox = new QGroupBox("Experiments", controlsWidget);
+	QVBoxLayout* experimentVBox = new QVBoxLayout();
+
+	//Add widget that loads experiments
+	ExperimentLoaderWidget* exptLoaderWidget = new ExperimentLoaderWidget(Globals::getSpikeStreamRoot() + "/plugins/simulation/nemoexperiments");
+	exptLoaderWidget->setMinimumSize(600, 200);
+	experimentVBox->addWidget(exptLoaderWidget);
+
+	//Add experiment group box to layout
+	experimentGroupBox->setLayout(experimentVBox);
+	controlsVBox->addWidget(experimentGroupBox);
+
 	//Put layout into enclosing box
 	mainVBox->addWidget(controlsWidget);
 	mainGroupBox->setLayout(mainVBox);
@@ -236,6 +249,14 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	connect(nemoWrapper, SIGNAL(timeStepChanged(unsigned)), this, SLOT(updateTimeStep(unsigned)), Qt::QueuedConnection);
 	connect(nemoWrapper, SIGNAL(timeStepChanged(unsigned, const QList<unsigned>&)), this, SLOT(updateTimeStep(unsigned, const QList<unsigned>&)), Qt::QueuedConnection);
 	connect(nemoWrapper, SIGNAL(timeStepChanged(unsigned, const QHash<unsigned, float>&)), this, SLOT(updateTimeStep(unsigned, const QHash<unsigned, float>&)), Qt::QueuedConnection);
+
+	//Set up link between experiment widgets and NeMo wrapper and signals/slots
+	QList<AbstractExperimentWidget*> exptWidgetList = exptLoaderWidget->getAbstractExperimentWidgets();
+	foreach(AbstractExperimentWidget* tmpExptWidget, exptWidgetList){
+		tmpExptWidget->setWrapper(nemoWrapper);
+		connect(tmpExptWidget, SIGNAL(experimentStarted()), this, SLOT(experimentStarted()));
+		connect(tmpExptWidget, SIGNAL(experimentEnded()), this, SLOT(experimentEnded()));
+	}
 
 	//Listen for network changes
 	connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(networkChanged()));
@@ -431,6 +452,20 @@ void NemoWidget::deleteRasterPlotDialog(int){
 		throw SpikeStreamException("Raster dialog not found: ID=" + QString::number(tmpID));
 	//delete rasterDialogMap[tmpID];
 	rasterDialogMap.remove(tmpID);
+}
+
+
+/*! Called when an experiment completes. Returns control to the user. */
+void NemoWidget::experimentEnded(){
+	monitorGroupBox->setEnabled(true);
+	injectGroupBox->setEnabled(true);
+}
+
+
+/*! Called when an experiment starts. Takes control away from the user. */
+void NemoWidget::experimentStarted(){
+	monitorGroupBox->setEnabled(false);
+	injectGroupBox->setEnabled(false);
 }
 
 

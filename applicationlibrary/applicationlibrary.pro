@@ -160,8 +160,10 @@ SOURCES += src/models/NeuronGroupModel.cpp \
 #----------------------------------------------#
 #---               Simulation               ---#
 #----------------------------------------------#
-HEADERS += include/AbstractSimulation.h
-SOURCES += src/simulation/AbstractSimulation.cpp
+HEADERS += include/AbstractSimulation.h \
+			include/AbstractExperimentWidget.h
+SOURCES += src/simulation/AbstractSimulation.cpp \
+			src/simulation/AbstractExperimentWidget.cpp
 
 
 #----------------------------------------------#

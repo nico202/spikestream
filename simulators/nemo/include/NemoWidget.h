@@ -37,6 +37,8 @@ namespace spikestream {
 			void checkResetWeightsProgress();
 			void checkSaveWeightsProgress();
 			void deleteRasterPlotDialog(int);
+			void experimentEnded();
+			void experimentStarted();
 			void injectCurrentButtonClicked();
 			void injectNoiseButtonClicked();
 			void injectPatternButtonClicked();
@@ -75,6 +77,12 @@ namespace spikestream {
 
 			/*! Box holding all widgets - makes it easy to enable and disable everything. */
 			QGroupBox* mainGroupBox;
+
+			/*! Box holding monitoring controls */
+			QGroupBox* monitorGroupBox;
+
+			/*! Box holding injection controls */
+			QGroupBox* injectGroupBox;
 
 			/*! Box holding widgets that need to be enabled when simulation is loaded */
 			QWidget* controlsWidget;
