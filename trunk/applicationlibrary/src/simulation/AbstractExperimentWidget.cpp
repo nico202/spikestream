@@ -1,5 +1,6 @@
 //SpikeStream includes
 #include "AbstractExperimentWidget.h"
+#include "Globals.h"
 using namespace spikestream;
 
 
@@ -21,11 +22,11 @@ AbstractExperimentWidget::~AbstractExperimentWidget(){
 QToolBar* AbstractExperimentWidget::getToolBar(){
 	QToolBar* tmpToolBar = new QToolBar(this);
 
-	QAction* playAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/play.png"), "Start experiment", this);
+	playAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/play.png"), "Start experiment", this);
 	connect(playAction, SIGNAL(triggered()), this, SLOT(startExperiment()));
 	tmpToolBar->addAction (playAction);
 
-	QAction* stopAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/stop.png"), "Stop experiment", this);
+	stopAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/stop.png"), "Stop experiment", this);
 	connect(stopAction, SIGNAL(triggered()), this, SLOT(stopExperiment()));
 	stopAction->setEnabled(false);
 	tmpToolBar->addAction (stopAction);

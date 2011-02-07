@@ -239,7 +239,7 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	//Put layout into enclosing box
 	mainVBox->addWidget(controlsWidget);
 	mainGroupBox->setLayout(mainVBox);
-	this->setMinimumSize(800, 700);
+	this->setMinimumSize(800, 800);
 
 	//Create wrapper for Nemo library
 	nemoWrapper = new NemoWrapper();
@@ -457,6 +457,7 @@ void NemoWidget::deleteRasterPlotDialog(int){
 
 /*! Called when an experiment completes. Returns control to the user. */
 void NemoWidget::experimentEnded(){
+	toolBar->setEnabled(true);
 	monitorGroupBox->setEnabled(true);
 	injectGroupBox->setEnabled(true);
 }
@@ -464,6 +465,7 @@ void NemoWidget::experimentEnded(){
 
 /*! Called when an experiment starts. Takes control away from the user. */
 void NemoWidget::experimentStarted(){
+	toolBar->setEnabled(false);
 	monitorGroupBox->setEnabled(false);
 	injectGroupBox->setEnabled(false);
 }

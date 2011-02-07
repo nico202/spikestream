@@ -443,4 +443,12 @@ float Util::toPositive(float num){
 }
 
 
+/*! Converts number to a positive number if it is negative */
+int Util::toPositive(int num){
+	if (num >= 0)
+		return num;
+	return num * -1;
+}
+
+
 

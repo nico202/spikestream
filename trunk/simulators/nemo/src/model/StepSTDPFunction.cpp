@@ -9,7 +9,7 @@ using namespace spikestream;
 using namespace std;
 
 //Prints out the arrays when enabled
-#define DEBUG
+//#define DEBUG
 
 
 /*! Constructor */

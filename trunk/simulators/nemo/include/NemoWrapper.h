@@ -8,6 +8,7 @@
 #include "NetworkDao.h"
 #include "ParameterInfo.h"
 #include "Pattern.h"
+#include "SpikeStreamTypes.h"
 
 //Qt includes
 #include <QHash>
@@ -39,6 +40,7 @@ namespace spikestream {
 			unsigned getArchiveID() { return archiveInfo.getID(); }
 			int getCurrentTask() { return currentTaskID; }
 			QString getErrorMessage() { return errorMessage; }
+			QList<neurid_t> getFiringNeuronIDs() { return firingNeuronList; }
 			nemo_configuration_t getNemoConfig(){ return nemoConfig; }
 			unsigned getSTDPFunctionID() { return stdpFunctionID; }
 			unsigned getTimeStep() { return timeStepCounter; }
@@ -46,6 +48,7 @@ namespace spikestream {
 			bool isError() { return error; }
 			bool isMonitorFiringNeurons() { return monitorFiringNeurons; }
 			bool isMonitorWeights() { return monitorWeights; }
+			bool isWaitForGraphics()  { return waitForGraphics; }
 			bool isWeightsReset() { return weightsReset; }
 			bool isWeightsSaved() { return weightsSaved; }
 			bool isSimulationLoaded() { return simulationLoaded; }
@@ -172,7 +175,7 @@ namespace spikestream {
 			unsigned stdpFunctionID;
 
 			/*! List of neurons that are firing at the current time step */
-			QList<unsigned int> firingNeuronList;
+			QList<neurid_t> firingNeuronList;
 
 			/*! Map of neuron groups to inject noise into at the next time step.
 				The key is the neuron group ID, the value is the number of neurons to fire. */
