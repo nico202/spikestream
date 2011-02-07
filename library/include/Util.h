@@ -57,6 +57,7 @@ namespace spikestream {
 			static void seedRandom(int seed = 0);
 			static void setGeneralization(QHash<unsigned int, WeightlessNeuron*>& weiNeurMap, double gen);
 			static float toPositive(float num);
+			static int toPositive(int num);
 
 	};
 

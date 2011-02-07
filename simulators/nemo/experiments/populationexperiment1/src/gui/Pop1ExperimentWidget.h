@@ -5,8 +5,12 @@
 #include "AbstractExperimentWidget.h"
 #include "Pop1ExperimentManager.h"
 #include "NemoWrapper.h"
+#include "SpikeStreamTypes.h"
 
 //Qt includes
+#include <QHash>
+#include <QPushButton>
+#include <QTextEdit>
 #include <QToolBar>
 #include <QWidget>
 
@@ -23,8 +27,10 @@ namespace spikestream {
 
 		private slots:
 			void managerFinished();
+			void parametersButtonClicked();
 			void startExperiment();
 			void stopExperiment();
+			void updateStatus(QString statusMsg);
 
 		private:
 			//=====================  VARIABLES  ====================
@@ -34,8 +40,28 @@ namespace spikestream {
 			/*! Manager that runs the experiments */
 			Pop1ExperimentManager* pop1ExperimentManager;
 
+			/*! Button to set parameters */
+			QPushButton* parametersButton;
+
+			/*! Widget holding messages from the manager */
+			QTextEdit* statusTextEdit;
+
+			/*! Current parameters for the experiment */
+			QHash<QString, double> parameterMap;
+
+			/*! Default arameters for the experiment */
+			QHash<QString, double> defaultParameterMap;
+
+			/*! Meta information about the parameters fro the experiment. */
+			QList<ParameterInfo> parameterInfoList;
+
+			/*! Start neuron id in the experiment.
+				Neuron ids are expected to increase
+				by 1 along Y axis and by 10 along X axis. */
+			NeuronGroup* neuronGroup;
 
 			//=====================  METHODS  ======================
+			void buildParameters();
 			void checkNetwork();
 
 	};

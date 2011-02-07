@@ -46,7 +46,6 @@ void Pattern::addPoint(const Point3D& point){
 
 /*! Returns true if the pattern contains the specified point. */
 bool Pattern::contains(const Point3D& point){
-	//this->print();
 	//Is the point contained within any of the boxes?
 	QList<Box>::iterator boxListEnd = boxList.end();
 	for(QList<Box>::iterator iter = boxList.begin(); iter!=boxListEnd; ++iter){
@@ -82,21 +81,21 @@ Pattern Pattern::getAlignedPattern(const Box& box) const{
 
 	//Translate the new pattern and return it.
 	alignedPattern.translate(dx, dy, dz);
-	alignedPattern.print();
 	return alignedPattern;
 }
 
+
 /*! Prints out the pattern */
-void Pattern::print(){
+void Pattern::print() const {
 	cout<<"-------------  Pattern: "<<name.toStdString()<<" ---------------------"<<endl;
-	QList<Box>::iterator boxListEnd = boxList.end();
-	for(QList<Box>::iterator iter = boxList.begin(); iter!=boxListEnd; ++iter){
+	QList<Box>::const_iterator boxListEnd = boxList.end();
+	for(QList<Box>::const_iterator iter = boxList.begin(); iter!=boxListEnd; ++iter){
 		cout<<iter->toString().toStdString()<<endl;
 	}
 
 	//Does the point match any of the points?
-	QList<Point3D>::iterator pointListEnd = pointList.end();
-	for(QList<Point3D>::iterator iter = pointList.begin(); iter!=pointListEnd; ++iter){
+	QList<Point3D>::const_iterator pointListEnd = pointList.end();
+	for(QList<Point3D>::const_iterator iter = pointList.begin(); iter!=pointListEnd; ++iter){
 		cout<<iter->toString().toStdString()<<endl;
 	}
 }

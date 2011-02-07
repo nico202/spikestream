@@ -44,7 +44,8 @@ HEADERS = include/GlobalVariables.h \
 			include/RGBColor.h \
 			include/Box.h \
 			include/Util.h \
-			include/SpikeStreamThread.h
+			include/SpikeStreamThread.h \
+			include/SpikeStreamTypes.h
 
 SOURCES = src/PerformanceTimer.cpp \
 			src/Box.cpp \

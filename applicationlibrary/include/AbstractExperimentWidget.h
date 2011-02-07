@@ -25,7 +25,20 @@ namespace spikestream {
 			virtual void startExperiment() = 0;
 			virtual void stopExperiment() = 0;
 
+
+		protected:
+			//=====================  VARIABLES  =======================
+			/*! Action to start experiment */
+			QAction* playAction;
+
+			/*! Action to stop experiment. */
+			QAction* stopAction;
+
+			//======================  METHODS  ========================
+			QToolBar* getToolBar();
+
 	};
 
 }
 #endif//ABSTRACTEXPERIMENT_H
+
