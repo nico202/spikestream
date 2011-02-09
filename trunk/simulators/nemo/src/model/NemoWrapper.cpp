@@ -36,6 +36,7 @@ NemoWrapper::NemoWrapper() : AbstractSimulation() {
 	injectCurrentNeuronCount = 0;
 	injectCurrentAmount = 0;
 	sustainInjectCurrent = false;
+	waitInterval_ms = 200;
 
 	//Zero is the default STDP function
 	stdpFunctionID = 0;
@@ -212,9 +213,13 @@ void  NemoWrapper::setInjectNoise(unsigned neuronGroupID, double percentage, boo
 
 /*! Steps through a single time step */
 void NemoWrapper::stepSimulation(){
+	runMutex.lock();
+
 	if(!simulationLoaded)
 		throw SpikeStreamException("Cannot step simulation - no simulation loaded.");
 	currentTaskID = STEP_SIMULATION_TASK;
+
+	runMutex.unlock();
 }
 
 
@@ -234,6 +239,8 @@ void NemoWrapper::run(){
 
 		//Wait for run or step command
 		while(!stopThread){
+			runMutex.lock();
+
 			//Run simulation
 			if(currentTaskID == RUN_SIMULATION_TASK){
 				runNemo();
@@ -260,14 +267,16 @@ void NemoWrapper::run(){
 			}
 			//Task ID not recognized
 			else{
-				throw SpikeStreamException("Task ID not recognized.");
+				throw SpikeStreamException("Task ID not recognizedL: " + QString::number(currentTaskID));
 			}
 
 			//Reset task ID
 			currentTaskID = NO_TASK_DEFINED;//Don't want it to continue stepping.
 
+			runMutex.unlock();
+
 			//Short sleep waiting for the next command
-			msleep(200);
+			msleep(waitInterval_ms);
 		}
 
 		//Clean up the thread specific network and archive daos
@@ -940,6 +949,9 @@ void NemoWrapper::unloadNemo(){
 		unlock again may cause a crash */
 	mutex.tryLock();
 	mutex.unlock();
+
+	runMutex.tryLock();
+	runMutex.unlock();
 
 	//Clean up dynamic arrays in volatile connection group map
 	for(QHash<unsigned, synapse_id*>::iterator conGrpIter = volatileConGrpMap.begin(); conGrpIter != volatileConGrpMap.end(); ++conGrpIter){

@@ -24,8 +24,9 @@ SUBDIRS += connectiongroups/random1 connectiongroups/topographic1
 
 #================  SIMULATION PLUGINS  =================
 SUBDIRS += simulators/nemo
+SUBDIRS += simulators/nemo/experiments/populationexperiment1
 	
-	
+
 #================  INSTALLATION  =====================
 SUBDIRS += installation/dbconfigtool
 
