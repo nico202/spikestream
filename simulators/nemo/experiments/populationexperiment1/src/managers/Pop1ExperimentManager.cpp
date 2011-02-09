@@ -25,8 +25,11 @@ Pop1ExperimentManager::~Pop1ExperimentManager(){
 void Pop1ExperimentManager::run(){
 	clearError();
 	stopThread = false;
+	unsigned origWaitInterval = nemoWrapper->getWaitInterval_ms();
+	nemoWrapper->setWaitInterval(1);//Minimal wait between steps
 
 	try{
+		getAverageHammingDistanceNoise();
 		runExperiment();
 	}
 	catch(SpikeStreamException& ex){
@@ -36,6 +39,7 @@ void Pop1ExperimentManager::run(){
 		setError("Pop1ExperimentManager has thrown an unknown exception.");
 	}
 
+	nemoWrapper->setWaitInterval(origWaitInterval);//Restore wrapper to original state
 	experimentNumber = NO_EXPERIMENT;
 	stopThread = true;
 }
@@ -64,7 +68,7 @@ void Pop1ExperimentManager::addHammingNoise(QList<Pattern>& patternList){
 		QList<Point3D> pointList = patternList.at(i).getPoints();
 
 		//Get a set of columns that will be changed. Ignore the last two points, which are there for alignment
-		QList<int> selectionIndexes = getRandomSelectionIndexes(numRandomShiftCols, pointList.size()-2);
+		QList<int> selectionIndexes = getRandomSelectionIndexes(numNoiseCols, pointList.size()-2);
 
 		//Change the points at the selection indexes
 		for(int j=0; j<selectionIndexes.size(); ++j){
@@ -73,7 +77,6 @@ void Pop1ExperimentManager::addHammingNoise(QList<Pattern>& patternList){
 
 			//Select shift direction at random - shift up if possible, otherwise shift down
 			if(Util::getRandom(0,2) == 0){
-				qDebug()<<"Shifting UP by "<<randomShiftAmount;
 				if(origY + randomShiftAmount < yStart + numYNeurons)
 					pointList[selectionIndexes.at(j)].setYPos(origY + randomShiftAmount);
 				else
@@ -82,7 +85,6 @@ void Pop1ExperimentManager::addHammingNoise(QList<Pattern>& patternList){
 
 			//Shift down if possible, otherwise shift up
 			else{
-				qDebug()<<"Shifting DOWN by "<<randomShiftAmount;
 				if(origY - randomShiftAmount >= yStart)
 					pointList[selectionIndexes.at(j)].setYPos(origY - randomShiftAmount);
 				else
@@ -103,6 +105,42 @@ void Pop1ExperimentManager::addHammingNoise(QList<Pattern>& patternList){
 
 	//Copy new patterns into original pattern list
 	patternList = newPatternList;
+}
+
+
+/*! Calculates the average Hamming distance that would be expected per pattern
+	if the signals were completely uncorrelated */
+int Pop1ExperimentManager::getAverageHammingDistanceNoise(){
+	QList<int> resultsList;
+
+	//Work through different seeds starting with the initial seed
+	for(int seedCtr = 0; seedCtr < 10; ++seedCtr){
+		Util::seedRandom(randomSeed + seedCtr*50);
+
+		int hammingTot = 0;
+		for(int i=0; i<numPatterns; ++i){
+			for(int j=0; j<numXNeurons; ++j){
+				hammingTot += Util::toPositive(Util::getRandom(yStart, numYNeurons+yStart) - Util::getRandom(yStart, numYNeurons+yStart));
+			}
+		}
+		resultsList.append(hammingTot);
+	}
+
+	//Calculate the averate
+	double average = 0.0;
+	for(int i=0; i<resultsList.size(); ++i)
+		average += resultsList.at(i);
+	average /= resultsList.size();
+
+	//Calculate the sample standard deviation
+	double sd = 0.0;
+	for(int i=0; i<resultsList.size(); ++i)
+		sd += pow(average - resultsList.at(i), 2);
+	sd /= (resultsList.size() -1 );
+	sd = sqrt(sd);
+
+	emit statusUpdate("Average total Hamming distance between uncorrelated patterns: " + QString::number(average) + "; population standard deviation: " + QString::number(sd));
+	return average;
 }
 
 
@@ -164,7 +202,7 @@ Pattern Pop1ExperimentManager::getPattern(){
 	float xPos, yPos, zPos = zStart;
 	for(int i=1; i<=numXNeurons; ++i){
 		xPos = i;
-		yPos = Util::getRandom(yStart, yStart + numYNeurons - 1);
+		yPos = Util::getRandom(yStart, yStart + numYNeurons);
 		tmpPattern.addPoint(Point3D(xPos, yPos, zPos));
 	}
 
@@ -184,7 +222,7 @@ QList<int> Pop1ExperimentManager::getRandomSelectionIndexes(int numSelections, i
 
 	QHash<int, bool> selectionMap;
 	while(selectionMap.size() != numSelections){
-		selectionMap[Util::getRandom(0, max-1)] = true;
+		selectionMap[Util::getRandom(0, max)] = true;
 	}
 
 	return selectionMap.keys();
@@ -242,10 +280,13 @@ void Pop1ExperimentManager::runExperiment(){
 	//Add noise to injection pattern for experiment 2
 	if(experimentNumber == EXPERIMENT2)
 		addHammingNoise(patternList);
+	else if(experimentNumber == EXPERIMENT3)
+		subtractRandomPoints(patternList);
 
 	//Inject each pattern and evaluate whether it has correctly invoked the subsequent pattern
 	//The last pattern is not injected because it has not been trained on anything
 	emit statusUpdate("Testing network");
+	int totalHammingDist = 0;
 	for(int i=0; i< numPatterns-1 && !stopThread; ++i){
 		//Inject it into the simulation
 		emit statusUpdate("Injecting pattern " + QString::number(i));
@@ -256,12 +297,16 @@ void Pop1ExperimentManager::runExperiment(){
 
 		//Output the Hamming distance between the actual firing pattern and the firing pattern we expect
 		int hammingDist = getHammingDistance(patternNeurIDList.at(i+1), nemoWrapper->getFiringNeuronIDs());
-		emit statusUpdate("Patten " + QString::number(i) + " produced a second pattern with a hamming distance of " + QString::number(hammingDist) + "; " + QString::number(nemoWrapper->getFiringNeuronIDs().size()) + " firing neurons in second pattern.");
+		totalHammingDist += hammingDist;
+		emit statusUpdate("Patten " + QString::number(i) + " produced a second pattern with a Hamming distance of " + QString::number(hammingDist) + "; " + QString::number(nemoWrapper->getFiringNeuronIDs().size()) + " firing neurons in second pattern.");
 
 		//Step beyond the end of the association chain before injecting the next pattern
 		emit statusUpdate("Waiting for sequence to finish.");
 		stepNemo((numPatterns-i) * 15);
 	}
+
+	//Output final result
+	emit statusUpdate("Total Hamming distance: " + QString::number(totalHammingDist));
 }
 
 
@@ -269,8 +314,8 @@ void Pop1ExperimentManager::runExperiment(){
 void Pop1ExperimentManager::stepNemo(unsigned numTimeSteps){
 	for(unsigned i=0; i<numTimeSteps && !stopThread; ++i){
 		nemoWrapper->stepSimulation();
-		while(nemoWrapper->getCurrentTask() == NemoWrapper::STEP_SIMULATION_TASK && !stopThread)
-			msleep(1);
+		while((nemoWrapper->isWaitForGraphics() || nemoWrapper->getCurrentTask() == NemoWrapper::STEP_SIMULATION_TASK) && !stopThread)
+			msleep(pauseInterval_ms);
 	}
 	msleep(pauseInterval_ms);
 }
@@ -310,9 +355,9 @@ void Pop1ExperimentManager::storeParameters(QHash<QString, double> &parameterMap
 		throw SpikeStreamException("Pop1ExperimentManager: z_start parameter missing");
 	zStart = (float)parameterMap["z_start"];
 
-	if(!parameterMap.contains("num_random_shift_cols"))
-		throw SpikeStreamException("Pop1ExperimentManager: num_random_shift_cols parameter missing");
-	numRandomShiftCols = (float)parameterMap["num_random_shift_cols"];
+	if(!parameterMap.contains("num_noise_cols"))
+		throw SpikeStreamException("Pop1ExperimentManager: num_noise_cols parameter missing");
+	numNoiseCols = (float)parameterMap["num_noise_cols"];
 
 	if(!parameterMap.contains("random_shift_amount"))
 		throw SpikeStreamException("Pop1ExperimentManager: random_shift_amount parameter missing");
@@ -326,5 +371,40 @@ void Pop1ExperimentManager::storeParameters(QHash<QString, double> &parameterMap
 		throw SpikeStreamException("Pop1ExperimentManager: pause_interval_ms parameter missing");
 	pauseInterval_ms = (int)parameterMap["pause_interval_ms"];
 }
+
+
+/*! Subtracts random points from the injection pattern used for testing. */
+void Pop1ExperimentManager::subtractRandomPoints(QList<Pattern>& patternList){
+	QList<Pattern> newPatternList;
+
+	for(int i=0; i<patternList.size(); ++i){
+		//Get the points in the current pattern
+		QList<Point3D> pointList = patternList.at(i).getPoints();
+
+		//Get a set of columns that will NOT their points removed. Ignore the last two points, which are there for alignment
+		QList<int> selectionIndexes = getRandomSelectionIndexes(numXNeurons - numNoiseCols, numXNeurons);
+
+		//Add selected points to the new pattern
+		Pattern tmpPattern;
+		for(int j=0; j<selectionIndexes.size(); ++j){
+			tmpPattern.addPoint(pointList[selectionIndexes.at(j)]);
+		}
+
+		//Add last two points to the pattern
+		tmpPattern.addPoint(pointList.at(pointList.size() - 1));
+		tmpPattern.addPoint(pointList.at(pointList.size() - 2));
+
+		//Create new pattern with the modified points
+		newPatternList.append(tmpPattern);
+		qDebug()<<"=============== ORIGINAL PATTERN =====================";
+		patternList.at(i).print();
+		qDebug()<<"=============== PERTURBED PATTERN =====================";
+		tmpPattern.print();
+	}
+
+	//Copy new patterns into original pattern list
+	patternList = newPatternList;
+}
+
 
 

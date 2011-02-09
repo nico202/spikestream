@@ -436,6 +436,14 @@ void Util::setGeneralization(QHash<unsigned int, WeightlessNeuron*>& weiNeurMap,
 
 
 /*! Converts number to a positive number if it is negative */
+double Util::toPositive(double num){
+	if (num > 0.0)
+		return num;
+	return num * -1.0;
+}
+
+
+/*! Converts number to a positive number if it is negative */
 float Util::toPositive(float num){
 	if (num > 0.0f)
 		return num;

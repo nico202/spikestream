@@ -13,9 +13,8 @@
 
 namespace spikestream {
 
-	/*! NOTE: GET A BENCHMARK BY INJECTING RANDOM NEW PATTERNS INTO TRAINED NETWORK AND GETTING THE
-		AVERAGE HAMMING DISTANCE. THEN AVERAGE HAMMING DISTANCE FOR RECONSTRUCTED PATTERNS CAN BE
-		QUOTED AS A PARAMETER
+	/*! Runs selected experiments on network exploring how population code can be used
+		in a recurrent network. */
 	class Pop1ExperimentManager : public SpikeStreamThread {
 		Q_OBJECT
 
@@ -45,6 +44,7 @@ namespace spikestream {
 			static const int NO_EXPERIMENT = -1;
 			static const int EXPERIMENT1 = 0;
 			static const int EXPERIMENT2 = 1;
+			static const int EXPERIMENT3 = 2;
 
 			/*! Number of neurons along the X axis */
 			int numXNeurons;
@@ -65,7 +65,7 @@ namespace spikestream {
 			int numPatterns;
 
 			/*! Number of columns to shift by a random amount. */
-			int numRandomShiftCols;
+			int numNoiseCols;
 
 			/*! Amount to shift each column by */
 			int randomShiftAmount;
@@ -79,6 +79,7 @@ namespace spikestream {
 
 			//======================  METHODS  ======================
 			void addHammingNoise(QList<Pattern>& patternList);
+			int getAverageHammingDistanceNoise();
 			int getHammingDistance(const QList<neurid_t>& expectedList, QList<neurid_t> actualList);
 			Pattern getPattern();
 			QList<int> getRandomSelectionIndexes(int numSelections, int max);
@@ -87,6 +88,7 @@ namespace spikestream {
 			void runExperiment();
 			void stepNemo(unsigned numTimeSteps);
 			void storeParameters(QHash<QString, double>& parameterMap);
+			void subtractRandomPoints(QList<Pattern>& patternList);
 
 	};
 

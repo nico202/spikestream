@@ -153,10 +153,16 @@ void Pop1ExperimentWidget::updateStatus(QString statusMsg){
 /*! Builds the current and default parameter map along with the parameter
 	info list. */
 void Pop1ExperimentWidget::buildParameters(){
+	//Reset maps and list
+	parameterInfoList.clear();
+	defaultParameterMap.clear();
+	parameterMap.clear();
+
 	ParameterInfo tmpInfo("experiment_number", "The experiment that is carried out", ParameterInfo::OPTION);
 	QList<QString> exptNameList;
 	exptNameList.append("Experiment 1 - Sequence Learning");
 	exptNameList.append("Experiment 2 - Sequence Learning with Noise");
+	exptNameList.append("Experiment 3 - Sequence Learning with Subtractions");
 	tmpInfo.setOptionNames(exptNameList);
 	parameterInfoList.append(tmpInfo);
 	defaultParameterMap["experiment_number"] = 0;
@@ -190,9 +196,9 @@ void Pop1ExperimentWidget::buildParameters(){
 	defaultParameterMap["z_start"] = 1;
 	parameterMap["z_start"] = defaultParameterMap["z_start"];
 
-	parameterInfoList.append(ParameterInfo("num_random_shift_cols", "Number of columns to shift by the random shift amount", ParameterInfo::INTEGER));
-	defaultParameterMap["num_random_shift_cols"] = 1;
-	parameterMap["num_random_shift_cols"] = defaultParameterMap["num_random_shift_cols"];
+	parameterInfoList.append(ParameterInfo("num_noise_cols", "Number of columns to affect by noise.", ParameterInfo::INTEGER));
+	defaultParameterMap["num_noise_cols"] = 1;
+	parameterMap["num_noise_cols"] = defaultParameterMap["num_noise_cols"];
 
 	parameterInfoList.append(ParameterInfo("random_shift_amount", "Amount to shift each Y value by in experiment 2", ParameterInfo::INTEGER));
 	defaultParameterMap["random_shift_amount"] = 1;

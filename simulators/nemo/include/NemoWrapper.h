@@ -45,6 +45,7 @@ namespace spikestream {
 			unsigned getSTDPFunctionID() { return stdpFunctionID; }
 			unsigned getTimeStep() { return timeStepCounter; }
 			unsigned getUpdateInterval_ms() { return this->updateInterval_ms; }
+			unsigned getWaitInterval_ms() { return waitInterval_ms; }
 			bool isError() { return error; }
 			bool isMonitorFiringNeurons() { return monitorFiringNeurons; }
 			bool isMonitorWeights() { return monitorWeights; }
@@ -72,6 +73,7 @@ namespace spikestream {
 			void setSustainCurrent(bool sustainCurrent) { this->sustainInjectCurrent = sustainCurrent; }
 			void setSustainNoise(bool sustainNoise) { this->sustainNoise = sustainNoise; }
 			void setSustainPattern(bool sustainPattern) { this->sustainPattern = sustainPattern; }
+			void setWaitInterval(unsigned waitInterval_ms) { this->waitInterval_ms = waitInterval_ms; }
 			void playSimulation();
 			void stepSimulation();
 			void stopSimulation();
@@ -164,12 +166,18 @@ namespace spikestream {
 			/*! Interval between each time step in milliseconds. */
 			unsigned updateInterval_ms;
 
+			/*! Amount of time that wrapper waits before checking for next task to execute. */
+			unsigned waitInterval_ms;
+
 			/*! In monitor mode we need to wait for the graphics to update before
 				moving on to the next time step */
 			bool waitForGraphics;
 
 			/*! Mutex controlling access to variables */
 			QMutex mutex;
+
+			/*! Mutex that is locked during run method loop and prevents changes whilst it runs. */
+			QMutex runMutex;
 
 			/*! ID of the STDP function */
 			unsigned stdpFunctionID;
