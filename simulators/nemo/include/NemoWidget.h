@@ -168,6 +168,9 @@ namespace spikestream {
 			/*! Flag to prevent calls to progress dialog while it is redrawing. */
 			bool updatingProgress;
 
+			/*! Switches injection of current on and off. */
+			QCheckBox* sustainCurrentChkBox;
+
 			/*! Combo to select number of neurons to inject current into */
 			QComboBox* injectCurrentNeuronCountCombo;
 
@@ -176,6 +179,9 @@ namespace spikestream {
 
 			/*! Button to inject current on single time step. */
 			QPushButton* injectCurrentButton;
+
+			/*! Switches injection of noise on and off. */
+			QCheckBox* sustainNoiseChkBox;
 
 			/*! Button to inject noise into a neuron group */
 			QPushButton* injectNoiseButton;
