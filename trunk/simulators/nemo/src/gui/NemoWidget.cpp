@@ -165,7 +165,7 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	injectCurrentButton->setMinimumHeight(20);
 	connect(injectCurrentButton, SIGNAL(clicked()), this, SLOT(injectCurrentButtonClicked()));
 	injectCurrentBox->addWidget(injectCurrentButton);
-	QCheckBox* sustainCurrentChkBox = new QCheckBox("Sustain");
+	sustainCurrentChkBox = new QCheckBox("Sustain");
 	connect(sustainCurrentChkBox, SIGNAL(clicked(bool)), this, SLOT(sustainCurrentChanged(bool)));
 	injectCurrentBox->addWidget(sustainCurrentChkBox);
 	injectCurrentBox->addStretch(5);
@@ -186,7 +186,7 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	injectNoiseButton->setMinimumHeight(20);
 	connect(injectNoiseButton, SIGNAL(clicked()), this, SLOT(injectNoiseButtonClicked()));
 	injectNoiseBox->addWidget(injectNoiseButton);
-	QCheckBox* sustainNoiseChkBox = new QCheckBox("Sustain");
+	sustainNoiseChkBox = new QCheckBox("Sustain");
 	connect(sustainNoiseChkBox, SIGNAL(clicked(bool)), this, SLOT(sustainNoiseChanged(bool)));
 	injectNoiseBox->addWidget(sustainNoiseChkBox);
 	injectNoiseBox->addStretch(5);
@@ -1035,6 +1035,23 @@ void NemoWidget::unloadSimulation(bool confirmWithUser){
 	archiveDescriptionEdit->setText("Undescribed");
 	archiveCheckBox->setChecked(false);//Single archive associated with each simulation run
 	timeStepLabel->setText("0");
+
+	//Inject patterns, current etc.
+	sustainPatternChkBox->setChecked(false);
+	injectPatternButton->setEnabled(true);
+	injectPatternNeurGrpCombo->setEnabled(true);
+	patternCombo->setEnabled(true);
+	patternCurrentCombo->setEnabled(true);
+
+	sustainNoiseChkBox->setChecked(false);
+	injectNoiseButton->setEnabled(true);
+	injectNoisePercentCombo->setEnabled(true);
+	injectNoiseNeuronGroupCombo->setEnabled(true);
+
+	sustainCurrentChkBox->setChecked(false);
+	injectCurrentButton->setEnabled(true);
+	injectCurrentNeuronCountCombo->setEnabled(true);
+	injectCurrentAmountCombo->setEnabled(true);
 
 	//Clean up any raster plots
 	for(QHash<unsigned, SpikeRasterDialog*>::iterator iter = rasterDialogMap.begin(); iter != rasterDialogMap.end(); ++iter){

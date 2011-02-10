@@ -959,6 +959,17 @@ void NemoWrapper::unloadNemo(){
 	}
 	volatileConGrpMap.clear();
 
+	//Clean up sustain noise etc.
+	sustainNoise = false;
+	injectNoiseMap.clear();
+	sustainInjectCurrent = false;
+	injectCurrentNeuronCount = 0;
+	injectCurrentAmount = 0;
+	sustainPattern = false;
+	injectionPatternVector.clear();
+	injectionCurrentNeurIDVector.clear();
+	injectionCurrentVector.clear();
+
 	simulationLoaded = false;
 	archiveInfo.reset();
 }
