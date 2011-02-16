@@ -107,6 +107,11 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	monitorMemPotNeuronsButton = new QRadioButton("Membrane potential");
 	monitorNeuronsButtonGroup->addButton(monitorMemPotNeuronsButton, MONITOR_NEURONS_MEMBRANE);
 	monitorNeuronsBox->addWidget(monitorMemPotNeuronsButton);
+	memPotGraphButton = new QPushButton("Graph");
+	connect(memPotGraphButton, SIGNAL(clicked()), this, SLOT(memPotGraphButtonClicked()));
+	memPotGraphButton->setMaximumSize(60,20);
+	memPotGraphButton->setEnabled(false);
+	monitorNeuronsBox->addWidget(memPotGraphButton);
 	monitorNeuronsBox->addStretch(5);
 	monitorVBox->addLayout(monitorNeuronsBox);
 	monitorVBox->addSpacing(5);
@@ -261,6 +266,10 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	//Listen for network changes
 	connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(networkChanged()));
 
+	//Listen for simulation control events
+	connect(Globals::getEventRouter(), SIGNAL(startStopSimulationSignal()), this, SLOT(startStopSimulation()));
+	connect(Globals::getEventRouter(), SIGNAL(stepSimulationSignal()), this, SLOT(stepSimulation()));
+
 	//Set initial state of tool bar
 	checkWidgetEnabled();
 
@@ -346,6 +355,7 @@ void NemoWidget::checkLoadingProgress(){
 	controlsWidget->setEnabled(true);
 	playAction->setEnabled(true);
 	stopAction->setEnabled(false);
+	stepAction->setEnabled(true);
 	monitorWeightsCheckBox->setChecked(nemoWrapper->isMonitorWeights());
 	archiveCheckBox->setChecked(false);//Single archive associated with each simulation run
 
@@ -440,6 +450,19 @@ void NemoWidget::checkSaveWeightsProgress(){
 	progressDialog->setValue(progressDialog->maximum());
 	delete progressDialog;
 	progressDialog = NULL;
+}
+
+
+/*! Deletes the raster plot dialog that invoked this slot.
+	Should be triggered when the plot dialog is closed.  */
+void NemoWidget::deleteMembranePotentialGraphDialog(int){
+	unsigned tmpID = sender()->objectName().toUInt();
+	qDebug()<<"Deleting Membrane potential graph dialog with ID: "<<tmpID;
+	if(!memPotGraphDialogMap.contains(tmpID)){
+		qCritical()<<"Raster dialog not found: ID="<<tmpID;
+		return;
+	}
+	memPotGraphDialogMap.remove(tmpID);
 }
 
 
@@ -582,6 +605,40 @@ void NemoWidget::loadSimulation(){
 }
 
 
+
+/*! Called when the raster button is clicked.
+	Launches a dialog to select the  neuron groups to monitor and then launches a raster plot dialog. */
+void NemoWidget::memPotGraphButtonClicked(){
+	//Get ID of current neuron
+	neurid_t neurID = Globals::getNetworkDisplay()->getSingleNeuronID();
+	if(neurID < START_NEURON_ID){
+		qCritical()<<"No neuron selected. You must select a neuron to plot a membrane potential graph.";
+		return;
+	}
+
+	//Do nothing if we are already monitoring this neuron
+	if(memPotGraphDialogMap.contains(neurID)){
+		qDebug()<<"Already monitoring this neuron";
+		return;
+	}
+
+	try{
+		//Create raster dialog
+		MembranePotentialGraphDialog* memPotDlg = new MembranePotentialGraphDialog(neurID, this);
+		memPotDlg->setObjectName(QString::number(neurID));
+		connect(memPotDlg, SIGNAL(finished(int)), this, SLOT(deleteMembranePotentialGraphDialog(int)));
+		memPotDlg->show();
+
+		//Store details so that we can update it
+		memPotGraphDialogMap[neurID] = memPotDlg;
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<ex.getMessage();
+	}
+}
+
+
+
 /*! Controls whether the time step is updated each time step. */
 void NemoWidget::monitorChanged(int state){
 	try{
@@ -616,16 +673,19 @@ void NemoWidget::monitorNeuronsStateChanged(int monitorType){
 		if(monitorType == MONITOR_NEURONS_OFF){
 			nemoWrapper->setMonitorNeurons(false, false);
 			rasterButton->setEnabled(false);
+			memPotGraphButton->setEnabled(false);
 		}
 		//Monitoring firing neurons
 		else if(monitorType == MONITOR_NEURONS_FIRING){
 			nemoWrapper->setMonitorNeurons(true, false);
 			rasterButton->setEnabled(true);
+			memPotGraphButton->setEnabled(false);
 		}
 		//Monitoring membrane potential
 		else if(monitorType == MONITOR_NEURONS_MEMBRANE){
 			nemoWrapper->setMonitorNeurons(false, true);
 			rasterButton->setEnabled(false);
+			memPotGraphButton->setEnabled(true);
 		}
 		//Unrecognized value
 		else{
@@ -811,6 +871,7 @@ void NemoWidget::simulationStopped(){
 	saveWeightsButton->setEnabled(true);
 	playAction->setEnabled(true);
 	stopAction->setEnabled(false);
+	stepAction->setEnabled(true);
 	unloadButton->setEnabled(true);
 	neuronParametersButton->setEnabled(true);
 }
@@ -860,6 +921,7 @@ void NemoWidget::updateTimeStep(unsigned int timeStep, const QHash<unsigned, flo
 	QHash<unsigned int, RGBColor*>* newHighlightMap = new QHash<unsigned int, RGBColor*>();
 	QHash<unsigned, float>::const_iterator endMap = membranePotentialMap.end();
 	for(QHash<unsigned, float>::const_iterator iter = membranePotentialMap.begin(); iter != endMap; ++iter){
+		//Update 3D display
 		tmpMemPot = iter.value();
 		if(tmpMemPot < -89.0f)
 			(*newHighlightMap)[iter.key()] = heatColorMap[-1];
@@ -885,6 +947,11 @@ void NemoWidget::updateTimeStep(unsigned int timeStep, const QHash<unsigned, flo
 			(*newHighlightMap)[iter.key()] = heatColorMap[9];
 		else
 			(*newHighlightMap)[iter.key()] = heatColorMap[10];
+
+		//Update graphs
+		if(memPotGraphDialogMap.contains(iter.key())){
+			memPotGraphDialogMap[iter.key()]->addData(iter.value(), timeStep);
+		}
 	}
 
 	//Set network display
@@ -908,14 +975,15 @@ void NemoWidget::simulationRateChanged(int){
 
 /*! Starts the simulation running */
 void NemoWidget::startSimulation(){
+	//Do nothing if there is no simulation loaded or if wrapper is busy
 	if(!nemoWrapper->isSimulationLoaded()){
-		qCritical()<<"Cannot play simulation: no simulation loaded.";
 		return;
 	}
 	try{
 		nemoWrapper->playSimulation();
 		playAction->setEnabled(false);
 		stopAction->setEnabled(true);
+		stepAction->setEnabled(false);
 		unloadButton->setEnabled(false);
 		neuronParametersButton->setEnabled(false);
 		saveWeightsButton->setEnabled(false);
@@ -926,10 +994,23 @@ void NemoWidget::startSimulation(){
 }
 
 
+/*! Starts simulation if it is not already running or stops it. */
+void NemoWidget::startStopSimulation(){
+	//Do nothing if there is no simulation loaded or if wrapper is busy
+	if(!nemoWrapper->isSimulationLoaded()){
+		return;
+	}
+	if(nemoWrapper->getCurrentTask() == NemoWrapper::NO_TASK_DEFINED)
+		startSimulation();
+	else if(nemoWrapper->getCurrentTask() == NemoWrapper::RUN_SIMULATION_TASK)
+		stopSimulation();
+}
+
+
 /*! Advances the simulation by one time step */
 void NemoWidget::stepSimulation(){
-	if(!nemoWrapper->isSimulationLoaded()){
-		qCritical()<<"Cannot step simulation: no simulation loaded.";
+	//Do nothing if there is no simulation loaded or if wrapper is busy
+	if(!nemoWrapper->isSimulationLoaded() || nemoWrapper->getCurrentTask() != NemoWrapper::NO_TASK_DEFINED){
 		return;
 	}
 
@@ -945,6 +1026,11 @@ void NemoWidget::stepSimulation(){
 
 /*! Stops the simulation */
 void NemoWidget::stopSimulation(){
+	//Do nothing if there is no simulation loaded
+	if(!nemoWrapper->isSimulationLoaded()){
+		return;
+	}
+
 	nemoWrapper->stopSimulation();
 }
 
@@ -1058,6 +1144,12 @@ void NemoWidget::unloadSimulation(bool confirmWithUser){
 		delete iter.value();
 	}
 	rasterDialogMap.clear();
+
+	//Clean up any membrane potential plots
+	for(QHash<unsigned, MembranePotentialGraphDialog*>::iterator iter = memPotGraphDialogMap.begin(); iter != memPotGraphDialogMap.end(); ++iter){
+		delete iter.value();
+	}
+	memPotGraphDialogMap.clear();
 }
 
 
@@ -1211,10 +1303,10 @@ QToolBar* NemoWidget::getToolBar(){
 	stopAction->setEnabled(false);
 	tmpToolBar->addAction (stopAction);
 
-	QAction* tmpAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/step.png"), "Step simulation", this);
-	connect(tmpAction, SIGNAL(triggered()), this, SLOT(stepSimulation()));
+	stepAction = new QAction(QIcon(Globals::getSpikeStreamRoot() + "/images/step.png"), "Step simulation", this);
+	connect(stepAction, SIGNAL(triggered()), this, SLOT(stepSimulation()));
+	tmpToolBar->addAction (stepAction);
 
-	tmpToolBar->addAction (tmpAction);
 	simulationRateCombo = new QComboBox();
 	simulationRateCombo->addItem("1");
 	simulationRateCombo->addItem("5");

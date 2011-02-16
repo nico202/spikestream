@@ -340,6 +340,17 @@ void SpikeStreamMainWindow::initializeApplication(){
 	connect(rotateRightAction, SIGNAL(triggered()), Globals::getEventRouter(), SLOT(rotateRightSlot()));
 	this->addAction(rotateRightAction);
 
+	//Simulation actions
+	QAction* startStopSimulationAction = new QAction(this);
+	startStopSimulationAction->setShortcut(QKeySequence(Qt::Key_Space));
+	connect(startStopSimulationAction, SIGNAL(triggered()), Globals::getEventRouter(), SLOT(startStopSimulationSlot()));
+	this->addAction(startStopSimulationAction);
+
+	QAction* stepSimulationAction = new QAction(this);
+	stepSimulationAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Space));
+	connect(stepSimulationAction, SIGNAL(triggered()), Globals::getEventRouter(), SLOT(stepSimulationSlot()));
+	this->addAction(stepSimulationAction);
+
 	//Show/hide all connection groups
 	QAction* showAllNoneConnectionsActions = new QAction(this);
 	showAllNoneConnectionsActions->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_W));

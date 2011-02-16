@@ -17,6 +17,8 @@ namespace spikestream {
 	/*! Type of a connection group ID */
 	typedef unsigned int congrpid_t;
 
+	/*! Type of a time step */
+	typedef int timestep_t;
 }
 
 

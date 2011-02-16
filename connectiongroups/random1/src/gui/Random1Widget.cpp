@@ -81,6 +81,7 @@ bool Random1Widget::checkInputs(){
 		checkInput(minDelayEdit, "Min delay has not been set.");
 		checkInput(maxDelayEdit, "Max delay has not been set.");
 		checkInput(connectionProbabilityEdit, "Density has not been set.");
+		checkInput(seedEdit, "Random seed has not been set.");
 	}
 	catch(SpikeStreamException& ex){
 		QMessageBox::warning(this, "Random1 Connection Group Builder", ex.getMessage(), QMessageBox::Ok);
@@ -109,6 +110,7 @@ ConnectionGroupInfo Random1Widget::getConnectionGroupInfo(){
 	paramMap["min_delay"] = Util::getDouble(minDelayEdit->text());
 	paramMap["max_delay"] = Util::getDouble(maxDelayEdit->text());
 	paramMap["connection_probability"] = Util::getDouble(connectionProbabilityEdit->text());
+	paramMap["random_seed"] = Util::getDouble(seedEdit->text());
 
 	//Use extracted praameters to construct connection group info
 	ConnectionGroupInfo info(0, descriptionEdit->text(), fromNeurGrpID, toNeurGrpID, paramMap, Globals::getNetworkDao()->getSynapseType(synapseTypeID));
@@ -128,6 +130,7 @@ void Random1Widget::buildGUI(QVBoxLayout* mainVBox){
 	QDoubleValidator* doubleValidator = new QDoubleValidator(-1.0, 1000000.0, 5, this);
 	QDoubleValidator* weightValidator = new QDoubleValidator(-1.0, 1.0, 5, this);
 	QIntValidator* delayValidator = new QIntValidator(0, 10000, this);
+	QIntValidator* seedValidator = new QIntValidator(0, 1000000000, this);
 	QIntValidator* percentValidator = new QIntValidator(0, 100, this);
 
 	//Add description widget
@@ -214,7 +217,18 @@ void Random1Widget::buildGUI(QVBoxLayout* mainVBox){
 	mainVBox->addLayout(miscLayout);
 	mainVBox->addSpacing(10);
 
+	//Random Seed
+	seedEdit = new QLineEdit("1234");
+	seedEdit->setMaximumSize(100, 30);
+	seedEdit->setValidator(seedValidator);
+	QHBoxLayout* seedLayout = new QHBoxLayout();
+	seedLayout->addWidget(new QLabel("Random seed: "));
+	seedLayout->addWidget(seedEdit);
+	seedLayout->addStretch(5);
+	mainVBox->addLayout(seedLayout);
+	mainVBox->addSpacing(10);
+
 	mainGroupBox->setLayout(mainVBox);
-	this->setMinimumSize(800, 300);
+	this->setMinimumSize(800, 400);
 }
 

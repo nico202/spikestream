@@ -14,9 +14,10 @@ using namespace spikestream;
 
 //Outputs debugging information for NeMo calls
 //#define DEBUG_LOAD
+#define DEBUG_PARAMETERS
+//#define DEBUG_PERFORMANCE
 //#define DEBUG_STEP
 //#define DEBUG_WEIGHTS
-//#define DEBUG_PERFORMANCE
 
 
 /*! Constructor */
@@ -148,7 +149,15 @@ void NemoWrapper::loadNemo(){
 void NemoWrapper::playSimulation(){
 	if(!simulationLoaded)
 		throw SpikeStreamException("Cannot run simulation - no simulation loaded.");
+
+	//Do nothing if we are already in play mode
+	if(currentTaskID == RUN_SIMULATION_TASK)
+		return;
+
+	runMutex.lock();
 	currentTaskID = RUN_SIMULATION_TASK;
+	runMutex.unlock();
+
 }
 
 
@@ -213,12 +222,20 @@ void  NemoWrapper::setInjectNoise(unsigned neuronGroupID, double percentage, boo
 
 /*! Steps through a single time step */
 void NemoWrapper::stepSimulation(){
-	runMutex.lock();
-
 	if(!simulationLoaded)
 		throw SpikeStreamException("Cannot step simulation - no simulation loaded.");
+
+	//Do nothing if we are already in step mode
+	if(currentTaskID == STEP_SIMULATION_TASK)
+		return;
+
+	//Lock mutex to prevent interference with current task
+	runMutex.lock();
+
+	//Set to step mode for when run loop is next ready
 	currentTaskID = STEP_SIMULATION_TASK;
 
+	//Release mutex
 	runMutex.unlock();
 }
 
@@ -759,6 +776,10 @@ void NemoWrapper::setExcitatoryNeuronParameters(NeuronGroup* neuronGroup){
 		d = d_1 - d_2 * rand1 * rand2;
 		u = b * v;
 
+		#ifdef DEBUG_PARAMETERS
+			qDebug()<<"Setting excitatory neuron parameters for neuron "<<iter.key()<<". a="<<a<<"; b="<<b<<"; c="<<c<<"; d="<<d<<"; u="<<u<<"; v="<<v<<"; sigma="<<sigma;
+		#endif//DEBUG_PARAMETERS
+
 		//Set parameters in neuron
 		checkNemoOutput(
 			nemo_set_neuron(
@@ -883,6 +904,8 @@ void NemoWrapper::stepNemo(){
 		//Add firing neuron ids to list
 		for(unsigned i=0; i<firedCount; ++i)
 			firingNeuronList.append(firedArray[i]);
+		if(firedCount > 0)
+			qDebug()<<"Number of firing neurons: "<<firedCount;
 
 		//Store firing neurons in database
 		if(archiveMode){
