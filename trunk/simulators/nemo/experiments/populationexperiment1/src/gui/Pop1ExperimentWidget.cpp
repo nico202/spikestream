@@ -1,6 +1,5 @@
 //SpikeStream includes
 #include "Globals.h"
-#include "ParametersDialog.h"
 #include "Pop1ExperimentWidget.h"
 using namespace spikestream;
 
@@ -28,23 +27,16 @@ Pop1ExperimentWidget::Pop1ExperimentWidget(QWidget* parent) : AbstractExperiment
 	//Add toolbar to start and stop experiment
 	QVBoxLayout* mainVBox = new QVBoxLayout(this);
 	QToolBar* toolBar = getToolBar();
-	parametersButton = new QPushButton("Parameters");
-	connect(parametersButton, SIGNAL(clicked()), this, SLOT(parametersButtonClicked()));
-	parametersButton->setMaximumSize(100, 20);
-	parametersButton->setMinimumSize(100, 20);
-	toolBar->addWidget(parametersButton);
 	mainVBox->addWidget(toolBar);
 
 	//Add status display area
 	statusTextEdit = new QTextEdit(this);
 	statusTextEdit->setReadOnly(true);
 	mainVBox->addWidget(statusTextEdit);
-
 	mainVBox->addStretch(5);
 
 	//Initialize variables
 	nemoWrapper = NULL;
-	buildParameters();
 
 	//Create experiment manager to run experiment
 	pop1ExperimentManager = new Pop1ExperimentManager();
@@ -84,20 +76,6 @@ void Pop1ExperimentWidget::managerFinished(){
 	playAction->setEnabled(true);
 	stopAction->setEnabled(false);
 	emit experimentEnded();
-}
-
-
-/*! Called when the parameters button is clicked. Sets the parameters. */
-void Pop1ExperimentWidget::parametersButtonClicked(){
-	try{
-		ParametersDialog dialog(parameterInfoList, defaultParameterMap, parameterMap, this);
-		if(dialog.exec() == QDialog::Accepted){
-			parameterMap = dialog.getParameters();
-		}
-	}
-	catch(SpikeStreamException& ex){
-		qCritical()<<ex.getMessage();
-	}
 }
 
 
@@ -147,7 +125,7 @@ void Pop1ExperimentWidget::updateStatus(QString statusMsg){
 
 
 /*----------------------------------------------------------*/
-/*------                PRIVATE METHODS               ------*/
+/*------              PROTECTED METHODS               ------*/
 /*----------------------------------------------------------*/
 
 /*! Builds the current and default parameter map along with the parameter
@@ -211,9 +189,12 @@ void Pop1ExperimentWidget::buildParameters(){
 	parameterInfoList.append(ParameterInfo("pause_interval_ms", "Time in ms to pause between sections of the experiment", ParameterInfo::INTEGER));
 	defaultParameterMap["pause_interval_ms"] = 1000;
 	parameterMap["pause_interval_ms"] = defaultParameterMap["pause_interval_ms"];
-
-
 }
+
+
+/*----------------------------------------------------------*/
+/*------                PRIVATE METHODS               ------*/
+/*----------------------------------------------------------*/
 
 /*! Checks that the network has the right number of neurons for the experiments. */
 void Pop1ExperimentWidget::checkNetwork(){

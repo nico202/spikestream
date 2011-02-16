@@ -36,6 +36,10 @@ void Random1BuilderThread::buildConnectionGroup(){
 	unsigned int minDelay = (unsigned int)getParameter("min_delay");
 	unsigned int maxDelay = (unsigned int)getParameter("max_delay");
 	double connectionProbability = getParameter("connection_probability");
+	int randomSeed = getParameter("random_seed");
+
+	//Set the random seed
+	qsrand(randomSeed);
 
 	//Work through each pair of neurons
 	numberOfProgressSteps = fromNeurGrp->size() + 1;
@@ -53,7 +57,7 @@ void Random1BuilderThread::buildConnectionGroup(){
 					weight = Util::getRandomDouble(minWeightRange2, maxWeightRange2);
 
 				//Add the connection
-				newConnectionGroup->addConnection(fromIter.key(), toIter.key(), Util::getRandomUInt(minDelay, maxDelay), weight);
+				newConnectionGroup->addConnection(fromIter.key(), toIter.key(), Util::getRandomUInt(minDelay, maxDelay+1), weight);
 			}
 		}
 

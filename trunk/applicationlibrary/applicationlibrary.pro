@@ -117,7 +117,8 @@ HEADERS += include/AbstractParametersEditDialog.h \
 			include/ConnectionGroupDialog.h \
 			include/DescriptionDialog.h \
 			include/NeuronGroupSelectionDialog.h \
-			include/SpikeRasterDialog.h
+			include/SpikeRasterDialog.h \
+			include/MembranePotentialGraphDialog.h
 SOURCES += src/dialogs/AbstractParametersEditDialog.cpp \
 			src/dialogs/LoadAnalysisDialog.cpp \
 			src/dialogs/PluginsDialog.cpp \
@@ -133,7 +134,8 @@ SOURCES += src/dialogs/AbstractParametersEditDialog.cpp \
 			src/dialogs/ConnectionGroupDialog.cpp \
 			src/dialogs/DescriptionDialog.cpp \
 			src/dialogs/NeuronGroupSelectionDialog.cpp \
-			src/dialogs/SpikeRasterDialog.cpp
+			src/dialogs/SpikeRasterDialog.cpp \
+			src/dialogs/MembranePotentialGraphDialog.cpp
 
 
 #----------------------------------------------#
@@ -197,7 +199,9 @@ HEADERS += include/NetworksWidget.h \
 			include/NetworkViewerProperties.h \
 			include/SimulationLoaderWidget.h \
 			include/AbstractConnectionWidget.h \
-			include/SpikeRasterWidget.h
+			include/SpikeRasterWidget.h \
+			include/AbstractGraphWidget.h \
+			include/MembranePotentialGraphWidget.h
 SOURCES += src/widgets/NetworksWidget.cpp \
 			src/widgets/ArchiveWidget.cpp \
 			src/widgets/NeuronGroupWidget.cpp \
@@ -205,7 +209,9 @@ SOURCES += src/widgets/NetworksWidget.cpp \
 			src/widgets/NetworkViewerProperties.cpp \
 			src/widgets/SimulationLoaderWidget.cpp \
 			src/widgets/AbstractConnectionWidget.cpp \
-			src/widgets/SpikeRasterWidget.cpp
+			src/widgets/SpikeRasterWidget.cpp \
+			src/widgets/AbstractGraphWidget.cpp \
+			src/widgets/MembranePotentialGraphWidget.cpp
 
 
 #----------------------------------------------#

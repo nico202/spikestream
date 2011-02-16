@@ -2,8 +2,10 @@
 #define NEMOWIDGET_H
 
 //SpikeStream includes
+#include "MembranePotentialGraphDialog.h"
 #include "NemoWrapper.h"
 #include "SpikeRasterDialog.h"
+#include "SpikeStreamTypes.h"
 #include "RGBColor.h"
 
 //Qt includes
@@ -36,6 +38,7 @@ namespace spikestream {
 			void checkLoadingProgress();
 			void checkResetWeightsProgress();
 			void checkSaveWeightsProgress();
+			void deleteMembranePotentialGraphDialog(int);
 			void deleteRasterPlotDialog(int);
 			void experimentEnded();
 			void experimentStarted();
@@ -44,6 +47,7 @@ namespace spikestream {
 			void injectPatternButtonClicked();
 			void loadPattern(QString comboStr);
 			void loadSimulation();
+			void memPotGraphButtonClicked();
 			void monitorChanged(int state);
 			void monitorNeuronsStateChanged(int monitorType);
 			void nemoWrapperFinished();
@@ -59,6 +63,7 @@ namespace spikestream {
 			void simulationRateChanged(int comboIndex);
 			void simulationStopped();
 			void startSimulation();
+			void startStopSimulation();
 			void stepSimulation();
 			void stopSimulation();
 			void sustainCurrentChanged(bool enabled);
@@ -110,6 +115,9 @@ namespace spikestream {
 
 			/*! Stop action */
 			QAction* stopAction;
+
+			/*! Action of stepping through the simulation. */
+			QAction* stepAction;
 
 			/*! Switches off monitoring of neurons */
 			QRadioButton* noMonitorNeuronsButton;
@@ -222,6 +230,12 @@ namespace spikestream {
 				The key is the raster dialog id. */
 			QHash<unsigned,  SpikeRasterDialog*> rasterDialogMap;
 
+			/*! Button to plot membrane potential graph for selected neuron */
+			QPushButton* memPotGraphButton;
+
+			/*! Map of the currently open membrane potential graph dialogs
+				The key is the unique id from the counter. */
+			QHash<unsigned,  MembranePotentialGraphDialog*> memPotGraphDialogMap;
 
 			//=======================  METHODS  =========================
 			bool checkForErrors();

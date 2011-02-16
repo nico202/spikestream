@@ -62,6 +62,9 @@ namespace spikestream {
 			/*! To enter the type of synapse */
 			QComboBox* synapseTypeCombo;
 
+			/*! To enter random seed */
+			QLineEdit* seedEdit;
+
 			//=====================  METHODS  ======================
 			void buildGUI(QVBoxLayout* mainVBox);
 

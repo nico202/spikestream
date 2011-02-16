@@ -16,7 +16,7 @@ using namespace spikestream;
 using namespace std;
 
 // Outputs verbose debugging behaviour about the loading of the network.
-//#define DEBUG_NEURONS
+#define DEBUG_NEURONS
 //#define DEBUG_SYNAPSES
 
 //Neuron type IDs in database. FIXME: WOULD BE BETTER TO USE THE NAME

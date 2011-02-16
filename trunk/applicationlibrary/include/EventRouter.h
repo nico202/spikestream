@@ -44,6 +44,12 @@ namespace spikestream {
 			void archiveChangedSignal();
 			void archiveListChangedSignal();
 
+			//Simulation signals
+			void startSimulationSignal();
+			void stopSimulationSignal();
+			void startStopSimulationSignal();
+			void stepSimulationSignal();
+
 			//OpenGL signals
 			void moveBackwardSignal();
 			void moveForwardSignal();
@@ -72,6 +78,12 @@ namespace spikestream {
 
 
 		private slots:
+			//Simulation slots
+			void startSimulationSlot() { emit startSimulationSignal(); }
+			void stopSimulationSlot() { emit stopSimulationSignal(); }
+			void startStopSimulationSlot() { emit startStopSimulationSignal(); }
+			void stepSimulationSlot() { emit stepSimulationSignal(); }
+
 			//OpenGL slots
 			void moveBackwardSlot() { emit moveBackwardSignal(); emit networkViewChangedSignal(); }
 			void moveForwardSlot() { emit moveForwardSignal(); emit networkViewChangedSignal(); }
