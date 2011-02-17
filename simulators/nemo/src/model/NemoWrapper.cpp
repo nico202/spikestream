@@ -14,7 +14,7 @@ using namespace spikestream;
 
 //Outputs debugging information for NeMo calls
 //#define DEBUG_LOAD
-#define DEBUG_PARAMETERS
+//#define DEBUG_PARAMETERS
 //#define DEBUG_PERFORMANCE
 //#define DEBUG_STEP
 //#define DEBUG_WEIGHTS
