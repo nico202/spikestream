@@ -43,7 +43,7 @@ namespace spikestream {
 			QList<neurid_t> getFiringNeuronIDs() { return firingNeuronList; }
 			nemo_configuration_t getNemoConfig(){ return nemoConfig; }
 			unsigned getSTDPFunctionID() { return stdpFunctionID; }
-			unsigned getTimeStep() { return timeStepCounter; }
+			timestep_t getTimeStep() { return timeStepCounter; }
 			unsigned getUpdateInterval_ms() { return this->updateInterval_ms; }
 			unsigned getWaitInterval_ms() { return waitInterval_ms; }
 			bool isError() { return error; }
@@ -60,6 +60,7 @@ namespace spikestream {
 			void setArchiveMode(bool mode, const QString& archiveDescription = "");
 			void setFrameRate(unsigned int frameRate);
 			void setInjectCurrent(int numNeurons, float current, bool sustain);
+			void setFiringNeuronIDs(QList<neurid_t>& neurIDList);
 			void setInjectNoise(unsigned neuronGroupID, double percentage, bool sustain);
 			void setFiringInjectionPattern(const Pattern& pattern, unsigned neuronGroupID, bool sustain);
 			void setCurrentInjectionPattern(const Pattern& pattern, float current, unsigned neuronGroupID, bool sustain);
@@ -200,6 +201,9 @@ namespace spikestream {
 
 			/*! Whether current is injected into neurons at each time step */
 			float sustainInjectCurrent;
+
+			/*! List of neuron IDs to fire in the next time step */
+			QList<neurid_t> neuronIDsToFire;
 
 			/*! Map linking neurons with membrane potential */
 			QHash<unsigned, float> membranePotentialMap;

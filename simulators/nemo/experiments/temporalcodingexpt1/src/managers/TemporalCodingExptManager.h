@@ -42,6 +42,7 @@ namespace spikestream {
 			static const int EXPERIMENT2 = 1;
 			static const int EXPERIMENT3 = 2;
 			static const int EXPERIMENT4 = 3;
+			static const int EXPERIMENT5 = 4;
 
 			/*! Neuron group to inject patterns into */
 			NeuronGroup* inputNeuronGroup;
@@ -64,20 +65,33 @@ namespace spikestream {
 			/*! Starting position of input layer on z axis */
 			int inputZStart;
 
+			/*! Output neuron coding up trends */
+			neurid_t outputNeuron1ID;
+
+			/*! Output neuron coding down trends */
+			neurid_t outputNeuron2ID;
+
 			/*! Number of steps to run network after pattern has been injected. */
-			int numInterExptSteps;
+			timestep_t numInterExptSteps;
 
 			/*! Number of steps to run network before result is read. */
-			int numResultSteps;
+			timestep_t numResultSteps;
 
 			/*! Number of time steps that pattern extends over */
-			int numTimeSteps;
+			timestep_t numTimeSteps;
+
+			/*! Number of time steps to record results after first result. */
+			timestep_t numResultIntegrationSteps;
+
+			/*! Whether output layers are trained or not */
+			bool learning;
 
 
 			//======================  METHODS  ======================
 			void applyInputSequence(QList<Pattern>& patternList);
 			QList<unsigned> getDownTrend();
 			QList<unsigned> getDownUpTrend();
+			QList<unsigned> getRandomSequence();
 			void getResults();
 			QList<Pattern> getTemporalPatternSequence(QList<unsigned>& numberSequence);
 			QList<unsigned> getUpTrend();
@@ -86,6 +100,7 @@ namespace spikestream {
 			void runExperiment2();
 			void runExperiment3();
 			void runExperiment4();
+			void runExperiment5();
 			void stepNemo(unsigned numTimeSteps);
 			void storeParameters(QHash<QString, double>& parameterMap);
 

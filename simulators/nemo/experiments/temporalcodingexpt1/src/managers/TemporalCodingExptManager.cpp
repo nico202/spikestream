@@ -48,6 +48,9 @@ void TemporalCodingExptManager::run(){
 			case EXPERIMENT4:
 				runExperiment4();
 			break;
+			case EXPERIMENT5:
+				runExperiment5();
+			break;
 			default:
 				throw SpikeStreamException("Experiment number not recognized: " + QString::number(experimentNumber));
 		}
@@ -74,6 +77,7 @@ void TemporalCodingExptManager::startExperiment(NemoWrapper* nemoWrapper, QHash<
 	//Get neuron layers that we need
 	QList<NeuronGroup*> neurGrpList = Globals::getNetwork()->getNeuronGroups();
 	inputNeuronGroup = NULL, featureNeuronGroup = NULL;
+	outputNeuron1ID = 0, outputNeuron2ID = 0;
 	foreach(NeuronGroup* tmpNeurGrp, neurGrpList){
 		if(tmpNeurGrp->getInfo().getName().toUpper() == "INPUT LAYER"){
 			inputNeuronGroup = tmpNeurGrp;
@@ -81,11 +85,21 @@ void TemporalCodingExptManager::startExperiment(NemoWrapper* nemoWrapper, QHash<
 		if(tmpNeurGrp->getInfo().getName().toUpper() == "FEATURE DETECTION"){
 			featureNeuronGroup = tmpNeurGrp;
 		}
+		if(tmpNeurGrp->getInfo().getName().toUpper() == "OUTPUT 1"){
+			if(tmpNeurGrp->size() != 1)
+				throw SpikeStreamException("Output neuron group 1 is expected to have 1 neuron.");
+			outputNeuron1ID = tmpNeurGrp->getNeuronIDs().at(0);
+		}
+		if(tmpNeurGrp->getInfo().getName().toUpper() == "OUTPUT 2"){
+			if(tmpNeurGrp->size() != 1)
+				throw SpikeStreamException("Output neuron group 2 is expected to have 1 neuron.");
+			outputNeuron2ID = tmpNeurGrp->getNeuronIDs().at(0);
+		}
 
 		if(inputNeuronGroup != NULL && featureNeuronGroup != NULL)
 			break;
 	}
-	if(inputNeuronGroup == NULL || featureNeuronGroup == NULL)
+	if(inputNeuronGroup == NULL || featureNeuronGroup == NULL || outputNeuron1ID == 0 || outputNeuron2ID == 0)
 		throw SpikeStreamException("Input and/or feature neuron group(s) not found.");
 
 	numInputNeurons = inputNeuronGroup->size();
@@ -110,26 +124,60 @@ void TemporalCodingExptManager::applyInputSequence(QList<Pattern>& patternList){
 	}
 }
 
+/*! Returns a random sequence of numbers within the range of the number of time steps. */
+QList<unsigned> TemporalCodingExptManager::getRandomSequence(){
+	QList<unsigned> tmpNumList;
+	for(int i=1; i<=numInputNeurons; ++i){
+		tmpNumList.append(Util::getRandomUInt(0, numTimeSteps));
+	}
+	qDebug()<<"TMP NUM LIST RANDOM: "<<tmpNumList;
+	return tmpNumList;
+}
+
+
 /*! Should be called after pattern injection. Looks for results
 	in the feature detection layer and prints the resulting spikes. */
 void TemporalCodingExptManager::getResults(){
 	//Step and accumulate results
 	QList<neurid_t> resultsList;
 	QString resultsStr = "";
+	timestep_t firstResultsTimeStep = 0;
 	for(int i=0; i<numResultSteps && !stopThread; ++i){
 		QList<neurid_t> tmpList = nemoWrapper->getFiringNeuronIDs();
 		foreach(neurid_t tmpNeurID, tmpList){
 			if(featureNeuronGroup->contains(tmpNeurID)){
+				//Record time step of first results
+				if(firstResultsTimeStep == 0)
+					firstResultsTimeStep = nemoWrapper->getTimeStep();
+
 				resultsList.append(tmpNeurID);
 				resultsStr += QString::number(tmpNeurID) + ", ";
 			}
 		}
 
-		//Take first neurons to fire and ignore the rest
-		if(resultsList.isEmpty())
+		//Take neurons during result integration period and ignore the rest
+		if(resultsList.isEmpty() || !(nemoWrapper->getTimeStep() - firstResultsTimeStep >= numResultIntegrationSteps)){
 			stepNemo(1);
-		else
+		}
+		//Have found all the feature detecting neurons that we want
+		else{
+			//Apply learning if required
+			if(learning){
+				if(experimentNumber == EXPERIMENT1){
+					QList<neurid_t> tmpNeurIDList;
+					tmpNeurIDList.append(outputNeuron1ID);
+					nemoWrapper->setFiringNeuronIDs(tmpNeurIDList);
+				}
+				if(experimentNumber == EXPERIMENT2){
+					QList<neurid_t> tmpNeurIDList;
+					tmpNeurIDList.append(outputNeuron2ID);
+					nemoWrapper->setFiringNeuronIDs(tmpNeurIDList);
+				}
+			}
+
+			//Exit loop
 			break;
+		}
 	}
 	emit statusUpdate("Feature detector firing neurons: " + resultsStr);
 }
@@ -149,6 +197,7 @@ QList<Pattern> TemporalCodingExptManager::getTemporalPatternSequence(QList<unsig
 
 	//Add test data to patterns and return list
 	for(int i=0; i<numInputNeurons; ++i){
+		qDebug()<<"Adding point: x="<<(inputXStart + i)<<"; y="<<inputYStart<<"; z="<<inputZStart;
 		tmpPatternList[numberList.at(i)].addPoint(Point3D(inputXStart + i, inputYStart, inputZStart));
 	}
 	return tmpPatternList;
@@ -158,9 +207,14 @@ QList<Pattern> TemporalCodingExptManager::getTemporalPatternSequence(QList<unsig
 /*! Returns a sequence of ascending numbers with noise */
 QList<unsigned> TemporalCodingExptManager::getUpTrend(){
 	QList<unsigned> tmpNumList;
-	for(int i=0; i<numInputNeurons; ++i){
-		tmpNumList.append(Util::rInt( (double)numTimeSteps * ( (double)i/(double)(numInputNeurons) ) ) );
+	for(int i=1; i<=numInputNeurons; ++i){
+		double tmpNum = ((double)(numTimeSteps) * ( (double)i/(double)(numInputNeurons))) - 1;
+		if(tmpNum  < 0.0)
+			tmpNum = 0.0;
+		qDebug()<<"TEMP NUM: "<<tmpNum;
+		tmpNumList.append(Util::rInt(tmpNum));
 	}
+	qDebug()<<"TMP NUM LIST: "<<tmpNumList;
 	return tmpNumList;
 }
 
@@ -169,10 +223,10 @@ QList<unsigned> TemporalCodingExptManager::getUpTrend(){
 QList<unsigned> TemporalCodingExptManager::getUpDownTrend(){
 	QList<unsigned> tmpNumList;
 	for(int i=0; i<numInputNeurons; i+=2){
-		tmpNumList.append(Util::rInt( (double)numTimeSteps * ( (double)i/(double)(numInputNeurons) ) ) );
+		tmpNumList.append(Util::rInt( (double)(numTimeSteps-1) * ( (double)i/(double)(numInputNeurons) ) ) );
 	}
 	for(int i=numInputNeurons-1; i>=0; i-=2){
-		tmpNumList.append(Util::rInt( (double)numTimeSteps * ( (double)i/(double)(numInputNeurons) ) ) );
+		tmpNumList.append(Util::rInt( (double)(numTimeSteps-1) * ( (double)i/(double)(numInputNeurons) ) ) );
 	}
 	return tmpNumList;
 }
@@ -181,8 +235,11 @@ QList<unsigned> TemporalCodingExptManager::getUpDownTrend(){
 /*! Returns a sequence of descending numbers with noise */
 QList<unsigned> TemporalCodingExptManager::getDownTrend(){
 	QList<unsigned> tmpNumList;
-	for(int i=numInputNeurons-1; i>=0; --i){
-		tmpNumList.append(Util::rInt( (double)numTimeSteps * ( (double)i/(double)(numInputNeurons) ) ) );
+	for(int i=numInputNeurons; i>0; --i){
+		double tmpNum = ((double)(numTimeSteps) * ( (double)i/(double)(numInputNeurons))) - 1;
+		if(tmpNum  < 0.0)
+			tmpNum = 0.0;
+		tmpNumList.append(Util::rInt(tmpNum));
 	}
 	return tmpNumList;
 }
@@ -192,10 +249,10 @@ QList<unsigned> TemporalCodingExptManager::getDownTrend(){
 QList<unsigned> TemporalCodingExptManager::getDownUpTrend(){
 	QList<unsigned> tmpNumList;
 	for(int i=numInputNeurons-1; i>=0; i-=2){
-		tmpNumList.append(Util::rInt( (double)numTimeSteps * ( (double)i/(double)(numInputNeurons) ) ) );
+		tmpNumList.append(Util::rInt( (double)(numTimeSteps-1) * ( (double)i/(double)(numInputNeurons) ) ) );
 	}
 	for(int i=0; i<numInputNeurons; i+=2){
-		tmpNumList.append(Util::rInt( (double)numTimeSteps * ( (double)i/(double)(numInputNeurons) ) ) );
+		tmpNumList.append(Util::rInt( (double)(numTimeSteps-1) * ( (double)i/(double)(numInputNeurons) ) ) );
 	}
 	return tmpNumList;
 }
@@ -245,6 +302,17 @@ void TemporalCodingExptManager::runExperiment4(){
 }
 
 
+/*! Runs the experiment. */
+void TemporalCodingExptManager::runExperiment5(){
+	emit statusUpdate("Injecting random sequence.");
+	QList<unsigned> numberList = getRandomSequence();
+	QList<Pattern> patternList = getTemporalPatternSequence(numberList);
+	applyInputSequence(patternList);
+	getResults();
+	stepNemo(numInterExptSteps);
+}
+
+
 /*! Advances the simulation by the specified number of time steps */
 void TemporalCodingExptManager::stepNemo(unsigned numTimeSteps){
 	for(unsigned i=0; i<numTimeSteps && !stopThread; ++i){
@@ -272,15 +340,23 @@ void TemporalCodingExptManager::storeParameters(QHash<QString, double> &paramete
 
 	if(!parameterMap.contains("num_time_steps"))
 		throw SpikeStreamException("TemporalCodingExptManager: num_time_steps parameter missing");
-	numTimeSteps = (int)parameterMap["num_time_steps"];
+	numTimeSteps = (timestep_t)parameterMap["num_time_steps"];
 
 	if(!parameterMap.contains("num_inter_expt_steps"))
 		throw SpikeStreamException("TemporalCodingExptManager: num_inter_expt_steps parameter missing");
-	numInterExptSteps = (int)parameterMap["num_inter_expt_steps"];
+	numInterExptSteps = (timestep_t)parameterMap["num_inter_expt_steps"];
 
 	if(!parameterMap.contains("num_result_steps"))
 		throw SpikeStreamException("TemporalCodingExptManager: num_result_steps parameter missing");
-	numResultSteps = (int)parameterMap["num_result_steps"];
+	numResultSteps = (timestep_t)parameterMap["num_result_steps"];
+
+	if(!parameterMap.contains("result_integration_steps"))
+		throw SpikeStreamException("TemporalCodingExptManager: result_integration_steps parameter missing");
+	numResultIntegrationSteps = (timestep_t)parameterMap["result_integration_steps"];
+
+	if(!parameterMap.contains("learning"))
+		throw SpikeStreamException("TemporalCodingExptManager: learning parameter missing");
+	learning = (bool)parameterMap["learning"];
 }
 
 

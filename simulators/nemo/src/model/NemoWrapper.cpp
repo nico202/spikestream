@@ -199,6 +199,24 @@ void  NemoWrapper::setInjectCurrent(int numNeurons, float current, bool sustain)
 }
 
 
+/*! Forces neurons with the specified IDs to fire in the next time step. */
+void NemoWrapper::setFiringNeuronIDs(QList<neurid_t>& neurIDList){
+	//Run checks
+	if(!simulationLoaded)
+		throw SpikeStreamException("Neurons cannot be fired when a simulation is not loaded.");
+
+	//Pointer to current network
+	Network* nwPtr = Globals::getNetwork();
+
+	QList<neurid_t>::iterator neurIDListEnd = neurIDList.end();
+	for(QList<neurid_t>::iterator iter = neurIDList.begin(); iter != neurIDListEnd; ++iter){
+		if(!nwPtr->containsNeuron(*iter))
+			throw SpikeStreamException("Neuron ID " + QString::number(*iter) + " cannot be found in the network.");
+		neuronIDsToFire.append(*iter);
+	}
+}
+
+
 /*! Forces the specified percentage of neurons in the specified neuron group to fire at the
 	next time step. Throws an exception if the neuron group ID does not exist in the current
 	network or if the percentage is < 0 or > 100. */
@@ -506,6 +524,16 @@ unsigned NemoWrapper::addInjectNoiseNeuronIDs(){
 	//Sanity check, then return number of neurons added
 	if(arrayCounter != arraySize)
 		throw SpikeStreamException("Error adding inject noise neuron IDs. Array counter: " + QString::number(arrayCounter) + "; Array size: " + QString::number(arraySize));
+
+	//Add neurons that are specified to fire during this time step
+	QList<neurid_t>::iterator neurIDListFireEnd = neuronIDsToFire.end();
+	for(QList<neurid_t>::iterator iter = neuronIDsToFire.begin(); iter != neurIDListFireEnd; ++iter){
+		injectionPatternVector.push_back(*iter);
+		++arraySize;
+	}
+	neuronIDsToFire.clear();
+
+	//Return the number of neurons that have been added
 	return arraySize;
 }
 
@@ -844,7 +872,7 @@ void NemoWrapper::stepNemo(){
 	//     Step simulation
 	//---------------------------------------
 	//Add inject noise neurons to end of injection vector
-	if(!injectNoiseMap.isEmpty())
+	if(!injectNoiseMap.isEmpty() || !neuronIDsToFire.isEmpty())
 		numNoiseNeurons = addInjectNoiseNeuronIDs();
 
 	if(injectCurrentNeuronCount > 0)

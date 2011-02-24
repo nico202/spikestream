@@ -144,6 +144,7 @@ void TemporalCodingExptWidget::buildParameters(){
 	exptNameList.append("Experiment 2 - Down trend");
 	exptNameList.append("Experiment 3 - Down/up trend");
 	exptNameList.append("Experiment 4 - Up/down trend");
+	exptNameList.append("Experiment 5 - Random");
 	tmpInfo.setOptionNames(exptNameList);
 	parameterInfoList.append(tmpInfo);
 	defaultParameterMap["experiment_number"] = 0;
@@ -168,6 +169,14 @@ void TemporalCodingExptWidget::buildParameters(){
 	parameterInfoList.append(ParameterInfo("num_result_steps", "Number of time steps to run simulator after a pattern has been injected before reading result.", ParameterInfo::INTEGER));
 	defaultParameterMap["num_result_steps"] = 20;
 	parameterMap["num_result_steps"] = defaultParameterMap["num_result_steps"];
+
+	parameterInfoList.append(ParameterInfo("result_integration_steps", "Number of time steps to record results after first result.", ParameterInfo::INTEGER));
+	defaultParameterMap["result_integration_steps"] = 0;
+	parameterMap["result_integration_steps"] = defaultParameterMap["result_integration_steps"];
+
+	parameterInfoList.append(ParameterInfo("learning", "Whether output layer is trained or not.", ParameterInfo::BOOLEAN));
+	defaultParameterMap["learning"] = 0;
+	parameterMap["learning"] = defaultParameterMap["learning"];
 }
 
 
@@ -181,7 +190,7 @@ void TemporalCodingExptWidget::checkNetwork(){
 	QList<NeuronGroup*> neurGrpList = tmpNetwork->getNeuronGroups();
 
 	//Check that input layer, temporal coding and feature detection are there
-	bool inputLayerFound = false, featureLayerFound = false;
+	bool inputLayerFound = false, featureLayerFound = false, output1Found = false, output2Found = false;
 	foreach(NeuronGroup* tmpNeurGrp, neurGrpList){
 		if(tmpNeurGrp->getInfo().getName().toUpper() == "INPUT LAYER"){
 			inputLayerFound = true;
@@ -189,15 +198,21 @@ void TemporalCodingExptWidget::checkNetwork(){
 		if(tmpNeurGrp->getInfo().getName().toUpper() == "FEATURE DETECTION"){
 			featureLayerFound = true;
 		}
+		if(tmpNeurGrp->getInfo().getName().toUpper() == "OUTPUT 1"){
+			output1Found = true;
+		}
+		if(tmpNeurGrp->getInfo().getName().toUpper() == "OUTPUT 2"){
+			output2Found = true;
+		}
 
 		//Exit loop if all layers found
-		if(inputLayerFound && featureLayerFound)
+		if(inputLayerFound && featureLayerFound && output1Found && output2Found)
 			break;
 	}
 
 	//Throw exception if we have not found the necessary neuron groups
-	if(!inputLayerFound || ! featureLayerFound)
-		throw SpikeStreamException("Input and/or feature layers could not be found.\nMake sure there are neuron groups labelled 'Input layer' and 'Feature detection' in your network.");
+	if(!inputLayerFound || ! featureLayerFound || !output1Found || !output2Found)
+		throw SpikeStreamException("Input and/or feature layers could not be found.\nMake sure there are neuron groups labelled 'Input layer', 'Feature detection', 'Output 1' and 'Output 2' in your network.");
 }
 
 
