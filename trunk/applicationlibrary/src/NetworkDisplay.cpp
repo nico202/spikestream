@@ -485,6 +485,7 @@ void NetworkDisplay::clearDirectionFiltering(){
 /*! Weights are rendered as lines, not polygons */
 void  NetworkDisplay::disableWeightRender(){
 	unsetWeightRenderFlag(WEIGHT_RENDER_ENABLED);
+	setDefaultVisibleConnectionGroupIDs();
 	emit networkDisplayChanged();
 }
 
@@ -494,6 +495,7 @@ void  NetworkDisplay::renderTempWeights(){
 	setWeightRenderFlag(WEIGHT_RENDER_ENABLED);
 	setWeightRenderFlag(RENDER_TEMP_WEIGHTS);
 	unsetWeightRenderFlag(RENDER_CURRENT_WEIGHTS);
+	setDefaultVisibleConnectionGroupIDs();
 	emit networkDisplayChanged();
 }
 
@@ -503,6 +505,7 @@ void  NetworkDisplay::renderCurrentWeights(){
 	setWeightRenderFlag(WEIGHT_RENDER_ENABLED);
 	setWeightRenderFlag(RENDER_CURRENT_WEIGHTS);
 	unsetWeightRenderFlag(RENDER_TEMP_WEIGHTS);
+	setDefaultVisibleConnectionGroupIDs();
 	emit networkDisplayChanged();
 }
 
@@ -572,8 +575,21 @@ void NetworkDisplay::setDefaultVisibleConnectionGroupIDs(){
 
 	//Show connection groups if the total number of visible connections is less than the threshold
 	QList<unsigned> visibleConGrpIDs;
-	if(	(fullRenderMode && (totalVisCons < connectionVisibilityThreshold_full) )
-		|| (!fullRenderMode && (totalVisCons < connectionVisibilityThreshold_fast) ) ) {
+	bool addAllCons = false;
+	if(fullRenderMode){
+		if( (weightRenderMode & WEIGHT_RENDER_ENABLED) && (totalVisCons < connectionVisibilityThreshold_full) )
+			addAllCons = true;
+		else if( !(weightRenderMode & WEIGHT_RENDER_ENABLED) && (totalVisCons < connectionVisibilityThreshold_fast) )
+			addAllCons = true;
+	}
+	else{
+		if(totalVisCons < connectionVisibilityThreshold_fast){
+			addAllCons = true;
+		}
+	}
+
+	//Show all connection groups if we are below the threshold
+	if(addAllCons){
 		foreach(ConnectionGroup* tmpConGrp, tmpConGrpList){
 			visibleConGrpIDs.append(tmpConGrp->getID());
 		}
