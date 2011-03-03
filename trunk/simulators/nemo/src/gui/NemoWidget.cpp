@@ -1,4 +1,5 @@
 //SpikeStream includes
+#include "DeviceLoaderWidget.h"
 #include "ExperimentLoaderWidget.h"
 #include "Globals.h"
 #include "GlobalVariables.h"
@@ -228,18 +229,25 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	injectGroupBox->setLayout(injectVBox);
 	controlsVBox->addWidget(injectGroupBox);
 
-	//Group box for experiment plugins
-	QGroupBox* experimentGroupBox = new QGroupBox("Experiments", controlsWidget);
-	QVBoxLayout* experimentVBox = new QVBoxLayout();
+	//Group box for plugins, such as experiments and devices
+	QGroupBox* pluginsGroupBox = new QGroupBox("Plugins", controlsWidget);
+	QVBoxLayout* pluginsVBox = new QVBoxLayout();
+	QTabWidget* pluginsTabWidget = new QTabWidget();
+
+	//Add widget that loads devices
+	DeviceLoaderWidget* deviceLoaderWidget = new DeviceLoaderWidget(Globals::getSpikeStreamRoot() + "/plugins/simulation/nemodevices");
+	deviceLoaderWidget->setMinimumSize(600, 200);
+	pluginsTabWidget->addTab(deviceLoaderWidget, "Devices");
 
 	//Add widget that loads experiments
 	ExperimentLoaderWidget* exptLoaderWidget = new ExperimentLoaderWidget(Globals::getSpikeStreamRoot() + "/plugins/simulation/nemoexperiments");
 	exptLoaderWidget->setMinimumSize(600, 200);
-	experimentVBox->addWidget(exptLoaderWidget);
+	pluginsTabWidget->addTab(exptLoaderWidget, "Experiments");
 
 	//Add experiment group box to layout
-	experimentGroupBox->setLayout(experimentVBox);
-	controlsVBox->addWidget(experimentGroupBox);
+	pluginsVBox->addWidget(pluginsTabWidget);
+	pluginsGroupBox->setLayout(pluginsVBox);
+	controlsVBox->addWidget(pluginsGroupBox);
 
 	//Put layout into enclosing box
 	mainVBox->addWidget(controlsWidget);
@@ -254,6 +262,12 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	connect(nemoWrapper, SIGNAL(timeStepChanged(unsigned)), this, SLOT(updateTimeStep(unsigned)), Qt::QueuedConnection);
 	connect(nemoWrapper, SIGNAL(timeStepChanged(unsigned, const QList<unsigned>&)), this, SLOT(updateTimeStep(unsigned, const QList<unsigned>&)), Qt::QueuedConnection);
 	connect(nemoWrapper, SIGNAL(timeStepChanged(unsigned, const QHash<unsigned, float>&)), this, SLOT(updateTimeStep(unsigned, const QHash<unsigned, float>&)), Qt::QueuedConnection);
+
+	//Pass device managers to NeMo wrapper
+	QList<AbstractDeviceWidget*> deviceWidgetList = deviceLoaderWidget->getAbstractDeviceWidgets();
+	foreach(AbstractDeviceWidget* tmpDevWidget, deviceWidgetList){
+		nemoWrapper->addDeviceManager(tmpDevWidget->getDeviceManager());
+	}
 
 	//Set up link between experiment widgets and NeMo wrapper and signals/slots
 	QList<AbstractExperimentWidget*> exptWidgetList = exptLoaderWidget->getAbstractExperimentWidgets();

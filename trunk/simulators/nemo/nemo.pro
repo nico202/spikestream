@@ -70,9 +70,11 @@ SOURCES += src/dialogs/NemoParametersDialog.cpp
 #-----               GUI                  -----#
 #----------------------------------------------#
 HEADERS += include/NemoWidget.h \
-			include/ExperimentLoaderWidget.h
+			include/ExperimentLoaderWidget.h \
+			include/DeviceLoaderWidget.h
 SOURCES += src/gui/NemoWidget.cpp \
-			src/gui/ExperimentLoaderWidget.cpp
+			src/gui/ExperimentLoaderWidget.cpp \
+			src/gui/DeviceLoaderWidget.cpp
 
 #----------------------------------------------#
 #-----              Managers              -----#

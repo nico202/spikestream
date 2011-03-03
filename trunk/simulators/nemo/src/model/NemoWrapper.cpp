@@ -58,6 +58,12 @@ NemoWrapper::~NemoWrapper(){
 /*-----                 PUBLIC METHODS                 -----*/
 /*----------------------------------------------------------*/
 
+/*! Adds a manager to interface with a device */
+void NemoWrapper::addDeviceManager(AbstractDeviceManager* deviceManager){
+	deviceManagerList.append(deviceManager);
+}
+
+
 /*! Cancels the loading of a simulation */
 void NemoWrapper::cancelLoading(){
 	stopThread = true;
@@ -533,6 +539,15 @@ unsigned NemoWrapper::addInjectNoiseNeuronIDs(){
 	}
 	neuronIDsToFire.clear();
 
+	//Add firing neuron IDs from plugins
+	for(int i=0; i<deviceManagerList.size(); ++i){
+		QList<neurid_t>::iterator outputNeuronsEnd = deviceManagerList[i]->outputNeuronsEnd();
+		for(QList<neurid_t>::iterator iter =  deviceManagerList[i]->outputNeuronsBegin(); iter != outputNeuronsEnd; ++iter){
+			injectionPatternVector.push_back(*iter);
+			++arraySize;
+		}
+	}
+
 	//Return the number of neurons that have been added
 	return arraySize;
 }
@@ -864,7 +879,7 @@ void NemoWrapper::setInhibitoryNeuronParameters(NeuronGroup* neuronGroup){
 
 /*! Advances the simulation by one step */
 void NemoWrapper::stepNemo(){
-	unsigned *firedArray, numNoiseNeurons = 0, numCurrentNeurons = 0;
+	unsigned *firedArray, numFiredNeurons = 0, numCurrentNeurons = 0;
 	size_t firedCount;
 	firingNeuronList.clear();
 
@@ -872,8 +887,8 @@ void NemoWrapper::stepNemo(){
 	//     Step simulation
 	//---------------------------------------
 	//Add inject noise neurons to end of injection vector
-	if(!injectNoiseMap.isEmpty() || !neuronIDsToFire.isEmpty())
-		numNoiseNeurons = addInjectNoiseNeuronIDs();
+	if(!injectNoiseMap.isEmpty() || !neuronIDsToFire.isEmpty() || !deviceManagerList.isEmpty())
+		numFiredNeurons = addInjectNoiseNeuronIDs();
 
 	if(injectCurrentNeuronCount > 0)
 		numCurrentNeurons = addInjectCurrentNeuronIDs();
@@ -915,8 +930,8 @@ void NemoWrapper::stepNemo(){
 	}
 	//Delete neurons added to end of vector from noise or current
 	else {
-		if(numNoiseNeurons > 0){
-			injectionPatternVector.erase(injectionPatternVector.end() - numNoiseNeurons, injectionPatternVector.end());
+		if(numFiredNeurons > 0){
+			injectionPatternVector.erase(injectionPatternVector.end() - numFiredNeurons, injectionPatternVector.end());
 		}
 		if(numCurrentNeurons > 0){
 			injectionCurrentNeurIDVector.erase(injectionCurrentNeurIDVector.end() - numCurrentNeurons, injectionCurrentNeurIDVector.end());
@@ -925,19 +940,26 @@ void NemoWrapper::stepNemo(){
 	}
 
 
-	//-----------------------------------------------
-	//         Process list of firing neurons
-	//-----------------------------------------------
-	if(archiveMode || (monitorFiringNeurons && monitor)){
+	//---------------------------------------------------------
+	//        Pass list of firing neurons to other classes
+	//---------------------------------------------------------
+	if(archiveMode || (monitorFiringNeurons && monitor) || !deviceManagerList.isEmpty()){
 		//Add firing neuron ids to list
 		for(unsigned i=0; i<firedCount; ++i)
 			firingNeuronList.append(firedArray[i]);
-		if(firedCount > 0)
-			qDebug()<<"Number of firing neurons: "<<firedCount;
+		#ifdef DEBUG_STEP
+			if(firedCount > 0)
+				qDebug()<<"Number of firing neurons: "<<firedCount;
+		#endif//DEBUG_STEP
 
 		//Store firing neurons in database
 		if(archiveMode){
 			archiveDao->addArchiveData(archiveInfo.getID(), timeStepCounter, firingNeuronList);
+		}
+
+		//Pass firing neurons to device managers
+		for(int i=0; i<deviceManagerList.size(); ++i){
+			deviceManagerList[i]->setInputNeurons(timeStepCounter, firingNeuronList);
 		}
 	}
 

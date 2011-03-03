@@ -2,6 +2,7 @@
 #define NEMOWRAPPER_H
 
 //SpikeStream includes
+#include "AbstractDeviceManager.h"
 #include "AbstractSimulation.h"
 #include "ArchiveDao.h"
 #include "ArchiveInfo.h"
@@ -33,6 +34,7 @@ namespace spikestream {
 		public:
 			NemoWrapper();
 			~NemoWrapper();
+			void addDeviceManager(AbstractDeviceManager* deviceManager);
 			void cancelLoading();
 			void cancelResetWeights();
 			void cancelSaveWeights();
@@ -252,6 +254,9 @@ namespace spikestream {
 
 			/*! Neuron group in which pattern is to be injected. */
 			unsigned patternNeuronGroupID;
+
+			/*! List of device managers that interact with devices */
+			QList<AbstractDeviceManager*> deviceManagerList;
 
 
 			//======================  METHODS  ========================
