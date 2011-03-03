@@ -91,6 +91,7 @@ SOURCES += src/analysis/AnalysisLoaderWidget.cpp \
 			src/analysis/AbstractSpectrogramData.cpp \
 			src/analysis/AnalysisSpectrogram.cpp
 
+
 #----------------------------------------------#
 #---                 Builders               ---#
 #----------------------------------------------#
@@ -98,6 +99,7 @@ HEADERS += include/AbstractConnectionBuilder.h \
 			include/AbstractNeuronBuilder.h
 SOURCES += src/builders/AbstractConnectionBuilder.cpp \
 			src/builders/AbstractNeuronBuilder.cpp
+
 
 #----------------------------------------------#
 #---                Dialogs                 ---#
@@ -163,9 +165,13 @@ SOURCES += src/models/NeuronGroupModel.cpp \
 #---               Simulation               ---#
 #----------------------------------------------#
 HEADERS += include/AbstractSimulation.h \
-			include/AbstractExperimentWidget.h
+			include/AbstractExperimentWidget.h \
+			include/AbstractDeviceManager.h \
+			include/AbstractDeviceWidget.h
 SOURCES += src/simulation/AbstractSimulation.cpp \
-			src/simulation/AbstractExperimentWidget.cpp
+			src/simulation/AbstractExperimentWidget.cpp \
+			src/simulation/AbstractDeviceManager.cpp \
+			src/simulation/AbstractDeviceWidget.cpp
 
 
 #----------------------------------------------#
