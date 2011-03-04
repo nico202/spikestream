@@ -14,7 +14,7 @@ QT += xml opengl sql
 #----------------------------------------------#
 #---              INCLUDE PATH              ---#
 #----------------------------------------------#
-INCLUDEPATH += src/gui src/managers \
+INCLUDEPATH += src/gui src/managers src/models src/views \
 				$${SPIKESTREAM_ROOT_DIR}/simulators/nemo/include \
 				$${SPIKESTREAM_ROOT_DIR}/library/include \
 				$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/include
@@ -50,7 +50,21 @@ SOURCES += src/gui/ISpikeWidget.cpp
 
 
 #----------------------------------------------#
-#-----              Managers              -----#
+#-----               MODELS               -----#
+#----------------------------------------------#
+HEADERS += src/models/ChannelModel.h
+SOURCES += src/models/ChannelModel.cpp
+
+
+#----------------------------------------------#
+#-----               VIEWS               -----#
+#----------------------------------------------#
+HEADERS += src/views/ChannelTableView.h
+SOURCES += src/views/ChannelTableView.cpp
+
+
+#----------------------------------------------#
+#-----              MANAGERS              -----#
 #----------------------------------------------#
 HEADERS += src/managers/ISpikeManager.h
 SOURCES += src/managers/ISpikeManager.cpp

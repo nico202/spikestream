@@ -957,9 +957,10 @@ void NemoWrapper::stepNemo(){
 			archiveDao->addArchiveData(archiveInfo.getID(), timeStepCounter, firingNeuronList);
 		}
 
-		//Pass firing neurons to device managers
+		//Pass firing neurons to device managers and step device managers
 		for(int i=0; i<deviceManagerList.size(); ++i){
 			deviceManagerList[i]->setInputNeurons(timeStepCounter, firingNeuronList);
+			deviceManagerList[i]->step();
 		}
 	}
 
