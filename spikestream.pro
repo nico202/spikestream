@@ -24,7 +24,8 @@ SUBDIRS += connectiongroups/random1 connectiongroups/topographic1
 
 #================  SIMULATION PLUGINS  =================
 SUBDIRS += simulators/nemo
-SUBDIRS += simulators/nemo/experiments/populationexperiment1
+SUBDIRS += simulators/nemo/experiments/populationexperiment1 simulators/nemo/experiments/temporalcodingexpt1
+SUBDIRS += simulators/nemo/devices/ispike
 	
 
 #================  INSTALLATION  =====================
