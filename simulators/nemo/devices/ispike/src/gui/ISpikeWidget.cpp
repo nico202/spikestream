@@ -28,6 +28,27 @@ ISpikeWidget::ISpikeWidget(QWidget* parent) : AbstractDeviceWidget(parent){
 	//Create layout for the entire widget
 	QVBoxLayout* mainVBox = new QVBoxLayout(this);
 
+	//Validators
+	QRegExp ipRegExp("\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b");
+	QRegExpValidator* ipAddressValidator = new QRegExpValidator(ipRegExp, this);
+
+	//Add inputs to set the DNS server
+	QHBoxLayout* dnsBox = new QHBoxLayout();
+	dnsBox->addWidget(new QLabel("DNS Server Address: "));
+	dnsEdit = new QLineEdit();
+	dnsEdit->setValidator(ipAddressValidator);
+	dnsBox->addWidget(dnsEdit);
+	connectButton = new QPushButton("Connect");
+	connectButton->setMinimumSize(60, 20);
+	connect(connectButton, SIGNAL(clicked()), this, SLOT(connectButtonClicked()));
+	dnsBox->addWidget(connectButton);
+	disconnectButton = new QPushButton("Disconnect");
+	disconnectButton->setMinimumSize(60, 20);
+	disconnectButton->setEnabled(false);
+	connect(disconnectButton, SIGNAL(clicked()), this, SLOT(disconnectButtonClicked()));
+	dnsBox->addWidget(disconnectButton);
+	mainVBox->addLayout(dnsBox);
+
 	//Combo boxes to connect layers
 	QHBoxLayout* channelBox = new QHBoxLayout();
 	channelCombo = new QComboBox();
@@ -45,7 +66,6 @@ ISpikeWidget::ISpikeWidget(QWidget* parent) : AbstractDeviceWidget(parent){
 
 	//Load up combo boxes with available channels and matching neuron groups
 	fillChannelCombo();
-	fillNeuronGroupCombo(channelCombo->currentText());
 
 	//Create iSpike manager
 	iSpikeManager = new ISpikeManager();
@@ -54,6 +74,9 @@ ISpikeWidget::ISpikeWidget(QWidget* parent) : AbstractDeviceWidget(parent){
 	channelModel = new ChannelModel(iSpikeManager);
 	ChannelTableView* channelView = new ChannelTableView(channelModel);
 	mainVBox->addWidget(channelView);
+
+	//Listen for changes in network
+	connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(networkChanged()));
 
 	mainVBox->addStretch(5);
 }
@@ -104,13 +127,62 @@ void ISpikeWidget::channelComboChanged(QString channelName){
 }
 
 
+/*! Called when the connect button is clicked.
+	Tries to connect to DNS server and gives an error message if this fails. */
+void ISpikeWidget::connectButtonClicked(){
+	//CHECK INPUT
+
+	//TRY TO CONNECT TO DNS SERVER
+
+	//Load list of available channels
+	fillChannelCombo();
+
+	//Enable/disable appropriate graphical components
+	connectButton->setEnabled(false);
+	dnsEdit->setEnabled(false);
+	disconnectButton->setEnabled(true);
+}
+
+
+/*! Called when the disconnect button is clicked.
+	Tries to connect to DNS server and gives an error message if this fails. */
+void ISpikeWidget::disconnectButtonClicked(){
+	//CHECK INPUT
+
+	//TRY TO DISCONNECT FROM DNS SERVER
+
+	//ENABLE CONNECT BUTTON; DISENABLE DISCONNECT BUTTON.
+
+	connectButton->setEnabled(true);
+	dnsEdit->setEnabled(true);
+	disconnectButton->setEnabled(false);
+}
+
+
+/*! Called when network is changed */
+void ISpikeWidget::networkChanged(){
+	neuronGroupCombo->clear();
+
+	if(Globals::networkLoaded())
+		fillNeuronGroupCombo(channelCombo->currentText());
+}
+
+
 /*----------------------------------------------------------*/
 /*------                PRIVATE METHODS               ------*/
 /*----------------------------------------------------------*/
 
 /*! Fills the channel combo with a list of available channels from the iSpike library */
 void ISpikeWidget::fillChannelCombo(){
+	channelCombo->clear();
 
+	//Get channel infromation from iSpike library
+
+
+	//Load matching neuron groups
+	neuronGroupCombo->clear();
+	if(Globals::networkLoaded())
+		fillNeuronGroupCombo(channelCombo->currentText());
 }
 
 
@@ -118,7 +190,7 @@ void ISpikeWidget::fillChannelCombo(){
 	the currently selected channel type. */
 void ISpikeWidget::fillNeuronGroupCombo(QString channelName){
 	if(!Globals::networkLoaded()){
-		qCritical()<<"Cannot initialize ISpikeWidget without a loaded network";
+		qCritical()<<"Cannot load neuron groups into ISpikeWidget without a loaded network";
 		return;
 	}
 
