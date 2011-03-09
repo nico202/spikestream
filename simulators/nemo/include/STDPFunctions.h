@@ -4,6 +4,7 @@
 //SpikeStream includes
 #include "AbstractSTDPFunction.h"
 #include "ParameterInfo.h"
+#include "SpikeStreamTypes.h"
 
 //Qt includes
 #include <QHash>
@@ -19,6 +20,7 @@ namespace spikestream {
 
 		public:
 			static void cleanup();
+			static timestep_t getApplySTDPInterval(unsigned functionID);
 			static QString getFunctionDescription(unsigned functionID);
 			static QList<unsigned> getFunctionIDs();
 			static QHash<QString, double> getParameters(unsigned functionID);

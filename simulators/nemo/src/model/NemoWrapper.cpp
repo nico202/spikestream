@@ -34,9 +34,7 @@ NemoWrapper::NemoWrapper() : AbstractSimulation() {
 	updateInterval_ms = 500;
 	patternNeuronGroupID = 0;
 	sustainPattern = false;
-	injectCurrentNeuronCount = 0;
-	injectCurrentAmount = 0;
-	sustainInjectCurrent = false;
+	sustainCurrent = false;
 	waitInterval_ms = 200;
 
 	//Zero is the default STDP function
@@ -133,6 +131,7 @@ void NemoWrapper::loadNemo(){
 					   STDPFunctions::getMaxWeight(stdpFunctionID)
 	);
 	stdpReward = STDPFunctions::getReward(stdpFunctionID);
+	applySTDPInterval = STDPFunctions::getApplySTDPInterval(stdpFunctionID);
 
 	//Load the network into the simulator
 	#ifdef DEBUG_LOAD
@@ -186,22 +185,27 @@ void NemoWrapper::saveWeights(){
 	currentTaskID = SAVE_WEIGHTS_TASK;
 }
 
-/*! Injects the specified amount of current in the specified number of randomly
+/*! Injects the specified amount of current in the specified percentage of randomly
 	selected neurons at each time step. Throws an exception if the number of neurons is
 	greater than the number of neurons in the network. */
-void  NemoWrapper::setInjectCurrent(int numNeurons, float current, bool sustain){
-	sustainNoise = sustain;
+void  NemoWrapper::setInjectCurrent(unsigned neuronGroupID, double percentage, double current, bool sustain){
+	sustainCurrent = sustain;
+	sustainNoise = sustain;//Both are controlled with a single check box
 
 	//Run checks
 	if(!simulationLoaded)
 		throw SpikeStreamException("Current cannot be injected when a simulation is not loaded.");
-	if(numNeurons > Globals::getNetwork()->size())
-		throw SpikeStreamException("Injecting current. Number of neurons is greater than the network size.");
+	if(percentage < 0.0 || percentage > 100.0)
+		throw SpikeStreamException("Injecting current. Percentage is out of range");
+	if(!Globals::getNetwork()->containsNeuronGroup(neuronGroupID))
+		throw SpikeStreamException("Injecting current. Neuron group ID cannot be found in current network: " + QString::number(neuronGroupID));
 
-	//Store variables
-	injectCurrentNeuronCount = numNeurons;
-	injectCurrentAmount = current;
-	sustainInjectCurrent = sustain;
+	//Calculate number of neurons to fire and store it in the map
+	unsigned numNeuronsToFire = Util::rUInt( (percentage / 100.0) * (double)Globals::getNetwork()->getNeuronGroup(neuronGroupID)->size());
+	if(numNeuronsToFire > (unsigned)Globals::getNetwork()->getNeuronGroup(neuronGroupID)->size())
+		throw SpikeStreamException("Number of neurons to fire is greater than neuron group size: " + QString::number(numNeuronsToFire) );
+
+	injectCurrentMap[neuronGroupID] = QPair<unsigned, double>(numNeuronsToFire, current);
 }
 
 
@@ -228,6 +232,7 @@ void NemoWrapper::setFiringNeuronIDs(QList<neurid_t>& neurIDList){
 	network or if the percentage is < 0 or > 100. */
 void  NemoWrapper::setInjectNoise(unsigned neuronGroupID, double percentage, bool sustain){
 	sustainNoise = sustain;
+	sustainCurrent = sustain;//Both are controlled with a single check box
 
 	//Run checks
 	if(!simulationLoaded)
@@ -498,7 +503,7 @@ void NemoWrapper::updateProgress(int stepsComplete, int totalSteps){
 /*! Adds neurons due to noise at the end of the injectNeuronID vector.
 	These neurons will be forced to fire at the next time step.
 	Returns the number of neurons added. */
-unsigned NemoWrapper::addInjectNoiseNeuronIDs(){
+unsigned NemoWrapper::addInjectFiringNeuronIDs(){
 	//Calculate total number of firing neurons
 	unsigned arraySize = 0, arrayCounter = 0;
 	for(QHash<unsigned, unsigned>::iterator iter = injectNoiseMap.begin(); iter != injectNoiseMap.end(); ++iter)
@@ -555,33 +560,43 @@ unsigned NemoWrapper::addInjectNoiseNeuronIDs(){
 
 /*! Adds current to a random selection of neurons */
 unsigned NemoWrapper::addInjectCurrentNeuronIDs(){
-	//Use a hash map to avoid duplicates
-	QHash<unsigned, bool> selectionMap;
+	//Calculate total number of current neurons
+	unsigned arraySize = 0, arrayCounter = 0;
+	for(QHash<unsigned, QPair<unsigned, double> >::iterator iter = injectCurrentMap.begin(); iter != injectCurrentMap.end(); ++iter)
+		arraySize += iter.value().first;
 
-	//Select the required number of neurons from the network.
-	QList<NeuronGroup*> neurGrpList = Globals::getNetwork()->getNeuronGroups();
-	unsigned tmpNeurID, tmpMax;
-	while(selectionMap.size() != injectCurrentNeuronCount){
-		tmpNeurID = 0;
-		tmpMax = 0;
-		//Random number between 0 and size of network
-		int tmpRand = Util::getRandom(0, Globals::getNetwork()->size());
-		for(QList<NeuronGroup*>::iterator iter = neurGrpList.begin(); iter != neurGrpList.end(); ++iter){
-			tmpMax += (*iter)->size();
-			if((unsigned)tmpRand < tmpMax){
-				tmpNeurID = tmpRand - (tmpMax - (*iter)->size()) + (*iter)->getStartNeuronID();
+	//Add a random selection of neuron ids from each group
+	unsigned randomIndex, neurGrpSize, numSelectedNeurons;
+	double injectCurrentAmount;
+	QHash<unsigned, bool> addedNeurIndxMap;//Prevent duplicates
+	for(QHash<unsigned, QPair<unsigned, double> >::iterator iter = injectCurrentMap.begin(); iter != injectCurrentMap.end(); ++iter){
+		//Get list of neuron ids
+		QList<unsigned> neuronIDList = Globals::getNetwork()->getNeuronGroup(iter.key())->getNeuronIDs();
+		neurGrpSize = neuronIDList.size();
+		addedNeurIndxMap.clear();
+		numSelectedNeurons = iter.value().first;
+		injectCurrentAmount = iter.value().second;
+
+		//Select indexes from the list of neuron ids
+		while((unsigned)addedNeurIndxMap.size() < numSelectedNeurons){
+			randomIndex = Util::getRandom(0, neurGrpSize);//Get random position in list of neuron ids
+			if(!addedNeurIndxMap.contains(randomIndex)){//New index
+				if(arrayCounter >= arraySize)//Sanity check
+					throw SpikeStreamException("Error adding current injection neuron ids - array counter out of range.");
+				injectionCurrentNeurIDVector.push_back(neuronIDList.at(randomIndex));//Add neuron id to pattern vector
+				injectionCurrentVector.push_back(injectCurrentAmount);
+				addedNeurIndxMap[randomIndex] = true;//Record the fact that we have selected this ID
+				++arrayCounter;
 			}
 		}
-		if(tmpNeurID == 0)
-			throw SpikeStreamException("Neuron ID not found for injection of current.");
-
-		if(!selectionMap.contains(tmpNeurID)){
-			selectionMap[tmpNeurID] = true;
-			injectionCurrentNeurIDVector.push_back(tmpNeurID);
-			injectionCurrentVector.push_back(injectCurrentAmount);
-		}
 	}
-	return (unsigned)selectionMap.size();
+
+	//Sanity check, then return number of neurons added
+	if(arrayCounter != arraySize)
+		throw SpikeStreamException("Error adding inject noise neuron IDs. Array counter: " + QString::number(arrayCounter) + "; Array size: " + QString::number(arraySize));
+
+	//Return the number of neurons that have been added
+	return arraySize;
 }
 
 
@@ -825,7 +840,7 @@ void NemoWrapper::setExcitatoryNeuronParameters(NeuronGroup* neuronGroup){
 
 		//Set parameters in neuron
 		checkNemoOutput(
-			nemo_set_neuron(
+			nemo_set_neuron_s(
 					nemoSimulation,
 					iter.key(),
 					a, b, c, d, u, v, sigma
@@ -866,7 +881,7 @@ void NemoWrapper::setInhibitoryNeuronParameters(NeuronGroup* neuronGroup){
 
 		//Set parameters in neuron FIXME
 		checkNemoOutput(
-			nemo_set_neuron(
+			nemo_set_neuron_s(
 					nemoSimulation,
 					iter.key(),
 					a, b, v, d, u, v, sigma
@@ -888,9 +903,9 @@ void NemoWrapper::stepNemo(){
 	//---------------------------------------
 	//Add inject noise neurons to end of injection vector
 	if(!injectNoiseMap.isEmpty() || !neuronIDsToFire.isEmpty() || !deviceManagerList.isEmpty())
-		numFiredNeurons = addInjectNoiseNeuronIDs();
+		numFiredNeurons = addInjectFiringNeuronIDs();
 
-	if(injectCurrentNeuronCount > 0)
+	if(!injectCurrentMap.isEmpty())
 		numCurrentNeurons = addInjectCurrentNeuronIDs();
 
 	#ifdef DEBUG_STEP
@@ -917,9 +932,8 @@ void NemoWrapper::stepNemo(){
 		injectNoiseMap.clear();
 
 	//Clear inject current parameters if we are not sustaining it
-	if(!sustainInjectCurrent){
-		injectCurrentNeuronCount = 0;
-		injectCurrentAmount = 0;
+	if(!sustainCurrent){
+		injectCurrentMap.clear();
 	}
 
 	//Delete pattern if it is not sustained
@@ -983,7 +997,9 @@ void NemoWrapper::stepNemo(){
 	//               Apply STDP
 	//--------------------------------------------
 	if(!volatileConGrpMap.isEmpty()){
-		nemo_apply_stdp(nemoSimulation, stdpReward);
+		if(timeStepCounter % applySTDPInterval == 0){
+			nemo_apply_stdp(nemoSimulation, stdpReward);
+		}
 	}
 
 
@@ -1036,9 +1052,8 @@ void NemoWrapper::unloadNemo(){
 	//Clean up sustain noise etc.
 	sustainNoise = false;
 	injectNoiseMap.clear();
-	sustainInjectCurrent = false;
-	injectCurrentNeuronCount = 0;
-	injectCurrentAmount = 0;
+	sustainCurrent = false;
+	injectCurrentMap.clear();
 	sustainPattern = false;
 	injectionPatternVector.clear();
 	injectionCurrentNeurIDVector.clear();

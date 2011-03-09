@@ -153,30 +153,6 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	injectGroupBox = new QGroupBox("Inject", controlsWidget);
 	QVBoxLayout* injectVBox = new QVBoxLayout();
 
-	//Add widget to enable injection of current into specific numbers of neurons
-	QHBoxLayout* injectCurrentBox = new QHBoxLayout();
-	injectCurrentNeuronCountCombo = new QComboBox();
-	injectCurrentNeuronCountCombo->setMinimumSize(200, 20);
-	injectCurrentNeuronCountCombo->addItem("1 neuron");
-	injectCurrentNeuronCountCombo->addItem("10 neurons");
-	injectCurrentNeuronCountCombo->addItem("100 neurons");
-	injectCurrentNeuronCountCombo->addItem("1000 neurons");
-	injectCurrentBox->addWidget(injectCurrentNeuronCountCombo);
-	injectCurrentAmountCombo = new QComboBox();
-	injectCurrentAmountCombo->setMinimumSize(50, 20);
-	for(int i=10; i<=100; i+= 10)
-		injectCurrentAmountCombo->addItem(QString::number(i));
-	injectCurrentBox->addWidget(injectCurrentAmountCombo);
-	injectCurrentButton = new QPushButton("Inject Current");
-	injectCurrentButton->setMinimumHeight(20);
-	connect(injectCurrentButton, SIGNAL(clicked()), this, SLOT(injectCurrentButtonClicked()));
-	injectCurrentBox->addWidget(injectCurrentButton);
-	sustainCurrentChkBox = new QCheckBox("Sustain");
-	connect(sustainCurrentChkBox, SIGNAL(clicked(bool)), this, SLOT(sustainCurrentChanged(bool)));
-	injectCurrentBox->addWidget(sustainCurrentChkBox);
-	injectCurrentBox->addStretch(5);
-	injectVBox->addSpacing(5);
-	injectVBox->addLayout(injectCurrentBox);
 
 	//Add widgets to inject noise into specified layers
 	QHBoxLayout* injectNoiseBox = new QHBoxLayout();
@@ -184,10 +160,21 @@ NemoWidget::NemoWidget(QWidget* parent) : QWidget(parent) {
 	injectNoiseNeuronGroupCombo->setMinimumSize(200, 20);
 	injectNoiseBox->addWidget(injectNoiseNeuronGroupCombo);
 	injectNoisePercentCombo = new QComboBox();
+	injectNoisePercentCombo->addItem("0.1 %");
+	injectNoisePercentCombo->addItem("1 %");
 	for(int i=10; i<=100; i += 10)
 		injectNoisePercentCombo->addItem(QString::number(i) + " %");
 	injectNoisePercentCombo->setMinimumSize(60, 20);
 	injectNoiseBox->addWidget(injectNoisePercentCombo);
+
+	injectNoiseCurrentCombo = new QComboBox();
+	injectNoiseCurrentCombo->addItem("Fire");
+	injectNoiseCurrentCombo->addItem("1");
+	for(int i=10; i<=100; i += 10)
+		injectNoiseCurrentCombo->addItem(QString::number(i));
+	injectNoiseCurrentCombo->setMinimumSize(60, 20);
+	injectNoiseBox->addWidget(injectNoiseCurrentCombo);
+
 	injectNoiseButton = new QPushButton("Inject Noise");
 	injectNoiseButton->setMinimumHeight(20);
 	connect(injectNoiseButton, SIGNAL(clicked()), this, SLOT(injectNoiseButtonClicked()));
@@ -508,13 +495,6 @@ void NemoWidget::experimentStarted(){
 }
 
 
-/*! Called when the inject current button is clicked. Sets the injection
-	of current in the nemo wrapper */
-void NemoWidget::injectCurrentButtonClicked(){
-	setInjectCurrent(false);
-}
-
-
 /*! Called when the inject noise button is clicked. Sets the injection
 	of noise in the nemo wrapper */
 void NemoWidget::injectNoiseButtonClicked(){
@@ -805,7 +785,6 @@ void NemoWidget::saveWeights(){
 	}
 
 	try{
-
 		//Start saving of weights
 		updatingProgress = false;
 		taskCancelled = false;
@@ -1049,38 +1028,20 @@ void NemoWidget::stopSimulation(){
 }
 
 
-/*! Switches between current injection controlled by button and continuous
-	current injection at every time step. */
-void NemoWidget::sustainCurrentChanged(bool enabled){
-	if(enabled){
-		injectCurrentButton->setEnabled(false);
-		injectCurrentNeuronCountCombo->setEnabled(false);
-		injectCurrentAmountCombo->setEnabled(false);
-		setInjectCurrent(true);
-	}
-	else{
-		injectCurrentButton->setEnabled(true);
-		injectCurrentNeuronCountCombo->setEnabled(true);
-		injectCurrentAmountCombo->setEnabled(true);
-
-		//Switch off sustain noise - it will be automatically deleted on next step.
-		nemoWrapper->setSustainCurrent(false);
-	}
-}
-
-
 /*! Switches between noise injection controlled by button and
 	continuous noise injection at every time step */
 void NemoWidget::sustainNoiseChanged(bool enabled){
 	if(enabled){
 		injectNoiseButton->setEnabled(false);
 		injectNoisePercentCombo->setEnabled(false);
+		injectNoiseCurrentCombo->setEnabled(false);
 		injectNoiseNeuronGroupCombo->setEnabled(false);
 		setInjectNoise(true);
 	}
 	else{
 		injectNoiseButton->setEnabled(true);
 		injectNoisePercentCombo->setEnabled(true);
+		injectNoiseCurrentCombo->setEnabled(true);
 		injectNoiseNeuronGroupCombo->setEnabled(true);
 
 		//Switch off sustain noise - it will be automatically deleted on next step.
@@ -1146,12 +1107,8 @@ void NemoWidget::unloadSimulation(bool confirmWithUser){
 	sustainNoiseChkBox->setChecked(false);
 	injectNoiseButton->setEnabled(true);
 	injectNoisePercentCombo->setEnabled(true);
+	injectNoiseCurrentCombo->setEnabled(true);
 	injectNoiseNeuronGroupCombo->setEnabled(true);
-
-	sustainCurrentChkBox->setChecked(false);
-	injectCurrentButton->setEnabled(true);
-	injectCurrentNeuronCountCombo->setEnabled(true);
-	injectCurrentAmountCombo->setEnabled(true);
 
 	//Clean up any raster plots
 	for(QHash<unsigned, SpikeRasterDialog*>::iterator iter = rasterDialogMap.begin(); iter != rasterDialogMap.end(); ++iter){
@@ -1334,8 +1291,8 @@ QToolBar* NemoWidget::getToolBar(){
 
 	timeStepLabel = new QLabel ("0");
 	timeStepLabel->setStyleSheet( "QLabel { margin-left: 5px; background-color: #ffffff; border-color: #555555; border-width: 2px; border-style: outset; font-weight: bold;}");
-	timeStepLabel->setMinimumSize(150, 20);
-	timeStepLabel->setMaximumSize(150, 20);
+	timeStepLabel->setMinimumSize(200, 20);
+	timeStepLabel->setMaximumSize(200, 20);
 	timeStepLabel->setAlignment(Qt::AlignCenter);
 	tmpToolBar->addWidget(timeStepLabel);
 
@@ -1361,29 +1318,17 @@ void NemoWidget::loadNeuronGroups(){
 }
 
 
-/*! Sets the injection of current */
-void NemoWidget::setInjectCurrent(bool sustain){
-	int numNeurons = Util::getUInt(injectCurrentNeuronCountCombo->currentText().section(" ", 0, 0));
-	if(numNeurons > Globals::getNetwork()->size()){
-		qCritical()<<"Number of neurons ("<<numNeurons<<" cannot be greater than the size of the network ("<<Globals::getNetwork()->size();
-		return;
-	}
-	float amount = Util::getFloat(injectCurrentAmountCombo->currentText());
-	try{
-		nemoWrapper->setInjectCurrent(numNeurons, amount, sustain);
-	}
-	catch(SpikeStreamException& ex){
-		qCritical()<<ex.getMessage();
-	}
-}
-
-
 /*! Sets the injection of noise */
 void NemoWidget::setInjectNoise(bool sustain){
 	unsigned percentage = Util::getUInt(injectNoisePercentCombo->currentText().section(" ", 0, 0));
 	unsigned neurGrpID = getNeuronGroupID(injectNoiseNeuronGroupCombo->currentText());
 	try{
-		nemoWrapper->setInjectNoise(neurGrpID, percentage, sustain);
+		if(injectNoiseCurrentCombo->currentText() == "Fire"){
+			nemoWrapper->setInjectNoise(neurGrpID, percentage, sustain);
+		}
+		else{
+			nemoWrapper->setInjectCurrent(neurGrpID, percentage, Util::getDouble(injectNoiseCurrentCombo->currentText()), sustain);
+		}
 	}
 	catch(SpikeStreamException& ex){
 		qCritical()<<ex.getMessage();
