@@ -3,6 +3,7 @@
 
 //SpikeStream includes
 #include "ParameterInfo.h"
+#include "SpikeStreamTypes.h"
 
 //Qt includes
 #include <QHash>
@@ -14,6 +15,7 @@ namespace spikestream {
 		public:
 			AbstractSTDPFunction();
 			virtual ~AbstractSTDPFunction();
+			virtual timestep_t getApplySTDPInterval();
 			virtual QHash<QString, double> getParameters();
 			virtual void setParameters(QHash<QString, double>& newParameterMap);
 			virtual QHash<QString, double> getDefaultParameters();

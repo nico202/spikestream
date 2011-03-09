@@ -61,7 +61,7 @@ namespace spikestream {
 			void saveWeights();
 			void setArchiveMode(bool mode, const QString& archiveDescription = "");
 			void setFrameRate(unsigned int frameRate);
-			void setInjectCurrent(int numNeurons, float current, bool sustain);
+			void setInjectCurrent(unsigned neuronGroupID, double percentage, double current, bool sustain);
 			void setFiringNeuronIDs(QList<neurid_t>& neurIDList);
 			void setInjectNoise(unsigned neuronGroupID, double percentage, bool sustain);
 			void setFiringInjectionPattern(const Pattern& pattern, unsigned neuronGroupID, bool sustain);
@@ -73,8 +73,7 @@ namespace spikestream {
 			void setNeuronParameters(unsigned neuronGroupID, QHash<QString, double> parameterMap);
 			void setSynapseParameters(unsigned connectionGroupID, QHash<QString, double> parameterMap);
 			void setSTDPFunctionID(unsigned stdpFunctionID) { this->stdpFunctionID = stdpFunctionID; }
-			void setSustainCurrent(bool sustainCurrent) { this->sustainInjectCurrent = sustainCurrent; }
-			void setSustainNoise(bool sustainNoise) { this->sustainNoise = sustainNoise; }
+			void setSustainNoise(bool sustain) { this->sustainNoise = sustain; this->sustainCurrent = sustain; }
 			void setSustainPattern(bool sustainPattern) { this->sustainPattern = sustainPattern; }
 			void setWaitInterval(unsigned waitInterval_ms) { this->waitInterval_ms = waitInterval_ms; }
 			void playSimulation();
@@ -188,21 +187,21 @@ namespace spikestream {
 			/*! List of neurons that are firing at the current time step */
 			QList<neurid_t> firingNeuronList;
 
-			/*! Map of neuron groups to inject noise into at the next time step.
+			/*! Map of neuron groups to inject firing noise into at the next time step.
 				The key is the neuron group ID, the value is the number of neurons to fire. */
 			QHash<unsigned, unsigned> injectNoiseMap;
 
 			/*! Controls whether noise is sustained for more than one time step */
 			bool sustainNoise;
 
-			/*! Number of neurons to inject current into */
-			int injectCurrentNeuronCount;
-
-			/*! Amount of current to inject */
-			float injectCurrentAmount;
+			/*! Map of neuron groups to inject current into at the next time step.
+				The key is the neuron group ID, the value is a pair in which
+				the first number is the number of neurons to inject current into
+				and the second number is the amount of current to inject. */
+			QHash<unsigned, QPair<unsigned, double> > injectCurrentMap;
 
 			/*! Whether current is injected into neurons at each time step */
-			float sustainInjectCurrent;
+			bool sustainCurrent;
 
 			/*! List of neuron IDs to fire in the next time step */
 			QList<neurid_t> neuronIDsToFire;
@@ -234,6 +233,9 @@ namespace spikestream {
 			/*! Reward used for STDP learning */
 			float stdpReward;
 
+			/*! Interval between applications of the learning function. */
+			timestep_t applySTDPInterval;
+
 			/*! ID of neuron group within which parameters will be set. */
 			unsigned neuronGroupID;
 
@@ -261,7 +263,7 @@ namespace spikestream {
 
 			//======================  METHODS  ========================
 			unsigned addInjectCurrentNeuronIDs();
-			unsigned addInjectNoiseNeuronIDs();
+			unsigned addInjectFiringNeuronIDs();
 			void checkNemoOutput(nemo_status_t result, const QString& errorMessage);
 			void clearError();
 			void fillInjectNoiseArray(unsigned*& array, int* arraySize);

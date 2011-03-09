@@ -25,6 +25,13 @@ void STDPFunctions::cleanup(){
 }
 
 
+/*! Returns the interval between applications of the STDP function. */
+timestep_t STDPFunctions::getApplySTDPInterval(unsigned functionID){
+	checkFunctionID(functionID);
+	return functionMap[functionID]->getApplySTDPInterval();
+}
+
+
 /*! Returns the parameters associated with a particular STDP function. */
 QHash<QString, double> STDPFunctions::getParameters(unsigned functionID){
 	checkInitialization();
