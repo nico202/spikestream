@@ -8,6 +8,14 @@ using namespace spikestream;
 #include <QLayout>
 #include <QLabel>
 
+//iSpike includes
+#include "iSpike/ChannelController.hpp"
+
+//Other includes
+#include <iostream>
+#include <map>
+using namespace std;
+
 
 //Functions for dynamic library loading
 extern "C" {
@@ -177,6 +185,21 @@ void ISpikeWidget::fillChannelCombo(){
 	channelCombo->clear();
 
 	//Get channel infromation from iSpike library
+	try{
+		ChannelController* controller = new ChannelController();
+		std::map<int, std::string>::iterator i;
+		std::map<int,std::string>* inputChannels = controller->getInputChannels();
+		std::cout << "Input Channels:" << std::endl;
+		for (i = inputChannels->begin(); i != inputChannels->end(); i++)
+			std::cout << i->first << "," << i->second << std::endl;
+		std::map<int,std::string>* outputChannels = controller->getOutputChannels();
+		std::cout << "Output Channels:" << std::endl;
+		for (i = outputChannels->begin(); i != outputChannels->end(); i++)
+			std::cout << i->first << "," << i->second << std::endl;
+	}
+	catch(...){
+		qCritical()<<"iSpike has thrown an unknown exception.";
+	}
 
 
 	//Load matching neuron groups
