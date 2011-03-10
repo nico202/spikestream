@@ -22,7 +22,7 @@ unix {
 	INCLUDEPATH += /usr/local/include
 }
 win32 {
-	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/nemo/include
+	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/ispike/include
 }
 
 
@@ -35,7 +35,7 @@ unix:!macx {
 win32{
 	LIBS += -lnemowrapper0 -L$${SPIKESTREAM_ROOT_DIR}/plugins/simulation/
 	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/lib -lspikestreamapplication0 -lspikestream0
-	LIBS += -lnemo -L$${SPIKESTREAM_ROOT_DIR}/extlib/nemo/lib
+	LIBS += -llibiSpike -L$${SPIKESTREAM_ROOT_DIR}/extlib/ispike/lib
 }
 macx {
 	LIBS += -lnemo -lspikestreamapplication -lspikestream
