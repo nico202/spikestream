@@ -193,15 +193,19 @@ void IzhikevichNetworkBuilder::addPolychronizationNetwork(){
 	//Create connection groups
 	ConnectionGroup* excitExcitConGrp = new ConnectionGroup(
 			ConnectionGroupInfo(0, getConGrpDescription(exNeurGrp, exNeurGrp), exNeurGrp->getID(), exNeurGrp->getID(), parameterMap, synapseType) );
-	excitExcitConGrp->setParameters(defaultParameterMaps[synapseType.getID()]);
+	QHash<QString, double> conParamMap = defaultParameterMaps[synapseType.getID()];
+	conParamMap["Learning"] = 1.0;
+	conParamMap["weight_factor"] = 10.0;
+	excitExcitConGrp->setParameters(conParamMap);
 
 	ConnectionGroup* excitInhibConGrp = new ConnectionGroup(
 			ConnectionGroupInfo(0, getConGrpDescription(exNeurGrp, inhibNeurGrp), exNeurGrp->getID(), inhibNeurGrp->getID(), parameterMap, synapseType) );
-	excitInhibConGrp->setParameters(defaultParameterMaps[synapseType.getID()]);
+	conParamMap["Learning"] = 0.0;
+	excitInhibConGrp->setParameters(conParamMap);
 
 	ConnectionGroup* inhibExcitConGrp = new ConnectionGroup(
 			ConnectionGroupInfo(0, getConGrpDescription(inhibNeurGrp, exNeurGrp), inhibNeurGrp->getID(), exNeurGrp->getID(), parameterMap, synapseType) );
-	inhibExcitConGrp->setParameters(defaultParameterMaps[synapseType.getID()]);
+	inhibExcitConGrp->setParameters(conParamMap);
 
 	//Add connections
 	int mOverD = M/D, toNeurIdx;

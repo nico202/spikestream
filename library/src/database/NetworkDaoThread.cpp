@@ -354,7 +354,7 @@ void NetworkDaoThread::addConnectionGroups(){
 
 		//Copy parameters from connection group into parameter table
 		QHash<QString, double> tmpParamMap = connectionGroup->getParameters();
-		setSynapseParameters(connGrpInfo, tmpParamMap);
+		setSynapseParameters(connectionGroup->getInfo(), tmpParamMap);
 
 		#ifdef TIME_PERFORMANCE
 			PerformanceTimer timer;
@@ -514,7 +514,7 @@ void NetworkDaoThread::addNeuronGroups(){
 
 		//Copy parameters from neuron group into parameter table
 		QHash<QString, double> tmpParamMap = neuronGroup->getParameters();
-		setNeuronParameters(neurGrpInfo, tmpParamMap);
+		setNeuronParameters(neuronGroup->getInfo(), tmpParamMap);
 
 		#ifdef TIME_PERFORMANCE
 			PerformanceTimer timer;
