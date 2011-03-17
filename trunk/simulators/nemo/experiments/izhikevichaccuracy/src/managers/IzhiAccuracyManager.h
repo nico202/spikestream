@@ -37,6 +37,12 @@ namespace spikestream {
 			/*! ID of experiment that is carried out. */
 			int experimentNumber;
 
+			/*! Excitatory neuron group */
+			NeuronGroup* excitatoryNeuronGroup;
+
+			/*! Inhibitory neuron group */
+			NeuronGroup* inhibitoryNeuronGroup;
+
 			static const int NO_EXPERIMENT = -1;
 			static const int EXPERIMENT1 = 0;
 
@@ -47,6 +53,7 @@ namespace spikestream {
 			//======================  METHODS  ======================
 			void runExperiment();
 			void stepNemo(unsigned numTimeSteps);
+			void storeNeuronGroups();
 			void storeParameters(QHash<QString, double>& parameterMap);
 
 	};

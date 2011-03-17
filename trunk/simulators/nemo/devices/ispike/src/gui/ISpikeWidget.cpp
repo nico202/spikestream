@@ -1,4 +1,5 @@
 //SpikeStream includes
+#include "AddChannelDialog.h"
 #include "ChannelTableView.h"
 #include "Globals.h"
 #include "ISpikeWidget.h"
@@ -9,7 +10,8 @@ using namespace spikestream;
 #include <QLabel>
 
 //iSpike includes
-#include "iSpike/ChannelController.hpp"
+#include "iSpike/Channel/InputChannel/InputChannel.hpp"
+#include "iSpike/Channel/OutputChannel/OutputChannel.hpp"
 
 //Other includes
 #include <iostream>
@@ -59,21 +61,11 @@ ISpikeWidget::ISpikeWidget(QWidget* parent) : AbstractDeviceWidget(parent){
 
 	//Combo boxes to connect layers
 	QHBoxLayout* channelBox = new QHBoxLayout();
-	channelCombo = new QComboBox();
-	connect(channelCombo, SIGNAL(currentIndexChanged(QString)), this, SLOT(channelComboChanged(QString)));
-	channelBox->addWidget(new QLabel("Channel: "));
-	channelBox->addWidget(channelCombo);
-	neuronGroupCombo = new QComboBox();
-	channelBox->addWidget(new QLabel("Neuron Group: "));
-	channelBox->addWidget(neuronGroupCombo);
-	addChannelButton = new QPushButton("Add");
+	addChannelButton = new QPushButton("Add channel");
 	connect(addChannelButton, SIGNAL(clicked()), this, SLOT(addChannel()));
 	channelBox->addWidget(addChannelButton);
 	channelBox->addStretch(5);
 	mainVBox->addLayout(channelBox);
-
-	//Load up combo boxes with available channels and matching neuron groups
-	fillChannelCombo();
 
 	//Create iSpike manager
 	iSpikeManager = new ISpikeManager();
@@ -111,27 +103,24 @@ AbstractDeviceManager* ISpikeWidget::getDeviceManager(){
 
 /*! Adds a new channel, which will produce or listen for neuron spikes. */
 void ISpikeWidget::addChannel(){
-	//Run some checks
-	if(channelCombo->currentText().isEmpty() || neuronGroupCombo->currentText().isEmpty()){
-		qCritical()<<"Channel and/or neuron group text missing. Cannot add channel.";
-		return;
+	try{
+		AddChannelDialog* tmpDlg = new AddChannelDialog(this);
+		if(tmpDlg->exec() == QDialog::Accepted){
+			if(tmpDlg->isInputChannel())
+				iSpikeManager->addChannel(tmpDlg->getInputChannel(), tmpDlg->getNeuronGroup());//Add channel to iSpikeManager
+			else
+				iSpikeManager->addChannel(tmpDlg->getOutputChannel(), tmpDlg->getNeuronGroup());//Add channel to iSpikeManager
+		}
 	}
-
-	//Get channel class from iSpike library
-	QString channelName = channelCombo->currentText();
-
-	//Add channel to iSpikeManager
-	iSpikeManager->addChannel();
+	catch(SpikeStreamException& ex){
+		qCritical()<<ex.getMessage();
+	}
+	catch(...){
+		qCritical()<<"An unknown exception occurred configuring a channel";
+	}
 
 	//Reload table displaying list of channels
 	channelModel->reload();
-}
-
-
-/*! Called when the channel combo is changed. Loads a selection of
-	neuron groups that are compatible with the channel. */
-void ISpikeWidget::channelComboChanged(QString channelName){
-	fillNeuronGroupCombo(channelName);
 }
 
 
@@ -142,8 +131,7 @@ void ISpikeWidget::connectButtonClicked(){
 
 	//TRY TO CONNECT TO DNS SERVER
 
-	//Load list of available channels
-	fillChannelCombo();
+	//CHECK THAT CHANNELS ARE STILL VALID
 
 	//Enable/disable appropriate graphical components
 	connectButton->setEnabled(false);
@@ -169,72 +157,17 @@ void ISpikeWidget::disconnectButtonClicked(){
 
 /*! Called when network is changed */
 void ISpikeWidget::networkChanged(){
-	neuronGroupCombo->clear();
-
+	if(channelModel->isEmpty()){
+		return;
+	}
 	if(Globals::networkLoaded())
-		fillNeuronGroupCombo(channelCombo->currentText());
+		qCritical()<<"Fixme - clear channels.";
 }
 
 
 /*----------------------------------------------------------*/
 /*------                PRIVATE METHODS               ------*/
 /*----------------------------------------------------------*/
-
-/*! Fills the channel combo with a list of available channels from the iSpike library */
-void ISpikeWidget::fillChannelCombo(){
-	channelCombo->clear();
-
-	//Get channel infromation from iSpike library
-	try{
-		ChannelController* controller = new ChannelController();
-		std::map<int, std::string>::iterator i;
-		std::map<int,std::string>* inputChannels = controller->getInputChannels();
-		std::cout << "Input Channels:" << std::endl;
-		for (i = inputChannels->begin(); i != inputChannels->end(); i++)
-			std::cout << i->first << "," << i->second << std::endl;
-		std::map<int,std::string>* outputChannels = controller->getOutputChannels();
-		std::cout << "Output Channels:" << std::endl;
-		for (i = outputChannels->begin(); i != outputChannels->end(); i++)
-			std::cout << i->first << "," << i->second << std::endl;
-	}
-	catch(...){
-		qCritical()<<"iSpike has thrown an unknown exception.";
-	}
-
-
-	//Load matching neuron groups
-	neuronGroupCombo->clear();
-	if(Globals::networkLoaded())
-		fillNeuronGroupCombo(channelCombo->currentText());
-}
-
-
-/*! Fills the neuron group combo with a list of neuron groups that match
-	the currently selected channel type. */
-void ISpikeWidget::fillNeuronGroupCombo(QString channelName){
-	if(!Globals::networkLoaded()){
-		qCritical()<<"Cannot load neuron groups into ISpikeWidget without a loaded network";
-		return;
-	}
-
-	//Clear combo
-	neuronGroupCombo->clear();
-	addChannelButton->setEnabled(false);
-
-	//Don't load any neuron groups if there are no channels
-	if(channelName.isEmpty()){
-		return;
-	}
-
-	//Load neuron groups that are compatible with the current channel
-	QList<NeuronGroup*> neurGrpList = Globals::getNetwork()->getNeuronGroups();
-	foreach(NeuronGroup* tmpNeurGrp, neurGrpList){
-		//CHECK SIZE MATCHES CURRENT CHANNEL
-		neuronGroupCombo->addItem(tmpNeurGrp->getInfo().getName());
-	}
-	if(neuronGroupCombo->count() > 0)
-		addChannelButton->setEnabled(true);
-}
 
 
 

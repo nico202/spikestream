@@ -26,7 +26,6 @@ namespace spikestream {
 
 		private slots:
 			void addChannel();
-			void channelComboChanged(QString channelName);
 			void connectButtonClicked();
 			void disconnectButtonClicked();
 			void networkChanged();
@@ -35,12 +34,6 @@ namespace spikestream {
 			//====================  VARIABLES  ======================
 			/*! Manager that interfaces with iSpike library */
 			ISpikeManager* iSpikeManager;
-
-			/*! Combo box holding list of available channels from iSpike */
-			QComboBox* channelCombo;
-
-			/*! Combo box holding neuron groups that are suitable for this channel */
-			QComboBox* neuronGroupCombo;
 
 			/*! Button to add channels */
 			QPushButton* addChannelButton;
@@ -59,8 +52,6 @@ namespace spikestream {
 
 
 			//====================  METHODS  ========================
-			void fillChannelCombo();
-			void fillNeuronGroupCombo(QString channelName);
 
 	};
 }

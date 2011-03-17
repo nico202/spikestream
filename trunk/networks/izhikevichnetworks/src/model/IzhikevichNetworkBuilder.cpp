@@ -200,11 +200,11 @@ void IzhikevichNetworkBuilder::addPolychronizationNetwork(){
 
 	ConnectionGroup* excitInhibConGrp = new ConnectionGroup(
 			ConnectionGroupInfo(0, getConGrpDescription(exNeurGrp, inhibNeurGrp), exNeurGrp->getID(), inhibNeurGrp->getID(), parameterMap, synapseType) );
-	conParamMap["Learning"] = 0.0;
 	excitInhibConGrp->setParameters(conParamMap);
 
 	ConnectionGroup* inhibExcitConGrp = new ConnectionGroup(
 			ConnectionGroupInfo(0, getConGrpDescription(inhibNeurGrp, exNeurGrp), inhibNeurGrp->getID(), exNeurGrp->getID(), parameterMap, synapseType) );
+	conParamMap["Learning"] = 0.0;
 	inhibExcitConGrp->setParameters(conParamMap);
 
 	//Add connections

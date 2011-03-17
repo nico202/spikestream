@@ -83,6 +83,14 @@ QVariant ChannelModel::data(const QModelIndex & index, int role) const{
 }
 
 
+/*! Returns true if there are no channels */
+bool ChannelModel::isEmpty(){
+	if(rowCount() == 0)
+		return true;
+	return false;
+}
+
+
 /*! Reloads the list of neuron groups */
 void ChannelModel::reload(){
 	loadChannels();

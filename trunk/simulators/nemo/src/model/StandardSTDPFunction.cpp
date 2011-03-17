@@ -97,6 +97,27 @@ float StandardSTDPFunction::getMaxWeight(){
 }
 
 
+/*! Prints out the function */
+void StandardSTDPFunction::print(){
+	checkFunctionUpToDate();
+
+	//Extract parameters
+	double aPlus = getParameter("A+");
+	double aMinus = getParameter("A-");
+	double tPlus = getParameter("T+");
+	double tMinus = getParameter("T-");
+
+	cout<<"Standard STDP Function"<<endl;
+	cout<<"Parameters. Pre length: "<<preLength<<"; postLength: "<<postLength<<"; A+: "<<aPlus<<"; A-: "<<aMinus<<"; T+: "<<tPlus<<"; T-: "<<tMinus<<endl;
+	for(int i=0; i<preLength; ++i)
+		cout<<"Pre array ["<<i<<"]: "<<preArray[i]<<endl;
+	cout<<endl;
+	for(int i=0; i<postLength; ++i)
+		cout<<"Post array ["<<i<<"]: "<<postArray[i]<<endl;
+	cout<<"Min weight: "<<getMinWeight()<<"; Max weight: "<<getMaxWeight()<<endl;
+}
+
+
 /*----------------------------------------------------------*/
 /*-----                PRIVATE METHODS                 -----*/
 /*----------------------------------------------------------*/
@@ -151,23 +172,6 @@ void StandardSTDPFunction::cleanUp(){
 	postArray = NULL;
 }
 
-
-/*! Prints out the function */
-void StandardSTDPFunction::print(){
-	//Extract parameters
-	double aPlus = getParameter("A+");
-	double aMinus = getParameter("A-");
-	double tPlus = getParameter("T+");
-	double tMinus = getParameter("T-");
-
-	cout<<"Standard STDP Function"<<endl;
-	cout<<"Parameters. Pre length: "<<preLength<<"; postLength: "<<postLength<<"; A+: "<<aPlus<<"; A-: "<<aMinus<<"; T+: "<<tPlus<<"; T-: "<<tMinus<<endl;
-	for(int i=0; i<preLength; ++i)
-		cout<<"Pre array ["<<i<<"]: "<<preArray[i]<<endl;
-	cout<<endl;
-	for(int i=0; i<postLength; ++i)
-		cout<<"Post array ["<<i<<"]: "<<postArray[i]<<endl;
-}
 
 
 

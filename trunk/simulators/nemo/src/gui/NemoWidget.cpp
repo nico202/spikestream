@@ -1320,7 +1320,7 @@ void NemoWidget::loadNeuronGroups(){
 
 /*! Sets the injection of noise */
 void NemoWidget::setInjectNoise(bool sustain){
-	unsigned percentage = Util::getUInt(injectNoisePercentCombo->currentText().section(" ", 0, 0));
+	double percentage = Util::getDouble(injectNoisePercentCombo->currentText().section(" ", 0, 0));
 	unsigned neurGrpID = getNeuronGroupID(injectNoiseNeuronGroupCombo->currentText());
 	try{
 		if(injectNoiseCurrentCombo->currentText() == "Fire"){

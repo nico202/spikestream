@@ -3,7 +3,7 @@
 
 //SpikeStream includes
 #include "AbstractExperimentWidget.h"
-#include "TemporalCodingExptManager.h"
+#include "IzhiAccuracyManager.h"
 #include "NemoWrapper.h"
 #include "SpikeStreamTypes.h"
 

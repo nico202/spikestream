@@ -140,7 +140,7 @@ void IzhiAccuracyExptWidget::buildParameters(){
 
 	ParameterInfo tmpInfo("experiment_number", "The experiment that is carried out", ParameterInfo::OPTION);
 	QList<QString> exptNameList;
-	exptNameList.append("Experiment 1 - Sequence Learning");
+	exptNameList.append("Experiment 1 - Accuracy test");
 	tmpInfo.setOptionNames(exptNameList);
 	parameterInfoList.append(tmpInfo);
 	defaultParameterMap["experiment_number"] = 0;
@@ -166,17 +166,25 @@ void IzhiAccuracyExptWidget::checkNetwork(){
 	QList<NeuronGroup*> neurGrpList = tmpNetwork->getNeuronGroups();
 
 	//Check that input layer, temporal coding and feature detection are there
-	bool inputLayerFound = false;
+	bool excitLayerFound = false, inhibLayerFound = false;
 	foreach(NeuronGroup* tmpNeurGrp, neurGrpList){
-		if(tmpNeurGrp->getInfo().getName().toUpper() == "INPUT LAYER"){
-			inputLayerFound = true;
-			break;
+		if(tmpNeurGrp->getInfo().getName().toUpper() == "EXCITATORY NEURON GROUP"){
+			if(tmpNeurGrp->size() != 800)
+				throw SpikeStreamException("Excitatory neuron group should contain 800 neurons");
+			excitLayerFound = true;
 		}
+		if(tmpNeurGrp->getInfo().getName().toUpper() == "INHIBITORY NEURON GROUP"){
+			if(tmpNeurGrp->size() != 200)
+				throw SpikeStreamException("Inhibitory neuron group should contain 200 neurons");
+			inhibLayerFound = true;
+		}
+		if(excitLayerFound && inhibLayerFound)
+			break;
 	}
 
 	//Throw exception if we have not found the necessary neuron groups
-	if(!inputLayerFound)
-		throw SpikeStreamException("Input layer could not be found. Make sure there is a neuron gruop labelled 'Input layer' in your network.");
+	if(!excitLayerFound || ! inhibLayerFound)
+		throw SpikeStreamException("Excitatory or inhibitory layers could not be found.\nMake sure there are neuron groups labelled 'Excitatory neuron group' and 'Inhibitory neuron group' in your network.");
 }
 
 

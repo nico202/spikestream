@@ -152,6 +152,13 @@ float STDPFunctions::getReward(unsigned functionID){
 }
 
 
+/*! Prints out the specified function */
+void STDPFunctions::print(unsigned functionID){
+	checkInitialization();
+	checkFunctionID(functionID);
+	functionMap[functionID]->print();
+}
+
 /*----------------------------------------------------------*/
 /*-----                PRIVATE METHODS                 -----*/
 /*----------------------------------------------------------*/
