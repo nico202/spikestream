@@ -63,6 +63,7 @@ namespace spikestream {
 			void setFrameRate(unsigned int frameRate);
 			void setInjectCurrent(unsigned neuronGroupID, double percentage, double current, bool sustain);
 			void setFiringNeuronIDs(QList<neurid_t>& neurIDList);
+			void setInjectCurrentNeuronIDs(QList<neurid_t>& neurIDList, double current);
 			void setInjectNoise(unsigned neuronGroupID, double percentage, bool sustain);
 			void setFiringInjectionPattern(const Pattern& pattern, unsigned neuronGroupID, bool sustain);
 			void setCurrentInjectionPattern(const Pattern& pattern, float current, unsigned neuronGroupID, bool sustain);
@@ -205,6 +206,9 @@ namespace spikestream {
 
 			/*! List of neuron IDs to fire in the next time step */
 			QList<neurid_t> neuronIDsToFire;
+
+			/*! Map linking neuron ids to amount of current to inject in next time step */
+			QHash<neurid_t, double> neuronIDCurrentMap;
 
 			/*! Map linking neurons with membrane potential */
 			QHash<unsigned, float> membranePotentialMap;

@@ -1,4 +1,5 @@
 //SpikeStream includes
+#include "Globals.h"
 #include "IzhiAccuracyManager.h"
 #include "Util.h"
 using namespace spikestream;
@@ -26,7 +27,7 @@ void IzhiAccuracyManager::run(){
 	clearError();
 	stopThread = false;
 	unsigned origWaitInterval = nemoWrapper->getWaitInterval_ms();
-	nemoWrapper->setWaitInterval(1);//Minimal wait between steps
+	nemoWrapper->setWaitInterval(0);//Minimal wait between steps
 
 	try{
 		runExperiment();
@@ -47,6 +48,7 @@ void IzhiAccuracyManager::run(){
 /*! Sets up the experiment and starts thread running. */
 void IzhiAccuracyManager::startExperiment(NemoWrapper* nemoWrapper, QHash<QString, double>& parameterMap){
 	this->nemoWrapper = nemoWrapper;
+	storeNeuronGroups();
 	storeParameters(parameterMap);
 	start();
 }
@@ -64,7 +66,19 @@ void IzhiAccuracyManager::runExperiment(){
 	//Train network on numPatterns patterns
 	emit statusUpdate("Starting Experiment " + QString::number(experimentNumber + 1));
 
-	stepNemo(10);
+	emit statusUpdate("First second with monitoring unchanged.");
+	stepNemo(1000);
+
+	emit statusUpdate("99 seconds without monitoring.");
+	nemoWrapper->setMonitor(false);
+	int origPauseInterval = pauseInterval_ms;
+	pauseInterval_ms = 0;
+	stepNemo(100000);
+	pauseInterval_ms = origPauseInterval;
+
+	emit statusUpdate("1 second with monitoring.");
+	nemoWrapper->setMonitor(true);
+	stepNemo(1000);
 
 	//Output final result
 	emit statusUpdate("Experiment complete.");
@@ -74,6 +88,11 @@ void IzhiAccuracyManager::runExperiment(){
 /*! Advances the simulation by the specified number of time steps */
 void IzhiAccuracyManager::stepNemo(unsigned numTimeSteps){
 	for(unsigned i=0; i<numTimeSteps && !stopThread; ++i){
+		//Inject current into a randomly selected neuron
+		//setInjectCurrentNeuronIDs(QList<neurid_t>& neurIDList, double current)
+
+
+		//Step simulation
 		nemoWrapper->stepSimulation();
 		while((nemoWrapper->isWaitForGraphics() || nemoWrapper->getCurrentTask() == NemoWrapper::STEP_SIMULATION_TASK) && !stopThread)
 			msleep(pauseInterval_ms);
@@ -82,18 +101,38 @@ void IzhiAccuracyManager::stepNemo(unsigned numTimeSteps){
 }
 
 
+/*! Stores pointers to the excitatory and inhibitory neuron groups */
+void IzhiAccuracyManager::storeNeuronGroups(){
+	QList<NeuronGroup*> neurGrpList = Globals::getNetwork()->getNeuronGroups();
+
+	//Get pointers to excitatory and inhibitory neuron groups
+	excitatoryNeuronGroup = NULL;
+	inhibitoryNeuronGroup = NULL;
+	foreach(NeuronGroup* tmpNeurGrp, neurGrpList){
+		if(tmpNeurGrp->getInfo().getName().toUpper() == "EXCITATORY NEURON GROUP"){
+			excitatoryNeuronGroup = tmpNeurGrp;
+		}
+		if(tmpNeurGrp->getInfo().getName().toUpper() == "INHIBITORY NEURON GROUP"){
+			inhibitoryNeuronGroup = tmpNeurGrp;
+		}
+		if(excitatoryNeuronGroup != NULL && inhibitoryNeuronGroup != NULL)
+			break;
+	}
+}
+
+
 /*! Stores the parameters for the experiment */
 void IzhiAccuracyManager::storeParameters(QHash<QString, double> &parameterMap){
 	if(!parameterMap.contains("experiment_number"))
-		throw SpikeStreamException("TemporalCodingExptManager: experiment_number parameter missing");
+		throw SpikeStreamException("IzhiAccuracyManager: experiment_number parameter missing");
 	experimentNumber = (int)parameterMap["experiment_number"];
 
 	if(!parameterMap.contains("random_seed"))
-		throw SpikeStreamException("TemporalCodingExptManager: random_seed parameter missing");
+		throw SpikeStreamException("IzhiAccuracyManager: random_seed parameter missing");
 	randomSeed = (int)parameterMap["random_seed"];
 
 	if(!parameterMap.contains("pause_interval_ms"))
-		throw SpikeStreamException("TemporalCodingExptManager: pause_interval_ms parameter missing");
+		throw SpikeStreamException("IzhiAccuracyManager: pause_interval_ms parameter missing");
 	pauseInterval_ms = (int)parameterMap["pause_interval_ms"];
 }
 

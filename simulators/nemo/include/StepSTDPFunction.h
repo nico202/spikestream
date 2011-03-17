@@ -16,6 +16,7 @@ namespace spikestream {
 			int getPostLength();
 			float getMinWeight();
 			float getMaxWeight();
+			void print();
 
 		private:
 			//=====================  VARIABLES  ====================
@@ -36,7 +37,6 @@ namespace spikestream {
 			void buildStepSTDPFunction();
 			void checkFunctionUpToDate();
 			void cleanUp();
-			void print();
 	};
 
 }

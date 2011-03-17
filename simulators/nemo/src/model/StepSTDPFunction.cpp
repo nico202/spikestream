@@ -83,13 +83,34 @@ int StepSTDPFunction::getPostLength(){
 
 /*! Returns the minimum weight for the specified function. */
 float StepSTDPFunction::getMinWeight(){
+	checkFunctionUpToDate();
 	return getParameter("min_weight");
 }
 
 
 /*! Returns the maximum weight for the specified function. */
 float StepSTDPFunction::getMaxWeight(){
+	checkFunctionUpToDate();
 	return getParameter("max_weight");
+}
+
+
+/*! Prints out the function */
+void StepSTDPFunction::print(){
+	checkFunctionUpToDate();
+
+	//Extract parameters
+	double preY = getParameter("pre_y_value");
+	double postY = getParameter("post_y_value");
+
+	cout<<"Step STDP Function"<<endl;
+	cout<<"Parameters. Pre length: "<<preLength<<"; post length: "<<postLength<<"; preY: "<<preY<<"; postY: "<<postY<<endl;
+	for(int i=0; i<preLength; ++i)
+		cout<<"Pre array ["<<i<<"]: "<<preArray[i]<<endl;
+	cout<<endl;
+	for(int i=0; i<postLength; ++i)
+		cout<<"Post array ["<<i<<"]: "<<postArray[i]<<endl;
+	cout<<"Min weight: "<<getMinWeight()<<"; Max weight: "<<getMaxWeight()<<endl;
 }
 
 
@@ -141,22 +162,6 @@ void StepSTDPFunction::cleanUp(){
 	if(postArray != NULL)
 		delete [] postArray;
 	postArray = NULL;
-}
-
-
-/*! Prints out the function */
-void StepSTDPFunction::print(){
-	//Extract parameters
-	double preY = getParameter("pre_y_value");
-	double postY = getParameter("post_y_value");
-
-	cout<<"Step STDP Function"<<endl;
-	cout<<"Parameters. Pre length: "<<preLength<<"; post length: "<<postLength<<"; preY: "<<preY<<"; postY: "<<postY<<endl;
-	for(int i=0; i<preLength; ++i)
-		cout<<"Pre array ["<<i<<"]: "<<preArray[i]<<endl;
-	cout<<endl;
-	for(int i=0; i<postLength; ++i)
-		cout<<"Post array ["<<i<<"]: "<<postArray[i]<<endl;
 }
 
 

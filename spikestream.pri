@@ -44,7 +44,7 @@ win32 {
 	LIBS += -lgmpxx -lgmp -L$${SPIKESTREAM_ROOT_DIR}/extlib/gmp/lib
 
 	# Boost
-	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib
+	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/boost/include
 }
 macx {
         # Qwt

@@ -34,6 +34,7 @@ namespace spikestream {
 			static float getMinWeight(unsigned functionID);
 			static float getMaxWeight(unsigned functionID);
 			static float getReward(unsigned functionID);
+			static void print(unsigned functionID);
 
 		private:
 			//=====================  VARIABLES  ====================

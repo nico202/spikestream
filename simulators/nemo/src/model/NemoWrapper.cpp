@@ -13,6 +13,7 @@ using namespace spikestream;
 #include "boost/random.hpp"
 
 //Outputs debugging information for NeMo calls
+//#define DEBUG_LEARNING
 //#define DEBUG_LOAD
 //#define DEBUG_PARAMETERS
 //#define DEBUG_PERFORMANCE
@@ -122,6 +123,9 @@ void NemoWrapper::loadNemo(){
 	delete nemoLoader;
 
 	//Set the STDP functionn in the configuration
+	#ifdef DEBUG_LEARNING
+		STDPFunctions::print(stdpFunctionID);
+	#endif
 	nemo_set_stdp_function(nemoConfig,
 					   STDPFunctions::getPreArray(stdpFunctionID),
 					   STDPFunctions::getPreLength(stdpFunctionID),
@@ -223,6 +227,24 @@ void NemoWrapper::setFiringNeuronIDs(QList<neurid_t>& neurIDList){
 		if(!nwPtr->containsNeuron(*iter))
 			throw SpikeStreamException("Neuron ID " + QString::number(*iter) + " cannot be found in the network.");
 		neuronIDsToFire.append(*iter);
+	}
+}
+
+
+/*! Injects the specified amount of current into the specified neurons in the next time step. */
+void NemoWrapper::setInjectCurrentNeuronIDs(QList<neurid_t>& neurIDList, double current){
+	//Run checks
+	if(!simulationLoaded)
+		throw SpikeStreamException("Neurons cannot be injected with current when a simulation is not loaded.");
+
+	//Pointer to current network
+	Network* nwPtr = Globals::getNetwork();
+
+	QList<neurid_t>::iterator neurIDListEnd = neurIDList.end();
+	for(QList<neurid_t>::iterator iter = neurIDList.begin(); iter != neurIDListEnd; ++iter){
+		if(!nwPtr->containsNeuron(*iter))
+			throw SpikeStreamException("Neuron ID " + QString::number(*iter) + " cannot be found in the network.");
+		neuronIDCurrentMap[*iter] = current;
 	}
 }
 
@@ -594,6 +616,15 @@ unsigned NemoWrapper::addInjectCurrentNeuronIDs(){
 	//Sanity check, then return number of neurons added
 	if(arrayCounter != arraySize)
 		throw SpikeStreamException("Error adding inject noise neuron IDs. Array counter: " + QString::number(arrayCounter) + "; Array size: " + QString::number(arraySize));
+
+	//Add neurons that have specified amount of current
+	QHash<neurid_t, double>::iterator neurIDCurrentMapEnd = neuronIDCurrentMap.end();
+	for(QHash<neurid_t, double>::iterator iter = neuronIDCurrentMap.begin(); iter != neurIDCurrentMapEnd; ++iter){
+		injectionCurrentNeurIDVector.push_back(iter.key());//Add neuron id to current vector
+		injectionCurrentVector.push_back(iter.value());
+		++arraySize;
+	}
+	neuronIDCurrentMap.clear();
 
 	//Return the number of neurons that have been added
 	return arraySize;
@@ -999,6 +1030,9 @@ void NemoWrapper::stepNemo(){
 	if(!volatileConGrpMap.isEmpty()){
 		if(timeStepCounter % applySTDPInterval == 0){
 			nemo_apply_stdp(nemoSimulation, stdpReward);
+			#ifdef DEBUG_LEARNING
+				qDebug()<<"Applying STDP. TimeStepCounter="<<timeStepCounter<<"; applySTDPInterval="<<applySTDPInterval;
+			#endif
 		}
 	}
 
@@ -1084,7 +1118,7 @@ void NemoWrapper::updateNetworkWeights(){
 		ConnectionIterator conGrpEnd = tmpConGrp->end();
 		for(ConnectionIterator conIter = tmpConGrp->begin(); conIter != conGrpEnd; ++conIter){
 			#ifdef DEBUG_WEIGHTS
-				qDebug()<<"About to query weights: nemo synapseID="<<synapseIDArray[0]<<" spikestream synapse id="<<conIter.value();
+				qDebug()<<"About to query weights: nemo synapseID="<<synapseIDArray[0]<<" spikestream synapse id="<<conIter->getID();
 			#endif//DEBUG_WEIGHTS
 
 			//Query weight
@@ -1093,12 +1127,12 @@ void NemoWrapper::updateNetworkWeights(){
 			//Update weight in connection
 			conIter->setTempWeight(weightArray[0] / weightFactor);
 
+			#ifdef DEBUG_WEIGHTS
+				qDebug()<<"TimeStep: "<<timeStepCounter<<"; Weight query complete: weight="<<weightArray[0]<<" nemo synapse id="<<synapseIDArray[conCntr];
+			#endif//DEBUG_WEIGHTS
+
 			//Increase counter for accessing synapse id array
 			++conCntr;
-
-			#ifdef DEBUG_WEIGHTS
-				qDebug()<<"Weight query complete: weight="<<weightArray[0];
-			#endif//DEBUG_WEIGHTS
 		}
 	}
 }
