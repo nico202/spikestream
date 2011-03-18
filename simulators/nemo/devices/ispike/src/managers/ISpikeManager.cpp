@@ -1,5 +1,6 @@
 //SpikeStream includes
 #include "ISpikeManager.h"
+#include "SpikeStreamException.h"
 using namespace spikestream;
 
 //Qt includes
@@ -23,17 +24,53 @@ ISpikeManager::~ISpikeManager(){
 /*----------------------------------------------------------*/
 /*------                PUBLIC METHODS                ------*/
 /*----------------------------------------------------------*/
+
 /*! Adds a channel, which will be a source of spikes to pass to the network
 	or the destination of spikes that will be passed back to iSpike. */
 void ISpikeManager::addChannel(InputChannel* inputChannel, NeuronGroup* neuronGroup){
 	inputChannels.append(QPair<InputChannel*, NeuronGroup*>(inputChannel, neuronGroup));
-	qDebug()<<"Adding input channel with name: "<<inputChannel->getChannelDescription().getChannelName().data();
-	//map<string, Property*> propertyMap = inputChannel->getChannelDescription().getChannelProperties();
 }
 
 
+/*! Adds an output channel, which will receive spikes from the network. */
 void ISpikeManager::addChannel(OutputChannel* outputChannel, NeuronGroup* neuronGroup){
 	outputChannels.append(QPair<OutputChannel*, NeuronGroup*>(outputChannel, neuronGroup));
+}
+
+
+/*! Deletes an input channel. */
+void ISpikeManager::deleteInputChannel(int index){
+	if(index < 0 || index >= inputChannels.size())
+		throw SpikeStreamException("Failed to delete input channel: index out of range: " + QString::number(index));
+	delete inputChannels.at(index).first;//FIXME, CHECK
+	inputChannels.removeAt(index);
+}
+
+
+/*! Deletes an output channel. */
+void ISpikeManager::deleteOutputChannel(int index){
+	if(index < 0 || index >= outputChannels.size())
+		throw SpikeStreamException("Failed to delete output channel: index out of range: " + QString::number(index));
+	delete outputChannels.at(index).first;//FIXME, CHECK
+	outputChannels.removeAt(index);
+}
+
+
+/*! Returns the parameters for an input channel. The index should be a valid
+	point in the input channels list. */
+map<string, Property*> ISpikeManager::getInputParameters(int index){
+	if(index < 0 || index >= inputChannels.size())
+		throw SpikeStreamException("Failed to get input parameters: index out of range: " + QString::number(index));
+	return inputChannels[index].first->getChannelDescription().getChannelProperties();
+}
+
+
+/*! Returns the parameters for an output channel. The index should be a valid
+ point in the output channels list. */
+map<string, Property*> ISpikeManager::getOutputParameters(int index){
+	if(index < 0 || index >= inputChannels.size())
+		throw SpikeStreamException("Failed to get input parameters: index out of range: " + QString::number(index));
+	return outputChannels[index].first->getChannelDescription().getChannelProperties();
 }
 
 
@@ -41,6 +78,7 @@ void ISpikeManager::addChannel(OutputChannel* outputChannel, NeuronGroup* neuron
 QList<neurid_t>::iterator ISpikeManager::outputNeuronsBegin(){
 	return outputNeuronIDs.begin();
 }
+
 
 //Inherited from AbstractDeviceManager
 QList<neurid_t>::iterator ISpikeManager::outputNeuronsEnd(){

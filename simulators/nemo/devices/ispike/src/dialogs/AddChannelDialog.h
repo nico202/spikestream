@@ -22,6 +22,7 @@
 #include <QPushButton>
 
 //Other includes
+#include <map>
 #include <vector>
 using namespace std;
 
@@ -52,6 +53,9 @@ namespace spikestream {
 			//=====================  VARIABLES  =======================
 			/*! Holds information about the available channel types */
 			QComboBox* channelTypeCombo;
+
+			/*! Button to select channel type */
+			QPushButton* selectChannelTypeButton;
 
 			/*! Holds information about available channels */
 			QComboBox* channelCombo;
@@ -84,12 +88,16 @@ namespace spikestream {
 			/*! Creates input channels */
 			InputChannelFactory* inputFactory;
 
+			/*! Descriptions of the available input channels. */
 			vector<InputChannelDescription> inChanDesc ;
 
+			/*! Descriptions of the available output channels. */
 			vector<OutputChannelDescription> outChanDesc;
 
+			/*! Descriptions of the available writers. */
 			vector<WriterDescription> writerDescVector;
 
+			/*! Descriptions of the available readers */
 			vector<ReaderDescription> readerDescVector ;
 
 			InputChannel* newInputChannel;
@@ -98,6 +106,7 @@ namespace spikestream {
 
 
 			//======================  METHODS  =======================
+			bool configureProperties(map<string, Property*> propertyMap, bool selectNeuronGroup = false);
 			void reset();
 
 	};

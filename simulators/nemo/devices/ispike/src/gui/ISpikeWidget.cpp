@@ -106,10 +106,14 @@ void ISpikeWidget::addChannel(){
 	try{
 		AddChannelDialog* tmpDlg = new AddChannelDialog(this);
 		if(tmpDlg->exec() == QDialog::Accepted){
+			//Add channel to model
 			if(tmpDlg->isInputChannel())
 				iSpikeManager->addChannel(tmpDlg->getInputChannel(), tmpDlg->getNeuronGroup());//Add channel to iSpikeManager
 			else
 				iSpikeManager->addChannel(tmpDlg->getOutputChannel(), tmpDlg->getNeuronGroup());//Add channel to iSpikeManager
+
+			//Instruct model to reload data.
+			channelModel->reload();
 		}
 	}
 	catch(SpikeStreamException& ex){

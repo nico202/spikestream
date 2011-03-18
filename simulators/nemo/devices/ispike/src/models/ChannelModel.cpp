@@ -1,5 +1,6 @@
 //SpikeStream includes
 #include "ChannelModel.h"
+#include "Globals.h"
 #include "SpikeStreamException.h"
 using namespace spikestream;
 
@@ -9,6 +10,7 @@ using namespace spikestream;
 
 /*! Constructor */
 ChannelModel::ChannelModel(ISpikeManager* iSpikeManager) : QAbstractTableModel(){
+	this->iSpikeManager = iSpikeManager;
 	loadChannels();
 }
 
@@ -41,45 +43,50 @@ QVariant ChannelModel::data(const QModelIndex & index, int role) const{
 
     //Return appropriate data
     if (role == Qt::DisplayRole){
-//		if(index.column() == ID_COL)
-//			return neurGrpInfoList[index.row()].getID();
-//		if(index.column() == NAME_COL)
-//			return neurGrpInfoList[index.row()].getName();
-//		if(index.column() == DESC_COL)
-//			return neurGrpInfoList[index.row()].getDescription();
-//		if(index.column() == SIZE_COL)
-//			return neurGrpSizeList[index.row()];
-//		if(index.column() == NEUR_TYPE_COL)
-//			return neurGrpInfoList[index.row()].getNeuronType().getDescription();
+		if(index.column() == CHANNEL_NAME_COL)
+			return channelNameList.at(index.row());
+		if(index.column() == NEURON_GROUP_NAME_COL)
+			return neuronGroupNameList.at(index.row());
     }
 
 	//Icons
     if (role == Qt::DecorationRole){
-//		if(index.column() == VIS_COL ){
-//			if(Globals::getNetworkDisplay()->neuronGroupVisible(neurGrpInfoList[index.row()].getID()))
-//				return QIcon(Globals::getSpikeStreamRoot() + "/images/visible.xpm");
-//			return QIcon(Globals::getSpikeStreamRoot() + "/images/hidden.xpm");
-//		}
-//		if(index.column() == ZOOM_COL){
-//			unsigned int tmpNeurGrpID = neurGrpInfoList[index.row()].getID();
-//			NetworkDisplay* netDisplay = Globals::getNetworkDisplay();
-//			//Zoom enabled on this neuron group
-//			if (netDisplay->isZoomEnabled() && netDisplay->getZoomNeuronGroupID() == tmpNeurGrpID){
-//				if(netDisplay->getZoomStatus() == NetworkDisplay::ZOOM_SIDE)
-//					return QIcon(Globals::getSpikeStreamRoot() + "/images/zoom_to_highlight.xpm");
-//				else if(netDisplay->getZoomStatus() == NetworkDisplay::ZOOM_ABOVE)
-//					return QIcon(Globals::getSpikeStreamRoot() + "/images/zoom_above_highlight.xpm");
-//			}
-//			//Zoom is disabled or enabled on a different neuron group
-//			return QIcon(Globals::getSpikeStreamRoot() + "/images/zoom_to.xpm");
-//		}
-//		if(index.column() == PARAM_COL){
-//			return QIcon(Globals::getSpikeStreamRoot() + "/images/parameters.xpm");
-//		}
+		if(index.column() == PARAM_COL ){
+			return QIcon(Globals::getSpikeStreamRoot() + "/images/parameters.png");
+		}
+		if(index.column() == DELETE_COL){
+			return QIcon(Globals::getSpikeStreamRoot() + "/images/trash_can.jpg");
+		}
 	}
 
     //If we have reached this point ignore request
     return QVariant();
+}
+
+
+/*! Deletes an input or output channel depending on the row */
+void ChannelModel::deleteChannel(int row){
+	FIXME: ADD 2 INPUT 1 OUTPUT; DELETE INPUTS, THROWS EXCEPTION.
+	if(row >= 0 && row < iSpikeManager->getInputChannelCount()){
+		iSpikeManager->deleteInputChannel(row);
+		reload();
+	}
+	else if (row - iSpikeManager->getInputChannelCount() < iSpikeManager->getOutputChannelCount()){
+		iSpikeManager->deleteOutputChannel(row - iSpikeManager->getInputChannelCount());
+		reload();
+	}
+	else
+		throw SpikeStreamException("Failed to delete channel; row out of range: " + QString::number(row));
+}
+
+
+/*! Returns the parameters for a particular active channel */
+map<string, Property*> ChannelModel::getParameters(int row){
+	if(row >= 0 && row < iSpikeManager->getInputChannelCount())
+		return iSpikeManager->getInputParameters(row);
+	else if (row - iSpikeManager->getInputChannelCount() < iSpikeManager->getOutputChannelCount())
+		return iSpikeManager->getOutputParameters(row - iSpikeManager->getInputChannelCount());
+	throw SpikeStreamException("Failed to get parameters; row out of range: " + QString::number(row));
 }
 
 
@@ -155,10 +162,6 @@ QVariant ChannelModel::headerData(int section, Qt::Orientation orientation, int 
 			return "Channel";
 		if(section == NEURON_GROUP_NAME_COL)
 			return "Neuron Group";
-		if(section == PARAM_COL)
-			return "Parameters";
-		if(section == DELETE_COL)
-			return "Delete";
     }
 
 	return QVariant();
@@ -168,7 +171,7 @@ QVariant ChannelModel::headerData(int section, Qt::Orientation orientation, int 
 
 /*! Inherited from QAbstractTableModel. Returns the number of rows in the model. */
 int ChannelModel::rowCount(const QModelIndex&) const{
-	return 0;//FIXME
+	return channelNameList.size();
 }
 
 
@@ -176,9 +179,30 @@ int ChannelModel::rowCount(const QModelIndex&) const{
 /*-------             PUBLIC METHODS               -------*/
 /*--------------------------------------------------------*/
 
+/*! Returns a standard formatted neuron group name including the ID. */
+QString ChannelModel::getNeuronGroupName(NeuronGroup* neuronGroup){
+	return neuronGroup->getInfo().getName() + " (" + QString::number(neuronGroup->getID()) + ")";
+}
+
+
 /*! Loads the current list of connected channels from the ISpikeManager */
 void ChannelModel::loadChannels(){
+	channelNameList.clear();
+	neuronGroupNameList.clear();
 
+	//Input channels
+	QList< QPair<InputChannel*, NeuronGroup*> > inputChannelList = iSpikeManager->getInputChannels();
+	for(int i=0; i< inputChannelList.size(); ++i){
+		channelNameList.append(inputChannelList[i].first->getChannelDescription().getChannelName().data());
+		neuronGroupNameList.append(getNeuronGroupName(inputChannelList[i].second));
+	}
+
+	//Output channels
+	QList< QPair<OutputChannel*, NeuronGroup*> > outputChannelList = iSpikeManager->getOutputChannels();
+	for(int i=0; i< outputChannelList.size(); ++i){
+		channelNameList.append(outputChannelList[i].first->getChannelDescription().getChannelName().data());
+		neuronGroupNameList.append(getNeuronGroupName(outputChannelList[i].second));
+	}
 
     //Instruct listening classes to reload data
     this->reset();

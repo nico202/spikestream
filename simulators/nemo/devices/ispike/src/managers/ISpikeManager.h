@@ -14,6 +14,10 @@
 #include <QList>
 #include <QPair>
 
+//Other includes
+#include <map>
+using namespace std;
+
 namespace spikestream {
 
 	class ISpikeManager : public AbstractDeviceManager{
@@ -22,6 +26,14 @@ namespace spikestream {
 			~ISpikeManager();
 			void addChannel(InputChannel* inputChannel, NeuronGroup* neuronGroup);
 			void addChannel(OutputChannel* outputChannel, NeuronGroup* neuronGroup);
+			void deleteInputChannel(int index);
+			void deleteOutputChannel(int index);
+			QList< QPair<InputChannel*, NeuronGroup*> > getInputChannels(){ return inputChannels; }
+			int getInputChannelCount() { return inputChannels.size(); }
+			map<string, Property*> getInputParameters(int index);
+			QList< QPair<OutputChannel*, NeuronGroup*> >  getOutputChannels(){  return outputChannels; }
+			int getOutputChannelCount() { return outputChannels.size(); }
+			map<string, Property*> getOutputParameters(int index);
 			QList<neurid_t>::iterator outputNeuronsBegin();
 			QList<neurid_t>::iterator outputNeuronsEnd();
 			void setInputNeurons(timestep_t timeStep, QList<neurid_t>& firingNeuronIDs);
@@ -35,8 +47,10 @@ namespace spikestream {
 
 			//STORE START NEURON ID AND END FOR EACH CHANNEL
 
+			/*! List of input channels and their associated neuron groups */
 			QList< QPair<InputChannel*, NeuronGroup*> > inputChannels;
 
+			/*! List of output channels and their associated neuron groups */
 			QList< QPair<OutputChannel*, NeuronGroup*> > outputChannels;
 	};
 

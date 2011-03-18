@@ -56,8 +56,10 @@ SOURCES += src/gui/ISpikeWidget.cpp
 #----------------------------------------------#
 #-----             DIALOGS                -----#
 #----------------------------------------------#
-HEADERS += src/dialogs/AddChannelDialog.h
-SOURCES += src/dialogs/AddChannelDialog.cpp
+HEADERS += src/dialogs/AddChannelDialog.h \
+			src/dialogs/EditPropertiesDialog.h
+SOURCES += src/dialogs/AddChannelDialog.cpp \
+			src/dialogs/EditPropertiesDialog.cpp
 
 
 #----------------------------------------------#
