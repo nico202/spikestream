@@ -21,7 +21,8 @@ namespace spikestream {
 			void clearSelection();
 			int columnCount(const QModelIndex& parent = QModelIndex()) const;
 			QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
-			QHash<QString, double> getParameters(int row);
+			void deleteChannel(int row);
+			map<string, Property*> getParameters(int row);
 			QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 			bool isEmpty();
 			void reload();
@@ -34,7 +35,11 @@ namespace spikestream {
 
 		private:
 			//====================  VARIABLES  ====================
-			/*! List containing the information about the channels */
+			/*! List containing the names of the channels */
+			QList<QString> channelNameList;
+
+			/*! List containing the names of the associated neuron groups */
+			QList<QString> neuronGroupNameList;
 
 			/*! Manager holding information about the channels */
 			ISpikeManager* iSpikeManager;
@@ -47,6 +52,7 @@ namespace spikestream {
 
 
 			//====================  METHODS  =====================
+			QString getNeuronGroupName(NeuronGroup* neuronGroup);
 			void loadChannels();
 
 		};

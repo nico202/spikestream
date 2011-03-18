@@ -1,5 +1,6 @@
 //SpikeStream includes
 #include "AddChannelDialog.h"
+#include "EditPropertiesDialog.h"
 #include "Globals.h"
 #include "Network.h"
 #include "SpikeStreamException.h"
@@ -10,13 +11,8 @@ using namespace spikestream;
 #include "iSpike/Reader/ReaderFactory.hpp"
 #include "iSpike/Writer/WriterFactory.hpp"
 
-
 //Qt includes
 #include <QLayout>
-
-//Other includes
-#include <map>
-using namespace std;
 
 
 /*! Constructor */
@@ -31,7 +27,7 @@ AddChannelDialog::AddChannelDialog(QWidget *parent) : QDialog(parent){
 	channelTypeCombo->addItem("Input");
 	channelTypeCombo->addItem("Output");
 	chanTypeBox->addWidget(channelTypeCombo);
-	QPushButton* selectChannelTypeButton = new QPushButton("Select");
+	selectChannelTypeButton = new QPushButton("Select");
 	selectChannelTypeButton->setMaximumSize(60, 20);
 	connect(selectChannelTypeButton, SIGNAL(clicked()), this, SLOT(selectChannelType()));
 	chanTypeBox->addWidget(selectChannelTypeButton);
@@ -107,15 +103,17 @@ void AddChannelDialog::cancelButtonClicked(){
 /*! Configures the channel */
 void AddChannelDialog::configureChannel(){
 	readerWriterCombo->clear();
-	if(channelTypeCombo->currentText() == "Input"){
+
+	if(inputChannel){
 		if(channelCombo->currentIndex() >= inChanDesc.size())
 			throw SpikeStreamException("Index out of range");
-		map<string, Property*> propertyMap = inChanDesc[channelCombo->currentIndex()].getChannelProperties();
 
-		//EDIT IF REQUIRED
-		/* One property will be called 'width' and another 'height'
-		   Use this to connect to neuron group appropriately */
+		//Edit properties of channel - abort channel configuration if operation is cancelled
+		bool propsConfigured = configureProperties(inChanDesc[channelCombo->currentIndex()].getChannelProperties(), true);
+		if(!propsConfigured)
+			return;
 
+		//Load list of available readers
 		string readerType = inChanDesc[channelCombo->currentIndex()].getReaderType();
 		ReaderFactory readerFactory;
 		readerDescVector = readerFactory.getReadersOfType(readerType);
@@ -124,32 +122,27 @@ void AddChannelDialog::configureChannel(){
 		}
 
 	}
-	else if(channelTypeCombo->currentText() == "Output"){
+	else{
 		if(channelCombo->currentIndex() >= outChanDesc.size())
 			throw SpikeStreamException("Index out of range");
-		map<string, Property*> propertyMap = outChanDesc[channelCombo->currentIndex()].getChannelProperties();
 
-		//EDIT IF REQUIRED
-		/* One property will be called 'width' and another 'height'
-		   Use this to connect to neuron group appropriately */
+		//Edit properties of channel - abort channel configuration if operation is cancelled
+		bool propsConfigured = configureProperties(outChanDesc[channelCombo->currentIndex()].getChannelProperties(), true);
+		if(!propsConfigured)
+			return;
 
+		//Load list of available writers
 		string writerType = outChanDesc[channelCombo->currentIndex()].getWriterType();
 		WriterFactory writerFactory;
 		writerDescVector = writerFactory.getWritersOfType(writerType);
 		for(int i=0; i< writerDescVector.size(); ++i){
 			readerWriterCombo->addItem(QString(writerDescVector[i].getWriterName().data()));
 		}
-
 	}
-	else
-		throw SpikeStreamException("Channel type not recognized.");
 
-	//FIXME SELECT NEURON GROUP
-	QList<NeuronGroup*> neuronGroupList = Globals::getNetwork()->getNeuronGroups();
-	if(neuronGroupList.isEmpty())
-		throw SpikeStreamException("NO Neuorn tuops");
-	neuronGroup = neuronGroupList.at(0);
-
+	//Enable/disable appropriate graphical components
+	channelCombo->setEnabled(false);
+	configureChannelButton->setEnabled(false);
 	readerWriterLabel->setVisible(true);
 	readerWriterCombo->setVisible(true);
 	configureReaderWriterButton->setVisible(true);
@@ -158,26 +151,29 @@ void AddChannelDialog::configureChannel(){
 
 /*! Configures the reader/writer associated with a channel */
 void AddChannelDialog::configureReaderWriter(){
-	if(channelTypeCombo->currentText() == "Input"){
+	if(inputChannel){
 		//Edit properties
 		if(readerWriterCombo->currentIndex() >= readerDescVector.size())
 			throw SpikeStreamException("Index out of range");
-		map<string, Property*> propertyMap = readerDescVector[readerWriterCombo->currentIndex()].getReaderProperties();
 
-		//EDIT IF REQUIRED
+		//Edit properties of channel - abort reader configuration if operation is cancelled
+		bool propsConfigured = configureProperties(readerDescVector[readerWriterCombo->currentIndex()].getReaderProperties());
+		if(!propsConfigured)
+			return;
 	}
-	else if(channelTypeCombo->currentText() == "Output"){
+	else{
 		//Edit properties
 		if(readerWriterCombo->currentIndex() >= writerDescVector.size())
 			throw SpikeStreamException("Index out of range");
-		map<string, Property*> propertyMap = writerDescVector[readerWriterCombo->currentIndex()].getWriterProperties();
 
-		//EDIT IF REQUIRED
-
+		//Edit properties of channel - abort reader configuration if operation is cancelled
+		bool propsConfigured = configureProperties(writerDescVector[readerWriterCombo->currentIndex()].getWriterProperties());
+		if(!propsConfigured)
+			return;
 	}
-	else
-		throw SpikeStreamException("Channel type not recognized.");
 
+	readerWriterCombo->setEnabled(false);
+	configureReaderWriterButton->setEnabled(false);
 	okButton->setEnabled(true);
 }
 
@@ -209,7 +205,7 @@ void AddChannelDialog::okButtonClicked(){
 }
 
 
-/*! Resets dialog to initial state. */
+/*! Called when reset button is clicked. Resets dialog to initial state. */
 void AddChannelDialog::resetButtonClicked(){
 	reset();
 }
@@ -218,8 +214,11 @@ void AddChannelDialog::resetButtonClicked(){
 /*! Selects the type of channel */
 void AddChannelDialog::selectChannelType(){
 	channelCombo->clear();
+
+	//Input or output are the two options
 	if(channelTypeCombo->currentText() == "Input"){
 		inputChannel = true;
+
 		//Get the input channels
 		inChanDesc = inputFactory->getAllChannels();
 		for(int i=0; i<inChanDesc.size(); ++i){
@@ -228,6 +227,7 @@ void AddChannelDialog::selectChannelType(){
 	}
 	else if(channelTypeCombo->currentText() == "Output"){
 		inputChannel = false;
+
 		//Get the output channels
 		outChanDesc = outputFactory->getAllChannels();
 		for(int i=0; i<outChanDesc.size(); ++i){
@@ -237,20 +237,67 @@ void AddChannelDialog::selectChannelType(){
 	else
 		throw SpikeStreamException("Channel type not recognized.");
 
+	channelTypeCombo->setEnabled(false);
+	selectChannelTypeButton->setEnabled(false);
 	channelLabel->setVisible(true);
 	channelCombo->setVisible(true);
 	configureChannelButton->setVisible(true);
 }
 
 
+/*----------------------------------------------------------*/
+/*------                PRIVATE METHODS               ------*/
+/*----------------------------------------------------------*/
+
+/*! Launches dialog to configure the supplied properties */
+bool AddChannelDialog::configureProperties(map<string, Property*> propertyMap, bool selectNeuronGroup){
+	try{
+		if(selectNeuronGroup){
+			EditPropertiesDialog* tmpDlg = new EditPropertiesDialog(propertyMap, Globals::getNetwork()->getNeuronGroups());
+			if(tmpDlg->exec() == QDialog::Accepted){
+				neuronGroup = tmpDlg->getNeuronGroup();
+				if(neuronGroup == NULL){
+					qCritical()<<"Neuron group has not been set.";
+					return false;
+				}
+				return true;
+			}
+		}
+		else {
+			EditPropertiesDialog* tmpDlg = new EditPropertiesDialog(propertyMap);
+			if(tmpDlg->exec() == QDialog::Accepted){
+				return true;
+			}
+		}
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<ex.getMessage();
+	}
+	catch(...){
+		qCritical()<<"An unknown exception occurred configuring a channel";
+	}
+
+	//Dialog not accepted or an error occurred
+	return false;
+}
+
+
+/*! Resets dialog to original state */
 void AddChannelDialog::reset(){
+	channelTypeCombo->setEnabled(true);
+	selectChannelTypeButton->setEnabled(true);
+
 	channelLabel->setVisible(false);
 	channelCombo->setVisible(false);
+	channelCombo->setEnabled(true);
 	configureChannelButton->setVisible(false);
+	configureChannelButton->setEnabled(true);
 
 	readerWriterLabel->setVisible(false);
 	readerWriterCombo->setVisible(false);
+	readerWriterCombo->setEnabled(true);
 	configureReaderWriterButton->setVisible(false);
+	configureReaderWriterButton->setEnabled(true);
 
 	okButton->setEnabled(false);
 }
