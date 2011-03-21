@@ -194,7 +194,7 @@ void ArchiveWidget::loadArchiveList(){
 		connect ( loadButton, SIGNAL(clicked()), this, SLOT( loadArchive() ) );
 
 		//Create the delete button and name it with the object id so we can tell which button was invoked
-		QPushButton* deleteButton = new QPushButton(QIcon(Globals::getSpikeStreamRoot() + "/images/trash_can.jpg"), "");
+		QPushButton* deleteButton = new QPushButton(QIcon(Globals::getSpikeStreamRoot() + "/images/trash_can.png"), "");
 		deleteButton->setObjectName(QString::number(archInfo.getID()));
 		connect ( deleteButton, SIGNAL(clicked()), this, SLOT( deleteArchive() ) );
 

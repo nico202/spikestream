@@ -23,7 +23,7 @@ NeuronGroupWidget::NeuronGroupWidget(QWidget* parent)  : QWidget(parent) {
 	addNeuronsButton->setEnabled(false);
 	connect (addNeuronsButton, SIGNAL(clicked()), this, SLOT(addNeurons()));
 	buttonLayout->addWidget(addNeuronsButton);
-	deleteButton = new QPushButton(QIcon(Globals::getSpikeStreamRoot() + "/images/trash_can.jpg"), "");
+	deleteButton = new QPushButton(QIcon(Globals::getSpikeStreamRoot() + "/images/trash_can.png"), "");
 	deleteButton->setMaximumSize(150, 30);
 	deleteButton->setEnabled(false);
 	connect (deleteButton, SIGNAL(clicked()), this, SLOT(deleteSelectedNeurons()));

@@ -30,11 +30,9 @@ win32 {
 #---               LIBRARIES                ---#
 #----------------------------------------------#
 unix:!macx {
-	LIBS += -lnemo -L$${SPIKESTREAM_ROOT_DIR}/lib  -lspikestreamapplication -lspikestream
+	LIBS += -liSpike -lnemo -L$${SPIKESTREAM_ROOT_DIR}/lib  -lspikestreamapplication -lspikestream
 }
 win32{
-	#QMAKE_CXXFLAGS += -Wl,-t -save-temps
-
 	LIBS += -lnemowrapper0 -L$${SPIKESTREAM_ROOT_DIR}/plugins/simulation/
 	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/lib -lspikestreamapplication0 -lspikestream0
 	LIBS += -llibiSpike -L$${SPIKESTREAM_ROOT_DIR}/extlib/ispike/lib
@@ -42,7 +40,7 @@ win32{
 	LIBS += -L$${SPIKESTREAM_ROOT_DIR}/extlib/boost/lib
 }
 macx {
-	LIBS += -lnemo -lspikestreamapplication -lspikestream
+	LIBS += -liSpike -lnemo -lspikestreamapplication -lspikestream
 }
 
 

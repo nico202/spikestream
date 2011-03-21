@@ -7,6 +7,12 @@
 # Root directory of SpikeStream
 !define SPIKESTREAM_ROOT ..\..\..
 
+# Location of other files
+!define QT_ROOT D:\Qt\4.7.2
+!define MINGW_ROOT D:\MinGW
+!define MYSQL_ROOT D:\MySQL
+
+
 # The name of the installer
 Name "SpikeStream 0.2"
 

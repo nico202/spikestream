@@ -70,6 +70,9 @@ void EditPropertiesDialog::okButtonClicked(){
 
 /*! Updates neuron combo to reflect changes in the number of neurons property */
 void EditPropertiesDialog::updateNeuronCombo(){
+	if(!neuronGroupSelectionMode)
+		return;
+
 	int numNeurons = Util::getInt(lineEditMap[NUM_NEURONS_STRING]->text());
 	updateCompatibleNeuronGroups(numNeurons);
 }
@@ -137,9 +140,11 @@ void EditPropertiesDialog::addParameters(QVBoxLayout* mainVLayout){
 			lineEditMap[propertyName] = tmpLineEdit;
 			gridLayout->addWidget(tmpLineEdit, cntr, 1);
 
-			//Listen for changes in the number of neurons
-			if(propertyName == NUM_NEURONS_STRING)
+			//Listen for changes in the number of neurons or disable editing of number of neurons
+			if(neuronGroupSelectionMode && propertyName == NUM_NEURONS_STRING)
 				connect(tmpLineEdit, SIGNAL(textChanged(QString)), this, SLOT(updateNeuronCombo()));
+			else if (propertyName == NUM_NEURONS_STRING)
+				lineEditMap[propertyName]->setEnabled(false);
 		}
 
 		//Add string parameter

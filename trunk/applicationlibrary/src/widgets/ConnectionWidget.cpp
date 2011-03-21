@@ -23,7 +23,7 @@ ConnectionWidget::ConnectionWidget(QWidget* parent)  : QWidget(parent) {
 	addConnectionsButton->setEnabled(false);
 	connect (addConnectionsButton, SIGNAL(clicked()), this, SLOT(addConnections()));
 	buttonLayout->addWidget(addConnectionsButton);
-	deleteButton = new QPushButton(QIcon(Globals::getSpikeStreamRoot() + "/images/trash_can.jpg"), "");
+	deleteButton = new QPushButton(QIcon(Globals::getSpikeStreamRoot() + "/images/trash_can.png"), "");
 	deleteButton->setEnabled(false);
 	connect (deleteButton, SIGNAL(clicked()), this, SLOT(deleteSelectedConnections()));
 	buttonLayout->addWidget(deleteButton);

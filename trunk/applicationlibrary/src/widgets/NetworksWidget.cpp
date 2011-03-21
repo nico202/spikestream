@@ -246,7 +246,7 @@ void NetworksWidget::loadNetworkList(){
 		gridLayout->addWidget(prototypeButton, i, protoCol);
 
 		//Create the delete button and name it with the object id so we can tell which button was invoked
-		QPushButton* deleteButton = new QPushButton(QIcon(Globals::getSpikeStreamRoot() + "/images/trash_can.jpg"), "");
+		QPushButton* deleteButton = new QPushButton(QIcon(Globals::getSpikeStreamRoot() + "/images/trash_can.png"), "");
 		deleteButton->setObjectName(QString::number(networkInfoList[i].getID()));
 		connect ( deleteButton, SIGNAL(clicked()), this, SLOT( deleteNetwork() ) );
 		gridLayout->addWidget(deleteButton, i, delCol);

@@ -11,6 +11,7 @@
 #include "iSpike/Channel/OutputChannel/OutputChannel.hpp"
 
 //Qt includes
+#include <QHash>
 #include <QList>
 #include <QPair>
 
@@ -26,6 +27,7 @@ namespace spikestream {
 			~ISpikeManager();
 			void addChannel(InputChannel* inputChannel, NeuronGroup* neuronGroup);
 			void addChannel(OutputChannel* outputChannel, NeuronGroup* neuronGroup);
+			void deleteAllChannels();
 			void deleteInputChannel(int index);
 			void deleteOutputChannel(int index);
 			QList< QPair<InputChannel*, NeuronGroup*> > getInputChannels(){ return inputChannels; }
@@ -45,7 +47,11 @@ namespace spikestream {
 			/*! List of output neuron ids */
 			QList<neurid_t> outputNeuronIDs;
 
-			//STORE START NEURON ID AND END FOR EACH CHANNEL
+			/*! Map linking a SpikeStream ID to an ID within iSpike */
+			QHash<neurid_t, QPair<neurid_t, vector<int>* >* > neurIDMap;
+
+			/*! Vectors holding input neurons for each channel */
+			vector< vector<int> > firingNeurIDVectors;
 
 			/*! List of input channels and their associated neuron groups */
 			QList< QPair<InputChannel*, NeuronGroup*> > inputChannels;

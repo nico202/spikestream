@@ -164,8 +164,10 @@ void ISpikeWidget::networkChanged(){
 	if(channelModel->isEmpty()){
 		return;
 	}
-	if(Globals::networkLoaded())
-		qCritical()<<"Fixme - clear channels.";
+	if(Globals::networkLoaded()){
+		iSpikeManager->deleteAllChannels();
+		channelModel->reload();
+	}
 }
 
 
