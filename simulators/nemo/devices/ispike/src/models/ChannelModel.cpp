@@ -55,7 +55,7 @@ QVariant ChannelModel::data(const QModelIndex & index, int role) const{
 			return QIcon(Globals::getSpikeStreamRoot() + "/images/parameters.png");
 		}
 		if(index.column() == DELETE_COL){
-			return QIcon(Globals::getSpikeStreamRoot() + "/images/trash_can.jpg");
+			return QIcon(Globals::getSpikeStreamRoot() + "/images/trash_can.png");
 		}
 	}
 
@@ -66,7 +66,6 @@ QVariant ChannelModel::data(const QModelIndex & index, int role) const{
 
 /*! Deletes an input or output channel depending on the row */
 void ChannelModel::deleteChannel(int row){
-	FIXME: ADD 2 INPUT 1 OUTPUT; DELETE INPUTS, THROWS EXCEPTION.
 	if(row >= 0 && row < iSpikeManager->getInputChannelCount()){
 		iSpikeManager->deleteInputChannel(row);
 		reload();
@@ -110,42 +109,6 @@ bool ChannelModel::setData(const QModelIndex& index, const QVariant&, int) {
 		return false;
     if (index.row() < 0 || index.row() >= rowCount())
 		return false;
-
-//    //Change visibility of neuron group
-//	if(index.column() == VIS_COL){
-//		unsigned int tmpNeurGrpID = neurGrpInfoList[index.row()].getID();
-//		if(Globals::getNetworkDisplay()->neuronGroupVisible(tmpNeurGrpID))
-//			Globals::getNetworkDisplay()->setNeuronGroupVisibility(tmpNeurGrpID, false);
-//		else
-//			Globals::getNetworkDisplay()->setNeuronGroupVisibility(tmpNeurGrpID, true);
-
-//		//Emit signal that data has changed and return true to indicate data set succesfully.
-//		emit dataChanged(index, index);
-//		return true;
-//    }
-
-//    //Change zoom of neuron group
-//	if(index.column() == ZOOM_COL){
-//		unsigned int tmpNeurGrpID = neurGrpInfoList[index.row()].getID();
-//		NetworkDisplay* netDisplay = Globals::getNetworkDisplay();
-//		//We are already zoomed on this neuron
-//		if (netDisplay->isZoomEnabled() && netDisplay->getZoomNeuronGroupID() == tmpNeurGrpID){
-//			if(netDisplay->getZoomStatus() == NetworkDisplay::ZOOM_SIDE)//We are zoomed into neuron group from the side
-//				netDisplay->setZoom(tmpNeurGrpID, NetworkDisplay::ZOOM_ABOVE);//Zoom neuron group from above
-//			else if(netDisplay->getZoomStatus() == NetworkDisplay::ZOOM_ABOVE)//We are zoomed into neuron group from above
-//				netDisplay->setZoom(0, NetworkDisplay::ZOOM_SIDE);//Zoom whole network from side
-//		}
-
-//		//Zoom is off or set for another neuron group
-//		else {
-//			netDisplay->setZoom(tmpNeurGrpID, NetworkDisplay::ZOOM_SIDE);//Zoom neuron group from side
-//		}
-
-//		//Call reset because any of the rows could have changed
-//		reset();
-//		return true;
-//    }
-
 
     //If we have reached this point no data has been set
     return false;
