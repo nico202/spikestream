@@ -12,6 +12,8 @@ using namespace spikestream;
 //iSpike includes
 #include "iSpike/Channel/InputChannel/InputChannel.hpp"
 #include "iSpike/Channel/OutputChannel/OutputChannel.hpp"
+#include "iSpike/Reader/ReaderFactory.hpp"
+#include "iSpike/Writer/WriterFactory.hpp"
 
 //Other includes
 #include <iostream>
@@ -41,21 +43,27 @@ ISpikeWidget::ISpikeWidget(QWidget* parent) : AbstractDeviceWidget(parent){
 	//Validators
 	QRegExp ipRegExp("\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b");
 	QRegExpValidator* ipAddressValidator = new QRegExpValidator(ipRegExp, this);
+	QIntValidator* unsignedIntValidator = new QIntValidator(0, 1000000, this);
 
 	//Add inputs to set the DNS server
 	QHBoxLayout* dnsBox = new QHBoxLayout();
-	dnsBox->addWidget(new QLabel("DNS Server Address: "));
-	dnsEdit = new QLineEdit();
+	dnsBox->addWidget(new QLabel("YARP DNS Server Address: "));
+	dnsEdit = new QLineEdit("127.0.0.1");
 	dnsEdit->setValidator(ipAddressValidator);
 	dnsBox->addWidget(dnsEdit);
-	connectButton = new QPushButton("Connect");
+	dnsBox->addWidget(new QLabel("Port"));
+	portEdit = new QLineEdit("10000");
+	portEdit->setValidator(unsignedIntValidator);
+	portEdit->setMaximumSize(60,20);
+	dnsBox->addWidget(portEdit);
+	connectButton = new QPushButton("Set");
 	connectButton->setMinimumSize(60, 20);
-	connect(connectButton, SIGNAL(clicked()), this, SLOT(connectButtonClicked()));
+	connect(connectButton, SIGNAL(clicked()), this, SLOT(setIPAddressButtonClicked()));
 	dnsBox->addWidget(connectButton);
-	disconnectButton = new QPushButton("Disconnect");
+	disconnectButton = new QPushButton("Unset");
 	disconnectButton->setMinimumSize(60, 20);
 	disconnectButton->setEnabled(false);
-	connect(disconnectButton, SIGNAL(clicked()), this, SLOT(disconnectButtonClicked()));
+	connect(disconnectButton, SIGNAL(clicked()), this, SLOT(unsetIPAddressButtonClicked()));
 	dnsBox->addWidget(disconnectButton);
 	mainVBox->addLayout(dnsBox);
 
@@ -77,6 +85,9 @@ ISpikeWidget::ISpikeWidget(QWidget* parent) : AbstractDeviceWidget(parent){
 
 	//Listen for changes in network
 	connect(Globals::getEventRouter(), SIGNAL(networkChangedSignal()), this, SLOT(networkChanged()));
+
+	//Default variable values
+	ipAddressSet = false;
 
 	mainVBox->addStretch(5);
 }
@@ -104,7 +115,11 @@ AbstractDeviceManager* ISpikeWidget::getDeviceManager(){
 /*! Adds a new channel, which will produce or listen for neuron spikes. */
 void ISpikeWidget::addChannel(){
 	try{
-		AddChannelDialog* tmpDlg = new AddChannelDialog(this);
+		AddChannelDialog* tmpDlg = NULL;
+		if(ipAddressSet)
+			tmpDlg = new AddChannelDialog(dnsEdit->text(), portEdit->text(), this);
+		else
+			tmpDlg = new AddChannelDialog(this);
 		if(tmpDlg->exec() == QDialog::Accepted){
 			//Add channel to model
 			if(tmpDlg->isInputChannel())
@@ -130,31 +145,40 @@ void ISpikeWidget::addChannel(){
 
 /*! Called when the connect button is clicked.
 	Tries to connect to DNS server and gives an error message if this fails. */
-void ISpikeWidget::connectButtonClicked(){
-	//CHECK INPUT
+void ISpikeWidget::setIPAddressButtonClicked(){
+	if(dnsEdit->text().isEmpty() || portEdit->text().isEmpty()){
+		qCritical()<<"IP address and/or port is missing";
+		return;
+	}
 
-	//TRY TO CONNECT TO DNS SERVER
-
-	//CHECK THAT CHANNELS ARE STILL VALID
+	//First test IP and port to see if a reader can access it
+	ipAddressSet = false;
+	try {
+		ReaderFactory readerFactory(dnsEdit->text().toStdString(), portEdit->text().toStdString());
+		WriterFactory writerFactory(dnsEdit->text().toStdString(), portEdit->text().toStdString());
+	}
+	catch(...){
+		qCritical()<<"Cannot connect to DNS server at IP: " + dnsEdit->text() + " and port " + portEdit->text();
+		return;
+	}
+	ipAddressSet = true;
 
 	//Enable/disable appropriate graphical components
 	connectButton->setEnabled(false);
 	dnsEdit->setEnabled(false);
+	portEdit->setEnabled(false);
 	disconnectButton->setEnabled(true);
 }
 
 
 /*! Called when the disconnect button is clicked.
 	Tries to connect to DNS server and gives an error message if this fails. */
-void ISpikeWidget::disconnectButtonClicked(){
-	//CHECK INPUT
-
-	//TRY TO DISCONNECT FROM DNS SERVER
-
-	//ENABLE CONNECT BUTTON; DISENABLE DISCONNECT BUTTON.
+void ISpikeWidget::unsetIPAddressButtonClicked(){
+	ipAddressSet = false;
 
 	connectButton->setEnabled(true);
 	dnsEdit->setEnabled(true);
+	portEdit->setEnabled(true);
 	disconnectButton->setEnabled(false);
 }
 

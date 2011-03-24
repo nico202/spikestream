@@ -53,6 +53,10 @@ namespace spikestream {
 				Key is the name of the parameter; value is a pointer to the line edit */
 			QHash<QString, QLineEdit*> lineEditMap;
 
+			/*! Map of the combo boxes
+				Key is the name of the parameter; value is a pointer to the combo */
+			QHash<QString, QComboBox*> comboMap;
+
 			/*! Records whether the properties of a channel are being configured. */
 			bool neuronGroupSelectionMode;
 

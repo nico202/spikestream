@@ -1,12 +1,16 @@
 //SpikeStream includes
 #include "Globals.h"
 #include "IzhiAccuracyManager.h"
+#include "SpikeStreamIOException.h"
 #include "Util.h"
 using namespace spikestream;
 
 //Qt includes
 #include <QDebug>
+#include <QFile>
 
+/*! Izhikevich's random function */
+#define getrandom(max1) ((rand()%(int)((max1))))
 
 /*! Constructor */
 IzhiAccuracyManager::IzhiAccuracyManager() : SpikeStreamThread(){
@@ -28,6 +32,7 @@ void IzhiAccuracyManager::run(){
 	stopThread = false;
 	unsigned origWaitInterval = nemoWrapper->getWaitInterval_ms();
 	nemoWrapper->setWaitInterval(0);//Minimal wait between steps
+	timeStep = 0;
 
 	try{
 		runExperiment();
@@ -62,23 +67,41 @@ void IzhiAccuracyManager::startExperiment(NemoWrapper* nemoWrapper, QHash<QStrin
 void IzhiAccuracyManager::runExperiment(){
 	//Seed the random number generator
 	Util::seedRandom(randomSeed);
-
-	//Train network on numPatterns patterns
 	emit statusUpdate("Starting Experiment " + QString::number(experimentNumber + 1));
 
-	emit statusUpdate("First second with monitoring unchanged.");
-	stepNemo(1000);
+	QTextStream* logTextStream = NULL;
+	QFile* logFile = new QFile(Globals::getSpikeStreamRoot() + "/log/nemo_spikes_1.dat");
+	if(logFile->open(QFile::WriteOnly | QFile::Truncate))
+		logTextStream = new QTextStream(logFile);
+	else{
+		throw SpikeStreamIOException("Cannot open log file for NemoLoader.");
+	}
 
-	emit statusUpdate("99 seconds without monitoring.");
-	nemoWrapper->setMonitor(false);
-	int origPauseInterval = pauseInterval_ms;
-	pauseInterval_ms = 0;
-	stepNemo(100000);
-	pauseInterval_ms = origPauseInterval;
+	emit statusUpdate("First 5 seconds with monitoring unchanged.");
+	stepNemo(5000, true, logTextStream);
 
-	emit statusUpdate("1 second with monitoring.");
-	nemoWrapper->setMonitor(true);
-	stepNemo(1000);
+	if(!stopThread){
+		emit statusUpdate("95 seconds without monitoring.");
+		nemoWrapper->setMonitor(false);
+		int origPauseInterval = pauseInterval_ms;
+		pauseInterval_ms = 0;
+		for(int i=1; i<=19;++i){
+			stepNemo(5000, true);
+			if(i%2 == 0)
+				emit statusUpdate(QString::number(i*5000) + " steps complete without monitoring.");
+		}
+		pauseInterval_ms = origPauseInterval;
+	}
+
+	if(!stopThread){
+		emit statusUpdate("5 seconds with monitoring.");
+		nemoWrapper->setMonitor(true);
+		stepNemo(5000, true);
+	}
+
+	//Clean up
+	logFile->close();
+	delete logTextStream;
 
 	//Output final result
 	emit statusUpdate("Experiment complete.");
@@ -86,14 +109,29 @@ void IzhiAccuracyManager::runExperiment(){
 
 
 /*! Advances the simulation by the specified number of time steps */
-void IzhiAccuracyManager::stepNemo(unsigned numTimeSteps){
+void IzhiAccuracyManager::stepNemo(unsigned numTimeSteps, bool injectCurrent, QTextStream* textStream){
 	for(unsigned i=0; i<numTimeSteps && !stopThread; ++i){
-		//Inject current into a randomly selected neuron
-		//setInjectCurrentNeuronIDs(QList<neurid_t>& neurIDList, double current)
-
+		if(injectCurrent){
+			//Inject current into a randomly selected neuron
+			QList<neurid_t> injectCurrentIDs;
+			injectCurrentIDs.append(neuronIDList.at(getrandom(1000)));
+			nemoWrapper->setInjectCurrentNeuronIDs(injectCurrentIDs, 20.0);
+		}
 
 		//Step simulation
 		nemoWrapper->stepSimulation();
+
+		//Output firing neuron ids
+		if(timeStep < 1000 && textStream != NULL){
+			QList<neurid_t> tmpFiringIDs = nemoWrapper->getFiringNeuronIDs();
+			for(int i=0; i<tmpFiringIDs.size(); ++i)
+				(*textStream)<<timeStep<<" "<<tmpFiringIDs.at(i)<<endl;
+		}
+
+		//Increase time step
+		++timeStep;
+
+		//Wait for NeMo and SpikeStream to finish
 		while((nemoWrapper->isWaitForGraphics() || nemoWrapper->getCurrentTask() == NemoWrapper::STEP_SIMULATION_TASK) && !stopThread)
 			msleep(pauseInterval_ms);
 	}
@@ -118,6 +156,21 @@ void IzhiAccuracyManager::storeNeuronGroups(){
 		if(excitatoryNeuronGroup != NULL && inhibitoryNeuronGroup != NULL)
 			break;
 	}
+
+	//Store list of neuron IDs
+	neuronIDList.clear();
+	NeuronIterator excitatoryNeuronGroupEnd = excitatoryNeuronGroup->end();
+	for(NeuronIterator iter = excitatoryNeuronGroup->begin(); iter != excitatoryNeuronGroupEnd; ++iter){
+		neuronIDList.append(iter.key());
+	}
+	NeuronIterator inhibitoryNeuronGroupEnd = inhibitoryNeuronGroup->end();
+	for(NeuronIterator iter = inhibitoryNeuronGroup->begin(); iter != inhibitoryNeuronGroupEnd; ++iter){
+		neuronIDList.append(iter.key());
+	}
+
+	//Run a check
+	if(neuronIDList.size() != 1000)
+		throw SpikeStreamException("There should be a total of 1000 neurons in the network. Actual number of neurons: " + QString::number(neuronIDList.size()));
 }
 
 

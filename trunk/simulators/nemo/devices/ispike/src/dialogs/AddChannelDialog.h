@@ -35,6 +35,7 @@ namespace spikestream {
 
 		public:
 			AddChannelDialog(QWidget* parent = 0);
+			AddChannelDialog(QString ipString, QString portString, QWidget* parent = 0);
 			~AddChannelDialog();
 			bool isInputChannel(){ return inputChannel; }
 			InputChannel* getInputChannel() { return newInputChannel; }
@@ -51,6 +52,15 @@ namespace spikestream {
 
 		private:
 			//=====================  VARIABLES  =======================
+			/*! String holding IP address of DNS server */
+			QString dnsIPAddress;
+
+			/*! String holding port of DNS server */
+			QString dnsPort;
+
+			/*! Records whether ip address and port have been set */
+			bool ipAddressSet;
+
 			/*! Holds information about the available channel types */
 			QComboBox* channelTypeCombo;
 
@@ -78,8 +88,10 @@ namespace spikestream {
 			/*! Confirms creation of channel and closes dialog */
 			QPushButton* okButton;
 
+			/*! Neuron group that will be linked to the channel. */
 			NeuronGroup* neuronGroup;
 
+			/*! Records whether channel is input or output */
 			bool inputChannel;
 
 			/*! Creates output channels */
@@ -100,12 +112,15 @@ namespace spikestream {
 			/*! Descriptions of the available readers */
 			vector<ReaderDescription> readerDescVector ;
 
+			/*! Input channel that we are creating. */
 			InputChannel* newInputChannel;
 
+			/*! Output channel that we are creating */
 			OutputChannel* newOutputChannel;
 
 
 			//======================  METHODS  =======================
+			void buildGUI();
 			bool configureProperties(map<string, Property*> propertyMap, bool selectNeuronGroup = false);
 			void reset();
 

@@ -8,6 +8,7 @@
 
 //Qt includes
 #include <QString>
+#include <QTextStream>
 
 
 namespace spikestream {
@@ -43,16 +44,22 @@ namespace spikestream {
 			/*! Inhibitory neuron group */
 			NeuronGroup* inhibitoryNeuronGroup;
 
+			/*! List of all the neuron IDs. Used for injecting current. */
+			QList<neurid_t> neuronIDList;
+
 			static const int NO_EXPERIMENT = -1;
 			static const int EXPERIMENT1 = 0;
 
 			/*! Time to pause between sections of the experiment */
 			int pauseInterval_ms;
 
+			/*! Keeps track of the time step */
+			timestep_t timeStep;
+
 
 			//======================  METHODS  ======================
 			void runExperiment();
-			void stepNemo(unsigned numTimeSteps);
+			void stepNemo(unsigned numTimeSteps, bool injectCurrent, QTextStream* textStream = NULL);
 			void storeNeuronGroups();
 			void storeParameters(QHash<QString, double>& parameterMap);
 

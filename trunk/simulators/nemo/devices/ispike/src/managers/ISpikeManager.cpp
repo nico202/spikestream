@@ -148,11 +148,16 @@ void ISpikeManager::setInputNeurons(timestep_t timeStep, QList<neurid_t>& firing
 			neurIDMap[*fireNeurIter]->second->push_back(*fireNeurIter - neurIDMap[*fireNeurIter]->first);
 	}
 
-	//Pass firing neuron ids to appropriate channels
-	for(int chanCtr = 0; chanCtr < outputChannels.size(); ++chanCtr){
-		if(!outputChannels[chanCtr].first->isInitialised())
-			outputChannels[chanCtr].first->start();
-		outputChannels[chanCtr].first->setFiring(&firingNeurIDVectors[chanCtr]);
+	try{
+		//Pass firing neuron ids to appropriate channels
+		for(int chanCtr = 0; chanCtr < outputChannels.size(); ++chanCtr){
+			if(!outputChannels[chanCtr].first->isInitialised())
+				outputChannels[chanCtr].first->start();
+			outputChannels[chanCtr].first->setFiring(&firingNeurIDVectors[chanCtr]);
+		}
+	}
+	catch(...){
+		throw SpikeStreamException("ISpikeManager: An unknown exception occurred setting input neurons.");
 	}
 }
 
@@ -164,7 +169,7 @@ void ISpikeManager::step(){
 	#endif//DEBUG
 	outputNeuronIDs.clear();
 
-	//Work through input channels
+	//Work through input channel
 	try{
 		for(int chanCtr = 0; chanCtr < inputChannels.size(); ++chanCtr){
 			if(!inputChannels[chanCtr].first->isInitialised())

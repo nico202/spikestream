@@ -13,6 +13,7 @@ using namespace spikestream;
 #include "boost/random.hpp"
 
 //Outputs debugging information for NeMo calls
+//#define DEBUG_INJECT_CURRENT
 //#define DEBUG_LEARNING
 //#define DEBUG_LOAD
 //#define DEBUG_PARAMETERS
@@ -622,6 +623,9 @@ unsigned NemoWrapper::addInjectCurrentNeuronIDs(){
 	for(QHash<neurid_t, double>::iterator iter = neuronIDCurrentMap.begin(); iter != neurIDCurrentMapEnd; ++iter){
 		injectionCurrentNeurIDVector.push_back(iter.key());//Add neuron id to current vector
 		injectionCurrentVector.push_back(iter.value());
+		#ifdef DEBUG_INJECT_CURRENT
+			qDebug()<<"TimeStep: "<<timeStepCounter<<". Injecting "<<iter.value()<<" current into neuron "<<iter.key();
+		#endif//DEBUG_INJECT_CURRENT
 		++arraySize;
 	}
 	neuronIDCurrentMap.clear();
@@ -936,7 +940,7 @@ void NemoWrapper::stepNemo(){
 	if(!injectNoiseMap.isEmpty() || !neuronIDsToFire.isEmpty() || !deviceManagerList.isEmpty())
 		numFiredNeurons = addInjectFiringNeuronIDs();
 
-	if(!injectCurrentMap.isEmpty())
+	if(!injectCurrentMap.isEmpty() || !neuronIDCurrentMap.isEmpty())
 		numCurrentNeurons = addInjectCurrentNeuronIDs();
 
 	#ifdef DEBUG_STEP
@@ -983,6 +987,8 @@ void NemoWrapper::stepNemo(){
 			injectionCurrentVector.erase(injectionCurrentVector.end() - numCurrentNeurons, injectionCurrentVector.end());
 		}
 	}
+
+	qDebug()<<"Size of inject current vector: "<<injectionCurrentNeurIDVector.size();
 
 
 	//---------------------------------------------------------

@@ -10,7 +10,8 @@ using namespace spikestream;
 #include <QLabel>
 #include <QPixmap>
 
-#define NUM_NEURONS_STRING "Number Of Neurons"
+#define NEURON_WIDTH_STRING "Neuron Width"
+#define NEURON_HEIGHT_STRING "Neuron Height"
 
 /*! Constructor used in standard mode. */
 EditPropertiesDialog::EditPropertiesDialog(map<string, Property*>& propertyMap, QWidget* parent) : QDialog(parent) {
@@ -35,9 +36,8 @@ EditPropertiesDialog::EditPropertiesDialog(map<string, Property*>& propertyMap, 
 	neuronGroupSelectionMode = true;
 
 	//Extract number of neurons, which is used in neuron group selection
-	//FIXME: REPLACE WITH WIDTH AND HEIGHT
-	if(propertyMap.count(NUM_NEURONS_STRING) == 0)
-		throw SpikeStreamException("Can only select neuron groups when parameter 'Number Of Neurons' is defined.");
+	if(propertyMap.count(NEURON_WIDTH_STRING) == 0 || propertyMap.count(NEURON_HEIGHT_STRING) == 0)
+		throw SpikeStreamException("Can only select neuron groups when parameters 'Neuron Width' and 'Neuron Height' are defined.");
 
 	//Add properties to layout
 	QVBoxLayout* mainVBox = new QVBoxLayout(this);
@@ -73,7 +73,7 @@ void EditPropertiesDialog::updateNeuronCombo(){
 	if(!neuronGroupSelectionMode)
 		return;
 
-	int numNeurons = Util::getInt(lineEditMap[NUM_NEURONS_STRING]->text());
+	int numNeurons = Util::getInt(lineEditMap[NEURON_WIDTH_STRING]->text()) * Util::getInt(lineEditMap[NEURON_HEIGHT_STRING]->text());
 	updateCompatibleNeuronGroups(numNeurons);
 }
 
@@ -105,7 +105,7 @@ void EditPropertiesDialog::addNeuronGroups(QVBoxLayout* mainVBox){
 	mainVBox->addLayout(neurGrpBox);
 
 	//Load the neuron groups that are compatible with this number of neurons
-	int numberOfNeurons = ((IntegerProperty*)propertyMap[NUM_NEURONS_STRING])->getValue();
+	int numberOfNeurons = ((IntegerProperty*)propertyMap[NEURON_WIDTH_STRING])->getValue() * ((IntegerProperty*)propertyMap[NEURON_HEIGHT_STRING])->getValue();
 	updateCompatibleNeuronGroups(numberOfNeurons);
 }
 
@@ -141,9 +141,9 @@ void EditPropertiesDialog::addParameters(QVBoxLayout* mainVLayout){
 			gridLayout->addWidget(tmpLineEdit, cntr, 1);
 
 			//Listen for changes in the number of neurons or disable editing of number of neurons
-			if(neuronGroupSelectionMode && propertyName == NUM_NEURONS_STRING)
+			if(neuronGroupSelectionMode && (propertyName == NEURON_WIDTH_STRING || propertyName == NEURON_HEIGHT_STRING) )
 				connect(tmpLineEdit, SIGNAL(textChanged(QString)), this, SLOT(updateNeuronCombo()));
-			else if (propertyName == NUM_NEURONS_STRING)
+			else if (propertyName == NEURON_WIDTH_STRING || propertyName == NEURON_HEIGHT_STRING)
 				lineEditMap[propertyName]->setEnabled(false);
 		}
 
@@ -153,6 +153,20 @@ void EditPropertiesDialog::addParameters(QVBoxLayout* mainVLayout){
 			QLineEdit* tmpLineEdit = new QLineEdit( QString( ((StringProperty*)iter->second)->getValue().data() ) );
 			lineEditMap[propertyName] = tmpLineEdit;
 			gridLayout->addWidget(tmpLineEdit, cntr, 1);
+		}
+
+		//Add combo parameter
+		else if(iter->second->getType() == Property::Combo){
+			gridLayout->addWidget(new QLabel(propertyName), cntr, 0);
+
+			//Build and add combo
+			QComboBox* tmpCombo = new QComboBox();
+			vector<string> comboOptions = ((ComboProperty*)iter->second)->getOptions();
+			qDebug()<<"NUMBER OF OPTIONS: "<<comboOptions.size();
+			for(size_t i=0; i<comboOptions.size(); ++i)
+				tmpCombo->addItem(QString(comboOptions[i].data()));
+			comboMap[propertyName] = tmpCombo;
+			gridLayout->addWidget(tmpCombo, cntr, 1);
 		}
 
 		//Unknown property type
@@ -180,7 +194,7 @@ QString EditPropertiesDialog::getNeuronGroupName(NeuronGroup* neuronGroup){
 /*! Stores the properties */
 void EditPropertiesDialog::storeParameterValues(){
 	//Run some basic checks
-	if(lineEditMap.size() != (int)propertyMap.size())
+	if( (lineEditMap.size() + comboMap.size()) != (int)propertyMap.size())
 		throw SpikeStreamException("Property map size does not match list of parameters.");
 
 	//Work through the properties
@@ -223,6 +237,16 @@ void EditPropertiesDialog::storeParameterValues(){
 
 			//Store value
 			((StringProperty*)iter->second)->setValue(lineEditMap[propertyName]->text().toStdString());
+		}
+
+		//Store combo parameter
+		else if(iter->second->getType() == Property::Combo){
+			//Run some checks
+			if(!comboMap.contains(propertyName))
+				throw SpikeStreamException("Property " + propertyName + " cannot be found.");
+
+			//Store value
+			((ComboProperty*)iter->second)->setValue(comboMap[propertyName]->currentIndex());
 		}
 
 		//Unknown property type

@@ -17,6 +17,247 @@ using namespace spikestream;
 
 /*! Constructor */
 AddChannelDialog::AddChannelDialog(QWidget *parent) : QDialog(parent){
+	//Construct user interface
+	buildGUI();
+
+	//Default variables
+	ipAddressSet = false;
+}
+
+
+/*! Constructor using DNS server and port */
+AddChannelDialog::AddChannelDialog(QString ipString, QString portString, QWidget *parent) : QDialog(parent){
+	//Store variables
+	ipAddressSet = true;
+	dnsIPAddress = ipString;
+	dnsPort = portString;
+
+	//Check variables
+	if(dnsIPAddress.isEmpty() || dnsPort.isEmpty())
+		throw SpikeStreamException("IP Address or Port are not specified. These are essential for adding Ethernet enabled channels.");
+
+	//Construct user interface
+	buildGUI();
+}
+
+
+/*! Destructor */
+AddChannelDialog::~AddChannelDialog(){
+
+}
+
+
+/*----------------------------------------------------------*/
+/*------                 PRIVATE SLOTS                ------*/
+/*----------------------------------------------------------*/
+
+/*! Cancels add channel and closes dialog */
+void AddChannelDialog::cancelButtonClicked(){
+	this->reject();
+}
+
+
+/*! Configures the channel */
+void AddChannelDialog::configureChannel(){
+	readerWriterCombo->clear();
+
+	try{
+		if(inputChannel){
+			if(channelCombo->currentIndex() >= inChanDesc.size())
+				throw SpikeStreamException("Index out of range");
+
+			//Edit properties of channel - abort channel configuration if operation is cancelled
+			bool propsConfigured = configureProperties(inChanDesc[channelCombo->currentIndex()].getChannelProperties(), true);
+			if(!propsConfigured)
+				return;
+
+			//Load list of available readers
+			string readerType = inChanDesc[channelCombo->currentIndex()].getReaderType();
+
+			//Readers that don't need internet connection.
+			if(ipAddressSet){
+				ReaderFactory readerFactory(dnsIPAddress.toStdString(), dnsPort.toStdString());
+				readerDescVector = readerFactory.getReadersOfType(readerType);
+			}
+			else{
+				ReaderFactory readerFactory;
+				readerDescVector = readerFactory.getReadersOfType(readerType);
+			}
+			for(int i=0; i< readerDescVector.size(); ++i){
+				readerWriterCombo->addItem(QString(readerDescVector[i].getReaderName().data()));
+			}
+		}
+		else{
+			if(channelCombo->currentIndex() >= outChanDesc.size())
+				throw SpikeStreamException("Index out of range");
+
+			//Edit properties of channel - abort channel configuration if operation is cancelled
+			bool propsConfigured = configureProperties(outChanDesc[channelCombo->currentIndex()].getChannelProperties(), true);
+			if(!propsConfigured)
+				return;
+
+			//Load list of available writers
+			string writerType = outChanDesc[channelCombo->currentIndex()].getWriterType();
+
+			//Writers that don't need internet connection
+			if(ipAddressSet){
+				WriterFactory writerFactory(dnsIPAddress.toStdString(), dnsPort.toStdString());
+				writerDescVector = writerFactory.getWritersOfType(writerType);
+			}
+			else{
+				WriterFactory writerFactory;
+				writerDescVector = writerFactory.getWritersOfType(writerType);
+			}
+			for(int i=0; i< writerDescVector.size(); ++i){
+				readerWriterCombo->addItem(QString(writerDescVector[i].getWriterName().data()));
+			}
+		}
+	}
+	catch(...){
+		qCritical()<<"AddChannelDialog: An unknown exception occurred configuring channel.";
+	}
+
+	//Enable/disable appropriate graphical components
+	channelCombo->setEnabled(false);
+	configureChannelButton->setEnabled(false);
+	readerWriterLabel->setVisible(true);
+	readerWriterCombo->setVisible(true);
+	configureReaderWriterButton->setVisible(true);
+}
+
+
+/*! Configures the reader/writer associated with a channel */
+void AddChannelDialog::configureReaderWriter(){
+	try{
+		if(inputChannel){
+			//Edit properties
+			if(readerWriterCombo->currentIndex() >= readerDescVector.size())
+				throw SpikeStreamException("Index out of range");
+
+			//Edit properties of channel - abort reader configuration if operation is cancelled
+			bool propsConfigured = configureProperties(readerDescVector[readerWriterCombo->currentIndex()].getReaderProperties());
+			if(!propsConfigured)
+				return;
+		}
+		else{
+			//Edit properties
+			if(readerWriterCombo->currentIndex() >= writerDescVector.size())
+				throw SpikeStreamException("Index out of range");
+
+			//Edit properties of channel - abort reader configuration if operation is cancelled
+			bool propsConfigured = configureProperties(writerDescVector[readerWriterCombo->currentIndex()].getWriterProperties());
+			if(!propsConfigured)
+				return;
+		}
+	}
+	catch(...){
+		qCritical()<<"AddChannelDialog: An unknown exception occurred configuring reader or writer.";
+	}
+
+	readerWriterCombo->setEnabled(false);
+	configureReaderWriterButton->setEnabled(false);
+	okButton->setEnabled(true);
+}
+
+
+/*! Adds channel and closes dialog */
+void AddChannelDialog::okButtonClicked(){
+	try{
+		if(inputChannel){
+			//Create the reader
+			Reader* newReader = NULL;
+			if(ipAddressSet){
+				ReaderFactory readerFactory(dnsIPAddress.toStdString(), dnsPort.toStdString());
+				ReaderDescription& tmpReaderDesc = readerDescVector[readerWriterCombo->currentIndex()];
+				newReader = readerFactory.create(tmpReaderDesc.getReaderName(), tmpReaderDesc.getReaderProperties());
+			}
+			else{
+				ReaderFactory readerFactory;
+				ReaderDescription& tmpReaderDesc = readerDescVector[readerWriterCombo->currentIndex()];
+				newReader = readerFactory.create(tmpReaderDesc.getReaderName(), tmpReaderDesc.getReaderProperties());
+			}
+
+			//Create channel
+			InputChannelDescription& tmpChanDesc = inChanDesc[channelCombo->currentIndex()];
+			newInputChannel = inputFactory->create(tmpChanDesc.getChannelName(), newReader, tmpChanDesc.getChannelProperties());
+		}
+		else {
+			//Create the writer
+			Writer* newWriter = NULL;
+			if(ipAddressSet){
+				WriterFactory writerFactory(dnsIPAddress.toStdString(), dnsPort.toStdString());
+				WriterDescription& tmpWriterDesc = writerDescVector[readerWriterCombo->currentIndex()];
+				newWriter = writerFactory.create(tmpWriterDesc.getWriterName(), tmpWriterDesc.getWriterProperties());
+			}
+			else{
+				WriterFactory writerFactory;
+				WriterDescription& tmpWriterDesc = writerDescVector[readerWriterCombo->currentIndex()];
+				newWriter = writerFactory.create(tmpWriterDesc.getWriterName(), tmpWriterDesc.getWriterProperties());
+			}
+
+			//Create channel
+			OutputChannelDescription& tmpChanDesc = outChanDesc[channelCombo->currentIndex()];
+			newOutputChannel = outputFactory->create(tmpChanDesc.getChannelName(), newWriter, tmpChanDesc.getChannelProperties());
+		}
+	}
+	catch(...){
+		qCritical()<<"AddChannelDialog: An unknown exception occurred creating the channel.";
+	}
+
+	this->accept();
+}
+
+
+/*! Called when reset button is clicked. Resets dialog to initial state. */
+void AddChannelDialog::resetButtonClicked(){
+	reset();
+}
+
+
+/*! Selects the type of channel */
+void AddChannelDialog::selectChannelType(){
+	channelCombo->clear();
+	try{
+		//Input or output are the two options
+		if(channelTypeCombo->currentText() == "Input"){
+			inputChannel = true;
+
+			//Get the input channels
+			inChanDesc = inputFactory->getAllChannels();
+			for(int i=0; i<inChanDesc.size(); ++i){
+				channelCombo->addItem(QString(inChanDesc[i].getChannelName().data()));
+			}
+		}
+		else if(channelTypeCombo->currentText() == "Output"){
+			inputChannel = false;
+
+			//Get the output channels
+			outChanDesc = outputFactory->getAllChannels();
+			for(int i=0; i<outChanDesc.size(); ++i){
+				channelCombo->addItem(QString(outChanDesc[i].getChannelName().data()));
+			}
+		}
+		else
+			throw SpikeStreamException("Channel type not recognized.");
+	}
+	catch(...){
+		qCritical()<<"AddChannelDialog: An unknown exception occurred selecting the channel type.";
+	}
+
+	channelTypeCombo->setEnabled(false);
+	selectChannelTypeButton->setEnabled(false);
+	channelLabel->setVisible(true);
+	channelCombo->setVisible(true);
+	configureChannelButton->setVisible(true);
+}
+
+
+/*----------------------------------------------------------*/
+/*------                PRIVATE METHODS               ------*/
+/*----------------------------------------------------------*/
+
+/*! Constructs the GUI */
+void AddChannelDialog::buildGUI(){
 	//Create layout for the entire widget
 	QVBoxLayout* mainVBox = new QVBoxLayout(this);
 
@@ -83,171 +324,6 @@ AddChannelDialog::AddChannelDialog(QWidget *parent) : QDialog(parent){
 	this->setMinimumSize(500, 300);
 }
 
-
-/*! Destructor */
-AddChannelDialog::~AddChannelDialog(){
-
-}
-
-
-/*----------------------------------------------------------*/
-/*------                 PRIVATE SLOTS                ------*/
-/*----------------------------------------------------------*/
-
-/*! Cancels add channel and closes dialog */
-void AddChannelDialog::cancelButtonClicked(){
-	this->reject();
-}
-
-
-/*! Configures the channel */
-void AddChannelDialog::configureChannel(){
-	readerWriterCombo->clear();
-
-	if(inputChannel){
-		if(channelCombo->currentIndex() >= inChanDesc.size())
-			throw SpikeStreamException("Index out of range");
-
-		//Edit properties of channel - abort channel configuration if operation is cancelled
-		bool propsConfigured = configureProperties(inChanDesc[channelCombo->currentIndex()].getChannelProperties(), true);
-		if(!propsConfigured)
-			return;
-
-		//Load list of available readers
-		string readerType = inChanDesc[channelCombo->currentIndex()].getReaderType();
-		ReaderFactory readerFactory;
-		readerDescVector = readerFactory.getReadersOfType(readerType);
-		for(int i=0; i< readerDescVector.size(); ++i){
-			readerWriterCombo->addItem(QString(readerDescVector[i].getReaderName().data()));
-		}
-
-	}
-	else{
-		if(channelCombo->currentIndex() >= outChanDesc.size())
-			throw SpikeStreamException("Index out of range");
-
-		//Edit properties of channel - abort channel configuration if operation is cancelled
-		bool propsConfigured = configureProperties(outChanDesc[channelCombo->currentIndex()].getChannelProperties(), true);
-		if(!propsConfigured)
-			return;
-
-		//Load list of available writers
-		string writerType = outChanDesc[channelCombo->currentIndex()].getWriterType();
-		WriterFactory writerFactory;
-		writerDescVector = writerFactory.getWritersOfType(writerType);
-		for(int i=0; i< writerDescVector.size(); ++i){
-			readerWriterCombo->addItem(QString(writerDescVector[i].getWriterName().data()));
-		}
-	}
-
-	//Enable/disable appropriate graphical components
-	channelCombo->setEnabled(false);
-	configureChannelButton->setEnabled(false);
-	readerWriterLabel->setVisible(true);
-	readerWriterCombo->setVisible(true);
-	configureReaderWriterButton->setVisible(true);
-}
-
-
-/*! Configures the reader/writer associated with a channel */
-void AddChannelDialog::configureReaderWriter(){
-	if(inputChannel){
-		//Edit properties
-		if(readerWriterCombo->currentIndex() >= readerDescVector.size())
-			throw SpikeStreamException("Index out of range");
-
-		//Edit properties of channel - abort reader configuration if operation is cancelled
-		bool propsConfigured = configureProperties(readerDescVector[readerWriterCombo->currentIndex()].getReaderProperties());
-		if(!propsConfigured)
-			return;
-	}
-	else{
-		//Edit properties
-		if(readerWriterCombo->currentIndex() >= writerDescVector.size())
-			throw SpikeStreamException("Index out of range");
-
-		//Edit properties of channel - abort reader configuration if operation is cancelled
-		bool propsConfigured = configureProperties(writerDescVector[readerWriterCombo->currentIndex()].getWriterProperties());
-		if(!propsConfigured)
-			return;
-	}
-
-	readerWriterCombo->setEnabled(false);
-	configureReaderWriterButton->setEnabled(false);
-	okButton->setEnabled(true);
-}
-
-
-/*! Adds channel and closes dialog */
-void AddChannelDialog::okButtonClicked(){
-	if(inputChannel){
-		//Create the reader
-		ReaderFactory readerFactory;
-		ReaderDescription& tmpReaderDesc = readerDescVector[readerWriterCombo->currentIndex()];
-		Reader* newReader = readerFactory.create(tmpReaderDesc.getReaderName(), tmpReaderDesc.getReaderProperties());
-
-		//Create channel
-		InputChannelDescription& tmpChanDesc = inChanDesc[channelCombo->currentIndex()];
-		newInputChannel = inputFactory->create(tmpChanDesc.getChannelName(), newReader, tmpChanDesc.getChannelProperties());
-	}
-	else {
-		//Create the writer
-		WriterFactory writerFactory;
-		WriterDescription& tmpWriterDesc = writerDescVector[readerWriterCombo->currentIndex()];
-		Writer* newWriter = writerFactory.create(tmpWriterDesc.getWriterName(), tmpWriterDesc.getWriterProperties());
-
-		//Create channel
-		OutputChannelDescription& tmpChanDesc = outChanDesc[channelCombo->currentIndex()];
-		newOutputChannel = outputFactory->create(tmpChanDesc.getChannelName(), newWriter, tmpChanDesc.getChannelProperties());
-	}
-
-	this->accept();
-}
-
-
-/*! Called when reset button is clicked. Resets dialog to initial state. */
-void AddChannelDialog::resetButtonClicked(){
-	reset();
-}
-
-
-/*! Selects the type of channel */
-void AddChannelDialog::selectChannelType(){
-	channelCombo->clear();
-
-	//Input or output are the two options
-	if(channelTypeCombo->currentText() == "Input"){
-		inputChannel = true;
-
-		//Get the input channels
-		inChanDesc = inputFactory->getAllChannels();
-		for(int i=0; i<inChanDesc.size(); ++i){
-			channelCombo->addItem(QString(inChanDesc[i].getChannelName().data()));
-		}
-	}
-	else if(channelTypeCombo->currentText() == "Output"){
-		inputChannel = false;
-
-		//Get the output channels
-		outChanDesc = outputFactory->getAllChannels();
-		for(int i=0; i<outChanDesc.size(); ++i){
-			channelCombo->addItem(QString(outChanDesc[i].getChannelName().data()));
-		}
-	}
-	else
-		throw SpikeStreamException("Channel type not recognized.");
-
-	channelTypeCombo->setEnabled(false);
-	selectChannelTypeButton->setEnabled(false);
-	channelLabel->setVisible(true);
-	channelCombo->setVisible(true);
-	configureChannelButton->setVisible(true);
-}
-
-
-/*----------------------------------------------------------*/
-/*------                PRIVATE METHODS               ------*/
-/*----------------------------------------------------------*/
 
 /*! Launches dialog to configure the supplied properties */
 bool AddChannelDialog::configureProperties(map<string, Property*> propertyMap, bool selectNeuronGroup){
