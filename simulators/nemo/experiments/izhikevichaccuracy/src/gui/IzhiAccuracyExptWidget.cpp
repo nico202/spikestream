@@ -147,7 +147,7 @@ void IzhiAccuracyExptWidget::buildParameters(){
 	parameterMap["experiment_number"] = defaultParameterMap["experiment_number"];
 
 	parameterInfoList.append(ParameterInfo("random_seed", "Seed for random number generator.", ParameterInfo::INTEGER));
-	defaultParameterMap["random_seed"] = 50;
+	defaultParameterMap["random_seed"] = 45;
 	parameterMap["random_seed"] = defaultParameterMap["random_seed"];
 
 	parameterInfoList.append(ParameterInfo("pause_interval_ms", "Time in ms to pause between sections of the experiment", ParameterInfo::INTEGER));

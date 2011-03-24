@@ -26,8 +26,8 @@ namespace spikestream {
 
 		private slots:
 			void addChannel();
-			void connectButtonClicked();
-			void disconnectButtonClicked();
+			void setIPAddressButtonClicked();
+			void unsetIPAddressButtonClicked();
 			void networkChanged();
 
 		private:
@@ -43,6 +43,12 @@ namespace spikestream {
 
 			/*! Place to enter the DNS server address */
 			QLineEdit* dnsEdit;
+
+			/*! Place to enter the port address */
+			QLineEdit* portEdit;
+
+			/*! Does the system try to connect to an IP address */
+			bool ipAddressSet;
 
 			/*! Button to connect to DNS server */
 			QPushButton* connectButton;

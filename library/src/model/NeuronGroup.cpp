@@ -14,6 +14,7 @@ using namespace std;
 
 //Initialize static variables
 unsigned NeuronGroup::neuronIDCounter = LAST_NEURON_ID + 1;
+//unsigned NeuronGroup::neuronIDCounter = 0;
 
 /*! Constructor */
 NeuronGroup::NeuronGroup(const NeuronGroupInfo& info){

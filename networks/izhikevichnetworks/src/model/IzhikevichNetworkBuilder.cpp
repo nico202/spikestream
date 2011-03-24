@@ -143,6 +143,7 @@ void IzhikevichNetworkBuilder::addPolychronizationNetwork(){
 	setExcitatoryParameters(parameterMap);
 	exNeurGrp->setParameters(parameterMap);
 
+	parameterMap.clear();
 	NeuronGroup* inhibNeurGrp = new NeuronGroup(NeuronGroupInfo(0, "Inhibitory neuron group",  "Inhibitory neuron group", parameterMap, inhibNeurType));
 	setInhibitoryParameters(parameterMap);
 	inhibNeurGrp->setParameters(parameterMap);
@@ -191,6 +192,7 @@ void IzhikevichNetworkBuilder::addPolychronizationNetwork(){
 	newNetwork->addNeuronGroups(neuronGroupList);
 
 	//Create connection groups
+	parameterMap.clear();//Just need an empty parameters for the NeuronGroupInfo
 	ConnectionGroup* excitExcitConGrp = new ConnectionGroup(
 			ConnectionGroupInfo(0, getConGrpDescription(exNeurGrp, exNeurGrp), exNeurGrp->getID(), exNeurGrp->getID(), parameterMap, synapseType) );
 	QHash<QString, double> conParamMap = defaultParameterMaps[synapseType.getID()];
