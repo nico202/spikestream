@@ -14,6 +14,7 @@ using namespace spikestream;
 
 //Outputs debugging information for NeMo calls
 //#define DEBUG_INJECT_CURRENT
+//#define DEBUG_INJECT_NOISE
 //#define DEBUG_LEARNING
 //#define DEBUG_LOAD
 //#define DEBUG_PARAMETERS
@@ -541,6 +542,9 @@ unsigned NemoWrapper::addInjectFiringNeuronIDs(){
 		neurGrpSize = neuronIDList.size();
 		addedNeurIndxMap.clear();
 		numSelectedNeurons = iter.value();
+		#ifdef DEBUG_INJECT_NOISE
+			qDebug()<<"Selecting random neurons for injecting noise. Num neurons: "<<neurGrpSize<<"; num neurons to select: "<<numSelectedNeurons;
+		#endif//DEBUG_INJECT_NOISE
 
 		//Select indexes from the list of neuron ids
 		while((unsigned)addedNeurIndxMap.size() < numSelectedNeurons){
@@ -549,6 +553,9 @@ unsigned NemoWrapper::addInjectFiringNeuronIDs(){
 				if(arrayCounter >= arraySize)//Sanity check
 					throw SpikeStreamException("Error adding noise injection neuron ids - array counter out of range.");
 				injectionPatternVector.push_back(neuronIDList.at(randomIndex));//Add neuron id to pattern vector
+				#ifdef DEBUG_INJECT_NOISE
+					qDebug()<<"Random index: "<<randomIndex<<"; Inject noise neuron ID: "<<neuronIDList.at(randomIndex);
+				#endif//DEBUG_INJECT_NOISE
 				addedNeurIndxMap[randomIndex] = true;//Record the fact that we have selected this ID
 				++arrayCounter;
 			}
@@ -987,8 +994,6 @@ void NemoWrapper::stepNemo(){
 			injectionCurrentVector.erase(injectionCurrentVector.end() - numCurrentNeurons, injectionCurrentVector.end());
 		}
 	}
-
-	qDebug()<<"Size of inject current vector: "<<injectionCurrentNeurIDVector.size();
 
 
 	//---------------------------------------------------------

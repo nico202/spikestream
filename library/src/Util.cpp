@@ -173,13 +173,13 @@ void Util::printParameterMap(const QHash<QString, double>& paramMap){
 
 
 /*! Returns a random integer in the range specified.
-	Will be less than, not equal to max. */
+	Will be less and not equal to the maximum. */
 int Util::getRandom(int min, int max){
 	if(max <= min)
 		throw SpikeStreamException("Incorrect range for random number: maximum <= minimum.");
 
 	int randomNum = min;
-	randomNum += qrand() % (max - min);
+	randomNum += Util::rUInt((max-1-min) * ((double)qrand() / (double)RAND_MAX));
 	return randomNum;
 }
 
