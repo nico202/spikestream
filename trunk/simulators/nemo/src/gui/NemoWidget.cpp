@@ -582,9 +582,9 @@ void NemoWidget::loadSimulation(){
 
 		//Start loading of simulation
 		taskCancelled = false;
-		progressDialog = new QProgressDialog("Loading simulation", "Cancel", 0, 100, this);
+		progressDialog = new QProgressDialog("Loading simulation", "Cancel", 0, 100, this, Qt::CustomizeWindowHint);
 		progressDialog->setWindowModality(Qt::WindowModal);
-		progressDialog->setMinimumDuration(1000);
+		progressDialog->show();
 		updatingProgress = false;
 		nemoWrapper->start();//Load carried out by run method
 

@@ -27,10 +27,19 @@ ISpikeManager::~ISpikeManager(){
 /*------                PUBLIC METHODS                ------*/
 /*----------------------------------------------------------*/
 
-/*! Adds a channel, which will be a source of spikes to pass to the network
- or the destination of spikes that will be passed back to iSpike. */
+/*! Adds an input channel, which will be a source of spikes to pass to the network. */
 void ISpikeManager::addChannel(InputChannel* inputChannel, NeuronGroup* neuronGroup){
 	inputChannels.append(QPair<InputChannel*, NeuronGroup*>(inputChannel, neuronGroup));
+
+	//Create an array whose index is the iSpike neuron id and whose value is the SpikeStream neuron ID
+	neurid_t* tmpNeurIDArray = new neurid_t[neuronGroup->size()];
+	int iSpikeIDCtr = 0;
+	NeuronPositionIterator neurGrpEnd = neuronGroup->positionEnd();
+	for(NeuronPositionIterator posIter = neuronGroup->positionBegin(); posIter != neurGrpEnd; ++posIter){
+		tmpNeurIDArray[iSpikeIDCtr] = posIter.value()->getID();
+		++iSpikeIDCtr;
+	}
+	inputArrayList.append(tmpNeurIDArray);
 }
 
 
@@ -46,12 +55,15 @@ void ISpikeManager::addChannel(OutputChannel* outputChannel, NeuronGroup* neuron
 	//Create vector to hold neuron IDs passed to this output channel
 	firingNeurIDVectors.push_back(vector<int>());
 
-	//Add entries to neuron ID map linking SpikeStream ID with start neuron ID and input vector
+	/* Add entries to neuron ID map linking SpikeStream ID with start neuron ID and input vector.
+		This has to be done topographically because neuron ids do not increase smoothly with distance. */
 	int startMapSize = neurIDMap.size();
-	neurid_t startNeurID = neuronGroup->getStartNeuronID();
-	QPair<neurid_t, vector<int>*>* channelDetails = new QPair<neurid_t, vector<int>*>(startNeurID, &firingNeurIDVectors.back());
-	for(int i=0; i<neuronGroup->size(); ++i){
-		neurIDMap[startNeurID + i] = channelDetails;
+	int iSpikeIDCtr = 0;
+	NeuronPositionIterator neurGrpEnd = neuronGroup->positionEnd();
+	for(NeuronPositionIterator posIter = neuronGroup->positionBegin(); posIter != neurGrpEnd; ++posIter){
+		QPair<neurid_t, vector<int>*>* channelDetails = new QPair<neurid_t, vector<int>*>(iSpikeIDCtr, &firingNeurIDVectors.back());
+		neurIDMap[posIter.value()->getID()] = channelDetails;
+		++iSpikeIDCtr;
 	}
 
 	//Check that IDs are in a continuous range.
@@ -75,7 +87,9 @@ void ISpikeManager::deleteAllChannels(){
 void ISpikeManager::deleteInputChannel(int index){
 	if(index < 0 || index >= inputChannels.size())
 		throw SpikeStreamException("Failed to delete input channel: index out of range: " + QString::number(index));
-	delete inputChannels.at(index).first;//FIXME, CHECK
+	delete inputChannels.at(index).first;//Delete iSpike input channel
+	delete inputArrayList.at(index);//Delete array linking iSpike IDs to SpikeStream IDs
+	inputArrayList.removeAt(index);
 	inputChannels.removeAt(index);
 }
 
@@ -88,9 +102,10 @@ void ISpikeManager::deleteOutputChannel(int index){
 
 	//Remove details about neuron group associated with output channel
 	NeuronGroup* tmpNeurGrp = outputChannels.at(index).second;
-	delete neurIDMap[tmpNeurGrp->getStartNeuronID()];//Remove dynamically allocated QPair
-	for(NeuronIterator iter = tmpNeurGrp->begin(); iter != tmpNeurGrp->end(); ++iter)
+	for(NeuronIterator iter = tmpNeurGrp->begin(); iter != tmpNeurGrp->end(); ++iter){
+		delete neurIDMap[iter.key()];//Remove dynamically allocated QPair
 		neurIDMap.remove(iter.key());
+	}
 
 	//Remove input vector associated with channel
 	firingNeurIDVectors.erase(firingNeurIDVectors.begin() + index);
@@ -145,7 +160,7 @@ void ISpikeManager::setInputNeurons(timestep_t timeStep, QList<neurid_t>& firing
 	QList<neurid_t>::iterator firingNeuronsEnd = firingNeuronIDs.end();
 	for(QList<neurid_t>::iterator fireNeurIter = firingNeuronIDs.begin(); fireNeurIter != firingNeuronsEnd; ++fireNeurIter){
 		if(neurIDMap.contains(*fireNeurIter))//Some neuron groups may not be connected to channels
-			neurIDMap[*fireNeurIter]->second->push_back(*fireNeurIter - neurIDMap[*fireNeurIter]->first);
+			neurIDMap[*fireNeurIter]->second->push_back(neurIDMap[*fireNeurIter]->first);
 	}
 
 	try{
@@ -182,11 +197,10 @@ void ISpikeManager::step(){
 			//Work through the firing neurons
 			for(vector< vector<int> >::iterator outerIter = tmpFiringVect.begin(); outerIter != tmpFiringVect.end(); ++outerIter){
 				for(vector<int>::iterator innerIter = outerIter->begin(); innerIter != outerIter->end(); ++innerIter){
-					neurid_t tmpNeurID = *innerIter + inputChannels[chanCtr].second->getStartNeuronID();
 					#ifdef DEBUG
-						qDebug()<<"FIRING NEURON ID: "<<tmpNeurID;
+						qDebug()<<"FIRING NEURON: iSpikeID: "<<*innerIter<<"; SpikeStream ID: "<<inputArrayList[chanCtr][*innerIter];
 					#endif//DEBUG
-					outputNeuronIDs.append(tmpNeurID);
+					outputNeuronIDs.append(inputArrayList[chanCtr][*innerIter]);
 				}
 			}
 		}

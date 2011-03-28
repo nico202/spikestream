@@ -53,6 +53,11 @@ namespace spikestream {
 			/*! Vectors holding input neurons for each channel */
 			vector< vector<int> > firingNeurIDVectors;
 
+			/*! List of arrays whose index is the iSpike neuron ID
+				and whose value is the spike stream ID. Used for mapping spikes from
+				an iSpike input channel to SpikeStream. */
+			QList<neurid_t*> inputArrayList;
+
 			/*! List of input channels and their associated neuron groups */
 			QList< QPair<InputChannel*, NeuronGroup*> > inputChannels;
 
