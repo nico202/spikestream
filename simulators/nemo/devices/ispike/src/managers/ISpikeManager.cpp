@@ -37,6 +37,7 @@ void ISpikeManager::addChannel(InputChannel* inputChannel, NeuronGroup* neuronGr
 	NeuronPositionIterator neurGrpEnd = neuronGroup->positionEnd();
 	for(NeuronPositionIterator posIter = neuronGroup->positionBegin(); posIter != neurGrpEnd; ++posIter){
 		tmpNeurIDArray[iSpikeIDCtr] = posIter.value()->getID();
+		//qDebug()<<"iSpike ID: "<<iSpikeIDCtr<<"; SpikeStream Position: ("<<posIter.value()->getXPos()<<", "<<posIter.value()->getYPos()<<", "<<posIter.value()->getZPos()<<")";
 		++iSpikeIDCtr;
 	}
 	inputArrayList.append(tmpNeurIDArray);
