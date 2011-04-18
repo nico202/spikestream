@@ -6,7 +6,7 @@ SUBDIRS =   library applicationlibrary application
 
 
 #================  ANALYSIS PLUGINS  =================
-#SUBDIRS += analysis/statebasedphi analysis/liveliness
+SUBDIRS += analysis/statebasedphi analysis/liveliness
 
 
 #================  NETWORKS PLUGINS  =================
@@ -26,7 +26,7 @@ SUBDIRS += connectiongroups/random1 connectiongroups/topographic1
 SUBDIRS += simulators/nemo
 SUBDIRS += simulators/nemo/experiments/populationexperiment1 simulators/nemo/experiments/temporalcodingexpt1
 SUBDIRS += simulators/nemo/experiments/izhikevichaccuracy 
-SUBDIRS += simulators/nemo/devices/ispike
+#SUBDIRS += simulators/nemo/devices/ispike
 	
 
 #================  INSTALLATION  =====================

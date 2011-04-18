@@ -55,7 +55,7 @@ win32{
 	LIBS += -lnemo -L$${SPIKESTREAM_ROOT_DIR}/extlib/nemo/lib
 }
 macx {
-	LIBS += -lnemo -lspikestreamapplication -lspikestream
+        LIBS += -lnemo -lspikestreamapplication -lspikestream -L$${SPIKESTREAM_ROOT_DIR}/lib
 }
 
 

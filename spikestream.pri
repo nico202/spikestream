@@ -3,7 +3,7 @@
 #----------------------------------------------#
 #---            DEBUG OR RELEASE            ---#
 #----------------------------------------------#
-DEBUG_MODE = true
+DEBUG_MODE = false
 contains (DEBUG_MODE, true) {
 	CONFIG += debug
 }
@@ -51,9 +51,11 @@ macx {
         INCLUDEPATH += /usr/local/qwt-5.2.2-svn/include
         LIBS += -lqwt -L/usr/local/qwt-5.2.2-svn/lib
 
-        # GMP and Boost
+        # GMP
         INCLUDEPATH += /opt/local/include
         LIBS += -lgmpxx -lgmp -L/opt/local/lib
+
+        CONFIG += x86
 }
 
 #----------------------------------------------#
