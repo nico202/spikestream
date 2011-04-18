@@ -38,7 +38,8 @@ win32{
 	LIBS += -lnemo -L$${SPIKESTREAM_ROOT_DIR}/extlib/nemo/lib
 }
 macx {
-	LIBS += -lnemo -lspikestreamapplication -lspikestream
+        LIBS += -lnemowrapper -lnemo -lspikestreamapplication -lspikestream
+        LIBS += -L$${SPIKESTREAM_ROOT_DIR}/lib -L$${SPIKESTREAM_ROOT_DIR}/plugins/simulation/
 }
 
 
