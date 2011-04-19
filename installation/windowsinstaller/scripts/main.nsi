@@ -17,7 +17,7 @@
 Name "SpikeStream 0.2"
 
 # The file to write
-outFile "../build/spikestream_setup-0.2.exe"
+outFile "../build/spikestream-windows-setup-0.2.exe"
 
 # The default installation directory 
 InstallDir $PROGRAMFILES\spikestream-0.2
