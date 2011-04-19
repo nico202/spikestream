@@ -10,7 +10,8 @@ install_name_tool -change libnemo.dylib @executable_path/../Frameworks/libnemo.d
 
 
 for file in neurons/libcuboid connections/librandom1 connections/libtopographic1 simulation/libnemowrapper analysis/libliveliness analysis/libstatebasedphi \
-			networks/libalekgameznets2 networks/libaleksandernetworks networks/libconnectionmatriximporter networks/libnrmimporter networks/libtononinetworks
+			networks/libalekgameznets2 networks/libaleksandernetworks networks/libconnectionmatriximporter networks/libnrmimporter networks/libtononinetworks \
+			networks/libizhikevichetworks
 do
 
 # Remove files to prevent duplicate versions of plugin being loaded
