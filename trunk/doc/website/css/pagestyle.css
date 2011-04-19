@@ -1,0 +1,86 @@
+/* Reset.css */
+ html, body ,  div,  span,  object,  iframe,  h1,  h2,  h3,  h4,  h5,  h6,  p,  blockquote,  pre,  a,  abbr,  acronym,  address,  code,  del,  dfn,  em,  img,  q,  dl,  dt,  dd,  ol,  ul,  li,  fieldset,  form,  label,  legend,  table,  caption,  tbody,  tfoot,  thead,  tr,  th,  td {
+	margin:0;
+	padding:0;
+	border:0;
+	font-weight:inherit;
+	font-style:inherit;
+	font-size:100%;
+	font-family:inherit;
+	vertical-align:middle;
+	text-decoration: none;
+	list-style-type:none;
+}
+
+body {
+ 	background-color: #eeeecc;
+}
+
+div.spikestream_logo {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+}
+
+div.sourceforge_logo{
+	margin: 20px 0px 0px 25px;
+}
+
+div.navigation_menu{
+	position: absolute;
+	top: 152px;
+	left: 0px;
+	width: 250px;
+	height: 800px;
+	text-align: left;
+	display: inline;
+}
+
+div.navigation_menu a {
+	color: #000000;
+	font-family: Arial;
+	font-size: 14px;
+	letter-spacing: 2.0px;
+	font-weight: normal;
+	text-decoration: none;
+	text-align: left;
+}
+
+
+div.page_content{
+	position: absolute;
+	top: 150px;
+	left: 250px;
+	width: 700px;
+}
+
+div.page_content p, div.page_content li, div.page_content a{
+	color: #000000;
+	font-family: Arial;
+	font-size: 14px;
+	margin: 0px 0px 10px 0px;
+	line-height: 20px;
+	vertical-align: baseline;
+}
+
+
+td.MenuItem{
+	text-align: left;
+}
+
+
+div.page_content li{
+	text-align: justify;
+	margin: 0px 0px 5px 40px;
+	line-height: 25px;
+	list-style-type: disc;
+}
+
+
+div.page_content a{
+	color: #880000;
+}
+
+
+
+

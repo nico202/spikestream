@@ -6,7 +6,7 @@ CreateDirectory $INSTDIR\log
 # SpikeStream configuration files
 File ${SPIKESTREAM_ROOT}\spikestream.config.template
 File /oname=spikestream.config ${SPIKESTREAM_ROOT}\spikestream.config.template
-AccessControl::GrantOnFile "$INSTDIR\mas.conf" "(BU)" "FullAccess"
+AccessControl::GrantOnFile "$INSTDIR\spikestream.config" "(BU)" "FullAccess"
 
 # SpikeStream Executable files
 File /oname=bin\spikestream.exe ${SPIKESTREAM_ROOT}\bin\spikestream.exe
