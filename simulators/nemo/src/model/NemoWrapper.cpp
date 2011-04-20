@@ -1124,7 +1124,7 @@ void NemoWrapper::updateNetworkWeights(){
 		double weightFactor = tmpConGrp->getParameter("weight_factor");//Amount by which weight was multiplied when connection was added to NeMo
 
 		//Work through connection group and query volatile connections
-		float* tmpWeight;//Will point to returned weight
+		float tmpWeight;//Variable passed to NeMo to get weight
 		unsigned conCntr = 0;
 		ConnectionIterator conGrpEnd = tmpConGrp->end();
 		for(ConnectionIterator conIter = tmpConGrp->begin(); conIter != conGrpEnd; ++conIter){
@@ -1133,13 +1133,13 @@ void NemoWrapper::updateNetworkWeights(){
 			#endif//DEBUG_WEIGHTS
 
 			//Query weight
-			checkNemoOutput( nemo_get_synapse_weight_s(nemoSimulation, synapseIDArray[conCntr], tmpWeight), "Error getting weights." );
+			checkNemoOutput( nemo_get_synapse_weight_s(nemoSimulation, synapseIDArray[conCntr], &tmpWeight), "Error getting weights." );
 
 			//Update weight in connection
-			conIter->setTempWeight(*tmpWeight / weightFactor);
+			conIter->setTempWeight(tmpWeight / weightFactor);
 
 			#ifdef DEBUG_WEIGHTS
-				qDebug()<<"TimeStep: "<<timeStepCounter<<"; Weight query complete: weight="<<*tmpWeight<<" nemo synapse id="<<synapseIDArray[conCntr];
+				qDebug()<<"TimeStep: "<<timeStepCounter<<"; Weight query complete: weight="<<tmpWeight<<" nemo synapse id="<<synapseIDArray[conCntr];
 			#endif//DEBUG_WEIGHTS
 
 			//Increase counter for accessing synapse id array
