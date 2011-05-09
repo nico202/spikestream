@@ -14,6 +14,9 @@ using namespace spikestream;
 #include <sstream>
 using namespace std;
 
+//Output debugging information
+#define DEBUG_SUBSETS
+
 /*! Standard Constructor */
 SubsetManager::SubsetManager(const DBInfo& netDBInfo, const DBInfo& archDBInfo, const DBInfo& anaDBInfo, const AnalysisInfo& anaInfo, unsigned int timeStep) : QObject() {
 	//Store variables
@@ -80,6 +83,23 @@ void SubsetManager::buildSubsetList(){
 	//Create array to select subsets
 	bool subsetSelectionArray[networkSize];
 	int subsetSize = networkSize;
+
+	//Skip subsets, just analyze whole network
+	if(analysisInfo.getParameter("ignore_subsets") == 1.0){
+		#ifdef DEBUG_SUBSETS
+			qDebug()<<"Ignoring subsets of network.";
+		#endif//DEBUG_SUBSETS
+		for(int i=0; i<networkSize; ++i)
+			subsetSelectionArray[i] = true;
+		addSubset(subsetSelectionArray, networkSize);
+		return;
+	}
+
+	#ifdef DEBUG_SUBSETS
+		qDebug()<<"Full analysis of network, including all subsets.";
+	#endif//DEBUG_SUBSETS
+
+	//Analyze subsets
 	while(!*stop && subsetSize >= 2){
 		//Fill permutation array with initial selection
 		Util::fillSelectionArray(subsetSelectionArray, networkSize, subsetSize);

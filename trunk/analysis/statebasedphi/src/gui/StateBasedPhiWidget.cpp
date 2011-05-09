@@ -233,6 +233,7 @@ void StateBasedPhiWidget::initializeAnalysisInfo(){
 	analysisInfo.getParameterMap()["generalization"] = 1.0;
 	analysisInfo.getParameterMap()["ignore_disconnected_subsets"] = 1.0;
 	analysisInfo.getParameterMap()["minimum_complex_phi"] = 1.0;
+	analysisInfo.getParameterMap()["ignore_subsets"] = 0.0;
 }
 
 
