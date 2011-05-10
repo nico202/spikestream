@@ -39,7 +39,8 @@ HEADERS = src/gui/AlekGam2NetworksWidget.h \
 			src/model/ModularNetworksBuilder.h \
 			src/model/SensoryNetworksBuilder.h \
 			src/model/MotorNetworksBuilder.h \
-			src/model/TestPartitionedNetworksBuilder.h
+			src/model/TestPartitionedNetworksBuilder.h \
+			src/model/SensoryMotorNetworksBuilder.h
 
 SOURCES = src/gui/AlekGam2NetworksWidget.cpp \
 			src/model/FullyConnectedNetworksBuilder.cpp \
@@ -47,4 +48,5 @@ SOURCES = src/gui/AlekGam2NetworksWidget.cpp \
 			src/model/ModularNetworksBuilder.cpp \
 			src/model/SensoryNetworksBuilder.cpp \
 			src/model/MotorNetworksBuilder.cpp \
-			src/model/TestPartitionedNetworksBuilder.cpp
+			src/model/TestPartitionedNetworksBuilder.cpp \
+			src/model/SensoryMotorNetworksBuilder.cpp
