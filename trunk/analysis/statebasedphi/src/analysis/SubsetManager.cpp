@@ -15,7 +15,7 @@ using namespace spikestream;
 using namespace std;
 
 //Output debugging information
-#define DEBUG_SUBSETS
+//#define DEBUG_SUBSETS
 
 /*! Standard Constructor */
 SubsetManager::SubsetManager(const DBInfo& netDBInfo, const DBInfo& archDBInfo, const DBInfo& anaDBInfo, const AnalysisInfo& anaInfo, unsigned int timeStep) : QObject() {
@@ -212,9 +212,17 @@ void SubsetManager::runCalculation(const bool * const stop){
 	if(analysisInfo.getParameter("ignore_disconnected_subsets")){
 		numberOfProgressSteps = 2*subsetList.size() + neuronIDList.size() - 1;
 	}
+	//Fix number of progress steps if we are only calculating phi on the entire system without subsets
+	if(analysisInfo.getParameter("ignore_subsets") == 1.0){
+		numberOfProgressSteps = 1 + neuronIDList.size();
+	}
 
 	//Calculate the phi of each of these subsets
 	calculateSubsetsPhi();
+
+	#ifdef DEBUG_SUBSETS
+		printSubsets();
+	#endif//DEBUG_SUBSETS
 
 	//Identify which of the subsets are complexes
 	identifyComplexes();
