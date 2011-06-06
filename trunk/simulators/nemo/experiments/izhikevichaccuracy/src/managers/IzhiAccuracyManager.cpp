@@ -121,9 +121,14 @@ void IzhiAccuracyManager::stepNemo(unsigned numTimeSteps, bool injectCurrent, QT
 		//Step simulation
 		nemoWrapper->stepSimulation();
 
+		//Wait for NeMo and SpikeStream to finish
+		while((nemoWrapper->isWaitForGraphics() || nemoWrapper->getCurrentTask() == NemoWrapper::STEP_SIMULATION_TASK) && !stopThread)
+			msleep(pauseInterval_ms);
+
 		//Output firing neuron ids
 		if(timeStep < 1000 && textStream != NULL){
 			QList<neurid_t> tmpFiringIDs = nemoWrapper->getFiringNeuronIDs();
+			qDebug()<<"TIME STEP: "<<timeStep<<"; NUMBER OF FIRING NEURONS: "<<tmpFiringIDs.size();
 			for(int i=0; i<tmpFiringIDs.size(); ++i)
 				(*textStream)<<timeStep<<" "<<tmpFiringIDs.at(i)<<endl;
 		}
@@ -131,9 +136,6 @@ void IzhiAccuracyManager::stepNemo(unsigned numTimeSteps, bool injectCurrent, QT
 		//Increase time step
 		++timeStep;
 
-		//Wait for NeMo and SpikeStream to finish
-		while((nemoWrapper->isWaitForGraphics() || nemoWrapper->getCurrentTask() == NemoWrapper::STEP_SIMULATION_TASK) && !stopThread)
-			msleep(pauseInterval_ms);
 	}
 	msleep(pauseInterval_ms);
 }
