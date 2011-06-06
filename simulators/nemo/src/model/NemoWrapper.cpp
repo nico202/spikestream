@@ -13,13 +13,13 @@ using namespace spikestream;
 #include "boost/random.hpp"
 
 //Outputs debugging information for NeMo calls
-//#define DEBUG_INJECT_CURRENT
+#define DEBUG_INJECT_CURRENT
 //#define DEBUG_INJECT_NOISE
 //#define DEBUG_LEARNING
 //#define DEBUG_LOAD
 //#define DEBUG_PARAMETERS
 //#define DEBUG_PERFORMANCE
-//#define DEBUG_STEP
+#define DEBUG_STEP
 //#define DEBUG_WEIGHTS
 
 
