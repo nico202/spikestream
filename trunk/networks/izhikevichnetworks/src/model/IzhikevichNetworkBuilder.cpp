@@ -5,6 +5,7 @@
 #include "NeuronGroupInfo.h"
 #include "NeuronGroup.h"
 #include "SpikeStreamException.h"
+#include "SpikeStreamIOException.h"
 #include "Util.h"
 using namespace spikestream;
 
@@ -14,6 +15,9 @@ using namespace std;
 
 /*! Random integer between 0 and max-1 */
 #define getrandom(max1) ((rand()%(int)((max1))))
+
+/*! Enables debuggging output */
+//#define DEBUG
 
 
 /*! Constructor */
@@ -92,6 +96,16 @@ void IzhikevichNetworkBuilder::addPolychronizationNetwork(){
 //	short	delays_length[N][D];	// distribution of delays
 //	short	delays[N][D][M];		// arrangement of delays
 
+	#ifdef DEBUG
+		QTextStream* logTextStream;
+		QFile* logFile = new QFile(Globals::getSpikeStreamRoot() + "/log/IzhikevichNetworkBuilder.log");
+		if(logFile->open(QFile::WriteOnly | QFile::Truncate))
+			logTextStream = new QTextStream(logFile);
+		else{
+			throw SpikeStreamIOException("Cannot open log file for IzhikevichNetworkBuilder.");
+		}
+	#endif//DEBUG
+
 	//Get neuron types
 	NetworkDao networkDao(Globals::getNetworkDao()->getDBInfo());
 	NeuronType exNeurType = networkDao.getNeuronType("Izhikevich Excitatory Neuron");
@@ -161,6 +175,9 @@ void IzhikevichNetworkBuilder::addPolychronizationNetwork(){
 				yPos = yStart + yCntr*ySpacing;
 				zPos = zStart + zCntr*zSpacing;
 				neuronArray[neurCtr] = exNeurGrp->addNeuron(xPos, yPos, zPos);
+				#ifdef DEBUG
+					(*logTextStream)<<"nemo_add_neuron(nemoNetwork, "<<neurCtr<<", 0.02, 0.2, -65, 8, -13, -65, 0);"<<endl;
+				#endif//DEBUG
 				++neurCtr;
 			}
 		}
@@ -180,6 +197,9 @@ void IzhikevichNetworkBuilder::addPolychronizationNetwork(){
 				yPos = yStart + yCntr*ySpacing;
 				zPos = zStart + zCntr*zSpacing;
 				neuronArray[neurCtr] = inhibNeurGrp->addNeuron(xPos, yPos, zPos);
+				#ifdef DEBUG
+					(*logTextStream)<<"nemo_add_neuron(nemoNetwork, "<<neurCtr<<", 0.1, 0.2, -65, 2, -13, -65, 0);"<<endl;
+				#endif//DEBUG
 				++neurCtr;
 			}
 		}
@@ -220,12 +240,24 @@ void IzhikevichNetworkBuilder::addPolychronizationNetwork(){
 			if(toNeurIdx >= N)
 				throw SpikeStreamException("To neuron index is out of range: " + QString::number(toNeurIdx));
 
-			if(fromNeurIdx < Ne && toNeurIdx < Ne)
+			if(fromNeurIdx < Ne && toNeurIdx < Ne){
 				excitExcitConGrp->addConnection(neuronArray[fromNeurIdx]->getID(), neuronArray[toNeurIdx]->getID(), 1 + conIdx / mOverD, 0.6);
-			else if(fromNeurIdx < Ne && toNeurIdx >= Ne)
+				#ifdef DEBUG
+					(*logTextStream)<<"nemo_add_synapse(nemoNetwork, "<<fromNeurIdx<<", "<<toNeurIdx<<", "<<(1 + conIdx / mOverD)<<", 6, 1, &newNemoSynapseID);"<<endl;
+				#endif//DEBUG
+			}
+			else if(fromNeurIdx < Ne && toNeurIdx >= Ne){
 				excitInhibConGrp->addConnection(neuronArray[fromNeurIdx]->getID(), neuronArray[toNeurIdx]->getID(), 1+ conIdx / mOverD, 0.6);
-			else if(fromNeurIdx >= Ne && toNeurIdx < Ne)
+				#ifdef DEBUG
+					(*logTextStream)<<"nemo_add_synapse(nemoNetwork, "<<fromNeurIdx<<", "<<toNeurIdx<<", "<<(1 + conIdx / mOverD)<<", 6, 1, &newNemoSynapseID);"<<endl;
+				#endif//DEBUG
+			}
+			else if(fromNeurIdx >= Ne && toNeurIdx < Ne){
 				inhibExcitConGrp->addConnection(neuronArray[fromNeurIdx]->getID(), neuronArray[toNeurIdx]->getID(), 1, -0.5);
+				#ifdef DEBUG
+					(*logTextStream)<<"nemo_add_synapse(nemoNetwork, "<<fromNeurIdx<<", "<<toNeurIdx<<", 1, -5, 0, &newNemoSynapseID);"<<endl;
+				#endif//DEBUG
+			}
 			else
 				throw SpikeStreamException("Condition not recognized.");
 		}
@@ -237,6 +269,13 @@ void IzhikevichNetworkBuilder::addPolychronizationNetwork(){
 	conGroupList.append(excitInhibConGrp);
 	conGroupList.append(inhibExcitConGrp);
 	newNetwork->addConnectionGroups(conGroupList);
+
+	//Clean up logging
+	#ifdef DEBUG
+		logFile->close();
+		delete logFile;
+		delete logTextStream;
+	#endif//DEBUG
 }
 
 

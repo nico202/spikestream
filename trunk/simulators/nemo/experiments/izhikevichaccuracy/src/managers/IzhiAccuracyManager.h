@@ -44,9 +44,6 @@ namespace spikestream {
 			/*! Inhibitory neuron group */
 			NeuronGroup* inhibitoryNeuronGroup;
 
-			/*! List of all the neuron IDs. Used for injecting current. */
-			QList<neurid_t> neuronIDList;
-
 			static const int NO_EXPERIMENT = -1;
 			static const int EXPERIMENT1 = 0;
 
@@ -55,6 +52,9 @@ namespace spikestream {
 
 			/*! Keeps track of the time step */
 			timestep_t timeStep;
+
+			/*! Neuron IDs ordered in same way as Izhikevich experiment. */
+			QList<neurid_t> orderedNeuronIDList;
 
 
 			//======================  METHODS  ======================

@@ -114,7 +114,7 @@ void IzhiAccuracyManager::stepNemo(unsigned numTimeSteps, bool injectCurrent, QT
 		if(injectCurrent){
 			//Inject current into a randomly selected neuron
 			QList<neurid_t> injectCurrentIDs;
-			injectCurrentIDs.append(neuronIDList.at(getrandom(1000)));
+			injectCurrentIDs.append(orderedNeuronIDList.at(getrandom(1000)));
 			nemoWrapper->setInjectCurrentNeuronIDs(injectCurrentIDs, 20.0);
 		}
 
@@ -158,21 +158,48 @@ void IzhiAccuracyManager::storeNeuronGroups(){
 		if(excitatoryNeuronGroup != NULL && inhibitoryNeuronGroup != NULL)
 			break;
 	}
+	if(excitatoryNeuronGroup == NULL && inhibitoryNeuronGroup == NULL)
+		throw SpikeStreamException("Excitatory or inhibitory neuron group(s) not found.");
 
-	//Store list of neuron IDs
-	neuronIDList.clear();
-	NeuronIterator excitatoryNeuronGroupEnd = excitatoryNeuronGroup->end();
-	for(NeuronIterator iter = excitatoryNeuronGroup->begin(); iter != excitatoryNeuronGroupEnd; ++iter){
-		neuronIDList.append(iter.key());
+	//Store list of neuron IDs ordered in the same way as the Izhikevich experiment
+	orderedNeuronIDList.clear();
+	float xStart = 0.0f, yStart = 0.0f, zStart = 0.0f;
+	float xSpacing = 1.0f, ySpacing = 1.0f, zSpacing = 1.0f;
+	float xPos, yPos, zPos;
+	unsigned numXNeur = 10, numYNeur = 10, numZNeur = 8;
+	for(unsigned xCntr = 0; xCntr < numXNeur; ++xCntr){
+		for(unsigned yCntr = 0; yCntr < numYNeur; ++yCntr){
+			for(unsigned zCntr = 0; zCntr < numZNeur; ++zCntr){
+				xPos = xStart + xCntr*xSpacing;
+				yPos = yStart + yCntr*ySpacing;
+				zPos = zStart + zCntr*zSpacing;
+				orderedNeuronIDList.append(excitatoryNeuronGroup->getNeuronIDAtLocation(Point3D(xPos, yPos, zPos)));
+			}
+		}
 	}
-	NeuronIterator inhibitoryNeuronGroupEnd = inhibitoryNeuronGroup->end();
-	for(NeuronIterator iter = inhibitoryNeuronGroup->begin(); iter != inhibitoryNeuronGroupEnd; ++iter){
-		neuronIDList.append(iter.key());
+
+	//Create a group of inhibitory neurons
+	xStart = 0.0f;
+	yStart = 0.0f;
+	zStart = 12.0f;
+	numXNeur = 8;
+	numYNeur = 5;
+	numZNeur = 5;
+	for(unsigned xCntr = 0; xCntr < numXNeur; ++xCntr){
+		for(unsigned yCntr = 0; yCntr < numYNeur; ++yCntr){
+			for(unsigned zCntr = 0; zCntr < numZNeur; ++zCntr){
+				xPos = xStart + xCntr*xSpacing;
+				yPos = yStart + yCntr*ySpacing;
+				zPos = zStart + zCntr*zSpacing;
+				orderedNeuronIDList.append(inhibitoryNeuronGroup->getNeuronIDAtLocation(Point3D(xPos, yPos, zPos)));
+			}
+		}
 	}
 
 	//Run a check
-	if(neuronIDList.size() != 1000)
-		throw SpikeStreamException("There should be a total of 1000 neurons in the network. Actual number of neurons: " + QString::number(neuronIDList.size()));
+	if(orderedNeuronIDList.size() != 1000)
+		throw SpikeStreamException("There should be a total of 1000 neurons in the network. Actual number of neurons: " + QString::number(orderedNeuronIDList.size()));
+
 }
 
 
