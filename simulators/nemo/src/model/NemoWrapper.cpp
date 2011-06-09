@@ -20,7 +20,7 @@ using namespace spikestream;
 //#define DEBUG_PARAMETERS
 //#define DEBUG_PERFORMANCE
 #define DEBUG_STEP
-//#define DEBUG_WEIGHTS
+#define DEBUG_WEIGHTS
 
 
 /*! Constructor */
