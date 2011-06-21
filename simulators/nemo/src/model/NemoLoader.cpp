@@ -16,8 +16,8 @@ using namespace spikestream;
 using namespace std;
 
 // Outputs verbose debugging behaviour about the loading of the network.
-#define DEBUG_NEURONS
-#define DEBUG_SYNAPSES
+//#define DEBUG_NEURONS
+//#define DEBUG_SYNAPSES
 
 //Neuron type IDs in database. FIXME: WOULD BE BETTER TO USE THE NAME
 #define IZHIKEVICH_EXCITATORY_NEURON_ID 1
@@ -127,7 +127,11 @@ void NemoLoader::addConnectionGroup(ConnectionGroup* conGroup, nemo_network_t ne
 		//Add synapse
 		result = nemo_add_synapse(nemoNetwork, conIter->getFromNeuronID(), conIter->getToNeuronID(), conIter->getDelay(), weightFactor * conIter->getWeight(), learning, &newNemoSynapseID);
 		#ifdef DEBUG_SYNAPSES
+<<<<<<< .mine
+			(*logTextStream)<<"nemo_add_synapse(nemoNetwork, "<<conIter->getFromNeuronID()<<", "<<conIter->getToNeuronID()<<", "<<conIter->getDelay()<<", "<<(weightFactor * conIter->getWeight())<<", "<<learning<<", &newNemoSynapseID);"<<endl;
+=======
 			(*logTextStream)<<"nemo_add_synapse(nemoNetwork, "<<conIter->getFromNeuronID()<<", "<<conIter->getToNeuronID()<<", "<<conIter->getDelay()<<", "<<(weightFactor * conIter->getWeight())<<", "<<learning<<", "<<newNemoSynapseID<<");"<<endl;
+>>>>>>> .r232
 		#endif//DEBUG_SYNAPSES
 		if(result != NEMO_OK)
 			throw SpikeStreamException("Error code returned from Nemo when adding synapse." + QString(nemo_strerror()));
@@ -166,7 +170,7 @@ void NemoLoader::addExcitatoryNeuronGroup(NeuronGroup* neuronGroup, nemo_network
 		#ifdef DEBUG_NEURONS
 			(*logTextStream)<<"nemo_add_neuron(nemoNetwork, "<<iter.value()->getID()<<", "<<a<<", "<<b<<", "<<c<<", "<<d<<", "<<u<<", "<<v<<", "<<sigma<<");"<<endl;
 		#endif//DEBUG_NEURONS
-		nemo_status_t result = nemo_add_neuron(nemoNetwork, iter.value()->getID(), a, b, c, d, u, v, sigma);
+		nemo_status_t result = nemo_add_neuron_iz(nemoNetwork, iter.value()->getID(), a, b, c, d, u, v, sigma);
 		if(result != NEMO_OK)
 			throw SpikeStreamException("Error code returned from Nemo when adding neuron." + QString(nemo_strerror()));
 	}
@@ -198,7 +202,7 @@ void NemoLoader::addInhibitoryNeuronGroup(NeuronGroup* neuronGroup, nemo_network
 		#ifdef DEBUG_NEURONS
 			(*logTextStream)<<"nemo_add_neuron(nemoNetwork, "<<iter.value()->getID()<<", "<<a<<", "<<b<<", "<<v<<", "<<d<<", "<<u<<", "<<v<<", "<<sigma<<");"<<endl;
 		#endif//DEBUG_NEURONS
-		nemo_status_t result = nemo_add_neuron(nemoNetwork, iter.value()->getID(), a, b, v, d, u, v, sigma);
+		nemo_status_t result = nemo_add_neuron_iz(nemoNetwork, iter.value()->getID(), a, b, v, d, u, v, sigma);
 		if(result != NEMO_OK)
 			throw SpikeStreamException("Error code returned from Nemo when adding neuron." + QString(nemo_strerror()));
 	}

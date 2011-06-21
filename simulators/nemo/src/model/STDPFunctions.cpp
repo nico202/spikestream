@@ -124,23 +124,43 @@ int STDPFunctions::getPostLength(unsigned functionID){
 }
 
 
-/*! Returns the minimum weight for the specified function.
+/*! Returns the minimum excitatory weight for the specified function.
 	Throws an exception if the function ID is not recognized.
 	Builds the maps of weights if this has not been done already. */
-float STDPFunctions::getMinWeight(unsigned functionID){
+float STDPFunctions::getMinExcitatoryWeight(unsigned functionID){
 	checkInitialization();
 	checkFunctionID(functionID);
-	return functionMap[functionID]->getMinWeight();
+	return functionMap[functionID]->getMinExcitatoryWeight();
 }
 
 
-/*! Returns the maximum weight for the specified function.
+/*! Returns the maximum excitatory weight for the specified function.
 	Throws an exception if the function ID is not recognized.
 	Builds the maps of weights if this has not been done already. */
-float STDPFunctions::getMaxWeight(unsigned functionID){
+float STDPFunctions::getMaxExcitatoryWeight(unsigned functionID){
 	checkInitialization();
 	checkFunctionID(functionID);
-	return functionMap[functionID]->getMaxWeight();
+	return functionMap[functionID]->getMaxExcitatoryWeight();
+}
+
+
+/*! Returns the minimum inhibitory weight for the specified function.
+ Throws an exception if the function ID is not recognized.
+ Builds the maps of weights if this has not been done already. */
+float STDPFunctions::getMinInhibitoryWeight(unsigned functionID){
+	checkInitialization();
+	checkFunctionID(functionID);
+	return functionMap[functionID]->getMinInhibitoryWeight();
+}
+
+
+/*! Returns the maximum inhibitory weight for the specified function.
+ Throws an exception if the function ID is not recognized.
+ Builds the maps of weights if this has not been done already. */
+float STDPFunctions::getMaxInhibitoryWeight(unsigned functionID){
+	checkInitialization();
+	checkFunctionID(functionID);
+	return functionMap[functionID]->getMaxInhibitoryWeight();
 }
 
 

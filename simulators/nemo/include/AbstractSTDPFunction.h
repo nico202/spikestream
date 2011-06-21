@@ -24,8 +24,10 @@ namespace spikestream {
 			virtual int getPreLength() = 0;
 			virtual float* getPostArray() = 0;
 			virtual int getPostLength() = 0;
-			virtual float getMinWeight() = 0;
-			virtual float getMaxWeight() = 0;
+			virtual float getMinExcitatoryWeight() = 0;
+			virtual float getMaxExcitatoryWeight() = 0;
+			virtual float getMinInhibitoryWeight() = 0;
+			virtual float getMaxInhibitoryWeight() = 0;
 			virtual float getReward();
 			virtual void print() = 0;
 

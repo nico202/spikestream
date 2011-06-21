@@ -15,6 +15,89 @@ using namespace spikestream;
 
 #define DEBUG true
 
+
+void TestNemoLibrary::testNemoSTDP(){
+	try{
+		//Initialize the nemo network and default configuration
+		nemo_network_t nemoNetwork = nemo_new_network();
+		nemo_configuration_t nemoConfig = nemo_new_configuration();
+
+		//Add 2 neurons and 1 synapse
+		synapse_id newNemoSynapseID;
+		nemo_add_neuron_iz(nemoNetwork, 17727, 0.02, 0.2, -55.0434, 7.88988, -13, -65, 0);
+		nemo_add_neuron_iz(nemoNetwork, 17728, 0.02, 0.2, -52.6931, 3.81656, -13, -65, 0);
+		nemo_add_synapse(nemoNetwork, 17727, 17728, 1, 0.5, 1, &newNemoSynapseID);
+
+		//Create STDP function
+		float preArray[1];
+		preArray[0] = 0.1;
+		float postArray[1];
+		postArray[0] = -0.15;
+
+		//Set the STDP function
+		nemo_set_stdp_function(nemoConfig, preArray, 1, postArray, 1, 0.0001, 1, -1, -0.0001);
+
+		//Create the simulation
+		nemo_simulation_t nemoSimulation = nemo_new_simulation(nemoNetwork, nemoConfig);
+		if(nemoSimulation == NULL) {
+			throw SpikeStreamException(QString("Failed to create Nemo simulation: ") + nemo_strerror());
+		}
+
+		//Array to fire neurons and other simulation variables
+		unsigned injectNeuronIDArray[0];
+		unsigned *firedArray;
+		size_t firedCount = 0;
+
+		//Fire neuron 1 and step 1 time step
+		injectNeuronIDArray[0] = 17727;
+		checkNemoOutput(
+			nemo_step(
+				nemoSimulation,
+				injectNeuronIDArray,
+				1,
+				0,
+				0,
+				0,
+				&firedArray,
+				&firedCount
+			),
+			"Nemo error on step." );
+
+		//Fire neuron 2 and step 1 time step
+		injectNeuronIDArray[0] = 17728;
+		checkNemoOutput(
+			nemo_step(
+				nemoSimulation,
+				injectNeuronIDArray,
+				1,
+				0,
+				0,
+				0,
+				&firedArray,
+				&firedCount
+			),
+			"Nemo error on step." );
+
+		//Apply STDP
+		nemo_apply_stdp(nemoSimulation, 1);
+
+		//Step a couple of time steps to ensure weight is updated
+		checkNemoOutput(nemo_step(nemoSimulation, 0,0,0,0,0, &firedArray, &firedCount), "Nemo error on step." );
+		checkNemoOutput(nemo_step(nemoSimulation, 0,0,0,0,0, &firedArray, &firedCount), "Nemo error on step." );
+
+		//Extract weight and compare it to original weight
+		float tmpWeight;
+		checkNemoOutput( nemo_get_synapse_weight_s(nemoSimulation, newNemoSynapseID, &tmpWeight), "Error getting weights." );
+		if(tmpWeight == 0.5){
+			throw SpikeStreamException("Weight has not changed");
+		}
+	}
+	catch(SpikeStreamException& ex){
+		QFAIL(ex.getMessage().toAscii());
+	}
+}
+
+/*
 //Initialize static variables
 synapse_id TestNemoLibrary::synapseIDCntr = 1;
 
@@ -266,11 +349,11 @@ void TestNemoLibrary::testNemoConfiguration(){
 
 
 /*! Returns a unique synapse id. */
-synapse_id TestNemoLibrary::getSynapseID(){
+/*synapse_id TestNemoLibrary::getSynapseID(){
 	++synapseIDCntr;
 	return synapseIDCntr;
 }
-
+*/
 
 /*! Checks the output from a nemo function call and throws exception if there is an error */
 void TestNemoLibrary::checkNemoOutput(nemo_status_t result, const QString& errorMessage){
