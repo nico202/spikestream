@@ -21,8 +21,10 @@ StandardSTDPFunction::StandardSTDPFunction() : AbstractSTDPFunction() {
 	parameterInfoList.append(ParameterInfo("A-", "A- description", ParameterInfo::DOUBLE));
 	parameterInfoList.append(ParameterInfo("T+", "T+ description", ParameterInfo::DOUBLE));
 	parameterInfoList.append(ParameterInfo("T-", "T- description", ParameterInfo::DOUBLE));
-	parameterInfoList.append(ParameterInfo("min_weight", "Minimum weight that synapse can reach with learning.", ParameterInfo::DOUBLE));
-	parameterInfoList.append(ParameterInfo("max_weight", "Maximum weight that synapse can reach with learning.", ParameterInfo::DOUBLE));
+	parameterInfoList.append(ParameterInfo("min_excitatory_weight", "Minimum weight that excitatory synapse can reach with learning.", ParameterInfo::DOUBLE));
+	parameterInfoList.append(ParameterInfo("max_excitatory_weight", "Maximum weight that excitatory synapse can reach with learning.", ParameterInfo::DOUBLE));
+	parameterInfoList.append(ParameterInfo("min_inhibitory_weight", "Minimum weight that inhibitory synapse can reach with learning. NOTE: The minimum is defined in ABSOLUTE terms, but the value is negative.", ParameterInfo::DOUBLE));
+	parameterInfoList.append(ParameterInfo("max_inhibitory_weight", "Maximum weight that inhibitory synapse can reach with learning. NOTE: The maximum is defined in ABSOLUTE terms, but the value is negative.", ParameterInfo::DOUBLE));
 
 	//Default values of parameters
 	defaultParameterMap["pre_length"] = 20;
@@ -31,8 +33,10 @@ StandardSTDPFunction::StandardSTDPFunction() : AbstractSTDPFunction() {
 	defaultParameterMap["A-"] = 0.00525;
 	defaultParameterMap["T+"] = 20.0;
 	defaultParameterMap["T-"] = 20.0;
-	defaultParameterMap["min_weight"] = -1.0;
-	defaultParameterMap["max_weight"] = 1.0;
+	defaultParameterMap["min_excitatory_weight"] = 0.0001;
+	defaultParameterMap["max_excitatory_weight"] = 1.0;
+	defaultParameterMap["min_inhibitory_weight"] = -0.0001;
+	defaultParameterMap["max_inhibitory_weight"] = -1;
 
 	//Initialise current parameter map with default values
 	parameterMap = defaultParameterMap;
@@ -85,15 +89,27 @@ int StandardSTDPFunction::getPostLength(){
 }
 
 
+/*! Returns the minimum excitatory weight for the specified function. */
+float StandardSTDPFunction::getMinExcitatoryWeight(){
+	return getParameter("min_excitatory_weight");
+}
+
+
+/*! Returns the maximum excitatory weight for the specified function. */
+float StandardSTDPFunction::getMaxExcitatoryWeight(){
+	return getParameter("max_excitatory_weight");
+}
+
+
 /*! Returns the minimum weight for the specified function. */
-float StandardSTDPFunction::getMinWeight(){
-	return getParameter("min_weight");
+float StandardSTDPFunction::getMinInhibitoryWeight(){
+	return getParameter("min_inhibitory_weight");
 }
 
 
 /*! Returns the maximum weight for the specified function. */
-float StandardSTDPFunction::getMaxWeight(){
-	return getParameter("max_weight");
+float StandardSTDPFunction::getMaxInhibitoryWeight(){
+	return getParameter("max_inhibitory_weight");
 }
 
 
@@ -114,7 +130,7 @@ void StandardSTDPFunction::print(){
 	cout<<endl;
 	for(int i=0; i<postLength; ++i)
 		cout<<"Post array ["<<i<<"]: "<<postArray[i]<<endl;
-	cout<<"Min weight: "<<getMinWeight()<<"; Max weight: "<<getMaxWeight()<<endl;
+	cout<<"Min excitatory weight: "<<getMinExcitatoryWeight()<<"; Max excitatory weight: "<<getMaxExcitatoryWeight()<<"; Min inhibitory weight: "<<getMinInhibitoryWeight()<<"; Max inhibitory weight: "<<getMaxInhibitoryWeight()<<endl;
 }
 
 

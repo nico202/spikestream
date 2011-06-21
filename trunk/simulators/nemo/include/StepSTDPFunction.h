@@ -14,8 +14,10 @@ namespace spikestream {
 			int getPreLength();
 			float* getPostArray();
 			int getPostLength();
-			float getMinWeight();
-			float getMaxWeight();
+			float getMinExcitatoryWeight();
+			float getMaxExcitatoryWeight();
+			float getMinInhibitoryWeight();
+			float getMaxInhibitoryWeight();
 			void print();
 
 		private:

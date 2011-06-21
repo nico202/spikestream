@@ -31,8 +31,10 @@ namespace spikestream {
 			static int getPreLength(unsigned functionID);
 			static float* getPostArray(unsigned functionID);
 			static int getPostLength(unsigned functionID);
-			static float getMinWeight(unsigned functionID);
-			static float getMaxWeight(unsigned functionID);
+			static float getMinExcitatoryWeight(unsigned functionID);
+			static float getMaxExcitatoryWeight(unsigned functionID);
+			static float getMinInhibitoryWeight(unsigned functionID);
+			static float getMaxInhibitoryWeight(unsigned functionID);
 			static float getReward(unsigned functionID);
 			static void print(unsigned functionID);
 

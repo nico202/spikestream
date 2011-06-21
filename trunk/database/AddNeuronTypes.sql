@@ -26,7 +26,7 @@ CREATE TABLE IzhikevichExcitatoryNeuronParameters (
 	d_1 DOUBLE DEFAULT 8.0 COMMENT 'After-spike reset of the recovery variable, u.\nd is calculated using the equation d = d_1 - d_2 * random1 * random2',
 	d_2 DOUBLE DEFAULT 6.0 COMMENT 'After-spike reset of the recovery variable, u.\nd is calculated using the equation d = d_1 - d_2 * random1 * random2',
 	v DOUBLE DEFAULT -65.0 COMMENT 'Initial value for the membrane potential.',
-	sigma DOUBLE DEFAULT 5.0 COMMENT 'Parameter for a random gaussian per-neuron process, which generates random input current drawn from an N(0,\a sigma) distribution. If set to zero no random input current will be generated.',
+	sigma DOUBLE DEFAULT 0.0 COMMENT 'Parameter for a random gaussian per-neuron process, which generates random input current drawn from an N(0,\a sigma) distribution. If set to zero no random input current will be generated.',
 	seed DOUBLE DEFAULT 45 COMMENT 'Seed for the random number generator. Will be rounded to the nearest integer. If the seed is <=0 the random number generator will be seeded using the time.',
 	
 	PRIMARY KEY (NeuronGroupID),
@@ -46,7 +46,7 @@ CREATE TABLE IzhikevichInhibitoryNeuronParameters (
 	b_2 DOUBLE DEFAULT 0.05 COMMENT 'Sensitivity to sub-threshold fluctutations in the membrane potential, v. b_1 is the first parameter that is used to generate a in equation b = b_1 - b_2 * random.',
 	d DOUBLE DEFAULT 2.0 COMMENT 'After-spike reset of the recovery variable, u.',
 	v DOUBLE DEFAULT -65.0 COMMENT 'Initial value for the membrane potential.',
-	sigma DOUBLE DEFAULT 2.0 COMMENT 'Parameter for a random gaussian per-neuron process, which generates random input current drawn from an N(0,\a sigma) distribution. If set to zero no random input current will be generated.',
+	sigma DOUBLE DEFAULT 0.0 COMMENT 'Parameter for a random gaussian per-neuron process, which generates random input current drawn from an N(0,\a sigma) distribution. If set to zero no random input current will be generated.',
 	seed DOUBLE DEFAULT 45 COMMENT 'Seed for the random number generator. Will be rounded to the nearest integer. If the seed is <=0 the random number generator will be seeded using the time.',
 	
 	PRIMARY KEY (NeuronGroupID),

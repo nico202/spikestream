@@ -25,7 +25,7 @@ win32 {
 	INCLUDEPATH += $${SPIKESTREAM_ROOT_DIR}/extlib/nemo/include \
 					$${SPIKESTREAM_ROOT_DIR}/library/include \
 					$${SPIKESTREAM_ROOT_DIR}/applicationlibrary/include \
-					$${SPIKESTREAM_ROOT_DIR}/simulators/nemo/src/model
+					$${SPIKESTREAM_ROOT_DIR}/simulators/nemo/include
 }
 
 

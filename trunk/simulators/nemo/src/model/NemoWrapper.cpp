@@ -13,13 +13,13 @@ using namespace spikestream;
 #include "boost/random.hpp"
 
 //Outputs debugging information for NeMo calls
-#define DEBUG_INJECT_CURRENT
+//#define DEBUG_INJECT_CURRENT
 //#define DEBUG_INJECT_NOISE
 //#define DEBUG_LEARNING
 //#define DEBUG_LOAD
 //#define DEBUG_PARAMETERS
 //#define DEBUG_PERFORMANCE
-#define DEBUG_STEP
+//#define DEBUG_STEP
 #define DEBUG_WEIGHTS
 
 
@@ -133,8 +133,10 @@ void NemoWrapper::loadNemo(){
 					   STDPFunctions::getPreLength(stdpFunctionID),
 					   STDPFunctions::getPostArray(stdpFunctionID),
 					   STDPFunctions::getPostLength(stdpFunctionID),
-					   STDPFunctions::getMinWeight(stdpFunctionID),
-					   STDPFunctions::getMaxWeight(stdpFunctionID)
+					   STDPFunctions::getMinExcitatoryWeight(stdpFunctionID),
+					   STDPFunctions::getMaxExcitatoryWeight(stdpFunctionID),
+					   STDPFunctions::getMinInhibitoryWeight(stdpFunctionID),
+						STDPFunctions::getMaxInhibitoryWeight(stdpFunctionID)
 	);
 	stdpReward = STDPFunctions::getReward(stdpFunctionID);
 	applySTDPInterval = STDPFunctions::getApplySTDPInterval(stdpFunctionID);
@@ -882,7 +884,7 @@ void NemoWrapper::setExcitatoryNeuronParameters(NeuronGroup* neuronGroup){
 
 		//Set parameters in neuron
 		checkNemoOutput(
-			nemo_set_neuron_s(
+			nemo_set_neuron_iz_s(
 					nemoSimulation,
 					iter.key(),
 					a, b, c, d, u, v, sigma
@@ -923,7 +925,7 @@ void NemoWrapper::setInhibitoryNeuronParameters(NeuronGroup* neuronGroup){
 
 		//Set parameters in neuron FIXME
 		checkNemoOutput(
-			nemo_set_neuron_s(
+			nemo_set_neuron_iz_s(
 					nemoSimulation,
 					iter.key(),
 					a, b, v, d, u, v, sigma
@@ -1136,6 +1138,9 @@ void NemoWrapper::updateNetworkWeights(){
 			checkNemoOutput( nemo_get_synapse_weight_s(nemoSimulation, synapseIDArray[conCntr], &tmpWeight), "Error getting weights." );
 
 			//Update weight in connection
+			#ifdef DEBUG_WEIGHTS
+				qDebug()<<"Old weight: "<<conIter->getTempWeight()<<"; New weight: "<<(tmpWeight / weightFactor);
+			#endif//DEBUG_WEIGHTS
 			conIter->setTempWeight(tmpWeight / weightFactor);
 
 			#ifdef DEBUG_WEIGHTS
