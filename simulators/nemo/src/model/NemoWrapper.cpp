@@ -31,6 +31,7 @@ NemoWrapper::NemoWrapper() : AbstractSimulation() {
 	stopThread = true;
 	archiveMode = false;
 	monitorFiringNeurons = false;
+	updateFiringNeurons = false;
 	monitorMembranePotential = false;
 	monitor = true;
 	monitorWeights = false;
@@ -1001,7 +1002,7 @@ void NemoWrapper::stepNemo(){
 	//---------------------------------------------------------
 	//        Pass list of firing neurons to other classes
 	//---------------------------------------------------------
-	if(archiveMode || (monitorFiringNeurons && monitor) || !deviceManagerList.isEmpty()){
+	if(archiveMode || (monitorFiringNeurons && monitor) || !deviceManagerList.isEmpty() || updateFiringNeurons){
 		//Add firing neuron ids to list
 		for(unsigned i=0; i<firedCount; ++i)
 			firingNeuronList.append(firedArray[i]);

@@ -76,6 +76,7 @@ namespace spikestream {
 			void setSTDPFunctionID(unsigned stdpFunctionID) { this->stdpFunctionID = stdpFunctionID; }
 			void setSustainNoise(bool sustain) { this->sustainNoise = sustain; this->sustainCurrent = sustain; }
 			void setSustainPattern(bool sustainPattern) { this->sustainPattern = sustainPattern; }
+			void setUpdateFiringNeurons(bool updateFiringNeurons){ this->updateFiringNeurons = updateFiringNeurons; }
 			void setWaitInterval(unsigned waitInterval_ms) { this->waitInterval_ms = waitInterval_ms; }
 			void playSimulation();
 			void stepSimulation();
@@ -147,6 +148,9 @@ namespace spikestream {
 
 			/*! Global control to switch monitoring on or off */
 			bool monitor;
+
+			/*! Extracts firing neurons at each time step regardless of the monitor state. */
+			bool updateFiringNeurons;
 
 			/*! The time step of the simulation */
 			unsigned int timeStepCounter;
