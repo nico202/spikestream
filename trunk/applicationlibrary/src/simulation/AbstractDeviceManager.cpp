@@ -5,6 +5,8 @@ using namespace spikestream;
 
 /*! Constructor */
 AbstractDeviceManager::AbstractDeviceManager() {
+	fireNeuronMode = true;
+	current = 10;
 }
 
 /*! Destructor */

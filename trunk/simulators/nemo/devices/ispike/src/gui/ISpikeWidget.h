@@ -26,6 +26,7 @@ namespace spikestream {
 
 		private slots:
 			void addChannel();
+			void setFireOrCurrent(int index);
 			void setIPAddressButtonClicked();
 			void unsetIPAddressButtonClicked();
 			void networkChanged();
@@ -55,6 +56,9 @@ namespace spikestream {
 
 			/*! Button to disconnect from DNS server */
 			QPushButton* disconnectButton;
+
+			/*! Switches between firing neurons or injecting current for the whole device */
+			QComboBox* fireOrCurrentCombo;
 
 
 			//====================  METHODS  ========================
