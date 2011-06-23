@@ -141,6 +141,7 @@ void IzhiAccuracyExptWidget::buildParameters(){
 	ParameterInfo tmpInfo("experiment_number", "The experiment that is carried out", ParameterInfo::OPTION);
 	QList<QString> exptNameList;
 	exptNameList.append("Experiment 1 - Accuracy test");
+	exptNameList.append("Experiment 2 - Monitoring test");
 	tmpInfo.setOptionNames(exptNameList);
 	parameterInfoList.append(tmpInfo);
 	defaultParameterMap["experiment_number"] = 0;

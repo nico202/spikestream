@@ -58,7 +58,8 @@ namespace spikestream {
 
 
 			//======================  METHODS  ======================
-			void runExperiment();
+			void runExperiment1();
+			void runExperiment2();
 			void stepNemo(unsigned numTimeSteps, bool injectCurrent, QTextStream* textStream = NULL);
 			void storeNeuronGroups();
 			void storeParameters(QHash<QString, double>& parameterMap);

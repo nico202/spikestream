@@ -1,6 +1,7 @@
 //SpikeStream includes
 #include "Globals.h"
 #include "IzhiAccuracyManager.h"
+#include "PerformanceTimer.h"
 #include "SpikeStreamIOException.h"
 #include "Util.h"
 using namespace spikestream;
@@ -8,6 +9,9 @@ using namespace spikestream;
 //Qt includes
 #include <QDebug>
 #include <QFile>
+
+//Other includes
+#include <iostream>
 
 /*! Izhikevich's random function */
 #define getrandom(max1) ((rand()%(int)((max1))))
@@ -35,13 +39,23 @@ void IzhiAccuracyManager::run(){
 	timeStep = 0;
 
 	try{
-		runExperiment();
+		switch(experimentNumber){
+			case 0:
+				runExperiment1();
+				break;
+			case 1:
+				runExperiment2();
+				break;
+			default:
+				throw SpikeStreamException("Experiment number not recognized");
+		}
+
 	}
 	catch(SpikeStreamException& ex){
 		setError(ex.getMessage());
 	}
 	catch(...){
-		setError("Pop1ExperimentManager has thrown an unknown exception.");
+		setError("IzhiAccuracyManager has thrown an unknown exception.");
 	}
 
 	nemoWrapper->setWaitInterval(origWaitInterval);//Restore wrapper to original state
@@ -64,7 +78,7 @@ void IzhiAccuracyManager::startExperiment(NemoWrapper* nemoWrapper, QHash<QStrin
 /*----------------------------------------------------------*/
 
 /*! Runs the experiment. */
-void IzhiAccuracyManager::runExperiment(){
+void IzhiAccuracyManager::runExperiment1(){
 	//Seed the random number generator
 	Util::seedRandom(randomSeed);
 	emit statusUpdate("Starting Experiment " + QString::number(experimentNumber + 1));
@@ -105,6 +119,63 @@ void IzhiAccuracyManager::runExperiment(){
 
 	//Output final result
 	emit statusUpdate("Experiment complete.");
+}
+
+/*! Check the ability to run experiment without monitoring and with extracting of neurons */
+void IzhiAccuracyManager::runExperiment2(){
+	int numTimeSteps = 1000;
+	int neuronCounter = 0;
+
+	//Leave monitoring on and step for 10000
+	nemoWrapper->setMonitor(true);
+	nemoWrapper->setUpdateFiringNeurons(false);
+	PerformanceTimer timer;
+	timer.start();
+	for(int i=0; i<numTimeSteps && !stopThread; ++i){
+		//Step simulation and wait for NeMo and SpikeStream to finish
+		nemoWrapper->stepSimulation();
+		while((nemoWrapper->isWaitForGraphics() || nemoWrapper->getCurrentTask() == NemoWrapper::STEP_SIMULATION_TASK) && !stopThread)
+			msleep(pauseInterval_ms);
+
+		neuronCounter += nemoWrapper->getFiringNeuronIDs().size();
+	}
+	cout<<"Number of firing neurons: "<<neuronCounter<<endl;
+	timer.printTime("10000 time steps monitoring on.");
+
+	//Turn monitoring off and step for 10000
+	neuronCounter =0;
+	nemoWrapper->setMonitor(false);
+	nemoWrapper->setUpdateFiringNeurons(true);
+	timer.start();
+	for(int i=0; i<numTimeSteps && !stopThread; ++i){
+		//Step simulation and wait for NeMo and SpikeStream to finish
+		nemoWrapper->stepSimulation();
+		while((nemoWrapper->isWaitForGraphics() || nemoWrapper->getCurrentTask() == NemoWrapper::STEP_SIMULATION_TASK) && !stopThread)
+			msleep(pauseInterval_ms);
+
+		neuronCounter += nemoWrapper->getFiringNeuronIDs().size();
+	}
+	cout<<"Number of firing neurons: "<<neuronCounter<<endl;
+	timer.printTime("10000 time steps monitoring off update firing neurons on.");
+
+	//No monitor
+	neuronCounter = 0;
+	nemoWrapper->setMonitor(false);
+	nemoWrapper->setUpdateFiringNeurons(false);
+	timer.start();
+	for(int i=0; i<numTimeSteps && !stopThread; ++i){
+		//Step simulation and wait for NeMo and SpikeStream to finish
+		nemoWrapper->stepSimulation();
+		while((nemoWrapper->isWaitForGraphics() || nemoWrapper->getCurrentTask() == NemoWrapper::STEP_SIMULATION_TASK) && !stopThread)
+			msleep(pauseInterval_ms);
+
+		neuronCounter += nemoWrapper->getFiringNeuronIDs().size();
+	}
+	cout<<"Number of firing neurons: 0 "<<endl;
+	timer.printTime("10000 time steps monitoring off update firing neurons off.");
+
+	nemoWrapper->setMonitor(true);
+	nemoWrapper->setUpdateFiringNeurons(true);
 }
 
 
