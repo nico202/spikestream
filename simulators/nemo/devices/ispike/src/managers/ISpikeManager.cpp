@@ -13,7 +13,7 @@ using namespace std;
 //#define DEBUG
 
 /*! Constructor */
-ISpikeManager::ISpikeManager() {
+ISpikeManager::ISpikeManager() : AbstractDeviceManager() {
 }
 
 

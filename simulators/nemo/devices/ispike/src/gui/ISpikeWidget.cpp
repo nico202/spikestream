@@ -3,6 +3,7 @@
 #include "ChannelTableView.h"
 #include "Globals.h"
 #include "ISpikeWidget.h"
+#include "Util.h"
 using namespace spikestream;
 
 //Qt includes
@@ -69,6 +70,16 @@ ISpikeWidget::ISpikeWidget(QWidget* parent) : AbstractDeviceWidget(parent){
 
 	//Combo boxes to connect layers
 	QHBoxLayout* channelBox = new QHBoxLayout();
+	fireOrCurrentCombo = new QComboBox();
+	fireOrCurrentCombo->addItem("Fire");
+	fireOrCurrentCombo->addItem("1");
+	for(int i=10; i<=100; i += 10)
+		fireOrCurrentCombo->addItem(QString::number(i));
+	fireOrCurrentCombo->setMinimumSize(60, 20);
+	connect(fireOrCurrentCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(setFireOrCurrent(int)));
+	channelBox->addWidget(new QLabel("Input fire or current: "));
+	channelBox->addWidget(fireOrCurrentCombo);
+	channelBox->addSpacing(10);
 	addChannelButton = new QPushButton("Add channel");
 	connect(addChannelButton, SIGNAL(clicked()), this, SLOT(addChannel()));
 	channelBox->addWidget(addChannelButton);
@@ -140,6 +151,18 @@ void ISpikeWidget::addChannel(){
 
 	//Reload table displaying list of channels
 	channelModel->reload();
+}
+
+
+/*! Switches the entire device between fire or current mode */
+void ISpikeWidget::setFireOrCurrent(int index){
+	if(index == 0){
+		getDeviceManager()->setFireNeuronMode(true);
+	}
+	else{
+		getDeviceManager()->setFireNeuronMode(false);
+		getDeviceManager()->setCurrent(Util::getDouble(fireOrCurrentCombo->currentText()));
+	}
 }
 
 

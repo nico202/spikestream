@@ -20,7 +20,7 @@ using namespace spikestream;
 //#define DEBUG_PARAMETERS
 //#define DEBUG_PERFORMANCE
 //#define DEBUG_STEP
-#define DEBUG_WEIGHTS
+//#define DEBUG_WEIGHTS
 
 
 /*! Constructor */
@@ -579,10 +579,12 @@ unsigned NemoWrapper::addInjectFiringNeuronIDs(){
 
 	//Add firing neuron IDs from plugins
 	for(int i=0; i<deviceManagerList.size(); ++i){
-		QList<neurid_t>::iterator outputNeuronsEnd = deviceManagerList[i]->outputNeuronsEnd();
-		for(QList<neurid_t>::iterator iter =  deviceManagerList[i]->outputNeuronsBegin(); iter != outputNeuronsEnd; ++iter){
-			injectionPatternVector.push_back(*iter);
-			++arraySize;
+		if(deviceManagerList[i]->isFireNeuronMode()){//Only add firing neuron IDs if we are in firing neuron mode
+			QList<neurid_t>::iterator outputNeuronsEnd = deviceManagerList[i]->outputNeuronsEnd();
+			for(QList<neurid_t>::iterator iter =  deviceManagerList[i]->outputNeuronsBegin(); iter != outputNeuronsEnd; ++iter){
+				injectionPatternVector.push_back(*iter);
+				++arraySize;
+			}
 		}
 	}
 
@@ -639,6 +641,19 @@ unsigned NemoWrapper::addInjectCurrentNeuronIDs(){
 		++arraySize;
 	}
 	neuronIDCurrentMap.clear();
+
+	//Add inject current neuron IDs from plugins
+	for(int i=0; i<deviceManagerList.size(); ++i){
+		if(!deviceManagerList[i]->isFireNeuronMode()){//Only add inject current neuron ids if firing neuron mode is off
+			QList<neurid_t>::iterator outputNeuronsEnd = deviceManagerList[i]->outputNeuronsEnd();
+			double tmpCurrent = deviceManagerList[i]->getCurrent();
+			for(QList<neurid_t>::iterator iter =  deviceManagerList[i]->outputNeuronsBegin(); iter != outputNeuronsEnd; ++iter){
+				injectionCurrentNeurIDVector.push_back(*iter);//Add neuron id to current vector
+				injectionCurrentVector.push_back(tmpCurrent);
+				++arraySize;
+			}
+		}
+	}
 
 	//Return the number of neurons that have been added
 	return arraySize;
@@ -950,7 +965,7 @@ void NemoWrapper::stepNemo(){
 	if(!injectNoiseMap.isEmpty() || !neuronIDsToFire.isEmpty() || !deviceManagerList.isEmpty())
 		numFiredNeurons = addInjectFiringNeuronIDs();
 
-	if(!injectCurrentMap.isEmpty() || !neuronIDCurrentMap.isEmpty())
+	if(!injectCurrentMap.isEmpty() || !neuronIDCurrentMap.isEmpty() || !deviceManagerList.isEmpty())
 		numCurrentNeurons = addInjectCurrentNeuronIDs();
 
 	#ifdef DEBUG_STEP
