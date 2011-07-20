@@ -15,6 +15,7 @@ using namespace spikestream;
 #include "iSpike/Channel/OutputChannel/OutputChannel.hpp"
 #include "iSpike/Reader/ReaderFactory.hpp"
 #include "iSpike/Writer/WriterFactory.hpp"
+#include "iSpike/ISpikeException.hpp"
 
 //Other includes
 #include <iostream>
@@ -179,6 +180,10 @@ void ISpikeWidget::setIPAddressButtonClicked(){
 	try {
 		ReaderFactory readerFactory(dnsEdit->text().toStdString(), portEdit->text().toStdString());
 		WriterFactory writerFactory(dnsEdit->text().toStdString(), portEdit->text().toStdString());
+	}
+	catch(ISpikeException& ex){
+		qCritical()<<"Cannot connect to DNS server at IP: " + dnsEdit->text() + " and port " + portEdit->text()<<" Message: "<<ex.what();
+		return;
 	}
 	catch(...){
 		qCritical()<<"Cannot connect to DNS server at IP: " + dnsEdit->text() + " and port " + portEdit->text();
