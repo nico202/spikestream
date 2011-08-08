@@ -22,7 +22,8 @@ namespace spikestream {
 			int columnCount(const QModelIndex& parent = QModelIndex()) const;
 			QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
 			void deleteChannel(int row);
-			map<string, Property*> getParameters(int row);
+			map<string, Property> getProperties(int row);
+			void setProperties(int row, map<string, Property> propertyMap);
 			QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 			bool isEmpty();
 			void reload();

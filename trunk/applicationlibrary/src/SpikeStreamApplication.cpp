@@ -39,6 +39,9 @@ bool SpikeStreamApplication::notify(QObject* receiver, QEvent* event){
 	catch(SpikeStreamException& ex){
 		qCritical()<<"Event handling exception: "<<ex.getMessage();
 	}
+	catch (exception& e) {
+		qCritical()<<"STD exception occurred during event handling: "<<e.what();
+	}
 	catch(...){
 		qCritical()<<"Unknown event handling exception.";
 	}

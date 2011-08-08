@@ -5,6 +5,10 @@
 #include "SpikeStreamException.h"
 using namespace spikestream;
 
+//iSpike includes
+#include "iSpike/ISpikeException.hpp"
+using namespace ispike;
+
 //Qt includes
 #include <QDebug>
 #include <QLabel>
@@ -14,9 +18,10 @@ using namespace spikestream;
 #define NEURON_HEIGHT_STRING "Neuron Height"
 
 /*! Constructor used in standard mode. */
-EditPropertiesDialog::EditPropertiesDialog(map<string, Property*>& propertyMap, QWidget* parent) : QDialog(parent) {
+EditPropertiesDialog::EditPropertiesDialog(map<string, Property> propertyMap, bool disableReadOnly, QWidget* parent) : QDialog(parent) {
 	//Store and initialize variables
 	this->propertyMap = propertyMap;
+	this->disableReadOnly = disableReadOnly;
 	neuronGroup = NULL;
 	neuronGroupSelectionMode = false;
 
@@ -28,9 +33,10 @@ EditPropertiesDialog::EditPropertiesDialog(map<string, Property*>& propertyMap, 
 
 
 /*! Constructor used when selecting a neuron group */
-EditPropertiesDialog::EditPropertiesDialog(map<string, Property*>& propertyMap, QList<NeuronGroup*> neuronGroupList, QWidget* parent) : QDialog(parent){
+EditPropertiesDialog::EditPropertiesDialog(map<string, Property> propertyMap, bool disableReadOnly, QList<NeuronGroup*> neuronGroupList, QWidget* parent) : QDialog(parent){
 	//Store and initialize variables
 	this->propertyMap = propertyMap;
+	this->disableReadOnly = disableReadOnly;
 	this->neuronGroupList = neuronGroupList;
 	neuronGroup = NULL;
 	neuronGroupSelectionMode = true;
@@ -64,6 +70,9 @@ void EditPropertiesDialog::okButtonClicked(){
 	}
 	catch(SpikeStreamException& ex){
 		qCritical()<<ex.getMessage();
+	}
+	catch(ISpikeException& ex){
+		qCritical()<<ex.what();
 	}
 }
 
@@ -105,12 +114,12 @@ void EditPropertiesDialog::addNeuronGroups(QVBoxLayout* mainVBox){
 	mainVBox->addLayout(neurGrpBox);
 
 	//Load the neuron groups that are compatible with this number of neurons
-	int numberOfNeurons = ((IntegerProperty*)propertyMap[NEURON_WIDTH_STRING])->getValue() * ((IntegerProperty*)propertyMap[NEURON_HEIGHT_STRING])->getValue();
+	int numberOfNeurons = propertyMap[NEURON_WIDTH_STRING].getInt() * propertyMap[NEURON_HEIGHT_STRING].getInt();
 	updateCompatibleNeuronGroups(numberOfNeurons);
 }
 
 
-/*! Adds the parameters to the layout with tool tips */
+/*! Adds the parameters to the layout with tool tips. */
 void EditPropertiesDialog::addParameters(QVBoxLayout* mainVLayout){
 	int cntr = 0;
 	QGridLayout* gridLayout = new QGridLayout();
@@ -120,64 +129,78 @@ void EditPropertiesDialog::addParameters(QVBoxLayout* mainVLayout){
 	QIntValidator* intValidator = new QIntValidator(-1000000, 1000000, this);
 
 	//Add parameters to the layout
-	for(map<string, Property*>::iterator iter = propertyMap.begin(); iter != propertyMap.end(); ++iter){
-		QString propertyName(iter->second->getName().data());
+	for(map<string, Property>::iterator iter = propertyMap.begin(); iter != propertyMap.end(); ++iter){
+		QString propertyName(iter->second.getName().data());
 
 		//Add double parameter
-		if(iter->second->getType() == Property::Double){
+		if(iter->second.getType() == Property::Double){
 			gridLayout->addWidget(new QLabel(propertyName), cntr, 0);
-			QLineEdit* tmpLineEdit = new QLineEdit( QString::number( ((DoubleProperty*)iter->second)->getValue() ) );
+			QLineEdit* tmpLineEdit = new QLineEdit( QString::number(iter->second.getDouble() ) );
 			tmpLineEdit->setValidator(doubleValidator);
 			lineEditMap[propertyName] = tmpLineEdit;
 			gridLayout->addWidget(tmpLineEdit, cntr, 1);
+
+			//Disable read only properties
+			if (disableReadOnly && iter->second.isReadOnly())
+				lineEditMap[propertyName]->setEnabled(false);
 		}
 
 		//Add integer parameter
-		else if(iter->second->getType() == Property::Integer){
+		else if(iter->second.getType() == Property::Integer){
 			gridLayout->addWidget(new QLabel(propertyName), cntr, 0);
-			QLineEdit* tmpLineEdit = new QLineEdit( QString::number( ((IntegerProperty*)iter->second)->getValue() ) );
+			QLineEdit* tmpLineEdit = new QLineEdit( QString::number( iter->second.getInt() ) );
 			tmpLineEdit->setValidator(intValidator);
 			lineEditMap[propertyName] = tmpLineEdit;
 			gridLayout->addWidget(tmpLineEdit, cntr, 1);
 
-			//Listen for changes in the number of neurons or disable editing of number of neurons
+			//Disable read only properties
+			if (disableReadOnly && iter->second.isReadOnly())
+				lineEditMap[propertyName]->setEnabled(false);
+
+			//Listen for changes in the number of neurons
 			if(neuronGroupSelectionMode && (propertyName == NEURON_WIDTH_STRING || propertyName == NEURON_HEIGHT_STRING) )
 				connect(tmpLineEdit, SIGNAL(textChanged(QString)), this, SLOT(updateNeuronCombo()));
-			else if (propertyName == NEURON_WIDTH_STRING || propertyName == NEURON_HEIGHT_STRING)
-				lineEditMap[propertyName]->setEnabled(false);
 		}
 
 		//Add string parameter
-		else if(iter->second->getType() == Property::String){
+		else if(iter->second.getType() == Property::String){
 			gridLayout->addWidget(new QLabel(propertyName), cntr, 0);
-			QLineEdit* tmpLineEdit = new QLineEdit( QString( ((StringProperty*)iter->second)->getValue().data() ) );
+			QLineEdit* tmpLineEdit = new QLineEdit( QString( iter->second.getString().data() ) );
 			lineEditMap[propertyName] = tmpLineEdit;
 			gridLayout->addWidget(tmpLineEdit, cntr, 1);
+
+			//Disable read only properties
+			if (disableReadOnly && iter->second.isReadOnly())
+				lineEditMap[propertyName]->setEnabled(false);
 		}
 
 		//Add combo parameter
-		else if(iter->second->getType() == Property::Combo){
+		else if(iter->second.getType() == Property::Combo){
 			gridLayout->addWidget(new QLabel(propertyName), cntr, 0);
 
 			//Build and add combo
 			QComboBox* tmpCombo = new QComboBox();
-			vector<string> comboOptions = ((ComboProperty*)iter->second)->getOptions();
+			vector<string> comboOptions = iter->second.getOptions();
 			qDebug()<<"NUMBER OF OPTIONS: "<<comboOptions.size();
 			for(size_t i=0; i<comboOptions.size(); ++i)
 				tmpCombo->addItem(QString(comboOptions[i].data()));
 			comboMap[propertyName] = tmpCombo;
 			gridLayout->addWidget(tmpCombo, cntr, 1);
+
+			//Disable read only properties
+			if (disableReadOnly && iter->second.isReadOnly())
+				comboMap[propertyName]->setEnabled(false);
 		}
 
 		//Unknown property type
 		else{
-			throw SpikeStreamException("Parameter type not recognized: " + QString::number(iter->second->getType()));
+			throw SpikeStreamException("Parameter type not recognized: " + QString::number(iter->second.getType()));
 		}
 
 		//Add help tool tip
 		QLabel* tmpLabel = new QLabel();
 		tmpLabel->setPixmap(QPixmap(Globals::getSpikeStreamRoot() + "/images/help.png"));
-		tmpLabel->setToolTip(QString(iter->second->getDescription().data()));
+		tmpLabel->setToolTip(QString(iter->second.getDescription().data()));
 		gridLayout->addWidget(tmpLabel, cntr, 2);
 		++cntr;
 	}
@@ -198,11 +221,11 @@ void EditPropertiesDialog::storeParameterValues(){
 		throw SpikeStreamException("Property map size does not match list of parameters.");
 
 	//Work through the properties
-	for(map<string, Property*>::iterator iter = propertyMap.begin(); iter != propertyMap.end(); ++iter){
-		QString propertyName(iter->second->getName().data());
+	for(map<string, Property>::iterator iter = propertyMap.begin(); iter != propertyMap.end(); ++iter){
+		QString propertyName(iter->second.getName().data());
 
 		//Store double parameter
-		if(iter->second->getType() == Property::Double){
+		if(iter->second.getType() == Property::Double){
 			//Run some checks
 			if(!lineEditMap.contains(propertyName))
 				throw SpikeStreamException("Property " + propertyName + " cannot be found.");
@@ -210,12 +233,11 @@ void EditPropertiesDialog::storeParameterValues(){
 				throw SpikeStreamException("Property " + propertyName + " must be a double.");
 
 			//Store value
-			double propValue = Util::getDouble(lineEditMap[propertyName]->text());
-			((DoubleProperty*)iter->second)->setValue(propValue);
+			iter->second.setDouble( Util::getDouble(lineEditMap[propertyName]->text()) );
 		}
 
 		//Store integer parameter
-		else if(iter->second->getType() == Property::Integer){
+		else if(iter->second.getType() == Property::Integer){
 			//Run some checks
 			if(!lineEditMap.contains(propertyName))
 				throw SpikeStreamException("Property " + propertyName + " cannot be found.");
@@ -223,12 +245,11 @@ void EditPropertiesDialog::storeParameterValues(){
 				throw SpikeStreamException("Property " + propertyName + " must be an integer.");
 
 			//Store value
-			int propValue = Util::getInt(lineEditMap[propertyName]->text());
-			((IntegerProperty*)iter->second)->setValue(propValue);
+			iter->second.setInt( Util::getInt(lineEditMap[propertyName]->text()) );
 		}
 
 		//Store string parameter
-		else if(iter->second->getType() == Property::String){
+		else if(iter->second.getType() == Property::String){
 			//Run some checks
 			if(!lineEditMap.contains(propertyName))
 				throw SpikeStreamException("Property " + propertyName + " cannot be found.");
@@ -236,22 +257,22 @@ void EditPropertiesDialog::storeParameterValues(){
 				throw SpikeStreamException("Property " + propertyName + " is an empty string.");
 
 			//Store value
-			((StringProperty*)iter->second)->setValue(lineEditMap[propertyName]->text().toStdString());
+			iter->second.setString( lineEditMap[propertyName]->text().toStdString() );
 		}
 
 		//Store combo parameter
-		else if(iter->second->getType() == Property::Combo){
+		else if(iter->second.getType() == Property::Combo){
 			//Run some checks
 			if(!comboMap.contains(propertyName))
 				throw SpikeStreamException("Property " + propertyName + " cannot be found.");
 
 			//Store value
-			((ComboProperty*)iter->second)->setValue(comboMap[propertyName]->currentIndex());
+			iter->second.setString( comboMap[propertyName]->currentText().toStdString() );
 		}
 
 		//Unknown property type
 		else{
-			throw SpikeStreamException("Parameter type not recognized: " + QString::number(iter->second->getType()));
+			throw SpikeStreamException("Property type not recognized: " + QString::number(iter->second.getType()));
 		}
 	}
 

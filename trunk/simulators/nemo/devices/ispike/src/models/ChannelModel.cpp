@@ -80,12 +80,23 @@ void ChannelModel::deleteChannel(int row){
 
 
 /*! Returns the parameters for a particular active channel */
-map<string, Property*> ChannelModel::getParameters(int row){
+map<string, Property> ChannelModel::getProperties(int row){
 	if(row >= 0 && row < iSpikeManager->getInputChannelCount())
-		return iSpikeManager->getInputParameters(row);
+		return iSpikeManager->getInputProperties(row);
 	else if (row - iSpikeManager->getInputChannelCount() < iSpikeManager->getOutputChannelCount())
-		return iSpikeManager->getOutputParameters(row - iSpikeManager->getInputChannelCount());
-	throw SpikeStreamException("Failed to get parameters; row out of range: " + QString::number(row));
+		return iSpikeManager->getOutputProperties(row - iSpikeManager->getInputChannelCount());
+	throw SpikeStreamException("Failed to get properties; row out of range: " + QString::number(row));
+}
+
+
+/*! Sets the properties for a particular channel */
+void  ChannelModel::setProperties(int row, map<string, Property> propertyMap){
+	if(row >= 0 && row < iSpikeManager->getInputChannelCount())
+		iSpikeManager->setInputProperties(row, propertyMap);
+	else if (row - iSpikeManager->getInputChannelCount() < iSpikeManager->getOutputChannelCount())
+		iSpikeManager->setOutputProperties(row - iSpikeManager->getInputChannelCount(), propertyMap);
+	else
+		throw SpikeStreamException("Failed to set properties; row out of range: " + QString::number(row));
 }
 
 
@@ -156,14 +167,14 @@ void ChannelModel::loadChannels(){
 	//Input channels
 	QList< QPair<InputChannel*, NeuronGroup*> > inputChannelList = iSpikeManager->getInputChannels();
 	for(int i=0; i< inputChannelList.size(); ++i){
-		channelNameList.append(inputChannelList[i].first->getChannelDescription().getChannelName().data());
+		channelNameList.append(inputChannelList[i].first->getChannelDescription().getName().data());
 		neuronGroupNameList.append(getNeuronGroupName(inputChannelList[i].second));
 	}
 
 	//Output channels
 	QList< QPair<OutputChannel*, NeuronGroup*> > outputChannelList = iSpikeManager->getOutputChannels();
 	for(int i=0; i< outputChannelList.size(); ++i){
-		channelNameList.append(outputChannelList[i].first->getChannelDescription().getChannelName().data());
+		channelNameList.append(outputChannelList[i].first->getChannelDescription().getName().data());
 		neuronGroupNameList.append(getNeuronGroupName(outputChannelList[i].second));
 	}
 

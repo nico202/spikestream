@@ -4,24 +4,35 @@
 #include "Globals.h"
 #include "Network.h"
 #include "SpikeStreamException.h"
+#include "Util.h"
 using namespace spikestream;
 
 //iSpike includes
 #include "iSpike/Property.hpp"
 #include "iSpike/Reader/ReaderFactory.hpp"
 #include "iSpike/Writer/WriterFactory.hpp"
+#include "iSpike/ISpikeException.hpp"
+using namespace ispike;
 
 //Qt includes
 #include <QLayout>
 
+//Other includes
+#include <exception>
+using namespace std;
+
 
 /*! Constructor */
 AddChannelDialog::AddChannelDialog(QWidget *parent) : QDialog(parent){
-	//Construct user interface
-	buildGUI();
-
 	//Default variables
 	ipAddressSet = false;
+	inputFactory = NULL;
+	outputFactory = NULL;
+	readerFactory = NULL;
+	writerFactory = NULL;
+
+	//Construct user interface
+	buildGUI();
 }
 
 
@@ -43,7 +54,14 @@ AddChannelDialog::AddChannelDialog(QString ipString, QString portString, QWidget
 
 /*! Destructor */
 AddChannelDialog::~AddChannelDialog(){
-
+	if(inputFactory != NULL)
+		delete inputFactory;
+	if(outputFactory != NULL)
+		delete outputFactory;
+	if(readerFactory != NULL)
+		delete readerFactory;
+	if(writerFactory != NULL)
+		delete writerFactory;
 }
 
 
@@ -62,56 +80,55 @@ void AddChannelDialog::configureChannel(){
 	readerWriterCombo->clear();
 
 	try{
+		//Create reader and writer factories
+		if(ipAddressSet){
+			readerFactory = new ReaderFactory(dnsIPAddress.toStdString(), Util::getUInt(dnsPort));
+			writerFactory = new WriterFactory(dnsIPAddress.toStdString(), Util::getUInt(dnsPort));
+		}
+		else{
+			readerFactory = new ReaderFactory();
+			writerFactory = new WriterFactory();
+		}
+
+		//Load lists of available readers or writers
 		if(inputChannel){
-			if(channelCombo->currentIndex() >= inChanDesc.size())
+			if(channelCombo->currentIndex() >= (int)inChanDesc.size())
 				throw SpikeStreamException("Index out of range");
 
 			//Edit properties of channel - abort channel configuration if operation is cancelled
-			bool propsConfigured = configureProperties(inChanDesc[channelCombo->currentIndex()].getChannelProperties(), true);
+			bool propsConfigured = configureProperties(inputFactory->getDefaultProperties(inChanDesc[channelCombo->currentIndex()]), channelProperties, true);
 			if(!propsConfigured)
 				return;
 
 			//Load list of available readers
-			string readerType = inChanDesc[channelCombo->currentIndex()].getReaderType();
-
-			//Readers that don't need internet connection.
-			if(ipAddressSet){
-				ReaderFactory readerFactory(dnsIPAddress.toStdString(), dnsPort.toStdString());
-				readerDescVector = readerFactory.getReadersOfType(readerType);
-			}
-			else{
-				ReaderFactory readerFactory;
-				readerDescVector = readerFactory.getReadersOfType(readerType);
-			}
-			for(int i=0; i< readerDescVector.size(); ++i){
-				readerWriterCombo->addItem(QString(readerDescVector[i].getReaderName().data()));
+			string readerType = inChanDesc[channelCombo->currentIndex()].getType();
+			readerDescVector = readerFactory->getReadersOfType(readerType);
+			for(size_t i=0; i< readerDescVector.size(); ++i){
+				readerWriterCombo->addItem(QString(readerDescVector[i].getName().data()));
 			}
 		}
 		else{
-			if(channelCombo->currentIndex() >= outChanDesc.size())
+			if(channelCombo->currentIndex() >= (int)outChanDesc.size())
 				throw SpikeStreamException("Index out of range");
 
 			//Edit properties of channel - abort channel configuration if operation is cancelled
-			bool propsConfigured = configureProperties(outChanDesc[channelCombo->currentIndex()].getChannelProperties(), true);
+			bool propsConfigured = configureProperties(outputFactory->getDefaultProperties(outChanDesc[channelCombo->currentIndex()]), channelProperties, true);
 			if(!propsConfigured)
 				return;
 
 			//Load list of available writers
-			string writerType = outChanDesc[channelCombo->currentIndex()].getWriterType();
-
-			//Writers that don't need internet connection
-			if(ipAddressSet){
-				WriterFactory writerFactory(dnsIPAddress.toStdString(), dnsPort.toStdString());
-				writerDescVector = writerFactory.getWritersOfType(writerType);
-			}
-			else{
-				WriterFactory writerFactory;
-				writerDescVector = writerFactory.getWritersOfType(writerType);
-			}
-			for(int i=0; i< writerDescVector.size(); ++i){
-				readerWriterCombo->addItem(QString(writerDescVector[i].getWriterName().data()));
+			string writerType = outChanDesc[channelCombo->currentIndex()].getType();
+			writerDescVector = writerFactory->getWritersOfType(writerType);
+			for(size_t i=0; i< writerDescVector.size(); ++i){
+				readerWriterCombo->addItem(QString(writerDescVector[i].getName().data()));
 			}
 		}
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<"SpikeStreamException thrown configuring channel: "<<ex.getMessage();
+	}
+	catch(ISpikeException& ex){
+		qCritical()<<"ISpikeException thrown configuring channel: "<<ex.what();
 	}
 	catch(...){
 		qCritical()<<"AddChannelDialog: An unknown exception occurred configuring channel.";
@@ -130,25 +147,29 @@ void AddChannelDialog::configureChannel(){
 void AddChannelDialog::configureReaderWriter(){
 	try{
 		if(inputChannel){
-			//Edit properties
-			if(readerWriterCombo->currentIndex() >= readerDescVector.size())
+			if(readerWriterCombo->currentIndex() >= (int)readerDescVector.size())
 				throw SpikeStreamException("Index out of range");
 
-			//Edit properties of channel - abort reader configuration if operation is cancelled
-			bool propsConfigured = configureProperties(readerDescVector[readerWriterCombo->currentIndex()].getReaderProperties());
+			//Edit properties of reader - abort configuration if operation is cancelled
+			bool propsConfigured = configureProperties(readerFactory->getDefaultProperties(readerDescVector[readerWriterCombo->currentIndex()]), readerWriterProperties);
 			if(!propsConfigured)
 				return;
 		}
 		else{
-			//Edit properties
-			if(readerWriterCombo->currentIndex() >= writerDescVector.size())
+			if(readerWriterCombo->currentIndex() >= (int)writerDescVector.size())
 				throw SpikeStreamException("Index out of range");
 
-			//Edit properties of channel - abort reader configuration if operation is cancelled
-			bool propsConfigured = configureProperties(writerDescVector[readerWriterCombo->currentIndex()].getWriterProperties());
+			//Edit properties of writer - abort configuration if operation is cancelled
+			bool propsConfigured = configureProperties(writerFactory->getDefaultProperties(writerDescVector[readerWriterCombo->currentIndex()]), readerWriterProperties);
 			if(!propsConfigured)
 				return;
 		}
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<"SpikeStreamException thrown configuring reader or writer: "<<ex.getMessage();
+	}
+	catch(ISpikeException& ex){
+		qCritical()<<"ISpikeException thrown configuring reader or writer: "<<ex.what();
 	}
 	catch(...){
 		qCritical()<<"AddChannelDialog: An unknown exception occurred configuring reader or writer.";
@@ -164,47 +185,29 @@ void AddChannelDialog::configureReaderWriter(){
 void AddChannelDialog::okButtonClicked(){
 	try{
 		if(inputChannel){
-			//Create the reader
-			Reader* newReader = NULL;
-			if(ipAddressSet){
-				ReaderFactory readerFactory(dnsIPAddress.toStdString(), dnsPort.toStdString());
-				ReaderDescription& tmpReaderDesc = readerDescVector[readerWriterCombo->currentIndex()];
-				newReader = readerFactory.create(tmpReaderDesc.getReaderName(), tmpReaderDesc.getReaderProperties());
-			}
-			else{
-				ReaderFactory readerFactory;
-				ReaderDescription& tmpReaderDesc = readerDescVector[readerWriterCombo->currentIndex()];
-				newReader = readerFactory.create(tmpReaderDesc.getReaderName(), tmpReaderDesc.getReaderProperties());
-			}
-
-			//Create channel
-			InputChannelDescription& tmpChanDesc = inChanDesc[channelCombo->currentIndex()];
-			newInputChannel = inputFactory->create(tmpChanDesc.getChannelName(), newReader, tmpChanDesc.getChannelProperties());
+			//Create the reader and input channel
+			Reader* newReader = readerFactory->create(readerDescVector[readerWriterCombo->currentIndex()], readerWriterProperties);
+			newInputChannel = inputFactory->create(inChanDesc[channelCombo->currentIndex()], newReader, channelProperties);
 		}
 		else {
-			//Create the writer
-			Writer* newWriter = NULL;
-			if(ipAddressSet){
-				WriterFactory writerFactory(dnsIPAddress.toStdString(), dnsPort.toStdString());
-				WriterDescription& tmpWriterDesc = writerDescVector[readerWriterCombo->currentIndex()];
-				newWriter = writerFactory.create(tmpWriterDesc.getWriterName(), tmpWriterDesc.getWriterProperties());
-			}
-			else{
-				WriterFactory writerFactory;
-				WriterDescription& tmpWriterDesc = writerDescVector[readerWriterCombo->currentIndex()];
-				newWriter = writerFactory.create(tmpWriterDesc.getWriterName(), tmpWriterDesc.getWriterProperties());
-			}
-
-			//Create channel
-			OutputChannelDescription& tmpChanDesc = outChanDesc[channelCombo->currentIndex()];
-			newOutputChannel = outputFactory->create(tmpChanDesc.getChannelName(), newWriter, tmpChanDesc.getChannelProperties());
+			//Create the writer and output channel
+			Writer* newWriter = writerFactory->create(writerDescVector[readerWriterCombo->currentIndex()], readerWriterProperties);
+			newOutputChannel = outputFactory->create(outChanDesc[channelCombo->currentIndex()], newWriter, channelProperties);
 		}
+		this->accept();
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<"SpikeStreamException thrown creating channel and reader/writer: "<<ex.getMessage();
+	}
+	catch(ISpikeException& ex){
+		qCritical()<<"ISpikeException thrown creating channel and reader/writer: "<<ex.what();
+	}
+	catch (exception& e) {
+		qCritical()<<"STD exception occurred creating channel and reader/writer: "<<e.what();
 	}
 	catch(...){
-		qCritical()<<"AddChannelDialog: An unknown exception occurred creating the channel.";
+		qCritical()<<"AddChannelDialog: An unknown exception occurred creating the channel and reader/writer.";
 	}
-
-	this->accept();
 }
 
 
@@ -224,8 +227,8 @@ void AddChannelDialog::selectChannelType(){
 
 			//Get the input channels
 			inChanDesc = inputFactory->getAllChannels();
-			for(int i=0; i<inChanDesc.size(); ++i){
-				channelCombo->addItem(QString(inChanDesc[i].getChannelName().data()));
+			for(size_t i=0; i<inChanDesc.size(); ++i){
+				channelCombo->addItem(QString(inChanDesc[i].getName().data()));
 			}
 		}
 		else if(channelTypeCombo->currentText() == "Output"){
@@ -233,12 +236,18 @@ void AddChannelDialog::selectChannelType(){
 
 			//Get the output channels
 			outChanDesc = outputFactory->getAllChannels();
-			for(int i=0; i<outChanDesc.size(); ++i){
-				channelCombo->addItem(QString(outChanDesc[i].getChannelName().data()));
+			for(size_t i=0; i<outChanDesc.size(); ++i){
+				channelCombo->addItem(QString(outChanDesc[i].getName().data()));
 			}
 		}
 		else
 			throw SpikeStreamException("Channel type not recognized.");
+	}
+	catch(SpikeStreamException& ex){
+		qCritical()<<"SpikeStreamException thrown selecting channel type: "<<ex.getMessage();
+	}
+	catch(ISpikeException& ex){
+		qCritical()<<"ISpikeException thrown selecting channel type: "<<ex.what();
 	}
 	catch(...){
 		qCritical()<<"AddChannelDialog: An unknown exception occurred selecting the channel type.";
@@ -325,23 +334,25 @@ void AddChannelDialog::buildGUI(){
 }
 
 
-/*! Launches dialog to configure the supplied properties */
-bool AddChannelDialog::configureProperties(map<string, Property*> propertyMap, bool selectNeuronGroup){
+/*! Launches dialog to configure the source properties, which are copied into the destination property map. */
+bool AddChannelDialog::configureProperties(map<string, Property> srcPropertyMap, map<string, Property>& destPropertyMap, bool selectNeuronGroup){
 	try{
 		if(selectNeuronGroup){
-			EditPropertiesDialog* tmpDlg = new EditPropertiesDialog(propertyMap, Globals::getNetwork()->getNeuronGroups());
+			EditPropertiesDialog* tmpDlg = new EditPropertiesDialog(srcPropertyMap, false, Globals::getNetwork()->getNeuronGroups());
 			if(tmpDlg->exec() == QDialog::Accepted){
 				neuronGroup = tmpDlg->getNeuronGroup();
 				if(neuronGroup == NULL){
 					qCritical()<<"Neuron group has not been set.";
 					return false;
 				}
+				destPropertyMap = tmpDlg->getPropertyMap();
 				return true;
 			}
 		}
 		else {
-			EditPropertiesDialog* tmpDlg = new EditPropertiesDialog(propertyMap);
+			EditPropertiesDialog* tmpDlg = new EditPropertiesDialog(srcPropertyMap, false);
 			if(tmpDlg->exec() == QDialog::Accepted){
+				destPropertyMap = tmpDlg->getPropertyMap();
 				return true;
 			}
 		}
@@ -349,8 +360,14 @@ bool AddChannelDialog::configureProperties(map<string, Property*> propertyMap, b
 	catch(SpikeStreamException& ex){
 		qCritical()<<ex.getMessage();
 	}
+	catch(ISpikeException& ex){
+		qCritical()<<"ISpikeException thrown configuring properties: "<<ex.what();
+	}
+	catch (exception& e) {
+		qCritical()<<"Exception occurred configuring properties: "<<e.what();
+	}
 	catch(...){
-		qCritical()<<"An unknown exception occurred configuring a channel";
+		qCritical()<<"An unknown exception occurred configuring properties.";
 	}
 
 	//Dialog not accepted or an error occurred

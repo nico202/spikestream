@@ -14,6 +14,7 @@
 
 //iSpike includes
 #include "iSpike/Property.hpp"
+using namespace ispike;
 
 //Other includes
 #include <map>
@@ -27,10 +28,11 @@ namespace spikestream {
 		Q_OBJECT
 
 		public:
-			EditPropertiesDialog(map<string, Property*>& propertyMap, QWidget* parent = 0);
-			EditPropertiesDialog(map<string, Property*>& propertyMap, QList<NeuronGroup*> neuronGroupList, QWidget* parent = 0);
+			EditPropertiesDialog(map<string, Property> propertyMap, bool disableReadOnly, QWidget* parent = 0);
+			EditPropertiesDialog(map<string, Property> propertyMap, bool disableReadOnly, QList<NeuronGroup*> neuronGroupList, QWidget* parent = 0);
 			~EditPropertiesDialog();
 			NeuronGroup* getNeuronGroup() { return neuronGroup; }
+			map<string, Property> getPropertyMap() { return propertyMap; }
 
 
 		protected slots:
@@ -41,7 +43,7 @@ namespace spikestream {
 		private:
 			//===================  VARIABLES  ====================
 			/*! Map that is being edited */
-			map<string, Property*> propertyMap;
+			map<string, Property> propertyMap;
 
 			/*! List of neuron groups - only used in neuronGroupSelectionMode */
 			QList<NeuronGroup*> neuronGroupList;
@@ -62,6 +64,9 @@ namespace spikestream {
 
 			/*! Neuron group that has been selected */
 			NeuronGroup* neuronGroup;
+
+			/*! Controls whether read only properties should be disabled */
+			bool disableReadOnly;
 
 
 			//====================  METHODS  =====================

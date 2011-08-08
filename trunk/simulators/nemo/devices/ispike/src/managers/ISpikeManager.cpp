@@ -1,6 +1,7 @@
 //SpikeStream includes
 #include "ISpikeManager.h"
 #include "SpikeStreamException.h"
+#include "iSpike/ISpikeException.hpp"
 using namespace spikestream;
 
 //Qt includes
@@ -34,12 +35,15 @@ void ISpikeManager::addChannel(InputChannel* inputChannel, NeuronGroup* neuronGr
 	//Create an array whose index is the iSpike neuron id and whose value is the SpikeStream neuron ID
 	neurid_t* tmpNeurIDArray = new neurid_t[neuronGroup->size()];
 	int iSpikeIDCtr = 0;
+	int posCnt = 0;
 	NeuronPositionIterator neurGrpEnd = neuronGroup->positionEnd();
 	for(NeuronPositionIterator posIter = neuronGroup->positionBegin(); posIter != neurGrpEnd; ++posIter){
 		tmpNeurIDArray[iSpikeIDCtr] = posIter.value()->getID();
+		++posCnt;
 		//qDebug()<<"iSpike ID: "<<iSpikeIDCtr<<"; SpikeStream Position: ("<<posIter.value()->getXPos()<<", "<<posIter.value()->getYPos()<<", "<<posIter.value()->getZPos()<<")";
 		++iSpikeIDCtr;
 	}
+	qDebug()<<"Min neuron id in group: "<<neuronGroup->getStartNeuronID()<<"; number of positions stored: "<<posCnt;
 	inputArrayList.append(tmpNeurIDArray);
 }
 
@@ -81,6 +85,8 @@ void ISpikeManager::deleteAllChannels(){
 	for(int i=0; i<outputChannels.size(); ++i){
 		deleteOutputChannel(i);
 	}
+	inputChannels.clear();
+	outputChannels.clear();
 }
 
 
@@ -89,7 +95,7 @@ void ISpikeManager::deleteInputChannel(int index){
 	if(index < 0 || index >= inputChannels.size())
 		throw SpikeStreamException("Failed to delete input channel: index out of range: " + QString::number(index));
 	delete inputChannels.at(index).first;//Delete iSpike input channel
-	delete inputArrayList.at(index);//Delete array linking iSpike IDs to SpikeStream IDs
+	delete [] inputArrayList.at(index);//Delete array linking iSpike IDs to SpikeStream IDs
 	inputArrayList.removeAt(index);
 	inputChannels.removeAt(index);
 }
@@ -119,19 +125,35 @@ void ISpikeManager::deleteOutputChannel(int index){
 
 /*! Returns the parameters for an input channel. The index should be a valid
  point in the input channels list. */
-map<string, Property*> ISpikeManager::getInputParameters(int index){
+map<string, Property> ISpikeManager::getInputProperties(int index){
 	if(index < 0 || index >= inputChannels.size())
 		throw SpikeStreamException("Failed to get input parameters: index out of range: " + QString::number(index));
-	return inputChannels[index].first->getChannelDescription().getChannelProperties();
+	return inputChannels[index].first->getProperties();
 }
 
 
 /*! Returns the parameters for an output channel. The index should be a valid
  point in the output channels list. */
-map<string, Property*> ISpikeManager::getOutputParameters(int index){
+map<string, Property> ISpikeManager::getOutputProperties(int index){
 	if(index < 0 || index >= outputChannels.size())
 		throw SpikeStreamException("Failed to get input parameters: index out of range: " + QString::number(index));
-	return outputChannels[index].first->getChannelDescription().getChannelProperties();
+	return outputChannels[index].first->getProperties();
+}
+
+
+/*! Sets the properties of a particular input channel */
+void ISpikeManager::setInputProperties(int index, map<string, Property> &propertyMap){
+	if(index < 0 || index >= inputChannels.size())
+		throw SpikeStreamException("Failed to set input properties index out of range: " + QString::number(index));
+	inputChannels[index].first->setProperties(propertyMap);
+}
+
+
+/*! Sets the properties of a particular input channel */
+void ISpikeManager::setOutputProperties(int index, map<string, Property> &propertyMap){
+	if(index < 0 || index >= outputChannels.size())
+		throw SpikeStreamException("Failed to set output properties index out of range: " + QString::number(index));
+	outputChannels[index].first->setProperties(propertyMap);
 }
 
 
@@ -167,10 +189,11 @@ void ISpikeManager::setInputNeurons(timestep_t timeStep, QList<neurid_t>& firing
 	try{
 		//Pass firing neuron ids to appropriate channels
 		for(int chanCtr = 0; chanCtr < outputChannels.size(); ++chanCtr){
-			if(!outputChannels[chanCtr].first->isInitialised())
-				outputChannels[chanCtr].first->start();
-			outputChannels[chanCtr].first->setFiring(&firingNeurIDVectors[chanCtr]);
+			outputChannels[chanCtr].first->setFiring(firingNeurIDVectors[chanCtr]);
 		}
+	}
+	catch(ISpikeException& ex){
+		throw SpikeStreamException("ISpikeManager: Error occurred setting input neurons: " + QString(ex.what()));
 	}
 	catch(...){
 		throw SpikeStreamException("ISpikeManager: An unknown exception occurred setting input neurons.");
@@ -188,29 +211,24 @@ void ISpikeManager::step(){
 	//Work through input channel
 	try{
 		for(int chanCtr = 0; chanCtr < inputChannels.size(); ++chanCtr){
-			if(!inputChannels[chanCtr].first->isInitialised())
-				inputChannels[chanCtr].first->start();
 			inputChannels[chanCtr].first->step();
-
-			//Get firing from input channels. CAN THIS BE A REFERENCE?
-			vector< vector<int> > tmpFiringVect = inputChannels[chanCtr].first->getFiring();
+			vector<int>& tmpFiringVect = inputChannels[chanCtr].first->getFiring();
 
 			//Work through the firing neurons
-			for(vector< vector<int> >::iterator outerIter = tmpFiringVect.begin(); outerIter != tmpFiringVect.end(); ++outerIter){
-				for(vector<int>::iterator innerIter = outerIter->begin(); innerIter != outerIter->end(); ++innerIter){
-					#ifdef DEBUG
-						qDebug()<<"FIRING NEURON: iSpikeID: "<<*innerIter<<"; SpikeStream ID: "<<inputArrayList[chanCtr][*innerIter];
-					#endif//DEBUG
-					outputNeuronIDs.append(inputArrayList[chanCtr][*innerIter]);
-				}
+			for(vector<int>::iterator iter = tmpFiringVect.begin(); iter != tmpFiringVect.end(); ++iter){
+				#ifdef DEBUG
+					qDebug()<<"FIRING NEURON: iSpikeID: "<<*innerIter<<"; SpikeStream ID: "<<inputArrayList[chanCtr][*innerIter];
+				#endif//DEBUG
+				outputNeuronIDs.append(inputArrayList[chanCtr][*iter]);
 			}
 		}
 		//Step output channelss
 		for(int chanCtr = 0; chanCtr < outputChannels.size(); ++chanCtr){
-			if(!outputChannels[chanCtr].first->isInitialised())
-				outputChannels[chanCtr].first->start();
 			outputChannels[chanCtr].first->step();
 		}
+	}
+	catch(ISpikeException& ex){
+		throw SpikeStreamException("ISpikeManager: Error occurred stepping channels: " + QString(ex.what()));
 	}
 	catch(...){
 		throw SpikeStreamException("An unknown exception occurred stepping iSpike channels.");

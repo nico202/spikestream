@@ -16,6 +16,7 @@ using namespace spikestream;
 #include "iSpike/Reader/ReaderFactory.hpp"
 #include "iSpike/Writer/WriterFactory.hpp"
 #include "iSpike/ISpikeException.hpp"
+using namespace ispike;
 
 //Other includes
 #include <iostream>
@@ -178,24 +179,24 @@ void ISpikeWidget::setIPAddressButtonClicked(){
 	//First test IP and port to see if a reader can access it
 	ipAddressSet = false;
 	try {
-		ReaderFactory readerFactory(dnsEdit->text().toStdString(), portEdit->text().toStdString());
-		WriterFactory writerFactory(dnsEdit->text().toStdString(), portEdit->text().toStdString());
+		ReaderFactory(dnsEdit->text().toStdString(), Util::getUInt(portEdit->text()));
+		WriterFactory(dnsEdit->text().toStdString(), Util::getUInt(portEdit->text()));
+
+		//If we reach this point without an exception, then IP address should be ok.
+		ipAddressSet = true;
+
+		//Enable/disable appropriate graphical components
+		connectButton->setEnabled(false);
+		dnsEdit->setEnabled(false);
+		portEdit->setEnabled(false);
+		disconnectButton->setEnabled(true);
 	}
 	catch(ISpikeException& ex){
-		qCritical()<<"Cannot connect to DNS server at IP: " + dnsEdit->text() + " and port " + portEdit->text()<<" Message: "<<ex.what();
-		return;
+		qCritical()<<"Cannot connect to DNS server at IP: " + dnsEdit->text() + " and port " + portEdit->text()<<": "<<ex.what();
 	}
 	catch(...){
 		qCritical()<<"Cannot connect to DNS server at IP: " + dnsEdit->text() + " and port " + portEdit->text();
-		return;
 	}
-	ipAddressSet = true;
-
-	//Enable/disable appropriate graphical components
-	connectButton->setEnabled(false);
-	dnsEdit->setEnabled(false);
-	portEdit->setEnabled(false);
-	disconnectButton->setEnabled(true);
 }
 
 
