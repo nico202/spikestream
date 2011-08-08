@@ -7,13 +7,12 @@
 //iSpike includes
 #include "iSpike/Channel/InputChannel/InputChannelFactory.hpp"
 #include "iSpike/Channel/OutputChannel/OutputChannelFactory.hpp"
-#include "iSpike/Channel/InputChannel/InputChannelDescription.hpp"
-#include "iSpike/Channel/OutputChannel/OutputChannelDescription.hpp"
-#include "iSpike/Reader/ReaderDescription.hpp"
-#include "iSpike/Writer/WriterDescription.hpp"
+#include "iSpike/Description.hpp"
 #include "iSpike/Channel/InputChannel/InputChannel.hpp"
 #include "iSpike/Channel/OutputChannel/OutputChannel.hpp"
-
+#include "iSpike/Writer/WriterFactory.hpp"
+#include "iSpike/Reader/ReaderFactory.hpp"
+using namespace ispike;
 
 //Qt includes
 #include <QComboBox>
@@ -100,17 +99,23 @@ namespace spikestream {
 			/*! Creates input channels */
 			InputChannelFactory* inputFactory;
 
+			/*! Creates writers */
+			WriterFactory* writerFactory;
+
+			/*! Creates readers */
+			ReaderFactory* readerFactory;
+
 			/*! Descriptions of the available input channels. */
-			vector<InputChannelDescription> inChanDesc ;
+			vector<Description> inChanDesc ;
 
 			/*! Descriptions of the available output channels. */
-			vector<OutputChannelDescription> outChanDesc;
+			vector<Description> outChanDesc;
 
 			/*! Descriptions of the available writers. */
-			vector<WriterDescription> writerDescVector;
+			vector<Description> writerDescVector;
 
 			/*! Descriptions of the available readers */
-			vector<ReaderDescription> readerDescVector ;
+			vector<Description> readerDescVector ;
 
 			/*! Input channel that we are creating. */
 			InputChannel* newInputChannel;
@@ -118,10 +123,16 @@ namespace spikestream {
 			/*! Output channel that we are creating */
 			OutputChannel* newOutputChannel;
 
+			/** Properties of the channel */
+			map<string, Property> channelProperties;
+
+			/** Properties of the reader or writer */
+			map<string, Property> readerWriterProperties;
+
 
 			//======================  METHODS  =======================
 			void buildGUI();
-			bool configureProperties(map<string, Property*> propertyMap, bool selectNeuronGroup = false);
+			bool configureProperties(map<string, Property> srcPropertyMap, map<string, Property>& destPropertyMap, bool selectNeuronGroup = false);
 			void reset();
 
 	};

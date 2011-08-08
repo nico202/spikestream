@@ -54,9 +54,10 @@ void ChannelTableView::resizeHeaders(){
 void ChannelTableView::tableClicked(QModelIndex index){
 	try{
 		if(index.column() == ChannelModel::PARAM_COL){
-			map<string, Property*> tmpParamMap = channelModel->getParameters(index.row());
-			EditPropertiesDialog* tmpDlg = new EditPropertiesDialog(tmpParamMap);
-			tmpDlg->exec();
+			EditPropertiesDialog* tmpDlg = new EditPropertiesDialog(channelModel->getProperties(index.row()), true);
+			if(tmpDlg->exec() == QDialog::Accepted){
+				channelModel->setProperties(index.row(), tmpDlg->getPropertyMap());
+			}
 			return;
 		}
 		else if(index.column() == ChannelModel::DELETE_COL){

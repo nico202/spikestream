@@ -9,6 +9,7 @@
 //iSpike includes
 #include "iSpike/Channel/InputChannel/InputChannel.hpp"
 #include "iSpike/Channel/OutputChannel/OutputChannel.hpp"
+using namespace ispike;
 
 //Qt includes
 #include <QHash>
@@ -32,13 +33,15 @@ namespace spikestream {
 			void deleteOutputChannel(int index);
 			QList< QPair<InputChannel*, NeuronGroup*> > getInputChannels(){ return inputChannels; }
 			int getInputChannelCount() { return inputChannels.size(); }
-			map<string, Property*> getInputParameters(int index);
+			map<string, Property> getInputProperties(int index);
 			QList< QPair<OutputChannel*, NeuronGroup*> >  getOutputChannels(){  return outputChannels; }
 			int getOutputChannelCount() { return outputChannels.size(); }
-			map<string, Property*> getOutputParameters(int index);
+			map<string, Property> getOutputProperties(int index);
 			QList<neurid_t>::iterator outputNeuronsBegin();
 			QList<neurid_t>::iterator outputNeuronsEnd();
 			void setInputNeurons(timestep_t timeStep, QList<neurid_t>& firingNeuronIDs);
+			void setInputProperties(int index, map<string, Property>& propertyMap);
+			void setOutputProperties(int index, map<string, Property>& propertyMap);
 			void step();
 
 
