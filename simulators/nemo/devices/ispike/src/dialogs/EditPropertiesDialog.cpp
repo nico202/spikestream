@@ -181,7 +181,6 @@ void EditPropertiesDialog::addParameters(QVBoxLayout* mainVLayout){
 			//Build and add combo
 			QComboBox* tmpCombo = new QComboBox();
 			vector<string> comboOptions = iter->second.getOptions();
-			qDebug()<<"NUMBER OF OPTIONS: "<<comboOptions.size();
 			for(size_t i=0; i<comboOptions.size(); ++i)
 				tmpCombo->addItem(QString(comboOptions[i].data()));
 			comboMap[propertyName] = tmpCombo;

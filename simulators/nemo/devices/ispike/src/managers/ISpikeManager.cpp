@@ -1,8 +1,12 @@
 //SpikeStream includes
+#include "Globals.h"
 #include "ISpikeManager.h"
 #include "SpikeStreamException.h"
-#include "iSpike/ISpikeException.hpp"
+#include "SpikeStreamIOException.h"
 using namespace spikestream;
+
+//iSpike includes
+#include "iSpike/ISpikeException.hpp"
 
 //Qt includes
 #include <QDebug>
@@ -11,16 +15,33 @@ using namespace spikestream;
 #include <vector>
 using namespace std;
 
+//Debug output
 //#define DEBUG
+//#define DEBUG_NEURON_IDS
+
 
 /*! Constructor */
 ISpikeManager::ISpikeManager() : AbstractDeviceManager() {
+	#ifdef DEBUG_NEURON_IDS
+		logFile = new QFile(Globals::getSpikeStreamRoot() + "/log/ISpikeManager.log");
+		if(logFile->open(QFile::WriteOnly | QFile::Truncate))
+			logTextStream = new QTextStream(logFile);
+		else{
+			throw SpikeStreamIOException("Cannot open log file for ISpikeManager.");
+		}
+	#endif//DEBUG_NEURON_IDS
 }
 
 
 /*! Destructor */
 ISpikeManager::~ISpikeManager(){
 	deleteAllChannels();
+	//Clean up log file if logging is enabled
+	#ifdef DEBUG_NEURON_IDS
+		logFile->close();
+		delete logFile;
+		delete logTextStream;
+	#endif//DEBUG_NEURON_IDS
 }
 
 
@@ -30,20 +51,34 @@ ISpikeManager::~ISpikeManager(){
 
 /*! Adds an input channel, which will be a source of spikes to pass to the network. */
 void ISpikeManager::addChannel(InputChannel* inputChannel, NeuronGroup* neuronGroup){
+	//Check channel matches neuron group
+	if(inputChannel->size() != neuronGroup->size())
+		throw SpikeStreamException("Input channel size does not match size of neuron group.");
+
+	//Store the channel
 	inputChannels.append(QPair<InputChannel*, NeuronGroup*>(inputChannel, neuronGroup));
+	int tmpWidth = inputChannel->getWidth();
+	int tmpHeight = inputChannel->getHeight();
+	int tmpX, tmpZ;
 
 	//Create an array whose index is the iSpike neuron id and whose value is the SpikeStream neuron ID
 	neurid_t* tmpNeurIDArray = new neurid_t[neuronGroup->size()];
-	int iSpikeIDCtr = 0;
-	int posCnt = 0;
+	int ctr = 0;
 	NeuronPositionIterator neurGrpEnd = neuronGroup->positionEnd();
 	for(NeuronPositionIterator posIter = neuronGroup->positionBegin(); posIter != neurGrpEnd; ++posIter){
-		tmpNeurIDArray[iSpikeIDCtr] = posIter.value()->getID();
-		++posCnt;
-		//qDebug()<<"iSpike ID: "<<iSpikeIDCtr<<"; SpikeStream Position: ("<<posIter.value()->getXPos()<<", "<<posIter.value()->getYPos()<<", "<<posIter.value()->getZPos()<<")";
-		++iSpikeIDCtr;
+		//Get X and Z position (assume layer is mounted vertically)
+		tmpX = ctr/tmpHeight;
+		tmpZ = ctr%tmpHeight;
+
+		//Convert X and Z positions to ensure topographic mapping with image
+		tmpNeurIDArray[tmpZ * tmpWidth + tmpX] = posIter.value()->getID();
+
+		//Output debugging information if required
+		#ifdef DEBUG_NEURON_IDS
+			(*logTextStream)<<"iSpike ID: "<<(tmpZ * tmpWidth + tmpX)<<"; SpikeStream ID: "<<posIter.value()->getID()<<"; SpikeStream Position: ("<<posIter.value()->getXPos()<<", "<<posIter.value()->getYPos()<<", "<<posIter.value()->getZPos()<<")"<<endl;
+		#endif//DEBUG_NEURON_IDS
+		++ctr;
 	}
-	qDebug()<<"Min neuron id in group: "<<neuronGroup->getStartNeuronID()<<"; number of positions stored: "<<posCnt;
 	inputArrayList.append(tmpNeurIDArray);
 }
 
@@ -98,6 +133,7 @@ void ISpikeManager::deleteInputChannel(int index){
 	delete [] inputArrayList.at(index);//Delete array linking iSpike IDs to SpikeStream IDs
 	inputArrayList.removeAt(index);
 	inputChannels.removeAt(index);
+	outputNeuronIDs.clear();//Make sure that there are not any old neuron IDs around
 }
 
 
@@ -208,8 +244,8 @@ void ISpikeManager::step(){
 	#endif//DEBUG
 	outputNeuronIDs.clear();
 
-	//Work through input channel
 	try{
+		//Work through input channels - these pass spikes TO the SpikeStream network
 		for(int chanCtr = 0; chanCtr < inputChannels.size(); ++chanCtr){
 			inputChannels[chanCtr].first->step();
 			vector<int>& tmpFiringVect = inputChannels[chanCtr].first->getFiring();
@@ -217,12 +253,15 @@ void ISpikeManager::step(){
 			//Work through the firing neurons
 			for(vector<int>::iterator iter = tmpFiringVect.begin(); iter != tmpFiringVect.end(); ++iter){
 				#ifdef DEBUG
-					qDebug()<<"FIRING NEURON: iSpikeID: "<<*innerIter<<"; SpikeStream ID: "<<inputArrayList[chanCtr][*innerIter];
+					qDebug()<<"FIRING NEURON: iSpikeID: "<<*innerIter<<"; SpikeStream ID: "<<inputArrayList[chanCtr][*iter];
 				#endif//DEBUG
+
+				//Convert iSpike ID to SpikeStream ID
 				outputNeuronIDs.append(inputArrayList[chanCtr][*iter]);
 			}
 		}
-		//Step output channelss
+
+		//Step output channels - these receive spikes FROM the SpikeStream network
 		for(int chanCtr = 0; chanCtr < outputChannels.size(); ++chanCtr){
 			outputChannels[chanCtr].first->step();
 		}
