@@ -15,6 +15,8 @@ using namespace ispike;
 #include <QHash>
 #include <QList>
 #include <QPair>
+#include <QFile>
+#include <QTextStream>
 
 //Other includes
 #include <map>
@@ -47,6 +49,12 @@ namespace spikestream {
 
 		private:
 			//=====================  VARIABLES  ======================
+			/*! File where log is written if required. */
+			QFile* logFile;
+
+			/*! Text stream connected to log file */
+			QTextStream* logTextStream;
+
 			/*! List of output neuron ids */
 			QList<neurid_t> outputNeuronIDs;
 

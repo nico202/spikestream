@@ -127,11 +127,7 @@ void NemoLoader::addConnectionGroup(ConnectionGroup* conGroup, nemo_network_t ne
 		//Add synapse
 		result = nemo_add_synapse(nemoNetwork, conIter->getFromNeuronID(), conIter->getToNeuronID(), conIter->getDelay(), weightFactor * conIter->getWeight(), learning, &newNemoSynapseID);
 		#ifdef DEBUG_SYNAPSES
-<<<<<<< .mine
-			(*logTextStream)<<"nemo_add_synapse(nemoNetwork, "<<conIter->getFromNeuronID()<<", "<<conIter->getToNeuronID()<<", "<<conIter->getDelay()<<", "<<(weightFactor * conIter->getWeight())<<", "<<learning<<", &newNemoSynapseID);"<<endl;
-=======
 			(*logTextStream)<<"nemo_add_synapse(nemoNetwork, "<<conIter->getFromNeuronID()<<", "<<conIter->getToNeuronID()<<", "<<conIter->getDelay()<<", "<<(weightFactor * conIter->getWeight())<<", "<<learning<<", "<<newNemoSynapseID<<");"<<endl;
->>>>>>> .r232
 		#endif//DEBUG_SYNAPSES
 		if(result != NEMO_OK)
 			throw SpikeStreamException("Error code returned from Nemo when adding synapse." + QString(nemo_strerror()));

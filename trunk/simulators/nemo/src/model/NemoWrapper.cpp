@@ -129,16 +129,20 @@ void NemoWrapper::loadNemo(){
 	#ifdef DEBUG_LEARNING
 		STDPFunctions::print(stdpFunctionID);
 	#endif
-	nemo_set_stdp_function(nemoConfig,
-					   STDPFunctions::getPreArray(stdpFunctionID),
-					   STDPFunctions::getPreLength(stdpFunctionID),
-					   STDPFunctions::getPostArray(stdpFunctionID),
-					   STDPFunctions::getPostLength(stdpFunctionID),
-					   STDPFunctions::getMinExcitatoryWeight(stdpFunctionID),
-					   STDPFunctions::getMaxExcitatoryWeight(stdpFunctionID),
-					   STDPFunctions::getMinInhibitoryWeight(stdpFunctionID),
-						STDPFunctions::getMaxInhibitoryWeight(stdpFunctionID)
+	checkNemoOutput(
+		nemo_set_stdp_function(nemoConfig,
+				STDPFunctions::getPreArray(stdpFunctionID),
+				STDPFunctions::getPreLength(stdpFunctionID),
+				STDPFunctions::getPostArray(stdpFunctionID),
+				STDPFunctions::getPostLength(stdpFunctionID),
+				STDPFunctions::getMinExcitatoryWeight(stdpFunctionID),
+				STDPFunctions::getMaxExcitatoryWeight(stdpFunctionID),
+				STDPFunctions::getMinInhibitoryWeight(stdpFunctionID),
+				STDPFunctions::getMaxInhibitoryWeight(stdpFunctionID)
+		),
+		"Nemo error setting STDP function."
 	);
+
 	stdpReward = STDPFunctions::getReward(stdpFunctionID);
 	applySTDPInterval = STDPFunctions::getApplySTDPInterval(stdpFunctionID);
 
@@ -1058,7 +1062,10 @@ void NemoWrapper::stepNemo(){
 	//--------------------------------------------
 	if(!volatileConGrpMap.isEmpty()){
 		if(timeStepCounter % applySTDPInterval == 0){
-			nemo_apply_stdp(nemoSimulation, stdpReward);
+			checkNemoOutput(
+				nemo_apply_stdp(nemoSimulation, stdpReward),
+				"NeMo error applying STDP"
+			);
 			#ifdef DEBUG_LEARNING
 				qDebug()<<"Applying STDP. TimeStepCounter="<<timeStepCounter<<"; applySTDPInterval="<<applySTDPInterval;
 			#endif
