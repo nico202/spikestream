@@ -51,7 +51,8 @@ ISpikeWidget::ISpikeWidget(QWidget* parent) : AbstractDeviceWidget(parent){
 	//Add inputs to set the DNS server
 	QHBoxLayout* dnsBox = new QHBoxLayout();
 	dnsBox->addWidget(new QLabel("YARP DNS Server Address: "));
-	dnsEdit = new QLineEdit("127.0.0.1");
+//	dnsEdit = new QLineEdit("127.0.0.1");
+	dnsEdit = new QLineEdit("192.168.56.101");
 	dnsEdit->setValidator(ipAddressValidator);
 	dnsBox->addWidget(dnsEdit);
 	dnsBox->addWidget(new QLabel("Port"));

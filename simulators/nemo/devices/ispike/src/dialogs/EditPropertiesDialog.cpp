@@ -180,10 +180,15 @@ void EditPropertiesDialog::addParameters(QVBoxLayout* mainVLayout){
 
 			//Build and add combo
 			QComboBox* tmpCombo = new QComboBox();
+			int tmpIndex = 0;
 			vector<string> comboOptions = iter->second.getOptions();
-			for(size_t i=0; i<comboOptions.size(); ++i)
+			for(size_t i=0; i<comboOptions.size(); ++i){
 				tmpCombo->addItem(QString(comboOptions[i].data()));
+				if(comboOptions[i] == iter->second.getString())
+					tmpIndex = i;
+			}
 			comboMap[propertyName] = tmpCombo;
+			tmpCombo->setCurrentIndex(tmpIndex);
 			gridLayout->addWidget(tmpCombo, cntr, 1);
 
 			//Disable read only properties
