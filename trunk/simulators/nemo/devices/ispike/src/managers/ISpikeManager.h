@@ -24,6 +24,8 @@ using namespace std;
 
 namespace spikestream {
 
+	typedef QHash<neurid_t, QPair<neurid_t, vector<int>* >* > NeurIDMap;
+
 	class ISpikeManager : public AbstractDeviceManager{
 		public:
 			ISpikeManager();
@@ -58,11 +60,12 @@ namespace spikestream {
 			/*! List of output neuron ids */
 			QList<neurid_t> outputNeuronIDs;
 
-			/*! Map linking a SpikeStream ID to an ID within iSpike */
-			QHash<neurid_t, QPair<neurid_t, vector<int>* >* > neurIDMap;
+			/*! Map linking a SpikeStream ID to an ID within iSpike
+				Key is a SpikeStream neuron ID, value is a pair of iSpike ID and a pointer to a vector of input neurons held in firingNeuronIDVectors. */
+			NeurIDMap neurIDMap;
 
 			/*! Vectors holding input neurons for each channel */
-			vector< vector<int> > firingNeurIDVectors;
+			vector< vector<int>* > firingNeurIDVectors;
 
 			/*! List of arrays whose index is the iSpike neuron ID
 				and whose value is the spike stream ID. Used for mapping spikes from
