@@ -21,6 +21,7 @@ using namespace spikestream;
 //#define DEBUG_PERFORMANCE
 //#define DEBUG_STEP
 //#define DEBUG_WEIGHTS
+#define TIME_PERFORMANCE
 
 
 /*! Constructor */
@@ -743,6 +744,10 @@ void NemoWrapper::runNemo(){
 	//Declare variables to use in the loop
 	QTime startTime;
 	unsigned int elapsedTime_ms;
+	#ifdef TIME_PERFORMANCE
+		unsigned timeTotal = 0;
+		unsigned timeCounter = 0;
+	#endif//TIME_PERFORMANCE
 
 	while(currentTaskID == RUN_SIMULATION_TASK && !stopThread){
 		//Record the current time
@@ -770,7 +775,19 @@ void NemoWrapper::runNemo(){
 		//Wait for graphics to update if we are monitoring the simulation
 		while(!stopThread && waitForGraphics)
 			usleep(1000);
+
+		#ifdef TIME_PERFORMANCE
+			timeTotal += startTime.msecsTo(QTime::currentTime());
+			++timeCounter;
+			if(timeCounter > 1000)
+				currentTaskID = NO_TASK_DEFINED;
+		#endif//TIME_PERFORMANCE
 	}
+
+	//Output performance measure
+	#ifdef TIME_PERFORMANCE
+		cout<<"Average time per timestep:"<<( (double)timeTotal / (double)timeCounter )<<" ms"<<endl;
+	#endif//TIME_PERFORMANCE
 
 	//Inform other classes that simulation has stopped playing
 	emit simulationStopped();
