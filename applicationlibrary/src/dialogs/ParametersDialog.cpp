@@ -4,6 +4,9 @@
 #include "SpikeStreamException.h"
 using namespace spikestream;
 
+//Qt includes
+#include <QScrollArea>
+
 
 /*! Constructor */
 ParametersDialog::ParametersDialog(const QList<ParameterInfo>& paramInfoList, const QHash<QString, double>& defaultParameterMap, const QHash<QString, double>& currentParameterMap, QWidget* parent)
@@ -12,8 +15,12 @@ ParametersDialog::ParametersDialog(const QList<ParameterInfo>& paramInfoList, co
 	//Store map with default values
 	this->defaultParameterMap = defaultParameterMap;
 
-	//Create layout to organize dialog
-	QVBoxLayout* mainVBox = new QVBoxLayout(this);
+	//Scroll area for parameters
+	QScrollArea* scrollArea = new QScrollArea(this);
+	QWidget* parameterHoldingWidget = new QWidget();
+
+	//Create layout to organize widget within scroll area
+	QVBoxLayout* mainVBox = new QVBoxLayout(parameterHoldingWidget);
 
 	//Add the parameter edit fields
 	addParameters(mainVBox);
@@ -23,6 +30,11 @@ ParametersDialog::ParametersDialog(const QList<ParameterInfo>& paramInfoList, co
 
 	//Add the buttons
 	addButtons(mainVBox);
+
+	scrollArea->setWidget(parameterHoldingWidget);
+	scrollArea->setMinimumSize(800, 500);
+	this->setMinimumSize(800,500);
+	this->setMaximumSize(800,500);
 }
 
 
