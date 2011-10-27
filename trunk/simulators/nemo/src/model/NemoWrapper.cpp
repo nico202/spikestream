@@ -1093,7 +1093,7 @@ void NemoWrapper::stepNemo(){
 	//--------------------------------------------
 	//             Retrieve weights
 	//--------------------------------------------
-	if(monitorWeights && monitor){
+	if(monitorWeights && monitor && (timeStepCounter % applySTDPInterval == 0)){//Same condition as applying STDP
 		updateNetworkWeights();
 
 		//Inform other classes that weights have changed

@@ -36,16 +36,17 @@ File /oname=bin\mingwm10.dll ${MINGW_ROOT}\bin\mingwm10.dll
 File /oname=bin\nemo.dll ${SPIKESTREAM_ROOT}\bin\nemo.dll
 File /oname=bin\nemo_base.dll ${SPIKESTREAM_ROOT}\bin\nemo_base.dll
 File /oname=bin\nemo_cpu.dll ${SPIKESTREAM_ROOT}\bin\nemo_cpu.dll
+File /oname=bin\nemo_cuda.dll ${SPIKESTREAM_ROOT}\bin\nemo_cuda.dll
 
 # iSpike and its Boost dependencies
-File /oname=bin\libiSpike.dll ${SPIKESTREAM_ROOT}\bin\libiSpike.dll
-File /oname=bin\libboost_regex-mgw45-mt-1_46.dll ${SPIKESTREAM_ROOT}\bin\libboost_regex-mgw45-mt-1_46.dll
-File /oname=bin\libboost_system-mgw45-mt-1_46.dll ${SPIKESTREAM_ROOT}\bin\libboost_system-mgw45-mt-1_46.dll
-File /oname=bin\libboost_thread-mgw45-mt-1_46.dll ${SPIKESTREAM_ROOT}\bin\libboost_thread-mgw45-mt-1_46.dll
+#File /oname=bin\libiSpike.dll ${SPIKESTREAM_ROOT}\bin\libiSpike.dll
+#File /oname=bin\libboost_regex-mgw45-mt-1_46.dll ${SPIKESTREAM_ROOT}\bin\libboost_regex-mgw45-mt-1_46.dll
+#File /oname=bin\libboost_system-mgw45-mt-1_46.dll ${SPIKESTREAM_ROOT}\bin\libboost_system-mgw45-mt-1_46.dll
+#File /oname=bin\libboost_thread-mgw45-mt-1_46.dll ${SPIKESTREAM_ROOT}\bin\libboost_thread-mgw45-mt-1_46.dll
 
 # Other library files
 File /oname=bin\qwt5.dll ${SPIKESTREAM_ROOT}\bin\qwt5.dll
-File /oname=bin\libmySQL.dll ${MYSQL_ROOT}\lib\libmySQL.dll
+File /oname=bin\libmySQL.dll ${MYSQL_LIB}\libmySQL.dll
 
 # Images
 File /r /x .svn /x test ${SPIKESTREAM_ROOT}\*.xpm
