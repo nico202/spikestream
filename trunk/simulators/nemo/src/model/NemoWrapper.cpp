@@ -760,13 +760,15 @@ void NemoWrapper::runNemo(){
 		stepNemo();
 
 		//Sleep if task was completed in less than the prescribed interval
-		elapsedTime_ms = startTime.msecsTo(QTime::currentTime());
-		#ifdef DEBUG_PERFORMANCE
-			qDebug()<<"Elapsed time: "<<elapsedTime_ms<<"; update interval: "<<updateInterval_ms;
-		#endif//DEBUG_PERFORMANCE
-		if(elapsedTime_ms < updateInterval_ms){
-			//Sleep for remaning time
-			usleep(1000 * (updateInterval_ms - elapsedTime_ms));
+		if(updateInterval_ms > 0){
+			elapsedTime_ms = startTime.msecsTo(QTime::currentTime());
+			#ifdef DEBUG_PERFORMANCE
+				qDebug()<<"Elapsed time: "<<elapsedTime_ms<<"; update interval: "<<updateInterval_ms;
+			#endif//DEBUG_PERFORMANCE
+			if(elapsedTime_ms < updateInterval_ms){
+				//Sleep for remaning time
+				usleep(1000 * (updateInterval_ms - elapsedTime_ms));
+			}
 		}
 
 		//Unlock mutex
