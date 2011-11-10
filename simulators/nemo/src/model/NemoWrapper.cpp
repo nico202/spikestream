@@ -21,7 +21,11 @@ using namespace spikestream;
 //#define DEBUG_PERFORMANCE
 //#define DEBUG_STEP
 //#define DEBUG_WEIGHTS
-#define TIME_PERFORMANCE
+//#define TIME_PERFORMANCE
+
+#ifdef TIME_PERFORMANCE
+	unsigned numberOfFiringNeurons = 0;
+#endif//TIME_PERFORMANCE
 
 
 /*! Constructor */
@@ -747,6 +751,7 @@ void NemoWrapper::runNemo(){
 	#ifdef TIME_PERFORMANCE
 		unsigned timeTotal = 0;
 		unsigned timeCounter = 0;
+		numberOfFiringNeurons = 0;
 	#endif//TIME_PERFORMANCE
 
 	while(currentTaskID == RUN_SIMULATION_TASK && !stopThread){
@@ -788,7 +793,7 @@ void NemoWrapper::runNemo(){
 
 	//Output performance measure
 	#ifdef TIME_PERFORMANCE
-		cout<<"Average time per timestep:"<<( (double)timeTotal / (double)timeCounter )<<" ms"<<endl;
+		cout<<"Average time per timestep:"<<( (double)timeTotal / (double)timeCounter )<<" ms; Average number of firing neurons per ms: "<<( (double)numberOfFiringNeurons / (double)timeCounter )<<endl;
 	#endif//TIME_PERFORMANCE
 
 	//Inform other classes that simulation has stopped playing
@@ -1048,6 +1053,9 @@ void NemoWrapper::stepNemo(){
 			if(firedCount > 0)
 				qDebug()<<"Number of firing neurons: "<<firedCount;
 		#endif//DEBUG_STEP
+		#ifdef TIME_PERFORMANCE
+			numberOfFiringNeurons += firedCount;
+		#endif//TIME_PERFORMANCE
 
 		//Store firing neurons in database
 		if(archiveMode){

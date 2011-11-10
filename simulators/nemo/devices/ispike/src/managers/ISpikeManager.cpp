@@ -93,7 +93,7 @@ void ISpikeManager::addChannel(OutputChannel* outputChannel, NeuronGroup* neuron
 	outputChannels.append(QPair<OutputChannel*, NeuronGroup*>(outputChannel, neuronGroup));
 
 	//Create vector to hold neuron IDs passed to this output channel
-	vector<int>* newVector = new vector<int>();
+	vector<unsigned>* newVector = new vector<unsigned>();
 	firingNeurIDVectors.push_back(newVector);
 
 	/* Add entries to neuron ID map linking SpikeStream ID with start neuron ID and input vector.
@@ -103,7 +103,7 @@ void ISpikeManager::addChannel(OutputChannel* outputChannel, NeuronGroup* neuron
 	NeuronPositionIterator neurGrpEnd = neuronGroup->positionEnd();
 	for(NeuronPositionIterator posIter = neuronGroup->positionBegin(); posIter != neurGrpEnd; ++posIter){
 		//Create pair linking iSpike ID with a vector holding firing neuron IDs for a particular output channel
-		QPair<neurid_t, vector<int>*>* channelDetails = new QPair<neurid_t, vector<int>*>(iSpikeIDCtr, newVector);
+		QPair<neurid_t, vector<unsigned>*>* channelDetails = new QPair<neurid_t, vector<unsigned>*>(iSpikeIDCtr, newVector);
 
 		//Store link between SpikeStream ID and pair.
 		neurIDMap[posIter.value()->getID()] = channelDetails;
@@ -155,7 +155,7 @@ void ISpikeManager::deleteOutputChannel(int index){
 
 	//Get address of firing neuron IDs vector associated with this output channel.
 	//This will be used to identify and remove neuron ID mappings for this channel
-	vector<int>* vectAddress = firingNeurIDVectors.at(index);
+	vector<unsigned>* vectAddress = firingNeurIDVectors.at(index);
 
 	//Remove details about neuron group associated with output channel
 	QList<neurid_t> tmpKeys = neurIDMap.keys();
@@ -235,7 +235,7 @@ void ISpikeManager::setInputNeurons(timestep_t, QList<neurid_t>& firingNeuronIDs
 		firingNeurIDVectors[i]->clear();
 
 	//Work through firing neurons and add them to the appropriate input vector for the channel without the start neuron ID.
-	QPair<neurid_t, vector<int>* >* pairPtr = NULL;
+	QPair<neurid_t, vector<unsigned>* >* pairPtr = NULL;
 	QList<neurid_t>::iterator firingNeuronsEnd = firingNeuronIDs.end();
 	for(QList<neurid_t>::iterator fireNeurIter = firingNeuronIDs.begin(); fireNeurIter != firingNeuronsEnd; ++fireNeurIter){
 		//See if we have a mapping for this neuron ID
@@ -281,10 +281,10 @@ void ISpikeManager::step(){
 		//Work through input channels - these pass spikes TO the SpikeStream network
 		for(int chanCtr = 0; chanCtr < inputChannels.size(); ++chanCtr){
 			inputChannels[chanCtr].first->step();
-			vector<int>& tmpFiringVect = inputChannels[chanCtr].first->getFiring();
+			const vector<unsigned>& tmpFiringVect = inputChannels[chanCtr].first->getFiring();
 
 			//Work through the firing neurons
-			for(vector<int>::iterator iter = tmpFiringVect.begin(); iter != tmpFiringVect.end(); ++iter){
+			for(vector<unsigned>::const_iterator iter = tmpFiringVect.begin(); iter != tmpFiringVect.end(); ++iter){
 				#ifdef DEBUG
 					qDebug()<<"FIRING NEURON: iSpikeID: "<<*iter<<"; SpikeStream ID: "<<inputArrayList[chanCtr][*iter];
 				#endif//DEBUG
