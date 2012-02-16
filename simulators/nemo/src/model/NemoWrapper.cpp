@@ -107,6 +107,14 @@ void NemoWrapper::loadNemo(){
 	waitForGraphics = false;
 	archiveMode = false;
 
+	// Set the NeMo plugin path
+	QString pluginPath = Globals::getSpikeStreamRoot()+"/bin/nemo-plugins";
+	qDebug()<<"Nemo plugin path: "<<pluginPath;
+	checkNemoOutput(
+		 nemo_add_plugin_path(pluginPath.toAscii()),
+		"NeMo error setting plugin path."
+	 );
+
 	//Get the network
 	if(!Globals::networkLoaded())
 		throw SpikeStreamSimulationException("Cannot load simulation: no network loaded.");

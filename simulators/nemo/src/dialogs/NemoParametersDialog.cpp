@@ -30,9 +30,7 @@ NemoParametersDialog::NemoParametersDialog(nemo_configuration_t nemoConfig, unsi
 	QVBoxLayout* mainVBox = new QVBoxLayout(this);
 	QGridLayout* gridLayout = new QGridLayout();
 
-	//Validators
-	QIntValidator* unsignedIntValidator = new QIntValidator(0, 1000, this);
-
+	//Tracks rows added.
 	int rowCntr = 0;
 
 	//Nemo version
@@ -47,14 +45,6 @@ NemoParametersDialog::NemoParametersDialog(nemo_configuration_t nemoConfig, unsi
 	gridLayout->addWidget(new QLabel("Backend: "), rowCntr, 0);
 	gridLayout->addWidget(backendCombo, rowCntr, 1);
 	connect(backendCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(backendChanged(int)));
-	++rowCntr;
-
-	//CPU threads line edit
-	threadsLineEdit = new QLineEdit();
-	threadsLineEdit->setValidator(unsignedIntValidator);
-	threadsLabel = new QLabel("Number of CPU threads: ");
-	gridLayout->addWidget(threadsLabel, rowCntr, 0);
-	gridLayout->addWidget(threadsLineEdit, rowCntr, 1);
 	++rowCntr;
 
 	//CUDA device list
@@ -101,16 +91,12 @@ NemoParametersDialog::~NemoParametersDialog(){
 	for CUDA or CPU backends. */
 void NemoParametersDialog::backendChanged(int index){
 	if(index == 0){
-		threadsLineEdit->hide();
-		threadsLabel->hide();
 		cudaDeviceLabel->show();
 		cudaDeviceCombo->show();
 	}
 	else if(index == 1){
 		cudaDeviceLabel->hide();
 		cudaDeviceCombo->hide();
-		threadsLabel->show();
-		threadsLineEdit->show();
 	}
 }
 
@@ -219,13 +205,6 @@ void NemoParametersDialog::loadParameters(nemo_configuration_t config){
 	backendCombo->setCurrentIndex(index);
 	backendChanged(index);
 
-	//Number of threads
-	int numThreads;
-	checkNemoOutput(nemo_cpu_thread_count(config, &numThreads), "Failed to get CPU thread count.");
-	if(numThreads < 1)//No point in displaying threads less than 1 - will never want to set it to this value
-	  numThreads = 1;
-	threadsLineEdit->setText(QString::number(numThreads));
-
 	//CUDA device
 	int cudaDev;
 	checkNemoOutput(nemo_cuda_device(config, &cudaDev), "Error getting CUDA device from NeMo");
@@ -249,8 +228,7 @@ void NemoParametersDialog::storeParameterValues(){
 		checkNemoOutput(nemo_set_cuda_backend(currentNemoConfig, cudaDeviceCombo->currentIndex()), "Failed to set CUDA device: ");
 	}
 	else if(backendCombo->currentIndex() == 1){//CPU
-		unsigned int numThreads = Util::getUInt(threadsLineEdit->text());
-		checkNemoOutput(nemo_set_cpu_backend(currentNemoConfig, numThreads), "Failed to set backend to CPU: ");
+		checkNemoOutput(nemo_set_cpu_backend(currentNemoConfig), "Failed to set backend to CPU: ");
 	}
 	else{
 		throw SpikeStreamException("Backend combo index not recognized.");
