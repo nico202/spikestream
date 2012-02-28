@@ -8,12 +8,12 @@
 !define SPIKESTREAM_ROOT ..\..\..
 
 # Location of other files
-#!define QT_ROOT D:\Qt\4.7.2
-#!define MINGW_ROOT D:\MinGW
-#!define MYSQL_ROOT D:\MySQL
-!define QT_ROOT C:\Qt\4.7.3
-!define MINGW_ROOT C:\MinGW
-!define MYSQL_LIB C:\MySQL\lib\opt
+!define QT_ROOT D:\Qt\4.7.2
+!define MINGW_ROOT D:\MinGW
+!define MYSQL_ROOT D:\MySQL
+#!define QT_ROOT C:\Qt\4.7.3
+#!define MINGW_ROOT C:\MinGW
+#!define MYSQL_LIB C:\MySQL\lib\opt
 
 
 # The name of the installer
