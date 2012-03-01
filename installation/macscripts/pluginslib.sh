@@ -9,9 +9,26 @@
 install_name_tool -change libnemo.dylib @executable_path/../Frameworks/libnemo.dylib ../../plugins/simulation/libnemowrapper.0.2.0.dylib
 
 
+# Fix iSpike library in wrapper
+install_name_tool -id @executable_path/../Frameworks/libiSpike.dylib  ../../bin/spikestream.app/Contents/Frameworks/libiSpike.dylib
+install_name_tool -change libiSpike.2.1.dylib @executable_path/../Frameworks/libiSpike.dylib ../../plugins/simulation/nemodevices/libispike.0.2.0.dylib
+install_name_tool -change libnemo.dylib @executable_path/../Frameworks/libnemo.dylib ../../plugins/simulation/nemodevices/libispike.0.2.0.dylib
+
+
+# Sort out iSpike Boost libraries
+install_name_tool -id @executable_path/../Frameworks/libboost_regex-mt.dylib ../../bin/spikestream.app/Contents/Frameworks/libboost_regex-mt.dylib 
+install_name_tool -id @executable_path/../Frameworks/libboost_system-mt.dylib../../bin/spikestream.app/Contents/Frameworks/libboost_system-mt.dylib 
+install_name_tool -id @executable_path/../Frameworks/libboost_thread-mt.dylib ../../bin/spikestream.app/Contents/Frameworks/libboost_thread-mt.dylib
+
+install_name_tool -change /opt/local/lib/libboost_regex-mt.dylib @executable_path/../Frameworks/libboost_regex-mt.dylib ../../bin/spikestream.app/Contents/Frameworks/libiSpike.dylib 
+install_name_tool -change /opt/local/lib/libboost_system-mt.dylib @executable_path/../Frameworks/libboost_system-mt.dylib ../../bin/spikestream.app/Contents/Frameworks/libiSpike.dylib 
+install_name_tool -change /opt/local/lib/libboost_thread-mt.dylib @executable_path/../Frameworks/libboost_thread-mt.dylib ../../bin/spikestream.app/Contents/Frameworks/libiSpike.dylib 
+
+
+# Change the rest of the plugins
 for file in neurons/libcuboid connections/librandom1 connections/libtopographic1 simulation/libnemowrapper analysis/libliveliness analysis/libstatebasedphi \
 			networks/libalekgameznets2 networks/libaleksandernetworks networks/libconnectionmatriximporter networks/libnrmimporter networks/libtononinetworks \
-			networks/libizhikevichetworks
+			networks/libizhikevichetworks simulation/nemodevices/libispike
 do
 
 # Remove files to prevent duplicate versions of plugin being loaded
