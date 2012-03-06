@@ -108,6 +108,7 @@ Section "Uninstall"
   RMDir /r $INSTDIR\log
   RMDir /r $INSTDIR\images
   RMDir /r $INSTDIR\plugins
+  RMDir /r $INSTDIR\patterns
   RMDir $INSTDIR
 
 SectionEnd
