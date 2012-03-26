@@ -4,8 +4,8 @@
 #include "GlobalVariables.h"
 #include "SpikeStreamException.h"
 #include "TransferEntropyWidget.h"
-#include "TransferEntropyTimeStepThread.h"
 #include "TransferEntropyCalculator.h"
+#include "TransferEntropyTimeStepThread.h"
 #include "Util.h"
 using namespace spikestream;
 
@@ -102,7 +102,7 @@ void TransferEntropyWidget::plotGraphs(){
 
 
 
-/*! Starts the analysis of the network for state-based phi */
+/*! Starts the analysis of the network for transfer entropy */
 void TransferEntropyWidget::startAnalysis(){
 	//Double check that both a network and an analysis are loaded
 	if(!Globals::networkLoaded() || !Globals::archiveLoaded()){
@@ -123,19 +123,19 @@ void TransferEntropyWidget::startAnalysis(){
 	}
 
 	try{
-		//Get data for the pair of neurons
+		statusTextEdit->append("Starting analysis.");
 		ArchiveDao archiveDao(Globals::getArchiveDao()->getDBInfo());
 
-		//Vectors holding
+		//Vectors holding neuron data
 		vector<unsigned> fromNeuronData;
 		vector<unsigned> toNeuronData;
 
+		statusTextEdit->append("Loading neuron data.");
 		for(unsigned timeStep = firstTimeStep; timeStep <= lastTimeStep; ++timeStep){
 			QList<neurid_t> firingNeuronIDs = archiveDao.getFiringNeuronIDs(analysisInfo.getArchiveID(), timeStep);
 
 			//Look for from and to neuron ids in the data for this time step
-			bool fromIDFound = false;
-			bool toIDFound = false;
+			bool fromIDFound = false, toIDFound = false;
 			for(int i=0; i<firingNeuronIDs.size(); ++i){
 				if(firingNeuronIDs.at(i) == fromNeuronID){
 					fromNeuronData.push_back(1);
@@ -161,20 +161,24 @@ void TransferEntropyWidget::startAnalysis(){
 		}
 
 		//Work through data and analyze it for transfer entropy
+		statusTextEdit->append("Calculating transfer entropy.");
 		TransferEntropyCalculator transferEntropyCalculator(k_param, l_param, timeWindow);
-		for(unsigned ts=0; ts<fromNeuronData.size()-timeWindow; ++ts){
-			transferEntropyCalculator.getTransferEntropy(ts, fromNeuronData, toNeuronData);
+		double tmpTransEnt, total=0.0;
+		unsigned count = 0;
+		for(unsigned startTimeStep=0; startTimeStep<fromNeuronData.size()-timeWindow; ++startTimeStep){
+			tmpTransEnt = transferEntropyCalculator.getTransferEntropy(startTimeStep, toNeuronData, fromNeuronData);
+			total += tmpTransEnt;
+			++count;
+			statusTextEdit->append("Start time step: " + QString::number(startTimeStep) + "; Transfer entropy: " + QString::number(tmpTransEnt));
 		}
-
+		statusTextEdit->append("Analysis finished. Total transfer entropy: " + QString::number(total) + "; Average transfer entropy: " + QString::number(total/count));
 	}
 	catch(SpikeStreamException& ex){
 		qCritical()<<ex.getMessage();
-
-		//We don't know if analysis runner has started or not, so set error just in case
-		analysisRunner->setError("Exception thrown starting task or adding analysis to database.");
 	}
-
-	statusTextEdit->append("Analysis started.");
+	catch(...){
+		qCritical()<<"Unknown exception occurred.";
+	}
 }
 
 
@@ -206,7 +210,7 @@ void TransferEntropyWidget::initializeAnalysisInfo(){
 
 	//Set the type of analysis, 3 corresponds to a liveliness analysis
 	//FIXME: ACCESS THIS USING A STRING NOT A DATABASE ID
-	analysisInfo.setAnalysisType(3);
+	analysisInfo.setAnalysisType(0);
 
 	//Set parameters
 	analysisInfo.getParameterMap()["time_window"] = 100;
@@ -239,6 +243,11 @@ void TransferEntropyWidget::storeParameters(){
 	timeWindow = analysisInfo.getParameterMap()["time_window"];
 	k_param = analysisInfo.getParameterMap()["k"];
 	l_param = analysisInfo.getParameterMap()["l"];
+
+	if(k_param < l_param)
+		qCritical()<<"k_param must be greater than or equal to l_param";
+	if(timeWindow <= k_param)
+		qCritical()<<"TimeWindow must be greater than k_param";
 
 }
 

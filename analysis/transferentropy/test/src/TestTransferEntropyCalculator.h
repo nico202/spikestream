@@ -19,6 +19,8 @@ namespace spikestream {
 			void testLoad_I_k_probabilities();
 			void testLoad_I_k_plus_1_probabilities();
 			void testLoad_I_k_J_k_probabilities();
+			void testLoad_I_k_plus_1_J_l_probabilities();
+			void testGetTransferEntropy();
 		private:
 
 	};

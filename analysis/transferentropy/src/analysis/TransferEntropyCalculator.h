@@ -20,11 +20,13 @@ namespace spikestream {
 			QString getBitString(unsigned num);
 			QHash<unsigned, double>& getI_k_probs() { return I_k_probs; }
 			QHash<unsigned, double>& getI_k_plus_1_probs() { return I_k_plus_1_probs; }
-			double getTransferEntropy(unsigned startTimeStep, vector<unsigned>& fromNeuronData, vector<unsigned>& toNeuronData);
+			QHash<unsigned, double>& getI_k_J_l_probs() { return I_k_J_l_probs; }
+			QHash<unsigned, double>& getI_k_plus_1_J_l_probs() { return I_k_plus_1_J_1_probs; }
+			double getTransferEntropy(unsigned startTimeStep, vector<unsigned>& iVector, vector<unsigned>& jVector);
 			void load_I_k_probabilities(unsigned startTimeStep, vector<unsigned>& iVector);
 			void load_I_k_plus_1_probabilities(unsigned startTimeStep, vector<unsigned>& iVector);
-			void load_I_k_J_k_probabilities(unsigned startTimeStep, vector<unsigned>& jVector, vector<unsigned>& iVector);
-			void load_I_k_plus_1_J_k_probabilities(unsigned startTimeStep, vector<unsigned>& jVector, vector<unsigned>& iSVector);
+			void load_I_k_J_l_probabilities(unsigned startTimeStep, vector<unsigned>& iVector, vector<unsigned>& jVector);
+			void load_I_k_plus_1_J_l_probabilities(unsigned startTimeStep, vector<unsigned>& iVector, vector<unsigned>& jSVector);
 
 		private:
 			//=============================  VARIABLES  ============================

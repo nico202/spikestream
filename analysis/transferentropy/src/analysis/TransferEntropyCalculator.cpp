@@ -15,7 +15,10 @@ using namespace std;
 #define NUM_BITS 32
 
 /*! Output debug information about probabilities */
-#define DEBUG_PROBABILITIES
+//#define DEBUG_PROBABILITIES
+
+/*! Output debug information about the calculation of the sum */
+//#define DEBUG_EQUATION
 
 
 /*! Constructor */
@@ -25,6 +28,8 @@ TransferEntropyCalculator::TransferEntropyCalculator(unsigned k_param, unsigned 
 		throw SpikeStreamAnalysisException("Parameters cannot be zero");
 	if(k_param < l_param)
 		throw SpikeStreamAnalysisException("k_param must be greater than or equal to l_param");
+	if(k_param > timeWindow)
+		throw SpikeStreamAnalysisException("k_param must be less or equal to the time window");
 
 	//Store parameters
 	this->k_param = k_param;
@@ -45,101 +50,131 @@ TransferEntropyCalculator::~TransferEntropyCalculator(){
 /*! Calculates the transfer entropy between the two sets of data for the time window specified.
 	fromNeuronData contains list of unsigned 1s and 0s indicating the spike activity in J.
 	toNeuronData contains list of unsigned 1s and 0s indicating the spike activity in I. */
-double TransferEntropyCalculator::getTransferEntropy(unsigned startTimeStep, vector<unsigned>& fromNeuronData, vector<unsigned>& toNeuronData){
-	//Run a couple of checks
-	if(startTimeStep + timeWindow > fromNeuronData.size())
+double TransferEntropyCalculator::getTransferEntropy(unsigned startTimeStep, vector<unsigned>& iVector, vector<unsigned>& jVector){
+	//Run checks
+	if(startTimeStep + timeWindow > iVector.size())
 		throw SpikeStreamAnalysisException("Start time step + time window exceeds available data");
-	if(fromNeuronData.size() != toNeuronData.size())
+	if(iVector.size() != jVector.size())
 		throw SpikeStreamAnalysisException("From neuron data size does not match to neuron data size");
+	if(startTimeStep + k_param >= iVector.size() || startTimeStep + l_param >= jVector.size())
+		throw SpikeStreamAnalysisException("StartTimeStep + parameter window is greater than vector size.");
 
 	//Load all probabilities for the time sequence into hash maps
-	load_I_k_probabilities(startTimeStep, toNeuronData);
-	load_I_k_plus_1_probabilities(startTimeStep, toNeuronData);
-	load_I_k_J_k_probabilities(startTimeStep, fromNeuronData, toNeuronData);
-	load_I_k_plus_1_J_k_probabilities(startTimeStep, fromNeuronData, toNeuronData);
-
-	//Work through sequence and calculate transfer entropy
-	double sum=0.0;
-	for(unsigned n= (startTimeStep+k_param-1); n < startTimeStep+timeWindow-1; ++n){
-		//-------------------------------------------------------
-		//Get joint probability p(i_n+1, i_n^k, j_n^k)
-		//-------------------------------------------------------
-		//Load i_n+1,i_n^k into integer
-		unsigned tmpNum = 0;
-		for(unsigned b = (n-k_param+1); b <= n+1; ++b){
-			tmpNum <<= 1;
-			tmpNum |= toNeuronData.at(b);
-		}
-
-		//Load j_n^l into integer
-		for(unsigned b = (n-l_param+1); b <=n; ++b){
-			tmpNum <<= 1;
-			tmpNum |= fromNeuronData.at(b);
-		}
-		double p1 = I_k_plus_1_J_1_probs[tmpNum];
+	load_I_k_probabilities(startTimeStep, iVector);
+	load_I_k_plus_1_probabilities(startTimeStep, iVector);
+	load_I_k_J_l_probabilities(startTimeStep, iVector, jVector);
+	load_I_k_plus_1_J_l_probabilities(startTimeStep, iVector, jVector);
 
 
-		//-------------------------------------------------------
-		//Get joint probability p(i_n^k, j_n^k)
-		//-------------------------------------------------------
-		//Load I into integer
-		tmpNum = 0;
-		for(unsigned b = (n-k_param+1); b <=n; ++b){
-			tmpNum <<= 1;
-			tmpNum |= toNeuronData.at(b);
-		}
+	//----------------------------------------------------------------
+	//  Bit masks - these methods are copied from the load methods
+	//----------------------------------------------------------------
+	unsigned i_k_bitmask = 1<<k_param;
+	--i_k_bitmask;
 
-		//Load J into integer
-		for(unsigned b = (n-l_param+1); b <=n; ++b){
-			tmpNum <<= 1;
-			tmpNum |= fromNeuronData.at(b);
-		}
-		double p2a = I_k_J_l_probs[tmpNum];
+	unsigned i_k_plus_1_bitmask = 1<<(k_param+1);
+	--i_k_plus_1_bitmask;
 
+	unsigned i_k_j_l_bitmask = 1<<(k_param+l_param);
+	--i_k_j_l_bitmask;
+	i_k_j_l_bitmask ^= (1<<l_param);
 
-		//-------------------------------------------------------
-		// Calculate conditional probability p(i_n+1 | i_n^k, j_n^k)
-		//-------------------------------------------------------
-		double p2=0.0;
-		if(p2a != 0)
-			p2 = p1/p2a; //p(A|B) = p(A and B)/P(B)
+	unsigned i_k_plus_1_j_l_bitmask = 1<<(k_param + 1 + l_param);
+	--i_k_plus_1_j_l_bitmask;
+	i_k_plus_1_j_l_bitmask ^= (1<<l_param);
 
 
-		//-------------------------------------------------------
-		// Get joint probability p(i_n+1, i_n^k)
-		//-------------------------------------------------------
-		//Load i_n+1,i_n^k into integer
-		tmpNum = 0;
-		for(unsigned b = (n-k_param+1); b <= n+1; ++b){
-			tmpNum <<= 1;
-			tmpNum |= toNeuronData.at(b);
-		}
-		double p3a = I_k_plus_1_probs[tmpNum];
+	//----------------------------------------------------------------------------------
+	//  Starting versions of numbers - these methods are copied from the load methods
+	//----------------------------------------------------------------------------------
+	//Load in first i_k number
+	unsigned i_k = 0;
+	for(unsigned b = startTimeStep; b < startTimeStep+k_param; ++b){
+		i_k <<= 1;
+		i_k |= iVector.at(b);
+	}
+
+	//Load in first i_k_plus_1 number
+	unsigned i_k_plus_1 = 0;
+	for(unsigned b = startTimeStep; b < startTimeStep+k_param+1; ++b){
+		i_k_plus_1 <<= 1;
+		i_k_plus_1 |= iVector.at(b);
+	}
+
+	//Load in first i_k_j_l number
+	unsigned i_k_j_l = 0;
+	for(unsigned b = startTimeStep; b < startTimeStep+k_param; ++b){
+		i_k_j_l <<= 1;
+		i_k_j_l |= iVector.at(b);
+	}
+	for(unsigned b = startTimeStep + k_param - l_param; b < startTimeStep+k_param; ++b){
+		i_k_j_l <<= 1;
+		i_k_j_l |= jVector.at(b);
+	}
+
+	//Load in first i_k_plus_1_j_l number
+	unsigned i_k_plus_1_j_l = 0;
+	for(unsigned b = startTimeStep; b < startTimeStep + k_param + 1; ++b){
+		i_k_plus_1_j_l <<= 1;
+		i_k_plus_1_j_l |= iVector.at(b);
+	}
+	for(unsigned b = startTimeStep + k_param - l_param; b < startTimeStep+k_param; ++b){
+		i_k_plus_1_j_l <<= 1;
+		i_k_plus_1_j_l |= jVector.at(b);
+	}
 
 
-		//-------------------------------------------------------
-		// Get joint probability p(i_n^k)
-		//-------------------------------------------------------
-		//Load I into integer
-		tmpNum = 0;
-		for(unsigned b = (n-k_param+1); b <=n; ++b){
-			tmpNum <<= 1;
-			tmpNum |= toNeuronData.at(b);
-		}
-		double p3b = I_k_probs[tmpNum];
+	//---------------------------------------------------------
+	//  Work through sequence and calculate transfer entropy
+	//---------------------------------------------------------
+	double p1, p2, p3, sum=0.0;
+	for(unsigned b = (startTimeStep+k_param); b < startTimeStep+timeWindow; ++b){
 
+		#ifdef DEBUG_EQUATION
+			cout<<"i_k: "<<getBitString(i_k).toStdString()<<endl;
+			cout<<"i_k_plus_1: "<<getBitString(i_k_plus_1).toStdString()<<endl;
+			cout<<"i_k_j_l: "<<getBitString(i_k_j_l).toStdString()<<endl;
+			cout<<"i_k_plus_1_j_l: "<<getBitString(i_k_plus_1_j_l).toStdString()<<endl;
+		#endif//DEBUG_EQUATION
 
-		//-------------------------------------------------------
-		// Get conditional probability p(i_n+1 | i_n^k)
-		//-------------------------------------------------------
-		double p3 = 0.0;
-		if(p3b != 0.0)
-			p3 = p3a/p3b; //p(A|B) = p(A and B)/P(B)
+		//Get joint probability p(i_n+1, i_n^k, j_n^l)
+		p1 = I_k_plus_1_J_1_probs[i_k_plus_1_j_l];
 
+		// Calculate conditional probability p(i_n+1 | i_n^k, j_n^l): p(A|B) = p(A and B)/P(B); p(i_n+1 | i_n^k, j_n^l) = p(i_n+1, i_n^k, j_n^l) / p(i_n^k, j_n^l)
+		p2 = p1/I_k_J_l_probs[i_k_j_l];//Should not =0 because sequence will have occurred at least once
+
+		// Get conditional probability p(i_n+1 | i_n^k): p(i_n+1 | i_n^k) = p( i_n+1, i_n^k) / p(i_n^k)
+		p3 = I_k_plus_1_probs[i_k_plus_1]/I_k_probs[i_k];//Should not =0 because sequence will have occurred at least once
 
 		//Update sum using probabilities
-		if(p3 != 0.0 && p2 != 0.0)
-			sum += p1 * log2 (p2 / p3);
+		sum += p1 * log2 (p2 / p3);
+
+		#ifdef DEBUG_EQUATION
+			cout<<"p1: "<<p1<<"; p2: "<<p2<<"; p3: "<<p3<<"; result="<<(p1 * log2 (p2 / p3))<<endl;
+		#endif//DEBUG_EQUATION
+
+		//Avoid final advance in numbers, which could put data vectors out of bounds
+		if(b == startTimeStep+timeWindow-1)
+			break;
+
+		//Advance numbers
+		i_k <<= 1;
+		i_k |= iVector.at(b);
+		i_k &= i_k_bitmask;
+
+		i_k_plus_1 <<= 1;
+		i_k_plus_1 |= iVector.at(b+1);
+		i_k_plus_1 &= i_k_plus_1_bitmask;
+
+		i_k_j_l <<= 1;
+		i_k_j_l &= i_k_j_l_bitmask;
+		i_k_j_l |= (iVector.at(b)<<l_param);
+		i_k_j_l |= jVector.at(b);
+
+		i_k_plus_1_j_l <<= 1;
+		i_k_plus_1_j_l &= i_k_plus_1_j_l_bitmask;
+		i_k_plus_1_j_l |= (iVector.at(b+1)<<l_param);
+		i_k_plus_1_j_l |= jVector.at(b);
 	}
 
 	//Return sum
@@ -235,14 +270,22 @@ void TransferEntropyCalculator::load_I_k_plus_1_probabilities(unsigned startTime
 }
 
 
-void TransferEntropyCalculator::load_I_k_J_k_probabilities(unsigned startTimeStep, vector<unsigned>& jVector, vector<unsigned>& iVector){
+/*! Loads probabilities p(i_n^k, j_n^l) into I_k_J_l_probs hash map.
+	Works through the entire sequence, totals the number of times that each pattern occurs and converts this into a probability.
+	Made publicly accessible to facilitate unit testing. */
+void TransferEntropyCalculator::load_I_k_J_l_probabilities(unsigned startTimeStep, vector<unsigned>& iVector, vector<unsigned>& jVector){
+	if(startTimeStep + k_param >= iVector.size() || startTimeStep + l_param >= jVector.size())
+		throw SpikeStreamAnalysisException("StartTimeStep + parameter window is greater than vector size.");
+	if(startTimeStep+timeWindow > iVector.size() || startTimeStep+timeWindow > jVector.size())
+		throw SpikeStreamAnalysisException("Analysis time window range is greater than size of vectors with data");
+
 	unsigned patternCount = 0;
 	I_k_J_l_probs.clear();
 
 	//Mask to clear bits after shift. Needs to clear end bits as well as the least significant bit in i
 	unsigned clearBits = 1<<(k_param+l_param);
 	--clearBits;//This will now clear any bits after the end of i
-	clearBits ^= (1<<l_param+1);//XOR to clear LSB value in i
+	clearBits ^= (1<<l_param);//XOR to clear LSB value in i
 
 	//Load in first number from i
 	unsigned tmpNum = 0;
@@ -250,21 +293,22 @@ void TransferEntropyCalculator::load_I_k_J_k_probabilities(unsigned startTimeSte
 		tmpNum <<= 1;
 		tmpNum |= iVector.at(b);
 	}
-	//Add first number from j
-	for(unsigned b = startTimeStep; b < startTimeStep+l_param; ++b){
+
+	//Add first number from j, need to offset this if l_param < k_param (cannot be >=)
+	for(unsigned b = startTimeStep + k_param - l_param; b < startTimeStep+k_param; ++b){
 		tmpNum <<= 1;
 		tmpNum |= jVector.at(b);
 	}
 	I_k_J_l_probs[tmpNum] = 1.0;
 	++patternCount;
 
-	//Load in subsequent numbers
+	//Load in subsequent numbers. Both iVector and jVector are stepped through adding a 1 or 0 to the pattern and shaving off the end
 	for(unsigned b = startTimeStep+k_param; b < startTimeStep+timeWindow; ++b){
 		tmpNum <<= 1;
 		tmpNum &= clearBits;
 
 		//Add in i value
-		tmpNum |= (iVector.at(b)<<(l_param+1));
+		tmpNum |= (iVector.at(b)<<l_param);
 
 		//Add in j value
 		tmpNum |= jVector.at(b);
@@ -274,7 +318,7 @@ void TransferEntropyCalculator::load_I_k_J_k_probabilities(unsigned startTimeSte
 			I_k_J_l_probs[tmpNum] = 1.0;
 		else
 			++I_k_J_l_probs[tmpNum];
-		++patternCount;//Could work this out, but safer just to add
+		++patternCount;//Could work this out, but add for the moment
 	}
 
 	//Convert count of instances into probabilites
@@ -287,10 +331,66 @@ void TransferEntropyCalculator::load_I_k_J_k_probabilities(unsigned startTimeSte
 }
 
 
+/*! Loads probabilities p(i_n+1, i_n^k, j_n^l) into I_k_plus_1_J_1_probs hash map.
+	Works through the entire sequence, totals the number of times that each pattern occurs and converts this into a probability.
+	Made publicly accessible to facilitate unit testing. */
+void TransferEntropyCalculator::load_I_k_plus_1_J_l_probabilities(unsigned startTimeStep, vector<unsigned>& iVector, vector<unsigned>& jVector){
+	if(startTimeStep + k_param + 1 >= iVector.size() || startTimeStep + l_param >= jVector.size())
+		throw SpikeStreamAnalysisException("StartTimeStep + parameter window is greater than vector size.");
+	if(startTimeStep+timeWindow > iVector.size() || startTimeStep+timeWindow > jVector.size())
+		throw SpikeStreamAnalysisException("Analysis time window range is greater than size of vectors with data");
 
-void TransferEntropyCalculator::load_I_k_plus_1_J_k_probabilities(unsigned startTimeStep, vector<unsigned>& jVector, vector<unsigned>& iVector){
+	unsigned patternCount = 0;
+	I_k_plus_1_J_1_probs.clear();
 
+	//Mask to clear bits after shift. Needs to clear end bits as well as the least significant bit in i
+	unsigned clearBits = 1<<(k_param + 1 + l_param);
+	--clearBits;//This will now clear any bits after the end of i
+	clearBits ^= (1<<l_param);//XOR to clear LSB value in i
+
+	//Load in first number from i
+	unsigned tmpNum = 0;
+	for(unsigned b = startTimeStep; b < startTimeStep + k_param + 1; ++b){
+		tmpNum <<= 1;
+		tmpNum |= iVector.at(b);
+	}
+
+	//Add first number from j. Offset it if k_param > l_param
+	for(unsigned b = startTimeStep + k_param - l_param; b < startTimeStep+k_param; ++b){
+		tmpNum <<= 1;
+		tmpNum |= jVector.at(b);
+	}
+	I_k_plus_1_J_1_probs[tmpNum] = 1.0;
+	++patternCount;
+
+	//Load in subsequent numbers.
+	for(unsigned b = startTimeStep + k_param + 1; b < startTimeStep+timeWindow; ++b){
+		tmpNum <<= 1;
+		tmpNum &= clearBits;
+
+		//Add in next i value
+		tmpNum |= (iVector.at(b)<<l_param);
+
+		//Add in j value - this is one step back from the current i index
+		tmpNum |= jVector.at(b-1);//the '-1' compensates for the fact that we are reading in the next i+1
+
+		//Add to hash map
+		if(!I_k_plus_1_J_1_probs.contains(tmpNum))
+			I_k_plus_1_J_1_probs[tmpNum] = 1.0;
+		else
+			++I_k_plus_1_J_1_probs[tmpNum];
+		++patternCount;//Could work this out, but add for the moment
+	}
+
+	//Convert count of instances into probabilites
+	for(QHash<unsigned, double>::iterator iter = I_k_plus_1_J_1_probs.begin(); iter != I_k_plus_1_J_1_probs.end(); ++iter)
+		iter.value() /= patternCount;
+
+	#ifdef DEBUG_PROBABILITIES
+		printMap(I_k_plus_1_J_1_probs, "I_k_plus_1_J_1_probs");
+	#endif//DEBUG_PROBABILITIES
 }
+
 
 /*! Converts the number to a string showing its 1's and 0's */
 QString TransferEntropyCalculator::getBitString(unsigned num){
@@ -309,7 +409,6 @@ QString TransferEntropyCalculator::getBitString(unsigned num){
 			tmpStr += "0";
 
 		mask >>= 1;
-
 	}
 	return tmpStr;
 }
