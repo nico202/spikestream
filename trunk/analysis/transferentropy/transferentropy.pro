@@ -36,9 +36,12 @@ win32 {
 
 #=================  ANALYSIS  ===================
 HEADERS += src/analysis/TransferEntropyTimeStepThread.h \
-			src/analysis/TransferEntropyCalculator.h
+			src/analysis/TransferEntropyCalculator.h \
+			src/analysis/transferentropycalc.h
 SOURCES += src/analysis/TransferEntropyTimeStepThread.cpp \
-			src/analysis/TransferEntropyCalculator.cpp
+			src/analysis/TransferEntropyCalculator.cpp \
+			src/analysis/transferentropycalc.cpp
+			
 
 #====================  GUI  =====================
 HEADERS += src/gui/TransferEntropyWidget.h 
