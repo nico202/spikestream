@@ -18,7 +18,7 @@ using namespace std;
 //#define DEBUG_PROBABILITIES
 
 /*! Output debug information about the calculation of the sum */
-//#define DEBUG_EQUATION
+#define DEBUG_EQUATION
 
 
 /*! Constructor */
@@ -131,10 +131,11 @@ double TransferEntropyCalculator::getTransferEntropy(unsigned startTimeStep, vec
 	for(unsigned b = (startTimeStep+k_param); b < startTimeStep+timeWindow; ++b){
 
 		#ifdef DEBUG_EQUATION
-			cout<<"i_k: "<<getBitString(i_k).toStdString()<<endl;
-			cout<<"i_k_plus_1: "<<getBitString(i_k_plus_1).toStdString()<<endl;
-			cout<<"i_k_j_l: "<<getBitString(i_k_j_l).toStdString()<<endl;
-			cout<<"i_k_plus_1_j_l: "<<getBitString(i_k_plus_1_j_l).toStdString()<<endl;
+			cout<<"n="<<b-1<<endl;
+			cout<<"i_k: "<<i_k<<"/"<<getBitString(i_k).toStdString()<<"="<<I_k_probs[i_k]<<endl;
+			cout<<"i_k_plus_1: "<<i_k_plus_1<<"/"<<getBitString(i_k_plus_1).toStdString()<<"="<<I_k_plus_1_probs[i_k_plus_1]<<endl;
+			cout<<"i_k_j_l: "<<i_k_j_l<<"/"<<getBitString(i_k_j_l).toStdString()<<"="<<I_k_J_l_probs[i_k_j_l]<<endl;
+			cout<<"i_k_plus_1_j_l: "<<i_k_plus_1_j_l<<"/"<<getBitString(i_k_plus_1_j_l).toStdString()<<"="<<I_k_plus_1_J_1_probs[i_k_plus_1_j_l]<<endl;
 		#endif//DEBUG_EQUATION
 
 		//Get joint probability p(i_n+1, i_n^k, j_n^l)
@@ -143,14 +144,19 @@ double TransferEntropyCalculator::getTransferEntropy(unsigned startTimeStep, vec
 		// Calculate conditional probability p(i_n+1 | i_n^k, j_n^l): p(A|B) = p(A and B)/P(B); p(i_n+1 | i_n^k, j_n^l) = p(i_n+1, i_n^k, j_n^l) / p(i_n^k, j_n^l)
 		p2 = p1/I_k_J_l_probs[i_k_j_l];//Should not =0 because sequence will have occurred at least once
 
-		// Get conditional probability p(i_n+1 | i_n^k): p(i_n+1 | i_n^k) = p( i_n+1, i_n^k) / p(i_n^k)
+		// Get conditional probability p(i_n+1 | i_n^k) = p( i_n+1, i_n^k) / p(i_n^k)
 		p3 = I_k_plus_1_probs[i_k_plus_1]/I_k_probs[i_k];//Should not =0 because sequence will have occurred at least once
 
 		//Update sum using probabilities
-		sum += p1 * log2 (p2 / p3);
+		//sum += p1 * log10 (p2 / p3);
+
+		double total = I_k_plus_1_J_1_probs[i_k_plus_1_j_l] * log10 ( (I_k_plus_1_J_1_probs[i_k_plus_1_j_l] * I_k_probs[i_k]) / (I_k_J_l_probs[i_k_j_l] * I_k_plus_1_probs[i_k_plus_1])  );
+		sum += total;
 
 		#ifdef DEBUG_EQUATION
-			cout<<"p1: "<<p1<<"; p2: "<<p2<<"; p3: "<<p3<<"; result="<<(p1 * log2 (p2 / p3))<<endl;
+			cout<<"TOTAL: "<<total<<endl<<endl;
+			//cout<<"p1: "<<p1<<"; p2: "<<p2<<"; p3: "<<p3<<"; result="<<(p1 * log10 (p2 / p3))<<endl<<endl;
+			//cout<< I_k_plus_1_J_1_probs[i_k_plus_1_j_l] * log10 ( (I_k_plus_1_J_1_probs[i_k_plus_1_j_l] * I_k_probs[i_k]) / (I_k_J_l_probs[i_k_j_l] * I_k_plus_1_probs[i_k_plus_1])
 		#endif//DEBUG_EQUATION
 
 		//Avoid final advance in numbers, which could put data vectors out of bounds
